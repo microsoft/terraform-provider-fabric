@@ -1,0 +1,8 @@
+---
+nav:
+  - fabric provider: index.md
+  - Guides: guides
+  - Authentication: auth
+  - Functions: functions
+  - Resources: resources
+  - Data Sources: data-sources

@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
+# Visit https://golangci-lint.run/ for usage documentation and information on other useful linters
+---
+run:
+  allow-parallel-runners: true
+  allow-serial-runners: true
+  timeout: 10m
+
+output:
+  sort-results: true
+  sort-order:
+    - linter
+    - severity
+    - file # filepath, line, and column
+  show-stats: true
+
+  # formats:
+  #   - format: checkstyle
+  #     path: golangci-report.xml
+  #   - format: colored-line-number
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  fix: true
+  exclude-rules:
+    - path: '(.+)_test\.go'
+      linters:
+        - dupl
+        - gochecknoglobals
+        - nonamedreturns
+    - path: "internal/testhelp/fakes"
+      linters:
+        - dupl
+    - path: "internal/testhelp"
+      linters:
+        - gochecknoglobals
+        - godox
+    - path: "internal/services"
+      linters:
+        - dupl
+    - path: "internal/pkg/fabricitem"
+      linters:
+        - dupl
+    - path: "internal/framework/customtypes"
+      linters:
+        - dupl
+
+linters:
+  enable-all: true
+  disable:
+    # deprecated - start
+    - gomnd
+    - execinquery
+    # deprecated - end
+    - depguard
+    - exhaustruct
+    - lll
+    - paralleltest
+    - ireturn
+    - wrapcheck
+    - funlen
+    - gomoddirectives
+    - err113
+    - mnd
+    - goheader
+    - cyclop
+    - exportloopref
+
+linters-settings:
+  exhaustive:
+    # Presence of "default" case in switch statements satisfies exhaustiveness,
+    # even if all enum members are not listed.
+    # Default: false
+    default-signifies-exhaustive: true
+
+  # goheader:
+  #   values:
+  #     const:
+  #       COMPANY: Microsoft Corporation
+  #       LICENSE: MPL-2.0
+  #   template: |-
+  #     Copyright (c) {{ COMPANY }}.
+  #     Licensed under the {{ LICENSE }} license.
+  #     SPDX-License-Identifier: {{ LICENSE }}
+  godot:
+    capital: true
+
+  revive:
+    ignore-generated-header: true
+    enable-all-rules: true
+    rules:
+      - name: line-length-limit
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: add-constant
+        disabled: true
+      - name: bare-return
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: unused-receiver
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: if-return
+        disabled: true
+
+  nestif:
+    min-complexity: 10
+
+  varnamelen:
+    min-name-length: 1
+
+  wsl:
+    allow-cuddle-declarations: true
+    allow-trailing-comment: true
+
+  gofumpt:
+    module-path: github.com/microsoft/terraform-provider-fabric
+    extra-rules: true
+
+  goimports:
+    local-prefixes: github.com/microsoft/terraform-provider-fabric
+
+  gci:
+    sections:
+      - standard
+      - default
+      - localmodule

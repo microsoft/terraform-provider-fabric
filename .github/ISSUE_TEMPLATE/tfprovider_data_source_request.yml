@@ -1,0 +1,104 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: 🔽 Provider Data Source Request
+description: Request a new data source to be added to the Terraform Provider 📢
+title: "[data source] "
+labels: [feature, data-source]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Description
+      description: |
+        Short description here describing the new data source that you're requesting.
+        Include a use case for why users need this data source.
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: 🔬 Details / References
+      description: Example Details
+      placeholder: |
+        - Data Source Name: `fabric_[your data source name]`
+        - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+        - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
+        - Related resources/data sources: <!-- are there any existing or potential data sources that are related to this one -->
+      value: |
+        - Data Source Name: fabric_[your data source name]
+        - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+        - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
+        - Related resources/data sources: <!-- are there any existing or potential data sources that are related to this one -->
+    validations:
+      required: false
+
+  - type: textarea
+    id: tf-configuration
+    attributes:
+      label: 🚧 Potential Terraform Configuration / Desired Solution
+      description: Sample Terraform config (and related) that describes how the new data source might look.
+      placeholder: |
+        ```terraform
+        data "fabric_[your data source name]" "example" {
+          name = "example"
+          parameter1 = "value1"
+          parameter2 = "value2"
+        }
+        ```
+      value: |
+        ```terraform
+        data "fabric_[your data source name]" "example" {
+          name = "example"
+          parameter1 = "value1"
+          parameter2 = "value2"
+        }
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context or screenshots about the feature request here.
+      placeholder: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: done-definition
+    attributes:
+      label: ✅ Definition of Done
+      description: Necessary criteria for a task or feature to be considered complete.
+      options:
+        - label: Data Transfer Objects (DTOs)
+          required: false
+        - label: Data Client functions
+          required: false
+        - label: Data Source Implementation
+          required: false
+        - label: Data Source Added to Provider
+          required: false
+        - label: Unit Tests for Happy path
+          required: false
+        - label: Unit Tests for Error path
+          required: false
+        - label: Acceptance Tests
+          required: false
+        - label: Example in the ./examples folder
+          required: false
+        - label: Schema documentation in code
+          required: false
+        - label: Updated auto-generated provider docs with `task docs`
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow our [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

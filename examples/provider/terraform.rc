@@ -1,0 +1,9 @@
+# Explicit Installation Method Configuration
+# docs: https://developer.hashicorp.com/terraform/cli/config/config-file#explicit-installation-method-configuration
+
+provider_installation {
+  filesystem_mirror {
+    path    = "/usr/share/terraform/providers"
+    include = ["registry.terraform.io/microsoft/fabric"]
+  }
+}

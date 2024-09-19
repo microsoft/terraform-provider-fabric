@@ -1,0 +1,12 @@
+steps:
+  # Bash example
+  - bash: terraform apply -auto-approve
+    env:
+      FABRIC_OIDC_REQUEST_TOKEN: $(System.AccessToken) # or SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID: "your-service-connection-id"
+
+  # PowerShell example
+  - powershell: terraform apply -auto-approve
+    env:
+      FABRIC_OIDC_REQUEST_TOKEN: $(System.AccessToken) # or SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID: "your-service-connection-id"

@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json
+---
+# Markdownlint YAML configuration
+# Default source: https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.yaml
+
+# Default state for all rules
+default: true
+
+# Path to configuration file to extend
+# extends: null
+
+ignore_front_matter: true
+
+# MD013/line-length - Line length
+MD013: false
+
+# MD024/no-duplicate-heading
+MD024: false
+
+# MD033/no-inline-html - Inline HTML
+MD033:
+  # Allowed elements
+  allowed_elements: ["br", "a"]
+
+# MD046/code-block-style - Code block style
+MD046:
+  # Block style
+  style: "fenced"
+
+# MD041/first-line-heading
+MD041: false
+# MD041:
+#   level: 1
+#   front_matter_title: ^\s*(title|page_title)\s*[:=]

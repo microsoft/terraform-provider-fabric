@@ -1,0 +1,35 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "name": "Set Variable",
+        "type": "SetVariable",
+        "dependsOn": [],
+        "policy": {
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "variableName": "pipelineReturnValue",
+          "value": [
+            {
+              "key": "testBool",
+              "value": {
+                "type": "Boolean",
+                "content": true
+              }
+            },
+            {
+              "key": "testString",
+              "value": {
+                "type": "String",
+                "content": "{{ .MyValue }}"
+              }
+            }
+          ],
+          "setSystemVariable": true
+        }
+      }
+    ]
+  }
+}

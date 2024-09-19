@@ -1,0 +1,70 @@
+---
+page_title: "Authenticating using a Managed Identity (MSI)"
+subcategory: "Authentication"
+description: |-
+
+---
+
+# Authenticating using a Managed Identity (MSI)
+
+---
+
+## Setting up Microsoft Fabric to allow Service Principals
+
+Follow [Configure Microsoft Fabric to allow Service Principals](./auth_app_reg_spn.md#configure-microsoft-fabric-to-allow-service-principals) guide.
+
+## Using a System-Assigned Managed Identity
+
+### Configuring a Virtual Machine to use a System-Assigned Managed Identity
+
+{{ codefile "shell" "examples/guides/auth_msi/azurevm_sami.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_msi/azurevm_sami.ps1" }}
+
+### Configuring Terraform to use the System-Assigned Managed Identity
+
+At this point we assume that managed identity is configured on the resource (e.g. virtual machine) being used, that permissions have been granted, and that you are running Terraform on that resource.
+
+Terraform can be configured to use managed identity for authentication in one of two ways: using Environment Variables or by defining the fields within the Provider Block.
+
+#### Environment Variables setup for the System-Assigned Managed Identity
+
+You can configure Terraform to use Managed Identity by setting the Environment Variable `FABRIC_USE_MSI` to `true`; as shown below:
+
+{{ codefile "shell" "examples/guides/auth_msi/envvars_sami.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_msi/envvars_sami.ps1" }}
+
+#### Provider Block setup for the System-Assigned Managed Identity
+
+The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+
+{{ tffile "examples/guides/auth_msi/provider_block_sami.tf" }}
+
+## Using a User-Assigned Managed Identity
+
+### Configuring a Virtual Machine to use a User-Assigned Managed Identity
+
+{{ codefile "shell" "examples/guides/auth_msi/azurevm_uami.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_msi/azurevm_uami.ps1" }}
+
+### Configuring Terraform to use the User-Assigned Managed Identity
+
+At this point we assume that managed identity is configured on the resource (e.g. virtual machine) being used, that permissions have been granted, and that you are running Terraform on that resource.
+
+Terraform can be configured to use managed identity for authentication in one of two ways: using Environment Variables or by defining the fields within the Provider block.
+
+#### Environment Variables setup for the User-Assigned Managed Identity
+
+You can configure Terraform to use Managed Identity by setting the Environment Variable `FABRIC_USE_MSI` to `true`; as shown below:
+
+{{ codefile "shell" "examples/guides/auth_msi/envvars_uami.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_msi/envvars_uami.ps1" }}
+
+#### Provider Block setup for the User-Assigned Managed Identity
+
+The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+
+{{ tffile "examples/guides/auth_msi/provider_block_uami.tf" }}

@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://json.schemastore.org/mkdocs-1.0.json
+---
+site_name: FABRIC DOCUMENTATION
+site_description: Terraform Provider for Microsoft Fabric documentation
+site_author: Microsoft Corporation
+use_directory_urls: true
+theme:
+  name: material
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  icon:
+    admonition:
+      note: octicons/info-16
+      warning: octicons/alert-16
+      danger: octicons/alert-16
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - navigation.indexes
+    - navigation.instant
+    - navigation.prune
+    - navigation.top
+    - toc.follow
+
+plugins:
+  - search
+  - awesome-pages
+
+validation:
+  links:
+    absolute_links: relative_to_docs
+    anchors: warn
+    unrecognized_links: warn
+
+markdown_extensions:
+  - meta
+  - abbr
+  - admonition
+  - attr_list
+  - pymdownx.smartsymbols
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      title: "ON THIS PAGE"
+      permalink: true
+
+copyright: Copyright &copy; 2024 Microsoft Corporation
+
+hooks:
+  - .github/dev/tfdocs.py

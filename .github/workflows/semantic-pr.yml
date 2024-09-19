@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+# Linter to enforce semantic pull request titles (see https://www.conventionalcommits.org/)
+---
+name: 🔍 Semantic PR
+
+on:
+  pull_request_target:
+    branches: ["main"]
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  pull-requests: write
+
+jobs:
+  main:
+    name: 🔍 Check PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Run Semantic PR validation
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        id: check_pr_title
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 💬 Comment on PR
+        if: always() && (steps.check_pr_title.outputs.error_message != null)
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
+        with:
+          header: pr-title-check-error
+          message: |
+            Hey there and thank you for opening this pull request! 👋🏼
+
+            We require pull request titles to follow the [Conventional Commits](https://www.conventionalcommits.org/) specification and it looks like your proposed title needs to be adjusted.
+
+            Details:
+
+            ```
+            ${{ steps.check_pr_title.outputs.error_message }}
+            ```
+
+      - name: 🗑 Delete PR comment
+        if: ${{ steps.check_pr_title.outputs.error_message == null }}
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
+        with:
+          header: pr-title-check-error
+          delete: true

@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: 🐛 Bug Report
+description: If something isn't working 🔧
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 🐛 What happened?
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 🔬 How to reproduce?
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. Run ...
+        4. Scroll down to...
+        5. See error
+    validations:
+      required: false
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: 🏗️ Code Sample / Log
+      description: |
+        Please copy and paste any relevant code sample / log output to help explain your problem.
+
+        ‼️ **REMINDER: REMOVE SENSITIVE DATA SUCH AS SECRETS, USER NAMES, EMAILS, TENANT INFORMATION, ETC.**
+      placeholder: code sample / log output to help explain your problem.
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📷 Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+      placeholder: Just do Ctrl+V having screenshot in the clipboard.
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 📈 Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: A clear and concise description of what you expected to happen.
+    validations:
+      required: false
+
+  - type: input
+    id: provider-version
+    attributes:
+      label: 🌌 Environment (Provider Version)
+      description: What Terraform Provider version are you running?
+      placeholder: 0.1.0-beta.1
+    validations:
+      required: true
+
+  - type: input
+    id: terraform-version
+    attributes:
+      label: 🌌 Environment (Terraform Version)
+      description: What Terraform version are you running? Run `terraform version` to see it.
+      placeholder: 1.9.6
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 🌌 Environment (OS)
+      description: What OS are you using to run the Provider?
+      options:
+        - Linux
+        - Windows
+        - macOS
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context about the problem here.
+      placeholder: Add any other context about the problem here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow our [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

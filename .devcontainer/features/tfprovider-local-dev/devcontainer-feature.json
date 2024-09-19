@@ -1,0 +1,23 @@
+{
+  "id": "tfprovider-local-dev",
+  "version": "0.0.1",
+  "name": "Local Terraform Provider Development configuration",
+  "documentationURL": "https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider#prepare-terraform-for-local-provider-install",
+  "description": "Installs Terraform Provider local configuration file for development.",
+  "options": {
+    "providerName": {
+      "type": "string",
+      "default": "",
+      "description": "Provider name"
+    },
+    "workspace": {
+      "type": "string",
+      "default": "${containerWorkspaceFolder}",
+      "description": "Root src workspace absolute path in DevContainer."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/go",
+    "ghcr.io/devcontainers/features/terraform"
+  ]
+}

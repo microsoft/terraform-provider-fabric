@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
+# See GitHub's documentation for more information on this file:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+---
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /.github/workflows
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: ci
+      include: scope
+
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: build
+      prefix-development: chore
+      include: scope
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: build
+      prefix-development: chore
+      include: scope

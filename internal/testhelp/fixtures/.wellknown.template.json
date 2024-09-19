@@ -1,0 +1,110 @@
+{
+  "workspace": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_workspace",
+    "description": "testacc_fabric_workspace"
+  },
+  "dashboard": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_dashboard",
+    "description": "testacc_fabric_dashboard"
+  },
+  "datamart": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_datamart",
+    "description": "testacc_fabric_datamart"
+  },
+  "dataPipeline": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_data_pipeline",
+    "description": "testacc_fabric_data_pipeline"
+  },
+  "environment": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_environment",
+    "description": "testacc_fabric_environment"
+  },
+  "eventhouse": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_eventhouse",
+    "description": "testacc_fabric_eventhouse"
+  },
+  "eventstream": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_eventstream",
+    "description": "testacc_fabric_eventstream"
+  },
+  "kqlDatabase": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_kql_database",
+    "description": "testacc_fabric_kql_database"
+  },
+  "kqlQueryset": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_kql_queryset",
+    "description": "testacc_fabric_kql_queryset"
+  },
+  "lakehouse": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_lakehouse",
+    "description": "testacc_fabric_lakehouse"
+  },
+  "mlExperiment": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_ml_experiment",
+    "description": "testacc_fabric_ml_experiment"
+  },
+  "mlModel": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_ml_model",
+    "description": "testacc_fabric_ml_model"
+  },
+  "notebook": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_notebook",
+    "description": "testacc_fabric_notebook"
+  },
+  "report": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_report",
+    "description": "testacc_fabric_report"
+  },
+  "semanticModel": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_semantic_model",
+    "description": "testacc_fabric_semantic_model"
+  },
+  "warehouse": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_warehouse",
+    "description": "testacc_fabric_warehouse"
+  },
+  "sparkJobDefinition": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_spark_job_definition",
+    "description": "testacc_fabric_spark_job_definition"
+  },
+  "capacity": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_fabric_capacity",
+    "description": "testacc_fabric_capacity"
+  },
+  "domainParent": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_domain_parent",
+    "description": "testacc_domain_parent"
+  },
+  "domainChild": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "displayName": "testacc_domain_child",
+    "description": "testacc_domain_child"
+  },
+  "principal": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "type": "ServicePrincipal"
+  },
+  "group": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "type": "Group"
+  }
+}

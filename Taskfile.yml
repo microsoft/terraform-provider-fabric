@@ -1,0 +1,504 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# docs: https://taskfile.dev
+#
+# Windows:
+# winget install Task.Task
+#
+# Linux:
+# sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+# echo 'command -v task >/dev/null || export PATH="$PATH:$HOME/.local/bin"' >> ~/.profile
+# source ~/.profile
+#
+# macOS:
+# brew install go-task/tap/go-task
+---
+version: "3"
+
+vars:
+  PROJECT_NAME: terraform-provider-fabric
+  MODULE_NAME:
+    sh: go mod edit -json | jq .Module.Path -r
+  PWSH: pwsh -NonInteractive -NoProfile -NoLogo -Command
+  BUILD_DEV_OUTPUT_DIR: "bin/{{OS}}-{{ARCH}}"
+  BUILD_DEV_ARTIFACT: "{{.BUILD_DEV_OUTPUT_DIR}}/{{.PROJECT_NAME}}{{exeExt}}"
+
+tasks:
+  # ----------------------
+  # Development
+  # ----------------------
+  dev-overrides:
+    desc: Set up the environment to point to the right directories
+    vars:
+      BUILD_DEV_ARTIFACT_PATH: "{{.ROOT_DIR}}/{{.BUILD_DEV_ARTIFACT}}"
+    cmds:
+      - cmd: cp .github/dev/dev.tfrc.template dev.tfrc
+        platforms: [linux, darwin]
+      - cmd: sed -i '' 's|<output_dir>|{{.BUILD_DEV_ARTIFACT_PATH}}|g' dev.tfrc
+        platforms: [darwin]
+      - cmd: sed -i 's|<output_dir>|{{.BUILD_DEV_ARTIFACT_PATH}}|g' dev.tfrc
+        platforms: [linux]
+      - cmd: if [ -z $TF_CLI_CONFIG_FILE ]; then echo -e "### Run the following command:\nexport TF_CLI_CONFIG_FILE={{.ROOT_DIR}}/dev.tfrc\n###"; fi
+        platforms: [linux, darwin]
+
+  deps:
+    desc: Check if dependencies are up to date
+    cmds:
+      - go mod tidy
+
+  deps:verify:
+    desc: Verify dependencies
+    cmds:
+      - go mod verify
+
+  deps:download:
+    desc: Download dependencies
+    cmds:
+      - go mod download
+
+  deps:up:
+    desc: Update dependencies
+    deps: [deps]
+    cmds:
+      - go get -u ./...
+      - defer:
+          task: deps
+
+  lint:
+    desc: Run linters
+    cmds:
+      - task: lint:files
+      - task: lint:go
+      - task: lint:tf
+      - task: lint:md
+
+  lint:files:
+    desc: Run linters for various file types
+    cmds:
+      - copywrite headers
+      - copywrite license
+
+  lint:go:
+    desc: Run Go linters
+    cmds:
+      - task: govulncheck
+      - task: golangci-lint
+      - task: tfproviderlintx
+
+  govulncheck:
+    desc: Run govulncheck
+    cmds:
+      - govulncheck ./...
+
+  golangci-lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run --fix ./...
+
+  tfproviderlintx:
+    desc: Run tfproviderlintx
+    cmds:
+      - tfproviderlintx -fix ./...
+
+  lint:tf:
+    desc: Run Terraform linters
+    cmds:
+      - terraform fmt -recursive
+      - tflint --recursive
+      - tfsec .
+      - checkov --directory .
+
+  lint:md:
+    desc: Run Markdown linters
+    cmds:
+      - markdownlint-cli2 "./**/*.md" --config "./.github/linters/.markdownlint-cli2.yaml" --fix
+
+  tools:
+    desc: Install required tools
+    cmds:
+      - for:
+          [
+            semver,
+            copywrite,
+            changie,
+            tfplugindocs,
+            goimports,
+            golangci-lint,
+            gofumpt,
+            goreleaser,
+            govulncheck,
+            tfproviderlintx,
+            mkdocs,
+            yamllint,
+            markdownlint,
+          ]
+        task: install:{{.ITEM}}
+      - task: test:tools
+      - task: lint:tf-tools
+
+  lint:tf-tools:
+    desc: Install Terraform lint tools
+    cmds:
+      - for: [tflint, tfsec, checkov]
+        task: install:{{.ITEM}}
+
+  tfp:
+    desc: Run Terraform plan
+    dir: "{{.USER_WORKING_DIR}}"
+    env:
+      TF_LOG: error
+    cmds:
+      - terraform plan
+
+  tfa:
+    desc: Run Terraform apply
+    dir: "{{.USER_WORKING_DIR}}"
+    env:
+      TF_LOG: error
+    cmds:
+      - terraform apply -auto-approve
+
+  otp:
+    desc: Run OpenTofu plan
+    dir: "{{.USER_WORKING_DIR}}"
+    env:
+      TF_LOG: error
+      TERRAFORM_CLI: tofu
+      TERRAFORM_PROVIDER_HOST: registry.opentofu.org
+      TF_ACC_TERRAFORM_PATH: tofu
+      TF_ACC_PROVIDER_HOST: registry.opentofu.org
+    cmds:
+      - tofu plan
+
+  ota:
+    desc: Run OpenTofu apply
+    dir: "{{.USER_WORKING_DIR}}"
+    env:
+      TF_LOG: error
+      TERRAFORM_CLI: tofu
+      TERRAFORM_PROVIDER_HOST: registry.opentofu.org
+      TF_ACC_TERRAFORM_PATH: tofu
+      TF_ACC_PROVIDER_HOST: registry.opentofu.org
+    cmds:
+      - tofu apply -auto-approve
+
+  # ----------------------
+  # Build
+  # ----------------------
+  build:
+    desc: Build development Provider binary with GoReleaser
+    deps: [build:clean]
+    cmds:
+      - goreleaser build --snapshot --single-target --clean --output {{.BUILD_DEV_ARTIFACT}}
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BUILD_DEV_ARTIFACT}}"
+
+  build:all:
+    desc: Build snapshot Provider binaries with GoReleaser
+    cmds:
+      - goreleaser build --snapshot --clean
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+
+  build:clean:
+    desc: Cleanup build workspace
+    cmds:
+      - cmd: |
+          {{.PWSH}} 'Remove-Item -Path {{.BUILD_DEV_OUTPUT_DIR}} -Recurse -Force -ErrorAction SilentlyContinue; exit 0'
+        platforms: [windows]
+      - cmd: rm -rf {{.BUILD_DEV_OUTPUT_DIR}}
+        platforms: [linux, darwin]
+      - defer:
+          task: build:output
+    silent: true
+    internal: true
+
+  build:output:
+    desc: Create build output directories
+    cmds:
+      - cmd: |
+          {{.PWSH}} 'New-Item -ItemType Directory -Force -Path {{.BUILD_DEV_OUTPUT_DIR}} -ErrorAction SilentlyContinue > $null'
+        platforms: [windows]
+      - cmd: mkdir -p {{.BUILD_DEV_OUTPUT_DIR}}
+        platforms: [linux, darwin]
+    silent: true
+    internal: true
+
+  docs:
+    desc: Auto generate documentation
+    cmds:
+      - tfplugindocs generate --provider-name {{.PROJECT_NAME}}
+      - task: lint:md
+
+  site:build:
+    desc: Build docs site
+    deps: [docs]
+    cmds:
+      - cmd: |
+          {{.PWSH}} 'Remove-Item -Path .\site -Recurse -Force -ErrorAction SilentlyContinue; exit 0'
+        platforms: [windows]
+      - cmd: rm -rf ./site
+        platforms: [linux, darwin]
+      - mkdocs build --verbose --clean
+    env:
+      TZ: UTC
+
+  site:preview:
+    desc: Preview a docs site locally
+    cmds:
+      - mkdocs serve --verbose --clean --strict
+    env:
+      TZ: UTC
+
+  # ----------------------
+  # Test
+  # ----------------------
+  testunit:
+    desc: Run unit tests
+    cmds:
+      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^TestUnit_{{.TEST_NAME}}" -p 4 -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format testname --junitfile "testresults.xml" -- ./... -run "^TestUnit_{{.TEST_NAME}}" -p 4 -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - task: test:getcover
+    vars:
+      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testUnit"
+    env:
+      TF_LOG: error
+      TF_ACC: 0
+
+  testacc:
+    desc: Run acceptance tests
+    cmds:
+      - go clean -testcache
+      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^TestAcc_{{.TEST_NAME}}" -timeout 15m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format pkgname-and-test-fails --junitfile "testresults.xml" -- ./... -run "^TestAcc_{{.TEST_NAME}}" -timeout 15m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - task: test:getcover
+    vars:
+      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testAcc"
+    env:
+      TF_LOG: error
+      TF_ACC: 1
+
+  test:
+    desc: Run tests
+    cmds:
+      - go clean -testcache
+      - go test -failfast -run ^TestDevEnv_Provision$ {{.MODULE_NAME}}/internal/testhelp
+      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 15m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}{{end}}'
+      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format pkgname-and-test-fails --junitfile "testresults.xml" -- ./... -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 15m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}{{end}}'
+      - task: test:getcover
+    vars:
+      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testAcc"
+      GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
+      GO_PKGS:
+        sh: |
+          {{if eq .OS "Windows_NT"}}
+            {{.PWSH}} "(go list ./... | Select-String -NotMatch '({{ .GO_PKGS_EXCLUDE }})$') -join ','"
+          {{else}}
+            go list ./... | grep -Ev '({{ .GO_PKGS_EXCLUDE }})$' | tr '\n' ','
+          {{end}}
+    env:
+      TF_LOG: error
+      TF_ACC: 1
+
+  # task testacc:setup -- fabtestaccqmjern
+  testacc:setup:
+    desc: Setup acceptence test environment
+    preconditions:
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} '$null = az account show; if ($LASTEXITCODE -ne 0) { exit 1 }'
+          {{else}}
+            az account show &>/dev/null
+          {{end}}
+        msg: "Please run 'az login' to setup account."
+      - sh: |
+          {{if eq .CLI_ARGS ""}}exit 1{{end}}
+        msg: "Capacity Name argument not provided."
+    cmds:
+      - go clean -testcache
+      - go test -failfast -run ^TestDevEnv_Provision$
+    dir: ./internal/testhelp
+    env:
+      FABRIC_TESTACC_WELLKNOWN_CREATE_RESOURCES: true
+      FABRIC_TESTACC_WELLKNOWN_CAPACITY_NAME: "{{ .CLI_ARGS }}"
+
+  test:tools:
+    desc: Install test tools
+    cmds:
+      - for: [gotestsum, gocov, gocov-xml]
+        task: install:{{.ITEM}}
+
+  test:getcover:
+    desc: Get coverage results
+    internal: true
+    cmds:
+      - gocov convert coverage.out > coverage.json
+      - gocov report coverage.json > coverage.txt
+      - cmd: |
+          {{ .PWSH }} 'Get-Content coverage.json | gocov-xml > coverage.xml'
+        platforms: [windows]
+      - cmd: gocov-xml < coverage.json > coverage.xml
+        platforms: [linux, darwin]
+      - go tool cover -html coverage.out -o coverage.html
+
+  # ----------------------
+  # Release
+  # ----------------------
+  release:prep:
+    desc: Prepare release
+    vars:
+      SEMVER:
+        sh: semver up beta
+
+    env:
+      CHANGIE_GITHUB_REPOSITORY: "microsoft/terraform-provider-fabric"
+    cmds:
+      - echo "{{.SEMVER}}"
+      - cmd: |
+          git checkout main && git fetch && git pull
+          git checkout -b "release/{{.SEMVER}}"
+      - changie batch {{.SEMVER}}
+      - changie merge
+      - task: docs
+      - cmd: |
+          git add .
+          git commit -a -m "feat(release): {{.SEMVER}}"
+      - cmd: |
+          gh pr create --title "feat(release): {{.SEMVER}}" --body-file ".changes/{{.SEMVER}}.md" --label "skip-changelog"
+
+  # ----------------------
+  # Install Helpers
+  # ----------------------
+  install:semver:
+    desc: Install semver
+    cmds:
+      - go install github.com/maykonlsf/semver-cli/cmd/semver@latest
+
+  install:copywrite:
+    desc: Install copywrite
+    cmds:
+      - go install github.com/hashicorp/copywrite@latest
+
+  install:changie:
+    desc: Install changie
+    cmds:
+      - go install github.com/miniscruff/changie@latest
+
+  install:gotestsum:
+    desc: Install gotestsum
+    cmds:
+      - go install gotest.tools/gotestsum@latest
+
+  install:gocov:
+    desc: Install gocov
+    cmds:
+      - go install github.com/axw/gocov/gocov@latest
+
+  install:gocov-xml:
+    desc: Install gocov-xml
+    cmds:
+      - go install github.com/AlekSi/gocov-xml@latest
+
+  install:tfplugindocs:
+    desc: Install tfplugindocs
+    cmds:
+      - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+  install:goimports:
+    desc: Install goimports
+    cmds:
+      - go install golang.org/x/tools/cmd/goimports@latest
+
+  install:golangci-lint:
+    desc: Install golangci-lint
+    cmds:
+      - cmd: winget install GolangCI.golangci-lint
+        ignore_error: true
+        platforms: [windows]
+      - cmd: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" latest
+        platforms: [linux]
+      - cmd: brew install golangci-lint
+        platforms: [darwin]
+
+  install:gofumpt:
+    desc: Install gofumpt
+    cmds:
+      - go install mvdan.cc/gofumpt@latest
+
+  install:goreleaser:
+    desc: Install goreleaser
+    cmds:
+      - go install github.com/goreleaser/goreleaser/v2@latest
+
+  install:tfproviderlintx:
+    desc: Install tfproviderlintx
+    cmds:
+      - go install github.com/bflad/tfproviderlint/cmd/tfproviderlintx@latest
+
+  install:markdownlint:
+    desc: Install markdownlint
+    cmds:
+      - npm install -g markdownlint-cli2
+
+  install:tflint:
+    desc: Install tflint
+    cmds:
+      - go install github.com/terraform-linters/tflint@latest
+
+  install:tfsec:
+    desc: Install tfsec
+    cmds:
+      - go install github.com/aquasecurity/tfsec/cmd/tfsec@latest
+
+  install:govulncheck:
+    desc: Install govulncheck
+    cmds:
+      - go install golang.org/x/vuln/cmd/govulncheck@latest
+
+  install:checkov:
+    desc: Install checkov
+    preconditions:
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} 'if (-not (Get-Command pipx -ErrorAction SilentlyContinue)) { exit 1 }'
+          {{else}}
+            command -v pipx &>/dev/null || exit 1
+          {{end}}
+        msg: "First install pipx: https://pipx.pypa.io/"
+    cmds:
+      - pipx install --force checkov
+
+  install:mkdocs:
+    desc: Install mkdocs
+    preconditions:
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} 'if (-not (Get-Command pipx -ErrorAction SilentlyContinue)) { exit 1 }'
+          {{else}}
+            command -v pipx &>/dev/null || exit 1
+          {{end}}
+        msg: "First install pipx: https://pipx.pypa.io/"
+    cmds:
+      - pipx install --force mkdocs
+      - pipx inject --include-deps --force mkdocs $(mkdocs get-deps)
+
+  install:yamllint:
+    desc: Install yamllint
+    preconditions:
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} 'if (-not (Get-Command pipx -ErrorAction SilentlyContinue)) { exit 1 }'
+          {{else}}
+            command -v pipx &>/dev/null || exit 1
+          {{end}}
+        msg: "First install pipx: https://pipx.pypa.io/"
+    cmds:
+      - pipx install --force yamllint

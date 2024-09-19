@@ -1,0 +1,62 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Notebook\n",
+        "\n",
+        "This is a template notebook used to test terraform functionality.\n",
+        "\n",
+        "Hello {{ .MESSAGE | default "" }}",
+        "\n",
+        "Note: {{ .MyValue | default "" }}"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {},
+      "outputs": [],
+      "source": [
+        "import logging\n",
+        "\n",
+        "# Customize the logging format for all loggers\n",
+        "FORMAT = \"%(asctime)s - %(name)s - %(levelname)s - %(message)s\"\n",
+        "formatter = logging.Formatter(fmt=FORMAT)\n",
+        "for handler in logging.getLogger().handlers:\n",
+        "    handler.setFormatter(formatter)\n",
+        "\n",
+        "# Customize log level for all loggers\n",
+        "logging.getLogger().setLevel(logging.INFO)\n",
+        "\n",
+        "# Customize the log level for a specific logger\n",
+        "customizedLogger = logging.getLogger('customized')\n",
+        "customizedLogger.setLevel(logging.WARNING)\n",
+        "\n",
+        "# logger that use the default global log level\n",
+        "defaultLogger = logging.getLogger('default')\n",
+        "\n",
+        "defaultLogger.debug(\"default debug message\")\n",
+        "defaultLogger.info(\"default info message\")\n",
+        "defaultLogger.warning(\"default warning message\")\n",
+        "defaultLogger.error(\"default error message\")\n",
+        "defaultLogger.critical(\"default critical message\")\n",
+        "\n",
+        "# logger that use the customized log level\n",
+        "customizedLogger.debug(\"customized debug message\")\n",
+        "customizedLogger.info(\"customized info message\")\n",
+        "customizedLogger.warning(\"customized warning message\")\n",
+        "customizedLogger.error(\"customized error message\")\n",
+        "customizedLogger.critical(\"customized critical message\")"
+      ]
+    }
+  ],
+  "metadata": {
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

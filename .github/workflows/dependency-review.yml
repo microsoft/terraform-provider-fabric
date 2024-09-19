@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: 🕵️ Dependency Review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  main:
+    name: 🕵️ Check Dependency
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: 🕵️ Run Dependency Review
+        uses: actions/dependency-review-action@5a2ce3f5b92ee19cbb1541a4984c76d921601d7c # v4.3.4
+        with:
+          vulnerability-check: true
+          license-check: true
+          show-openssf-scorecard: true
+          comment-summary-in-pr: on-failure

@@ -1,0 +1,58 @@
+---
+name: 🏷️ Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".changes/*.md"
+
+permissions:
+  contents: read
+
+jobs:
+  release-tag:
+    name: 🏷️ Set Release Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: 🏷️ Check for Tag
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: release_tag
+        with:
+          list-files: shell
+          filters: |
+            changelog:
+              - added: '.changes/*.md'
+
+      - name: 🏷️ Get Release Tag
+        if: ${{ steps.release_tag.outputs.changelog == 'true' }}
+        run: |
+          echo "RELEASE_TAG=$(basename "${{ steps.release_tag.outputs.changelog_files }}" .md)" >> $GITHUB_ENV
+
+      - name: 🤖 Get bot details
+        if: ${{ steps.release_tag.outputs.changelog == 'true' }}
+        id: bot-details
+        uses: raven-actions/bot-details@b2d5fd6eb98adc0cb67df864daa834849f3a8bc0 # v1.1.0
+        with:
+          set-env: false
+
+      - name: 🔖 Push Release Tag
+        if: ${{ steps.release_tag.outputs.changelog == 'true' }}
+        run: |
+          git config --global user.name "${{ steps.bot-details.outputs.name }}"
+          git config --global user.email "${{ steps.bot-details.outputs.email }}"
+          git tag -a "${{ env.RELEASE_TAG }}" -m "${{ env.RELEASE_TAG }}"
+          git push origin --follow-tags
+
+      - name: 🚀 Release
+        if: ${{ steps.release_tag.outputs.changelog == 'true' }}
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          event-type: release
+          client-payload: '{"tag": "${{ env.RELEASE_TAG }}"}'

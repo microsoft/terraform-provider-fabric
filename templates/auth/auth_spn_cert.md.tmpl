@@ -1,0 +1,91 @@
+---
+page_title: "Authenticating using a Service Principal and Client Certificate"
+subcategory: "Authentication"
+description: |-
+
+---
+
+# Authenticating using a Service Principal and Client Certificate
+
+---
+
+!> We recommend using either a [Service Principal with OpenID Connect (OIDC)](./auth_spn_oidc.md) or [Managed Service Identity (MSI)](./auth_msi.md) authentication when running Terraform non-interactively (such as when running Terraform in a CI server), and authenticating using the Azure CLI when running Terraform locally.
+
+---
+
+## Setting up Entra Application and Service Principal
+
+Follow [Creating an App Registration for the Service Principal context (SPN)](./auth_app_reg_spn.md) guide.
+
+## Generating Client Certificate
+
+Firstly we need to create a certificate which can be used for authentication. To do that we're going to generate a private key and self-signed certificate using OpenSSL or LibreSSL (this can also be achieved using PowerShell, however that's outside the scope of this document).
+
+{{ codefile "shell" "examples/guides/auth_spn_cert/gen_cert.sh" }}
+
+## Adding a Client Certificate to Entra App
+
+### Using Azure Portal
+
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com), in **App registrations**, select your application.
+1. Select **Certificates & secrets** > `Certificates` > `Upload certificate`.
+1. Select the file you want to upload. It must be one of the following file types: *.cer, .pem, .crt*.
+1. Select `Add`.
+
+### Using Azure CLI
+
+Run the following command to upload the certificate:
+
+{{ codefile "shell" "examples/guides/auth_spn_cert/add_app_cert.sh" }}
+
+Replace `00000000-0000-0000-0000-000000000000` with the Application (client) ID of the service principal.
+
+### Using Azure PowerShell
+
+Run the following command to upload the certificate:
+
+{{ codefile "powershell" "examples/guides/auth_spn_cert/add_app_cert.ps1" }}
+
+Replace `00000000-0000-0000-0000-000000000000` with the Application (client) ID of the service principal.
+
+## Configuring Terraform to use the Client Certificate
+
+Now that we have our Client Certificate uploaded to Entra App and ready to use, it's possible to configure Terraform in a few different ways.
+
+The provider can be configured to read the certificate bundle from the `.pfx` file in your filesystem, or alternatively you can pass a base64-encoded copy of the certificate bundle directly to the provider.
+
+### Environment Variables
+
+Our recommended approach is storing the credentials as Environment Variables, for example:
+
+#### Reading the certificate bundle from the filesystem (env vars)
+
+{{ codefile "shell" "examples/guides/auth_spn_cert/envvars_file.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_spn_cert/envvars_file.ps1" }}
+
+#### Passing the encoded certificate bundle directly (env vars)
+
+{{ codefile "shell" "examples/guides/auth_spn_cert/envvars_b64.sh" }}
+
+{{ codefile "powershell" "examples/guides/auth_spn_cert/envvars_b64.ps1" }}
+
+The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+
+{{ tffile "examples/guides/auth_spn_cert/provider_envvars.tf" }}
+
+### Provider Block
+
+It's also possible to configure these variables either directly or from variables in your provider block.
+
+#### Reading the certificate bundle from the filesystem (provider block)
+
+The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+
+{{ tffile "examples/guides/auth_spn_cert/provider_block_cert_file.tf" }}
+
+#### Passing the encoded certificate bundle directly (provider block)
+
+The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+
+{{ tffile "examples/guides/auth_spn_cert/provider_block_cert.tf" }}

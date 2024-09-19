@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: ❓ Question
+description: Ask a question about this project 🎓
+title: "[question] "
+labels: [question]
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ☑️ Checklist
+      description: Mark with an ✔️ all the checkboxes that apply.
+      options:
+        - label: I've searched the project's [`issues`](../issues?q=is%3Aissue) and did not find answer for my question.
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ Question
+      description: What is your question?
+      placeholder: |
+        How can I ...?
+        Is it possible to ...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context or screenshots about the question here.
+      placeholder: Add any other context or screenshots about the question here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

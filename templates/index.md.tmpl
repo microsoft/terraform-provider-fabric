@@ -1,0 +1,60 @@
+---
+page_title: "{{ title .ProviderShortName}} Provider"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{ title .ProviderShortName }} Provider
+
+The {{ title .ProviderShortName }} provider allows managing environments and other resources within [Microsoft {{ title .ProviderShortName }}](https://fabric.microsoft.com/).
+
+!> This code is experimental and provided solely for evaluation purposes. It is **NOT** intended for production use and may contain bugs, incomplete features, or other issues. Use at your own risk, as it may undergo significant changes without notice, and no guarantees or support are provided. By using this code, you acknowledge and agree to these conditions. Consult the documentation or contact the maintainer if you have questions or concerns.
+
+## Requirements
+
+This provider requires **Terraform >= 1.8.x**.  For more information on provider installation and constraining provider versions, see the [Provider Requirements documentation](https://developer.hashicorp.com/terraform/language/providers/requirements).
+
+## Installation
+
+To install this provider, copy and paste this code into your Terraform configuration. Then, run `terraform init`.
+
+{{ if .HasExample -}}
+{{tffile .ExampleFile }}
+{{- end }}
+
+## Installation (developers only)
+
+To use the provider you can download the binaries from [Releases](https://github.com/microsoft/{{ .ProviderName }}/releases) to your local file system and configure Terraform to use your local mirror. See the [Explicit Installation Method Configuration](https://developer.hashicorp.com/terraform/cli/config/config-file#explicit-installation-method-configuration) for more information about using local binaries.
+
+{{ codefile "hcl" "examples/provider/terraform.rc" }}
+
+## Authentication
+
+The provider allows authentication via service principal or user credentials. All sensitive information should be passed into Terraform using environment variables (don't put secrets in your tf files).
+
+### Using Azure CLI (Default)
+
+The {{ title .ProviderShortName }} provider can use the Azure CLI to authenticate. If you have the Azure CLI installed, you can use it to log in to your Azure account and the {{ title .ProviderShortName }} provider will use the credentials from the Azure CLI.
+
+1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+1. Follow the [Creating an App Registration for the User context to use with Azure CLI](./auth/auth_app_reg_user.md) guide.
+
+### Using a Service Principal
+
+You can find more information on how to do this in the following guides:
+
+- [Authenticating using Managed Identity (MSI)](./auth/auth_msi.md)
+- [Authenticating using a Service Principal and OpenID Connect (OIDC)](./auth/auth_spn_oidc.md)
+- [Authenticating using a Service Principal and Client Certificate](./auth/auth_spn_cert.md)
+- [Authenticating using a Service Principal and Client Secret](./auth/auth_spn_secret.md)
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Know limitations
+
+- **Capacity**: [Microsoft Fabric trial capacity](https://learn.microsoft.com/fabric/get-started/fabric-trial) is not supported. Only self-provisioned [Fabric Capacity](https://learn.microsoft.com/fabric/enterprise/plan-capacity) on Azure is supported. You can setup your capacity in the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities).
+- **Service Principal**: Not all Fabric resources support Service Principals yet. For Provider evaluation, we recommend using the [Azure CLI for authentication with User context](./auth/auth_app_reg_user.md).
+
+## Contributing
+
+Contributions to this provider are always welcome! Please see the [Contribution Guidelines](https://github.com/microsoft/{{ .ProviderName }}/)

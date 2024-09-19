@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: 📄 Documentation Request
+description: Request new documentation or updates to existing documentation to improve clarity or usefulness 📢
+title: "[documentation] "
+labels: [documentation]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Description
+      description: |
+        Short description describing the documentation that you're requesting.
+        Include a use case for why users need this documentation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context or screenshots about the feature request here.
+      placeholder: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: done-definition
+    attributes:
+      label: ✅ Definition of Done
+      description: Necessary criteria for a task or feature to be considered complete.
+      options:
+        - label: Users should be able to use the documentation to complete a task
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow our [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

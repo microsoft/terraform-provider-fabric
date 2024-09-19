@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: 🚀 Feature Request
+description: Suggest an idea for this project 📢
+title: "[feature] "
+labels: [feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this new feature or enhancement idea!
+        Use this form only if Terraform Provider specific issue's forms (resource, data source, example, documentation) do not apply.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🚀 Feature description
+      description: A clear and concise description of the feature or enhancement proposal.
+      placeholder: A clear and concise description of the feature or enhancement proposal.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 🔈 Motivation
+      description: Please describe the motivation for this proposal.
+      placeholder: Please describe the motivation for this proposal.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🛰 Alternatives
+      description: A clear and concise description of any alternative solutions or features you've considered.
+      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: textarea
+    id: potential-solution
+    attributes:
+      label: 🚧 Potential Configuration / Desired Solution
+      description: Sample config that describes how the new feature might look.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context or screenshots about the feature request here.
+      placeholder: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

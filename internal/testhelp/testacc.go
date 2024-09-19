@@ -1,0 +1,119 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package testhelp
+
+import (
+	"errors"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+
+	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/provider"
+)
+
+var NewTestAccCase = func(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
+	t.Helper()
+
+	if preCheck == nil {
+		return newTestAccCase(t, testResource, TestAccPreCheck, steps)
+	}
+
+	return newTestAccCase(t, testResource, preCheck, steps)
+}
+
+// lintignore:AT003
+func TestAccPreCheck(t *testing.T) {
+	t.Helper()
+	// You can add code here to run prior to any test case execution, for example assertions
+	// about the appropriate environment variables being set are common to see in a pre-check
+	// function.
+}
+
+// lintignore:AT003
+func TestAccPreCheckNoEnvs(t *testing.T) {
+	t.Helper()
+
+	for _, env := range os.Environ() {
+		envPair := strings.SplitN(env, "=", 2) // Split into key and value
+		if strings.HasPrefix(envPair[0], "FABRIC_") && !strings.HasPrefix(envPair[0], "FABRIC_TESTACC_") {
+			os.Unsetenv(envPair[0]) //revive:disable-line:unhandled-error
+		}
+	}
+}
+
+func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
+	t.Helper()
+
+	return resource.TestCase{
+		IsUnitTest: false,
+		PreCheck:   func() { preCheck(t) },
+		CheckDestroy: func(s *terraform.State) error {
+			if testResource != nil {
+				_, ok := s.RootModule().Resources[*testResource]
+				if !ok {
+					return errors.New(*testResource + ` - resource still exists`)
+				}
+			}
+
+			return nil
+		},
+		ProtoV6ProviderFactories: GetTestAccProtoV6ProviderFactories(),
+		Steps:                    steps,
+	}
+}
+
+// getTestAccProtoV6ProviderFactories are used to instantiate a provider during
+// acceptance testing. The factory function will be invoked for every Terraform
+// CLI command executed to create a provider server to which the CLI can
+// reattach.
+func GetTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
+	return map[string]func() (tfprotov6.ProviderServer, error){
+		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
+	}
+}
+
+// lintignore:AT003
+func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+	t.Helper()
+
+	resourceHCL = at.CompileConfig(
+		at.ResourceHeader(TypeName("fabric", "workspace"), "test"),
+		map[string]any{
+			"display_name": RandomName(),
+			"capacity_id":  capacityID,
+		},
+	)
+
+	resourceFQN = ResourceFQN("fabric", "workspace", "test")
+
+	return resourceHCL, resourceFQN
+}
+
+// ShouldSkipTest checks if a test should be skipped based on FABRIC_TESTACC_SKIP_NO_SPN environment variable.
+func ShouldSkipTest(t *testing.T) bool {
+	t.Helper()
+
+	return strings.EqualFold(os.Getenv("FABRIC_TESTACC_SKIP_NO_SPN"), "true")
+}
+
+func GetFixturesDirPath(fixtureDir ...string) string {
+	_, filename, _, _ := runtime.Caller(0) //nolint:dogsled
+	testHelpDir := filepath.Dir(filename)
+
+	var tempPath []string
+
+	tempPath = append(tempPath, testHelpDir)
+	tempPath = append(tempPath, "fixtures")
+	tempPath = append(tempPath, fixtureDir...)
+
+	return filepath.ToSlash(filepath.Join(tempPath...))
+}

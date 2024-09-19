@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-config.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository#configuring-the-template-chooser
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Security Bug Report
+    url: https://aka.ms/opensource/security/create-report
+    about: Please report security vulnerabilities here. DO NOT post via Issues.
+  - name: Microsoft Fabric Community
+    url: https://aka.ms/FabricCommunity
+    about: Connect with community members, ask questions, and learn more about Fabric.
+  - name: Microsoft Fabric Ideas
+    url: https://aka.ms/FabricIdeas
+    about: Share ideas and feature requests for Fabric.
