@@ -37,24 +37,24 @@ The provider allows authentication via service principal or user credentials. Al
 The {{ title .ProviderShortName }} provider can use the Azure CLI to authenticate. If you have the Azure CLI installed, you can use it to log in to your Azure account and the {{ title .ProviderShortName }} provider will use the credentials from the Azure CLI.
 
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-1. Follow the [Creating an App Registration for the User context to use with Azure CLI](./auth/auth_app_reg_user.md) guide.
+1. Follow the [Creating an App Registration for the User context to use with Azure CLI](./guides/auth_app_reg_user.md) guide.
 
 ### Using a Service Principal
 
 You can find more information on how to do this in the following guides:
 
-- [Authenticating using Managed Identity (MSI)](./auth/auth_msi.md)
-- [Authenticating using a Service Principal and OpenID Connect (OIDC)](./auth/auth_spn_oidc.md)
-- [Authenticating using a Service Principal and Client Certificate](./auth/auth_spn_cert.md)
-- [Authenticating using a Service Principal and Client Secret](./auth/auth_spn_secret.md)
+- [Authenticating using Managed Identity (MSI)](./guides/auth_msi.md)
+- [Authenticating using a Service Principal and OpenID Connect (OIDC)](./guides/auth_spn_oidc.md)
+- [Authenticating using a Service Principal and Client Certificate](./guides/auth_spn_cert.md)
+- [Authenticating using a Service Principal and Client Secret](./guides/auth_spn_secret.md)
 
 {{ .SchemaMarkdown | trimspace }}
 
 ## Know limitations
 
 - **Capacity**: [Microsoft Fabric trial capacity](https://learn.microsoft.com/fabric/get-started/fabric-trial) is not supported. Only self-provisioned [Fabric Capacity](https://learn.microsoft.com/fabric/enterprise/plan-capacity) on Azure is supported. You can setup your capacity in the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities).
-- **Service Principal**: Not all Fabric resources support Service Principals yet. For Provider evaluation, we recommend using the [Azure CLI for authentication with User context](./auth/auth_app_reg_user.md).
+- **Service Principal**: Not all Fabric resources support Service Principals yet. For Provider evaluation, we recommend using the [Azure CLI for authentication with User context](./guides/auth_app_reg_user.md).
 
 ## Contributing
 
-Contributions to this provider are always welcome! Please see the [Contribution Guidelines](https://github.com/microsoft/{{ .ProviderName }}/)
+This project welcomes feedback and suggestions only via GitHub Issues. Pull Request (PR) contributions will **NOT** be accepted at this time. Please see the [Contribution Guidelines](https://github.com/microsoft/{{ .ProviderName }}/)
