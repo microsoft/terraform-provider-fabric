@@ -65,7 +65,7 @@ Once you have the prerequisites, you can follow these steps to open the repo in 
 1. Open VS Code and press F1 to open the command palette. Type "Remote-Containers: Open Folder in Container..." and select it.
 1. Browse to the folder where you cloned or forked the repo and click "Open".
 1. VS Code will reload and start building the DevContainer image. This may take a few minutes depending on your network speed and the size of the image.
-1. When the DevContainer is ready, you will see "Dev Container: Fabric Terraform Provider" in the lower left corner of the VS Code status bar. You can also open a new terminal (Ctrl+Shift+`) and see that you are inside the container.
+1. When the DevContainer is ready, you will see "Dev Container: Terraform Provider" in the lower left corner of the VS Code status bar. You can also open a new terminal (Ctrl+Shift+`) and see that you are inside the container.
 1. You can now edit, run, debug, and test the code as if you were on your local machine. Any changes you make will be reflected in the container and in your local file system.
 
 > [!NOTE]
