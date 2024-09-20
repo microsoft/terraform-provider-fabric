@@ -8,11 +8,11 @@ description: |-
 # Getting started
 
 [HashiCorp Terraform](https://www.terraform.io/) is a popular open source tool for creating safe and predictable cloud infrastructure across several cloud providers.
-You can use the Microsoft Fabric Terraform provider to manage your Microsoft Fabric workspaces using a flexible, powerful tool.
-The goal of the Microsoft Fabric Terraform provider is to support automation of the most complicated aspects of deploying and managing Microsoft Fabric.
-Microsoft Fabric customers are using the Microsoft Fabric Terraform provider to deploy and manage clusters and jobs and to configure data access.
+You can use the Microsoft Fabric Terraform Provider to manage your Microsoft Fabric workspaces using a flexible, powerful tool.
+The goal of the Microsoft Fabric Terraform Provider is to support automation of the most complicated aspects of deploying and managing Microsoft Fabric.
+Microsoft Fabric customers are using the Microsoft Fabric Terraform Provider to deploy and manage clusters and jobs and to configure data access.
 
-In this section, you install and configure requirements to use Terraform and the Microsoft Fabric Terraform provider on your local development machine.
+In this section, you install and configure requirements to use Terraform and the Microsoft Fabric Terraform Provider on your local development machine.
 You then configure Terraform authentication. Following this section, this article provides a sample configuration that you can experiment with to provision a Microsoft Fabric notebook and lakehouse.
 
 ## Requirements
@@ -27,7 +27,7 @@ You then configure Terraform authentication. Following this section, this articl
 
     Include Terraform configurations for your project in one or more configuration files in your Terraform project. For information about the configuration file syntax, see [Terraform Language Documentation](https://developer.hashicorp.com/terraform/language) on the Terraform website.
 
-1. You must configure authentication for your Terraform project. See [Authentication](https://improved-adventure-935np96.pages.github.io/#authentication) in the Microsoft Fabric Terraform provider documentation.
+1. You must configure authentication for your Terraform project. See [Authentication](https://improved-adventure-935np96.pages.github.io/#authentication) in the Microsoft Fabric Terraform Provider documentation.
 1. You must have a [Fabric Capacity](https://learn.microsoft.com/fabric/enterprise/licenses#capacity) provisioned in Azure. A capacity can be added in the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities). Note: Please keep the capacity name handy, as we will use it below to fetch the capacity id.
 
 ## Sample configuration
@@ -146,11 +146,11 @@ Microsoft Fabric workspace. We will also add a data source to fetch the Microsof
 
 ## Troubleshooting
 
-> Note: For Terraform-specific support, see the Latest Terraform topics on the [HashiCorp Discuss website](https://discuss.hashicorp.com/). For issues specific to the Microsoft Fabric Terraform Provider, see Issues in the [cse-labs/terraform-provider-fabric](https://github.com/cse-labs/terraform-provider-fabric) GitHub repository.
+> Note: For Terraform-specific support, see the Latest Terraform topics on the [HashiCorp Discuss website](https://discuss.hashicorp.com/). For issues specific to the Microsoft Fabric Terraform Provider, see Issues in the [microsoft/terraform-provider-fabric](https://github.com/microsoft/terraform-provider-fabric) GitHub repository.
 
 ### Enable logging
 
-The Microsoft Fabric Terraform provider outputs logs that you can enable by setting the `TF_LOG` environment variable to `DEBUG` or any other log level that Terraform supports.
+The Microsoft Fabric Terraform Provider outputs logs that you can enable by setting the `TF_LOG` environment variable to `DEBUG` or any other log level that Terraform supports.
 
 By default, logs are sent to `stderr`. To send logs to a file, set the `TF_LOG_PATH` environment variable to the target file path.
 

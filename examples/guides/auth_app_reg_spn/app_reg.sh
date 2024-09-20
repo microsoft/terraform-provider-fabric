@@ -10,7 +10,7 @@ currentUserObjId=$(az ad signed-in-user show --output tsv --query id)
 
 # Create a new Entra Application
 # See https://learn.microsoft.com/cli/azure/ad/app#az-ad-app-create) for more details.
-appObjId=$(az ad app create --display-name "Fabric Terraform Provider" --sign-in-audience AzureADMyOrg --output tsv --query id)
+appObjId=$(az ad app create --display-name "Microsoft Fabric Terraform Provider" --sign-in-audience AzureADMyOrg --output tsv --query id)
 
 # (optional, recommended) Add the current user as an owner of the application
 # See https://learn.microsoft.com/cli/azure/ad/app/owner#az-ad-app-owner-add for more details.

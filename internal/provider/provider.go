@@ -303,7 +303,7 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 // }
 
 func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	tflog.Debug(ctx, "Fabric Terraform Provider configuration started")
+	tflog.Debug(ctx, "Microsoft Fabric Terraform Provider configuration started")
 	tflog.Info(ctx, "Initializing Terraform Provider for Microsoft Fabric")
 
 	var config pconfig.ProviderConfigModel

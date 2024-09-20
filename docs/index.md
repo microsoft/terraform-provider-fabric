@@ -1,12 +1,12 @@
 ---
-page_title: "Fabric Provider"
+page_title: "Microsoft Fabric Provider"
 description: |-
   
 ---
 
-# Fabric Provider
+# Microsoft Fabric Provider
 
-The Fabric provider allows managing environments and other resources within [Microsoft Fabric](https://fabric.microsoft.com/).
+The Microsoft Fabric Provider allows managing environments and other resources within [Microsoft Fabric](https://fabric.microsoft.com/).
 
 !> This code is experimental and provided solely for evaluation purposes. It is **NOT** intended for production use and may contain bugs, incomplete features, or other issues. Use at your own risk, as it may undergo significant changes without notice, and no guarantees or support are provided. By using this code, you acknowledge and agree to these conditions. Consult the documentation or contact the maintainer if you have questions or concerns.
 

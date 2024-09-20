@@ -15,7 +15,7 @@ You can follow this [guide](https://learn.microsoft.com/entra/identity-platform/
 
 ## Set API Permissions
 
-In the **API permissions** menu of your App Registration, add required API permissions to use with the Fabric Terraform provider:
+In the **API permissions** menu of your App Registration, add required API permissions to use with the Microsoft Fabric Terraform Provider:
 
 -> Depends on your solution you may add various set of API permissions. The below one are just an example.
 
@@ -45,10 +45,10 @@ api://fabric_terraform_provider
 
 1. Scope name: `default`
 1. Who can consent: `Admins and users`
-1. Admin consent display name: `Fabric Terraform Provider`
-1. Admin consent description: `Allows connection to backend services for Fabric Terraform Provider`
-1. User consent display name: `Fabric Terraform Provider`
-1. User consent description: `Allows connection to backend services for Fabric Terraform Provider`
+1. Admin consent display name: `Microsoft Fabric Terraform Provider`
+1. Admin consent description: `Allows connection to backend services for Microsoft Fabric Terraform Provider`
+1. User consent display name: `Microsoft Fabric Terraform Provider`
+1. User consent description: `Allows connection to backend services for Microsoft Fabric Terraform Provider`
 1. State: `Enabled`
 
 - You will finally need to pre-authorize Azure CLI/Azure PowerShell and Power BI to access your exposed API permissions by adding Azure CLI/Azure PowerShell and Power BI 1st party Microsoft applications. In the `Authorized client applications` section add:

@@ -14,7 +14,7 @@ $currentUser = (Get-EntraUser -Filter "UserPrincipalName eq '$($ctx.Account)'" -
 
 # Create a new Entra Application
 # See https://learn.microsoft.com/powershell/module/microsoft.graph.entra/new-entraapplication for more details.
-$app = (New-EntraApplication -DisplayName 'Fabric Terraform Provider' -SigninAudience AzureADMyOrg)
+$app = (New-EntraApplication -DisplayName 'Microsoft Fabric Terraform Provider' -SigninAudience AzureADMyOrg)
 
 # (optional, recommended) Add the current user as an owner of the application
 # See https://learn.microsoft.com/powershell/module/microsoft.graph.entra/add-entraapplicationowner for more details.
