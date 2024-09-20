@@ -1,5 +1,0 @@
-kind: fixed
-body: Unnecessary sbom json in the release assets
-time: 2024-09-20T14:14:00.4673888-07:00
-custom:
-    Issue: "7"
