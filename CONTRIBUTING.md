@@ -38,11 +38,11 @@ Examples of real-world use cases are encouraged. Please contribute those types o
 
 PRs for new resources or data sources are expected to meeting the following criteria:
 
-- Add a production quality implementation of the resource or data-source in [./internal/provider/services](./internal/provider/services)
+- Add a production quality implementation of the resource or data-source in [./internal/services](./internal/services)
 - Add unit tests and acceptance tests for your contribution in [./internal/provider](./internal/provider)
   - Tests should pass and provide >90% coverage of your contribution
 - Add examples for your contribution in [./examples](./examples) (see [Terraform Documentation on examples](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-documentation-generation#add-configuration-examples))
-- Add [schema descriptions](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-documentation-generation#add-schema-descriptions) for your resource or data-source in [./internal/provider/services](./internal/provider/services)
+- Add [schema descriptions](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-documentation-generation#add-schema-descriptions) for your resource or data-source in [./internal/services](./internal/services)
 - and/or [./templates](./templates)
 - Update auto-generated documentation in [./docs](./docs). (DO NOT manually edit [./docs](./docs) or your updates will be overwritten)
 - Ensure the PR description clearly describes the feature you're adding and any known limitations
