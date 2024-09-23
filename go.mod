@@ -10,7 +10,7 @@ require (
 	github.com/dcarbone/terraform-plugin-framework-utils/v3 v3.7.0
 	github.com/go-sprout/sprout v0.6.0
 	github.com/google/go-cmp v0.6.0
-	github.com/hashicorp/go-azure-sdk/sdk v0.20240906.1232634
+	github.com/hashicorp/go-azure-sdk/sdk v0.20240920.1135249
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-framework v1.12.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
