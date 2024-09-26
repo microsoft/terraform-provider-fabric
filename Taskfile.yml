@@ -513,7 +513,7 @@ tasks:
     cmds:
       - cmd: winget install lycheeverse.lychee
         platforms: [windows]
-      - cmd: cargo install lychee
+      - cmd: cargo binstall lychee
         platforms: [linux]
       - cmd: brew install lychee
         platforms: [darwin]

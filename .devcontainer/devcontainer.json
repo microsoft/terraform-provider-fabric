@@ -50,6 +50,7 @@
     // "ghcr.io/devcontainers-contrib/features/markdownlint-cli2:1": {},
     // "ghcr.io/devcontainers-contrib/features/yamllint:2": {},
     "ghcr.io/devcontainers-contrib/features/go-task:1": {},
+    "ghcr.io/lee-orr/rusty-dev-containers/cargo-binstall:0": {},
     "./features/tfprovider-local-dev": {
       "providerName": "microsoft/fabric",
       "workspace": "${containerWorkspaceFolder}"
