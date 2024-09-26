@@ -112,6 +112,11 @@ tasks:
     cmds:
       - markdownlint-cli2 "./**/*.md" --config "./.github/linters/.markdownlint-cli2.yaml" --fix
 
+  lint:links:
+    desc: Run link checkers
+    cmds:
+      - lychee --config ./.github/linters/.lychee.toml .
+
   tools:
     desc: Install required tools
     cmds:
@@ -502,3 +507,13 @@ tasks:
         msg: "First install pipx: https://pipx.pypa.io/"
     cmds:
       - pipx install --force yamllint
+
+  install:lychee:
+    desc: Install lychee
+    cmds:
+      - cmd: winget install lycheeverse.lychee
+        platforms: [windows]
+      - cmd: cargo install lychee
+        platforms: [linux]
+      - cmd: brew install lychee
+        platforms: [darwin]

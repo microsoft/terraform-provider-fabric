@@ -37,6 +37,7 @@ testresults.xml
 golangci-report.xml
 .wellknown.json
 changie.md
+.lycheecache
 
 # Terraform
 .terraform/
