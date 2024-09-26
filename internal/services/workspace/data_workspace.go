@@ -85,8 +85,8 @@ func (d *dataSourceWorkspace) Schema(ctx context.Context, _ datasource.SchemaReq
 				Computed:            true,
 				CustomType:          supertypes.NewSingleNestedObjectTypeOf[workspaceIdentityModel](ctx),
 				Attributes: map[string]schema.Attribute{
-					"enabled": schema.BoolAttribute{
-						MarkdownDescription: "The workspace identity status.",
+					"type": schema.StringAttribute{
+						MarkdownDescription: "The workspace identity type. Possible values: " + utils.ConvertStringSlicesToString(workspaceIdentityTypes, true, true) + ".",
 						Computed:            true,
 					},
 					"application_id": schema.StringAttribute{
