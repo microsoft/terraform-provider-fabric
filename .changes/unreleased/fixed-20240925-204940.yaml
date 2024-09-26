@@ -1,7 +1,0 @@
-kind: fixed
-body: |
-  The `fabric_workspace` data-source had invalid schema for the workspace identity.
-  The schema has been changed from `enabled` (bool) to `type` (string).
-time: 2024-09-25T20:49:40.662186-07:00
-custom:
-  Issue: "15"

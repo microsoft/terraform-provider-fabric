@@ -514,6 +514,7 @@ tasks:
       - cmd: winget install lycheeverse.lychee
         platforms: [windows]
       - cmd: cargo install lychee
+        ignore_error: true
         platforms: [linux]
       - cmd: brew install lychee
         platforms: [darwin]
