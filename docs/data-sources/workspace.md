@@ -67,5 +67,5 @@ Optional:
 Read-Only:
 
 - `application_id` (String) The application ID.
-- `enabled` (Boolean) The workspace identity status.
 - `service_principal_id` (String) The service principal ID.
+- `type` (String) The workspace identity type. Possible values: `SystemAssigned`.
