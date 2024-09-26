@@ -4,7 +4,7 @@ page_title: "fabric_sql_endpoints Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   List a Fabric SQL Endpoints.
-  Use this data source to list SQL Endpoints https://learn.microsoft.com/power-bi/transform-model/sqlendpoints/sqlendpoints-overview.
+  Use this data source to list SQL Endpoints https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse.
   -> This item does not support Service Principal. Please use a User context authentication.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 List a Fabric SQL Endpoints.
 
-Use this data source to list [SQL Endpoints](https://learn.microsoft.com/power-bi/transform-model/sqlendpoints/sqlendpoints-overview).
+Use this data source to list [SQL Endpoints](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse).
 
 -> This item does not support Service Principal. Please use a User context authentication.
 
