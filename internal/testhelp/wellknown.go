@@ -390,7 +390,7 @@ func CreateWellKnownResources() { //nolint:maintidx
 	panicOnError(err)
 	log.Printf("Created Entra Group (DisplayName: %s, ObjectID: %s)\n", *group.DisplayName, *group.Id)
 
-	values.Group.ID = sp.Id
+	values.Group.ID = group.Id
 	values.Group.Type = to.Ptr("Group")
 
 	// write the values to the file, pretty printed
