@@ -20,7 +20,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.24.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
-	github.com/manicminer/hamilton v0.71.0
+	github.com/manicminer/hamilton v0.72.0
 	github.com/microsoft/fabric-sdk-go v0.1.0-beta.2
 	github.com/ohler55/ojg v1.24.1
 	github.com/stretchr/testify v1.9.0
