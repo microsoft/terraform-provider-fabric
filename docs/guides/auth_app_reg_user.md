@@ -43,7 +43,7 @@ api://fabric_terraform_provider
 
 - Add required scope in the `Scopes defined by this API` section:
 
-1. Scope name: `default`
+1. Scope name: `access`
 1. Who can consent: `Admins and users`
 1. Admin consent display name: `Microsoft Fabric Terraform Provider`
 1. Admin consent description: `Allows connection to backend services for Microsoft Fabric Terraform Provider`
@@ -73,7 +73,7 @@ az config set core.enable_broker_on_windows=false
 
 # Login to Azure with Entra ID credentials
 # See https://learn.microsoft.com/cli/azure/authenticate-azure-cli for more details.
-az login --allow-no-subscriptions --tenant 00000000-0000-0000-0000-000000000000 --scope api://fabric_terraform_provider/default
+az login --allow-no-subscriptions --tenant 00000000-0000-0000-0000-000000000000 --scope api://fabric_terraform_provider/.default
 ```
 
 The following Fabric Provider block can be specified to use the Azure CLI:
