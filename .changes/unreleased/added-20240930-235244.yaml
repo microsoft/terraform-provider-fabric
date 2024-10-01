@@ -1,0 +1,8 @@
+kind: added
+body: |
+  Additional binaries to the build artifacts
+  - os: freebsd
+  - arch: 386
+time: 2024-09-30T23:52:44.4012609-07:00
+custom:
+  Issue: "22"
