@@ -23,16 +23,18 @@ builds:
     ldflags:
       - "-s -w -X {{ .ModulePath }}/main.version={{ .Version }}"
     goos:
+      - freebsd
       - windows
       - linux
       - darwin
     goarch:
       - amd64
+      - "386"
       - arm
       - arm64
     ignore:
       - goos: darwin
-        goarch: arm
+        goarch: "386"
     binary: "{{ .ProjectName }}_v{{ .Version }}"
 
 checksum:
