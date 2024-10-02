@@ -115,7 +115,7 @@ tasks:
   lint:links:
     desc: Run link checkers
     cmds:
-      - lychee --config ./.github/linters/.lychee.toml .
+      - lychee --config ./.github/linters/.lychee.toml --format markdown .
 
   tools:
     desc: Install required tools
