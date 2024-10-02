@@ -33,9 +33,9 @@ Fabric Capacity can be accessed by Service Principals (SPN), Managed Identities 
 
 The steps outlined below illustrate the manual method for granting access to the Capacity via Azure Portal. Automation of this process is also possible using various tools such as [Azure REST API](https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/update), [Azure CLI](https://learn.microsoft.com/cli/azure/), [Azure PowerShell](https://learn.microsoft.com/powershell/azure/), or Terraform (with [AzAPI](https://registry.terraform.io/providers/Azure/azapi) and [AzureAD](https://registry.terraform.io/providers/hashicorp/azuread) providers).
 
--> If you choose to automate this section, ensure you use the principal ID (Enterprise Application Object ID) for Service Principals (SPN) and Managed Inentities (MSI). For Users, please use User Principal Name (UPN).
+-> If you choose to automate this section, ensure you use the principal ID (Enterprise Application Object ID) for Service Principals (SPN) and Managed Identities (MSI). For Users, please use User Principal Name (UPN).
 
-### Service Principals (SPN) and Managed Inentities (MSI)
+### Service Principals (SPN) and Managed Identities (MSI)
 
 1. Sign in to the [Azure Portal](https://portal.azure.com/).
 1. Browse to the Fabric Capacity you want to grant access to.
@@ -53,8 +53,6 @@ The steps outlined below illustrate the manual method for granting access to the
 1. Search for the User you want to grant access to and click **Select**.
 1. Click **Save**.
 
-## Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Inentities (MSI)
+## Configure Microsoft Fabric to allow Service Principals or Managed Identities
 
-1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal).
-1. Browse to **Tenant settings** > **Developer settings** > [Service principals can use Fabric APIs](https://learn.microsoft.com/fabric/admin/service-admin-portal-developer#service-principals-can-use-fabric-apis) and check **Enable**.
-1. Apply security restrictions to **The entire organization** or **Specific security groups**
+Please follow [Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Identities (MSI)](./auth_app_reg_spn.md#configure-microsoft-fabric-to-allow-service-principals-spn-and-managed-identities-msi) guide.

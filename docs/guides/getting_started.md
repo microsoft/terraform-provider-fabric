@@ -146,18 +146,4 @@ Microsoft Fabric workspace. We will also add a data source to fetch the Microsof
 
 ## Troubleshooting
 
-> Note: For Terraform-specific support, see the Latest Terraform topics on the [HashiCorp Discuss website](https://discuss.hashicorp.com/). For issues specific to the Microsoft Fabric Terraform Provider, see Issues in the [microsoft/terraform-provider-fabric](https://github.com/microsoft/terraform-provider-fabric) GitHub repository.
-
-### Enable logging
-
-The Microsoft Fabric Terraform Provider outputs logs that you can enable by setting the `TF_LOG` environment variable to `DEBUG` or any other log level that Terraform supports.
-
-By default, logs are sent to `stderr`. To send logs to a file, set the `TF_LOG_PATH` environment variable to the target file path.
-
-For example, you can run the following command to enable logging at the debug level, and to output logs in monochrome format to a file named `tf.log` relative to the current working directory, while the `terraform apply` command runs:
-
-```bash
-TF_LOG=DEBUG TF_LOG_PATH=tf.log terraform apply -no-color
-```
-
-For more information about Terraform logging, see [Debugging Terraform](https://developer.hashicorp.com/terraform/internals/debugging).
+See [Troubleshooting](./troubleshooting.md) guide.
