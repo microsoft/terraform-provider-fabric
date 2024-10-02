@@ -35,7 +35,7 @@ For more information about Terraform logging, see [Debugging Terraform](https://
 
 - Check if your SPN, MSI or User that is used for Provider authentication is added to Fabric `Capacity administrators`.
 - Check if your Fabric Capacity is not in the `paused` state.
-- Majority of Fabric Items require to have Fabric Capacity assigned to the workspace. If you manage Workspace using [`fabric_workspace` resource](../resources/workspace), ensure that you have assigned Fabric Capacity to the Workspace.
+- Majority of Fabric Items require to have Fabric Capacity assigned to the workspace. If you manage Workspace using [`fabric_workspace` resource](../resources/workspace.md), ensure that you have assigned Fabric Capacity to the Workspace.
 
 ### I am getting error `Unable to find Capacity...`
 
@@ -44,7 +44,7 @@ For more information about Terraform logging, see [Debugging Terraform](https://
 
 ### I am getting error `Failed to create workspace identity`
 
-- If you manage Workspace using [`fabric_workspace` resource](../resources/workspace), ensure that you have assigned Fabric Capacity to the Workspace.
+- If you manage Workspace using [`fabric_workspace` resource](../resources/workspace.md), ensure that you have assigned Fabric Capacity to the Workspace.
 - Check if your Fabric Capacity assigned to the Workspace is not in the `paused` state.
 
 ### I am getting error `Workspace name already exists`
