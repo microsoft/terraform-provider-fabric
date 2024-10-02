@@ -109,7 +109,7 @@ $env:FABRIC_CLIENT_CERTIFICATE = [System.Convert]::ToBase64String([System.IO.Fil
 $env:FABRIC_CLIENT_CERTIFICATE_PASSWORD = 'YourBundlePassword'
 ```
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 # We strongly recommend using the required_providers block to set the Fabric Provider source and version being used
@@ -133,7 +133,7 @@ It's also possible to configure these variables either directly or from variable
 
 #### Reading the certificate bundle from the filesystem (provider block)
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 variable "client_certificate" {
@@ -168,7 +168,7 @@ provider "fabric" {
 
 #### Passing the encoded certificate bundle directly (provider block)
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 variable "client_certificate" {

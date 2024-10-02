@@ -11,7 +11,7 @@ description: |-
 
 ## Setting up Microsoft Fabric to allow Service Principals
 
-Follow [Configure Microsoft Fabric to allow Service Principals](./auth_app_reg_spn.md#configure-microsoft-fabric-to-allow-service-principals) guide.
+Follow [Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Identities (MSI)](./auth_app_reg_spn.md#configure-microsoft-fabric-to-allow-service-principals-spn-and-managed-identities-msi) guide.
 
 ## Using a System-Assigned Managed Identity
 
@@ -37,7 +37,7 @@ You can configure Terraform to use Managed Identity by setting the Environment V
 
 #### Provider Block setup for the System-Assigned Managed Identity
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_msi/provider_block_sami.tf" }}
 
@@ -65,6 +65,6 @@ You can configure Terraform to use Managed Identity by setting the Environment V
 
 #### Provider Block setup for the User-Assigned Managed Identity
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_msi/provider_block_uami.tf" }}

@@ -1,0 +1,10 @@
+steps:
+  - task: AzureCLI@2
+    env:
+      FABRIC_USE_CLI: true
+    inputs:
+      azureSubscription: "your-service-connection-name"
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform apply -auto-approve
