@@ -27,7 +27,7 @@ You then configure Terraform authentication. Following this section, this articl
 
     Include Terraform configurations for your project in one or more configuration files in your Terraform project. For information about the configuration file syntax, see [Terraform Language Documentation](https://developer.hashicorp.com/terraform/language) on the Terraform website.
 
-1. You must configure authentication for your Terraform project. See [Authentication](https://improved-adventure-935np96.pages.github.io/#authentication) in the Microsoft Fabric Terraform Provider documentation.
+1. You must configure authentication for your Terraform project. See [Authentication](./auth_app_reg_spn.md) in the Microsoft Fabric Terraform Provider documentation.
 1. You must have a [Fabric Capacity](https://learn.microsoft.com/fabric/enterprise/licenses#capacity) provisioned in Azure. A capacity can be added in the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities). Note: Please keep the capacity name handy, as we will use it below to fetch the capacity id.
 
 ## Sample configuration
