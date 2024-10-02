@@ -37,7 +37,7 @@ You can configure Terraform to use Managed Identity by setting the Environment V
 
 #### Provider Block setup for the System-Assigned Managed Identity
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_msi/provider_block_sami.tf" }}
 
@@ -65,6 +65,12 @@ You can configure Terraform to use Managed Identity by setting the Environment V
 
 #### Provider Block setup for the User-Assigned Managed Identity
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_msi/provider_block_uami.tf" }}
+
+## Configure Microsoft Fabric to allow Managed Inentities (MSI)
+
+1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal).
+1. Browse to **Tenant settings** > **Developer settings** > [Service principals can use Fabric APIs](https://learn.microsoft.com/fabric/admin/service-admin-portal-developer#service-principals-can-use-fabric-apis) and check **Enable**.
+1. Apply security restrictions to **The entire organization** or **Specific security groups**

@@ -70,7 +70,7 @@ Our recommended approach is storing the credentials as Environment Variables, fo
 
 {{ codefile "powershell" "examples/guides/auth_spn_cert/envvars_b64.ps1" }}
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_spn_cert/provider_envvars.tf" }}
 
@@ -80,12 +80,12 @@ It's also possible to configure these variables either directly or from variable
 
 #### Reading the certificate bundle from the filesystem (provider block)
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_spn_cert/provider_block_cert_file.tf" }}
 
 #### Passing the encoded certificate bundle directly (provider block)
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 {{ tffile "examples/guides/auth_spn_cert/provider_block_cert.tf" }}

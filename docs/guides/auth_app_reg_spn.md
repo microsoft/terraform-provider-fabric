@@ -88,8 +88,8 @@ $sp = (New-EntraServicePrincipal -AppId $app.AppId)
 Add-EntraServicePrincipalOwner -ObjectId $sp.Id -RefObjectId $currentUser.Id
 ```
 
-## Configure Microsoft Fabric to allow Service Principals
+## Configure Microsoft Fabric to allow Service Principals (SPN)
 
 1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal).
-1. Browse to **Tenant settings** > **Developer settings** > **Service principals can use Fabric APIs** and check **Enable**.
-1. Optionally apply security restrictions to **The entire organization** or **Specific security groups**
+1. Browse to **Tenant settings** > **Developer settings** > [Service principals can use Fabric APIs](https://learn.microsoft.com/fabric/admin/service-admin-portal-developer#service-principals-can-use-fabric-apis) and check **Enable**.
+1. Apply security restrictions to **The entire organization** or **Specific security groups**

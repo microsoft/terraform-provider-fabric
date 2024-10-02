@@ -65,6 +65,8 @@ Now that we have our federated credential for Entra App and ready to use, it's p
 
 ### Environment Variables
 
+Whether using OIDC with a generic token, GitHub Action, or Azure DevOps Pipeline, you need these common environment variables shown in the examples below.
+
 ```shell
 # sh
 export FABRIC_USE_OIDC=true
@@ -79,13 +81,13 @@ $env:FABRIC_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 $env:FABRIC_CLIENT_ID = '00000000-0000-0000-0000-000000000000'
 ```
 
-#### OIDC token
+### Generic OIDC token (Environment Variables)
 
 The provider will use the `FABRIC_OIDC_TOKEN` environment variable as an OIDC token. You can use this variable to specify the token provided by your OIDC provider. If your OIDC provider provides an ID token in a file, you can specify the path to this file with the `FABRIC_OIDC_TOKEN_FILE_PATH` environment variable.
 
-#### GitHub Actions
+### GitHub Actions (Environment Variables)
 
-When running in GitHub Actions, the provider will detect the `ACTIONS_ID_TOKEN_REQUEST_URL` and `ACTIONS_ID_TOKEN_REQUEST_TOKEN` environment variables set by the GitHub Actions runtime. You can also specify the `FABRIC_OIDC_REQUEST_TOKEN` and `FABRIC_OIDC_REQUEST_URL` environment variables.
+When running in GitHub Actions, the provider will detect the `ACTIONS_ID_TOKEN_REQUEST_URL` and `ACTIONS_ID_TOKEN_REQUEST_TOKEN` environment variables set by the GitHub Actions runner runtime. You can also specify the `FABRIC_OIDC_REQUEST_TOKEN` and `FABRIC_OIDC_REQUEST_URL` environment variables.
 
 For GitHub Actions workflows, you'll need to ensure the workflow has `write` permissions for the `id-token`.
 
@@ -97,23 +99,54 @@ permissions:
 
 For more information about OIDC in GitHub Actions, see [official documentation](https://docs.github.com/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers).
 
-#### Azure DevOps Pipelines
+### Azure DevOps Pipelines (Environment Variables)
 
-When running in Azure DevOps Pipelines, the provider will detect the `SYSTEM_ACCESSTOKEN` environment variable set by the Azure DevOps runtime. You can also specify the `FABRIC_OIDC_REQUEST_TOKEN` environment variables.
+When running in Azure DevOps Pipelines, the provider will detect the `SYSTEM_ACCESSTOKEN` environment variable set by the Azure DevOps agent runtime. You can also specify the `FABRIC_OIDC_REQUEST_TOKEN` environment variables.
 
 ```yaml
 steps:
   # Bash example
   - bash: terraform apply -auto-approve
     env:
+      FABRIC_USE_OIDC: true
+      FABRIC_TENANT_ID: 00000000-0000-0000-0000-000000000000
+      FABRIC_CLIENT_ID: 00000000-0000-0000-0000-000000000000
       FABRIC_OIDC_REQUEST_TOKEN: $(System.AccessToken) # or SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID: "your-service-connection-id"
 
   # PowerShell example
   - powershell: terraform apply -auto-approve
     env:
+      FABRIC_USE_OIDC: true
+      FABRIC_TENANT_ID: 00000000-0000-0000-0000-000000000000
+      FABRIC_CLIENT_ID: 00000000-0000-0000-0000-000000000000
       FABRIC_OIDC_REQUEST_TOKEN: $(System.AccessToken) # or SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID: "your-service-connection-id"
+```
+
+Be aware that `FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID` is an ID (GUID), not a Service Connection name. You can locate it in the URL of the Service Connection details page.
+`https://dev.azure.com/<ORG>/<PROJECT>/_settings/adminservices?resourceId=<YOUR_SERVICE_CONNECTION_ID>`
+
+For more information about OIDC in Azure DevOps Pipelines, see:
+
+- [Create an Azure Resource Manager service connection that uses workload identity federation](https://learn.microsoft.com/azure/devops/pipelines/library/connect-to-azure?view=azure-devops#create-an-azure-resource-manager-service-connection-that-uses-workload-identity-federation)
+- [System.AccessToken](https://learn.microsoft.com/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken).
+
+### Azure DevOps Pipelines with Azure CLI
+
+You can leverage `AzureCLI@2` task to enable Azure CLI's native OIDC authentication for service principals with a Workload Identity Federation service connection. Here, no extra OIDC configuration is needed; adding any may disrupt your authentication since it's handled by Azure CLI.
+
+```yaml
+steps:
+  - task: AzureCLI@2
+    env:
+      FABRIC_USE_CLI: true
+    inputs:
+      azureSubscription: "your-service-connection-name"
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform apply -auto-approve
 ```
 
 For more information about OIDC in Azure DevOps Pipelines, see:
@@ -123,7 +156,7 @@ For more information about OIDC in Azure DevOps Pipelines, see:
 
 ### Provider Block
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 # We strongly recommend using the required_providers block to set the Fabric Provider source and version being used

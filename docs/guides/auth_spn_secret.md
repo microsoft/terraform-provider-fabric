@@ -52,7 +52,7 @@ $env:FABRIC_CLIENT_ID = '00000000-0000-0000-0000-000000000000'
 $env:FABRIC_CLIENT_SECRET = 'YourClientSecret'
 ```
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 # We strongly recommend using the required_providers block to set the Fabric Provider source and version being used
@@ -74,7 +74,7 @@ provider "fabric" {}
 
 It's also possible to configure these variables either directly or from variables in your provider block.
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 variable "client_secret" {
@@ -126,7 +126,7 @@ client_secret = "YourClientSecret"
 
 In the terraform documentation [Protect sensitive input variables](https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables) you can find more examples.
 
-The following Terraform and Provider blocks can be specified, where `0.0.0-preview` is the version of the Fabric Provider that you'd like to use:
+The following Terraform and Provider blocks can be specified, where `0.0.0` is the version of the Fabric Provider that you'd like to use:
 
 ```terraform
 variable "tenant_id" {
