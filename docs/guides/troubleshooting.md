@@ -50,3 +50,9 @@ For more information about Terraform logging, see [Debugging Terraform](https://
 ### I am getting error `Workspace name already exists`
 
 - Ensure that you have provided the unique name for the Workspace that does not exist in the Fabric yet.
+
+### Operations take too long to complete or timeout
+
+You can observe some Terraform operations take time to complete with the messages like `Still creating...`, `Still reading...`, etc. or end up with a timeout error. This can happen due to various reasons such as network latency or [Fabric API throttling](https://learn.microsoft.com/rest/api/fabric/articles/throttling).
+
+Try to increase the global timeout for the operations by setting the [`timeout`](../index.md#timeout) attribute in the Provider block, or you can set the timeout for the specific Resource or Data-Source using the `timeouts` attribute.
