@@ -208,6 +208,14 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 
 	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
 
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	identityPlan := &workspaceIdentityModel{}
 
 	if !plan.Identity.IsNull() && !plan.Identity.IsUnknown() {
@@ -305,7 +313,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		"state":  req.State,
 	})
 
-	var plan, state resourceWorkspaceModel
+	var plan, state, intermediary resourceWorkspaceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -314,10 +322,14 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	intermediary.ID = plan.ID
+
 	timeout, diags := plan.Timeouts.Update(ctx, r.pConfigData.Timeout)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	intermediary.Timeouts = plan.Timeouts
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -331,6 +343,14 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 	if !reflect.DeepEqual(reqUpdatePlan.UpdateWorkspaceRequest, reqUpdateState.UpdateWorkspaceRequest) {
 		_, err := r.client.UpdateWorkspace(ctx, plan.ID.ValueString(), reqUpdatePlan.UpdateWorkspaceRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &intermediary)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(resp.State.Set(ctx, intermediary)...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
@@ -369,6 +389,14 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		}
 
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &intermediary)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(resp.State.Set(ctx, intermediary)...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
