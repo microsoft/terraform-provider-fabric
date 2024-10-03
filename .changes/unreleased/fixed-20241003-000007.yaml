@@ -1,5 +1,5 @@
 kind: fixed
-body: Add intermediary state save checkpoint for `fabric_workspace` Resource
+body: Add intermediary state checkpoints for `fabric_workspace` Resource
 time: 2024-10-03T00:00:07.8739957-07:00
 custom:
-    Issue: "111"
+  Issue: "29"
