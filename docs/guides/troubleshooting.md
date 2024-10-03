@@ -35,18 +35,24 @@ For more information about Terraform logging, see [Debugging Terraform](https://
 
 - Check if your SPN, MSI or User that is used for Provider authentication is added to Fabric `Capacity administrators`.
 - Check if your Fabric Capacity is not in the `paused` state.
-- Majority of Fabric Items require to have Fabric Capacity assigned to the workspace. If you manage Workspace using [`fabric_workspace` resource](../resources/workspace.md), ensure that you have assigned Fabric Capacity to the Workspace.
+- Majority of Fabric Items require to have Fabric Capacity assigned to the workspace. If you manage Workspace using [`fabric_workspace`](../resources/workspace.md) resource, ensure that you have assigned Fabric Capacity to the Workspace.
 
 ### I am getting error `Unable to find Capacity...`
 
-- Check if your SPN, MSI or User that is used for is added to Fabric `Capacity administrators`.
+- Check if your SPN, MSI or User that is used for Provider authentication is added to Fabric `Capacity administrators`.
 - Check if your Fabric Capacity is not in the `paused` state.
 
 ### I am getting error `Failed to create workspace identity`
 
-- If you manage Workspace using [`fabric_workspace` resource](../resources/workspace.md), ensure that you have assigned Fabric Capacity to the Workspace.
+- If you manage Workspace using [`fabric_workspace`](../resources/workspace.md) resource, ensure that you have assigned Fabric Capacity to the Workspace.
 - Check if your Fabric Capacity assigned to the Workspace is not in the `paused` state.
 
 ### I am getting error `Workspace name already exists`
 
-- Ensure that you have provided the unique name for the Workspace.
+- Ensure that you have provided the unique name for the Workspace that does not exist in the Fabric yet.
+
+### Operations take too long to complete or timeout
+
+You can observe some Terraform operations take time to complete with the messages like `Still creating...`, `Still reading...`, etc. or end up with a timeout error. This can happen due to various reasons such as network latency or [Fabric API throttling](https://learn.microsoft.com/rest/api/fabric/articles/throttling).
+
+Try to increase the global timeout for the operations by setting the [`timeout`](../index.md#timeout) attribute in the Provider block, or you can set the timeout for the specific Resource or Data-Source using the `timeouts` attribute.
