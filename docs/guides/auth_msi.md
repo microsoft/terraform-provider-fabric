@@ -18,21 +18,41 @@ Follow [Configure Microsoft Fabric to allow Service Principals (SPN) and Managed
 ### Configuring a Virtual Machine to use a System-Assigned Managed Identity
 
 ```shell
+#!/bin/bash
+
+# Set input variables
+vmRgName="<VM RESOURCE GROUP NAME>"                          # Resource group where the VM is located
+vmName="<VM NAME>"                                           # Name of the VM
+fabricCapacityRgName="<FABRIC CAPACITY RESOURCE GROUP NAME>" # Resource group where the Fabric Capacity is located
+fabricCapacityName="<FABRIC CAPACITY NAME>"                  # Name of the existing Fabric Capacity
+
+# Login to Azure with Entra ID credentials
+# See https://learn.microsoft.com/cli/azure/authenticate-azure-cli for more details.
+az login
+
+# Get the current subscription ID
+# See https://learn.microsoft.com/cli/azure/account#az-account-show for more details.
+subscriptionId=$(az account show --output tsv --query id)
+
 # Assign the system-assigned managed identity to the VM
 # See https://learn.microsoft.com/cli/azure/vm/identity#az-vm-identity-assign for more details.
-az vm identity assign --resource-group "<RESOURCE GROUP NAME>" --name "<VM NAME>" --identities system
+identityPrincipalId=$(az vm identity assign --resource-group "${vmRgName}" --name "${vmName}" --identities "[system]" --output tsv --query systemAssignedIdentity)
 
 # Assign Contributor role for the system-assigned managed identity to the Fabric Capacity
 # See https://learn.microsoft.com/cli/azure/role/assignment#az-role-assignment-create for more details.
-az role assignment create --assignee "<PRINCIPAL ID>" --role Contributor --scope "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>"
+az role assignment create --assignee "${identityPrincipalId}" --role Contributor --scope "/subscriptions/${subscriptionId}/resourceGroups/${fabricCapacityRgName}/providers/Microsoft.Fabric/capacities/${fabricCapacityName}"
 
-# Get current admin members and add a new principal to the array
+# Install the Microsoft Fabric extension for Azure CLI
+# See https://github.com/Azure/azure-cli-extensions/blob/main/src/microsoft-fabric/README.md for more details.
+az extension add --name microsoft-fabric
+
+# Get current Fabric Capacity admin members and add a new principal to the array
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/get for more details.
-members=$(az rest --method get --uri "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>?api-version=2023-11-01" --output json --query properties.administration.members | jq '. += ["<PRINCIPAL ID>"]')
+members=$(az fabric capacity show --resource-group "${fabricCapacityRgName}" --capacity-name "${fabricCapacityName}" --output json --query administration | jq --compact-output '.members += ["'"${identityPrincipalId}"'"]')
 
 # Update the Fabric Capacity with the new admin members
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/update for more details.
-az rest --method patch --uri "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>?api-version=2023-11-01" --body "{\"properties\":{\"administration\":{\"members\":${members}}}}"
+az fabric capacity update --resource-group "${fabricCapacityRgName}" --capacity-name "${fabricCapacityName}" --administration "${members}"
 ```
 
 ```powershell
@@ -113,25 +133,49 @@ provider "fabric" {
 ### Configuring a Virtual Machine to use a User-Assigned Managed Identity
 
 ```shell
-# Create a user-assigned managed identity
+#!/bin/bash
+
+# Set input variables
+identityRgName="<IDENTITY RESOURCE GROUP NAME>"              # Resource group where the user-assigned managed identity will be created
+identityName="<IDENTITY NAME>"                               # Name of the user-assigned managed identity
+vmRgName="<VM RESOURCE GROUP NAME>"                          # Resource group where the VM is located
+vmName="<VM NAME>"                                           # Name of the existing VM
+fabricCapacityRgName="<FABRIC CAPACITY RESOURCE GROUP NAME>" # Resource group where the Fabric Capacity is located
+fabricCapacityName="<FABRIC CAPACITY NAME>"                  # Name of the existing Fabric Capacity
+
+# Login to Azure with Entra ID credentials
+# See https://learn.microsoft.com/cli/azure/authenticate-azure-cli for more details.
+az login
+
+# Get the current subscription ID
+# See https://learn.microsoft.com/cli/azure/account#az-account-show for more details.
+subscriptionId=$(az account show --output tsv --query id)
+
+# Create a user-assigned managed identity and get details
 # See https://learn.microsoft.com/cli/azure/identity#az-identity-create for more details.
-az identity create --resource-group "<RESOURCE GROUP NAME>" --name "<IDENTITY NAME>"
+identityObj=$(az identity create --resource-group "${identityRgName}" --name "${identityName}" --output json)
+identityId=$(echo "${identityObj}" | jq -r '.id')
+identityPrincipalId=$(echo "${identityObj}" | jq -r '.principalId')
 
 # Assign the user-assigned managed identity to the VM
 # See https://learn.microsoft.com/cli/azure/vm/identity#az-vm-identity-assign for more details.
-az vm identity assign --resource-group "<RESOURCE GROUP NAME>" --name "<VM NAME>" --identities "<IDENTITY ID>"
+az vm identity assign --resource-group "${vmRgName}" --name "${vmName}" --identities "${identityId}"
 
 # Assign Contributor role for the user-assigned managed identity to the Fabric Capacity
 # See https://learn.microsoft.com/cli/azure/role/assignment#az-role-assignment-create for more details.
-az role assignment create --assignee "<PRINCIPAL ID>" --role Contributor --scope "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>"
+az role assignment create --assignee "${identityPrincipalId}" --role Contributor --scope "/subscriptions/${subscriptionId}/resourceGroups/${fabricCapacityRgName}/providers/Microsoft.Fabric/capacities/${fabricCapacityName}"
 
-# Get current admin members and add a new principal to the array
+# Install the Microsoft Fabric extension for Azure CLI
+# See https://github.com/Azure/azure-cli-extensions/blob/main/src/microsoft-fabric/README.md for more details.
+az extension add --name microsoft-fabric
+
+# Get current Fabric Capacity admin members and add a new principal to the array
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/get for more details.
-members=$(az rest --method get --uri "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>?api-version=2023-11-01" --output json --query properties.administration.members | jq '. += ["<PRINCIPAL ID>"]')
+members=$(az fabric capacity show --resource-group "${fabricCapacityRgName}" --capacity-name "${fabricCapacityName}" --output json --query administration | jq --compact-output '.members += ["'"${identityPrincipalId}"'"]')
 
 # Update the Fabric Capacity with the new admin members
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/update for more details.
-az rest --method patch --uri "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>/providers/Microsoft.Fabric/capacities/<FABRIC CAPACITY NAME>?api-version=2023-11-01" --body "{\"properties\":{\"administration\":{\"members\":${members}}}}"
+az fabric capacity update --resource-group "${fabricCapacityRgName}" --capacity-name "${fabricCapacityName}" --administration "${members}"
 ```
 
 ```powershell

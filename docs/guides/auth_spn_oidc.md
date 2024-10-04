@@ -40,7 +40,7 @@ Where the `credential.json` contains the following content:
 {
   "name": "branch-main",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:your-github-org/your-github-repo:refs:refs/heads/main",
+  "subject": "repo:YOUR-GITHUB-ORG/YOUR-GITHUB-REPO:refs:refs/heads/main",
   "description": "Deployments from the main branch",
   "audiences": [
     "api://AzureADTokenExchange"
