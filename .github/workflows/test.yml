@@ -51,6 +51,7 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
+              - '.github/workflows/test.yml'
 
       - name: 🚧 Setup Go
         if: steps.changes_check.outputs.changes == 'true'
@@ -193,6 +194,7 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
+              - '.github/workflows/test.yml'
 
       - name: 🚧 Setup Go
         if: steps.changes_check.outputs.changes == 'true'
@@ -352,6 +354,7 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
+              - '.github/workflows/test.yml'
 
       - name: 🚧 Setup Go
         if: steps.changes_check.outputs.changes == 'true'
