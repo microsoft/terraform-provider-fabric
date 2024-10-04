@@ -75,10 +75,6 @@ func TestUnit_ReportsDataSource(t *testing.T) {
 }
 
 func TestAcc_ReportsDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspaceID := *testhelp.WellKnown().Workspace.ID
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
