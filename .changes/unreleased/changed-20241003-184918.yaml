@@ -1,0 +1,5 @@
+kind: changed
+body: Moved from az rest to fabric az-cli extension in the bash examples
+time: 2024-10-03T18:49:18.4972577-07:00
+custom:
+  Issue: "32"
