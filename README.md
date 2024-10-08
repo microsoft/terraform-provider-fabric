@@ -1,5 +1,6 @@
 # Terraform Provider for Microsoft Fabric
 
+[![🧪 Test](https://github.com/microsoft/terraform-provider-fabric/actions/workflows/test.yml/badge.svg)](https://github.com/microsoft/terraform-provider-fabric/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/microsoft/terraform-provider-fabric/graph/badge.svg?token=bBhqawIjZX)](https://codecov.io/github/microsoft/terraform-provider-fabric)
 
 ---
