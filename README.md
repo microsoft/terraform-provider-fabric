@@ -1,5 +1,9 @@
 # Terraform Provider for Microsoft Fabric
 
+[![codecov](https://codecov.io/github/microsoft/terraform-provider-fabric/graph/badge.svg?token=bBhqawIjZX)](https://codecov.io/github/microsoft/terraform-provider-fabric)
+
+---
+
 The Microsoft Fabric Terraform Provider allows managing environments and other resources within [Microsoft Fabric](https://fabric.microsoft.com/).
 
 > [!WARNING]
