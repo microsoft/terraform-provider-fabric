@@ -40,7 +40,7 @@ Where the `credential.json` contains the following content:
 {
   "name": "branch-main",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:your-github-org/your-github-repo:refs:refs/heads/main",
+  "subject": "repo:YOUR-GITHUB-ORG/YOUR-GITHUB-REPO:refs:refs/heads/main",
   "description": "Deployments from the main branch",
   "audiences": [
     "api://AzureADTokenExchange"
@@ -130,7 +130,7 @@ Be aware that `FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID` is an ID (GUID), not a
 For more information about OIDC in Azure DevOps Pipelines, see:
 
 - [Create an Azure Resource Manager service connection that uses workload identity federation](https://learn.microsoft.com/azure/devops/pipelines/library/connect-to-azure?view=azure-devops#create-an-azure-resource-manager-service-connection-that-uses-workload-identity-federation)
-- [System.AccessToken](https://learn.microsoft.com/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken).
+- [System.AccessToken](https://learn.microsoft.com/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken)
 
 ### Azure DevOps Pipelines with Azure CLI
 
@@ -152,7 +152,7 @@ steps:
 For more information about OIDC in Azure DevOps Pipelines, see:
 
 - [Create an Azure Resource Manager service connection that uses workload identity federation](https://learn.microsoft.com/azure/devops/pipelines/library/connect-to-azure?view=azure-devops#create-an-azure-resource-manager-service-connection-that-uses-workload-identity-federation)
-- [System.AccessToken](https://learn.microsoft.com/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken).
+- [System.AccessToken](https://learn.microsoft.com/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken)
 
 ### Provider Block
 
