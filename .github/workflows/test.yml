@@ -14,6 +14,7 @@ on:
       - synchronize
   schedule:
     - cron: "0 2 * * *"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ format('{0}-{1}-{2}-{3}-{4}', github.workflow, github.event_name, github.ref, github.base_ref || null, github.head_ref || null) }}
@@ -357,33 +358,33 @@ jobs:
               - '.github/workflows/test.yml'
 
       - name: 🚧 Setup Go
-        if: steps.changes_check.outputs.changes == 'true'
+        if: steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Terraform
-        if: ${{ matrix.cli == 'terraform' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ matrix.version }}
           terraform_wrapper: false
 
       - name: ⚙️ Configure Terraform
-        if: ${{ matrix.cli == 'terraform' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: |
           terraform -version
 
       - name: 🚧 Setup OpenTofu
         uses: opentofu/setup-opentofu@12f4debbf681675350b6cd1f0ff8ecfbda62027b # v1.0.4
-        if: ${{ matrix.cli == 'tofu' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         with:
           tofu_version: ${{ matrix.version }}
           tofu_wrapper: false
 
       - name: ⚙️ Configure OpenTofu
-        if: ${{ matrix.cli == 'tofu' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: |
           echo "TERRAFORM_CLI=$(which tofu)" >> $GITHUB_ENV
           echo "REGISTRY_HOST=registry.opentofu.org" >> $GITHUB_ENV
@@ -393,27 +394,27 @@ jobs:
           tofu -version
 
       - name: ⚙️ Set CLI version
-        if: steps.changes_check.outputs.changes == 'true'
+        if: steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: |
           version=$(echo "${{ matrix.version }}" | sed 's/\./_/g')
           echo "CLI_VERSION=$version" >> $GITHUB_ENV
 
       - name: 🚧 Setup Task
-        if: steps.changes_check.outputs.changes == 'true'
+        if: steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
         with:
           repo-token: ${{ github.token }}
 
       - name: 🔀 Download Go dependencies
-        if: steps.changes_check.outputs.changes == 'true'
+        if: steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: task deps:download
 
       - name: 🔨 Setup Test tools
-        if: steps.changes_check.outputs.changes == 'true'
+        if: steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: task test:tools
 
       - name: 🧪 Run tests
-        if: ${{ matrix.cli == 'terraform' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: task test
         timeout-minutes: 15
         env:
@@ -423,7 +424,7 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
 
       - name: 🧪 Run tests
-        if: ${{ matrix.cli == 'tofu' && steps.changes_check.outputs.changes == 'true' }}
+        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: task test
         timeout-minutes: 15
         env:
@@ -433,7 +434,7 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
 
       - name: 📤 Upload test results
-        if: always() && steps.changes_check.outputs.changes == 'true'
+        if: always() && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
@@ -442,7 +443,7 @@ jobs:
           overwrite: true
 
       - name: 📤 Upload coverage results
-        if: always() && steps.changes_check.outputs.changes == 'true'
+        if: always() && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
@@ -456,7 +457,7 @@ jobs:
           overwrite: true
 
       - name: 📢 Publish test results
-        if: always() && steps.changes_check.outputs.changes == 'true'
+        if: always() && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1.9.1
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
@@ -464,7 +465,7 @@ jobs:
           path: testresults.xml
 
       - name: ⚙️ Get Coverage summary
-        if: always() && steps.changes_check.outputs.changes == 'true'
+        if: always() && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
         with:
           filename: coverage.xml
@@ -478,7 +479,7 @@ jobs:
           thresholds: "40 60"
 
       - name: 📤 Upload Coverage summary
-        if: always() && steps.changes_check.outputs.changes == 'true'
+        if: always() && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
@@ -488,7 +489,7 @@ jobs:
           overwrite: true
 
   coverage-summary:
-    if: always() && needs.test.outputs.changes == 'true'
+    if: always() && (needs.test.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
     name: 📔 Coverage Summary
     needs: test
     runs-on: ubuntu-latest
