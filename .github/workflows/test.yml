@@ -434,7 +434,7 @@ jobs:
 
       - name: 📤 Upload test results
         if: always() && steps.changes_check.outputs.changes == 'true'
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
+        uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
           path: testresults.xml
@@ -443,7 +443,7 @@ jobs:
 
       - name: 📤 Upload coverage results
         if: always() && steps.changes_check.outputs.changes == 'true'
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
+        uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -479,7 +479,7 @@ jobs:
 
       - name: 📤 Upload Coverage summary
         if: always() && steps.changes_check.outputs.changes == 'true'
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
+        uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
           path: |
