@@ -60,7 +60,7 @@ Required:
 
 - `branch_name` (String) The branch name.
 - `directory_name` (String) The directory name.
-- `git_provider_type` (String) The Git provider type. Accepted values: `AzureDevOps`
+- `git_provider_type` (String) The Git provider type. Accepted values: `AzureDevOps`, `GitHub`
 - `organization_name` (String) The organization name.
 - `project_name` (String) The project name.
 - `repository_name` (String) The repository name.
