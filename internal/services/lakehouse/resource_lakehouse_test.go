@@ -271,9 +271,13 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 
 func TestAcc_LakehouseConfigurationResource_CRUD(t *testing.T) {
 	workspaceID := *testhelp.WellKnown().Workspace.ID
-	entityCreateDisplayName := testhelp.RandomName()
-	entityUpdateDisplayName := testhelp.RandomName()
-	entityUpdateDescription := testhelp.RandomName()
+	entityCreateDisplayName1 := testhelp.RandomName()
+	entityUpdateDisplayName1 := testhelp.RandomName()
+	entityUpdateDescription1 := testhelp.RandomName()
+
+	entityCreateDisplayName2 := testhelp.RandomName()
+	entityUpdateDisplayName2 := testhelp.RandomName()
+	entityUpdateDescription2 := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read (configuration)
@@ -283,14 +287,14 @@ func TestAcc_LakehouseConfigurationResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
+					"display_name": entityCreateDisplayName1,
 					"configuration": map[string]any{
 						"enable_schemas": true,
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.default_schema", "dbo"),
@@ -303,18 +307,59 @@ func TestAcc_LakehouseConfigurationResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
+					"display_name": entityUpdateDisplayName1,
+					"description":  entityUpdateDescription1,
 					"configuration": map[string]any{
 						"enable_schemas": true,
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.default_schema", "dbo"),
+			),
+		},
+		// Create and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName2,
+					"configuration": map[string]any{
+						"enable_schemas": false,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
+			),
+		},
+		// Update and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName2,
+					"description":  entityUpdateDescription2,
+					"configuration": map[string]any{
+						"enable_schemas": false,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
 			),
 		},
 	},
