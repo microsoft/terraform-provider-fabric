@@ -41,6 +41,8 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 		oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel)
 	}
 
+	to.OneLakeEndpoints = oneLakeEndpoints
+
 	workspaceIdentity := supertypes.NewSingleNestedObjectValueOfNull[workspaceIdentityModel](ctx)
 
 	if from.WorkspaceIdentity != nil {
