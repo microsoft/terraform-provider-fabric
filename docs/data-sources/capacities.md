@@ -49,6 +49,6 @@ Read-Only:
 
 - `display_name` (String) The Capacity display name.
 - `id` (String) The Capacity ID.
-- `region` (String) The Azure region where the Capacity has been provisioned.
+- `region` (String) The Azure region where the Capacity has been provisioned. Possible values: `Australia East`, `Australia Southeast`, `Brazil South`, `Brazil Southeast`, `Canada Central`, `Canada East`, `Central India`, `Central US`, `Central US EUAP`, `China East`, `China East 2`, `China East 3`, `China North`, `China North 2`, `China North 3`, `East Asia`, `East US`, `East US 2`, `France Central`, `France South`, `Germany Central`, `Germany North`, `Germany Northeast`, `Germany West Central`, `Israel Central`, `Italy North`, `Japan East`, `Japan West`, `Korea Central`, `Korea South`, `Mexico Central`, `North Central US`, `North Europe`, `Norway East`, `Norway West`, `Poland Central`, `Qatar Central`, `South Africa North`, `South Africa West`, `South Central US`, `South India`, `Southeast Asia`, `Spain Central`, `Sweden Central`, `Switzerland North`, `Switzerland West`, `UAE Central`, `UAE North`, `UK South`, `UK West`, `West Central US`, `West Europe`, `West India`, `West US`, `West US 2`, `West US 3`
 - `sku` (String) The Capacity SKU.
-- `state` (String) The Capacity state.
+- `state` (String) The Capacity state. Possible values: `Active`, `Inactive`
