@@ -19,6 +19,8 @@ import (
 type baseWorkspaceInfoModel struct {
 	baseWorkspaceModel
 	CapacityAssignmentProgress types.String                                                 `tfsdk:"capacity_assignment_progress"`
+	CapacityRegion             types.String                                                 `tfsdk:"capacity_region"`
+	OneLakeEndpoints           supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
 	Identity                   supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
 }
 
@@ -29,6 +31,15 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
 	to.CapacityAssignmentProgress = types.StringPointerValue((*string)(from.CapacityAssignmentProgress))
+	to.CapacityRegion = types.StringPointerValue((*string)(from.CapacityRegion))
+
+	oneLakeEndpoints := supertypes.NewSingleNestedObjectValueOfNull[oneLakeEndpointsModel](ctx)
+
+	if from.OneLakeEndpoints != nil {
+		oneLakeEndpointsModel := &oneLakeEndpointsModel{}
+		oneLakeEndpointsModel.set(from.OneLakeEndpoints)
+		oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel)
+	}
 
 	workspaceIdentity := supertypes.NewSingleNestedObjectValueOfNull[workspaceIdentityModel](ctx)
 
@@ -67,6 +78,16 @@ func (to *workspaceIdentityModel) set(from *fabcore.WorkspaceIdentity) {
 	to.Type = types.StringValue(workspaceIdentityTypes[0])
 	to.ApplicationID = customtypes.NewUUIDPointerValue(from.ApplicationID)
 	to.ServicePrincipalID = customtypes.NewUUIDPointerValue(from.ServicePrincipalID)
+}
+
+type oneLakeEndpointsModel struct {
+	BlobEndpoint types.String `tfsdk:"blob_endpoint"`
+	DfsEndpoint  types.String `tfsdk:"dfs_endpoint"`
+}
+
+func (to *oneLakeEndpointsModel) set(from *fabcore.OneLakeEndpoints) {
+	to.BlobEndpoint = types.StringPointerValue(from.BlobEndpoint)
+	to.DfsEndpoint = types.StringPointerValue(from.DfsEndpoint)
 }
 
 func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
