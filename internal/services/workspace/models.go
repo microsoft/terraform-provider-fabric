@@ -83,13 +83,13 @@ func (to *workspaceIdentityModel) set(from *fabcore.WorkspaceIdentity) {
 }
 
 type oneLakeEndpointsModel struct {
-	BlobEndpoint types.String `tfsdk:"blob_endpoint"`
-	DfsEndpoint  types.String `tfsdk:"dfs_endpoint"`
+	BlobEndpoint customtypes.URL `tfsdk:"blob_endpoint"`
+	DfsEndpoint  customtypes.URL `tfsdk:"dfs_endpoint"`
 }
 
 func (to *oneLakeEndpointsModel) set(from *fabcore.OneLakeEndpoints) {
-	to.BlobEndpoint = types.StringPointerValue(from.BlobEndpoint)
-	to.DfsEndpoint = types.StringPointerValue(from.DfsEndpoint)
+	to.BlobEndpoint = customtypes.NewURLPointerValue(from.BlobEndpoint)
+	to.DfsEndpoint = customtypes.NewURLPointerValue(from.DfsEndpoint)
 }
 
 func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
