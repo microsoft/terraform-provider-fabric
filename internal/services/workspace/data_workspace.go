@@ -92,10 +92,12 @@ func (d *dataSourceWorkspace) Schema(ctx context.Context, _ datasource.SchemaReq
 					"blob_endpoint": schema.StringAttribute{
 						MarkdownDescription: "The OneLake API endpoint available for Blob API operations.",
 						Computed:            true,
+						CustomType:          customtypes.URLType{},
 					},
 					"dfs_endpoint": schema.StringAttribute{
 						MarkdownDescription: "The OneLake API endpoint available for Distributed File System (DFS) or ADLSgen2 filesystem API operations.",
 						Computed:            true,
+						CustomType:          customtypes.URLType{},
 					},
 				},
 			},
