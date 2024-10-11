@@ -92,11 +92,30 @@ func (r *resourceWorkspace) Schema(ctx context.Context, _ resource.SchemaRequest
 				Optional:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
+			"capacity_region": schema.StringAttribute{
+				MarkdownDescription: "The region of the capacity associated with this workspace. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityRegionValues(), true, true),
+				Computed:            true,
+			},
 			"capacity_assignment_progress": schema.StringAttribute{
-				MarkdownDescription: "A Workspace assignment to capacity progress status.",
+				MarkdownDescription: "A Workspace assignment to capacity progress status. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityAssignmentProgressValues(), true, true),
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"onelake_endpoints": schema.SingleNestedAttribute{
+				MarkdownDescription: "The OneLake API endpoints associated with this workspace.",
+				Computed:            true,
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[oneLakeEndpointsModel](ctx),
+				Attributes: map[string]schema.Attribute{
+					"blob_endpoint": schema.StringAttribute{
+						MarkdownDescription: "The OneLake API endpoint available for Blob API operations.",
+						Computed:            true,
+					},
+					"dfs_endpoint": schema.StringAttribute{
+						MarkdownDescription: "The OneLake API endpoint available for Distributed File System (DFS) or ADLSgen2 filesystem API operations.",
+						Computed:            true,
+					},
 				},
 			},
 			"identity": schema.SingleNestedAttribute{
