@@ -35,7 +35,7 @@ func (to *requestCreateLakehouse) set(ctx context.Context, from resourceLakehous
 			return diags
 		}
 
-		if !configuration.EnableSchemas.IsNull() && !configuration.EnableSchemas.IsUnknown() {
+		if configuration.EnableSchemas.ValueBool() {
 			to.CreationPayload = &fablakehouse.CreationPayload{
 				EnableSchemas: configuration.EnableSchemas.ValueBoolPointer(),
 			}
