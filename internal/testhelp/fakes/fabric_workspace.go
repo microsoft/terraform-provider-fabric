@@ -120,9 +120,14 @@ func NewRandomWorkspaceInfo() fabcore.WorkspaceInfo {
 		ID:                         to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                to.Ptr(testhelp.RandomName()),
 		Description:                to.Ptr(testhelp.RandomName()),
-		CapacityID:                 to.Ptr(testhelp.RandomUUID()),
 		Type:                       to.Ptr(fabcore.WorkspaceTypeWorkspace),
+		CapacityID:                 to.Ptr(testhelp.RandomUUID()),
+		CapacityRegion:             to.Ptr(fabcore.CapacityRegionWestUS2),
 		CapacityAssignmentProgress: to.Ptr(fabcore.CapacityAssignmentProgressCompleted),
+		OneLakeEndpoints: &fabcore.OneLakeEndpoints{
+			BlobEndpoint: to.Ptr(testhelp.RandomURI()),
+			DfsEndpoint:  to.Ptr(testhelp.RandomURI()),
+		},
 	}
 }
 
