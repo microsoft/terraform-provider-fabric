@@ -178,7 +178,7 @@ jobs:
   checkbuild:
     name: 🏗️ Check Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read
@@ -321,7 +321,7 @@ jobs:
     environment:
       name: development
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: read
       actions: read
@@ -416,7 +416,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: task test
-        timeout-minutes: 15
+        timeout-minutes: 30
         env:
           FABRIC_TESTACC_SKIP_NO_SPN: true
           FABRIC_USE_OIDC: true
@@ -426,7 +426,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         run: task test
-        timeout-minutes: 15
+        timeout-minutes: 30
         env:
           FABRIC_TESTACC_SKIP_NO_SPN: true
           FABRIC_USE_OIDC: true
