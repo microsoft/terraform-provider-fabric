@@ -46,10 +46,12 @@ data "fabric_workspace" "example_by_name" {
 
 ### Read-Only
 
-- `capacity_assignment_progress` (String) A Workspace assignment to capacity progress status.
+- `capacity_assignment_progress` (String) A Workspace assignment to capacity progress status. Possible values: `Completed`, `Failed`, `InProgress`
 - `capacity_id` (String) The ID of the Capacity the Workspace is assigned to.
+- `capacity_region` (String) The region of the capacity associated with this workspace. Possible values: `Australia East`, `Australia Southeast`, `Brazil South`, `Brazil Southeast`, `Canada Central`, `Canada East`, `Central India`, `Central US`, `Central US EUAP`, `China East`, `China East 2`, `China East 3`, `China North`, `China North 2`, `China North 3`, `East Asia`, `East US`, `East US 2`, `France Central`, `France South`, `Germany Central`, `Germany North`, `Germany Northeast`, `Germany West Central`, `Israel Central`, `Italy North`, `Japan East`, `Japan West`, `Korea Central`, `Korea South`, `Mexico Central`, `North Central US`, `North Europe`, `Norway East`, `Norway West`, `Poland Central`, `Qatar Central`, `South Africa North`, `South Africa West`, `South Central US`, `South India`, `Southeast Asia`, `Spain Central`, `Sweden Central`, `Switzerland North`, `Switzerland West`, `UAE Central`, `UAE North`, `UK South`, `UK West`, `West Central US`, `West Europe`, `West India`, `West US`, `West US 2`, `West US 3`
 - `description` (String) The Workspace description.
 - `identity` (Attributes) A workspace identity object. (see [below for nested schema](#nestedatt--identity))
+- `onelake_endpoints` (Attributes) The OneLake API endpoints associated with this workspace. (see [below for nested schema](#nestedatt--onelake_endpoints))
 - `type` (String) The Workspace type.
 
 <a id="nestedatt--timeouts"></a>
@@ -69,3 +71,12 @@ Read-Only:
 - `application_id` (String) The application ID.
 - `service_principal_id` (String) The service principal ID.
 - `type` (String) The workspace identity type. Possible values: `SystemAssigned`.
+
+<a id="nestedatt--onelake_endpoints"></a>
+
+### Nested Schema for `onelake_endpoints`
+
+Read-Only:
+
+- `blob_endpoint` (String) The OneLake API endpoint available for Blob API operations.
+- `dfs_endpoint` (String) The OneLake API endpoint available for Distributed File System (DFS) or ADLSgen2 filesystem API operations.

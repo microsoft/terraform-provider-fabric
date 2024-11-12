@@ -1,0 +1,5 @@
+kind: changed
+body: Updated docs for possible values for `state` and `region` in the `fabric_capacity` Data-Source.
+time: 2024-10-11T16:37:51.3606012+02:00
+custom:
+    Issue: "46"

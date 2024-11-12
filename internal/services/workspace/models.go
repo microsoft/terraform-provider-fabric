@@ -19,6 +19,8 @@ import (
 type baseWorkspaceInfoModel struct {
 	baseWorkspaceModel
 	CapacityAssignmentProgress types.String                                                 `tfsdk:"capacity_assignment_progress"`
+	CapacityRegion             types.String                                                 `tfsdk:"capacity_region"`
+	OneLakeEndpoints           supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
 	Identity                   supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
 }
 
@@ -29,6 +31,17 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
 	to.CapacityAssignmentProgress = types.StringPointerValue((*string)(from.CapacityAssignmentProgress))
+	to.CapacityRegion = types.StringPointerValue((*string)(from.CapacityRegion))
+
+	oneLakeEndpoints := supertypes.NewSingleNestedObjectValueOfNull[oneLakeEndpointsModel](ctx)
+
+	if from.OneLakeEndpoints != nil {
+		oneLakeEndpointsModel := &oneLakeEndpointsModel{}
+		oneLakeEndpointsModel.set(from.OneLakeEndpoints)
+		oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel)
+	}
+
+	to.OneLakeEndpoints = oneLakeEndpoints
 
 	workspaceIdentity := supertypes.NewSingleNestedObjectValueOfNull[workspaceIdentityModel](ctx)
 
@@ -67,6 +80,16 @@ func (to *workspaceIdentityModel) set(from *fabcore.WorkspaceIdentity) {
 	to.Type = types.StringValue(workspaceIdentityTypes[0])
 	to.ApplicationID = customtypes.NewUUIDPointerValue(from.ApplicationID)
 	to.ServicePrincipalID = customtypes.NewUUIDPointerValue(from.ServicePrincipalID)
+}
+
+type oneLakeEndpointsModel struct {
+	BlobEndpoint customtypes.URL `tfsdk:"blob_endpoint"`
+	DfsEndpoint  customtypes.URL `tfsdk:"dfs_endpoint"`
+}
+
+func (to *oneLakeEndpointsModel) set(from *fabcore.OneLakeEndpoints) {
+	to.BlobEndpoint = customtypes.NewURLPointerValue(from.BlobEndpoint)
+	to.DfsEndpoint = customtypes.NewURLPointerValue(from.DfsEndpoint)
 }
 
 func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
