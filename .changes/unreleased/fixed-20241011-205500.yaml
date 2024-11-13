@@ -1,5 +1,0 @@
-kind: fixed
-body: '`fabric_lakehouse` Resource creation failed when `configuration.enable_schemas` has been set to `false`'
-time: 2024-10-11T20:55:00.0241833+02:00
-custom:
-    Issue: "47"
