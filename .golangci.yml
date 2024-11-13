@@ -49,10 +49,6 @@ issues:
 linters:
   enable-all: true
   disable:
-    # deprecated - start
-    - gomnd
-    - execinquery
-    # deprecated - end
     - depguard
     - exhaustruct
     - lll
@@ -105,6 +101,8 @@ linters-settings:
       - name: cyclomatic
         disabled: true
       - name: if-return
+        disabled: true
+      - name: max-public-structs
         disabled: true
 
   nestif:

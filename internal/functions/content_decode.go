@@ -25,11 +25,11 @@ func NewFunctionContentDecode() function.Function {
 
 type functionContentDecode struct{}
 
-func (f functionContentDecode) Metadata(_ context.Context, _ function.MetadataRequest, resp *function.MetadataResponse) {
+func (f *functionContentDecode) Metadata(_ context.Context, _ function.MetadataRequest, resp *function.MetadataResponse) {
 	resp.Name = "content_decode"
 }
 
-func (f functionContentDecode) Definition(_ context.Context, _ function.DefinitionRequest, resp *function.DefinitionResponse) {
+func (f *functionContentDecode) Definition(_ context.Context, _ function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
 		Summary:             "Decode a Definition JSON object.",
 		MarkdownDescription: "Given a Base64 Gzip encoded content, will decode and return a Definition JSON object representation of that resource.",
