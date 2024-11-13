@@ -1,5 +1,0 @@
-kind: added
-body: 'New read-only properties in the `fabric_workspace` Resource/Data-Source: `capacity_region`, `onelake_endpoints`'
-time: 2024-10-11T16:36:24.8279227+02:00
-custom:
-    Issue: "46"
