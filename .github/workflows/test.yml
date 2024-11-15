@@ -497,6 +497,7 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+      id-token: write
     steps:
       - name: 📥 Download
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -508,10 +509,11 @@ jobs:
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       - name: 📤 Upload results to Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        uses: codecov/codecov-action@968872560f81e7bdde9272853e65f2507c0eca7c # v5.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage.out
+          use_oidc: true
+          files: coverage.out
 
       - name: 🔎 Find comment
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
