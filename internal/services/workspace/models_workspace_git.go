@@ -86,6 +86,7 @@ type gitProviderDetailsModel struct {
 	GitProviderType  types.String `tfsdk:"git_provider_type"`
 	OrganizationName types.String `tfsdk:"organization_name"`
 	ProjectName      types.String `tfsdk:"project_name"`
+	OwnerName        types.String `tfsdk:"owner_name"`
 	RepositoryName   types.String `tfsdk:"repository_name"`
 	BranchName       types.String `tfsdk:"branch_name"`
 	DirectoryName    types.String `tfsdk:"directory_name"`
@@ -99,6 +100,18 @@ func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassifica
 		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
 		to.OrganizationName = types.StringPointerValue(gitProviderDetails.OrganizationName)
 		to.ProjectName = types.StringPointerValue(gitProviderDetails.ProjectName)
+		to.OwnerName = types.StringNull()
+		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
+		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
+		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
+
+		return nil
+
+	case *fabcore.GitHubDetails:
+		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
+		to.OrganizationName = types.StringNull()
+		to.ProjectName = types.StringNull()
+		to.OwnerName = types.StringPointerValue(gitProviderDetails.OwnerName)
 		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
 		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
 		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
@@ -133,6 +146,14 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 			RepositoryName:   gitProviderDetails.RepositoryName.ValueStringPointer(),
 			BranchName:       gitProviderDetails.BranchName.ValueStringPointer(),
 			DirectoryName:    gitProviderDetails.DirectoryName.ValueStringPointer(),
+		}
+	case fabcore.GitProviderTypeGitHub:
+		to.GitProviderDetails = &fabcore.GitHubDetails{
+			GitProviderType: &gitProviderType,
+			OwnerName:       gitProviderDetails.OwnerName.ValueStringPointer(),
+			RepositoryName:  gitProviderDetails.RepositoryName.ValueStringPointer(),
+			BranchName:      gitProviderDetails.BranchName.ValueStringPointer(),
+			DirectoryName:   gitProviderDetails.DirectoryName.ValueStringPointer(),
 		}
 	default:
 		diags.AddError(

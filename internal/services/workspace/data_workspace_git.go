@@ -76,11 +76,15 @@ func (d *dataSourceWorkspaceGit) Schema(ctx context.Context, _ datasource.Schema
 						Computed:            true,
 					},
 					"organization_name": schema.StringAttribute{
-						MarkdownDescription: "The organization name.",
+						MarkdownDescription: "The Azure DevOps organization name.",
 						Computed:            true,
 					},
 					"project_name": schema.StringAttribute{
-						MarkdownDescription: "The project name.",
+						MarkdownDescription: "The Azure DevOps project name.",
+						Computed:            true,
+					},
+					"owner_name": schema.StringAttribute{
+						MarkdownDescription: "The GitHub owner name.",
 						Computed:            true,
 					},
 					"repository_name": schema.StringAttribute{

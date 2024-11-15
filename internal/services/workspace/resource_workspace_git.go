@@ -120,15 +120,25 @@ func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequ
 						},
 					},
 					"organization_name": schema.StringAttribute{
-						MarkdownDescription: "The organization name.",
-						Required:            true,
+						MarkdownDescription: "The Azure DevOps organization name.",
+						Computed:            true,
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.LengthAtMost(100),
 						},
 					},
 					"project_name": schema.StringAttribute{
-						MarkdownDescription: "The project name.",
-						Required:            true,
+						MarkdownDescription: "The Azure DevOps project name.",
+						Computed:            true,
+						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(100),
+						},
+					},
+					"owner_name": schema.StringAttribute{
+						MarkdownDescription: "The GitHub owner name.",
+						Computed:            true,
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.LengthAtMost(100),
 						},
