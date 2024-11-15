@@ -511,7 +511,7 @@ jobs:
         uses: codecov/codecov-action@968872560f81e7bdde9272853e65f2507c0eca7c # v5.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage.out
+          files: coverage.out
 
       - name: 🔎 Find comment
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
