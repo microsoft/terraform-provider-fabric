@@ -511,9 +511,9 @@ jobs:
       - name: 📤 Upload results to Codecov
         uses: codecov/codecov-action@5c47607acb93fed5485fdbf7232e8a31425f672a # v5.0.2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          # token: ${{ secrets.CODECOV_TOKEN }}
           use_oidc: true
-          files: coverage.out
+          files: ./coverage.out
 
       - name: 🔎 Find comment
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
