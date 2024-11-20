@@ -204,7 +204,7 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		"plan":   req.Plan,
 	})
 
-	var plan resourceWorkspaceModel
+	var plan, state resourceWorkspaceModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -218,6 +218,8 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	state.Timeouts = plan.Timeouts
+
 	var reqCreate requestCreateWorkspace
 
 	reqCreate.set(plan)
@@ -228,12 +230,13 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
+	state.ID = plan.ID
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(resp.State.Set(ctx, state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -263,11 +266,11 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		})
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
