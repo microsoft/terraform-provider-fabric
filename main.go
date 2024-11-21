@@ -6,7 +6,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -32,7 +31,8 @@ func main() {
 	flag.Parse()
 
 	if printVersion {
-		fmt.Printf("Version: %s\n", version)
+		log.Printf("Version: %s\n", version)
+
 		return
 	}
 
