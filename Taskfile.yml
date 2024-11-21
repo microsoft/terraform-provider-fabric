@@ -271,7 +271,7 @@ tasks:
       - task: test:getcover
     vars:
       TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
-      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testUnit"
+      LDFLAGS: "-s -w -X main.version=testUnit"
     env:
       TF_LOG: error
       TF_ACC: 0
@@ -285,7 +285,7 @@ tasks:
       - task: test:getcover
     vars:
       TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
-      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testAcc"
+      LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
       TF_ACC: 1
@@ -300,7 +300,7 @@ tasks:
       - task: test:getcover
     vars:
       TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
-      LDFLAGS: "-s -w -X {{.MODULE_NAME}}/main.version=testAcc"
+      LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:
         sh: |

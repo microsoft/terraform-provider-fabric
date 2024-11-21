@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -24,9 +25,16 @@ var version = "dev"
 
 func main() {
 	var debug bool
+	var printVersion bool
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.BoolVar(&printVersion, "version", false, "print the version")
 	flag.Parse()
+
+	if printVersion {
+		fmt.Printf("Version: %s\n", version)
+		return
+	}
 
 	opts := providerserver.ServeOpts{
 		Address: "registry.terraform.io/microsoft/fabric",
