@@ -1,0 +1,5 @@
+kind: fixed
+body: Remove the package name from the flags used to set main.version during the release process
+time: 2024-11-21T21:42:45.530221257Z
+custom:
+    Issue: "102"
