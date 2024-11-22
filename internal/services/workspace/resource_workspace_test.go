@@ -83,6 +83,21 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttConfigMissing),
 		},
+		// error - invalid identity type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"capacity_id":  "00000000-0000-0000-0000-000000000000",
+					"identity": map[string]any{
+						"type": "Test",
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
 	}))
 }
 

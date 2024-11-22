@@ -10,6 +10,7 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -95,7 +96,7 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 					"git_provider_details":    testHelperGitProviderDetails,
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - invalid git_provider_type
 		{
@@ -108,7 +109,7 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 					"git_provider_details":    testCaseInvalidGitProviderType,
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - invalid directory_name
 		{
@@ -121,7 +122,7 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 					"git_provider_details":    testCaseInvalidDirectoryName,
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - missing branch_name
 		{

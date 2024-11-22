@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/microsoft/fabric-sdk-go/fabric/admin"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -84,7 +85,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 					"role":       "invalid role",
 				},
 			),
-			ExpectError: regexp.MustCompile("Invalid Attribute Value Match"),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - no required attributes - principals[0].id
 		{

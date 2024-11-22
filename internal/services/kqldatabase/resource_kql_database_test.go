@@ -112,7 +112,7 @@ func TestUnit_KQLDatabaseResource_Attributes(t *testing.T) {
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile("Invalid Attribute Value Match"),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - source_database_name - unexpected attribute
 		{
