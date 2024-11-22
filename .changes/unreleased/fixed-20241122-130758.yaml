@@ -1,0 +1,5 @@
+kind: fixed
+body: Deprovision Workspace Identity during destroy Workspace operation
+time: 2024-11-22T13:07:58.7068428-08:00
+custom:
+    Issue: "96"
