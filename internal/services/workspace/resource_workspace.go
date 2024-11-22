@@ -522,7 +522,6 @@ func (r *resourceWorkspace) Delete(ctx context.Context, req resource.DeleteReque
 		}
 
 		if !identityState.ApplicationID.IsNull() && !identityState.ApplicationID.IsUnknown() {
-
 			tflog.Debug(ctx, "DEPROVISION IDENTITY", map[string]any{
 				"action": "start",
 				"id":     state.ID.ValueString(),
