@@ -515,6 +515,31 @@ func (r *resourceWorkspace) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	if !state.Identity.IsNull() && !state.Identity.IsUnknown() {
+		identityState, diags := state.Identity.Get(ctx)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if !identityState.ApplicationID.IsNull() && !identityState.ApplicationID.IsUnknown() {
+
+			tflog.Debug(ctx, "DEPROVISION IDENTITY", map[string]any{
+				"action": "start",
+				"id":     state.ID.ValueString(),
+			})
+
+			_, err := r.client.DeprovisionIdentity(ctx, state.ID.ValueString(), nil)
+			if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+				return
+			}
+
+			tflog.Debug(ctx, "DEPROVISION IDENTITY", map[string]any{
+				"action": "end",
+				"id":     state.ID.ValueString(),
+			})
+		}
+	}
+
 	_, err := r.client.DeleteWorkspace(ctx, state.ID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
