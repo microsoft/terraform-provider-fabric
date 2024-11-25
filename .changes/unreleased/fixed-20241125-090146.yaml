@@ -1,0 +1,5 @@
+kind: fixed
+body: Removed info about GitHub support in the docs, which one is not yet supported in provider.
+time: 2024-11-25T09:01:46.6991069-08:00
+custom:
+  Issue: "108"
