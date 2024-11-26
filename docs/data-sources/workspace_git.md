@@ -51,7 +51,7 @@ Read-Only:
 
 - `branch_name` (String) The branch name.
 - `directory_name` (String) The directory name.
-- `git_provider_type` (String) The Git provider type. Possible values: `AzureDevOps`, `GitHub`
+- `git_provider_type` (String) The Git provider type. Possible values: `AzureDevOps`
 - `organization_name` (String) The organization name.
 - `project_name` (String) The project name.
 - `repository_name` (String) The repository name.

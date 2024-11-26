@@ -72,7 +72,7 @@ func (d *dataSourceWorkspaceGit) Schema(ctx context.Context, _ datasource.Schema
 				CustomType:          supertypes.NewSingleNestedObjectTypeOf[gitProviderDetailsModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"git_provider_type": schema.StringAttribute{
-						MarkdownDescription: "The Git provider type. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitProviderTypeValues(), true, true),
+						MarkdownDescription: "The Git provider type. Possible values: " + utils.ConvertStringSlicesToString(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true, true),
 						Computed:            true,
 					},
 					"organization_name": schema.StringAttribute{

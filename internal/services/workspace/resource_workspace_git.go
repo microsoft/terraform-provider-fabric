@@ -101,10 +101,10 @@ func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequ
 				},
 				Attributes: map[string]schema.Attribute{
 					"git_provider_type": schema.StringAttribute{
-						MarkdownDescription: "The Git provider type. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitProviderTypeValues(), true, true),
+						MarkdownDescription: "The Git provider type. Accepted values: " + utils.ConvertStringSlicesToString(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true, true),
 						Required:            true,
 						Validators: []validator.String{
-							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitProviderTypeValues(), true)...),
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true)...),
 						},
 					},
 					"organization_name": schema.StringAttribute{
