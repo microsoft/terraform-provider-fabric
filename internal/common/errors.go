@@ -11,6 +11,7 @@ const (
 	ErrorInvalidValue                 string = "Invalid Value"
 	ErrorAttComboInvalid              string = "Invalid Attribute Combination"
 	ErrorAttConfigMissing             string = "Missing Attribute Configuration"
+	ErrorAttValueMatch                string = "Invalid Attribute Value Match"
 	ErrorDataSourceConfigType         string = "Unexpected Data Source Configure Type"
 	ErrorResourceConfigType           string = "Unexpected Resource Configure Type"
 	ErrorModelConversion              string = "Data Model Conversion Error"

@@ -1,0 +1,5 @@
+kind: fixed
+body: Create Identity with Fabric workspace failed due to inconsistent result after apply
+time: 2024-11-19T21:51:39.7634679-08:00
+custom:
+    Issue: "93"
