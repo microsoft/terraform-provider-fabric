@@ -25,7 +25,7 @@ terraform {
   required_providers {
     fabric = {
       source  = "microsoft/fabric"
-      version = "0.1.0-beta.5"
+      version = "0.1.0-beta.6"
     }
   }
 }
