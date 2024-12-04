@@ -7,13 +7,13 @@ description: |-
 
 # Getting started
 
-[HashiCorp Terraform](https://www.terraform.io/) is a popular open source tool for creating safe and predictable cloud infrastructure across several cloud providers.
+[HashiCorp Terraform](https://www.terraform.io/) is a popular open-source tool for creating safe and predictable cloud infrastructure across several cloud providers.
 You can use the Microsoft Fabric Terraform Provider to manage your Microsoft Fabric workspaces using a flexible, powerful tool.
 The goal of the Microsoft Fabric Terraform Provider is to support automation of the most complicated aspects of deploying and managing Microsoft Fabric.
 Microsoft Fabric customers are using the Microsoft Fabric Terraform Provider to deploy and manage clusters and jobs and to configure data access.
 
 In this section, you install and configure requirements to use Terraform and the Microsoft Fabric Terraform Provider on your local development machine.
-You then configure Terraform authentication. Following this section, this article provides a sample configuration that you can experiment with to provision a Microsoft Fabric notebook and lakehouse.
+You then configure Terraform authentication. Following this section, this article provides a sample configuration that you can experiment with to provision a Microsoft Fabric Notebook and Lakehouse.
 
 ## Requirements
 
@@ -32,30 +32,30 @@ You then configure Terraform authentication. Following this section, this articl
 
 ## Sample configuration
 
-This section provides a sample configuration that you can experiment with to provision a Microsoft Fabric notebook and a lakehouse. It assumes that you have already set up the requirements, as well as created a Terraform project and configured the project with Terraform authentication as described in the previous section.
+This section provides a sample configuration that you can experiment with to provision a Microsoft Fabric Notebook and a Lakehouse. It assumes that you have already set up the requirements, as well as created a Terraform project and configured the project with Terraform authentication as described in the previous section.
 
 1. Create a new file named `provider.tf` in your Terraform project directory.
 1. Add the following code to `provider.tf` to define a dependency on the Microsoft Fabric Terraform Provider:
 
-```terraform
-# We strongly recommend using the required_providers block to set the Fabric Provider source and version being used
-terraform {
-  required_version = ">= 1.8, < 2.0"
-  required_providers {
-    fabric = {
-      source  = "microsoft/fabric"
-      version = "0.1.0-beta.6"
+    ```terraform
+    # We strongly recommend using the required_providers block to set the Fabric Provider source and version being used
+    terraform {
+      required_version = ">= 1.8, < 2.0"
+      required_providers {
+        fabric = {
+          source  = "microsoft/fabric"
+          version = "0.1.0-beta.6"
+        }
+      }
     }
-  }
-}
 
-# Configure the Microsoft Fabric Terraform Provider
-provider "fabric" {
-  # Configuration options
-}
-```
+    # Configure the Microsoft Fabric Terraform Provider
+    provider "fabric" {
+      # Configuration options
+    }
+    ```
 
-1. Create another file named `variables.tf`, and add the following code. This file represents input variables that can be used to configure a notebook and lakehouse.
+1. Create another file named `variables.tf`, and add the following code. This file represents input variables that can be used to configure a Notebook and Lakehouse.
 
     ```terraform
     variable "workspace_display_name" {
@@ -85,8 +85,7 @@ provider "fabric" {
     }
     ```
 
-1. Create a file named `workspace.tf` and add the following hcl code to represent a
-Microsoft Fabric workspace. We will also add a data source to fetch the Microsoft Fabric Capacity id by name (see requirements section).
+1. Create a file named `workspace.tf` and add the following hcl code to represent a Microsoft Fabric workspace. We will also add a data source to fetch the Microsoft Fabric Capacity id by name (see requirements section).
 
     ```terraform
     data "fabric_capacity" "capacity" {
@@ -101,7 +100,7 @@ Microsoft Fabric workspace. We will also add a data source to fetch the Microsof
     ```
 
 1. Create a file named notebook.ipynb in the same folder and copy the content of [this example notebook](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/single_tech_samples/fabric/fabric_ci_cd/src/notebooks/nb-city-safety.ipynb).
-1. Create a file named `notebook.tf` and add the following hcl code to represent a notebook. This notebook references the workspace created in step 4, specifically using the workspace id.
+1. Create a file named `notebook.tf` and add the following hcl code to represent a Notebook. This Notebook references the workspace created in step 4, specifically using the workspace id.
 
     ```terraform
     resource "fabric_notebook" "example_notebook" {
@@ -116,7 +115,7 @@ Microsoft Fabric workspace. We will also add a data source to fetch the Microsof
     }
     ```
 
-1. Create another file named `terraform.tfvars`, and add the following code. This file specifies the notebook's properties. Learn more about [tfvars file](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files).
+1. Create another file named `terraform.tfvars`, and add the following code. This file specifies the Notebook's properties. Learn more about [tfvars file](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files).
 
     ```terraform
     workspace_display_name = "example workspace"
@@ -141,8 +140,8 @@ Microsoft Fabric workspace. We will also add a data source to fetch the Microsof
 1. Run `terraform init`. If there are any errors, fix them, and then run the command again.
 1. Run `terraform plan -out=plan.tfplan`. If there are any errors, fix them, and then run the command again. In this example, we are capturing the output to a plan file named `plan.tfplan`.
 1. Run `terraform apply plan.tfplan`. This command applies the changes required to reach the desired state of the configuration. If there are any errors, fix them, and then run the command again.
-1. Verify that the workspace and notebook were created in Microsoft Fabric. In the output of the `terraform apply` command, find the notebook id and capacity id.
-1. when you are done with this sample, delete the notebook, and workspace from Microsoft Fabric by running `terraform destroy`.
+1. Verify that the Workspace and Notebook were created in Microsoft Fabric. In the output of the `terraform apply` command, find the Notebook id and capacity id.
+1. when you are done with this sample, delete the Notebook, and workspace from Microsoft Fabric by running `terraform destroy`.
 
 ## Troubleshooting
 
