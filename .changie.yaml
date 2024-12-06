@@ -46,3 +46,6 @@ replacements:
   - path: ./examples/provider/provider.tf
     find: ' version = ".*"'
     replace: ' version = "{{.VersionNoPrefix}}"'
+  - path: ./templates/guides/getting_started.md.tmpl
+    find: '          version = ".*"'
+    replace: '          version = "{{.VersionNoPrefix}}"'
