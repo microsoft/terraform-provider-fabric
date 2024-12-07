@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -122,14 +123,30 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			break
 		}
 
+		errCode := *errRespFabric.ErrorResponse.ErrorCode
+		errMessage := *errRespFabric.ErrorResponse.Message
+
+		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
+			var errCodes []string
+			var errMessages []string
+
+			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
+				errCodes = append(errCodes, *errMoreDetail.ErrorCode)
+				errMessages = append(errMessages, *errMoreDetail.Message)
+			}
+
+			errCode = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.ErrorCode, strings.Join(errCodes, " / "))
+			errMessage = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.Message, strings.Join(errMessages, " / "))
+		}
+
 		if diagErrSummary == "" {
-			diagErrSummary = *errRespFabric.ErrorResponse.ErrorCode
+			diagErrSummary = errCode
 		}
 
 		if diagErrDetail == "" {
-			diagErrDetail = *errRespFabric.ErrorResponse.Message
+			diagErrDetail = errMessage
 		} else {
-			diagErrDetail = fmt.Sprintf("%s: %s", diagErrDetail, *errRespFabric.ErrorResponse.Message)
+			diagErrDetail = fmt.Sprintf("%s: %s", diagErrDetail, errMessage)
 		}
 	case errors.As(err, &errRespAzIdentity):
 		var errAuthResp authErrorResponse
