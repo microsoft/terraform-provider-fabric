@@ -146,6 +146,7 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 				if errMoreDetail.ErrorCode != nil {
 					errCodes = append(errCodes, *errMoreDetail.ErrorCode)
 				}
+
 				if errMoreDetail.Message != nil {
 					errMessages = append(errMessages, *errMoreDetail.Message)
 				}
