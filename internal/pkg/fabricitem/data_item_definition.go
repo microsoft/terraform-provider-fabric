@@ -49,7 +49,7 @@ func (d *DataSourceFabricItemDefinition) Metadata(_ context.Context, req datasou
 }
 
 func (d *DataSourceFabricItemDefinition) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = GetDataSourceFabricItemDefinitionSchema(ctx, d.Name, d.MarkdownDescription, d.IsDisplayNameUnique, d.FormatTypes, d.DefinitionPathKeys)
+	resp.Schema = GetDataSourceFabricItemDefinitionSchema(ctx, *d)
 }
 
 func (d *DataSourceFabricItemDefinition) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
