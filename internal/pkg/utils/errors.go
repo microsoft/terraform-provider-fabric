@@ -133,7 +133,7 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 
 			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
 				errCodes = append(errCodes, *errMoreDetail.ErrorCode)
-				errMessages = append(errMessages, *errMoreDetail.Message)
+				if errMoreDetail.Message != nil { errMessages = append(errMessages, *errMoreDetail.Message) }
 			}
 
 			errCode = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.ErrorCode, strings.Join(errCodes, " / "))
