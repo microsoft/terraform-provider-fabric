@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -122,14 +123,47 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			break
 		}
 
+		errCode := ""
+		if errRespFabric.ErrorResponse.ErrorCode != nil {
+			errCode = *errRespFabric.ErrorResponse.ErrorCode
+		}
+
+		errMessage := ""
+		if errRespFabric.ErrorResponse.Message != nil {
+			errMessage = *errRespFabric.ErrorResponse.Message
+		}
+
+		errRequestID := ""
+		if errRespFabric.ErrorResponse.RequestID != nil {
+			errRequestID = *errRespFabric.ErrorResponse.RequestID
+		}
+
+		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
+			var errCodes []string
+			var errMessages []string
+
+			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
+				if errMoreDetail.ErrorCode != nil {
+					errCodes = append(errCodes, *errMoreDetail.ErrorCode)
+				}
+
+				if errMoreDetail.Message != nil {
+					errMessages = append(errMessages, *errMoreDetail.Message)
+				}
+			}
+
+			errCode = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.ErrorCode, strings.Join(errCodes, " / "))
+			errMessage = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.Message, strings.Join(errMessages, " / "))
+		}
+
 		if diagErrSummary == "" {
-			diagErrSummary = *errRespFabric.ErrorResponse.ErrorCode
+			diagErrSummary = errCode
 		}
 
 		if diagErrDetail == "" {
-			diagErrDetail = *errRespFabric.ErrorResponse.Message
+			diagErrDetail = fmt.Sprintf("%s\n\nErrorCode: %s\nRequestID: %s", errMessage, errCode, errRequestID)
 		} else {
-			diagErrDetail = fmt.Sprintf("%s: %s", diagErrDetail, *errRespFabric.ErrorResponse.Message)
+			diagErrDetail = fmt.Sprintf("%s: %s\n\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, errRequestID)
 		}
 	case errors.As(err, &errRespAzIdentity):
 		var errAuthResp authErrorResponse
