@@ -123,7 +123,7 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			break
 		}
 
-		errCode := *errRespFabric.ErrorResponse.ErrorCode
+		errCode := ""; if errRespFabric.ErrorResponse.ErrorCode != nil { errCode = *errRespFabric.ErrorResponse.ErrorCode }
 		errMessage := *errRespFabric.ErrorResponse.Message
 		errRequestID := ""
 
