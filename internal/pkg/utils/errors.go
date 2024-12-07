@@ -149,9 +149,9 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 		}
 
 		if diagErrDetail == "" {
-			diagErrDetail = fmt.Sprintf("%s\nErrorCode: %s\nRequestID: %s", errMessage, errCode, errRequestID)
+			diagErrDetail = fmt.Sprintf("%s\n\nErrorCode: %s\nRequestID: %s", errMessage, errCode, errRequestID)
 		} else {
-			diagErrDetail = fmt.Sprintf("%s: %s\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, errRequestID)
+			diagErrDetail = fmt.Sprintf("%s: %s\n\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, errRequestID)
 		}
 	case errors.As(err, &errRespAzIdentity):
 		var errAuthResp authErrorResponse
