@@ -9,15 +9,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -54,53 +48,7 @@ func (r *ResourceFabricItem) Metadata(_ context.Context, req resource.MetadataRe
 }
 
 func (r *ResourceFabricItem) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	displayNamePlanModifiers := []planmodifier.String{}
-
-	if !r.NameRenameAllowed {
-		displayNamePlanModifiers = []planmodifier.String{
-			stringplanmodifier.RequiresReplace(),
-		}
-	}
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
-		Attributes: map[string]schema.Attribute{
-			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace ID.",
-				Required:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"id": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s ID.", r.Name),
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s display name.", r.Name),
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(r.DisplayNameMaxLength),
-				},
-				PlanModifiers: displayNamePlanModifiers,
-			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s description.", r.Name),
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(r.DescriptionMaxLength),
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
-	}
+	resp.Schema = GetResourceFabricItemSchema(ctx, *r)
 }
 
 func (r *ResourceFabricItem) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

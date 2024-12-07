@@ -67,7 +67,15 @@ func (d *dataSourceEventhouse) Schema(ctx context.Context, _ datasource.SchemaRe
 		},
 	}
 
-	resp.Schema = fabricitem.GetDataSourceFabricItemPropertiesSchema(ctx, ItemName, markdownDescription, true, properties)
+	itemConfig := fabricitem.DataSourceFabricItem{
+		Type:                ItemType,
+		Name:                ItemName,
+		TFName:              ItemTFName,
+		MarkdownDescription: markdownDescription,
+		IsDisplayNameUnique: true,
+	}
+
+	resp.Schema = fabricitem.GetDataSourceFabricItemPropertiesSchema(ctx, itemConfig, properties)
 }
 
 func (d *dataSourceEventhouse) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
