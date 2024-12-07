@@ -125,6 +125,7 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 
 		errCode := *errRespFabric.ErrorResponse.ErrorCode
 		errMessage := *errRespFabric.ErrorResponse.Message
+		errRequestID := ""
 
 		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
 			var errCodes []string
@@ -139,14 +140,18 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			errMessage = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.Message, strings.Join(errMessages, " / "))
 		}
 
+		if errRespFabric.ErrorResponse.RequestID != nil {
+			errRequestID = *errRespFabric.ErrorResponse.RequestID
+		}
+
 		if diagErrSummary == "" {
 			diagErrSummary = errCode
 		}
 
 		if diagErrDetail == "" {
-			diagErrDetail = fmt.Sprintf("%s\nErrorCode: %s\nRequestID: %s", errMessage, errCode, *errRespFabric.ErrorResponse.RequestID)
+			diagErrDetail = fmt.Sprintf("%s\nErrorCode: %s\nRequestID: %s", errMessage, errCode, errRequestID)
 		} else {
-			diagErrDetail = fmt.Sprintf("%s: %s\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, *errRespFabric.ErrorResponse.RequestID)
+			diagErrDetail = fmt.Sprintf("%s: %s\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, errRequestID)
 		}
 	case errors.As(err, &errRespAzIdentity):
 		var errAuthResp authErrorResponse
