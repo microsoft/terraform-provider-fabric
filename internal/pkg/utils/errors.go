@@ -123,25 +123,36 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			break
 		}
 
-		errCode := ""; if errRespFabric.ErrorResponse.ErrorCode != nil { errCode = *errRespFabric.ErrorResponse.ErrorCode }
-		errMessage := *errRespFabric.ErrorResponse.Message
+		errCode := ""
+		if errRespFabric.ErrorResponse.ErrorCode != nil {
+			errCode = *errRespFabric.ErrorResponse.ErrorCode
+		}
+
+		errMessage := ""
+		if errRespFabric.ErrorResponse.Message != nil {
+			errMessage = *errRespFabric.ErrorResponse.Message
+		}
+
 		errRequestID := ""
+		if errRespFabric.ErrorResponse.RequestID != nil {
+			errRequestID = *errRespFabric.ErrorResponse.RequestID
+		}
 
 		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
 			var errCodes []string
 			var errMessages []string
 
 			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
-				errCodes = append(errCodes, *errMoreDetail.ErrorCode)
-				if errMoreDetail.Message != nil { errMessages = append(errMessages, *errMoreDetail.Message) }
+				if errMoreDetail.ErrorCode != nil {
+					errCodes = append(errCodes, *errMoreDetail.ErrorCode)
+				}
+				if errMoreDetail.Message != nil {
+					errMessages = append(errMessages, *errMoreDetail.Message)
+				}
 			}
 
 			errCode = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.ErrorCode, strings.Join(errCodes, " / "))
 			errMessage = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.Message, strings.Join(errMessages, " / "))
-		}
-
-		if errRespFabric.ErrorResponse.RequestID != nil {
-			errRequestID = *errRespFabric.ErrorResponse.RequestID
 		}
 
 		if diagErrSummary == "" {
