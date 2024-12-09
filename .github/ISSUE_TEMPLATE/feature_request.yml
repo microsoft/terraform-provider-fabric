@@ -3,14 +3,15 @@
 ---
 name: 🚀 Feature Request
 description: Suggest an idea for this project 📢
-title: "[feature] "
+title: "[FEAT] "
 labels: [feature]
+projects: ["microsoft/1018"]
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for taking the time to fill out this new feature or enhancement idea!
-        Use this form only if Terraform Provider specific issue's forms (resource, data source, example, documentation) do not apply.
+        ‼️ Use this form only if Terraform Provider specific issue's forms (resource, data source, example, documentation) do not apply.
 
   - type: textarea
     id: description
