@@ -3,8 +3,9 @@
 ---
 name: 🔼 Provider Resource Request
 description: Request a new resource to be added to the Terraform Provider 📢
-title: "[resource] "
+title: "[RS] "
 labels: [feature, resource]
+projects: ["microsoft/1018"]
 body:
   - type: textarea
     id: description
@@ -27,7 +28,7 @@ body:
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
         - Related resources/data sources: <!-- are there any existing or potential resources that are related to this one -->
       value: |
-        - Resource Name: fabric_[your resource name]
+        - Resource Name: `fabric_[your resource name]`
         - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
         - Related resources/data sources: <!-- are there any existing or potential resources that are related to this one -->

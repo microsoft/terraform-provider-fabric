@@ -3,12 +3,15 @@
 ---
 name: 🐛 Bug Report
 description: If something isn't working 🔧
-title: "[bug] "
+title: "[BUG] "
 labels: ["bug"]
+projects: ["microsoft/1018"]
 body:
   - type: markdown
     attributes:
-      value: Thanks for taking the time to fill out this bug report!
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        Before you submit the issue, please make sure you have done [Troubleshooting](https://registry.terraform.io/providers/microsoft/fabric/latest/docs/guides/troubleshooting) guide.
 
   - type: textarea
     id: what-happened
@@ -39,6 +42,7 @@ body:
       label: 🏗️ Code Sample / Log
       description: |
         Please copy and paste any relevant code sample / log output to help explain your problem.
+        For the log output, please make sure you set `TF_LOG=DEBUG` environment variable before running Terraform. This will help to provide more detailed logs for debugging purposes.
 
         ‼️ **REMINDER: REMOVE SENSITIVE DATA SUCH AS SECRETS, USER NAMES, EMAILS, TENANT INFORMATION, ETC.**
       placeholder: code sample / log output to help explain your problem.

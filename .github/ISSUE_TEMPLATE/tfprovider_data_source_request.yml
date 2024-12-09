@@ -3,8 +3,9 @@
 ---
 name: 🔽 Provider Data Source Request
 description: Request a new data source to be added to the Terraform Provider 📢
-title: "[data source] "
+title: "[DS] "
 labels: [feature, data-source]
+projects: ["microsoft/1018"]
 body:
   - type: textarea
     id: description
@@ -27,7 +28,7 @@ body:
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
         - Related resources/data sources: <!-- are there any existing or potential data sources that are related to this one -->
       value: |
-        - Data Source Name: fabric_[your data source name]
+        - Data Source Name: `fabric_[your data source name]`
         - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
         - Related resources/data sources: <!-- are there any existing or potential data sources that are related to this one -->

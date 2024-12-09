@@ -3,8 +3,9 @@
 ---
 name: ❓ Question
 description: Ask a question about this project 🎓
-title: "[question] "
+title: "[Q] "
 labels: [question]
+projects: ["microsoft/1018"]
 body:
   - type: checkboxes
     id: checklist
