@@ -74,7 +74,15 @@ func (d *dataSourceKQLDatabase) Schema(ctx context.Context, _ datasource.SchemaR
 		},
 	}
 
-	resp.Schema = fabricitem.GetDataSourceFabricItemPropertiesSchema(ctx, ItemName, markdownDescription, true, properties)
+	itemConfig := fabricitem.DataSourceFabricItem{
+		Type:                ItemType,
+		Name:                ItemName,
+		TFName:              ItemTFName,
+		MarkdownDescription: markdownDescription,
+		IsDisplayNameUnique: true,
+	}
+
+	resp.Schema = fabricitem.GetDataSourceFabricItemPropertiesSchema(ctx, itemConfig, properties)
 }
 
 func (d *dataSourceKQLDatabase) ConfigValidators(_ context.Context) []datasource.ConfigValidator {

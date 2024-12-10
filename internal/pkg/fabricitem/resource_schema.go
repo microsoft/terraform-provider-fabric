@@ -26,7 +26,7 @@ import (
 )
 
 func GetResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) schema.Schema {
-	attributes := baseResourceFabricItemAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
 	return schema.Schema{
 		MarkdownDescription: r.MarkdownDescription,
@@ -35,44 +35,10 @@ func GetResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 }
 
 func GetResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
-	attributes := baseResourceFabricItemAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attributes["definition_update_enabled"] = schema.BoolAttribute{
-		MarkdownDescription: "Update definition on change of source content. Default: `true`.",
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
-	}
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	if len(r.FormatTypes) > 0 {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", r.Name, utils.ConvertStringSlicesToString(r.FormatTypes, true, false)),
-			Computed:            true,
-			Default:             stringdefault.StaticString(r.FormatTypeDefault),
-		}
-	} else {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", r.Name, DefinitionFormatNotApplicable),
-			Computed:            true,
-			Default:             stringdefault.StaticString(DefinitionFormatNotApplicable),
-		}
-	}
-
-	if r.DefinitionRequired {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s.", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false)),
-			Required:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          r.DefinitionPathKeysValidator,
-			NestedObject:        GetResourceFabricItemDefinitionPartSchema(ctx),
-		}
-	} else {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s.", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false)),
-			Optional:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          r.DefinitionPathKeysValidator,
-			NestedObject:        GetResourceFabricItemDefinitionPartSchema(ctx),
-		}
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r) {
+		attributes[key] = value
 	}
 
 	return schema.Schema{
@@ -82,7 +48,7 @@ func GetResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabric
 }
 
 func GetResourceFabricItemPropertiesSchema(ctx context.Context, itemName, markdownDescription string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool, properties schema.SingleNestedAttribute) schema.Schema {
-	attributes := baseResourceFabricItemAttributes(ctx, itemName, displayNameMaxLength, descriptionMaxLength, nameRenameAllowed)
+	attributes := getResourceFabricItemBaseAttributes(ctx, itemName, displayNameMaxLength, descriptionMaxLength, nameRenameAllowed)
 	attributes["properties"] = properties
 
 	return schema.Schema{
@@ -91,8 +57,22 @@ func GetResourceFabricItemPropertiesSchema(ctx context.Context, itemName, markdo
 	}
 }
 
+func GetResourceFabricItemPropertiesDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes["properties"] = properties
+
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r) {
+		attributes[key] = value
+	}
+
+	return schema.Schema{
+		MarkdownDescription: r.MarkdownDescription,
+		Attributes:          attributes,
+	}
+}
+
 func GetResourceFabricItemPropertiesCreationSchema(ctx context.Context, itemName, markdownDescription string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool, properties, configuration schema.SingleNestedAttribute) schema.Schema {
-	attributes := baseResourceFabricItemAttributes(ctx, itemName, displayNameMaxLength, descriptionMaxLength, nameRenameAllowed)
+	attributes := getResourceFabricItemBaseAttributes(ctx, itemName, displayNameMaxLength, descriptionMaxLength, nameRenameAllowed)
 	attributes["properties"] = properties
 	attributes["configuration"] = configuration
 
@@ -103,7 +83,7 @@ func GetResourceFabricItemPropertiesCreationSchema(ctx context.Context, itemName
 }
 
 // Helper function to get base Fabric Item resource attributes.
-func baseResourceFabricItemAttributes(ctx context.Context, name string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
 	displayNamePlanModifiers := []planmodifier.String{}
 
 	if !nameRenameAllowed {
@@ -152,7 +132,54 @@ func baseResourceFabricItemAttributes(ctx context.Context, name string, displayN
 	return attributes
 }
 
-func GetResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.NestedAttributeObject {
+// Helper function to get Fabric Item definition attributes.
+func getResourceFabricItemDefinitionAttributes(ctx context.Context, r ResourceFabricItemDefinition) map[string]schema.Attribute {
+	attributes := make(map[string]schema.Attribute)
+
+	attributes["definition_update_enabled"] = schema.BoolAttribute{
+		MarkdownDescription: "Update definition on change of source content. Default: `true`.",
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
+	}
+
+	if len(r.FormatTypes) > 0 {
+		attributes["format"] = schema.StringAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", r.Name, utils.ConvertStringSlicesToString(r.FormatTypes, true, false)),
+			Computed:            true,
+			Default:             stringdefault.StaticString(r.FormatTypeDefault),
+		}
+	} else {
+		attributes["format"] = schema.StringAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", r.Name, DefinitionFormatNotApplicable),
+			Computed:            true,
+			Default:             stringdefault.StaticString(DefinitionFormatNotApplicable),
+		}
+	}
+
+	if r.DefinitionRequired {
+		attributes["definition"] = schema.MapNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false), r.Name, r.DefinitionPathDocsURL),
+			Required:            true,
+			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
+			Validators:          r.DefinitionPathKeysValidator,
+			NestedObject:        getResourceFabricItemDefinitionPartSchema(ctx),
+		}
+	} else {
+		attributes["definition"] = schema.MapNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false), r.Name, r.DefinitionPathDocsURL),
+			Optional:            true,
+			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
+			Validators:          r.DefinitionPathKeysValidator,
+			NestedObject:        getResourceFabricItemDefinitionPartSchema(ctx),
+		}
+	}
+
+	return attributes
+}
+
+// Helper function to get Fabric Item data-source definition part attributes.
+func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: map[string]schema.Attribute{
 			"source": schema.StringAttribute{
