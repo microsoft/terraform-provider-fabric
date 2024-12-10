@@ -3,8 +3,9 @@
 ---
 name: 📄 Documentation Request
 description: Request new documentation or updates to existing documentation to improve clarity or usefulness 📢
-title: "[documentation] "
+title: "[DOCS] "
 labels: [documentation]
+projects: ["microsoft/1018"]
 body:
   - type: textarea
     id: description
