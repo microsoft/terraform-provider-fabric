@@ -92,6 +92,7 @@ func (r *resourceLakehouse) Schema(ctx context.Context, _ resource.SchemaRequest
 			},
 		},
 	}
+
 	configuration := schema.SingleNestedAttribute{
 		MarkdownDescription: "The " + ItemName + " creation configuration.\n\n" +
 			"Any changes to this configuration will result in recreation of the " + ItemName + ".",

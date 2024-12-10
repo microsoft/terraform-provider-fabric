@@ -11,15 +11,9 @@ import (
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -106,93 +100,7 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 }
 
 func (r *ResourceFabricItemDefinition) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	displayNamePlanModifiers := []planmodifier.String{}
-
-	if !r.NameRenameAllowed {
-		displayNamePlanModifiers = []planmodifier.String{
-			stringplanmodifier.RequiresReplace(),
-		}
-	}
-
-	attributes := map[string]schema.Attribute{
-		"workspace_id": schema.StringAttribute{
-			MarkdownDescription: "The Workspace ID.",
-			Required:            true,
-			CustomType:          customtypes.UUIDType{},
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.RequiresReplace(),
-			},
-		},
-		"id": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s ID.", r.Name),
-			Computed:            true,
-			CustomType:          customtypes.UUIDType{},
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
-		"display_name": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s display name.", r.Name),
-			Required:            true,
-			Validators: []validator.String{
-				stringvalidator.LengthAtMost(r.DisplayNameMaxLength),
-			},
-			PlanModifiers: displayNamePlanModifiers,
-		},
-		"description": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s description.", r.Name),
-			Optional:            true,
-			Computed:            true,
-			Default:             stringdefault.StaticString(""),
-			Validators: []validator.String{
-				stringvalidator.LengthAtMost(r.DescriptionMaxLength),
-			},
-		},
-		"definition_update_enabled": schema.BoolAttribute{
-			MarkdownDescription: "Update definition on change of source content. Default: `true`.",
-			Optional:            true,
-			Computed:            true,
-			Default:             booldefault.StaticBool(true),
-		},
-		"timeouts": timeouts.AttributesAll(ctx),
-	}
-
-	if len(r.FormatTypes) > 0 {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", r.Name, utils.ConvertStringSlicesToString(r.FormatTypes, true, false)),
-			Computed:            true,
-			Default:             stringdefault.StaticString(r.FormatTypeDefault),
-		}
-	} else {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", r.Name, DefinitionFormatNotApplicable),
-			Computed:            true,
-			Default:             stringdefault.StaticString(DefinitionFormatNotApplicable),
-		}
-	}
-
-	if r.DefinitionRequired {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false), r.Name, r.DefinitionPathDocsURL),
-			Required:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          r.DefinitionPathKeysValidator,
-			NestedObject:        GetResourceFabricItemDefinitionPartSchema(ctx),
-		}
-	} else {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(r.DefinitionPathKeys, true, false), r.Name, r.DefinitionPathDocsURL),
-			Optional:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          r.DefinitionPathKeysValidator,
-			NestedObject:        GetResourceFabricItemDefinitionPartSchema(ctx),
-		}
-	}
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
-		Attributes:          attributes,
-	}
+	resp.Schema = GetResourceFabricItemDefinitionSchema(ctx, *r)
 }
 
 func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
