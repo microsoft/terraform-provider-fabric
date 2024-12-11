@@ -37,9 +37,9 @@ type DataSourceFabricItemProperties[T any, Tm any] struct {
 	TFName              string
 	MarkdownDescription string
 	IsDisplayNameUnique bool
-	PropertiesSchema    *schema.SingleNestedAttribute
-	PropertiesSetter    *func(ctx context.Context, from *Tm, to *DataSourceFabricItemPropertiesModel[T, Tm]) diag.Diagnostics
-	ItemGetter          *func(ctx context.Context, fabClient fabric.Client, model DataSourceFabricItemPropertiesModel[T, Tm], fabItem *FabricItem[Tm]) diag.Diagnostics
+	PropertiesSchema    schema.SingleNestedAttribute
+	PropertiesSetter    func(ctx context.Context, from *Tm, to *DataSourceFabricItemPropertiesModel[T, Tm]) diag.Diagnostics
+	ItemGetter          func(ctx context.Context, fabClient fabric.Client, model DataSourceFabricItemPropertiesModel[T, Tm], fabItem *FabricItem[Tm]) diag.Diagnostics
 }
 
 func NewDataSourceFabricItemProperties[T any, Tm any](config DataSourceFabricItemProperties[T, Tm]) datasource.DataSource {
@@ -139,7 +139,7 @@ func (d *DataSourceFabricItemProperties[T, Tm]) getByID(ctx context.Context, mod
 	var fabItem FabricItem[Tm]
 
 	if d.ItemGetter != nil {
-		diags := (*d.ItemGetter)(ctx, *d.pConfigData.FabricClient, *model, &fabItem)
+		diags := d.ItemGetter(ctx, *d.pConfigData.FabricClient, *model, &fabItem)
 		if diags.HasError() {
 			return diags
 		}
@@ -156,7 +156,7 @@ func (d *DataSourceFabricItemProperties[T, Tm]) getByID(ctx context.Context, mod
 
 	// usee PropertiesSetter to set the properties of the model
 	if d.PropertiesSetter != nil {
-		diags := (*d.PropertiesSetter)(ctx, fabItem.Properties, model)
+		diags := d.PropertiesSetter(ctx, fabItem.Properties, model)
 		if diags.HasError() {
 			return diags
 		}

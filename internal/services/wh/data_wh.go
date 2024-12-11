@@ -80,9 +80,9 @@ func NewDataSourceWH(ctx context.Context) datasource.DataSource {
 			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: true,
-		PropertiesSchema:    &properties,
-		PropertiesSetter:    &propertiesSetter,
-		ItemGetter:          &itemGetter,
+		PropertiesSchema:    properties,
+		PropertiesSetter:    propertiesSetter,
+		ItemGetter:          itemGetter,
 	}
 
 	return fabricitem.NewDataSourceFabricItemProperties(config)
