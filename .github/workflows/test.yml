@@ -379,7 +379,7 @@ jobs:
           terraform -version
 
       - name: 🚧 Setup OpenTofu
-        uses: opentofu/setup-opentofu@12f4debbf681675350b6cd1f0ff8ecfbda62027b # v1.0.4
+        uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
         if: matrix.cli == 'tofu' && (steps.changes_check.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
         with:
           tofu_version: ${{ matrix.version }}
