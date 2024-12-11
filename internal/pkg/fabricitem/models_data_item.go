@@ -4,6 +4,7 @@
 package fabricitem
 
 import (
+	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -30,4 +31,10 @@ func (to *DataSourceFabricItemDefinitionPartModel) Set(from string) diag.Diagnos
 	to.Content = types.StringPointerValue(&content)
 
 	return nil
+}
+
+type DataSourceFabricItemPropertiesModel[T any, Tm any] struct {
+	baseFabricItemModel1[T, Tm]
+	Timeouts   timeouts.Value                          `tfsdk:"timeouts"`
+	Properties supertypes.SingleNestedObjectValueOf[T] `tfsdk:"properties"`
 }

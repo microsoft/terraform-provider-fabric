@@ -55,6 +55,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/wh"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 )
 
@@ -379,7 +380,7 @@ func (p *FabricProvider) Resources(_ context.Context) []func() resource.Resource
 	}
 }
 
-func (p *FabricProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
@@ -428,6 +429,7 @@ func (p *FabricProvider) DataSources(_ context.Context) []func() datasource.Data
 		workspace.NewDataSourceWorkspaces,
 		workspace.NewDataSourceWorkspaceRoleAssignments,
 		workspace.NewDataSourceWorkspaceGit,
+		func() datasource.DataSource { return wh.NewDataSourceWH(ctx) },
 	}
 }
 

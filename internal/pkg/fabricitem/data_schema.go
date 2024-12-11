@@ -47,6 +47,16 @@ func GetDataSourceFabricItemPropertiesSchema(ctx context.Context, d DataSourceFa
 	}
 }
 
+func GetDataSourceFabricItemPropertiesSchema1[T any, Tm any](ctx context.Context, d DataSourceFabricItemProperties[T, Tm]) schema.Schema {
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
+	attributes["properties"] = d.PropertiesSchema
+
+	return schema.Schema{
+		MarkdownDescription: d.MarkdownDescription,
+		Attributes:          attributes,
+	}
+}
+
 func GetDataSourceFabricItemPropertiesDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = properties
