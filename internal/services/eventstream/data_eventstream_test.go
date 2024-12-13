@@ -150,10 +150,6 @@ func TestUnit_EventstreamDataSource(t *testing.T) {
 }
 
 func TestAcc_EventstreamDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspaceID := *testhelp.WellKnown().Workspace.ID
 	entity := testhelp.WellKnown().Eventstream
 

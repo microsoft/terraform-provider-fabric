@@ -51,10 +51,6 @@ func TestUnit_DomainsDataSource(t *testing.T) {
 }
 
 func TestAcc_DomainsDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{

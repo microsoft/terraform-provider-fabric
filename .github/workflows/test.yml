@@ -21,6 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  FABRIC_TESTACC_SKIP_NO_SPN: true
   FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
   FABRIC_TIMEOUT: 20m
 
@@ -421,7 +422,6 @@ jobs:
         timeout-minutes: 30
         env:
           # TF_LOG: DEBUG
-          # FABRIC_TESTACC_SKIP_NO_SPN: true
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
@@ -431,7 +431,6 @@ jobs:
         run: task test
         timeout-minutes: 30
         env:
-          FABRIC_TESTACC_SKIP_NO_SPN: true
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}

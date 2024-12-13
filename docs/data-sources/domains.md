@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   List a Fabric Domains.
   Use this data source to list Domains https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  -> This item does not support Service Principal. Please use a User context authentication.
 ---
 
 # fabric_domains (Data Source)
@@ -14,7 +14,7 @@ List a Fabric Domains.
 
 Use this data source to list [Domains](https://learn.microsoft.com/fabric/governance/domains).
 
--> This item supports Service Principal authentication.
+-> This item does not support Service Principal. Please use a User context authentication.
 
 ## Example Usage
 

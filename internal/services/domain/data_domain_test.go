@@ -87,10 +87,6 @@ func TestUnit_DomainDataSource(t *testing.T) {
 }
 
 func TestAcc_DomainDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	entity := testhelp.WellKnown().DomainParent
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
