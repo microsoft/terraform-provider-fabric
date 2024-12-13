@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -139,6 +140,53 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 		assert.Len(t, diags, 1)
 		assert.Equal(t, common.ErrorReadHeader, diags[0].Summary())
 		assert.Equal(t, fmt.Sprintf("%s: %s\n\nErrorCode: %s\nRequestID: %s", common.ErrorReadDetails, "Message", "ErrorCode", requestID), diags[0].Detail())
+	})
+
+	t.Run("azcore.ResponseError", func(t *testing.T) {
+		requestID := testhelp.RandomUUID()
+		respBody := map[string]any{
+			"errorCode": "ErrorCode",
+			"message":   "Message",
+			"moreDetails": []map[string]any{
+				{
+					"errorCode": "ErrorCodeMoreDetails",
+					"message":   "MessageMoreDetails",
+					"relatedResource": map[string]any{
+						"resourceId":   testhelp.RandomUUID(),
+						"resourceType": "ResourceType",
+					},
+				},
+			},
+			"relatedResource": map[string]any{
+				"resourceId":   testhelp.RandomUUID(),
+				"resourceType": "ResourceType",
+			},
+			"requestId": requestID,
+		}
+		respBodyJson, _ := json.Marshal(respBody)
+
+		err := &azcore.ResponseError{
+			ErrorCode:  "ErrorCode",
+			StatusCode: 404,
+			RawResponse: &http.Response{
+				StatusCode: 404,
+				Status:     "404 Not Found",
+				Body:       io.NopCloser(strings.NewReader(string(respBodyJson))),
+				Request: &http.Request{
+					Method: "GET",
+					URL: &url.URL{
+						Scheme: "https",
+						Host:   "example.com",
+					},
+				},
+			},
+		}
+
+		diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil)
+
+		assert.Len(t, diags, 1)
+		assert.Equal(t, common.ErrorReadHeader, diags[0].Summary())
+		assert.Equal(t, fmt.Sprintf("%s: %s\n\nErrorCode: %s\nRequestID: %s", common.ErrorReadDetails, "Message / MessageMoreDetails", "ErrorCode / ErrorCodeMoreDetails", requestID), diags[0].Detail())
 	})
 
 	t.Run("azidentity.AuthenticationFailedError", func(t *testing.T) {
