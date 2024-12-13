@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Manage a Fabric Domain Workspace Assignments.
   See Domain https://learn.microsoft.com/fabric/governance/domains for more information.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_domain_workspace_assignments (Resource)
@@ -14,7 +14,7 @@ Manage a Fabric Domain Workspace Assignments.
 
 See [Domain](https://learn.microsoft.com/fabric/governance/domains) for more information.
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 

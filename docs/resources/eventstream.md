@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Manage a Fabric Eventstream.
   Use this resource to manage Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_eventstream (Resource)
@@ -14,7 +14,7 @@ Manage a Fabric Eventstream.
 
 Use this resource to manage [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 

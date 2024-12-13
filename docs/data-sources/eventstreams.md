@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   List a Fabric Eventstreams.
   Use this data source to list Eventstreams https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_eventstreams (Data Source)
@@ -14,7 +14,7 @@ List a Fabric Eventstreams.
 
 Use this data source to list [Eventstreams](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 

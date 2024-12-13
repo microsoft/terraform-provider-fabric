@@ -12,7 +12,7 @@ const (
 	ItemTFName                       = "domain"
 	ItemsName                        = "Domains"
 	ItemsTFName                      = "domains"
-	ItemDocsSPNSupport               = common.DocsSPNNotSupported
+	ItemDocsSPNSupport               = common.DocsSPNSupported
 	ItemDocsURL                      = "https://learn.microsoft.com/fabric/governance/domains"
 	DomainWorkspaceAssignmentsName   = "Domain Workspace Assignments"
 	DomainWorkspaceAssignmentsTFName = "domain_workspace_assignments"

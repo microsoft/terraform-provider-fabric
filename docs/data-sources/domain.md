@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Get a Fabric Domain.
   Use this data source to get Domain https://learn.microsoft.com/fabric/governance/domains.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_domain (Data Source)
@@ -14,7 +14,7 @@ Get a Fabric Domain.
 
 Use this data source to get [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 

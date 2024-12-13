@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   This resource manages a Fabric Domain.
   See Domains https://learn.microsoft.com/fabric/governance/domains for more information.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_domain (Resource)
@@ -14,7 +14,7 @@ This resource manages a Fabric Domain.
 
 See [Domains](https://learn.microsoft.com/fabric/governance/domains) for more information.
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 
