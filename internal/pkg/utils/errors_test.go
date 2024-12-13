@@ -18,9 +18,8 @@ import (
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/stretchr/testify/assert"
-
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
