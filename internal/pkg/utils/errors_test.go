@@ -128,7 +128,7 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 		requestID := testhelp.RandomUUID()
 		err := &fabcore.ResponseError{
 			ErrorCode:  "ErrorCode",
-			StatusCode: 404,
+			StatusCode: http.StatusNotFound,
 			ErrorResponse: &fabcore.ErrorResponse{
 				ErrorCode: azto.Ptr("ErrorCode"),
 				Message:   azto.Ptr("Message"),
@@ -163,17 +163,17 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 			},
 			"requestId": requestID,
 		}
-		respBodyJson, _ := json.Marshal(respBody)
+		respBodyJSON, _ := json.Marshal(respBody)
 
 		err := &azcore.ResponseError{
 			ErrorCode:  "ErrorCode",
-			StatusCode: 404,
+			StatusCode: http.StatusNotFound,
 			RawResponse: &http.Response{
-				StatusCode: 404,
+				StatusCode: http.StatusNotFound,
 				Status:     "404 Not Found",
-				Body:       io.NopCloser(strings.NewReader(string(respBodyJson))),
+				Body:       io.NopCloser(strings.NewReader(string(respBodyJSON))),
 				Request: &http.Request{
-					Method: "GET",
+					Method: http.MethodGet,
 					URL: &url.URL{
 						Scheme: "https",
 						Host:   "example.com",
@@ -199,14 +199,14 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 			"correlation_id":    testhelp.RandomUUID(),
 			"error_uri":         "https://login.microsoftonline.com/error?code=7000215",
 		}
-		respBodyJson, _ := json.Marshal(respBody)
+		respBodyJSON, _ := json.Marshal(respBody)
 		err := &azidentity.AuthenticationFailedError{
 			RawResponse: &http.Response{
-				StatusCode: 404,
+				StatusCode: http.StatusNotFound,
 				Status:     "404 Not Found",
-				Body:       io.NopCloser(strings.NewReader(string(respBodyJson))),
+				Body:       io.NopCloser(strings.NewReader(string(respBodyJSON))),
 				Request: &http.Request{
-					Method: "GET",
+					Method: http.MethodGet,
 					URL: &url.URL{
 						Scheme: "https",
 						Host:   "example.com",

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -186,7 +187,7 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 
 			errCodes := make([]string, len(errAuthResp.ErrorCodes))
 			for i, code := range errAuthResp.ErrorCodes {
-				errCodes[i] = fmt.Sprintf("%d", code)
+				errCodes[i] = strconv.Itoa(code)
 			}
 
 			diagErrDetail = fmt.Sprintf("%s\n\nErrorCode: %s\nErrorURI: %s", errAuthResp.ErrorDescription, strings.Join(errCodes, " / "), errAuthResp.ErrorURI)
