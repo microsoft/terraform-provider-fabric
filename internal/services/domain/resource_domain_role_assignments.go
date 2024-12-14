@@ -314,7 +314,9 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 
 	var reqDelete requestDeleteDomainRoleAssignments
 
-	reqDelete.set(ctx, state)
+	if resp.Diagnostics.Append(reqDelete.set(ctx, state)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	_, err := r.client.RoleAssignmentsBulkUnassign(ctx, state.DomainID.ValueString(), reqDelete.DomainRoleUnassignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {

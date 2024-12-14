@@ -26,7 +26,11 @@ func (to *dataSourceWorkspaceRoleAssignmentsModel) setValues(ctx context.Context
 
 	for _, entity := range from {
 		var entityModel workspaceRoleAssignmentModel
-		entityModel.set(ctx, entity)
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
+
 		slice = append(slice, &entityModel)
 	}
 
@@ -41,13 +45,18 @@ type workspaceRoleAssignmentModel struct {
 	Details     supertypes.SingleNestedObjectValueOf[principalDetailsModel] `tfsdk:"details"`
 }
 
-func (to *workspaceRoleAssignmentModel) set(ctx context.Context, from fabcore.WorkspaceRoleAssignment) {
+func (to *workspaceRoleAssignmentModel) set(ctx context.Context, from fabcore.WorkspaceRoleAssignment) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Role = types.StringPointerValue((*string)(from.Role))
 
 	detailsModel := &principalDetailsModel{}
 	detailsModel.set(from.Principal, to)
-	to.Details.Set(ctx, detailsModel)
+
+	if diags := to.Details.Set(ctx, detailsModel); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }
 
 type principalDetailsModel struct {

@@ -39,7 +39,10 @@ func (to *baseEnvironmentPropertiesModel) setProperties(ctx context.Context, fro
 
 	if from.Properties != nil {
 		propertiesModel := &environmentPropertiesModel{}
-		propertiesModel.set(ctx, from.Properties)
+
+		if diags := propertiesModel.set(ctx, from.Properties); diags.HasError() {
+			return diags
+		}
 
 		if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 			return diags
@@ -55,16 +58,24 @@ type environmentPropertiesModel struct {
 	PublishDetails supertypes.SingleNestedObjectValueOf[environmentPublishDetailsModel] `tfsdk:"publish_details"`
 }
 
-func (to *environmentPropertiesModel) set(ctx context.Context, from *fabenvironment.PublishInfo) {
+func (to *environmentPropertiesModel) set(ctx context.Context, from *fabenvironment.PublishInfo) diag.Diagnostics {
 	publishDetails := supertypes.NewSingleNestedObjectValueOfNull[environmentPublishDetailsModel](ctx)
 
 	if from.PublishDetails != nil {
 		publishDetailsModel := &environmentPublishDetailsModel{}
-		publishDetailsModel.set(ctx, from.PublishDetails)
-		publishDetails.Set(ctx, publishDetailsModel)
+
+		if diags := publishDetailsModel.set(ctx, from.PublishDetails); diags.HasError() {
+			return diags
+		}
+
+		if diags := publishDetails.Set(ctx, publishDetailsModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.PublishDetails = publishDetails
+
+	return nil
 }
 
 type environmentPublishDetailsModel struct {
@@ -75,7 +86,7 @@ type environmentPublishDetailsModel struct {
 	ComponentPublishInfo supertypes.SingleNestedObjectValueOf[environmentComponentPublishInfoModel] `tfsdk:"component_publish_info"`
 }
 
-func (to *environmentPublishDetailsModel) set(ctx context.Context, from *fabenvironment.PublishDetails) {
+func (to *environmentPublishDetailsModel) set(ctx context.Context, from *fabenvironment.PublishDetails) diag.Diagnostics {
 	to.State = types.StringPointerValue((*string)(from.State))
 	to.TargetVersion = customtypes.NewUUIDPointerValue(from.TargetVersion)
 	to.StartTime = timetypes.NewRFC3339TimePointerValue(from.StartTime)
@@ -85,11 +96,19 @@ func (to *environmentPublishDetailsModel) set(ctx context.Context, from *fabenvi
 
 	if from.ComponentPublishInfo != nil {
 		publishDetailsModel := &environmentComponentPublishInfoModel{}
-		publishDetailsModel.set(ctx, from.ComponentPublishInfo)
-		componentPublishInfo.Set(ctx, publishDetailsModel)
+
+		if diags := publishDetailsModel.set(ctx, from.ComponentPublishInfo); diags.HasError() {
+			return diags
+		}
+
+		if diags := componentPublishInfo.Set(ctx, publishDetailsModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.ComponentPublishInfo = componentPublishInfo
+
+	return nil
 }
 
 type environmentComponentPublishInfoModel struct {
@@ -97,13 +116,16 @@ type environmentComponentPublishInfoModel struct {
 	SparkSettings  supertypes.SingleNestedObjectValueOf[environmentSparkSettingsModel]  `tfsdk:"spark_settings"`
 }
 
-func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *fabenvironment.ComponentPublishInfo) {
+func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *fabenvironment.ComponentPublishInfo) diag.Diagnostics {
 	sparkLibraries := supertypes.NewSingleNestedObjectValueOfNull[environmentSparkLibrariesModel](ctx)
 
 	if from.SparkLibraries != nil {
 		sparkLibrariesModel := &environmentSparkLibrariesModel{}
 		sparkLibrariesModel.set(from.SparkLibraries)
-		sparkLibraries.Set(ctx, sparkLibrariesModel)
+
+		if diags := sparkLibraries.Set(ctx, sparkLibrariesModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.SparkLibraries = sparkLibraries
@@ -113,10 +135,15 @@ func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *f
 	if from.SparkSettings != nil {
 		sparkSettingsModel := &environmentSparkSettingsModel{}
 		sparkSettingsModel.set(from.SparkSettings)
-		sparkSettings.Set(ctx, sparkSettingsModel)
+
+		if diags := sparkSettings.Set(ctx, sparkSettingsModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.SparkSettings = sparkSettings
+
+	return nil
 }
 
 type environmentSparkLibrariesModel struct {

@@ -600,9 +600,7 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			return diags
 
 		case fabcore.CapacityAssignmentProgressCompleted:
-			model.set(ctx, respGet.WorkspaceInfo)
-
-			return nil
+			return model.set(ctx, respGet.WorkspaceInfo)
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018
