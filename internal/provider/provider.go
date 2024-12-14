@@ -34,6 +34,7 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
@@ -383,6 +384,8 @@ func (p *FabricProvider) DataSources(_ context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
+		connection.NewDataSourceConnection,
+		connection.NewDataSourceConnections,
 		dashboard.NewDataSourceDashboards,
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,

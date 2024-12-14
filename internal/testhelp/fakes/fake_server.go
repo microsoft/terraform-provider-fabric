@@ -31,6 +31,7 @@ func newFakeServer() *fakeServer {
 	// Register entities.
 	handleEntity(server, configureItem)
 	handleEntity(server, configureCapacity)
+	handleEntity(server, configureConnection)
 	handleEntity(server, configureDataPipeline)
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
