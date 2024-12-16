@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: `SparkJobDefinitionV1.json`. (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Spark Job Definition description.
 - `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`.
+- `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -97,3 +98,11 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Read-Only:
+
+- `onelake_root_path` (String) OneLake path to the Spark Job Definition root directory.
