@@ -215,7 +215,6 @@ func (r *resourceWarehouse) Read(ctx context.Context, req resource.ReadRequest, 
 		resp.Diagnostics.Append(diags...)
 
 		return
-
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
@@ -376,7 +375,7 @@ func (r *resourceWarehouse) ImportState(ctx context.Context, req resource.Import
 func (r *resourceWarehouse) get(ctx context.Context, model *resourceWarehouseModel, operation utils.Operation) diag.Diagnostics {
 	tflog.Trace(ctx, "getting Warehouse")
 
-	var errIs error = nil
+	var errIs error
 	if operation == utils.OperationRead {
 		errIs = fabcore.ErrCommon.EntityNotFound
 	}
