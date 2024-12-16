@@ -182,14 +182,14 @@ func TestUnit_SparkJobDefinitionResource_ImportState(t *testing.T) {
 
 func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entityExist := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity

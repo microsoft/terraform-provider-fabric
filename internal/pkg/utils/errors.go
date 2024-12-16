@@ -69,7 +69,7 @@ func IsErrNotFound(resourceID string, diags *diag.Diagnostics, err error) bool {
 	return false
 }
 
-func GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics { //nolint:gocognit
+func GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics { //nolint:gocognit, gocognit
 	if err == nil {
 		return nil
 	}
