@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -163,12 +164,13 @@ func (r *resourceWarehouse) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	plan.set(ctx, respCreate.Warehouse)
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Warehouse)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
-	err = r.get(ctx, &plan)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan, utils.OperationCreate)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -205,8 +207,7 @@ func (r *resourceWarehouse) Read(ctx context.Context, req resource.ReadRequest, 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := r.get(ctx, &state)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
+	if diags := r.get(ctx, &state, utils.OperationRead); diags.HasError() {
 		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 			resp.State.RemoveResource(ctx)
 		}
@@ -260,12 +261,15 @@ func (r *resourceWarehouse) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	plan.set(ctx, respUpdate.Warehouse)
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.Warehouse)...); resp.Diagnostics.HasError() {
+		return
+	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
-	err = r.get(ctx, &plan)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan, utils.OperationUpdate)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -353,8 +357,7 @@ func (r *resourceWarehouse) ImportState(ctx context.Context, req resource.Import
 		Timeouts: timeout,
 	}
 
-	err := r.get(ctx, &state)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationImport, nil)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state, utils.OperationImport)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -369,15 +372,18 @@ func (r *resourceWarehouse) ImportState(ctx context.Context, req resource.Import
 	}
 }
 
-func (r *resourceWarehouse) get(ctx context.Context, model *resourceWarehouseModel) error {
+func (r *resourceWarehouse) get(ctx context.Context, model *resourceWarehouseModel, operation utils.Operation) diag.Diagnostics {
 	tflog.Trace(ctx, "getting Warehouse")
 
-	respGet, err := r.client.GetWarehouse(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-	if err != nil {
-		return err
+	var errIs error
+	if operation == utils.OperationRead {
+		errIs = fabcore.ErrCommon.EntityNotFound
 	}
 
-	model.set(ctx, respGet.Warehouse)
+	respGet, err := r.client.GetWarehouse(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, operation, errIs); diags.HasError() {
+		return diags
+	}
 
-	return nil
+	return model.set(ctx, respGet.Warehouse)
 }

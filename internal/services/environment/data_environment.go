@@ -208,9 +208,8 @@ func (d *dataSourceEnvironment) getByID(ctx context.Context, model *dataSourceEn
 	}
 
 	model.set(respGet.Environment)
-	model.setProperties(ctx, respGet.Environment)
 
-	return nil
+	return model.setProperties(ctx, respGet.Environment)
 }
 
 func (d *dataSourceEnvironment) getByDisplayName(ctx context.Context, model *dataSourceEnvironmentModel) diag.Diagnostics {
@@ -228,9 +227,8 @@ func (d *dataSourceEnvironment) getByDisplayName(ctx context.Context, model *dat
 		for _, entity := range page.Value {
 			if *entity.DisplayName == model.DisplayName.ValueString() {
 				model.set(entity)
-				model.setProperties(ctx, entity)
 
-				return nil
+				return model.setProperties(ctx, entity)
 			}
 		}
 	}

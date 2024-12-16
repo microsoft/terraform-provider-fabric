@@ -287,7 +287,9 @@ func (r *resourceDomainWorkspaceAssignments) Delete(ctx context.Context, req res
 	if len(state.WorkspaceIDs.Elements()) > 0 {
 		var reqDelete requestDeleteDomainWorkspaceAssignments
 
-		reqDelete.set(ctx, state)
+		if resp.Diagnostics.Append(reqDelete.set(ctx, state)...); resp.Diagnostics.HasError() {
+			return
+		}
 
 		_, err := r.client.UnassignDomainWorkspacesByIDs(ctx, state.DomainID.ValueString(), &fabadmin.DomainsClientUnassignDomainWorkspacesByIDsOptions{
 			UnassignDomainWorkspacesByIDsRequest: &reqDelete.UnassignDomainWorkspacesByIDsRequest,

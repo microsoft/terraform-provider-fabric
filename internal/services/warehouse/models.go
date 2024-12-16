@@ -8,6 +8,7 @@ import (
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabwarehouse "github.com/microsoft/fabric-sdk-go/fabric/warehouse"
 
@@ -22,7 +23,7 @@ type baseWarehouseModel struct {
 	Properties  supertypes.SingleNestedObjectValueOf[warehousePropertiesModel] `tfsdk:"properties"`
 }
 
-func (to *baseWarehouseModel) set(ctx context.Context, from fabwarehouse.Warehouse) {
+func (to *baseWarehouseModel) set(ctx context.Context, from fabwarehouse.Warehouse) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
@@ -33,10 +34,15 @@ func (to *baseWarehouseModel) set(ctx context.Context, from fabwarehouse.Warehou
 	if from.Properties != nil {
 		propertiesModel := &warehousePropertiesModel{}
 		propertiesModel.set(from.Properties)
-		properties.Set(ctx, propertiesModel)
+
+		if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.Properties = properties
+
+	return nil
 }
 
 type warehousePropertiesModel struct {

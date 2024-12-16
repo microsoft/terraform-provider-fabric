@@ -24,7 +24,7 @@ type baseWorkspaceInfoModel struct {
 	Identity                   supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
 }
 
-func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.WorkspaceInfo) {
+func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.WorkspaceInfo) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
@@ -38,7 +38,10 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	if from.OneLakeEndpoints != nil {
 		oneLakeEndpointsModel := &oneLakeEndpointsModel{}
 		oneLakeEndpointsModel.set(from.OneLakeEndpoints)
-		oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel)
+
+		if diags := oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.OneLakeEndpoints = oneLakeEndpoints
@@ -48,10 +51,15 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	if from.WorkspaceIdentity != nil {
 		workspaceIdentityModel := &workspaceIdentityModel{}
 		workspaceIdentityModel.set(from.WorkspaceIdentity)
-		workspaceIdentity.Set(ctx, workspaceIdentityModel)
+
+		if diags := workspaceIdentity.Set(ctx, workspaceIdentityModel); diags.HasError() {
+			return diags
+		}
 	}
 
 	to.Identity = workspaceIdentity
+
+	return nil
 }
 
 type baseWorkspaceModel struct {

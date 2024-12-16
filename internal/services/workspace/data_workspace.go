@@ -216,9 +216,7 @@ func (d *dataSourceWorkspace) getByID(ctx context.Context, model *dataSourceWork
 		return diags
 	}
 
-	model.set(ctx, respGet.WorkspaceInfo)
-
-	return nil
+	return model.set(ctx, respGet.WorkspaceInfo)
 }
 
 func (d *dataSourceWorkspace) getByDisplayName(ctx context.Context, model *dataSourceWorkspaceModel) diag.Diagnostics {

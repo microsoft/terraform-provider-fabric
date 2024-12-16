@@ -179,9 +179,7 @@ func (d *dataSourceWarehouse) getByID(ctx context.Context, model *dataSourceWare
 		return diags
 	}
 
-	model.set(ctx, respGet.Warehouse)
-
-	return nil
+	return model.set(ctx, respGet.Warehouse)
 }
 
 func (d *dataSourceWarehouse) getByDisplayName(ctx context.Context, model *dataSourceWarehouseModel) diag.Diagnostics {
@@ -198,9 +196,7 @@ func (d *dataSourceWarehouse) getByDisplayName(ctx context.Context, model *dataS
 
 		for _, entity := range page.Value {
 			if *entity.DisplayName == model.DisplayName.ValueString() {
-				model.set(ctx, entity)
-
-				return nil
+				return model.set(ctx, entity)
 			}
 		}
 	}
