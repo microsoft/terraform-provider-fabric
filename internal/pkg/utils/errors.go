@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -105,7 +106,8 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 	}
 
 	var errRespFabric *fabcore.ResponseError
-	var errRespAzIdentity *azidentity.AuthenticationFailedError
+	var errAuthFailed *azidentity.AuthenticationFailedError
+	var errAuthRequired *azidentity.AuthenticationRequiredError
 
 	switch {
 	case errors.As(err, &errRespFabric):
@@ -123,14 +125,15 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			break
 		}
 
-		errCode := ""
+		var errCodes []string
+		var errMessages []string
+
 		if errRespFabric.ErrorResponse.ErrorCode != nil {
-			errCode = *errRespFabric.ErrorResponse.ErrorCode
+			errCodes = append(errCodes, *errRespFabric.ErrorResponse.ErrorCode)
 		}
 
-		errMessage := ""
 		if errRespFabric.ErrorResponse.Message != nil {
-			errMessage = *errRespFabric.ErrorResponse.Message
+			errMessages = append(errMessages, *errRespFabric.ErrorResponse.Message)
 		}
 
 		errRequestID := ""
@@ -139,9 +142,6 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 		}
 
 		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
-			var errCodes []string
-			var errMessages []string
-
 			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
 				if errMoreDetail.ErrorCode != nil {
 					errCodes = append(errCodes, *errMoreDetail.ErrorCode)
@@ -151,10 +151,10 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 					errMessages = append(errMessages, *errMoreDetail.Message)
 				}
 			}
-
-			errCode = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.ErrorCode, strings.Join(errCodes, " / "))
-			errMessage = fmt.Sprintf("%s / %s", *errRespFabric.ErrorResponse.Message, strings.Join(errMessages, " / "))
 		}
+
+		errCode := strings.Join(errCodes, " / ")
+		errMessage := strings.Join(errMessages, " / ")
 
 		if diagErrSummary == "" {
 			diagErrSummary = errCode
@@ -165,15 +165,15 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 		} else {
 			diagErrDetail = fmt.Sprintf("%s: %s\n\nErrorCode: %s\nRequestID: %s", diagErrDetail, errMessage, errCode, errRequestID)
 		}
-	case errors.As(err, &errRespAzIdentity):
+	case errors.As(err, &errAuthFailed):
 		var errAuthResp authErrorResponse
 
-		err := errAuthResp.getErrFromResp(errRespAzIdentity.RawResponse)
+		err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
 		if err != nil {
 			diagErrSummary = "Failed to parse authentication error response"
 			diagErrDetail = err.Error()
 		} else {
-			tflog.Debug(ctx, "AUTH ERROR", map[string]any{
+			tflog.Debug(ctx, "AUTH FAILED ERROR", map[string]any{
 				"CorrelationID":    errAuthResp.CorrelationID,
 				"Error":            errAuthResp.Error,
 				"ErrorDescription": errAuthResp.ErrorDescription,
@@ -184,8 +184,21 @@ func GetDiagsFromError(ctx context.Context, err error, operation Operation, errI
 			})
 
 			diagErrSummary = errAuthResp.Error
-			diagErrDetail = errAuthResp.ErrorDescription
+
+			errCodes := make([]string, len(errAuthResp.ErrorCodes))
+			for i, code := range errAuthResp.ErrorCodes {
+				errCodes[i] = strconv.Itoa(code)
+			}
+
+			diagErrDetail = fmt.Sprintf("%s\n\nErrorCode: %s\nErrorURI: %s", errAuthResp.ErrorDescription, strings.Join(errCodes, " / "), errAuthResp.ErrorURI)
 		}
+	case errors.As(err, &errAuthRequired):
+		tflog.Debug(ctx, "AUTH REQUIRED ERROR", map[string]any{
+			"Error": err.Error(),
+		})
+
+		diagErrSummary = "authentication required"
+		diagErrDetail = err.Error()
 	default:
 		tflog.Debug(ctx, "UNKNOWN ERROR", map[string]any{
 			"Error": err.Error(),
