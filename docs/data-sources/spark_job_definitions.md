@@ -56,4 +56,13 @@ Read-Only:
 - `description` (String) The Spark Job Definition description.
 - `display_name` (String) The Spark Job Definition display name.
 - `id` (String) The Spark Job Definition ID.
+- `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `onelake_root_path` (String) OneLake path to the Spark Job Definition root directory.
