@@ -103,10 +103,6 @@ func TestUnit_DomainWorkspaceAssignmentsDataSource_Attributes(t *testing.T) {
 }
 
 func TestAcc_DomainWorkspaceAssignmentsDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	domainID := *testhelp.WellKnown().DomainParent.ID
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{

@@ -15,6 +15,6 @@ const (
 	ItemsName          = "Eventstreams"
 	ItemsTFName        = "eventstreams"
 	ItemType           = fabcore.ItemTypeEventstream
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
+	ItemDocsSPNSupport = common.DocsSPNSupported
 	ItemDocsURL        = "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview"
 )
