@@ -14,6 +14,7 @@ body:
       description: |
         Short description here describing the new resource that you're requesting.
         Include a use case for why users need this resource.
+        Try to follow the Job Story format: "When [situation] I want to [motivation] so I can [expected outcome]". Learn more about Job Stories: https://www.mountaingoatsoftware.com/blog/job-stories-offer-a-viable-alternative-to-user-stories
     validations:
       required: true
 
