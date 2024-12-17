@@ -74,7 +74,7 @@ body:
     attributes:
       label: ☑️ Acceptance Criteria
       description: |
-        The functional criteria by which this feature will be accepted. Describe the expected behavior of the feature.
+        The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
     validations:
       required: false
 
