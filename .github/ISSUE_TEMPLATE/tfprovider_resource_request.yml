@@ -68,6 +68,15 @@ body:
     validations:
       required: false
 
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ☑️ Acceptance Criteria
+      description: |
+        The functional criteria by which this feature will be accepted. Describe the expected behavior of the feature.
+    validations:
+      required: false
+
   - type: checkboxes
     id: done-definition
     attributes:
