@@ -26,13 +26,21 @@ body:
       placeholder: |
         - Resource Name: `fabric_[your resource name]`
         - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
-        - Related resources/data sources: <!-- are there any existing or potential resources that are related to this one -->
+        - Related resources/data-sources: <!-- are there any existing or potential resources that are related to this one -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
       value: |
         - Resource Name: `fabric_[your resource name]`
         - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
         - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
-        - Related resources/data sources: <!-- are there any existing or potential resources that are related to this one -->
+        - Related resources/data-sources: <!-- are there any existing or potential resources that are related to this one -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
     validations:
       required: false
 
@@ -73,8 +81,8 @@ body:
     id: acceptance-criteria
     attributes:
       label: ☑️ Acceptance Criteria
-      description: |
-        The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      description: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      placeholder: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
     validations:
       required: false
 
@@ -85,8 +93,6 @@ body:
       description: Necessary criteria for a task or feature to be considered complete.
       options:
         - label: Data Transfer Objects (DTOs)
-          required: false
-        - label: Data Client functions
           required: false
         - label: Resource Implementation
           required: false

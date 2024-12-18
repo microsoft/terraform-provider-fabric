@@ -47,6 +47,7 @@ body:
     attributes:
       label: 🚧 Potential Configuration / Desired Solution
       description: Sample config that describes how the new feature might look.
+      placeholder: Sample config that describes how the new feature might look.
     validations:
       required: false
 
@@ -63,8 +64,8 @@ body:
     id: acceptance-criteria
     attributes:
       label: ☑️ Acceptance Criteria
-      description: |
-        The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      description: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      placeholder: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
     validations:
       required: false
 
