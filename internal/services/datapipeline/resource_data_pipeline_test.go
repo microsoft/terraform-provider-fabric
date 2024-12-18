@@ -215,7 +215,9 @@ func TestAcc_DataPipelineResource_CRUD(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspaceID := *testhelp.WellKnown().Workspace.ID
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()

@@ -75,7 +75,8 @@ func TestUnit_EventhousesDataSource(t *testing.T) {
 }
 
 func TestAcc_EventhousesDataSource(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read

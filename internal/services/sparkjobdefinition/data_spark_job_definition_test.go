@@ -150,8 +150,13 @@ func TestUnit_SparkJobDefinitionDataSource(t *testing.T) {
 }
 
 func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
-	entity := testhelp.WellKnown().SparkJobDefinition
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["SparkJobDefinition"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityDescription := entity["description"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by id
@@ -160,14 +165,14 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"id":           *entity.ID,
+					"id":           entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 			),
 		},
 		// read by id - not found
@@ -187,14 +192,14 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"display_name": *entity.DisplayName,
+					"display_name": entityDisplayName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 			),
 		},
 		// read by name - not found

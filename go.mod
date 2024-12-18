@@ -10,7 +10,6 @@ require (
 	github.com/dcarbone/terraform-plugin-framework-utils/v3 v3.8.0
 	github.com/go-sprout/sprout v0.6.0
 	github.com/google/go-cmp v0.6.0
-	github.com/hashicorp/go-azure-sdk/sdk v0.20241212.1154051
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-framework v1.13.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
@@ -20,7 +19,6 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.25.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
-	github.com/manicminer/hamilton v0.72.0
 	github.com/microsoft/fabric-sdk-go v0.1.0-beta.8
 	github.com/ohler55/ojg v1.25.0
 	github.com/stretchr/testify v1.10.0
@@ -42,7 +40,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-azure-helpers v0.66.2 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 // indirect
@@ -80,7 +77,6 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
-	golang.org/x/oauth2 v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

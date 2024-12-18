@@ -25,10 +25,13 @@ issues:
   fix: true
   exclude-rules:
     - path: '(.+)_test\.go'
+      text: "unchecked-type-assertion"
+    - path: '(.+)_test\.go'
       linters:
         - dupl
         - gochecknoglobals
         - nonamedreturns
+        - forcetypeassert
     - path: "internal/testhelp/fakes"
       linters:
         - dupl

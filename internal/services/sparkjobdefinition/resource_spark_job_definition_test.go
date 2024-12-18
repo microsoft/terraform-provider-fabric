@@ -249,7 +249,9 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 

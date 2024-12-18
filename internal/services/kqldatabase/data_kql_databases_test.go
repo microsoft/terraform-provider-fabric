@@ -75,7 +75,8 @@ func TestUnit_KQLDatabasesDataSource(t *testing.T) {
 }
 
 func TestAcc_KQLDatabasesDataSource(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read

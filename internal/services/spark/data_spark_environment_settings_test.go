@@ -18,8 +18,11 @@ var (
 )
 
 func TestAcc_SparkEnvironmentSettingsDataSource(t *testing.T) {
-	environment := testhelp.WellKnown().Environment
-	workspace := testhelp.WellKnown().Workspace
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	environment := testhelp.WellKnown()["Environment"].(map[string]any)
+	environmentID := environment["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceSparkEnvironmentSettingsFQN, nil, []resource.TestStep{
 		// read - Published
@@ -28,8 +31,8 @@ func TestAcc_SparkEnvironmentSettingsDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceSparkEnvironmentSettingsHeader,
 				map[string]any{
-					"workspace_id":       *workspace.ID,
-					"environment_id":     *environment.ID,
+					"workspace_id":       workspaceID,
+					"environment_id":     environmentID,
 					"publication_status": "Published",
 				},
 			),
@@ -45,8 +48,8 @@ func TestAcc_SparkEnvironmentSettingsDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceSparkEnvironmentSettingsHeader,
 				map[string]any{
-					"workspace_id":       *workspace.ID,
-					"environment_id":     *environment.ID,
+					"workspace_id":       workspaceID,
+					"environment_id":     environmentID,
 					"publication_status": "Staging",
 				},
 			),

@@ -13,6 +13,7 @@ project {
     ".devcontainer/**",
     ".vscode/**",
     "*.yaml",
-    "*.yml"
+    "*.yml",
+    "**/*.ps1"
   ]
 }

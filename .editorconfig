@@ -26,3 +26,9 @@ indent_style = space
 
 [*.{json,jsonc}]
 indent_style = space
+
+[*.ps1]
+indent_style = space
+
+[*.sh]
+indent_style = space
