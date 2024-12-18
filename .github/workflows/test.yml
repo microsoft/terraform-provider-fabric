@@ -31,8 +31,29 @@ permissions:
   pull-requests: read
 
 jobs:
+  changes:
+    name: ✔️ Check for changes
+    runs-on: ubuntu-latest
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: ✔️ Changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            src:
+              - '**.go'
+              - 'go.mod'
+              - 'go.sum'
+              - '.github/workflows/test.yml'
+
   test-auth-spn:
     name: 🔐 Test Auth (SPN ${{ matrix.method }})
+    needs: changes
+    if: needs.changes.outputs.src == 'true'
     environment:
       name: development
     runs-on: ubuntu-latest
@@ -44,48 +65,32 @@ jobs:
       - name: ⤵️ Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: ✔️ Check for changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes_check
-        with:
-          filters: |
-            src:
-              - '**.go'
-              - 'go.mod'
-              - 'go.sum'
-              - '.github/workflows/test.yml'
-
       - name: 🚧 Setup Go
-        if: steps.changes_check.outputs.src == 'true'
         uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Task
-        if: steps.changes_check.outputs.src == 'true'
         uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
         with:
           repo-token: ${{ github.token }}
 
       - name: ⚙️ Configure TF dev overrides
-        if: steps.changes_check.outputs.src == 'true'
         run: .devcontainer/features/tfprovider-local-dev/install.sh
         env:
           PROVIDERNAME: microsoft/fabric
 
       - name: 🚧 Setup Terraform
-        if: steps.changes_check.outputs.src == 'true'
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_wrapper: false
 
       - name: 🔨 Setup Test tools
-        if: steps.changes_check.outputs.src == 'true'
         run: task test:tools
 
       - name: 🧪 Run acceptance tests (OIDC)
-        if: ${{ matrix.method == 'oidc' && steps.changes_check.outputs.src == 'true' }}
+        if: matrix.method == 'oidc'
         run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_USE_OIDC: true
@@ -93,7 +98,7 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_OIDC_CLIENT_ID }}
 
       - name: 🧪 Run acceptance tests (Certificate)
-        if: ${{ matrix.method == 'certificate' && steps.changes_check.outputs.src == 'true' }}
+        if: matrix.method == 'certificate'
         run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -102,7 +107,7 @@ jobs:
           FABRIC_CLIENT_CERTIFICATE_PASSWORD: ${{ secrets.TESTACC_SPN_CERT_CLIENT_CERTIFICATE_PASSWORD }}
 
       - name: 🧪 Run acceptance tests (Secret)
-        if: ${{ matrix.method == 'secret' && steps.changes_check.outputs.src == 'true' }}
+        if: matrix.method == 'secret'
         run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -111,6 +116,8 @@ jobs:
 
   # test-auth-msi:
   #   name: 🔐 Test Auth (MSI ${{ matrix.method }})
+  #   needs: changes
+  #   if: needs.changes.outputs.src == 'true'
   #   environment:
   #     name: development
   #   runs-on: [self-hosted, containerjob]
@@ -133,36 +140,31 @@ jobs:
   #             - 'go.sum'
 
   #     - name: 🚧 Setup Go
-  #       if: steps.changes_check.outputs.src == 'true'
   #       uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
   #       with:
   #         go-version-file: go.mod
   #         cache: true
 
   #     - name: 🚧 Setup Task
-  #       if: steps.changes_check.outputs.src == 'true'
   #       uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
   #       with:
   #         repo-token: ${{ github.token }}
 
   #     - name: ⚙️ Configure TF dev overrides
-  #       if: steps.changes_check.outputs.src == 'true'
   #       run: .devcontainer/features/tfprovider-local-dev/install.sh
   #       env:
   #         PROVIDERNAME: microsoft/fabric
 
   #     - name: 🚧 Setup Terraform
-  #       if: steps.changes_check.outputs.src == 'true'
   #       uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
   #       with:
   #         terraform_wrapper: false
 
   #     - name: 🔨 Setup Test tools
-  #       if: steps.changes_check.outputs.src == 'true'
   #       run: task test:tools
 
   #     - name: 🧪 Run acceptance tests (User Assigned)
-  #       if: ${{ matrix.method == 'user' && steps.changes_check.outputs.src == 'true' }}
+  #       if: matrix.method == 'user'
   #       run: task testacc -- WorkspaceResource_CRUD
   #       env:
   #         FABRIC_USE_MSI: true
@@ -170,7 +172,7 @@ jobs:
   #         FABRIC_CLIENT_ID: ${{ secrets.TESTACC_MSI_CLIENT_ID }}
 
   #     - name: 🧪 Run acceptance tests (System Assigned)
-  #       if: ${{ matrix.method == 'system' && steps.changes_check.outputs.src == 'true' }}
+  #       if: matrix.method == 'system'
   #       run: task testacc -- WorkspaceResource_CRUD
   #       env:
   #         FABRIC_USE_MSI: true
@@ -178,6 +180,8 @@ jobs:
 
   checkbuild:
     name: 🏗️ Check Build
+    needs: changes
+    if: needs.changes.outputs.src == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -187,48 +191,31 @@ jobs:
       - name: ⤵️ Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: ✔️ Check for changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes_check
-        with:
-          filters: |
-            src:
-              - '**.go'
-              - 'go.mod'
-              - 'go.sum'
-              - '.github/workflows/test.yml'
-
       - name: 🚧 Setup Go
-        if: steps.changes_check.outputs.src == 'true'
         uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Task
-        if: steps.changes_check.outputs.src == 'true'
         uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
         with:
           repo-token: ${{ github.token }}
 
       - name: 🔀 Get dependencies
-        if: steps.changes_check.outputs.src == 'true'
         run: task deps
 
       - name: 🔀 Check for differences
-        if: steps.changes_check.outputs.src == 'true'
         run: |
           git diff --exit-code -- go.mod go.sum || \
             (echo; echo "Unexpected difference in go.mod/go.sum files. Run 'task deps' command or revert any go.mod/go.sum changes and commit."; git diff --exit-code)
 
       - name: ✔️ Run GoVulnCheck
-        if: steps.changes_check.outputs.src == 'true'
         run: |
           task install:govulncheck
           task govulncheck
 
       - name: ✔️ Run Go linters
-        if: steps.changes_check.outputs.src == 'true'
         uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
         with:
           version: latest
@@ -238,19 +225,16 @@ jobs:
           args: --out-format=github-actions
 
       - name: 🚧 Setup Terraform
-        if: steps.changes_check.outputs.src == 'true'
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_wrapper: false
 
       - name: ✔️ Run tfproviderlintx
-        if: steps.changes_check.outputs.src == 'true'
         run: |
           task install:tfproviderlintx
           task tfproviderlintx
 
       - name: ✔️ Run Terraform linters
-        if: steps.changes_check.outputs.src == 'true'
         run: |
           task lint:tf-tools
           task lint:tf
@@ -267,7 +251,6 @@ jobs:
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        if: steps.changes_check.outputs.src == 'true'
         uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
         with:
           version: "~> v2"
@@ -318,7 +301,8 @@ jobs:
   # Run tests in a matrix with Terraform CLI versions
   test:
     name: 🧪 Run Tests (${{ matrix.cli }} ${{ matrix.version }})
-    # needs: checkbuild
+    needs: changes
+    if: needs.changes.outputs.src == 'true'
     environment:
       name: development
     runs-on: ubuntu-latest
@@ -329,8 +313,6 @@ jobs:
       checks: write
       pull-requests: write
       id-token: write
-    outputs:
-      changes: ${{ steps.changes_check.outputs.src }}
     strategy:
       fail-fast: false
       matrix:
@@ -349,45 +331,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ✔️ Check for changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes_check
-        with:
-          filters: |
-            src:
-              - '**.go'
-              - 'go.mod'
-              - 'go.sum'
-              - '.github/workflows/test.yml'
-
       - name: 🚧 Setup Go
-        if: steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Terraform
-        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'terraform'
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ matrix.version }}
           terraform_wrapper: false
 
       - name: ⚙️ Configure Terraform
-        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'terraform'
         run: |
           terraform -version
 
       - name: 🚧 Setup OpenTofu
         uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
-        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'tofu'
         with:
           tofu_version: ${{ matrix.version }}
           tofu_wrapper: false
 
       - name: ⚙️ Configure OpenTofu
-        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'tofu'
         run: |
           echo "TERRAFORM_CLI=$(which tofu)" >> $GITHUB_ENV
           echo "REGISTRY_HOST=registry.opentofu.org" >> $GITHUB_ENV
@@ -397,27 +367,23 @@ jobs:
           tofu -version
 
       - name: ⚙️ Set CLI version
-        if: steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: |
           version=$(echo "${{ matrix.version }}" | sed 's/\./_/g')
           echo "CLI_VERSION=$version" >> $GITHUB_ENV
 
       - name: 🚧 Setup Task
-        if: steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
         with:
           repo-token: ${{ github.token }}
 
       - name: 🔀 Download Go dependencies
-        if: steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: task deps:download
 
       - name: 🔨 Setup Test tools
-        if: steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target'
         run: task test:tools
 
       - name: 🧪 Run tests
-        if: matrix.cli == 'terraform' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'terraform'
         run: task test
         timeout-minutes: 30
         env:
@@ -427,7 +393,7 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
 
       - name: 🧪 Run tests
-        if: matrix.cli == 'tofu' && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: matrix.cli == 'tofu'
         run: task test
         timeout-minutes: 30
         env:
@@ -436,7 +402,7 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
 
       - name: 📤 Upload test results
-        if: always() && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: always()
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
@@ -445,7 +411,7 @@ jobs:
           overwrite: true
 
       - name: 📤 Upload coverage results
-        if: always() && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: always()
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
@@ -459,7 +425,7 @@ jobs:
           overwrite: true
 
       - name: 📢 Publish test results
-        if: always() && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: always()
         uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1.9.1
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
@@ -467,7 +433,7 @@ jobs:
           path: testresults.xml
 
       - name: ⚙️ Get Coverage summary
-        if: always() && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: always()
         uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
         with:
           filename: coverage.xml
@@ -481,7 +447,7 @@ jobs:
           thresholds: "40 60"
 
       - name: 📤 Upload Coverage summary
-        if: always() && (steps.changes_check.outputs.src == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
+        if: always()
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
@@ -491,9 +457,11 @@ jobs:
           overwrite: true
 
   coverage-summary:
-    if: always() && (needs.test.outputs.changes == 'true' || github.event_name != 'pull_request' || github.event_name != 'pull_request_target')
     name: 📔 Coverage Summary
-    needs: test
+    needs:
+      - test
+      - changes
+    if: always() && needs.changes.outputs.src == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
