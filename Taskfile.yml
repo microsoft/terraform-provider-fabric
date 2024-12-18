@@ -16,8 +16,6 @@ version: "3"
 
 vars:
   PROJECT_NAME: terraform-provider-fabric
-  MODULE_NAME:
-    sh: go mod edit -json | jq .Module.Path -r
   PWSH: pwsh -NonInteractive -NoProfile -NoLogo -Command
   BUILD_DEV_OUTPUT_DIR: "bin/{{OS}}-{{ARCH}}"
   BUILD_DEV_ARTIFACT: "{{.BUILD_DEV_OUTPUT_DIR}}/{{.PROJECT_NAME}}{{exeExt}}"
@@ -267,11 +265,12 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^TestUnit_{{.TEST_NAME}}" -p 4 -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
-      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format testname --junitfile "testresults.xml" -- ./... -run "^TestUnit_{{.TEST_NAME}}" -p 4 -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -p {{numCPU}} -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
-      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
+      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
       LDFLAGS: "-s -w -X main.version=testUnit"
     env:
       TF_LOG: error
@@ -281,11 +280,12 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^TestAcc_{{.TEST_NAME}}" -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
-      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format pkgname-and-test-fails --junitfile "testresults.xml" -- ./... -run "^TestAcc_{{.TEST_NAME}}" -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic{{end}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
-      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
+      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
@@ -295,17 +295,18 @@ tasks:
     desc: Run tests
     cmds:
       - go clean -testcache
-      - go test -failfast -run ^TestDevEnv_Provision$ {{.MODULE_NAME}}/internal/testhelp
-      - '{{if eq .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format github-actions --junitfile "testresults.xml" -- ./... -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}{{end}}'
-      - '{{if ne .GITHUB_ACTIONS "true"}}gotestsum --format-hivis --format pkgname-and-test-fails --junitfile "testresults.xml" -- ./... -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}{{end}}'
+      - go test -failfast -run ^TestDevEnv_Provision$ ./internal/testhelp
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
-      TEST_NAME: '{{if ne .CLI_ARGS ""}}{{.CLI_ARGS}}{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
+      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:
         sh: |
-          {{if eq .OS "Windows_NT"}}
+          {{if eq OS "windows"}}
             {{.PWSH}} "(go list ./... | Select-String -NotMatch '({{ .GO_PKGS_EXCLUDE }})$') -join ','"
           {{else}}
             go list ./... | grep -Ev '({{ .GO_PKGS_EXCLUDE }})$' | tr '\n' ','

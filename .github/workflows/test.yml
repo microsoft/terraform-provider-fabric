@@ -86,7 +86,7 @@ jobs:
 
       - name: 🧪 Run acceptance tests (OIDC)
         if: ${{ matrix.method == 'oidc' && steps.changes_check.outputs.src == 'true' }}
-        run: task testacc -- WorkspaceResource_CRUD
+        run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -94,7 +94,7 @@ jobs:
 
       - name: 🧪 Run acceptance tests (Certificate)
         if: ${{ matrix.method == 'certificate' && steps.changes_check.outputs.src == 'true' }}
-        run: task testacc -- WorkspaceResource_CRUD
+        run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_CERT_CLIENT_ID }}
@@ -103,7 +103,7 @@ jobs:
 
       - name: 🧪 Run acceptance tests (Secret)
         if: ${{ matrix.method == 'secret' && steps.changes_check.outputs.src == 'true' }}
-        run: task testacc -- WorkspaceResource_CRUD
+        run: task testacc -- WorkspaceResource_CRUD ./internal/services/workspace
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
