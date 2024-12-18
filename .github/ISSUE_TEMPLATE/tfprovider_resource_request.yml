@@ -4,7 +4,7 @@
 name: 🔼 Provider Resource Request
 description: Request a new resource to be added to the Terraform Provider 📢
 title: "[RS] "
-labels: [feature, resource]
+labels: ["tf/resource"]
 projects: ["microsoft/1018"]
 body:
   - type: textarea
