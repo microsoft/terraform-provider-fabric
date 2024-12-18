@@ -79,8 +79,11 @@ func TestUnit_LakehouseTablesDataSource(t *testing.T) {
 }
 
 func TestAcc_LakehouseTablesDataSource(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
-	entity := testhelp.WellKnown().Lakehouse
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["Lakehouse"].(map[string]any)
+	entityID := entity["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -89,12 +92,12 @@ func TestAcc_LakehouseTablesDataSource(t *testing.T) {
 				testDataSourceLakehouseTablesHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"lakehouse_id": *entity.ID,
+					"lakehouse_id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceLakehouseTables, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceLakehouseTables, "lakehouse_id", entity.ID),
+				resource.TestCheckResourceAttr(testDataSourceLakehouseTables, "lakehouse_id", entityID),
 				resource.TestCheckResourceAttrSet(testDataSourceLakehouseTables, "values.0.name"),
 			),
 		},

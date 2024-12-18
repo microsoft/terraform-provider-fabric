@@ -79,7 +79,8 @@ func TestAcc_SQLEndpointsDataSource(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspaceID := *testhelp.WellKnown().Workspace.ID
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read

@@ -98,10 +98,12 @@ func TestUnit_LakehouseTableDataSource(t *testing.T) {
 }
 
 func TestAcc_LakehouseTableDataSource(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
-	entity := testhelp.WellKnown().Lakehouse
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
-	tableName := "publicholidays"
+	entity := testhelp.WellKnown()["Lakehouse"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityTableName := entity["tableName"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read - not found
@@ -110,7 +112,7 @@ func TestAcc_LakehouseTableDataSource(t *testing.T) {
 				testDataSourceLakehouseTableHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"lakehouse_id": *entity.ID,
+					"lakehouse_id": entityID,
 					"name":         testhelp.RandomName(),
 				},
 			),
@@ -122,14 +124,14 @@ func TestAcc_LakehouseTableDataSource(t *testing.T) {
 				testDataSourceLakehouseTableHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"lakehouse_id": *entity.ID,
-					"name":         tableName,
+					"lakehouse_id": entityID,
+					"name":         entityTableName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceLakehouseTable, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceLakehouseTable, "lakehouse_id", entity.ID),
-				resource.TestCheckResourceAttr(testDataSourceLakehouseTable, "name", tableName),
+				resource.TestCheckResourceAttr(testDataSourceLakehouseTable, "lakehouse_id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceLakehouseTable, "name", entityTableName),
 			),
 		},
 	},

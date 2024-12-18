@@ -145,8 +145,14 @@ func TestUnit_WorkspaceRoleAssignmentResource_ImportState(t *testing.T) {
 }
 
 func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, *testhelp.WellKnown().Capacity.ID)
-	entity := testhelp.WellKnown().Principal
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+
+	entity := testhelp.WellKnown()["Principal"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityType := entity["type"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceWorkspaceRoleAssignment, nil, []resource.TestStep{
 		// Create and Read
@@ -158,15 +164,15 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 					testResourceWorkspaceRoleAssignmentHeader,
 					map[string]any{
 						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"principal_id":   *entity.ID,
-						"principal_type": *entity.Type,
+						"principal_id":   entityID,
+						"principal_type": entityType,
 						"role":           "Member",
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceWorkspaceRoleAssignment, "principal_id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testResourceWorkspaceRoleAssignment, "principal_type", entity.Type),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_id", entityID),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_type", entityType),
 				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "role", "Member"),
 			),
 		},
@@ -179,15 +185,15 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 					testResourceWorkspaceRoleAssignmentHeader,
 					map[string]any{
 						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"principal_id":   *entity.ID,
-						"principal_type": *entity.Type,
+						"principal_id":   entityID,
+						"principal_type": entityType,
 						"role":           "Viewer",
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceWorkspaceRoleAssignment, "principal_id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testResourceWorkspaceRoleAssignment, "principal_type", entity.Type),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_id", entityID),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_type", entityType),
 				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "role", "Viewer"),
 			),
 		},

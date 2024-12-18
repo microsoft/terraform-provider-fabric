@@ -88,7 +88,8 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 
 	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
 
-	entity := testhelp.WellKnown().Workspace
+	entity := testhelp.WellKnown()["Workspace"].(map[string]any)
+	entityID := entity["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Create and Read
@@ -101,14 +102,14 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
 						"workspace_ids": []string{
-							*entity.ID,
+							entityID,
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "1"),
-				resource.TestCheckResourceAttrPtr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity.ID),
+				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entityID),
 			),
 		},
 		// Update and Read

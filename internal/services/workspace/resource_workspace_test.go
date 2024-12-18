@@ -202,7 +202,9 @@ func TestUnit_WorkspaceResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
-	capacityID := *testhelp.WellKnown().Capacity.ID
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
@@ -316,7 +318,9 @@ func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
-	capacityID := *testhelp.WellKnown().Capacity.ID
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()

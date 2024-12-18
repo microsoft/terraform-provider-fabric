@@ -17,6 +17,7 @@ version: "3"
 vars:
   PROJECT_NAME: terraform-provider-fabric
   PWSH: pwsh -NonInteractive -NoProfile -NoLogo -Command
+  PWSH_SCRIPT: pwsh -NonInteractive -NoProfile -NoLogo -File
   BUILD_DEV_OUTPUT_DIR: "bin/{{OS}}-{{ARCH}}"
   BUILD_DEV_ARTIFACT: "{{.BUILD_DEV_OUTPUT_DIR}}/{{.PROJECT_NAME}}{{exeExt}}"
 
@@ -295,7 +296,7 @@ tasks:
     desc: Run tests
     cmds:
       - go clean -testcache
-      - go test -failfast -run ^TestDevEnv_Provision$ ./internal/testhelp
+      - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
       - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
@@ -315,27 +316,18 @@ tasks:
       TF_LOG: error
       TF_ACC: 1
 
-  # task testacc:setup -- fabtestaccqmjern
   testacc:setup:
-    desc: Setup acceptence test environment
+    desc: Setup acceptence/development test environment
+    dotenv: ["wellknown.env"]
     preconditions:
       - sh: |
-          {{if eq OS "windows"}}
-            {{.PWSH}} '$null = az account show; if ($LASTEXITCODE -ne 0) { exit 1 }'
-          {{else}}
-            az account show &>/dev/null
+          {{if ne OS "windows"}}
+            command -v pwsh &>/dev/null || exit 1
           {{end}}
-        msg: "Please run 'az login' to setup account."
-      - sh: |
-          {{if eq .CLI_ARGS ""}}exit 1{{end}}
-        msg: "Capacity Name argument not provided."
+        msg: "First install PowerShell: https://learn.microsoft.com/powershell/scripting/install/installing-powershell"
     cmds:
-      - go clean -testcache
-      - go test -failfast -run ^TestDevEnv_Provision$
-    dir: ./internal/testhelp
-    env:
-      FABRIC_TESTACC_WELLKNOWN_CREATE_RESOURCES: true
-      FABRIC_TESTACC_WELLKNOWN_CAPACITY_NAME: "{{ .CLI_ARGS }}"
+      - cmd: |
+          {{.PWSH_SCRIPT}} ./tools/scripts/Set-WellKnown.ps1
 
   test:tools:
     desc: Install test tools

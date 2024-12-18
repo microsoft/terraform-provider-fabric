@@ -18,7 +18,10 @@ var (
 )
 
 func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, *testhelp.WellKnown().Capacity.ID)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceSparkWorkspaceSettingsFQN, nil, []resource.TestStep{
 		// Create and Read

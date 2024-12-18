@@ -278,13 +278,16 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ReportResource_CRUD(t *testing.T) {
-	workspaceID := *testhelp.WellKnown().Workspace.ID
-	semanticModel := testhelp.WellKnown().SemanticModel
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	semanticModel := testhelp.WellKnown()["SemanticModel"].(map[string]any)
+	semanticModelID := semanticModel["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 
-	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = *semanticModel.ID //nolint:forcetypeassert
+	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = semanticModelID
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read

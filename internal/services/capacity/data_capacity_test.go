@@ -123,19 +123,21 @@ func TestUnit_CapacityDataSource(t *testing.T) {
 }
 
 func TestAcc_CapacityDataSource(t *testing.T) {
-	entity := testhelp.WellKnown().Capacity
+	entity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"id": *entity.ID,
+					"id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 			),
 		},
 		// read by id - not found
@@ -153,12 +155,12 @@ func TestAcc_CapacityDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"display_name": *entity.DisplayName,
+					"display_name": entityDisplayName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 			),
 		},
 		// read by name - not found

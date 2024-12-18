@@ -103,7 +103,8 @@ func TestUnit_DomainWorkspaceAssignmentsDataSource_Attributes(t *testing.T) {
 }
 
 func TestAcc_DomainWorkspaceAssignmentsDataSource(t *testing.T) {
-	domainID := *testhelp.WellKnown().DomainParent.ID
+	entity := testhelp.WellKnown()["DomainParent"].(map[string]any)
+	entityID := entity["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -111,11 +112,11 @@ func TestAcc_DomainWorkspaceAssignmentsDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceDomainWorkspaceAssignmentsHeader,
 				map[string]any{
-					"domain_id": domainID,
+					"domain_id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceDomainWorkspaceAssignments, "domain_id", domainID),
+				resource.TestCheckResourceAttr(testDataSourceDomainWorkspaceAssignments, "domain_id", entityID),
 			),
 		},
 	},

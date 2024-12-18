@@ -18,7 +18,10 @@ var (
 )
 
 func TestAcc_SparkWorkspaceSettingsDataSource(t *testing.T) {
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, *testhelp.WellKnown().Capacity.ID)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceSparkWorkspaceSettingsFQN, nil, []resource.TestStep{
 		// read

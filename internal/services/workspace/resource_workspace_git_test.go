@@ -175,7 +175,15 @@ func TestAcc_WorkspaceGitResource(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, *testhelp.WellKnown().Capacity.ID)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	azdo := testhelp.WellKnown()["AzDO"].(map[string]any)
+	azdoOrganization := azdo["organizationName"].(string)
+	azdoProject := azdo["projectName"].(string)
+	azdoRepository := azdo["repositoryName"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceWorkspaceGitFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -190,9 +198,9 @@ func TestAcc_WorkspaceGitResource(t *testing.T) {
 						"initialization_strategy": "PreferWorkspace",
 						"git_provider_details": map[string]any{
 							"git_provider_type": "AzureDevOps",
-							"organization_name": "MngEnv990162",
-							"project_name":      "testacc-fabric",
-							"repository_name":   "testacc-fabric",
+							"organization_name": azdoOrganization,
+							"project_name":      azdoProject,
+							"repository_name":   azdoRepository,
 							"branch_name":       "main",
 							"directory_name":    "/",
 						},

@@ -18,7 +18,10 @@ var (
 )
 
 func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, *testhelp.WellKnown().Capacity.ID)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 	testHelperSparkCustomPoolResource := getSparkCustomPoolResourceAttr(t, testhelp.RefByFQN(workspaceResourceFQN, "id"), "test")
 
 	entityCreateName := testhelp.RandomName()
