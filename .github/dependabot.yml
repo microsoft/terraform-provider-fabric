@@ -12,6 +12,9 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+    labels:
+      - "deps/github-actions"
+      - dependencies
 
   - package-ecosystem: devcontainers
     directory: /
@@ -21,6 +24,9 @@ updates:
       prefix: build
       prefix-development: chore
       include: scope
+    labels:
+      - "deps/devcontainer"
+      - dependencies
 
   - package-ecosystem: gomod
     directory: /
@@ -30,3 +36,6 @@ updates:
       prefix: build
       prefix-development: chore
       include: scope
+    labels:
+      - "deps/go"
+      - dependencies
