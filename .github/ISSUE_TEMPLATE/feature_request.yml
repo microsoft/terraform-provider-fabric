@@ -17,7 +17,9 @@ body:
     id: description
     attributes:
       label: 🚀 Feature description
-      description: A clear and concise description of the feature or enhancement proposal.
+      description: |
+        A clear and concise description of the feature or enhancement proposal.
+        Try to follow the Job Story format: "When [situation] I want to [motivation] so I can [expected outcome]". Learn more about Job Stories: https://www.mountaingoatsoftware.com/blog/job-stories-offer-a-viable-alternative-to-user-stories
       placeholder: A clear and concise description of the feature or enhancement proposal.
     validations:
       required: true
@@ -45,6 +47,7 @@ body:
     attributes:
       label: 🚧 Potential Configuration / Desired Solution
       description: Sample config that describes how the new feature might look.
+      placeholder: Sample config that describes how the new feature might look.
     validations:
       required: false
 
@@ -54,6 +57,15 @@ body:
       label: 📎 Additional context
       description: Add any other context or screenshots about the feature request here.
       placeholder: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ☑️ Acceptance Criteria
+      description: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      placeholder: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
     validations:
       required: false
 
