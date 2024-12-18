@@ -61,7 +61,8 @@
   },
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": {
-    "git-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+    "git-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+    "pwsh-chown": "sudo chown -R vscode:vscode /home/vscode/.local/share/powershell"
   },
   // "privileged": true,
   "remoteUser": "vscode",
@@ -86,8 +87,9 @@
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.defaultProfile.osx": "zsh",
         "powershell.powerShellAdditionalExePaths": {
-          "pwsh": "/usr/local/bin/pwsh"
-        }
+          "pwsh": "/usr/bin/pwsh"
+        },
+        "powershell.powerShellDefaultVersion": "pwsh"
       },
       "extensions": [
         "golang.go",
@@ -109,6 +111,7 @@
         "darkriszty.markdown-table-prettify",
         "TakumiI.markdowntable",
         "hashicorp.terraform",
+        "ms-azuretools.vscode-azure-github-copilot",
         "ms-azuretools.vscode-azureterraform",
         "ms-azuretools.vscode-docker",
         "ms-vscode-remote.vscode-remote-extensionpack",
