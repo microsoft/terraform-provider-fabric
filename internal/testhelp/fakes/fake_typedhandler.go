@@ -156,35 +156,37 @@ func (h *typedHandler[TEntity]) Upsert(element TEntity) {
 
 // Get gets an element by ID.
 func (h *typedHandler[TEntity]) Get(id string) TEntity {
-	// check if it is a FabricItem
-	if !h.entityTypeIsFabricItem() {
-		pointer := h.getPointer(id)
-		if pointer == nil {
-			// if it wasn't found, try to find it as fabric item
-			for _, element := range h.elements {
-				if h.entityTypeCanBeConvertedToFabricItem() {
-					item := asFabricItem(element)
-					if strings.HasSuffix(id, *item.ID) {
-						return h.getFabricItemAsTEntity(item)
-					}
-				}
-			}
-
-			// if that didn't work, panic
-			panic("Element not found") // lintignore:R009
-		}
-
-		return *pointer
-	} else {
+	// check if TEntity is FabricItem
+	if h.entityTypeIsFabricItem() {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
+				//nolint
 				return element.(TEntity)
 			}
 		}
 
 		panic("Element not found") // lintignore:R009
 	}
+
+	// if it is not a FabricItem, find the element by ID
+	pointer := h.getPointer(id)
+	if pointer != nil {
+		return *pointer
+	}
+
+	// if it still wasn't found, try to find it if they were inserted as fabric items
+	if h.entityTypeCanBeConvertedToFabricItem() {
+		for _, element := range h.elements {
+			item := asFabricItem(element)
+			if strings.HasSuffix(id, *item.ID) {
+				return h.getFabricItemAsTEntity(item)
+			}
+		}
+	}
+
+	// if that didn't work, panic
+	panic("Element not found") // lintignore:R009
 }
 
 // Contains returns true if the element exists.
@@ -259,7 +261,7 @@ func getReflectedStringPropertyValue(element any, propertyName string) *string {
 }
 
 // setReflectedStringPropertyValue sets a string property value on a reflected object.
-func (h *typedHandler[TEntity]) setReflectedStringPropertyValue(entity *TEntity, propertyName string, value string) {
+func (h *typedHandler[TEntity]) setReflectedStringPropertyValue(entity *TEntity, propertyName, value string) {
 	reflectedValue := reflect.ValueOf(entity).Elem()
 	propertyValue := reflectedValue.FieldByName(propertyName)
 
@@ -273,6 +275,7 @@ func (h *typedHandler[TEntity]) setReflectedStringPropertyValue(entity *TEntity,
 
 func (h *typedHandler[TEntity]) entityTypeIsFabricItem() bool {
 	var entity TEntity
+
 	return reflect.TypeOf(entity) == reflect.TypeOf(fabcore.Item{})
 }
 
