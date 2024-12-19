@@ -2,4 +2,4 @@ kind: added
 body: Added extended properties to `fabric_spark_job_definition` Data Source.
 time: 2024-12-11T01:16:22.8183258-08:00
 custom:
-  Issue: "140"
+  Issue: "157"
