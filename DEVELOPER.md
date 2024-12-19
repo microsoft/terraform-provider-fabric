@@ -16,6 +16,7 @@
 - [Debugging](#debugging)
   - [Debugging with VS Code](#debugging-with-vs-code)
 - [Testing](#testing)
+  - [Well-Known resources](#well-known-resources)
   - [Unit Tests](#unit-tests)
   - [Acceptance Tests](#acceptance-tests)
 - [Dependencies](#dependencies)
@@ -107,9 +108,9 @@ Local development is still possible on Windows, Linux and macOS, but requires ad
 #### Requirements
 
 - [Git](https://git-scm.com/downloads) `>= 2.44.0`
-- [Go](https://go.dev/doc/install) `>= 1.22.5`
+- [Go](https://go.dev/doc/install) `>= 1.23.4`
   - We recommend you to use Go version manager [go-nv/goenv](https://github.com/go-nv/goenv/blob/master/INSTALL.md)
-    - `goenv install 1.22.5`
+    - `goenv install 1.23.4`
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) `>= 1.8.1`
   - We recommend you to use Terraform version manager [tfutils/tfenv](https://github.com/tfutils/tfenv/blob/master/README.md)
     - `tfenv install 1.8.1`, `tfenv use 1.8.1`
@@ -286,7 +287,35 @@ This provider support [terraform plugin debugging](https://developer.hashicorp.c
 
 ## Testing
 
+### Well-Known resources
+
+To run tests, especially "Acceptance Tests" some resources on the Fabric, Entra and Azure DevOps side have to be pre-created first. To setup them, set input environment variables:
+
+```text
+# Required
+FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID="<ENTRA TENANT ID>"
+FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID="<AZURE SUBSCRIPTION ID>"
+FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME="<FABRIC CAPACITY NAME>"
+FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME="<AZURE DEVOPS ORGANIZATION NAME>"
+FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX="<RESOURCES PREFIX>"
+
+# Optional
+FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX=""
+FABRIC_TESTACC_WELLKNOWN_NAME_BASE=""
+```
+
+You can set those variables into `./wellknown.env` files as well.
+
+Then run:
+
+```shell
+task testacc:setup
+```
+
 ### Unit Tests
+
+> [!NOTE]
+> Unit tests won't create the actual resources since they will be run against a fake server.
 
 To run all unit tests
 
@@ -311,7 +340,7 @@ sudo chown -R vscode /go/pkg
 ### Acceptance Tests
 
 > [!NOTE]
-> Acceptance tests won't create the actual resources since they will be run against a mock server.
+> Acceptance tests will create the actual resources since they will be run against real APIs.
 
 To run all acceptance tests
 
