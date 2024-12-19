@@ -401,7 +401,7 @@ function Get-DisplayName {
     $result = "${result}${Separator}${Suffix}"
   }
 
-  return $base
+  return $result
 }
 
 # Define an array of modules to install
@@ -436,7 +436,7 @@ if (!$azContext -or $azContext.Tenant.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA
 Write-Log -Message 'Logging in to Azure DevOps.' -Level 'DEBUG'
 $secureAccessToken = (Get-AzAccessToken -WarningAction SilentlyContinue -AsSecureString -ResourceUrl '499b84ac-1321-427f-aa17-267ca6975798').Token
 $unsecureAccessToken = $secureAccessToken | ConvertFrom-SecureString -AsPlainText
-$azdoContext = Connect-ADOPS -TenantId $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -Organization $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -OAuthToken $unsecureAccessToken
+$azdoContext = Connect-ADOPS -TenantId $azContext.Tenant.Id -Organization $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -OAuthToken $unsecureAccessToken
 
 $SPN = $null
 if ($Env:FABRIC_TESTACC_WELLKNOWN_SPN_NAME) {
@@ -710,7 +710,7 @@ if (!$result) {
 }
 $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
-  displayName = if ($result) { $result.displayName } else { $displayNameDatamart }
+  displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
 }
 
