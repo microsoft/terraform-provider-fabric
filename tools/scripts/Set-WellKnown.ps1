@@ -360,17 +360,8 @@ function Set-FabricDomain {
   return $result
 }
 
-function Get-DisplayName {
+function Get-BaseName {
   param (
-    [Parameter(Mandatory = $false)]
-    [string]$Prefix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
-
-    [Parameter(Mandatory = $false)]
-    [string]$Suffix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX,
-
-    [Parameter(Mandatory = $false)]
-    [string]$Separator = '_',
-
     [Parameter(Mandatory = $false)]
     [int]$Length = 10
   )
@@ -381,13 +372,33 @@ function Get-DisplayName {
     $base = -join ((65..90) + (97..122) | Get-Random -Count $Length | ForEach-Object { [char]$_ })
   }
 
+  return $base
+}
+
+function Get-DisplayName {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$Base,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Prefix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Suffix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Separator = '_'
+  )
+
+  $result = $Base
+
   # add prefix and suffix
   if ($Prefix) {
-    $base = "$Prefix$Separator$base"
+    $result = "${Prefix}${Separator}${result}"
   }
 
   if ($Suffix) {
-    $base = "$base$Separator$Suffix"
+    $result = "${result}${Separator}${Suffix}"
   }
 
   return $base
@@ -479,7 +490,9 @@ $itemNaming = @{
   'AzDOProject'           = 'proj'
 }
 
-$displayName = Get-DisplayName
+$baseName = Get-BaseName
+$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE = $baseName
+$displayName = Get-DisplayName -Base $baseName
 
 # Create Workspace if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Workspace'])"
