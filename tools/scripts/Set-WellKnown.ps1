@@ -360,17 +360,8 @@ function Set-FabricDomain {
   return $result
 }
 
-function Get-DisplayName {
+function Get-BaseName {
   param (
-    [Parameter(Mandatory = $false)]
-    [string]$Prefix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
-
-    [Parameter(Mandatory = $false)]
-    [string]$Suffix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX,
-
-    [Parameter(Mandatory = $false)]
-    [string]$Separator = '_',
-
     [Parameter(Mandatory = $false)]
     [int]$Length = 10
   )
@@ -381,13 +372,33 @@ function Get-DisplayName {
     $base = -join ((65..90) + (97..122) | Get-Random -Count $Length | ForEach-Object { [char]$_ })
   }
 
+  return $base
+}
+
+function Get-DisplayName {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$Base,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Prefix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Suffix = $Env:FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Separator = '_'
+  )
+
+  $result = $Base
+
   # add prefix and suffix
   if ($Prefix) {
-    $base = "$Prefix$Separator$base"
+    $result = "${Prefix}${Separator}${result}"
   }
 
   if ($Suffix) {
-    $base = "$base$Separator$Suffix"
+    $result = "${result}${Separator}${Suffix}"
   }
 
   return $base
@@ -403,7 +414,9 @@ foreach ($module in $modules) {
 }
 
 # Import the .env file into the environment variables
-Import-Dotenv -Path wellknown.env -SkipReadErrorCheck -AllowClobber
+if (Test-Path -Path './wellknown.env') {
+  Import-Dotenv -Path ./wellknown.env -AllowClobber
+}
 
 if (!$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX) {
   Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME and FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX are required environment variables.' -Level 'ERROR'
@@ -477,7 +490,9 @@ $itemNaming = @{
   'AzDOProject'           = 'proj'
 }
 
-$displayName = Get-DisplayName
+$baseName = Get-BaseName
+$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE = $baseName
+$displayName = Get-DisplayName -Base $baseName
 
 # Create Workspace if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Workspace'])"
@@ -741,6 +756,29 @@ if ($SPN) {
   $result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSPN.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
 }
 
+# Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json
 $wellKnownJson
-$wellKnownJson | Set-Content -Path 'internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
+$wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
+
+# Save env vars wellknown.env file
+$envVarNames = @(
+  'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID',
+  'FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID',
+  'FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME',
+  'FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME',
+  'FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX',
+  'FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX',
+  'FABRIC_TESTACC_WELLKNOWN_NAME_BASE',
+  'FABRIC_TESTACC_WELLKNOWN_SPN_NAME'
+)
+
+$envVars = $envVarNames | ForEach-Object {
+  $envVarName = $_
+  if (Test-Path "Env:${envVarName}") {
+    $value = (Get-ChildItem "Env:${envVarName}").Value
+    "$envVarName=`"$value`""
+  }
+}
+
+$envVars -join "`n" | Set-Content -Path './wellknown.env' -Force -NoNewline -Encoding utf8
