@@ -22,11 +22,11 @@ var (
 
 func TestUnit_SparkJobDefinitionsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

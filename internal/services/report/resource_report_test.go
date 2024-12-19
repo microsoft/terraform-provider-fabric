@@ -218,7 +218,7 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
 
-	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = *semanticModel.ID //nolint:forcetypeassert
+	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = *semanticModel.ID
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity

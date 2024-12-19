@@ -27,7 +27,7 @@ func GetDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 func GetDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
 		attributes[key] = value
 	}
 
@@ -47,11 +47,25 @@ func GetDataSourceFabricItemPropertiesSchema(ctx context.Context, d DataSourceFa
 	}
 }
 
-func GetDataSourceFabricItemPropertiesDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
+func GetDataSourceFabricItemDefinitionPropertiesSchema(ctx context.Context, d DataSourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = properties
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+		attributes[key] = value
+	}
+
+	return schema.Schema{
+		MarkdownDescription: d.MarkdownDescription,
+		Attributes:          attributes,
+	}
+}
+
+func GetDataSourceFabricItemDefinitionPropertiesSchema1[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) schema.Schema {
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
+	attributes["properties"] = d.PropertiesSchema
+
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
 		attributes[key] = value
 	}
 
@@ -104,17 +118,17 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 }
 
 // Helper function to get Fabric Item data-source definition attributes.
-func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, d DataSourceFabricItemDefinition) map[string]schema.Attribute {
+func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name string, formatTypes, definitionPathKeys []string) map[string]schema.Attribute {
 	attributes := make(map[string]schema.Attribute)
 
-	if len(d.FormatTypes) > 0 {
+	if len(formatTypes) > 0 {
 		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", d.Name, utils.ConvertStringSlicesToString(d.FormatTypes, true, false)),
+			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", name, utils.ConvertStringSlicesToString(formatTypes, true, false)),
 			Computed:            true,
 		}
 	} else {
 		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", d.Name, DefinitionFormatNotApplicable),
+			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", name, DefinitionFormatNotApplicable),
 			Computed:            true,
 		}
 	}
@@ -128,8 +142,8 @@ func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, d DataSour
 
 	definitionMarkdownDescription := "Definition parts."
 
-	if len(d.DefinitionPathKeys) > 0 {
-		definitionMarkdownDescription = definitionMarkdownDescription + " Possible path keys: " + utils.ConvertStringSlicesToString(d.DefinitionPathKeys, true, false) + "."
+	if len(definitionPathKeys) > 0 {
+		definitionMarkdownDescription = definitionMarkdownDescription + " Possible path keys: " + utils.ConvertStringSlicesToString(definitionPathKeys, true, false) + "."
 	}
 
 	attributes["definition"] = schema.MapNestedAttribute{

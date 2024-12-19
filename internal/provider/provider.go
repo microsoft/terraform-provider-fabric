@@ -352,7 +352,7 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	tflog.Info(ctx, "Configured Microsoft Fabric client", map[string]any{"success": true})
 }
 
-func (p *FabricProvider) Resources(_ context.Context) []func() resource.Resource {
+func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
@@ -371,7 +371,7 @@ func (p *FabricProvider) Resources(_ context.Context) []func() resource.Resource
 		spark.NewResourceSparkCustomPool,
 		spark.NewResourceSparkEnvironmentSettings,
 		spark.NewResourceSparkWorkspaceSettings,
-		sparkjobdefinition.NewResourceSparkJobDefinition,
+		func() resource.Resource { return sparkjobdefinition.NewResourceSparkJobDefinition(ctx) },
 		warehouse.NewResourceWarehouse,
 		workspace.NewResourceWorkspace,
 		workspace.NewResourceWorkspaceRoleAssignment,
@@ -379,7 +379,7 @@ func (p *FabricProvider) Resources(_ context.Context) []func() resource.Resource
 	}
 }
 
-func (p *FabricProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
@@ -419,8 +419,8 @@ func (p *FabricProvider) DataSources(_ context.Context) []func() datasource.Data
 		spark.NewDataSourceSparkCustomPool,
 		spark.NewDataSourceSparkEnvironmentSettings,
 		spark.NewDataSourceSparkWorkspaceSettings,
-		sparkjobdefinition.NewDataSourceSparkJobDefinition,
-		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		func() datasource.DataSource { return sparkjobdefinition.NewDataSourceSparkJobDefinition(ctx) },
+		func() datasource.DataSource { return sparkjobdefinition.NewDataSourceSparkJobDefinitions(ctx) },
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
