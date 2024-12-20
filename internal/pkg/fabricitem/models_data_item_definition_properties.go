@@ -11,24 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop any] struct {
-	baseFabricItemModel
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
 	Format           types.String                                                               `tfsdk:"format"`
 	OutputDefinition types.Bool                                                                 `tfsdk:"output_definition"`
 	Definition       supertypes.MapNestedObjectValueOf[DataSourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
-	Properties       supertypes.SingleNestedObjectValueOf[Ttfprop]                              `tfsdk:"properties"`
 	Timeouts         timeouts.Value                                                             `tfsdk:"timeouts"`
-}
-
-func (to *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProperties[Titemprop]) { //revive:disable-line:confusing-naming
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
 }
 
 func (to *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) setDefinition(ctx context.Context, from fabcore.ItemDefinition) diag.Diagnostics {

@@ -28,7 +28,6 @@ func (to *baseFabricItemModel) set(from fabcore.Item) {
 }
 
 type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
-	// baseFabricItemModel
 	WorkspaceID customtypes.UUID                              `tfsdk:"workspace_id"`
 	ID          customtypes.UUID                              `tfsdk:"id"`
 	DisplayName types.String                                  `tfsdk:"display_name"`
