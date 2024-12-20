@@ -23,11 +23,11 @@ var (
 
 func TestUnit_SparkJobDefinitionDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -173,6 +173,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// read by id - not found
@@ -200,6 +201,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// read by name - not found
@@ -212,6 +214,24 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id with definition
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.SparkJobDefinitionV1.json.content"),
+			),
 		},
 	}))
 }
