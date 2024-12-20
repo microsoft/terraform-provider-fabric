@@ -67,7 +67,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.C
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
@@ -163,7 +163,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Cont
 	}
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -214,7 +214,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 	}
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
@@ -246,7 +246,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Delete(ctx context.Co
 	})
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -305,7 +305,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(ctx conte
 	}
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(ctx context.Context, model *ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(ctx context.Context, model *ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
