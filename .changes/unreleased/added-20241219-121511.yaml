@@ -1,5 +1,0 @@
-kind: added
-body: Added extended properties to `fabric_spark_job_definition` Resource.
-time: 2024-12-19T12:15:11.1738255-08:00
-custom:
-    Issue: "158"
