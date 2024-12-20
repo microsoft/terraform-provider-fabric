@@ -94,8 +94,8 @@ func (o *operationsSparkJobDefinition) TransformUpdate(entity fabsparkjobdefinit
 
 // Update implements concreteOperations.
 func (o *operationsSparkJobDefinition) Update(base fabsparkjobdefinition.SparkJobDefinition, data fabsparkjobdefinition.UpdateSparkJobDefinitionRequest) fabsparkjobdefinition.SparkJobDefinition {
-	base.Description = data.Description
 	base.DisplayName = data.DisplayName
+	base.Description = data.Description
 
 	return base
 }

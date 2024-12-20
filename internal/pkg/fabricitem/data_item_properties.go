@@ -48,7 +48,7 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Schema(ctx context.
 	resp.Schema = GetDataSourceFabricItemPropertiesSchema1(ctx, *d)
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator { //revive:disable-line:confusing-naming
 	if d.IsDisplayNameUnique {
 		return []datasource.ConfigValidator{
 			datasourcevalidator.Conflicting(
@@ -127,7 +127,7 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Co
 	}
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
@@ -142,7 +142,7 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(ctx context
 	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.Name, model.DisplayName.ValueString()))
 
 	errNotFoundCode := fabcore.ErrCommon.EntityNotFound.Error()

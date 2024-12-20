@@ -37,8 +37,7 @@ func NewDataSourceSparkJobDefinition(ctx context.Context) datasource.DataSource 
 			propertiesModel := &sparkJobDefinitionPropertiesModel{}
 			propertiesModel.set(from)
 
-			diags := properties.Set(ctx, propertiesModel)
-			if diags.HasError() {
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
 		}
