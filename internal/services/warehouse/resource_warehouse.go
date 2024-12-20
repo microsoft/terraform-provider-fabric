@@ -7,7 +7,6 @@ import (
 	"context"
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -22,22 +21,7 @@ func NewResourceWarehouse(ctx context.Context) resource.Resource {
 		MarkdownDescription: "The " + ItemName + " properties.",
 		Computed:            true,
 		CustomType:          supertypes.NewSingleNestedObjectTypeOf[warehousePropertiesModel](ctx),
-		Attributes: map[string]schema.Attribute{
-			"connection_string": schema.StringAttribute{
-				MarkdownDescription: "The SQL connection string connected to the workspace containing this warehouse.",
-				Computed:            true,
-			},
-			"created_date": schema.StringAttribute{
-				MarkdownDescription: "The date and time the warehouse was created.",
-				Computed:            true,
-				CustomType:          timetypes.RFC3339Type{},
-			},
-			"last_updated_time": schema.StringAttribute{
-				MarkdownDescription: "The date and time the warehouse was last updated.",
-				Computed:            true,
-				CustomType:          timetypes.RFC3339Type{},
-			},
-		},
+		Attributes:          getResourcePropertiesAttributesSchema(),
 	}
 
 	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.ResourceFabricItemPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties]) diag.Diagnostics {
