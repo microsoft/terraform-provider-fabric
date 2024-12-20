@@ -24,12 +24,7 @@ func NewResourceSparkJobDefinition(ctx context.Context) resource.Resource {
 		MarkdownDescription: "The " + ItemName + " properties.",
 		Computed:            true,
 		CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkJobDefinitionPropertiesModel](ctx),
-		Attributes: map[string]schema.Attribute{
-			"onelake_root_path": schema.StringAttribute{
-				MarkdownDescription: "OneLake path to the Spark Job Definition root directory.",
-				Computed:            true,
-			},
-		},
+		Attributes:          getResourcePropertiesAttributesSchema(),
 	}
 
 	propertiesSetter := func(ctx context.Context, from *fabsparkjobdefinition.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[sparkJobDefinitionPropertiesModel, fabsparkjobdefinition.Properties]) diag.Diagnostics {
