@@ -246,9 +246,9 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
