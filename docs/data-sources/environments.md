@@ -56,4 +56,50 @@ Read-Only:
 - `description` (String) The Environment description.
 - `display_name` (String) The Environment display name.
 - `id` (String) The Environment ID.
+- `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `publish_details` (Attributes) Environment publish operation details. (see [below for nested schema](#nestedatt--values--properties--publish_details))
+
+<a id="nestedatt--values--properties--publish_details"></a>
+
+### Nested Schema for `values.properties.publish_details`
+
+Read-Only:
+
+- `component_publish_info` (Attributes) Environment component publish information. (see [below for nested schema](#nestedatt--values--properties--publish_details--component_publish_info))
+- `end_time` (String) End time of publish operation.
+- `start_time` (String) Start time of publish operation.
+- `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
+- `target_version` (String) Target version to be published.
+
+<a id="nestedatt--values--properties--publish_details--component_publish_info"></a>
+
+### Nested Schema for `values.properties.publish_details.component_publish_info`
+
+Read-Only:
+
+- `spark_libraries` (Attributes) Spark libraries publish information. (see [below for nested schema](#nestedatt--values--properties--publish_details--component_publish_info--spark_libraries))
+- `spark_settings` (Attributes) Spark settings publish information. (see [below for nested schema](#nestedatt--values--properties--publish_details--component_publish_info--spark_settings))
+
+<a id="nestedatt--values--properties--publish_details--component_publish_info--spark_libraries"></a>
+
+### Nested Schema for `values.properties.publish_details.component_publish_info.spark_libraries`
+
+Read-Only:
+
+- `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
+
+<a id="nestedatt--values--properties--publish_details--component_publish_info--spark_settings"></a>
+
+### Nested Schema for `values.properties.publish_details.component_publish_info.spark_settings`
+
+Read-Only:
+
+- `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
