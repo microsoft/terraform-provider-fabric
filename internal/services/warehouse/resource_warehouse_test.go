@@ -188,6 +188,9 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// Update and Read
