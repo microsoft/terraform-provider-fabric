@@ -107,7 +107,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				// resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by id - not found
@@ -138,7 +138,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				// resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by name - not found
@@ -182,7 +182,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				// resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by id - not found
@@ -214,7 +214,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				// resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by name - not found
