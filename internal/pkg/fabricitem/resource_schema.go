@@ -57,6 +57,17 @@ func GetResourceFabricItemPropertiesSchema(ctx context.Context, itemName, markdo
 	}
 }
 
+func GetResourceFabricItemPropertiesSchema1[Ttfprop, Titemprop any](ctx context.Context, r ResourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+
+	attributes["properties"] = r.PropertiesSchema
+
+	return schema.Schema{
+		MarkdownDescription: r.MarkdownDescription,
+		Attributes:          attributes,
+	}
+}
+
 func GetResourceFabricItemDefinitionPropertiesSchema(ctx context.Context, r ResourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = properties
