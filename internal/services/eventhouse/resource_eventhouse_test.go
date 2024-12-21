@@ -283,7 +283,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
-				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// Update and Read
@@ -306,7 +306,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
-				// resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 	},
