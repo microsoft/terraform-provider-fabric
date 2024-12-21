@@ -267,6 +267,56 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName,
+					"description":  entityUpdateDescription,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
 				at.CompileConfig(
@@ -283,7 +333,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// Update and Read
@@ -306,7 +356,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 	},
