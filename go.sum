@@ -14,8 +14,8 @@ github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 h1:XHOnouVk1mx
 github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
 github.com/FrangipaneTeam/terraform-plugin-framework-supertypes v0.4.0 h1:5lFfjKOhBxBQNwQ63PZWBc5Unqgi5ppYq9RDoN05N+k=
 github.com/FrangipaneTeam/terraform-plugin-framework-supertypes v0.4.0/go.mod h1:klzXBi/0nMGXBh4bzRjP2wef+HE6rfCMia81Glc2+eY=
-github.com/FrangipaneTeam/terraform-plugin-framework-validators v1.8.1 h1:C17IEM0/4sxsTN0IpwDdgncea/cxfZVlWESIWvlEuBo=
-github.com/FrangipaneTeam/terraform-plugin-framework-validators v1.8.1/go.mod h1:GkF0MeJVDma0RHglpXxSzZ3yv7ftneMgI1KwHrJBOWA=
+github.com/FrangipaneTeam/terraform-plugin-framework-validators v1.9.0 h1:p6ZVfg1JSPlV3gWn68CLKprP6zFgF37xQmL5lpElP7s=
+github.com/FrangipaneTeam/terraform-plugin-framework-validators v1.9.0/go.mod h1:w0a2/pACt8OZubXxPDMHj2LEKYnKCHs1DTug7dagP5A=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
