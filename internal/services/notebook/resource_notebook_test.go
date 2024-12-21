@@ -250,7 +250,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_NotebookResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()

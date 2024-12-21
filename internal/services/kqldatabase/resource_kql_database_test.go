@@ -368,7 +368,7 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_KQLDatabaseResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
