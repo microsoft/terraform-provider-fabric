@@ -3,25 +3,54 @@
 page_title: "fabric_eventhouse Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric Eventhouse.
-  See Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse for more information.
+  Manage a Fabric Eventhouse.
+  Use this resource to manage an Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
   -> This item supports Service Principal authentication.
 ---
 
 # fabric_eventhouse (Resource)
 
-This resource manages a Fabric Eventhouse.
+Manage a Fabric Eventhouse.
 
-See [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse) for more information.
+Use this resource to manage an [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
 -> This item supports Service Principal authentication.
 
 ## Example Usage
 
 ```terraform
+# Example 1 - Item without definition
 resource "fabric_eventhouse" "example" {
-  display_name = "example"
+  display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Example 2 - Item with definition bootstrapping only
+resource "fabric_eventhouse" "example_definition_bootstrap" {
+  display_name              = "example2"
+  description               = "example with definition bootstrapping"
+  workspace_id              = "00000000-0000-0000-0000-000000000000"
+  definition_update_enabled = false # <-- Disable definition update
+  definition = {
+    "EventhouseProperties.json" = {
+      source = "${local.path}/EventhouseProperties.json.tmpl"
+    }
+  }
+}
+
+# Example 3 - Item with definition update when source or tokens changed
+resource "fabric_eventhouse" "example_definition_update" {
+  display_name = "example3"
+  description  = "example with definition update when source or tokens changed"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  definition = {
+    "EventhouseProperties.json" = {
+      source = "${local.path}/EventhouseProperties.json.tmpl"
+      tokens = {
+        "MyKey" = "MyValue"
+      }
+    }
+  }
 }
 ```
 
@@ -35,13 +64,34 @@ resource "fabric_eventhouse" "example" {
 
 ### Optional
 
+- `definition` (Attributes Map) Definition parts. Accepted path keys: `EventhouseProperties.json`. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventhouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `format` (String) The Eventhouse format. Possible values: `NotApplicable`
 - `id` (String) The Eventhouse ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Required:
+
+- `source` (String) Path to the file with source of the definition part.
+
+The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.
+
+Optional:
+
+- `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+
+Read-Only:
+
+- `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -60,7 +110,7 @@ Optional:
 
 Read-Only:
 
-- `database_ids` (List of String) The IDs list of KQL Databases.
+- `database_ids` (List of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.
 

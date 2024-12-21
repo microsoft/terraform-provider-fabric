@@ -21,12 +21,7 @@ func NewDataSourceSparkJobDefinitions(ctx context.Context) datasource.DataSource
 		MarkdownDescription: "The " + ItemName + " properties.",
 		Computed:            true,
 		CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkJobDefinitionPropertiesModel](ctx),
-		Attributes: map[string]schema.Attribute{
-			"onelake_root_path": schema.StringAttribute{
-				MarkdownDescription: "OneLake path to the Spark Job Definition root directory.",
-				Computed:            true,
-			},
-		},
+		Attributes:          getDataSourcePropertiesAttributesSchema(),
 	}
 
 	propertiesSetter := func(ctx context.Context, from *fabsparkjobdefinition.Properties, to *fabricitem.FabricItemPropertiesModel[sparkJobDefinitionPropertiesModel, fabsparkjobdefinition.Properties]) diag.Diagnostics {
@@ -36,8 +31,7 @@ func NewDataSourceSparkJobDefinitions(ctx context.Context) datasource.DataSource
 			propertiesModel := &sparkJobDefinitionPropertiesModel{}
 			propertiesModel.set(from)
 
-			diags := properties.Set(ctx, propertiesModel)
-			if diags.HasError() {
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
 		}

@@ -22,11 +22,11 @@ var (
 
 func TestUnit_EventhousesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomEventhouseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomEventhouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomEventhouseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -69,6 +69,9 @@ func TestUnit_EventhousesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.database_ids.0"),
 			),
 		},
 	}))
@@ -90,6 +93,9 @@ func TestAcc_EventhousesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.database_ids.0"),
 			),
 		},
 	},

@@ -70,6 +70,6 @@ Optional:
 
 Read-Only:
 
-- `connection_string` (String) Connection String
-- `created_date` (String) Created Date
-- `last_updated_time` (String) Last Updated Time
+- `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
+- `created_date` (String) The date and time the warehouse was created.
+- `last_updated_time` (String) The date and time the warehouse was last updated.

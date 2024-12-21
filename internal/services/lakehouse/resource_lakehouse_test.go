@@ -224,7 +224,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_LakehouseResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -272,7 +272,7 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_LakehouseConfigurationResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName1 := testhelp.RandomName()
