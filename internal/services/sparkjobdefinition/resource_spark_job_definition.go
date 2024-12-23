@@ -8,7 +8,6 @@ import (
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -75,15 +74,14 @@ func NewResourceSparkJobDefinition(ctx context.Context) resource.Resource {
 			DisplayNameMaxLength:  123,
 			DescriptionMaxLength:  256,
 			FormatTypeDefault:     ItemFormatTypeDefault,
-			FormatTypes:           ItemFormatTypes,
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeys:    ItemDefinitionPaths,
 			DefinitionPathKeysValidator: []validator.Map{
 				mapvalidator.SizeAtMost(1),
-				mapvalidator.KeysAre(stringvalidator.OneOf(ItemDefinitionPaths...)),
+				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 			},
 			DefinitionRequired: false,
 			DefinitionEmpty:    ItemDefinitionEmpty,
+			DefinitionFormats:  itemDefinitionFormats,
 		},
 		PropertiesSchema: propertiesSchema,
 		PropertiesSetter: propertiesSetter,

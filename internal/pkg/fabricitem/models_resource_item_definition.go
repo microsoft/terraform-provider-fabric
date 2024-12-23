@@ -35,9 +35,13 @@ type fabricItemDefinition struct {
 	fabcore.ItemDefinition
 }
 
-func (to *fabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, update bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics { //revive:disable-line:flag-parameter
+func (to *fabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, update bool, definitionEmpty string, definitionPaths []string, definitionFormats []DefinitionFormat) diag.Diagnostics { //revive:disable-line:flag-parameter
 	if from.Format.ValueString() != DefinitionFormatNotApplicable {
-		to.Format = from.Format.ValueStringPointer()
+		apiFormat := GetDefinitionFormatAPI(definitionFormats, from.Format.ValueString())
+
+		if apiFormat != "" {
+			to.Format = azto.Ptr(apiFormat)
+		}
 	}
 
 	to.Parts = []fabcore.ItemDefinitionPart{}
@@ -90,7 +94,7 @@ type requestCreateFabricItemDefinition struct {
 	fabcore.CreateItemRequest
 }
 
-func (to *requestCreateFabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, itemType fabcore.ItemType) diag.Diagnostics {
+func (to *requestCreateFabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, itemType fabcore.ItemType, definitionFormats []DefinitionFormat) diag.Diagnostics {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
 	to.Type = azto.Ptr(itemType)
@@ -98,7 +102,7 @@ func (to *requestCreateFabricItemDefinition) set(ctx context.Context, from resou
 	if !from.Definition.IsNull() && !from.Definition.IsUnknown() {
 		var def fabricItemDefinition
 
-		if diags := def.set(ctx, from, false, "", []string{}); diags.HasError() {
+		if diags := def.set(ctx, from, false, "", []string{}, definitionFormats); diags.HasError() {
 			return diags
 		}
 
@@ -121,10 +125,10 @@ type requestUpdateFabricItemDefinitionDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinitionDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, definitionEmpty string, definitionPaths []string) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinitionDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, definitionEmpty string, definitionPaths []string, definitionFormats []DefinitionFormat) diag.Diagnostics {
 	var def fabricItemDefinition
 
-	if diags := def.set(ctx, from, true, definitionEmpty, definitionPaths); diags.HasError() {
+	if diags := def.set(ctx, from, true, definitionEmpty, definitionPaths, definitionFormats); diags.HasError() {
 		return diags
 	}
 

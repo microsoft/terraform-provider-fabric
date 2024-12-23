@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -21,4 +22,10 @@ const (
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api"
 )
 
-var ItemDefinitionPaths = []string{"pipeline-content.json"} //nolint:gochecknoglobals
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  "",
+		API:   "",
+		Paths: []string{"pipeline-content.json"},
+	},
+}

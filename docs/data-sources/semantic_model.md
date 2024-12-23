@@ -29,6 +29,7 @@ data "fabric_semantic_model" "example" {
 data "fabric_semantic_model" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "TMSL"
   output_definition = true
 }
 
@@ -53,6 +54,7 @@ output "example_definition_bim_object" {
 
 ### Optional
 
+- `format` (String) The Semantic Model format. Possible values: `TMSL`
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
 !> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
@@ -64,7 +66,6 @@ output "example_definition_bim_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: `model.bim`, `definition.pbism`, `diagramLayout.json`. (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Semantic Model description.
 - `display_name` (String) The Semantic Model display name.
-- `format` (String) The Semantic Model format. Possible values: `TMSL`.
 
 <a id="nestedatt--timeouts"></a>
 

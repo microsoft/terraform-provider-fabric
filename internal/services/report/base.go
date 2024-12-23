@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -21,7 +22,10 @@ const (
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition"
 )
 
-var (
-	ItemFormatTypes               = []string{"PBIR-Legacy"}                                                                                                  //nolint:gochecknoglobals
-	ItemDefinitionPathsPBIRLegacy = []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"} //nolint:gochecknoglobals
-)
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  "PBIR-Legacy",
+		API:   "PBIR-Legacy",
+		Paths: []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
+	},
+}

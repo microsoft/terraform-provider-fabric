@@ -9,6 +9,7 @@ import (
 	"regexp"
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
+	superstringvalidator "github.com/FrangipaneTeam/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -37,7 +38,7 @@ func GetResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 func GetResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
 		attributes[key] = value
 	}
 
@@ -61,7 +62,7 @@ func GetResourceFabricItemDefinitionPropertiesSchema(ctx context.Context, r Reso
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = properties
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
 		attributes[key] = value
 	}
 
@@ -75,7 +76,7 @@ func GetResourceFabricItemDefinitionPropertiesSchema1[Ttfprop, Titemprop any](ct
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = r.PropertiesSchema
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired) {
 		attributes[key] = value
 	}
 
@@ -147,7 +148,7 @@ func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displ
 }
 
 // Helper function to get Fabric Item definition attributes.
-func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, formatTypeDefault string, formatTypes []string, definitionPathDocsURL string, definitionPathKeys []string, definitionPathKeysValidator []validator.Map, definitionRequired bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, definitionPathDocsURL string, definitionFormatTypes []DefinitionFormat, definitionPathKeysValidator []validator.Map, definitionRequired bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
 	attributes := make(map[string]schema.Attribute)
 
 	attributes["definition_update_enabled"] = schema.BoolAttribute{
@@ -157,37 +158,47 @@ func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, format
 		Default:             booldefault.StaticBool(true),
 	}
 
-	if len(formatTypes) > 0 {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", name, utils.ConvertStringSlicesToString(formatTypes, true, false)),
-			Computed:            true,
-			Default:             stringdefault.StaticString(formatTypeDefault),
+	formatTypes := GetDefinitionFormats(definitionFormatTypes)
+	definitionPathKeys := GetDefinitionFormatsPaths(definitionFormatTypes)
+
+	// format attribute
+	attrFormat := schema.StringAttribute{}
+
+	if len(formatTypes) > 1 || (len(formatTypes) == 1 && formatTypes[0] != "") {
+		attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: %s", name, utils.ConvertStringSlicesToString(formatTypes, true, false))
+		attrFormat.Validators = []validator.String{
+			stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(formatTypes, true)...),
+			superstringvalidator.RequireIfAttributeIsSet(path.MatchRoot("definition")),
+		}
+
+		if definitionRequired {
+			attrFormat.Required = true
+		} else {
+			attrFormat.Optional = true
 		}
 	} else {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", name, DefinitionFormatNotApplicable),
-			Computed:            true,
-			Default:             stringdefault.StaticString(DefinitionFormatNotApplicable),
-		}
+		attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: `%s`", name, DefinitionFormatNotApplicable)
+		attrFormat.Computed = true
+		attrFormat.Default = stringdefault.StaticString(DefinitionFormatNotApplicable)
 	}
 
+	attributes["format"] = attrFormat
+
+	// definition attribute
+	attrDefinition := schema.MapNestedAttribute{}
+
+	attrDefinition.MarkdownDescription = fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(definitionPathKeys, true, false), name, definitionPathDocsURL)
+	attrDefinition.CustomType = supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx)
+	attrDefinition.Validators = definitionPathKeysValidator
+	attrDefinition.NestedObject = getResourceFabricItemDefinitionPartSchema(ctx)
+
 	if definitionRequired {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(definitionPathKeys, true, false), name, definitionPathDocsURL),
-			Required:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          definitionPathKeysValidator,
-			NestedObject:        getResourceFabricItemDefinitionPartSchema(ctx),
-		}
+		attrDefinition.Required = true
 	} else {
-		attributes["definition"] = schema.MapNestedAttribute{
-			MarkdownDescription: fmt.Sprintf("Definition parts. Accepted path keys: %s. Read more about [%s definition part paths](%s).", utils.ConvertStringSlicesToString(definitionPathKeys, true, false), name, definitionPathDocsURL),
-			Optional:            true,
-			CustomType:          supertypes.NewMapNestedObjectTypeOf[ResourceFabricItemDefinitionPartModel](ctx),
-			Validators:          definitionPathKeysValidator,
-			NestedObject:        getResourceFabricItemDefinitionPartSchema(ctx),
-		}
+		attrDefinition.Optional = true
 	}
+
+	attributes["definition"] = attrDefinition
 
 	return attributes
 }
