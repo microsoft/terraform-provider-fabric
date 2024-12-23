@@ -54,7 +54,7 @@ output "example_definition_bim_object" {
 
 ### Optional
 
-- `format` (String) The Semantic Model format. Possible values: `TMSL`. Default: `TMSL`
+- `format` (String) The Semantic Model format. Possible values: `TMSL`
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
 !> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.

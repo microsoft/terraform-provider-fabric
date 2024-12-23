@@ -69,7 +69,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Spark Job Definition display name.
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`. Default: `SparkJobDefinitionV1`
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
 - `id` (String) The Spark Job Definition ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 

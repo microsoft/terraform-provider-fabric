@@ -57,7 +57,7 @@ output "example_definition_report_object" {
 
 ### Optional
 
-- `format` (String) The Report format. Possible values: `PBIR-Legacy`. Default: `PBIR-Legacy`
+- `format` (String) The Report format. Possible values: `PBIR-Legacy`
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
 !> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.

@@ -69,7 +69,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Notebook display name.
-- `format` (String) The Notebook format. Possible values: `ipynb`, `py`. Default: `ipynb`
+- `format` (String) The Notebook format. Possible values: `ipynb`, `py`
 - `id` (String) The Notebook ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
