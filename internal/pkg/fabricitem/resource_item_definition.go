@@ -43,12 +43,11 @@ type ResourceFabricItemDefinition struct {
 	DisplayNameMaxLength        int
 	DescriptionMaxLength        int
 	FormatTypeDefault           string
-	FormatTypes                 []string
 	DefinitionPathDocsURL       string
-	DefinitionPathKeys          []string
 	DefinitionPathKeysValidator []validator.Map
 	DefinitionRequired          bool
 	DefinitionEmpty             string
+	DefinitionFormats           []DefinitionFormat
 }
 
 func NewResourceFabricItemDefinition(config ResourceFabricItemDefinition) resource.Resource {
@@ -147,7 +146,7 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 
 	var reqCreate requestCreateFabricItemDefinition
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -411,7 +410,9 @@ func (r *ResourceFabricItemDefinition) checkUpdateItem(plan, state resourceFabri
 
 func (r *ResourceFabricItemDefinition) checkUpdateDefinition(ctx context.Context, plan, state resourceFabricItemDefinitionModel, reqUpdate *requestUpdateFabricItemDefinitionDefinition) (bool, diag.Diagnostics) {
 	if !plan.Definition.Equal(state.Definition) && plan.DefinitionUpdateEnabled.ValueBool() {
-		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, r.DefinitionPathKeys); diags.HasError() {
+		definitionPathKeys := GetDefinitionFormatsPaths(r.DefinitionFormats)
+
+		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, definitionPathKeys, r.DefinitionFormats); diags.HasError() {
 			return false, diags
 		}
 

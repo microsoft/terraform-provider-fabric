@@ -8,8 +8,14 @@ import (
 	"fmt"
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
+	superstringvalidator "github.com/FrangipaneTeam/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -27,7 +33,7 @@ func GetDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 func GetDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypeDefault, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
@@ -51,7 +57,7 @@ func GetDataSourceFabricItemDefinitionPropertiesSchema(ctx context.Context, d Da
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = properties
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypeDefault, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
@@ -65,7 +71,7 @@ func GetDataSourceFabricItemDefinitionPropertiesSchema1[Ttfprop, Titemprop any](
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = d.PropertiesSchema
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypeDefault, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
@@ -118,13 +124,21 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 }
 
 // Helper function to get Fabric Item data-source definition attributes.
-func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name string, formatTypes, definitionPathKeys []string) map[string]schema.Attribute {
+func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name, formatTypeDefault string, definitionFormatTypes []DefinitionFormat) map[string]schema.Attribute {
 	attributes := make(map[string]schema.Attribute)
 
-	if len(formatTypes) > 0 {
+	formatTypes := GetDefinitionFormats(definitionFormatTypes)
+	definitionPathKeys := GetDefinitionFormatsPaths(definitionFormatTypes)
+
+	if len(formatTypes) > 1 || (len(formatTypes) == 1 && formatTypes[0] != "") {
 		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", name, utils.ConvertStringSlicesToString(formatTypes, true, false)),
+			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s. Default: `%s`", name, utils.ConvertStringSlicesToString(formatTypes, true, false), formatTypeDefault),
+			Optional:            true,
 			Computed:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(formatTypes...),
+				superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("output_definition"), []attr.Value{types.BoolValue(true)}),
+			},
 		}
 	} else {
 		attributes["format"] = schema.StringAttribute{

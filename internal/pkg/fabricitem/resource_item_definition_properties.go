@@ -136,7 +136,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 
 	var reqCreate requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop]
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -414,7 +414,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) checkUpdate
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) checkUpdateDefinition(ctx context.Context, plan, state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], reqUpdate *requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]) (bool, diag.Diagnostics) {
 	if !plan.Definition.Equal(state.Definition) && plan.DefinitionUpdateEnabled.ValueBool() {
-		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, r.DefinitionPathKeys); diags.HasError() {
+		definitionPathKeys := GetDefinitionFormatsPaths(r.DefinitionFormats)
+
+		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, definitionPathKeys, r.DefinitionFormats); diags.HasError() {
 			return false, diags
 		}
 

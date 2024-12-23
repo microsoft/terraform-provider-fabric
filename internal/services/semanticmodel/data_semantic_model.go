@@ -19,8 +19,7 @@ func NewDataSourceSemanticModel() datasource.DataSource {
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: false,
 		FormatTypeDefault:   ItemFormatTypeDefault,
-		FormatTypes:         ItemFormatTypes,
-		DefinitionPathKeys:  ItemDefinitionPathsTMSL,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
 	return fabricitem.NewDataSourceFabricItemDefinition(config)

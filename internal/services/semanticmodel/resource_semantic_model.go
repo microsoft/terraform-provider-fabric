@@ -24,15 +24,14 @@ func NewResourceSemanticModel() resource.Resource {
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
 		FormatTypeDefault:     ItemFormatTypeDefault,
-		FormatTypes:           ItemFormatTypes,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-		DefinitionPathKeys:    ItemDefinitionPathsTMSL,
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtLeast(2),
-			mapvalidator.KeysAre(stringvalidator.OneOf(ItemDefinitionPathsTMSL...)),
+			mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMSL")...)),
 		},
 		DefinitionRequired: true,
 		DefinitionEmpty:    "",
+		DefinitionFormats:  itemDefinitionFormats,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)

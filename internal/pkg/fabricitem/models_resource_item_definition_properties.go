@@ -39,9 +39,13 @@ type FabricItemDefinitionProperties[Ttfprop, Titemprop any] struct { //revive:di
 	fabcore.ItemDefinition
 }
 
-func (to *FabricItemDefinitionProperties[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], update bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics { //revive:disable-line:flag-parameter,confusing-naming
+func (to *FabricItemDefinitionProperties[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], update bool, definitionEmpty string, definitionPaths []string, definitionFormats []DefinitionFormat) diag.Diagnostics { //revive:disable-line:flag-parameter,confusing-naming
 	if from.Format.ValueString() != DefinitionFormatNotApplicable {
-		to.Format = from.Format.ValueStringPointer()
+		apiFormat := GetDefinitionFormatAPI(definitionFormats, from.Format.ValueString())
+
+		if apiFormat != "" {
+			to.Format = azto.Ptr(apiFormat)
+		}
 	}
 
 	to.Parts = []fabcore.ItemDefinitionPart{}
@@ -94,7 +98,7 @@ type requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop any] struct 
 	fabcore.CreateItemRequest
 }
 
-func (to *requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], itemType fabcore.ItemType) diag.Diagnostics { //revive:disable-line:confusing-naming
+func (to *requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], itemType fabcore.ItemType, definitionFormats []DefinitionFormat) diag.Diagnostics { //revive:disable-line:confusing-naming
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
 	to.Type = azto.Ptr(itemType)
@@ -102,7 +106,7 @@ func (to *requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop]) set(c
 	if !from.Definition.IsNull() && !from.Definition.IsUnknown() {
 		var def FabricItemDefinitionProperties[Ttfprop, Titemprop]
 
-		if diags := def.set(ctx, from, false, "", []string{}); diags.HasError() {
+		if diags := def.set(ctx, from, false, "", []string{}, definitionFormats); diags.HasError() {
 			return diags
 		}
 
@@ -125,10 +129,10 @@ type requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop an
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], definitionEmpty string, definitionPaths []string) diag.Diagnostics { //revive:disable-line:confusing-naming
+func (to *requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]) set(ctx context.Context, from ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], definitionEmpty string, definitionPaths []string, definitionFormats []DefinitionFormat) diag.Diagnostics { //revive:disable-line:confusing-naming
 	var def FabricItemDefinitionProperties[Ttfprop, Titemprop]
 
-	if diags := def.set(ctx, from, true, definitionEmpty, definitionPaths); diags.HasError() {
+	if diags := def.set(ctx, from, true, definitionEmpty, definitionPaths, definitionFormats); diags.HasError() {
 		return diags
 	}
 
