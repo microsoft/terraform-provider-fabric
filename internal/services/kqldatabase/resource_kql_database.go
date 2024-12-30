@@ -113,7 +113,7 @@ func NewResourceKQLDatabase() resource.Resource {
 			// DefinitionRequired: false,
 			// DefinitionEmpty:    "",
 		},
-		IsConfigRequired:      false,
+		IsConfigRequired:      true,
 		ConfigAttributes:      getResourceKQLDatabaseConfigurationAttributes(),
 		CreationPayloadSetter: creationPayloadSetter,
 		PropertiesAttributes:  getResourceKQLDatabasePropertiesAttributes(),

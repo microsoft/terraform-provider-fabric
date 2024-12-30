@@ -73,14 +73,14 @@ resource "fabric_kql_database" "example4" {
 
 ### Required
 
+- `configuration` (Attributes) The KQL Database creation configuration.
+
+Any changes to this configuration will result in recreation of the KQL Database. (see [below for nested schema](#nestedatt--configuration))
+
 - `display_name` (String) The KQL Database display name.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
-
-- `configuration` (Attributes) The KQL Database creation configuration.
-
-Any changes to this configuration will result in recreation of the KQL Database. (see [below for nested schema](#nestedatt--configuration))
 
 - `description` (String) The KQL Database description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
