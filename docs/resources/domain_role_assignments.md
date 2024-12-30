@@ -59,7 +59,7 @@ resource "fabric_domain_role_assignments" "example" {
 Required:
 
 - `id` (String) The Principal ID. Changing this forces a new resource to be created.
-- `type` (String) ThePrincipal type. Accepted values: `Group`, `User`. Changing this forces a new resource to be created.
+- `type` (String) The Principal type. Accepted values: `Group`, `User`. Changing this forces a new resource to be created.
 
 <a id="nestedatt--timeouts"></a>
 

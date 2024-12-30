@@ -92,7 +92,7 @@ func (r *resourceDomainRoleAssignments) Schema(ctx context.Context, _ resource.S
 							CustomType:          customtypes.UUIDType{},
 						},
 						"type": schema.StringAttribute{
-							MarkdownDescription: "ThePrincipal type. Accepted values: " + utils.ConvertStringSlicesToString(possiblePrincipalTypeValues, true, true) + ". " + common.DocsRequiresReplace,
+							MarkdownDescription: "The Principal type. Accepted values: " + utils.ConvertStringSlicesToString(possiblePrincipalTypeValues, true, true) + ". " + common.DocsRequiresReplace,
 							Required:            true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possiblePrincipalTypeValues, false)...),

@@ -43,7 +43,7 @@ resource "fabric_domain_workspace_assignments" "example" {
 ### Required
 
 - `domain_id` (String) The Domain ID. Changing this forces a new resource to be created.
-- `workspace_ids` (Set of String) The list of Workspaces.
+- `workspace_ids` (Set of String) The set of Workspace IDs.
 
 ### Optional
 
