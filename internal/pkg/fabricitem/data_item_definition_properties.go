@@ -31,10 +31,10 @@ var (
 
 type DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop any] struct {
 	DataSourceFabricItemDefinition
-	PropertiesSchema schema.SingleNestedAttribute
-	PropertiesSetter func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
-	ItemGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], fabricItem *FabricItemProperties[Titemprop]) error
-	ItemListGetter   func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], errNotFound fabcore.ResponseError, fabricItem *FabricItemProperties[Titemprop]) error
+	PropertiesAttributes map[string]schema.Attribute
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
+	ItemGetter           func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], fabricItem *FabricItemProperties[Titemprop]) error
+	ItemListGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], errNotFound fabcore.ResponseError, fabricItem *FabricItemProperties[Titemprop]) error
 }
 
 func NewDataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop any](config DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) datasource.DataSource {
@@ -46,10 +46,10 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) { //revive:disable-line:confusing-naming
-	resp.Schema = GetDataSourceFabricItemDefinitionPropertiesSchema1(ctx, *d)
+	resp.Schema = getDataSourceFabricItemDefinitionPropertiesSchema(ctx, *d)
 }
 
-func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
+func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator { //revive:disable-line:confusing-naming
 	if d.IsDisplayNameUnique {
 		return []datasource.ConfigValidator{
 			datasourcevalidator.Conflicting(
@@ -148,7 +148,7 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx 
 	}
 }
 
-func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByID(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByID(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
@@ -160,15 +160,10 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByID(c
 
 	model.set(fabricItem)
 
-	diags := d.PropertiesSetter(ctx, fabricItem.Properties, model)
-	if diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
 
-func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByDisplayName(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByDisplayName(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.Name, model.DisplayName.ValueString()))
 
 	errNotFoundCode := fabcore.ErrCommon.EntityNotFound.Error()
@@ -192,12 +187,7 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByDisp
 
 	model.set(fabricItem)
 
-	diags := d.PropertiesSetter(ctx, fabricItem.Properties, model)
-	if diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getDefinition(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
@@ -214,5 +204,12 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getDefini
 		return diags
 	}
 
-	return model.setDefinition(ctx, *respGet.Definition)
+	definition, diags := getDataSourceDefinitionModel(ctx, *respGet.Definition)
+	if diags.HasError() {
+		return diags
+	}
+
+	model.setDefinition(definition)
+
+	return nil
 }

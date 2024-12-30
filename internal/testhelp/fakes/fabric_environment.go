@@ -17,6 +17,18 @@ import (
 
 type operationsEnvironment struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsEnvironment) ConvertItemToEntity(item fabcore.Item) fabenvironment.Environment {
+	return fabenvironment.Environment{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
+		Properties:  NewRandomEnvironment().Properties,
+	}
+}
+
 // CreateWithParentID implements concreteOperations.
 func (o *operationsEnvironment) CreateWithParentID(parentID string, data fabenvironment.CreateEnvironmentRequest) fabenvironment.Environment {
 	entity := NewRandomEnvironmentWithWorkspace(parentID)
@@ -106,8 +118,8 @@ func configureEnvironment(server *fakeServer) fabenvironment.Environment {
 	}
 
 	var entityOperations concreteEntityOperations = &operationsEnvironment{}
-
-	handler := newTypedHandler(server, entityOperations)
+	var converter itemConverter[fabenvironment.Environment] = &operationsEnvironment{}
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,

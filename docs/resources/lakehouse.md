@@ -3,16 +3,16 @@
 page_title: "fabric_lakehouse Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric Lakehouse.
-  See Lakehouse https://learn.microsoft.com/training/modules/get-started-lakehouses for more information.
+  Manage a Fabric Lakehouse.
+  Use this resource to manage a Lakehouse https://learn.microsoft.com/training/modules/get-started-lakehouses.
   -> This item supports Service Principal authentication.
 ---
 
 # fabric_lakehouse (Resource)
 
-This resource manages a Fabric Lakehouse.
+Manage a Fabric Lakehouse.
 
-See [Lakehouse](https://learn.microsoft.com/training/modules/get-started-lakehouses) for more information.
+Use this resource to manage a [Lakehouse](https://learn.microsoft.com/training/modules/get-started-lakehouses).
 
 -> This item supports Service Principal authentication.
 

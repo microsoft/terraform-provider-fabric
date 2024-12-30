@@ -16,6 +16,37 @@ import (
 
 type operationsKQLDatabase struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsKQLDatabase) ConvertItemToEntity(item fabcore.Item) fabkqldatabase.KQLDatabase {
+	return fabkqldatabase.KQLDatabase{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
+		Properties:  NewRandomKQLDatabase().Properties,
+	}
+}
+
+// CreateDefinition implements concreteDefinitionOperations.
+func (o *operationsKQLDatabase) CreateDefinition(data fabkqldatabase.CreateKQLDatabaseRequest) *fabkqldatabase.Definition {
+	return data.Definition
+}
+
+// TransformDefinition implements concreteDefinitionOperations.
+func (o *operationsKQLDatabase) TransformDefinition(entity *fabkqldatabase.Definition) fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse {
+	return fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse{
+		DefinitionResponse: fabkqldatabase.DefinitionResponse{
+			Definition: entity,
+		},
+	}
+}
+
+// UpdateDefinition implements concreteDefinitionOperations.
+func (o *operationsKQLDatabase) UpdateDefinition(_ *fabkqldatabase.Definition, data fabkqldatabase.UpdateKQLDatabaseDefinitionRequest) *fabkqldatabase.Definition {
+	return data.Definition
+}
+
 // CreateWithParentID implements concreteOperations.
 func (o *operationsKQLDatabase) CreateWithParentID(parentID string, data fabkqldatabase.CreateKQLDatabaseRequest) fabkqldatabase.KQLDatabase {
 	entity := NewRandomKQLDatabaseWithWorkspace(parentID)
@@ -104,9 +135,22 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 			fabkqldatabase.UpdateKQLDatabaseRequest]
 	}
 
+	type concreteDefinitionOperations interface {
+		definitionOperations[
+			fabkqldatabase.Definition,
+			fabkqldatabase.CreateKQLDatabaseRequest,
+			fabkqldatabase.UpdateKQLDatabaseDefinitionRequest,
+			fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse,
+			fabkqldatabase.ItemsClientUpdateKQLDatabaseDefinitionResponse]
+	}
+
 	var entityOperations concreteEntityOperations = &operationsKQLDatabase{}
 
-	handler := newTypedHandler(server, entityOperations)
+	var definitionOperations concreteDefinitionOperations = &operationsKQLDatabase{}
+
+	var converter itemConverter[fabkqldatabase.KQLDatabase] = &operationsKQLDatabase{}
+
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,
@@ -116,6 +160,14 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.NewListKQLDatabasesPager,
 		&server.ServerFactory.KQLDatabase.ItemsServer.DeleteKQLDatabase)
+
+	configureDefinitions(
+		handler,
+		entityOperations,
+		definitionOperations,
+		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
+		&server.ServerFactory.KQLDatabase.ItemsServer.BeginGetKQLDatabaseDefinition,
+		&server.ServerFactory.KQLDatabase.ItemsServer.BeginUpdateKQLDatabaseDefinition)
 
 	return fabkqldatabase.KQLDatabase{}
 }
@@ -141,4 +193,27 @@ func NewRandomKQLDatabaseWithWorkspace(workspaceID string) fabkqldatabase.KQLDat
 	result.WorkspaceID = &workspaceID
 
 	return result
+}
+
+func NewRandomKQLDatabaseDefinition() fabkqldatabase.Definition {
+	defPart1 := fabkqldatabase.DefinitionPart{
+		PayloadType: to.Ptr(fabkqldatabase.PayloadTypeInlineBase64),
+		Path:        to.Ptr("DatabaseProperties.json"),
+		Payload:     to.Ptr("ew0KICAiZGF0YWJhc2VUeXBlIjogIlJlYWRXcml0ZSIsDQogICJwYXJlbnRFdmVudGhvdXNlSXRlbUlkIjogIjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsIA0KICAib25lTGFrZUNhY2hpbmdQZXJpb2QiOiAiUDM2NTAwRCIsIA0KICAib25lTGFrZVN0YW5kYXJkU3RvcmFnZVBlcmlvZCI6ICJQMzY1MDAwRCIgDQp9"),
+	}
+
+	defPart2 := fabkqldatabase.DefinitionPart{
+		PayloadType: to.Ptr(fabkqldatabase.PayloadTypeInlineBase64),
+		Path:        to.Ptr("DatabaseSchema.kql"),
+		Payload:     to.Ptr("LmNyZWF0ZS1tZXJnZSB0YWJsZSBNeUxvZ3MyIChMZXZlbDpzdHJpbmcsIFRpbWVzdGFtcDpkYXRldGltZSwgVXNlcklkOnN0cmluZywgVHJhY2VJZDpzdHJpbmcsIE1lc3NhZ2U6c3RyaW5nLCBQcm9jZXNzSWQ6aW50KSANCi5jcmVhdGUtbWVyZ2UgdGFibGUgTXlMb2dzMyAoTGV2ZWw6c3RyaW5nLCBUaW1lc3RhbXA6ZGF0ZXRpbWUsIFVzZXJJZDpzdHJpbmcsIFRyYWNlSWQ6c3RyaW5nLCBNZXNzYWdlOnN0cmluZywgUHJvY2Vzc0lkOmludCkgDQouY3JlYXRlLW1lcmdlIHRhYmxlIE15TG9nczcgKExldmVsOnN0cmluZywgVGltZXN0YW1wOmRhdGV0aW1lLCBVc2VySWQ6c3RyaW5nLCBUcmFjZUlkOnN0cmluZywgTWVzc2FnZTpzdHJpbmcsIFByb2Nlc3NJZDppbnQp"),
+	}
+
+	var defParts []fabkqldatabase.DefinitionPart
+
+	defParts = append(defParts, defPart1)
+	defParts = append(defParts, defPart2)
+
+	return fabkqldatabase.Definition{
+		Parts: defParts,
+	}
 }

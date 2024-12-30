@@ -16,6 +16,37 @@ import (
 
 type operationsEventhouse struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsEventhouse) ConvertItemToEntity(item fabcore.Item) fabeventhouse.Eventhouse {
+	return fabeventhouse.Eventhouse{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
+		Properties:  NewRandomEventhouse().Properties,
+	}
+}
+
+// CreateDefinition implements concreteDefinitionOperations.
+func (o *operationsEventhouse) CreateDefinition(data fabeventhouse.CreateEventhouseRequest) *fabeventhouse.Definition {
+	return data.Definition
+}
+
+// TransformDefinition implements concreteDefinitionOperations.
+func (o *operationsEventhouse) TransformDefinition(entity *fabeventhouse.Definition) fabeventhouse.ItemsClientGetEventhouseDefinitionResponse {
+	return fabeventhouse.ItemsClientGetEventhouseDefinitionResponse{
+		DefinitionResponse: fabeventhouse.DefinitionResponse{
+			Definition: entity,
+		},
+	}
+}
+
+// UpdateDefinition implements concreteDefinitionOperations.
+func (o *operationsEventhouse) UpdateDefinition(_ *fabeventhouse.Definition, data fabeventhouse.UpdateEventhouseDefinitionRequest) *fabeventhouse.Definition {
+	return data.Definition
+}
+
 // CreateWithParentID implements concreteOperations.
 func (o *operationsEventhouse) CreateWithParentID(parentID string, data fabeventhouse.CreateEventhouseRequest) fabeventhouse.Eventhouse {
 	entity := NewRandomEventhouseWithWorkspace(parentID)
@@ -75,8 +106,8 @@ func (o *operationsEventhouse) TransformUpdate(entity fabeventhouse.Eventhouse) 
 
 // Update implements concreteOperations.
 func (o *operationsEventhouse) Update(base fabeventhouse.Eventhouse, data fabeventhouse.UpdateEventhouseRequest) fabeventhouse.Eventhouse {
-	base.Description = data.Description
 	base.DisplayName = data.DisplayName
+	base.Description = data.Description
 
 	return base
 }
@@ -104,9 +135,22 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 			fabeventhouse.UpdateEventhouseRequest]
 	}
 
+	type concreteDefinitionOperations interface {
+		definitionOperations[
+			fabeventhouse.Definition,
+			fabeventhouse.CreateEventhouseRequest,
+			fabeventhouse.UpdateEventhouseDefinitionRequest,
+			fabeventhouse.ItemsClientGetEventhouseDefinitionResponse,
+			fabeventhouse.ItemsClientUpdateEventhouseDefinitionResponse]
+	}
+
 	var entityOperations concreteEntityOperations = &operationsEventhouse{}
 
-	handler := newTypedHandler(server, entityOperations)
+	var definitionOperations concreteDefinitionOperations = &operationsEventhouse{}
+
+	var converter itemConverter[fabeventhouse.Eventhouse] = &operationsEventhouse{}
+
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,
@@ -116,6 +160,14 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.NewListEventhousesPager,
 		&server.ServerFactory.Eventhouse.ItemsServer.DeleteEventhouse)
+
+	configureDefinitions(
+		handler,
+		entityOperations,
+		definitionOperations,
+		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
+		&server.ServerFactory.Eventhouse.ItemsServer.BeginGetEventhouseDefinition,
+		&server.ServerFactory.Eventhouse.ItemsServer.BeginUpdateEventhouseDefinition)
 
 	return fabeventhouse.Eventhouse{}
 }
@@ -140,4 +192,20 @@ func NewRandomEventhouseWithWorkspace(workspaceID string) fabeventhouse.Eventhou
 	result.WorkspaceID = &workspaceID
 
 	return result
+}
+
+func NewRandomEventhouseDefinition() fabeventhouse.Definition {
+	defPart := fabeventhouse.DefinitionPart{
+		PayloadType: to.Ptr(fabeventhouse.PayloadTypeInlineBase64),
+		Path:        to.Ptr("EventhouseProperties.json"),
+		Payload:     to.Ptr("e30="),
+	}
+
+	var defParts []fabeventhouse.DefinitionPart
+
+	defParts = append(defParts, defPart)
+
+	return fabeventhouse.Definition{
+		Parts: defParts,
+	}
 }

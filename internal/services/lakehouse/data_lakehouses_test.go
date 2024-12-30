@@ -22,11 +22,11 @@ var (
 
 func TestUnit_LakehousesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -75,7 +75,7 @@ func TestUnit_LakehousesDataSource(t *testing.T) {
 }
 
 func TestAcc_LakehousesDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{

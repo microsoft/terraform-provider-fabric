@@ -56,4 +56,15 @@ Read-Only:
 - `description` (String) The Warehouse description.
 - `display_name` (String) The Warehouse display name.
 - `id` (String) The Warehouse ID.
+- `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
+- `created_date` (String) The date and time the warehouse was created.
+- `last_updated_time` (String) The date and time the warehouse was last updated.

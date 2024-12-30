@@ -112,7 +112,7 @@ func TestUnit_ReportDataSource(t *testing.T) {
 }
 
 func TestAcc_ReportDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Report"].(map[string]any)

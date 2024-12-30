@@ -22,11 +22,11 @@ var (
 
 func TestUnit_WarehousesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomWarehouseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -69,6 +69,9 @@ func TestUnit_WarehousesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.last_updated_time"),
 			),
 		},
 	}))
@@ -79,7 +82,7 @@ func TestAcc_WarehousesDataSource(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
@@ -94,6 +97,9 @@ func TestAcc_WarehousesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.last_updated_time"),
 			),
 		},
 	},

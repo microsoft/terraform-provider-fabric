@@ -24,6 +24,10 @@ var (
 	testResourceItemHeader = at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
 )
 
+// var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+// 	"path": testhelp.GetFixturesDirPath("kql_database"),
+// })
+
 func TestUnit_KQLDatabaseResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -219,6 +223,48 @@ func TestUnit_KQLDatabaseResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.URLTypeErrorInvalidStringHeader),
 		},
+		// error - no required attributes (definition)
+		// {
+		// 	ResourceName: testResourceItemFQN,
+		// 	Config: at.CompileConfig(
+		// 		testResourceItemHeader,
+		// 		map[string]any{
+		// 			"workspace_id": "00000000-0000-0000-0000-000000000000",
+		// 			"display_name": "test",
+		// 			"definition":   map[string]any{},
+		// 		},
+		// 	),
+		// 	ExpectError: regexp.MustCompile("Invalid Attribute Value"),
+		// },
+		// error - conflicting attributes (configuration/definition)
+		// {
+		// 	ResourceName: testResourceItemFQN,
+		// 	Config: at.JoinConfigs(
+		// 		testHelperLocals,
+		// 		at.CompileConfig(
+		// 			testResourceItemHeader,
+		// 			map[string]any{
+		// 				"workspace_id": "00000000-0000-0000-0000-000000000000",
+		// 				"display_name": "test",
+		// 				"configuration": map[string]any{
+		// 					"database_type": "ReadWrite",
+		// 					"eventhouse_id": "00000000-0000-0000-0000-000000000000",
+		// 				},
+		// 				"definition": map[string]any{
+		// 					`"DatabasesProperties.json"`: map[string]any{
+		// 						"source": "${local.path}/DatabaseProperties.json.tmpl",
+		// 						"tokens": map[string]any{
+		// 							"EventhouseID": "00000000-0000-0000-0000-000000000000",
+		// 						},
+		// 					},
+		// 					`"DatabaseSchema.kql"`: map[string]any{
+		// 						"source": "${local.path}/DatabaseSchema.kql",
+		// 					},
+		// 				},
+		// 			},
+		// 		)),
+		// 	ExpectError: regexp.MustCompile("Invalid Attribute Combination"),
+		// },
 	}))
 }
 
@@ -367,8 +413,8 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_KQLDatabaseResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
@@ -378,7 +424,7 @@ func TestAcc_KQLDatabaseResource_CRUD(t *testing.T) {
 	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read (Configuration)
+		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -402,7 +448,7 @@ func TestAcc_KQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 			),
 		},
-		// Update and Read (Configuration)
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -430,3 +476,73 @@ func TestAcc_KQLDatabaseResource_CRUD(t *testing.T) {
 	},
 	))
 }
+
+// func TestAcc_KQLDatabaseDefinitionResource_CRUD(t *testing.T) {
+// 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+// 	workspaceID := workspace["id"].(string)
+
+// 	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
+
+// 	testHelperDefinition := map[string]any{
+// 		`"DatabaseProperties.json"`: map[string]any{
+// 			"source": "${local.path}/DatabaseProperties.json.tmpl",
+// 			"tokens": map[string]any{
+// 				"EventhouseID": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
+// 			},
+// 		},
+// 		`"DatabaseSchema.kql"`: map[string]any{
+// 			"source": "${local.path}/DatabaseSchema.kql",
+// 		},
+// 	}
+
+// 	entityCreateDisplayName := testhelp.RandomName()
+// 	entityUpdateDisplayName := testhelp.RandomName()
+// 	entityUpdateDescription := testhelp.RandomName()
+
+// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+// 		// Create and Read
+// 		{
+// 			ResourceName: testResourceItemFQN,
+// 			Config: at.JoinConfigs(
+// 				eventhouseResourceHCL,
+// 				testHelperLocals,
+// 				at.CompileConfig(
+// 					testResourceItemHeader,
+// 					map[string]any{
+// 						"workspace_id": workspaceID,
+// 						"display_name": entityCreateDisplayName,
+// 						"definition":   testHelperDefinition,
+// 					},
+// 				),
+// 			),
+// 			Check: resource.ComposeAggregateTestCheckFunc(
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+// 			),
+// 		},
+// 		// Update and Read
+// 		{
+// 			ResourceName: testResourceItemFQN,
+// 			Config: at.JoinConfigs(
+// 				eventhouseResourceHCL,
+// 				testHelperLocals,
+// 				at.CompileConfig(
+// 					testResourceItemHeader,
+// 					map[string]any{
+// 						"workspace_id": workspaceID,
+// 						"display_name": entityUpdateDisplayName,
+// 						"description":  entityUpdateDescription,
+// 						"definition":   testHelperDefinition,
+// 					},
+// 				),
+// 			),
+// 			Check: resource.ComposeAggregateTestCheckFunc(
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+// 			),
+// 		},
+// 	},
+// 	))
+// }

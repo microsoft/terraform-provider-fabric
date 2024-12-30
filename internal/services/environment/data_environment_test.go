@@ -105,6 +105,9 @@ func TestUnit_EnvironmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// read by id - not found
@@ -133,6 +136,9 @@ func TestUnit_EnvironmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// read by name - not found
@@ -150,7 +156,7 @@ func TestUnit_EnvironmentDataSource(t *testing.T) {
 }
 
 func TestAcc_EnvironmentDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Environment"].(map[string]any)
@@ -173,6 +179,9 @@ func TestAcc_EnvironmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// read by id - not found
@@ -200,6 +209,9 @@ func TestAcc_EnvironmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// read by name - not found

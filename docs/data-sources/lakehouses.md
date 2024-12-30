@@ -56,4 +56,26 @@ Read-Only:
 - `description` (String) The Lakehouse description.
 - `display_name` (String) The Lakehouse display name.
 - `id` (String) The Lakehouse ID.
+- `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `default_schema` (String) Default schema of the Lakehouse. This property is returned only for schema enabled Lakehouse.
+- `onelake_files_path` (String) OneLake path to the Lakehouse files directory
+- `onelake_tables_path` (String) OneLake path to the Lakehouse tables directory.
+- `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--values--properties--sql_endpoint_properties))
+
+<a id="nestedatt--values--properties--sql_endpoint_properties"></a>
+
+### Nested Schema for `values.properties.sql_endpoint_properties`
+
+Read-Only:
+
+- `connection_string` (String) SQL endpoint connection string.
+- `id` (String) SQL endpoint ID.
+- `provisioning_status` (String) The SQL endpoint provisioning status.

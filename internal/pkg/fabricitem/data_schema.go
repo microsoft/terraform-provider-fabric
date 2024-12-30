@@ -15,7 +15,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func GetDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) schema.Schema {
+func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
 	return schema.Schema{
@@ -24,7 +24,7 @@ func GetDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 	}
 }
 
-func GetDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
+func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
 	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
@@ -37,9 +37,9 @@ func GetDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFa
 	}
 }
 
-func GetDataSourceFabricItemPropertiesSchema(ctx context.Context, d DataSourceFabricItem, properties schema.SingleNestedAttribute) schema.Schema {
+func getDataSourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
-	attributes["properties"] = properties
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
 	return schema.Schema{
 		MarkdownDescription: d.MarkdownDescription,
@@ -47,23 +47,9 @@ func GetDataSourceFabricItemPropertiesSchema(ctx context.Context, d DataSourceFa
 	}
 }
 
-func GetDataSourceFabricItemDefinitionPropertiesSchema(ctx context.Context, d DataSourceFabricItemDefinition, properties schema.SingleNestedAttribute) schema.Schema {
+func getDataSourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
-	attributes["properties"] = properties
-
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
-		attributes[key] = value
-	}
-
-	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
-		Attributes:          attributes,
-	}
-}
-
-func GetDataSourceFabricItemDefinitionPropertiesSchema1[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) schema.Schema {
-	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
-	attributes["properties"] = d.PropertiesSchema
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
 	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
 		attributes[key] = value
@@ -90,29 +76,30 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 		"timeouts": timeouts.Attributes(ctx),
 	}
 
+	// id attribute
+	attrID := schema.StringAttribute{}
+	attrID.MarkdownDescription = fmt.Sprintf("The %s ID.", itemName)
+	attrID.CustomType = customtypes.UUIDType{}
+
 	if isDisplayNameUnique {
-		attributes["id"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s ID.", itemName),
-			Optional:            true,
-			Computed:            true,
-			CustomType:          customtypes.UUIDType{},
-		}
-		attributes["display_name"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s display name.", itemName),
-			Optional:            true,
-			Computed:            true,
-		}
+		attrID.Optional = true
+		attrID.Computed = true
 	} else {
-		attributes["id"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s ID.", itemName),
-			Required:            true,
-			CustomType:          customtypes.UUIDType{},
-		}
-		attributes["display_name"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s display name.", itemName),
-			Computed:            true,
-		}
+		attrID.Required = true
 	}
+
+	attributes["id"] = attrID
+
+	// display_name attribute
+	attrDisplayName := schema.StringAttribute{}
+	attrDisplayName.MarkdownDescription = fmt.Sprintf("The %s display name.", itemName)
+	attrDisplayName.Computed = true
+
+	if isDisplayNameUnique {
+		attrDisplayName.Optional = true
+	}
+
+	attributes["display_name"] = attrDisplayName
 
 	return attributes
 }
@@ -140,16 +127,9 @@ func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name strin
 		Computed: true,
 	}
 
-	definitionMarkdownDescription := "Definition parts."
-
-	if len(definitionPathKeys) > 0 {
-		definitionMarkdownDescription = definitionMarkdownDescription + " Possible path keys: " + utils.ConvertStringSlicesToString(definitionPathKeys, true, false) + "."
-	}
-
-	attributes["definition"] = schema.MapNestedAttribute{
-		MarkdownDescription: definitionMarkdownDescription,
-		Computed:            true,
-		CustomType:          supertypes.NewMapNestedObjectTypeOf[DataSourceFabricItemDefinitionPartModel](ctx),
+	attrDefinition := schema.MapNestedAttribute{
+		Computed:   true,
+		CustomType: supertypes.NewMapNestedObjectTypeOf[dataSourceFabricItemDefinitionPartModel](ctx),
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				"content": schema.StringAttribute{
@@ -161,5 +141,22 @@ func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name strin
 		},
 	}
 
+	if len(definitionPathKeys) > 0 {
+		attrDefinition.MarkdownDescription = "Definition parts. Possible path keys: " + utils.ConvertStringSlicesToString(definitionPathKeys, true, false) + "."
+	} else {
+		attrDefinition.MarkdownDescription = "Definition parts."
+	}
+
+	attributes["definition"] = attrDefinition
+
 	return attributes
+}
+
+func getDataSourceFabricItemPropertiesNestedAttr[Ttfprop any](ctx context.Context, name string, attributes map[string]schema.Attribute) schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		MarkdownDescription: "The " + name + " properties.",
+		Computed:            true,
+		CustomType:          supertypes.NewSingleNestedObjectTypeOf[Ttfprop](ctx),
+		Attributes:          attributes,
+	}
 }

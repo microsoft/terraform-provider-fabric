@@ -33,7 +33,7 @@ permissions:
 jobs:
   changes:
     name: 🔂 Check Changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       src: ${{ steps.filter.outputs.src }}
     steps:
@@ -56,7 +56,7 @@ jobs:
     if: needs.changes.outputs.src == 'true'
     environment:
       name: development
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -182,7 +182,7 @@ jobs:
     name: 🏗️ Check Build
     needs: changes
     if: needs.changes.outputs.src == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -258,7 +258,7 @@ jobs:
 
   checkdocs:
     name: 📃 Check Docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -305,7 +305,7 @@ jobs:
     if: needs.changes.outputs.src == 'true'
     environment:
       name: development
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -462,7 +462,7 @@ jobs:
       - test
       - changes
     if: always() && needs.changes.outputs.src == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       issues: write
@@ -514,7 +514,7 @@ jobs:
     if: always()
     name: 🧪 Check Tests
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: ✅ OK
         if: ${{ !(contains(needs.*.result, 'failure')) }}

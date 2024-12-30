@@ -112,7 +112,7 @@ func TestUnit_SemanticModelDataSource(t *testing.T) {
 }
 
 func TestAcc_SemanticModelDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["SemanticModel"].(map[string]any)

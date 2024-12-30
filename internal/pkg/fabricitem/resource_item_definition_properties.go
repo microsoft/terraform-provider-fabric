@@ -6,7 +6,6 @@ package fabricitem
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"strings"
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
@@ -35,9 +34,9 @@ var (
 
 type ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop any] struct {
 	ResourceFabricItemDefinition
-	PropertiesSchema schema.SingleNestedAttribute
-	PropertiesSetter func(ctx context.Context, from *Titemprop, to *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
-	ItemGetter       func(ctx context.Context, fabricClient fabric.Client, model ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], fabricItem *FabricItemProperties[Titemprop]) error
+	PropertiesAttributes map[string]schema.Attribute
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
+	ItemGetter           func(ctx context.Context, fabricClient fabric.Client, model ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], fabricItem *FabricItemProperties[Titemprop]) error
 }
 
 func NewResourceFabricItemDefinitionProperties[Ttfprop, Titemprop any](config ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) resource.Resource {
@@ -48,7 +47,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(_ 
 	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
 		"action": "start",
 	})
@@ -68,9 +67,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 			return
 		}
 
-		var reqUpdate requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]
+		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := r.checkUpdateDefinition(ctx, plan, state, &reqUpdate)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -89,7 +88,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) { //revive:disable-line:confusing-naming
-	resp.Schema = GetResourceFabricItemDefinitionPropertiesSchema1(ctx, *r)
+	resp.Schema = getResourceFabricItemDefinitionPropertiesSchema(ctx, *r)
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) { //revive:disable-line:confusing-naming
@@ -111,7 +110,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(_
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
@@ -134,9 +133,13 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqCreate requestCreateFabricItemDefinitionProperties[Ttfprop, Titemprop]
+	var reqCreate requestCreateFabricItem
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type)...); resp.Diagnostics.HasError() {
+	reqCreate.setDisplayName(plan.DisplayName)
+	reqCreate.setDescription(plan.Description)
+	reqCreate.setType(r.Type)
+
+	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -145,8 +148,8 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 		return
 	}
 
-	plan.ID = customtypes.NewUUIDValue(*respCreate.ID)
-	plan.WorkspaceID = customtypes.NewUUIDValue(*respCreate.WorkspaceID)
+	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
+	plan.WorkspaceID = customtypes.NewUUIDPointerValue(respCreate.WorkspaceID)
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -209,7 +212,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx co
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -236,9 +239,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqUpdatePlan requestUpdateFabricItemDefinitionProperties[Ttfprop, Titemprop]
+	var reqUpdatePlan requestUpdateFabricItem
 
-	if r.checkUpdateItem(plan, state, &reqUpdatePlan) {
+	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
 		_, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest, nil)
@@ -253,9 +256,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 		resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 	}
 
-	var reqUpdateDefinition requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]
+	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := r.checkUpdateDefinition(ctx, plan, state, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -280,7 +283,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
@@ -312,7 +315,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx 
 	})
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -353,13 +356,13 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 		return
 	}
 
-	var definition supertypes.MapNestedObjectValueOf[ResourceFabricItemDefinitionPartModel]
+	var definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel]
 	if resp.Diagnostics.Append(resp.State.GetAttribute(ctx, path.Root("definition"), &definition)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	state := ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]{
-		baseFabricItemModel: baseFabricItemModel{
+		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},
@@ -383,7 +386,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(ctx context.Context, model *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(ctx context.Context, model *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
@@ -395,33 +398,5 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(ctx con
 
 	model.set(fabricItem)
 
-	diags := r.PropertiesSetter(ctx, fabricItem.Properties, model)
-	if diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) checkUpdateItem(plan, state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], reqUpdatePlan *requestUpdateFabricItemDefinitionProperties[Ttfprop, Titemprop]) bool {
-	var reqUpdateState requestUpdateFabricItemDefinitionProperties[Ttfprop, Titemprop]
-
-	reqUpdatePlan.set(plan)
-	reqUpdateState.set(state)
-
-	return !reflect.DeepEqual(reqUpdatePlan.UpdateItemRequest, reqUpdateState.UpdateItemRequest)
-}
-
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) checkUpdateDefinition(ctx context.Context, plan, state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], reqUpdate *requestUpdateFabricItemDefinitionPropertiesDefinition[Ttfprop, Titemprop]) (bool, diag.Diagnostics) {
-	if !plan.Definition.Equal(state.Definition) && plan.DefinitionUpdateEnabled.ValueBool() {
-		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, r.DefinitionPathKeys); diags.HasError() {
-			return false, diags
-		}
-
-		if len(reqUpdate.Definition.Parts) > 0 && !plan.Definition.Equal(state.Definition) {
-			return true, nil
-		}
-	}
-
-	return false, nil
+	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

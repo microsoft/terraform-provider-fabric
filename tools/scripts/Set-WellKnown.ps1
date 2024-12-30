@@ -404,6 +404,76 @@ function Get-DisplayName {
   return $result
 }
 
+function Set-FabricWorkspace {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$CapacityId
+  )
+
+  $workspaces = Invoke-FabricRest -Method 'GET' -Endpoint 'workspaces'
+  $workspace = $workspaces.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+  if (!$workspace) {
+    Write-Log -Message "Creating Workspace: $DisplayName" -Level 'WARN'
+    $payload = @{
+      displayName = $DisplayName
+      description = $DisplayName
+      capacityId  = $CapacityId
+    }
+    $workspace = (Invoke-FabricRest -Method 'POST' -Endpoint 'workspaces' -Payload $payload).Response
+  }
+
+  return $workspace
+}
+
+function Set-FabricWorkspaceCapacity {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$CapacityId
+  )
+
+  $workspace = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId"
+  if ($workspace.Response.capacityId -ne $CapacityId) {
+    Write-Log -Message "Assigning Workspace to Capacity ID: $CapacityId" -Level 'WARN'
+    $payload = @{
+      capacityId = $CapacityId
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/assignToCapacity" -Payload $payload).Response
+    $workspace.Response.capacityId = $CapacityId
+  }
+
+  return $workspace.Response
+}
+
+function Set-FabricWorkspaceRoleAssignment {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [object]$SPN
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $SPN.Id }
+  if (!$result) {
+    Write-Log -Message "Assigning SPN to Workspace: $($SPN.DisplayName)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $SPN.Id
+        type = 'ServicePrincipal'
+      }
+      role      = 'Admin'
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/roleAssignments" -Payload $payload).Response
+  }
+}
+
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS')
 
@@ -482,7 +552,8 @@ $itemNaming = @{
   'SQLDatabase'           = 'sqldb'
   'SQLEndpoint'           = 'sqle'
   'Warehouse'             = 'wh'
-  'Workspace'             = 'ws'
+  'WorkspaceDS'           = 'wsds'
+  'WorkspaceRS'           = 'wsrs'
   'DomainParent'          = 'parent'
   'DomainChild'           = 'child'
   'EntraServicePrincipal' = 'sp'
@@ -517,52 +588,42 @@ $envVars -join "`n" | Set-Content -Path './wellknown.env' -Force -NoNewline -Enc
 
 $displayName = Get-DisplayName -Base $baseName
 
-# Create Workspace if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['Workspace'])"
-$workspaces = Invoke-FabricRest -Method 'GET' -Endpoint 'workspaces'
-$workspace = $workspaces.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
-if (!$workspace) {
-  Write-Log -Message "Creating Workspace: $displayNameTemp" -Level 'WARN'
-  $payload = @{
-    displayName = $displayNameTemp
-    description = $displayNameTemp
-    capacityId  = $capacity.id
-  }
-  $workspace = (Invoke-FabricRest -Method 'POST' -Endpoint 'workspaces' -Payload $payload).Response
-}
+# Create WorkspaceRS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
 
-# Assign Workspace to Capacity if not already assigned or assigned to a different capacity
-if ($workspace.capacityId -ne $capacity.id) {
-  Write-Log -Message "Assigning Workspace to Capacity ID: $($capacity.id)" -Level 'WARN'
-  $payload = @{
-    capacityId = $capacity.id
-  }
-  $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($workspace.id)/assignToCapacity" -Payload $payload).Response
-  $workspace.capacityId = $capacity.id
-}
+# Assign WorkspaceDS to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
 
-# Assign SPN to Workspace if not already assigned
-if ($SPN) {
-  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($workspace.id)/roleAssignments"
-  $result = $results.Response.value | Where-Object { $_.id -eq $SPN.Id }
-  if (!$result) {
-    Write-Log -Message "Assigning SPN to Workspace: $($SPN.DisplayName)" -Level 'WARN'
-    $payload = @{
-      principal = @{
-        id   = $SPN.Id
-        type = 'ServicePrincipal'
-      }
-      role      = 'Admin'
-    }
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($workspace.id)/roleAssignments" -Payload $payload).Response
-  }
-}
-
-Write-Log -Message "Workspace - Name: $($workspace.displayName) / ID: $($workspace.id)"
-$wellKnown['Workspace'] = @{
+Write-Log -Message "WorkspaceRS - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceRS'] = @{
   id          = $workspace.id
   displayName = $workspace.displayName
   description = $workspace.description
+}
+
+# Assign SPN to WorkspaceRS if not already assigned
+if ($SPN) {
+  Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SPN $SPN
+}
+
+# Create WorkspaceDS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceDS'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceDS to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceDS - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceDS'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+# Assign SPN to WorkspaceRS if not already assigned
+if ($SPN) {
+  Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SPN $SPN
 }
 
 # Define an array of item types to create
@@ -783,5 +844,3 @@ if ($SPN) {
 $wellKnownJson = $wellKnown | ConvertTo-Json
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
-
-

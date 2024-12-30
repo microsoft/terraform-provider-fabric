@@ -89,7 +89,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 					"id": *entity.ID,
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
 		// read by id
 		{
@@ -105,6 +105,9 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by id - not found
@@ -133,6 +136,9 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by name - not found
@@ -150,7 +156,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 }
 
 func TestAcc_EventhouseDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Eventhouse"].(map[string]any)
@@ -174,6 +180,9 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by id - not found
@@ -203,6 +212,9 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 			),
 		},
 		// read by name - not found
@@ -216,6 +228,25 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id with definition
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.EventhouseProperties.json.content"),
+			),
 		},
 	}))
 }

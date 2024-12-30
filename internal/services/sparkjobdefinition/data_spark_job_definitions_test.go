@@ -69,13 +69,14 @@ func TestUnit_SparkJobDefinitionsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.onelake_root_path"),
 			),
 		},
 	}))
 }
 
 func TestAcc_SparkJobDefinitionsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
@@ -90,6 +91,7 @@ func TestAcc_SparkJobDefinitionsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_root_path"),
 			),
 		},
 	},

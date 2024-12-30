@@ -242,6 +242,7 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -249,7 +250,7 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -273,6 +274,7 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// Update and Read
@@ -291,6 +293,7 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 	},

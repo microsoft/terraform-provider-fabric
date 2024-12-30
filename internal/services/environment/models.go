@@ -15,45 +15,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type baseEnvironmentModel struct {
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Description types.String     `tfsdk:"description"`
-}
-
-func (to *baseEnvironmentModel) set(from fabenvironment.Environment) {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-}
-
-type baseEnvironmentPropertiesModel struct {
-	baseEnvironmentModel
-	Properties supertypes.SingleNestedObjectValueOf[environmentPropertiesModel] `tfsdk:"properties"`
-}
-
-func (to *baseEnvironmentPropertiesModel) setProperties(ctx context.Context, from fabenvironment.Environment) diag.Diagnostics {
-	properties := supertypes.NewSingleNestedObjectValueOfNull[environmentPropertiesModel](ctx)
-
-	if from.Properties != nil {
-		propertiesModel := &environmentPropertiesModel{}
-
-		if diags := propertiesModel.set(ctx, from.Properties); diags.HasError() {
-			return diags
-		}
-
-		if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.Properties = properties
-
-	return nil
-}
-
 type environmentPropertiesModel struct {
 	PublishDetails supertypes.SingleNestedObjectValueOf[environmentPublishDetailsModel] `tfsdk:"publish_details"`
 }

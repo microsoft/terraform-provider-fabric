@@ -188,6 +188,9 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// Update and Read
@@ -204,6 +207,9 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -215,7 +221,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -236,6 +242,9 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// Update and Read
@@ -252,6 +261,9 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 	},

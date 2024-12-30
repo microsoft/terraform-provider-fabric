@@ -28,9 +28,9 @@ var (
 
 type DataSourceFabricItemsProperties[Ttfprop, Titemprop any] struct {
 	DataSourceFabricItems
-	PropertiesSchema schema.SingleNestedAttribute
-	PropertiesSetter func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
-	ItemListGetter   func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop], fabricItems *[]FabricItemProperties[Titemprop]) error
+	PropertiesAttributes map[string]schema.Attribute
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
+	ItemListGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop], fabricItems *[]FabricItemProperties[Titemprop]) error
 }
 
 func NewDataSourceFabricItemsProperties[Ttfprop, Titemprop any](config DataSourceFabricItemsProperties[Ttfprop, Titemprop]) datasource.DataSource {
@@ -63,7 +63,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 		},
 	}
 
-	attributes["properties"] = d.PropertiesSchema
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: d.MarkdownDescription,

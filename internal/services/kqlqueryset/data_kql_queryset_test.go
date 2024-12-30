@@ -150,7 +150,7 @@ func TestUnit_KQLQuerysetDataSource(t *testing.T) {
 }
 
 func TestAcc_KQLQuerysetDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["KQLQueryset"].(map[string]any)

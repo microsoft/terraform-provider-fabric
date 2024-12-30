@@ -150,7 +150,7 @@ func TestUnit_SparkJobDefinitionDataSource(t *testing.T) {
 }
 
 func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["SparkJobDefinition"].(map[string]any)
@@ -158,9 +158,10 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
 
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
 		// read by id
 		{
+			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -178,6 +179,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 		},
 		// read by id - not found
 		{
+			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -189,6 +191,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 		},
 		// read by name
 		{
+			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -206,6 +209,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 		},
 		// read by name - not found
 		{
+			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -217,6 +221,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 		},
 		// read by id with definition
 		{
+			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{

@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabsparkjobdefinition "github.com/microsoft/fabric-sdk-go/fabric/sparkjobdefinition"
@@ -19,19 +18,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewResourceSparkJobDefinition(ctx context.Context) resource.Resource {
-	propertiesSchema := schema.SingleNestedAttribute{
-		MarkdownDescription: "The " + ItemName + " properties.",
-		Computed:            true,
-		CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkJobDefinitionPropertiesModel](ctx),
-		Attributes: map[string]schema.Attribute{
-			"onelake_root_path": schema.StringAttribute{
-				MarkdownDescription: "OneLake path to the Spark Job Definition root directory.",
-				Computed:            true,
-			},
-		},
-	}
-
+func NewResourceSparkJobDefinition() resource.Resource {
 	propertiesSetter := func(ctx context.Context, from *fabsparkjobdefinition.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[sparkJobDefinitionPropertiesModel, fabsparkjobdefinition.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[sparkJobDefinitionPropertiesModel](ctx)
 
@@ -85,9 +72,9 @@ func NewResourceSparkJobDefinition(ctx context.Context) resource.Resource {
 			DefinitionRequired: false,
 			DefinitionEmpty:    ItemDefinitionEmpty,
 		},
-		PropertiesSchema: propertiesSchema,
-		PropertiesSetter: propertiesSetter,
-		ItemGetter:       itemGetter,
+		PropertiesAttributes: getResourceSparkJobDefinitionPropertiesAttributes(),
+		PropertiesSetter:     propertiesSetter,
+		ItemGetter:           itemGetter,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinitionProperties(config)

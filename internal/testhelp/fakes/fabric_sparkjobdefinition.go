@@ -16,6 +16,18 @@ import (
 
 type operationsSparkJobDefinition struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsSparkJobDefinition) ConvertItemToEntity(item fabcore.Item) fabsparkjobdefinition.SparkJobDefinition {
+	return fabsparkjobdefinition.SparkJobDefinition{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
+		Properties:  NewRandomSparkJobDefinition().Properties,
+	}
+}
+
 // CreateDefinition implements concreteDefinitionOperations.
 func (o *operationsSparkJobDefinition) CreateDefinition(data fabsparkjobdefinition.CreateSparkJobDefinitionRequest) *fabsparkjobdefinition.PublicDefinition {
 	return data.Definition
@@ -94,8 +106,8 @@ func (o *operationsSparkJobDefinition) TransformUpdate(entity fabsparkjobdefinit
 
 // Update implements concreteOperations.
 func (o *operationsSparkJobDefinition) Update(base fabsparkjobdefinition.SparkJobDefinition, data fabsparkjobdefinition.UpdateSparkJobDefinitionRequest) fabsparkjobdefinition.SparkJobDefinition {
-	base.Description = data.Description
 	base.DisplayName = data.DisplayName
+	base.Description = data.Description
 
 	return base
 }
@@ -133,10 +145,10 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 	}
 
 	var entityOperations concreteEntityOperations = &operationsSparkJobDefinition{}
-
+	var converter itemConverter[fabsparkjobdefinition.SparkJobDefinition] = &operationsSparkJobDefinition{}
 	var definitionOperations concreteDefinitionOperations = &operationsSparkJobDefinition{}
 
-	handler := newTypedHandler(server, entityOperations)
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,

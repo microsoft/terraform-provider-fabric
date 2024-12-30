@@ -4,46 +4,10 @@
 package warehouse
 
 import (
-	"context"
-
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabwarehouse "github.com/microsoft/fabric-sdk-go/fabric/warehouse"
-
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
-
-type baseWarehouseModel struct {
-	WorkspaceID customtypes.UUID                                               `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                                               `tfsdk:"id"`
-	DisplayName types.String                                                   `tfsdk:"display_name"`
-	Description types.String                                                   `tfsdk:"description"`
-	Properties  supertypes.SingleNestedObjectValueOf[warehousePropertiesModel] `tfsdk:"properties"`
-}
-
-func (to *baseWarehouseModel) set(ctx context.Context, from fabwarehouse.Warehouse) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-
-	properties := supertypes.NewSingleNestedObjectValueOfNull[warehousePropertiesModel](ctx)
-
-	if from.Properties != nil {
-		propertiesModel := &warehousePropertiesModel{}
-		propertiesModel.set(from.Properties)
-
-		if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.Properties = properties
-
-	return nil
-}
 
 type warehousePropertiesModel struct {
 	ConnectionString types.String      `tfsdk:"connection_string"`

@@ -79,7 +79,7 @@ func TestUnit_LakehouseTablesDataSource(t *testing.T) {
 }
 
 func TestAcc_LakehouseTablesDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Lakehouse"].(map[string]any)
