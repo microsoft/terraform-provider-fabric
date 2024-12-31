@@ -359,6 +359,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domain.NewResourceDomain,
 		domain.NewResourceDomainRoleAssignments,
 		domain.NewResourceDomainWorkspaceAssignments,
+		connection.NewResourceConnection,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,

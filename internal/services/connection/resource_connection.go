@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	superstringvalidator "github.com/FrangipaneTeam/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
@@ -33,8 +33,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure      = (*resourceConnection)(nil)
-	_ resource.ResourceWithValidateConfig = (*resourceConnection)(nil)
+	_ resource.ResourceWithConfigure  = (*resourceConnection)(nil)
+	_ resource.ResourceWithModifyPlan = (*resourceConnection)(nil)
 )
 
 type resourceConnection struct {
@@ -120,14 +120,23 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 					"type": schema.StringAttribute{
 						MarkdownDescription: "The type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(possibleConnectionTypeValues(), true, true),
 						Required:            true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(possibleConnectionTypeValues()...),
+						},
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"creation_method": schema.StringAttribute{
 						MarkdownDescription: "The creation method used to create the connection.",
 						Required:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"parameters": schema.MapAttribute{
 						MarkdownDescription: "A map of key/value pairs of connection parameters.",
-						Computed:            true,
+						Optional:            true,
 						CustomType:          supertypes.NewMapTypeOf[string](ctx),
 					},
 				},
@@ -135,15 +144,21 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 			"credential_details": schema.SingleNestedAttribute{
 				MarkdownDescription: "The credential details of the connection.",
 				Required:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialDetailsModel](ctx),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[rsCredentialDetailsModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"connection_encryption": schema.StringAttribute{
 						MarkdownDescription: "The connection encryption type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleConnectionEncryptionValues(), true, true),
 						Required:            true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleConnectionEncryptionValues(), false)...),
+						},
 					},
 					"single_sign_on_type": schema.StringAttribute{
-						MarkdownDescription: "The single sign-on type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleSingleSignOnTypeValues(), true, true),
+						MarkdownDescription: "The single sign-on type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleSingleSignOnTypeValues(), true, true),
 						Required:            true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleSingleSignOnTypeValues(), false)...),
+						},
 					},
 					"skip_test_connection": schema.BoolAttribute{
 						MarkdownDescription: "Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.",
@@ -307,14 +322,14 @@ func (r *resourceConnection) Configure(ctx context.Context, req resource.Configu
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 }
 
-func (r *resourceConnection) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var config resourceConnectionModel
+func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var plan resourceConnectionModel
 
-	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	connectionDetails, diags := config.getConnectionDetails(ctx)
+	connectionDetails, diags := plan.getConnectionDetails(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -329,7 +344,7 @@ func (r *resourceConnection) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
-	credentialDetails, diags := config.getCredentialDetails(ctx)
+	credentialDetails, diags := plan.getCredentialDetails(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -430,7 +445,7 @@ func (r *resourceConnection) Delete(ctx context.Context, req resource.DeleteRequ
 
 func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
 	respList, err := r.client.ListSupportedConnectionTypes(ctx, &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
-		ShowAllCreationMethods: to.Ptr(true),
+		ShowAllCreationMethods: azto.Ptr(true),
 	})
 
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
@@ -441,7 +456,7 @@ func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, mode
 
 	for _, v := range respList {
 		if *v.Type == model.Type.ValueString() {
-			supportedConnectionType = &v
+			*supportedConnectionType = v
 
 			return nil
 		}
@@ -564,6 +579,8 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 	}
 
 	// check if all keys of connectionDetailsParams are in vParameters
+	var vNames []string
+
 	for k := range connectionDetailsParams {
 		var found bool
 
@@ -572,16 +589,24 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 				found = true
 
 				break
+			} else {
+				found = false
 			}
+
+			vNames = append(vNames, *v.Name)
 		}
 
 		if !found {
 			diags.AddAttributeError(
 				path.Root("connection_details").AtName("parameters"),
 				"Unsupported connection parameter",
-				fmt.Sprintf("The connection parameter '%s' is not supported.", k),
+				fmt.Sprintf("The connection parameter '%s' is not supported. Supported parameters: %s", k, utils.ConvertStringSlicesToString(vNames, true, true)),
 			)
 		}
+	}
+
+	if diags.HasError() {
+		return diags
 	}
 
 	// check if all required keys of vParameters are in connectionDetailsParams
@@ -593,20 +618,22 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 					"Missing connection parameter",
 					fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
 				)
-
-				return diags
 			}
 
-			if connectionDetailsParams[*v.Name] == "" {
-				diags.AddAttributeError(
-					path.Root("connection_details").AtName("parameters"),
-					"Missing required connection parameter",
-					fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
-				)
+			// if connectionDetailsParams[*v.Name] == "" {
+			// 	diags.AddAttributeError(
+			// 		path.Root("connection_details").AtName("parameters"),
+			// 		"Missing required connection parameter",
+			// 		fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
+			// 	)
 
-				return diags
-			}
+			// 	return diags
+			// }
 		}
+	}
+
+	if diags.HasError() {
+		return diags
 	}
 
 	return nil
