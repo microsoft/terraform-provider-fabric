@@ -166,8 +166,7 @@ type rsCredentialDetailsModel struct {
 	ConnectionEncryption types.String `tfsdk:"connection_encryption"`
 	SingleSignOnType     types.String `tfsdk:"single_sign_on_type"`
 	SkipTestConnection   types.Bool   `tfsdk:"skip_test_connection"`
-
-	CredentialType types.String `tfsdk:"credential_type"`
+	CredentialType       types.String `tfsdk:"credential_type"`
 
 	// AnonymousCredentials                   supertypes.SingleNestedObjectValueOf[anonymousCredentialsModel]                   `tfsdk:"anonymous_credentials"`
 	BasicCredentials                 supertypes.SingleNestedObjectValueOf[credentialsBasicModel]                 `tfsdk:"basic_credentials"`
