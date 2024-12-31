@@ -43,7 +43,7 @@ func getDataSourceConnectionAttributes(ctx context.Context) map[string]schema.At
 		"connection_details": schema.SingleNestedAttribute{
 			MarkdownDescription: "The connection details of the connection.",
 			Computed:            true,
-			CustomType:          supertypes.NewSingleNestedObjectTypeOf[connectionDetailsModel](ctx),
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[dsConnectionDetailsModel](ctx),
 			Attributes: map[string]schema.Attribute{
 				"path": schema.StringAttribute{
 					MarkdownDescription: "The path of the connection.",
@@ -58,7 +58,7 @@ func getDataSourceConnectionAttributes(ctx context.Context) map[string]schema.At
 		"credential_details": schema.SingleNestedAttribute{
 			MarkdownDescription: "The credential details of the connection.",
 			Computed:            true,
-			CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialDetailsModel](ctx),
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[dsCredentialDetailsModel](ctx),
 			Attributes: map[string]schema.Attribute{
 				"connection_encryption": schema.StringAttribute{
 					MarkdownDescription: "The connection encryption type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleConnectionEncryptionValues(), true, true),

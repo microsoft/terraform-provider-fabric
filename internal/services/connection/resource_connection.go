@@ -6,6 +6,10 @@ package connection
 import (
 	"context"
 	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
@@ -303,7 +307,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 	}
 }
 
-func (r *resourceConnection) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *resourceConnection) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -430,8 +434,6 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// r.client.CreateConnection(ctx, createConnectionRequest fabcore.CreateConnectionRequestClassification, options *fabcore.ConnectionsClientCreateConnectionOptions)
 }
 
 func (r *resourceConnection) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -452,7 +454,7 @@ func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, mode
 		return diags
 	}
 
-	var vNames []string
+	vNames := make([]string, 0, len(respList))
 
 	for _, v := range respList {
 		if *v.Type == model.Type.ValueString() {
@@ -461,7 +463,7 @@ func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, mode
 			return nil
 		}
 
-		vNames = append(vNames, string(*v.Type))
+		vNames = append(vNames, *v.Type)
 	}
 
 	var diags diag.Diagnostics
@@ -476,7 +478,7 @@ func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, mode
 }
 
 func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
-	var vNames []string
+	vNames := make([]string, 0, len(elements))
 
 	for _, v := range elements {
 		if *v.Name == model.CreationMethod.ValueString() {
@@ -533,9 +535,8 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 	return diags
 }
 
-func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics {
+func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	if model.SkipTestConnection.ValueBool() != supportsSkipTestConnection {
-
 		var diags diag.Diagnostics
 
 		diags.AddAttributeError(
@@ -589,8 +590,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 				found = true
 
 				break
-			} else {
-				found = false
 			}
 
 			vNames = append(vNames, *v.Name)
@@ -599,7 +598,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 		if !found {
 			diags.AddAttributeError(
 				path.Root("connection_details").AtName("parameters"),
-				"Unsupported connection parameter",
+				"Unsupported connection parameter key",
 				fmt.Sprintf("The connection parameter '%s' is not supported. Supported parameters: %s", k, utils.ConvertStringSlicesToString(vNames, true, true)),
 			)
 		}
@@ -615,20 +614,18 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			if _, ok := connectionDetailsParams[*v.Name]; !ok {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
-					"Missing connection parameter",
+					"Missing connection parameter key",
 					fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
 				)
 			}
 
-			// if connectionDetailsParams[*v.Name] == "" {
-			// 	diags.AddAttributeError(
-			// 		path.Root("connection_details").AtName("parameters"),
-			// 		"Missing required connection parameter",
-			// 		fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
-			// 	)
-
-			// 	return diags
-			// }
+			if connectionDetailsParams[*v.Name] == "" {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Missing connection parameter value",
+					fmt.Sprintf("The required connection parameter '%s' value is missing.", *v.Name),
+				)
+			}
 		}
 	}
 
@@ -636,5 +633,104 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 		return diags
 	}
 
-	return nil
+	for k, v := range connectionDetailsParams {
+		var dataType fabcore.DataType
+		var allowedValues []string
+
+		for _, v := range vParameters {
+			if *v.Name == k {
+				dataType = *v.DataType
+				allowedValues = v.AllowedValues
+
+				break
+			}
+		}
+
+		switch dataType {
+		case fabcore.DataTypeBoolean:
+			// Use boolean as the parameter input value. False - the value is false, True - the value is true.
+			if !strings.EqualFold(v, "true") && !strings.EqualFold(v, "false") {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported values: `True`, `False`", k),
+				)
+			}
+		case fabcore.DataTypeDate:
+			// Use date as the parameter input value, using YYYY-MM-DD format.
+			if _, err := time.Parse(time.DateOnly, v); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `YYYY-MM-DD`", k),
+				)
+			}
+		case fabcore.DataTypeDateTime:
+			// Use date time as the parameter input value, using YYYY-MM-DDTHH:mm:ss.FFFZ (ISO 8601) format.
+			if _, err := time.Parse("2006-01-02T15:04:05.000Z07:00", v); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `YYYY-MM-DDTHH:mm:ss.FFFZ`", k),
+				)
+			}
+		case fabcore.DataTypeDateTimeZone:
+			// Use date time zone as the parameter input value, using YYYY-MM-DDTHH:mm:ss.FFF±hh:mm format.
+			if _, err := time.Parse("2006-01-02T03:04:05.000-07:00", v); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `YYYY-MM-DDTHH:mm:ss.FFF±hh:mm`", k),
+				)
+			}
+		case fabcore.DataTypeDuration:
+			// Use duration as the parameter input value, using [-]P(n)DT(n)H(n)M(n)S format. For example: P3DT4H30M10S (for 3 days, 4 hours, 30 minutes, and 10 seconds).
+			if _, err := time.ParseDuration(v); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `[-]P(n)DT(n)H(n)M(n)S`", k),
+				)
+			}
+		case fabcore.DataTypeNumber:
+			// Use number as the parameter input value (integer or floating point).
+			if _, err := strconv.ParseFloat(v, 64); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. It must be integer or floating point.", k),
+				)
+			}
+		case fabcore.DataTypeText:
+			// Use text as the parameter input value.
+			if v == "" {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. It must not be empty.", k),
+				)
+			}
+		case fabcore.DataTypeTime:
+			// Use time as the parameter input value, using HH:mm:ss.FFFZ format.
+			if _, err := time.Parse("15:04:05.000Z07:00", v); err != nil {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `HH:mm:ss.FFFZ`", k),
+				)
+			}
+		}
+
+		if len(allowedValues) > 0 {
+			if !slices.Contains(allowedValues, v) {
+				diags.AddAttributeError(
+					path.Root("connection_details").AtName("parameters"),
+					"Invalid connection parameter value",
+					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported values: %s", k, utils.ConvertStringSlicesToString(allowedValues, true, true)),
+				)
+			}
+		}
+	}
+
+	return diags
 }
