@@ -36,8 +36,7 @@ type DataSourceFabricItemDefinition struct {
 	MarkdownDescription string
 	IsDisplayNameUnique bool
 	FormatTypeDefault   string
-	FormatTypes         []string
-	DefinitionPathKeys  []string
+	DefinitionFormats   []DefinitionFormat
 }
 
 func NewDataSourceFabricItemDefinition(config DataSourceFabricItemDefinition) datasource.DataSource {
@@ -120,10 +119,12 @@ func (d *DataSourceFabricItemDefinition) Read(ctx context.Context, req datasourc
 		return
 	}
 
-	data.Format = types.StringNull()
-
-	if d.FormatTypeDefault != "" {
-		data.Format = types.StringValue(d.FormatTypeDefault)
+	if data.Format.IsNull() || data.Format.IsUnknown() {
+		if d.FormatTypeDefault != "" {
+			data.Format = types.StringValue(d.FormatTypeDefault)
+		} else {
+			data.Format = types.StringNull()
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
@@ -203,7 +204,11 @@ func (d *DataSourceFabricItemDefinition) getDefinition(ctx context.Context, mode
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 
 	if !model.Format.IsNull() {
-		respGetOpts.Format = model.Format.ValueStringPointer()
+		apiFormat := GetDefinitionFormatAPI(d.DefinitionFormats, model.Format.ValueString())
+
+		if apiFormat != "" {
+			respGetOpts.Format = azto.Ptr(apiFormat)
+		}
 	}
 
 	respGet, err := d.client.GetItemDefinition(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), respGetOpts)

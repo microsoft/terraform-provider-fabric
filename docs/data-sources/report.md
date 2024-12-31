@@ -29,6 +29,7 @@ data "fabric_report" "example" {
 data "fabric_report" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "PBIR-Legacy"
   output_definition = true
 }
 
@@ -56,6 +57,7 @@ output "example_definition_report_object" {
 
 ### Optional
 
+- `format` (String) The Report format. Possible values: `PBIR-Legacy`
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
 !> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
@@ -67,7 +69,6 @@ output "example_definition_report_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: `report.json`, `definition.pbir`, `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`. (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Report description.
 - `display_name` (String) The Report display name.
-- `format` (String) The Report format. Possible values: `PBIR-Legacy`.
 
 <a id="nestedatt--timeouts"></a>
 

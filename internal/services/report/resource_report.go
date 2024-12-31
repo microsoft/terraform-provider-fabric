@@ -27,20 +27,19 @@ func NewResourceReport() resource.Resource {
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
 		FormatTypeDefault:     ItemFormatTypeDefault,
-		FormatTypes:           ItemFormatTypes,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-		DefinitionPathKeys:    ItemDefinitionPathsPBIRLegacy,
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtLeast(3),
 			mapvalidator.KeysAre(
 				stringvalidator.RegexMatches(
 					regexp.MustCompile(`^(report\.json|definition\.pbir|StaticResources/RegisteredResources/.*|StaticResources/SharedResources/.*)$`),
-					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(ItemDefinitionPathsPBIRLegacy, true, false),
+					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "PBIR-Legacy"), true, false),
 				),
 			),
 		},
 		DefinitionRequired: true,
 		DefinitionEmpty:    "",
+		DefinitionFormats:  itemDefinitionFormats,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)

@@ -24,6 +24,7 @@ resource "fabric_report" "example_bootstrap" {
   display_name              = "example"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "PBIR-Legacy"
   definition = {
     "report.json" = {
       source = "${local.path}/report.json"
@@ -44,6 +45,7 @@ resource "fabric_report" "example_bootstrap" {
 resource "fabric_report" "example_update" {
   display_name = "example with update"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "PBIR-Legacy"
   definition = {
     "report.json" = {
       source = "${local.path}/report.json"
@@ -68,6 +70,7 @@ resource "fabric_report" "example_update" {
 
 - `definition` (Attributes Map) Definition parts. Accepted path keys: `report.json`, `definition.pbir`, `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Report display name.
+- `format` (String) The Report format. Possible values: `PBIR-Legacy`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
@@ -78,7 +81,6 @@ resource "fabric_report" "example_update" {
 
 ### Read-Only
 
-- `format` (String) The Report format. Possible values: `PBIR-Legacy`.
 - `id` (String) The Report ID.
 
 <a id="nestedatt--definition"></a>
