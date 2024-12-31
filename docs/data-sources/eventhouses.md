@@ -56,4 +56,15 @@ Read-Only:
 - `description` (String) The Eventhouse description.
 - `display_name` (String) The Eventhouse display name.
 - `id` (String) The Eventhouse ID.
+- `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `database_ids` (List of String) List of all KQL Database children IDs.
+- `ingestion_service_uri` (String) Ingestion service URI.
+- `query_service_uri` (String) Query service URI.

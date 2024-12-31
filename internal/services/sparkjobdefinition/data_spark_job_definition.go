@@ -8,7 +8,6 @@ import (
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -17,19 +16,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceSparkJobDefinition(ctx context.Context) datasource.DataSource {
-	propertiesSchema := schema.SingleNestedAttribute{
-		MarkdownDescription: "The " + ItemName + " properties.",
-		Computed:            true,
-		CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkJobDefinitionPropertiesModel](ctx),
-		Attributes: map[string]schema.Attribute{
-			"onelake_root_path": schema.StringAttribute{
-				MarkdownDescription: "OneLake path to the Spark Job Definition root directory.",
-				Computed:            true,
-			},
-		},
-	}
-
+func NewDataSourceSparkJobDefinition() datasource.DataSource {
 	propertiesSetter := func(ctx context.Context, from *fabsparkjobdefinition.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[sparkJobDefinitionPropertiesModel, fabsparkjobdefinition.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[sparkJobDefinitionPropertiesModel](ctx)
 
@@ -37,8 +24,7 @@ func NewDataSourceSparkJobDefinition(ctx context.Context) datasource.DataSource 
 			propertiesModel := &sparkJobDefinitionPropertiesModel{}
 			propertiesModel.set(from)
 
-			diags := properties.Set(ctx, propertiesModel)
-			if diags.HasError() {
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
 		}
@@ -96,10 +82,10 @@ func NewDataSourceSparkJobDefinition(ctx context.Context) datasource.DataSource 
 			FormatTypes:         ItemFormatTypes,
 			DefinitionPathKeys:  ItemDefinitionPaths,
 		},
-		PropertiesSchema: propertiesSchema,
-		PropertiesSetter: propertiesSetter,
-		ItemGetter:       itemGetter,
-		ItemListGetter:   itemListGetter,
+		PropertiesAttributes: getDataSourceSparkJobDefinitionPropertiesAttributes(),
+		PropertiesSetter:     propertiesSetter,
+		ItemGetter:           itemGetter,
+		ItemListGetter:       itemListGetter,
 	}
 
 	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)

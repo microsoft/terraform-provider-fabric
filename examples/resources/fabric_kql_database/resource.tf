@@ -1,4 +1,4 @@
-# Create a ReadWrite KQL database example
+# Example 1 - Create a ReadWrite KQL database
 resource "fabric_kql_database" "example1" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -9,7 +9,7 @@ resource "fabric_kql_database" "example1" {
   }
 }
 
-# Create a Shortcut KQL database to source Azure Data Explorer cluster example
+# Example 2 - Create a Shortcut KQL database to source Azure Data Explorer cluster
 resource "fabric_kql_database" "example2" {
   display_name = "example2"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -22,7 +22,7 @@ resource "fabric_kql_database" "example2" {
   }
 }
 
-# Create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token example
+# Example 3 - Create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
 resource "fabric_kql_database" "example3" {
   display_name = "example3"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -34,7 +34,7 @@ resource "fabric_kql_database" "example3" {
   }
 }
 
-# Create a Shortcut KQL database to source KQL database example
+# Example 4 - Create a Shortcut KQL database to source KQL database
 resource "fabric_kql_database" "example4" {
   display_name = "example4"
   workspace_id = "00000000-0000-0000-0000-000000000000"

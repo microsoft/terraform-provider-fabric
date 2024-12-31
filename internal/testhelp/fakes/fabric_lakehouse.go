@@ -16,6 +16,18 @@ import (
 
 type operationsLakehouse struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsLakehouse) ConvertItemToEntity(item fabcore.Item) fablakehouse.Lakehouse {
+	return fablakehouse.Lakehouse{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
+		Properties:  NewRandomLakehouse().Properties,
+	}
+}
+
 // CreateWithParentID implements concreteOperations.
 func (o *operationsLakehouse) CreateWithParentID(parentID string, data fablakehouse.CreateLakehouseRequest) fablakehouse.Lakehouse {
 	entity := NewRandomLakehouseWithWorkspace(parentID)
@@ -106,7 +118,9 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 
 	var entityOperations concreteEntityOperations = &operationsLakehouse{}
 
-	handler := newTypedHandler(server, entityOperations)
+	var converter itemConverter[fablakehouse.Lakehouse] = &operationsLakehouse{}
+
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,
@@ -130,6 +144,7 @@ func NewRandomLakehouse() fablakehouse.Lakehouse {
 		Properties: &fablakehouse.Properties{
 			OneLakeFilesPath:  to.Ptr(testhelp.RandomName()),
 			OneLakeTablesPath: to.Ptr(testhelp.RandomName()),
+			DefaultSchema:     to.Ptr("dbo"),
 			SQLEndpointProperties: &fablakehouse.SQLEndpointProperties{
 				ID:                 to.Ptr(testhelp.RandomUUID()),
 				ProvisioningStatus: to.Ptr(fablakehouse.SQLEndpointProvisioningStatusSuccess),

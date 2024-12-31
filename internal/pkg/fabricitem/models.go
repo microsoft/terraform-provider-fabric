@@ -13,14 +13,14 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type baseFabricItemModel struct {
+type fabricItemModel struct {
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 	ID          customtypes.UUID `tfsdk:"id"`
 	DisplayName types.String     `tfsdk:"display_name"`
 	Description types.String     `tfsdk:"description"`
 }
 
-func (to *baseFabricItemModel) set(from fabcore.Item) {
+func (to *fabricItemModel) set(from fabcore.Item) {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)

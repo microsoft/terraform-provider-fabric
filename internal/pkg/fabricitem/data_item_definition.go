@@ -49,7 +49,7 @@ func (d *DataSourceFabricItemDefinition) Metadata(_ context.Context, req datasou
 }
 
 func (d *DataSourceFabricItemDefinition) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = GetDataSourceFabricItemDefinitionSchema(ctx, *d)
+	resp.Schema = getDataSourceFabricItemDefinitionSchema(ctx, *d)
 }
 
 func (d *DataSourceFabricItemDefinition) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
@@ -211,5 +211,12 @@ func (d *DataSourceFabricItemDefinition) getDefinition(ctx context.Context, mode
 		return diags
 	}
 
-	return model.setDefinition(ctx, *respGet.Definition)
+	definition, diags := getDataSourceDefinitionModel(ctx, *respGet.Definition)
+	if diags.HasError() {
+		return diags
+	}
+
+	model.setDefinition(definition)
+
+	return nil
 }

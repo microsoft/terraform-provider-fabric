@@ -22,11 +22,11 @@ var (
 
 func TestUnit_EnvironmentsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomEnvironmentWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomEnvironmentWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomEnvironmentWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -69,13 +69,16 @@ func TestUnit_EnvironmentsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 	}))
 }
 
 func TestAcc_EnvironmentsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
@@ -90,6 +93,9 @@ func TestAcc_EnvironmentsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 	},

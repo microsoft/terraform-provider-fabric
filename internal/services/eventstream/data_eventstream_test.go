@@ -150,7 +150,7 @@ func TestUnit_EventstreamDataSource(t *testing.T) {
 }
 
 func TestAcc_EventstreamDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Eventstream"].(map[string]any)

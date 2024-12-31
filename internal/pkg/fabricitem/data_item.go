@@ -45,7 +45,7 @@ func (d *DataSourceFabricItem) Metadata(_ context.Context, req datasource.Metada
 }
 
 func (d *DataSourceFabricItem) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = GetDataSourceFabricItemSchema(ctx, *d)
+	resp.Schema = getDataSourceFabricItemSchema(ctx, *d)
 }
 
 func (d *DataSourceFabricItem) ConfigValidators(_ context.Context) []datasource.ConfigValidator {

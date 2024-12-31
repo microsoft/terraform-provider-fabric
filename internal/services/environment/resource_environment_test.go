@@ -188,6 +188,9 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// Update and Read
@@ -204,6 +207,9 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -211,7 +217,7 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -232,6 +238,9 @@ func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 		// Update and Read
@@ -248,6 +257,9 @@ func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
 	},

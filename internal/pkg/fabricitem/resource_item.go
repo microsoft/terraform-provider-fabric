@@ -48,7 +48,7 @@ func (r *ResourceFabricItem) Metadata(_ context.Context, req resource.MetadataRe
 }
 
 func (r *ResourceFabricItem) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = GetResourceFabricItemSchema(ctx, *r)
+	resp.Schema = getResourceFabricItemSchema(ctx, *r)
 }
 
 func (r *ResourceFabricItem) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -95,7 +95,9 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 
 	var reqCreate requestCreateFabricItem
 
-	reqCreate.set(plan, r.Type)
+	reqCreate.setDisplayName(plan.DisplayName)
+	reqCreate.setDescription(plan.Description)
+	reqCreate.setType(r.Type)
 
 	respCreate, err := r.client.CreateItem(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -187,7 +189,8 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 
 	var reqUpdate requestUpdateFabricItem
 
-	reqUpdate.set(plan)
+	reqUpdate.setDisplayName(plan.DisplayName)
+	reqUpdate.setDescription(plan.Description)
 
 	respUpdate, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {

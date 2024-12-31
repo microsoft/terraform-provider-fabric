@@ -18,7 +18,7 @@ var (
 )
 
 func TestAcc_SparkEnvironmentSettingsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	environment := testhelp.WellKnown()["Environment"].(map[string]any)

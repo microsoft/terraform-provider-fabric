@@ -3,9 +3,16 @@
 
 package fakes
 
+import fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+
 type identifier[TEntity any] interface {
 	// GetID returns the ID of the entity.
 	GetID(entity TEntity) string
+}
+
+type itemConverter[TEntity any] interface {
+	// ConvertItemToEntity converts an fabcore.Item into an specific entity.
+	ConvertItemToEntity(item fabcore.Item) TEntity
 }
 
 type getTransformer[TEntity, TOutput any] interface {

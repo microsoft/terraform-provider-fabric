@@ -3,16 +3,16 @@
 page_title: "fabric_warehouse Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric Warehouse.
-  See Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing for more information.
+  Manage a Fabric Warehouse.
+  Use this resource to manage a Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This item does not support Service Principal. Please use a User context authentication.
 ---
 
 # fabric_warehouse (Resource)
 
-This resource manages a Fabric Warehouse.
+Manage a Fabric Warehouse.
 
-See [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing) for more information.
+Use this resource to manage a [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This item does not support Service Principal. Please use a User context authentication.
 
@@ -60,9 +60,9 @@ Optional:
 
 Read-Only:
 
-- `connection_string` (String) Connection String
-- `created_date` (String) Created Date
-- `last_updated_time` (String) Last Updated Time
+- `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
+- `created_date` (String) The date and time the warehouse was created.
+- `last_updated_time` (String) The date and time the warehouse was last updated.
 
 ## Import
 

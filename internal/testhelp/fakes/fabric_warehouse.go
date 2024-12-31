@@ -93,6 +93,18 @@ func (o *operationsWarehouse) Validate(newEntity fabwarehouse.Warehouse, existin
 	return http.StatusCreated, nil
 }
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsWarehouse) ConvertItemToEntity(entity fabcore.Item) fabwarehouse.Warehouse {
+	return fabwarehouse.Warehouse{
+		ID:          entity.ID,
+		DisplayName: entity.DisplayName,
+		Description: entity.Description,
+		WorkspaceID: entity.WorkspaceID,
+		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
+		Properties:  NewRandomWarehouse().Properties,
+	}
+}
+
 func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 	type concreteEntityOperations interface {
 		parentIDOperations[
@@ -106,8 +118,9 @@ func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 	}
 
 	var entityOperations concreteEntityOperations = &operationsWarehouse{}
+	var converter itemConverter[fabwarehouse.Warehouse] = &operationsWarehouse{}
 
-	handler := newTypedHandler(server, entityOperations)
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,

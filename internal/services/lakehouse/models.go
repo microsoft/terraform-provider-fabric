@@ -14,39 +14,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type baseLakehouseModel struct {
-	WorkspaceID customtypes.UUID                                               `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                                               `tfsdk:"id"`
-	DisplayName types.String                                                   `tfsdk:"display_name"`
-	Description types.String                                                   `tfsdk:"description"`
-	Properties  supertypes.SingleNestedObjectValueOf[lakehousePropertiesModel] `tfsdk:"properties"`
-}
-
-func (to *baseLakehouseModel) set(ctx context.Context, from fablakehouse.Lakehouse) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-
-	properties := supertypes.NewSingleNestedObjectValueOfNull[lakehousePropertiesModel](ctx)
-
-	if from.Properties != nil {
-		propertiesModel := &lakehousePropertiesModel{}
-
-		if diags := propertiesModel.set(ctx, from.Properties); diags.HasError() {
-			return diags
-		}
-
-		if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.Properties = properties
-
-	return nil
-}
-
 type lakehousePropertiesModel struct {
 	OneLakeFilesPath      types.String                                                              `tfsdk:"onelake_files_path"`
 	OneLakeTablesPath     types.String                                                              `tfsdk:"onelake_tables_path"`

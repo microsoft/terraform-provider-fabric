@@ -18,14 +18,14 @@ import (
 )
 
 type resourceFabricItemDefinitionModel struct {
-	baseFabricItemModel
+	fabricItemModel
 	Format                  types.String                                                             `tfsdk:"format"`
 	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
-	Definition              supertypes.MapNestedObjectValueOf[ResourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
+	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
 	Timeouts                timeouts.Value                                                           `tfsdk:"timeouts"`
 }
 
-type ResourceFabricItemDefinitionPartModel struct {
+type resourceFabricItemDefinitionPartModel struct {
 	Source              types.String                  `tfsdk:"source"`
 	Tokens              supertypes.MapValueOf[string] `tfsdk:"tokens"`
 	SourceContentSha256 types.String                  `tfsdk:"source_content_sha256"`
@@ -35,14 +35,16 @@ type fabricItemDefinition struct {
 	fabcore.ItemDefinition
 }
 
-func (to *fabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, update bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics { //revive:disable-line:flag-parameter
-	if from.Format.ValueString() != DefinitionFormatNotApplicable {
-		to.Format = from.Format.ValueStringPointer()
+func (to *fabricItemDefinition) setFormat(v types.String) {
+	if v.ValueString() != DefinitionFormatNotApplicable && v.ValueString() != "" {
+		to.Format = v.ValueStringPointer()
 	}
+}
 
+func (to *fabricItemDefinition) setParts(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], definitionEmpty string, definitionPaths []string, definitionUpdateEnabled types.Bool, update bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	to.Parts = []fabcore.ItemDefinitionPart{}
 
-	defParts, diags := from.Definition.Get(ctx)
+	defParts, diags := definition.Get(ctx)
 	if diags.HasError() {
 		return diags
 	}
@@ -69,7 +71,7 @@ func (to *fabricItemDefinition) set(ctx context.Context, from resourceFabricItem
 	}
 
 	for defPartKey, defPartValue := range defParts {
-		if !update || (update && from.DefinitionUpdateEnabled.ValueBool()) {
+		if !update || (update && definitionUpdateEnabled.ValueBool()) {
 			payloadB64, _, diags := transforms.SourceFileToPayload(ctx, defPartValue.Source, defPartValue.Tokens)
 			if diags.HasError() {
 				return diags
@@ -86,45 +88,16 @@ func (to *fabricItemDefinition) set(ctx context.Context, from resourceFabricItem
 	return nil
 }
 
-type requestCreateFabricItemDefinition struct {
-	fabcore.CreateItemRequest
-}
-
-func (to *requestCreateFabricItemDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, itemType fabcore.ItemType) diag.Diagnostics {
-	to.DisplayName = from.DisplayName.ValueStringPointer()
-	to.Description = from.Description.ValueStringPointer()
-	to.Type = azto.Ptr(itemType)
-
-	if !from.Definition.IsNull() && !from.Definition.IsUnknown() {
-		var def fabricItemDefinition
-
-		if diags := def.set(ctx, from, false, "", []string{}); diags.HasError() {
-			return diags
-		}
-
-		to.Definition = &def.ItemDefinition
-	}
-
-	return nil
-}
-
 type requestUpdateFabricItemDefinition struct {
-	fabcore.UpdateItemRequest
-}
-
-func (to *requestUpdateFabricItemDefinition) set(from resourceFabricItemDefinitionModel) {
-	to.DisplayName = from.DisplayName.ValueStringPointer()
-	to.Description = from.Description.ValueStringPointer()
-}
-
-type requestUpdateFabricItemDefinitionDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinitionDefinition) set(ctx context.Context, from resourceFabricItemDefinitionModel, definitionEmpty string, definitionPaths []string) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics {
 	var def fabricItemDefinition
 
-	if diags := def.set(ctx, from, true, definitionEmpty, definitionPaths); diags.HasError() {
+	def.setFormat(format)
+
+	if diags := def.setParts(ctx, definition, definitionEmpty, definitionPaths, definitionUpdateEnabled, true); diags.HasError() {
 		return diags
 	}
 

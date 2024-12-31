@@ -3,23 +3,23 @@
 page_title: "fabric_kql_database Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric KQL Database.
-  See KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database for more information.
+  Manage a Fabric KQL Database.
+  Use this resource to manage a KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
   -> This item supports Service Principal authentication.
 ---
 
 # fabric_kql_database (Resource)
 
-This resource manages a Fabric KQL Database.
+Manage a Fabric KQL Database.
 
-See [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database) for more information.
+Use this resource to manage a [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
 
 -> This item supports Service Principal authentication.
 
 ## Example Usage
 
 ```terraform
-# Create a ReadWrite KQL database example
+# Example 1 - Create a ReadWrite KQL database
 resource "fabric_kql_database" "example1" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -30,7 +30,7 @@ resource "fabric_kql_database" "example1" {
   }
 }
 
-# Create a Shortcut KQL database to source Azure Data Explorer cluster example
+# Example 2 - Create a Shortcut KQL database to source Azure Data Explorer cluster
 resource "fabric_kql_database" "example2" {
   display_name = "example2"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -43,7 +43,7 @@ resource "fabric_kql_database" "example2" {
   }
 }
 
-# Create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token example
+# Example 3 - Create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
 resource "fabric_kql_database" "example3" {
   display_name = "example3"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -55,7 +55,7 @@ resource "fabric_kql_database" "example3" {
   }
 }
 
-# Create a Shortcut KQL database to source KQL database example
+# Example 4 - Create a Shortcut KQL database to source KQL database
 resource "fabric_kql_database" "example4" {
   display_name = "example4"
   workspace_id = "00000000-0000-0000-0000-000000000000"

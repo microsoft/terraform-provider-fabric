@@ -1,10 +1,10 @@
-# Example 1 - Spark Job Definition without definition
+# Example 1 - Item without definition
 resource "fabric_spark_job_definition" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
-# Example 2 - Spark Job Definition with definition bootstrapping only
+# Example 2 - Item with definition bootstrapping only
 resource "fabric_spark_job_definition" "example_definition_bootstrap" {
   display_name              = "example2"
   description               = "example with definition bootstrapping"
@@ -17,7 +17,7 @@ resource "fabric_spark_job_definition" "example_definition_bootstrap" {
   }
 }
 
-# Example 3 - Spark Job Definition with definition update when source or tokens changed
+# Example 3 - Item with definition update when source or tokens changed
 resource "fabric_spark_job_definition" "example_definition_update" {
   display_name = "example3"
   description  = "example with definition update when source or tokens changed"

@@ -10,11 +10,18 @@ import (
 )
 
 const (
-	ItemName           = "KQL Database"
-	ItemTFName         = "kql_database"
-	ItemsName          = "KQL Databases"
-	ItemsTFName        = "kql_databases"
-	ItemType           = fabcore.ItemTypeKQLDatabase
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/real-time-intelligence/create-database"
+	ItemName                  = "KQL Database"
+	ItemTFName                = "kql_database"
+	ItemsName                 = "KQL Databases"
+	ItemsTFName               = "kql_databases"
+	ItemType                  = fabcore.ItemTypeKQLDatabase
+	ItemDocsSPNSupport        = common.DocsSPNSupported
+	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/create-database"
+	ItemFormatTypeDefault     = ""
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition"
+)
+
+var (
+	ItemFormatTypes     = []string{""}                                              //nolint:gochecknoglobals
+	ItemDefinitionPaths = []string{"DatabaseProperties.json", "DatabaseSchema.kql"} //nolint:gochecknoglobals
 )

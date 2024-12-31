@@ -105,6 +105,9 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// read by id - not found
@@ -133,6 +136,9 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// read by name - not found
@@ -154,7 +160,7 @@ func TestAcc_WarehouseDataSource(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Warehouse"].(map[string]any)
@@ -177,6 +183,9 @@ func TestAcc_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// read by id - not found
@@ -204,6 +213,9 @@ func TestAcc_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 			),
 		},
 		// read by name - not found

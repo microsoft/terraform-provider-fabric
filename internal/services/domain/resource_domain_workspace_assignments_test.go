@@ -88,7 +88,7 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 
 	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
 
-	entity := testhelp.WellKnown()["Workspace"].(map[string]any)
+	entity := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	entityID := entity["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{

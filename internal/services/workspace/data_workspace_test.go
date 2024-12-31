@@ -147,7 +147,7 @@ func TestUnit_WorkspaceDataSource(t *testing.T) {
 }
 
 func TestAcc_WorkspaceDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["Workspace"].(map[string]any)
+	entity := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)

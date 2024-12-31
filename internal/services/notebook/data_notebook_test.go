@@ -150,7 +150,7 @@ func TestUnit_NotebookDataSource(t *testing.T) {
 }
 
 func TestAcc_NotebookDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["Notebook"].(map[string]any)

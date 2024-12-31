@@ -154,7 +154,7 @@ func TestAcc_MLModelDataSource(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entity := testhelp.WellKnown()["MLModel"].(map[string]any)

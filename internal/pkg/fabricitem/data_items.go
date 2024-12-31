@@ -57,7 +57,7 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 			"values": schema.ListNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The list of %s.", d.Names),
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseFabricItemModel](ctx),
+				CustomType:          supertypes.NewListNestedObjectTypeOf[fabricItemModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"workspace_id": schema.StringAttribute{

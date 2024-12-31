@@ -14,17 +14,37 @@ import (
 
 var errItemNotFound = fabcore.ErrItem.ItemNotFound.Error()
 
+type defaultConverter[TEntity any] struct{}
+
+func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEntity {
+	var entity TEntity
+
+	setReflectedStringPropertyValue(&entity, "ID", *item.ID)
+	setReflectedStringPropertyValue(&entity, "WorkspaceID", *item.WorkspaceID)
+	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
+	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
+	setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
+
+	return entity
+}
+
 // typedHandler is a handler for a specific entity type.
 type typedHandler[TEntity any] struct {
 	*fakeServer
 	identifier identifier[TEntity]
+	converter  itemConverter[TEntity]
 }
 
 // newTypedHandler creates a new typedHandler.
 func newTypedHandler[TEntity any](server *fakeServer, identifier identifier[TEntity]) *typedHandler[TEntity] {
+	return newTypedHandlerWithConverter(server, identifier, &defaultConverter[TEntity]{})
+}
+
+func newTypedHandlerWithConverter[TEntity any](server *fakeServer, identifier identifier[TEntity], converter itemConverter[TEntity]) *typedHandler[TEntity] {
 	typedHandler := &typedHandler[TEntity]{
 		fakeServer: server,
 		identifier: identifier,
+		converter:  converter,
 	}
 
 	return typedHandler
@@ -103,17 +123,14 @@ func generateID(parentID, childID string) string {
 func (h *typedHandler[TEntity]) Elements() []TEntity {
 	ret := make([]TEntity, 0)
 
-	// if it is a FabricItem, return all the elements as fabric items
-	if h.entityTypeIsFabricItem() {
-		for _, element := range h.elements {
+	for _, element := range h.elements {
+		// if it already is the right type, add it.
+		if castedElement, ok := element.(TEntity); ok {
+			ret = append(ret, castedElement)
+		} else if h.entityTypeCanBeConvertedToFabricItem() {
+			// if it is not the right type, but it's a fabric item, convert it to the right type
 			item := asFabricItem(element)
-			ret = append(ret, h.getFabricItemAsTEntity(item))
-		}
-	} else {
-		for _, element := range h.elements {
-			if element, ok := element.(TEntity); ok {
-				ret = append(ret, element)
-			}
+			ret = append(ret, h.converter.ConvertItemToEntity(item))
 		}
 	}
 
@@ -180,7 +197,7 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				return h.getFabricItemAsTEntity(item)
+				return h.converter.ConvertItemToEntity(item)
 			}
 		}
 	}
@@ -223,18 +240,6 @@ func (h *typedHandler[TEntity]) getPointer(id string) *TEntity {
 	return nil
 }
 
-func (h *typedHandler[TEntity]) getFabricItemAsTEntity(item fabcore.Item) TEntity {
-	var entity TEntity
-
-	h.setReflectedStringPropertyValue(&entity, "ID", *item.ID)
-	h.setReflectedStringPropertyValue(&entity, "WorkspaceID", *item.WorkspaceID)
-	h.setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
-	h.setReflectedStringPropertyValue(&entity, "Description", *item.Description)
-	h.setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
-
-	return entity
-}
-
 // asFabricItem converts an element to a fabric item.
 func asFabricItem(element any) fabcore.Item {
 	itemType := fabcore.ItemType(*getReflectedStringPropertyValue(element, "Type"))
@@ -261,7 +266,7 @@ func getReflectedStringPropertyValue(element any, propertyName string) *string {
 }
 
 // setReflectedStringPropertyValue sets a string property value on a reflected object.
-func (h *typedHandler[TEntity]) setReflectedStringPropertyValue(entity *TEntity, propertyName, value string) {
+func setReflectedStringPropertyValue[TEntity any](entity *TEntity, propertyName, value string) {
 	reflectedValue := reflect.ValueOf(entity).Elem()
 	propertyValue := reflectedValue.FieldByName(propertyName)
 

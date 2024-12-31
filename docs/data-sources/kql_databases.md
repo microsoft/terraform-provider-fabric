@@ -56,4 +56,16 @@ Read-Only:
 - `description` (String) The KQL Database description.
 - `display_name` (String) The KQL Database display name.
 - `id` (String) The KQL Database ID.
+- `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `database_type` (String) The type of the database. Possible values:`ReadWrite`, `Shortcut`.
+- `eventhouse_id` (String) Parent Eventhouse ID.
+- `ingestion_service_uri` (String) Ingestion service URI.
+- `query_service_uri` (String) Query service URI.

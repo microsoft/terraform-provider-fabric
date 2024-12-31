@@ -6,7 +6,6 @@ package fabricitem
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"strings"
 
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
@@ -79,9 +78,9 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 			return
 		}
 
-		var reqUpdate requestUpdateFabricItemDefinitionDefinition
+		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := r.checkUpdateDefinition(ctx, plan, state, &reqUpdate)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -100,7 +99,7 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 }
 
 func (r *ResourceFabricItemDefinition) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = GetResourceFabricItemDefinitionSchema(ctx, *r)
+	resp.Schema = getResourceFabricItemDefinitionSchema(ctx, *r)
 }
 
 func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -145,9 +144,13 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqCreate requestCreateFabricItemDefinition
+	var reqCreate requestCreateFabricItem
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, r.Type)...); resp.Diagnostics.HasError() {
+	reqCreate.setDisplayName(plan.DisplayName)
+	reqCreate.setDescription(plan.Description)
+	reqCreate.setType(r.Type)
+
+	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -242,9 +245,9 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqUpdatePlan requestUpdateFabricItemDefinition
+	var reqUpdatePlan requestUpdateFabricItem
 
-	if r.checkUpdateItem(plan, state, &reqUpdatePlan) {
+	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
 		respUpdate, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest, nil)
@@ -257,9 +260,9 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 		resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 	}
 
-	var reqUpdateDefinition requestUpdateFabricItemDefinitionDefinition
+	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := r.checkUpdateDefinition(ctx, plan, state, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -357,13 +360,13 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 		return
 	}
 
-	var definition supertypes.MapNestedObjectValueOf[ResourceFabricItemDefinitionPartModel]
+	var definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel]
 	if resp.Diagnostics.Append(resp.State.GetAttribute(ctx, path.Root("definition"), &definition)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	state := resourceFabricItemDefinitionModel{
-		baseFabricItemModel: baseFabricItemModel{
+		fabricItemModel: fabricItemModel{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},
@@ -398,27 +401,4 @@ func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceF
 	model.set(respGet.Item)
 
 	return nil
-}
-
-func (r *ResourceFabricItemDefinition) checkUpdateItem(plan, state resourceFabricItemDefinitionModel, reqUpdatePlan *requestUpdateFabricItemDefinition) bool {
-	var reqUpdateState requestUpdateFabricItemDefinition
-
-	reqUpdatePlan.set(plan)
-	reqUpdateState.set(state)
-
-	return !reflect.DeepEqual(reqUpdatePlan.UpdateItemRequest, reqUpdateState.UpdateItemRequest)
-}
-
-func (r *ResourceFabricItemDefinition) checkUpdateDefinition(ctx context.Context, plan, state resourceFabricItemDefinitionModel, reqUpdate *requestUpdateFabricItemDefinitionDefinition) (bool, diag.Diagnostics) {
-	if !plan.Definition.Equal(state.Definition) && plan.DefinitionUpdateEnabled.ValueBool() {
-		if diags := reqUpdate.set(ctx, plan, r.DefinitionEmpty, r.DefinitionPathKeys); diags.HasError() {
-			return false, diags
-		}
-
-		if len(reqUpdate.Definition.Parts) > 0 && !plan.Definition.Equal(state.Definition) {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

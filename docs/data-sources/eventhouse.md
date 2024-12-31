@@ -4,7 +4,7 @@ page_title: "fabric_eventhouse Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   Get a Fabric Eventhouse.
-  Use this data source to fetch a Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
+  Use this data source to fetch an Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
   -> This item supports Service Principal authentication.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 Get a Fabric Eventhouse.
 
-Use this data source to fetch a [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
+Use this data source to fetch an [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
 -> This item supports Service Principal authentication.
 
@@ -27,6 +27,24 @@ data "fabric_eventhouse" "example_by_id" {
 data "fabric_eventhouse" "example_by_name" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Get item details with definition
+# Examples uses `id` but `display_name` can be used as well
+data "fabric_eventhouse" "example_definition" {
+  id                = "11111111-1111-1111-1111-111111111111"
+  workspace_id      = "00000000-0000-0000-0000-000000000000"
+  output_definition = true
+}
+
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_eventhouse.example_definition.definition["EventhouseProperties.json"].content, ".")
+}
+
+# Access the content of the definition as JSON object
+output "example_definition_content_object" {
+  value = provider::fabric::content_decode(data.fabric_eventhouse.example_definition.definition["EventhouseProperties.json"].content)
 }
 
 # This is an invalid data source
@@ -49,11 +67,17 @@ data "fabric_eventhouse" "example_by_name" {
 
 - `display_name` (String) The Eventhouse display name.
 - `id` (String) The Eventhouse ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: `EventhouseProperties.json`. (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Eventhouse description.
+- `format` (String) The Eventhouse format. Possible values: `NotApplicable`
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
@@ -64,12 +88,21 @@ Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
 <a id="nestedatt--properties"></a>
 
 ### Nested Schema for `properties`
 
 Read-Only:
 
-- `database_ids` (List of String) The IDs list of KQL Databases.
+- `database_ids` (List of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.
