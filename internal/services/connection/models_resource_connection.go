@@ -6,10 +6,14 @@ package connection
 import (
 	"context"
 
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type resourceConnectionModel struct {
@@ -31,6 +35,95 @@ func (m resourceConnectionModel) getCredentialDetails(ctx context.Context) (*rsC
 	}
 
 	return nil, nil
+}
+
+type baseResourceConnectionModel struct {
+	connectionModel
+	ConnectionDetails supertypes.SingleNestedObjectValueOf[rsConnectionDetailsModel] `tfsdk:"connection_details"`
+	CredentialDetails supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel] `tfsdk:"credential_details"`
+}
+
+func (to *baseResourceConnectionModel) setConnectionDetails(ctx context.Context, from fabcore.Connection) diag.Diagnostics {
+	connectionDetails := supertypes.NewSingleNestedObjectValueOfNull[rsConnectionDetailsModel](ctx)
+
+	connectionDetails = to.ConnectionDetails
+
+	if from.ConnectionDetails != nil {
+		connectionDetailsModel := &rsConnectionDetailsModel{}
+		connectionDetailsModel.set(*from.ConnectionDetails)
+
+		diags := connectionDetails.Set(ctx, connectionDetailsModel)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	to.ConnectionDetails = connectionDetails
+
+	return nil
+}
+
+func (to *baseResourceConnectionModel) setCredentialDetails(ctx context.Context, from fabcore.Connection) diag.Diagnostics {
+	credentialDetails := supertypes.NewSingleNestedObjectValueOfNull[rsCredentialDetailsModel](ctx)
+
+	credentialDetails = to.CredentialDetails
+
+	if from.CredentialDetails != nil {
+		credentialDetailsModel := &rsCredentialDetailsModel{}
+		credentialDetailsModel.set(*from.CredentialDetails)
+
+		diags := credentialDetails.Set(ctx, credentialDetailsModel)
+		if diags.HasError() {
+			return diags
+		}
+
+		to.CredentialDetails = credentialDetails
+	}
+
+	return nil
+}
+
+type rsConnectionDetailsModel struct {
+	Path           types.String                  `tfsdk:"path"` // computed
+	Type           types.String                  `tfsdk:"type"`
+	CreationMethod types.String                  `tfsdk:"creation_method"`
+	Parameters     supertypes.MapValueOf[string] `tfsdk:"parameters"`
+}
+
+func (m rsConnectionDetailsModel) getParameters(ctx context.Context) (map[string]string, diag.Diagnostics) {
+	if !m.Parameters.IsNull() && !m.Parameters.IsUnknown() {
+		return m.Parameters.Get(ctx)
+	}
+
+	return nil, nil
+}
+
+func (to *rsConnectionDetailsModel) set(from fabcore.ListConnectionDetails) {
+	to.Path = types.StringPointerValue(from.Path)
+	to.Type = types.StringPointerValue(from.Type)
+}
+
+type rsCredentialDetailsModel struct {
+	ConnectionEncryption types.String `tfsdk:"connection_encryption"`
+	SingleSignOnType     types.String `tfsdk:"single_sign_on_type"`
+	SkipTestConnection   types.Bool   `tfsdk:"skip_test_connection"`
+	CredentialType       types.String `tfsdk:"credential_type"`
+
+	// AnonymousCredentials                   supertypes.SingleNestedObjectValueOf[anonymousCredentialsModel]                   `tfsdk:"anonymous_credentials"`
+	BasicCredentials                 supertypes.SingleNestedObjectValueOf[credentialsBasicModel]                 `tfsdk:"basic_credentials"`
+	KeyCredentials                   supertypes.SingleNestedObjectValueOf[credentialsKeyModel]                   `tfsdk:"key_credentials"`
+	ServicePrincipalCredentials      supertypes.SingleNestedObjectValueOf[credentialsServicePrincipalModel]      `tfsdk:"service_principal_credentials"`
+	SharedAccessSignatureCredentials supertypes.SingleNestedObjectValueOf[credentialsSharedAccessSignatureModel] `tfsdk:"shared_access_signature_credentials"`
+	WindowsCredentials               supertypes.SingleNestedObjectValueOf[credentialsWindowsModel]               `tfsdk:"windows_credentials"`
+	// WindowsWithoutImpersonationCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsWithoutImpersonationModel] `tfsdk:"windows_without_impersonation_credentials"`
+	// WorkspaceIdentityCredentials           supertypes.SingleNestedObjectValueOf[credentialsWorkspaceIdentityModel]           `tfsdk:"workspace_identity_credentials"`
+}
+
+func (to *rsCredentialDetailsModel) set(from fabcore.ListCredentialDetails) {
+	to.ConnectionEncryption = types.StringPointerValue((*string)(from.ConnectionEncryption))
+	to.SingleSignOnType = types.StringPointerValue((*string)(from.SingleSignOnType))
+	to.SkipTestConnection = types.BoolPointerValue(from.SkipTestConnection)
+	to.CredentialType = types.StringPointerValue((*string)(from.CredentialType))
 }
 
 type requestCreateConnection struct {
@@ -58,25 +151,59 @@ func (to *requestCreateConnection) set(ctx context.Context, from resourceConnect
 	// }
 
 	var requestCreateConnectionDetails requestCreateConnectionDetails
-	requestCreateConnectionDetails.set(ctx, from.ConnectionDetails)
+	if diags := requestCreateConnectionDetails.set(ctx, from.ConnectionDetails); diags.HasError() {
+		return diags
+	}
+
+	var requestCreateCredentialDetails requestCreateCredentialDetails
+	if connectivityType == fabcore.ConnectivityTypeShareableCloud || connectivityType == fabcore.ConnectivityTypePersonalCloud || connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway {
+		if diags := requestCreateCredentialDetails.set(ctx, from.CredentialDetails); diags.HasError() {
+			return diags
+		}
+	}
+
+	var requestCreateOnPremisesCredentialDetails requestCreateOnPremisesCredentialDetails
+	if connectivityType == fabcore.ConnectivityTypeOnPremisesGateway || connectivityType == fabcore.ConnectivityTypeOnPremisesGatewayPersonal {
+		if diags := requestCreateOnPremisesCredentialDetails.set(ctx, from.GatewayID, from.CredentialDetails); diags.HasError() {
+			return diags
+		}
+	}
+
+	var requestCreateConnection fabcore.CreateConnectionRequestClassification
 
 	switch connectivityType {
-	case fabcore.ConnectivityTypeShareableCloud:
-		aaa := &fabcore.CreateCloudConnectionRequest{
+	case fabcore.ConnectivityTypeShareableCloud, fabcore.ConnectivityTypePersonalCloud:
+		requestCreateConnection = &fabcore.CreateCloudConnectionRequest{
 			DisplayName:       from.DisplayName.ValueStringPointer(),
 			PrivacyLevel:      (*fabcore.PrivacyLevel)(from.PrivacyLevel.ValueStringPointer()),
 			ConnectivityType:  &connectivityType,
 			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
-			CredentialDetails: &fabcore.CreateCredentialDetails{},
+			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
 		}
-
-		to.CreateConnectionRequestClassification = aaa
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
-
-		bbb := &fabcore.CreateVirtualNetworkGatewayConnectionRequest{}
-
-		to.CreateConnectionRequestClassification = bbb
+		requestCreateConnection = &fabcore.CreateVirtualNetworkGatewayConnectionRequest{
+			DisplayName:       from.DisplayName.ValueStringPointer(),
+			PrivacyLevel:      (*fabcore.PrivacyLevel)(from.PrivacyLevel.ValueStringPointer()),
+			ConnectivityType:  &connectivityType,
+			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
+			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
+			GatewayID:         from.GatewayID.ValueStringPointer(),
+		}
+	case fabcore.ConnectivityTypeOnPremisesGateway, fabcore.ConnectivityTypeOnPremisesGatewayPersonal:
+		requestCreateConnection = &fabcore.CreateOnPremisesConnectionRequest{
+			DisplayName:       from.DisplayName.ValueStringPointer(),
+			PrivacyLevel:      (*fabcore.PrivacyLevel)(from.PrivacyLevel.ValueStringPointer()),
+			ConnectivityType:  &connectivityType,
+			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
+			CredentialDetails: &requestCreateOnPremisesCredentialDetails.CreateOnPremisesCredentialDetails,
+			GatewayID:         from.GatewayID.ValueStringPointer(),
+		}
+	case fabcore.ConnectivityTypeAutomatic, fabcore.ConnectivityTypeNone:
+		// todo
+		requestCreateConnection = &fabcore.CreateConnectionRequest{}
 	}
+
+	to.CreateConnectionRequestClassification = requestCreateConnection
 
 	return nil
 }
@@ -86,21 +213,142 @@ type requestCreateConnectionDetails struct {
 }
 
 func (to *requestCreateConnectionDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsConnectionDetailsModel]) diag.Diagnostics {
-	if !from.IsNull() && !from.IsUnknown() {
-		connectionDetails, diags := from.Get(ctx)
+	connectionDetails, diags := from.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if !connectionDetails.Parameters.IsNull() && !connectionDetails.Parameters.IsUnknown() {
+		_, diags := connectionDetails.Parameters.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	to.CreationMethod = connectionDetails.CreationMethod.ValueStringPointer()
+	to.Type = connectionDetails.Type.ValueStringPointer()
+
+	return nil
+}
+
+type requestCreateCredentialDetails struct {
+	fabcore.CreateCredentialDetails
+}
+
+func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
+	credentialDetails, diags := from.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.ConnectionEncryption = (*fabcore.ConnectionEncryption)(credentialDetails.ConnectionEncryption.ValueStringPointer())
+	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
+	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
+
+	credentialType := (fabcore.CredentialType)(credentialDetails.CredentialType.ValueString())
+
+	var requestCreateCredential fabcore.CredentialsClassification
+
+	switch credentialType {
+	case fabcore.CredentialTypeAnonymous:
+		requestCreateCredential = &fabcore.AnonymousCredentials{
+			CredentialType: &credentialType,
+		}
+	case fabcore.CredentialTypeBasic:
+		cred, diags := credentialDetails.BasicCredentials.Get(ctx)
 		if diags.HasError() {
 			return diags
 		}
 
-		if !connectionDetails.Parameters.IsNull() && !connectionDetails.Parameters.IsUnknown() {
-			_, diags := connectionDetails.Parameters.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
+		requestCreateCredential = &fabcore.BasicCredentials{
+			CredentialType: &credentialType,
+			Username:       cred.Username.ValueStringPointer(),
+			Password:       cred.Password.ValueStringPointer(),
+		}
+	case fabcore.CredentialTypeKey:
+		cred, diags := credentialDetails.KeyCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
 		}
 
-		to.CreationMethod = connectionDetails.CreationMethod.ValueStringPointer()
-		to.Type = connectionDetails.Type.ValueStringPointer()
+		requestCreateCredential = &fabcore.KeyCredentials{
+			CredentialType: &credentialType,
+			Key:            cred.Key.ValueStringPointer(),
+		}
+	case fabcore.CredentialTypeOAuth2:
+		requestCreateCredential = &fabcore.Credentials{
+			CredentialType: &credentialType,
+		}
+	case fabcore.CredentialTypeServicePrincipal:
+		cred, diags := credentialDetails.ServicePrincipalCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestCreateCredential = &fabcore.ServicePrincipalCredentials{
+			CredentialType:           &credentialType,
+			TenantID:                 cred.TenantID.ValueStringPointer(),
+			ServicePrincipalClientID: cred.ClientID.ValueStringPointer(),
+			ServicePrincipalSecret:   cred.ClientSecret.ValueStringPointer(),
+		}
+	case fabcore.CredentialTypeSharedAccessSignature:
+		cred, diags := credentialDetails.SharedAccessSignatureCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestCreateCredential = &fabcore.SharedAccessSignatureCredentials{
+			CredentialType: &credentialType,
+			Token:          cred.Token.ValueStringPointer(),
+		}
+	case fabcore.CredentialTypeWindows:
+		cred, diags := credentialDetails.WindowsCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestCreateCredential = &fabcore.WindowsCredentials{
+			CredentialType: &credentialType,
+			Username:       cred.Username.ValueStringPointer(),
+			Password:       cred.Password.ValueStringPointer(),
+		}
+	case fabcore.CredentialTypeWindowsWithoutImpersonation:
+		requestCreateCredential = &fabcore.WindowsWithoutImpersonationCredentials{
+			CredentialType: &credentialType,
+		}
+	case fabcore.CredentialTypeWorkspaceIdentity:
+		requestCreateCredential = &fabcore.WorkspaceIdentityCredentials{
+			CredentialType: &credentialType,
+		}
+	}
+
+	to.Credentials = requestCreateCredential
+
+	return nil
+}
+
+type requestCreateOnPremisesCredentialDetails struct {
+	fabcore.CreateOnPremisesCredentialDetails
+}
+
+func (to *requestCreateOnPremisesCredentialDetails) set(ctx context.Context, gatewayID customtypes.UUID, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
+	credentialDetails, diags := from.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.ConnectionEncryption = (*fabcore.ConnectionEncryption)(credentialDetails.ConnectionEncryption.ValueStringPointer())
+	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
+	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
+
+	to.Credentials = &fabcore.OnPremisesGatewayCredentials{
+		CredentialType: (*fabcore.CredentialType)(azto.Ptr("OnPremisesGatewayCredentials")),
+		Values: []fabcore.OnPremisesCredentialEntry{
+			{
+				EncryptedCredentials: azto.Ptr("TODO"),
+				GatewayID:            gatewayID.ValueStringPointer(),
+			},
+		},
 	}
 
 	return nil

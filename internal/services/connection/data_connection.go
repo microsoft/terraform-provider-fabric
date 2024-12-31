@@ -166,7 +166,6 @@ func (d *dataSourceConnection) getByDisplayName(ctx context.Context, model *data
 
 		for _, entity := range page.Value {
 			if *entity.DisplayName == model.DisplayName.ValueString() {
-
 				model.set(entity)
 
 				if diags := model.setConnectionDetails(ctx, entity.ConnectionDetails); diags.HasError() {
