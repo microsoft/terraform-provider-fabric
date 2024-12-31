@@ -6,8 +6,8 @@ package eventhouse
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]schema.Attribute {

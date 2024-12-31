@@ -6,10 +6,10 @@ package domain
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 type dataSourceDomainsModel struct {
