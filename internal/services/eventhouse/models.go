@@ -6,9 +6,9 @@ package eventhouse
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabeventhouse "github.com/microsoft/fabric-sdk-go/fabric/eventhouse"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 type eventhousePropertiesModel struct {

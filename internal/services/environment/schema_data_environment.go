@@ -6,10 +6,10 @@ package environment
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	fabenvironment "github.com/microsoft/fabric-sdk-go/fabric/environment"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"

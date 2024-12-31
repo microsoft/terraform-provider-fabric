@@ -6,12 +6,12 @@ package kqldatabase
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabkqldatabase "github.com/microsoft/fabric-sdk-go/fabric/kqldatabase"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )

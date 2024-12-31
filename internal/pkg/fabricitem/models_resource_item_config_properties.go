@@ -4,8 +4,8 @@
 package fabricitem
 
 import (
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 type ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {

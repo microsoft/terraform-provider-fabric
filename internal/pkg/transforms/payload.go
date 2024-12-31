@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"text/template"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/go-sprout/sprout"
 	sproutchecksum "github.com/go-sprout/sprout/registry/checksum"
 	sproutconversion "github.com/go-sprout/sprout/registry/conversion"
@@ -26,6 +25,7 @@ import (
 	sproutuniqueid "github.com/go-sprout/sprout/registry/uniqueid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"

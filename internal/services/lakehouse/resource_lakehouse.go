@@ -9,13 +9,13 @@ import (
 	"time"
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fablakehouse "github.com/microsoft/fabric-sdk-go/fabric/lakehouse"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )

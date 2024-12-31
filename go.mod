@@ -5,8 +5,6 @@ go 1.23.4
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
-	github.com/FrangipaneTeam/terraform-plugin-framework-supertypes v0.4.0
-	github.com/FrangipaneTeam/terraform-plugin-framework-validators v1.9.0
 	github.com/dcarbone/terraform-plugin-framework-utils/v3 v3.8.0
 	github.com/go-sprout/sprout v0.6.0
 	github.com/google/go-cmp v0.6.0
@@ -21,6 +19,8 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
 	github.com/microsoft/fabric-sdk-go v0.1.0-beta.8
 	github.com/ohler55/ojg v1.25.1
+	github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v0.5.0
+	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.10.0
 	github.com/stretchr/testify v1.10.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )

@@ -6,11 +6,11 @@ package lakehouse
 import (
 	"context"
 
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fablakehouse "github.com/microsoft/fabric-sdk-go/fabric/lakehouse"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
