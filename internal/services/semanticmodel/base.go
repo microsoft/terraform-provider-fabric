@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -21,7 +22,10 @@ const (
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition"
 )
 
-var (
-	ItemFormatTypes         = []string{"TMSL"}                                                //nolint:gochecknoglobals
-	ItemDefinitionPathsTMSL = []string{"model.bim", "definition.pbism", "diagramLayout.json"} //nolint:gochecknoglobals
-)
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  "TMSL",
+		API:   "TMSL",
+		Paths: []string{"model.bim", "definition.pbism", "diagramLayout.json"},
+	},
+}

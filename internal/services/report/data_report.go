@@ -19,8 +19,7 @@ func NewDataSourceReport() datasource.DataSource {
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: false,
 		FormatTypeDefault:   ItemFormatTypeDefault,
-		FormatTypes:         ItemFormatTypes,
-		DefinitionPathKeys:  ItemDefinitionPathsPBIRLegacy,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
 	return fabricitem.NewDataSourceFabricItemDefinition(config)

@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/planmodifiers"
@@ -40,7 +41,7 @@ func getResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
 		attributes[key] = value
 	}
 
@@ -64,7 +65,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
 		attributes[key] = value
 	}
 
@@ -98,7 +99,7 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	attributes["configuration"] = attrConfiguration
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.FormatTypes, r.DefinitionPathDocsURL, r.DefinitionPathKeys, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.FormatTypeDefault, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
 		attributes[key] = value
 	}
 
@@ -188,7 +189,7 @@ func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displ
 }
 
 // Helper function to get Fabric Item definition attributes.
-func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, formatTypeDefault string, formatTypes []string, definitionPathDocsURL string, definitionPathKeys []string, definitionPathKeysValidator []validator.Map, definitionRequired, alongConfiguration bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
+func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, formatTypeDefault, definitionPathDocsURL string, definitionFormats []DefinitionFormat, definitionPathKeysValidator []validator.Map, definitionRequired, alongConfiguration bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
 	attributes := make(map[string]schema.Attribute)
 
 	attrDefinitionUpdateEnabled := schema.BoolAttribute{}
@@ -206,21 +207,33 @@ func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, format
 
 	attributes["definition_update_enabled"] = attrDefinitionUpdateEnabled
 
-	attrFormat := schema.StringAttribute{}
-	attrFormat.Computed = true
+	formatTypes := GetDefinitionFormats(definitionFormats)
+	definitionPathKeys := GetDefinitionFormatsPaths(definitionFormats)
 
-	if len(formatTypes) > 0 {
-		attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: %s.", name, utils.ConvertStringSlicesToString(formatTypes, true, false))
-		attrFormat.Default = stringdefault.StaticString(formatTypeDefault)
+	attrFormat := schema.StringAttribute{}
+
+	if len(formatTypes) > 1 || (len(formatTypes) == 1 && formatTypes[0] != "") {
+		attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: %s", name, utils.ConvertStringSlicesToString(formatTypes, true, false))
+		attrFormat.Validators = []validator.String{
+			stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(formatTypes, true)...),
+			superstringvalidator.RequireIfAttributeIsSet(path.MatchRoot("definition")),
+		}
+
+		if definitionRequired {
+			attrFormat.Required = true
+		} else {
+			attrFormat.Optional = true
+			attrFormat.Computed = true
+			attrFormat.Default = stringdefault.StaticString(formatTypeDefault)
+		}
 	} else {
 		attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: `%s`", name, DefinitionFormatNotApplicable)
+		attrFormat.Computed = true
 		attrFormat.Default = stringdefault.StaticString(DefinitionFormatNotApplicable)
 	}
 
 	if alongConfiguration {
-		attrFormat.Validators = []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("configuration")),
-		}
+		attrFormat.Validators = append(attrFormat.Validators, stringvalidator.ConflictsWith(path.MatchRoot("configuration")))
 	}
 
 	attributes["format"] = attrFormat

@@ -35,9 +35,13 @@ type fabricItemDefinition struct {
 	fabcore.ItemDefinition
 }
 
-func (to *fabricItemDefinition) setFormat(v types.String) {
+func (to *fabricItemDefinition) setFormat(v types.String, definitionFormats []DefinitionFormat) {
 	if v.ValueString() != DefinitionFormatNotApplicable && v.ValueString() != "" {
-		to.Format = v.ValueStringPointer()
+		apiFormat := GetDefinitionFormatAPI(definitionFormats, v.ValueString())
+
+		if apiFormat != "" {
+			to.Format = azto.Ptr(apiFormat)
+		}
 	}
 }
 
@@ -92,12 +96,14 @@ type requestUpdateFabricItemDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionFormats []DefinitionFormat) diag.Diagnostics {
 	var def fabricItemDefinition
 
-	def.setFormat(format)
+	def.setFormat(format, definitionFormats)
 
-	if diags := def.setParts(ctx, definition, definitionEmpty, definitionPaths, definitionUpdateEnabled, true); diags.HasError() {
+	definitionPathKeys := GetDefinitionFormatsPaths(definitionFormats)
+
+	if diags := def.setParts(ctx, definition, definitionEmpty, definitionPathKeys, definitionUpdateEnabled, true); diags.HasError() {
 		return diags
 	}
 
