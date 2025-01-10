@@ -38,6 +38,7 @@ type DataSourceFabricItemDefinition struct {
 	FormatTypeDefault   string
 	FormatTypes         []string
 	DefinitionPathKeys  []string
+	IsPreview           bool
 }
 
 func NewDataSourceFabricItemDefinition(config DataSourceFabricItemDefinition) datasource.DataSource {
@@ -86,6 +87,15 @@ func (d *DataSourceFabricItemDefinition) Configure(_ context.Context, req dataso
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *DataSourceFabricItemDefinition) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

@@ -16,6 +16,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -23,44 +24,55 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceDomain)(nil)
 
 type dataSourceDomain struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewDataSourceDomain() datasource.DataSource {
-	return &dataSourceDomain{}
+	markdownDescription := "Get a Fabric " + ItemName + ".\n\n" +
+		"Use this data source to get [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &dataSourceDomain{
+		Name:                ItemName,
+		TFName:              ItemTFName,
+		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (d *dataSourceDomain) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
 }
 
 func (d *dataSourceDomain) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Get a Fabric " + ItemName + ".\n\n" +
-			"Use this data source to get [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: d.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " ID.",
+				MarkdownDescription: "The " + d.Name + " ID.",
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " display name.",
+				MarkdownDescription: "The " + d.Name + " display name.",
 				Computed:            true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " description.",
+				MarkdownDescription: "The " + d.Name + " description.",
 				Computed:            true,
 			},
 			"parent_domain_id": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " parent ID.",
+				MarkdownDescription: "The " + d.Name + " parent ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"contributors_scope": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " contributors scope. Possible values: " + utils.ConvertStringSlicesToString(fabadmin.PossibleContributorsScopeTypeValues(), true, true) + ".",
+				MarkdownDescription: "The " + d.Name + " contributors scope. Possible values: " + utils.ConvertStringSlicesToString(fabadmin.PossibleContributorsScopeTypeValues(), true, true) + ".",
 				Computed:            true,
 			},
 			"timeouts": timeouts.Attributes(ctx),
@@ -85,6 +97,15 @@ func (d *dataSourceDomain) Configure(_ context.Context, req datasource.Configure
 
 	d.pConfigData = pConfigData
 	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *dataSourceDomain) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

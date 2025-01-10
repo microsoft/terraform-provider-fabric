@@ -6,6 +6,7 @@ description: |-
   Manage a Fabric Workspace Git integration.
   See Workspace Git integration https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration for more information.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_git (Resource)
@@ -15,6 +16,8 @@ Manage a Fabric Workspace Git integration.
 See [Workspace Git integration](https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration) for more information.
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

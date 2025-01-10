@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeDashboard
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/power-bi/consumer/end-user-dashboards"
+	ItemPreview        = true
 )

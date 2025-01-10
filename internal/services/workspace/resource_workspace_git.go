@@ -24,6 +24,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -31,25 +32,36 @@ import (
 var _ resource.ResourceWithConfigure = (*resourceWorkspaceGit)(nil)
 
 type resourceWorkspaceGit struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.GitClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabcore.GitClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewResourceWorkspaceGit() resource.Resource {
-	return &resourceWorkspaceGit{}
+	markdownDescription := "Manage a Fabric " + WorkspaceGitName + ".\n\n" +
+		"See [" + WorkspaceGitName + "](" + WorkspaceGitDocsURL + ") for more information.\n\n" +
+		common.DocsSPNNotSupported
+
+	return &resourceWorkspaceGit{
+		Name:                WorkspaceGitName,
+		TFName:              WorkspaceGitTFName,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, true),
+		IsPreview:           true,
+	}
 }
 
 func (r *resourceWorkspaceGit) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + WorkspaceGitTFName
+	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
 func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	possibleInitializationStrategyValues := utils.RemoveSliceByValue(fabcore.PossibleInitializationStrategyValues(), fabcore.InitializationStrategyNone)
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + WorkspaceGitName + ".\n\n" +
-			"See [" + WorkspaceGitName + "](" + WorkspaceGitDocsURL + ") for more information.\n\n" +
-			common.DocsSPNNotSupported,
+		MarkdownDescription: r.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:   true,
@@ -175,6 +187,15 @@ func (r *resourceWorkspaceGit) Configure(_ context.Context, req resource.Configu
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGitClient()
+
+	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (r *resourceWorkspaceGit) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

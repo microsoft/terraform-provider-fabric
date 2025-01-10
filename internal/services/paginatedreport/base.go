@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypePaginatedReport
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table"
+	ItemPreview        = true
 )

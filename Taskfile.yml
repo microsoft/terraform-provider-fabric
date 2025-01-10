@@ -21,6 +21,9 @@ vars:
   BUILD_DEV_OUTPUT_DIR: "bin/{{OS}}-{{ARCH}}"
   BUILD_DEV_ARTIFACT: "{{.BUILD_DEV_OUTPUT_DIR}}/{{.PROJECT_NAME}}{{exeExt}}"
 
+env:
+  FABRIC_PREVIEW: true
+
 tasks:
   # ----------------------
   # Development

@@ -286,6 +286,12 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				MarkdownDescription: "Allow Managed Service Identity (MSI) to be used for authentication.",
 				Optional:            true,
 			},
+
+			// Use preview features
+			"preview": schema.BoolAttribute{
+				MarkdownDescription: "Enable preview mode to use preview features.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -603,6 +609,17 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 
 		return
 	}
+
+	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
+	*ctx = tflog.SetField(*ctx, "preview", config.Preview.ValueBool())
+
+	if config.Preview.ValueBool() {
+		resp.Diagnostics.AddWarning(
+			"Preview mode enabled",
+			"Features available in preview mode are not yet generally available and may change without notice include breaking changes. "+
+				"Production use is not recommended. Use at your own risk!",
+		)
+	}
 }
 
 func (p *FabricProvider) mapConfig(ctx *context.Context, config *pconfig.ProviderConfigModel, resp *provider.ConfigureResponse) {
@@ -699,6 +716,8 @@ func (p *FabricProvider) mapConfig(ctx *context.Context, config *pconfig.Provide
 	p.validateConfigAuthMSI(resp)
 	p.validateConfigAuthCertificate(resp)
 	p.validateConfigAuthSecret(resp)
+
+	p.config.Preview = config.Preview.ValueBool()
 }
 
 func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse) {

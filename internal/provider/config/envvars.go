@@ -94,3 +94,7 @@ func GetEnvVarsUseDevCLI() []string {
 func GetEnvVarsUseCLI() []string {
 	return []string{"FABRIC_USE_CLI", "ARM_USE_CLI"}
 }
+
+func GetEnvVarsPreview() []string {
+	return []string{"FABRIC_PREVIEW"}
+}

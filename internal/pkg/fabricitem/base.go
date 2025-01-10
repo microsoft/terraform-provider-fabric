@@ -3,4 +3,8 @@
 
 package fabricitem
 
-const DefinitionFormatNotApplicable = "NotApplicable"
+const (
+	DefinitionFormatNotApplicable = "NotApplicable"
+	PreviewDataSource             = "\n\n~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
+	PreviewResource               = "\n\n~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
+)

@@ -32,7 +32,7 @@ func getResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -45,7 +45,7 @@ func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabric
 	}
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -55,7 +55,7 @@ func getResourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.C
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -69,7 +69,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	}
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -80,7 +80,7 @@ func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, 
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -103,7 +103,7 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	}
 
 	return schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
+		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
 		Attributes:          attributes,
 	}
 }

@@ -21,41 +21,48 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
-)
-
-const (
-	DomainRoleAssignmentsName   = "Domain Role Assignments"
-	DomainRoleAssignmentsTFName = "domain_role_assignments"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
 var _ resource.ResourceWithConfigure = (*resourceDomainRoleAssignments)(nil)
 
 type resourceDomainRoleAssignments struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewResourceDomainRoleAssignments() resource.Resource {
-	return &resourceDomainRoleAssignments{}
+	markdownDescription := "Manage a Fabric " + DomainRoleAssignmentsName + ".\n\n" +
+		"Use this resource to manage [" + DomainRoleAssignmentsName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &resourceDomainRoleAssignments{
+		Name:                DomainRoleAssignmentsName,
+		TFName:              DomainRoleAssignmentsTFName,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (r *resourceDomainRoleAssignments) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + DomainRoleAssignmentsTFName
+	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
 func (r *resourceDomainRoleAssignments) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	possiblePrincipalTypeValues := utils.RemoveSlicesByValues(fabadmin.PossiblePrincipalTypeValues(), []fabadmin.PrincipalType{fabadmin.PrincipalTypeServicePrincipal, fabadmin.PrincipalTypeServicePrincipalProfile})
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + DomainRoleAssignmentsName + ".\n\n" +
-			"See [" + ItemName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: r.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + DomainRoleAssignmentsName + " ID.",
+				MarkdownDescription: "The " + r.Name + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -123,6 +130,15 @@ func (r *resourceDomainRoleAssignments) Configure(_ context.Context, req resourc
 
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (r *resourceDomainRoleAssignments) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

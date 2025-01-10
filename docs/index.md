@@ -92,6 +92,7 @@ You can find more information on how to do this in the following guides:
 - `oidc_request_url` (String) The URL for the OIDC provider from which to request an ID token. For use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_token` (String, Sensitive) The OIDC token for use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_token_file_path` (String) The path to a file containing an OIDC token for use when authenticating as a Service Principal using OpenID Connect.
+- `preview` (Boolean) Enable preview mode to use preview features.
 - `tenant_id` (String) The ID of the Microsoft Entra ID tenant that Fabric API uses to authenticate with.
 - `timeout` (String) Default timeout for all requests. It can be overridden at any Resource/Data-Source
    A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as `30s` or `2h45m`. Valid time units are "s" (seconds), "m" (minutes), "h" (hours)

@@ -83,6 +83,15 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) { //revive:disable-line:confusing-naming

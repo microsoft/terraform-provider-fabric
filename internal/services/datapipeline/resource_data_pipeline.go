@@ -33,6 +33,7 @@ func NewResourceDataPipeline() resource.Resource {
 		},
 		DefinitionRequired: false,
 		DefinitionEmpty:    ItemDefinitionEmpty,
+		IsPreview:          ItemPreview,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)

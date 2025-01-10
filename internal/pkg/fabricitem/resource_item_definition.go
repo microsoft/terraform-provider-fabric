@@ -48,6 +48,7 @@ type ResourceFabricItemDefinition struct {
 	DefinitionPathKeysValidator []validator.Map
 	DefinitionRequired          bool
 	DefinitionEmpty             string
+	IsPreview                   bool
 }
 
 func NewResourceFabricItemDefinition(config ResourceFabricItemDefinition) resource.Resource {
@@ -119,6 +120,15 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
