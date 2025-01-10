@@ -6,6 +6,7 @@ package domain
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -62,7 +63,7 @@ func (r *resourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ resou
 				},
 			},
 			"workspace_ids": schema.SetAttribute{
-				MarkdownDescription: "The list of Workspaces.",
+				MarkdownDescription: "The set of Workspace IDs.",
 				Required:            true,
 				ElementType:         customtypes.UUIDType{},
 			},
@@ -309,15 +310,13 @@ func (r *resourceDomainWorkspaceAssignments) Delete(ctx context.Context, req res
 func (r *resourceDomainWorkspaceAssignments) diffWorkspaces(ctx context.Context, slice1, slice2 types.Set) (types.Set, diag.Diagnostics) {
 	s1 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
-	diags := slice1.ElementsAs(ctx, &s1, false)
-	if diags.HasError() {
+	if diags := slice1.ElementsAs(ctx, &s1, false); diags.HasError() {
 		return types.SetNull(customtypes.UUIDType{}), diags
 	}
 
 	s2 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
-	diags = slice2.ElementsAs(ctx, &s2, false)
-	if diags.HasError() {
+	if diags := slice2.ElementsAs(ctx, &s2, false); diags.HasError() {
 		return types.SetNull(customtypes.UUIDType{}), diags
 	}
 
@@ -350,5 +349,24 @@ func (r *resourceDomainWorkspaceAssignments) list(ctx context.Context, model *re
 		return diags
 	}
 
-	return model.setWorkspaces(ctx, respList)
+	workspaceIDs, diags := getWorkspaceIDs(ctx, *model)
+	if diags.HasError() {
+		return diags
+	}
+
+	elements := make([]string, 0, len(respList))
+
+	for _, element := range respList {
+		elements = append(elements, *element.ID)
+	}
+
+	var values []string
+
+	for _, workspaceID := range workspaceIDs {
+		if slices.Contains(elements, workspaceID) {
+			values = append(values, workspaceID)
+		}
+	}
+
+	return model.setWorkspaces(ctx, values)
 }

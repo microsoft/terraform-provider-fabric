@@ -1,0 +1,7 @@
+kind: fixed
+body: |
+  `Provider produced inconsistent result after apply` error appears when using `fabric_domain_workspace_assignments` multiple times due to enforce assignments based only on TF configuration and ignoring the real state on the Fabric side.
+  Resource must only manage TF provided configuration and ignore any configuration provided outside TF.
+time: 2025-01-08T11:51:42.1488752-08:00
+custom:
+  Issue: "174"
