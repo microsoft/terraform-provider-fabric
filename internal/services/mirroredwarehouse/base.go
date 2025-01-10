@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeMirroredWarehouse
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/fabric/database/mirrored-database/overview"
+	ItemPreview        = true
 )

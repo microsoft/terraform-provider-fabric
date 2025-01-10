@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeDatamart
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview"
+	ItemPreview        = true
 )

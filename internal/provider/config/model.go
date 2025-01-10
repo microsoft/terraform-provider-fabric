@@ -19,6 +19,7 @@ type ProviderData struct {
 	Timeout      time.Duration
 	Endpoint     string
 	Version      string
+	Preview      bool
 }
 
 type ProviderConfig struct {
@@ -51,4 +52,5 @@ type ProviderConfigModel struct {
 	UseCLI                         types.Bool           `tfsdk:"use_cli"`
 	UseDevCLI                      types.Bool           `tfsdk:"use_dev_cli"`
 	UseMSI                         types.Bool           `tfsdk:"use_msi"`
+	Preview                        types.Bool           `tfsdk:"preview"`
 }

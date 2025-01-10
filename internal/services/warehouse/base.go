@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeWarehouse
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing"
+	ItemPreview        = true
 )

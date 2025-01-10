@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeMLExperiment
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-science/machine-learning-experiment"
+	ItemPreview        = true
 )

@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -24,23 +25,34 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceDomainWorkspaceAssignments)(nil)
 
 type dataSourceDomainWorkspaceAssignments struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewDataSourceDomainWorkspaceAssignments() datasource.DataSource {
-	return &dataSourceDomainWorkspaceAssignments{}
+	markdownDescription := "List a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
+		"Use this data source to list [" + DomainWorkspaceAssignmentsName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &dataSourceDomainWorkspaceAssignments{
+		Name:                DomainWorkspaceAssignmentsName,
+		TFName:              DomainWorkspaceAssignmentsTFName,
+		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (d *dataSourceDomainWorkspaceAssignments) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + DomainWorkspaceAssignmentsTFName
+	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
 }
 
 func (d *dataSourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
-			"See [" + ItemName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: d.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"domain_id": schema.StringAttribute{
 				MarkdownDescription: "The Domain ID.",
@@ -48,7 +60,7 @@ func (d *dataSourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ dat
 				CustomType:          customtypes.UUIDType{},
 			},
 			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of " + DomainWorkspaceAssignmentsName + ".",
+				MarkdownDescription: "The list of " + d.Name + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewListNestedObjectTypeOf[workspaceModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
@@ -86,6 +98,15 @@ func (d *dataSourceDomainWorkspaceAssignments) Configure(_ context.Context, req 
 
 	d.pConfigData = pConfigData
 	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewModeEnabled(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil && diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	} else if diags != nil {
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (d *dataSourceDomainWorkspaceAssignments) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

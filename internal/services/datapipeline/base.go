@@ -19,6 +19,7 @@ const (
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines"
 	ItemDefinitionEmpty       = `{"properties":{"activities":[]}}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api"
+	ItemPreview               = true
 )
 
 var ItemDefinitionPaths = []string{"pipeline-content.json"} //nolint:gochecknoglobals

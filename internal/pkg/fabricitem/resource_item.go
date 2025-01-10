@@ -37,6 +37,7 @@ type ResourceFabricItem struct {
 	MarkdownDescription  string
 	DisplayNameMaxLength int
 	DescriptionMaxLength int
+	IsPreview            bool
 }
 
 func NewResourceFabricItem(config ResourceFabricItem) resource.Resource {
@@ -68,6 +69,15 @@ func (r *ResourceFabricItem) Configure(_ context.Context, req resource.Configure
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewModeEnabled(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil && diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	} else if diags != nil {
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -78,6 +78,7 @@ func NewDataSourceWarehouse() datasource.DataSource {
 				"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
 			IsDisplayNameUnique: true,
+			IsPreview:           ItemPreview,
 		},
 		PropertiesAttributes: getDataSourceWarehousePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,

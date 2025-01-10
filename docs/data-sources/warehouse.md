@@ -6,6 +6,7 @@ description: |-
   Get a Fabric Warehouse.
   Use this data source to fetch a Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Data Source)
@@ -15,6 +16,8 @@ Get a Fabric Warehouse.
 Use this data source to fetch a [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

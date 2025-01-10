@@ -19,7 +19,7 @@ func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -32,7 +32,7 @@ func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFa
 	}
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -42,7 +42,7 @@ func getDataSourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -56,7 +56,7 @@ func getDataSourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](c
 	}
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }

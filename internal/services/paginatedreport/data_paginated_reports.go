@@ -18,6 +18,7 @@ func NewDataSourcePaginatedReports() datasource.DataSource {
 		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
 			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
+		IsPreview: ItemPreview,
 	}
 
 	return fabricitem.NewDataSourceFabricItems(config)

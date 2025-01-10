@@ -20,6 +20,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -28,26 +29,37 @@ import (
 var _ resource.ResourceWithConfigure = (*resourceDomainWorkspaceAssignments)(nil)
 
 type resourceDomainWorkspaceAssignments struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewResourceDomainWorkspaceAssignments() resource.Resource {
-	return &resourceDomainWorkspaceAssignments{}
+	markdownDescription := "Manage a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
+		"Use this resource to manage [" + DomainWorkspaceAssignmentsName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &resourceDomainWorkspaceAssignments{
+		Name:                DomainWorkspaceAssignmentsName,
+		TFName:              DomainWorkspaceAssignmentsTFName,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (r *resourceDomainWorkspaceAssignments) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + DomainWorkspaceAssignmentsTFName
+	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
 func (r *resourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
-			"See [" + ItemName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: r.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + DomainWorkspaceAssignmentsName + " ID.",
+				MarkdownDescription: "The " + r.Name + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -89,6 +101,15 @@ func (r *resourceDomainWorkspaceAssignments) Configure(_ context.Context, req re
 
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewModeEnabled(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil && diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	} else if diags != nil {
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (r *resourceDomainWorkspaceAssignments) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

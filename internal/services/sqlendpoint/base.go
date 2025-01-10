@@ -17,4 +17,5 @@ const (
 	ItemType           = fabcore.ItemTypeSQLEndpoint
 	ItemDocsSPNSupport = common.DocsSPNNotSupported
 	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse"
+	ItemPreview        = true
 )

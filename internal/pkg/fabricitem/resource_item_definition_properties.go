@@ -108,6 +108,15 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(_
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewModeEnabled(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil && diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	} else if diags != nil {
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) { //revive:disable-line:confusing-naming

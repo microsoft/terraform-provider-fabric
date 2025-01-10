@@ -3,18 +3,21 @@
 page_title: "fabric_domain Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric Domain.
-  See Domains https://learn.microsoft.com/fabric/governance/domains for more information.
+  Manage a Fabric Domain.
+  Use this resource to manage Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain (Resource)
 
-This resource manages a Fabric Domain.
+Manage a Fabric Domain.
 
-See [Domains](https://learn.microsoft.com/fabric/governance/domains) for more information.
+Use this resource to manage [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
