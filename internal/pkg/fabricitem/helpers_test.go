@@ -12,6 +12,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
 func TestUnit_GetDataSourcePreviewNote_PreviewEnabled(t *testing.T) {
@@ -47,7 +48,7 @@ func TestUnit_GetResourcePreviewNote_PreviewDisabled(t *testing.T) {
 }
 
 func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeDisabled(t *testing.T) {
-	name := "test-item"
+	name := testhelp.RandomName()
 	itemIsPreview := true
 	providerPreviewMode := false
 
@@ -60,7 +61,7 @@ func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeDisabled(t *testing
 }
 
 func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeEnabled(t *testing.T) {
-	name := "test-item"
+	name := testhelp.RandomName()
 	itemIsPreview := true
 	providerPreviewMode := true
 
@@ -73,7 +74,7 @@ func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeEnabled(t *testing.
 }
 
 func TestUnit_IsPreviewMode_ItemIsNotPreview(t *testing.T) {
-	name := "test-item"
+	name := testhelp.RandomName()
 	itemIsPreview := false
 	providerPreviewMode := false
 
