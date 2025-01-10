@@ -27,7 +27,7 @@ func GetResourcePreviewNote(md string, preview bool) string { //revive:disable-l
 	return md
 }
 
-func IsPreviewModeEnabled(name string, itemIsPreview, providerPreviewMode bool) diag.Diagnostics { //revive:disable-line:flag-parameter
+func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	var diags diag.Diagnostics
 
 	if itemIsPreview && !providerPreviewMode {

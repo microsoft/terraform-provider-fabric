@@ -103,13 +103,13 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Configure(_ contex
 
 	d.pConfigData = pConfigData
 
-	diags := IsPreviewModeEnabled(d.Name, d.IsPreview, d.pConfigData.Preview)
-	if diags != nil && diags.HasError() {
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 
-		return
-	} else if diags != nil {
-		resp.Diagnostics.Append(diags...)
+		if diags.HasError() {
+			return
+		}
 	}
 }
 

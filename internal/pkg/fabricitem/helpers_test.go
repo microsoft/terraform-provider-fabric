@@ -46,12 +46,12 @@ func TestUnit_GetResourcePreviewNote_PreviewDisabled(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestUnit_IsPreviewModeEnabled_ItemIsPreview_ProviderPreviewModeDisabled(t *testing.T) {
+func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeDisabled(t *testing.T) {
 	name := "test-item"
 	itemIsPreview := true
 	providerPreviewMode := false
 
-	diags := fabricitem.IsPreviewModeEnabled(name, itemIsPreview, providerPreviewMode)
+	diags := fabricitem.IsPreviewMode(name, itemIsPreview, providerPreviewMode)
 
 	assert.Len(t, diags, 1)
 	assert.Equal(t, diags[0].Severity(), diag.SeverityError)
@@ -59,12 +59,12 @@ func TestUnit_IsPreviewModeEnabled_ItemIsPreview_ProviderPreviewModeDisabled(t *
 	assert.Equal(t, diags[0].Detail(), fmt.Sprintf(common.ErrorPreviewModeDetails, name))
 }
 
-func TestUnit_IsPreviewModeEnabled_ItemIsPreview_ProviderPreviewModeEnabled(t *testing.T) {
+func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeEnabled(t *testing.T) {
 	name := "test-item"
 	itemIsPreview := true
 	providerPreviewMode := true
 
-	diags := fabricitem.IsPreviewModeEnabled(name, itemIsPreview, providerPreviewMode)
+	diags := fabricitem.IsPreviewMode(name, itemIsPreview, providerPreviewMode)
 
 	assert.Len(t, diags, 1)
 	assert.Equal(t, diags[0].Severity(), diag.SeverityWarning)
@@ -72,12 +72,12 @@ func TestUnit_IsPreviewModeEnabled_ItemIsPreview_ProviderPreviewModeEnabled(t *t
 	assert.Equal(t, diags[0].Detail(), fmt.Sprintf(common.WarningPreviewModeDetails, name))
 }
 
-func TestUnit_IsPreviewModeEnabled_ItemIsNotPreview(t *testing.T) {
+func TestUnit_IsPreviewMode_ItemIsNotPreview(t *testing.T) {
 	name := "test-item"
 	itemIsPreview := false
 	providerPreviewMode := false
 
-	diags := fabricitem.IsPreviewModeEnabled(name, itemIsPreview, providerPreviewMode)
+	diags := fabricitem.IsPreviewMode(name, itemIsPreview, providerPreviewMode)
 
 	assert.Len(t, diags, 0)
 }

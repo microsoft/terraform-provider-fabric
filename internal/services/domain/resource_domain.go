@@ -130,13 +130,13 @@ func (r *resourceDomain) Configure(_ context.Context, req resource.ConfigureRequ
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 
-	diags := fabricitem.IsPreviewModeEnabled(r.Name, r.IsPreview, r.pConfigData.Preview)
-	if diags != nil && diags.HasError() {
+	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 
-		return
-	} else if diags != nil {
-		resp.Diagnostics.Append(diags...)
+		if diags.HasError() {
+			return
+		}
 	}
 }
 

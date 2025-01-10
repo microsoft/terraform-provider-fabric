@@ -188,13 +188,13 @@ func (r *resourceWorkspaceGit) Configure(_ context.Context, req resource.Configu
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGitClient()
 
-	diags := fabricitem.IsPreviewModeEnabled(r.Name, r.IsPreview, r.pConfigData.Preview)
-	if diags != nil && diags.HasError() {
+	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 
-		return
-	} else if diags != nil {
-		resp.Diagnostics.Append(diags...)
+		if diags.HasError() {
+			return
+		}
 	}
 }
 
