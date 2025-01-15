@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   List a Fabric Warehouses.
   Use this data source to list Warehouses https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
 ---
 
 # fabric_warehouses (Data Source)
@@ -14,7 +14,7 @@ List a Fabric Warehouses.
 
 Use this data source to list [Warehouses](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ## Example Usage
 

@@ -217,10 +217,6 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WarehouseResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
