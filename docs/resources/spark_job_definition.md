@@ -31,6 +31,7 @@ resource "fabric_spark_job_definition" "example_definition_bootstrap" {
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "SparkJobDefinitionV1"
   definition = {
     "SparkJobDefinitionV1.json" = {
       source = "${local.path}/SparkJobDefinitionV1.json.tmpl"
@@ -43,6 +44,7 @@ resource "fabric_spark_job_definition" "example_definition_update" {
   display_name = "example3"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "SparkJobDefinitionV1"
   definition = {
     "SparkJobDefinitionV1.json" = {
       source = "${local.path}/SparkJobDefinitionV1.json.tmpl"
@@ -65,14 +67,14 @@ resource "fabric_spark_job_definition" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `SparkJobDefinitionV1.json`. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). Accepted path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Spark Job Definition description.
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`.
 - `id` (String) The Spark Job Definition ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
 

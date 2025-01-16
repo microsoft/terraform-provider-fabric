@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -17,12 +18,14 @@ const (
 	ItemType                  = fabcore.ItemTypeEventhouse
 	ItemDocsSPNSupport        = common.DocsSPNSupported
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse"
-	ItemFormatTypeDefault     = ""
 	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition"
 )
 
-var (
-	ItemFormatTypes     = []string{}                            //nolint:gochecknoglobals
-	ItemDefinitionPaths = []string{"EventhouseProperties.json"} //nolint:gochecknoglobals
-)
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  fabricitem.DefinitionFormatDefault,
+		API:   "",
+		Paths: []string{"EventhouseProperties.json"},
+	},
+}

@@ -70,14 +70,14 @@ resource "fabric_data_pipeline" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `pipeline-content.json`. Read more about [Data Pipeline definition part paths](https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Data Pipeline definition part paths](https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api). Accepted path keys: **Default** format: `pipeline-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Data Pipeline description.
+- `format` (String) The Data Pipeline format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `format` (String) The Data Pipeline format. Possible values: `NotApplicable`
 - `id` (String) The Data Pipeline ID.
 
 <a id="nestedatt--definition"></a>

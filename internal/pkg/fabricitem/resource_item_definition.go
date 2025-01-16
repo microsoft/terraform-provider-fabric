@@ -41,13 +41,11 @@ type ResourceFabricItemDefinition struct {
 	MarkdownDescription         string
 	DisplayNameMaxLength        int
 	DescriptionMaxLength        int
-	FormatTypeDefault           string
-	FormatTypes                 []string
 	DefinitionPathDocsURL       string
-	DefinitionPathKeys          []string
 	DefinitionPathKeysValidator []validator.Map
 	DefinitionRequired          bool
 	DefinitionEmpty             string
+	DefinitionFormats           []DefinitionFormat
 	IsPreview                   bool
 }
 
@@ -81,7 +79,7 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 
 		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -160,7 +158,7 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	reqCreate.setDescription(plan.Description)
 	reqCreate.setType(r.Type)
 
-	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -272,7 +270,7 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 
 	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionPathKeys, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}

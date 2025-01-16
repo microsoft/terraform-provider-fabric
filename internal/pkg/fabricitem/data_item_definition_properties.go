@@ -126,12 +126,6 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx 
 		return
 	}
 
-	data.Format = types.StringNull()
-
-	if d.FormatTypeDefault != "" {
-		data.Format = types.StringValue(d.FormatTypeDefault)
-	}
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	if data.OutputDefinition.IsNull() || data.OutputDefinition.IsUnknown() {
@@ -205,7 +199,11 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getDefini
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 
 	if !model.Format.IsNull() {
-		respGetOpts.Format = model.Format.ValueStringPointer()
+		apiFormat := getDefinitionFormatAPI(d.DefinitionFormats, model.Format.ValueString())
+
+		if apiFormat != "" {
+			respGetOpts.Format = &apiFormat
+		}
 	}
 
 	respGet, err := d.client.GetItemDefinition(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), respGetOpts)
