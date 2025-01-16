@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 )
@@ -48,7 +49,7 @@ func ConvertEnumsToStringSlices[T any](values []T, sorting bool) []string { //re
 	}
 
 	if sorting {
-		slices.Sort(result)
+		result = slices.Sorted(slices.Values(result))
 	}
 
 	return result
@@ -76,19 +77,12 @@ func ConvertStringSlicesToString[T any](values []T, backticks, sorting bool, sep
 
 // SortMapStringByKeys sorts a map[string]string by keys.
 func SortMapStringByKeys[T any](m map[string]T) map[string]T {
-	sortedKeys := make([]string, 0, len(m))
-	for k := range m {
-		sortedKeys = append(sortedKeys, k)
+	result := make(map[string]T, len(m))
+	for _, k := range slices.Sorted(maps.Keys(m)) {
+		result[k] = m[k]
 	}
 
-	slices.Sort(sortedKeys)
-
-	sortedMap := make(map[string]T)
-	for _, k := range sortedKeys {
-		sortedMap[k] = m[k]
-	}
-
-	return sortedMap
+	return result
 }
 
 func Sha256(content string) string {
