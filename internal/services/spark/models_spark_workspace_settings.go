@@ -32,6 +32,7 @@ type baseSparkWorkspaceSettingsModel struct {
 	AutomaticLog    supertypes.SingleNestedObjectValueOf[automaticLogPropertiesModel]    `tfsdk:"automatic_log"`
 	Environment     supertypes.SingleNestedObjectValueOf[environmentPropertiesModel]     `tfsdk:"environment"`
 	HighConcurrency supertypes.SingleNestedObjectValueOf[highConcurrencyPropertiesModel] `tfsdk:"high_concurrency"`
+	Jobs            supertypes.SingleNestedObjectValueOf[jobsPropertiesModel]            `tfsdk:"jobs"`
 	Pool            supertypes.SingleNestedObjectValueOf[poolPropertiesModel]            `tfsdk:"pool"`
 }
 
@@ -76,6 +77,19 @@ func (to *baseSparkWorkspaceSettingsModel) set(ctx context.Context, from fabspar
 
 	to.HighConcurrency = highConcurrency
 
+	jobs := supertypes.NewSingleNestedObjectValueOfNull[jobsPropertiesModel](ctx)
+
+	if from.Jobs != nil {
+		jobsModel := &jobsPropertiesModel{}
+		jobsModel.set(from.Jobs)
+
+		if diags := jobs.Set(ctx, jobsModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	to.Jobs = jobs
+
 	pool := supertypes.NewSingleNestedObjectValueOfNull[poolPropertiesModel](ctx)
 
 	if from.Pool != nil {
@@ -115,10 +129,22 @@ func (to *environmentPropertiesModel) set(from *fabspark.EnvironmentProperties) 
 
 type highConcurrencyPropertiesModel struct {
 	NotebookInteractiveRunEnabled types.Bool `tfsdk:"notebook_interactive_run_enabled"`
+	NotebookPipelineRunEnabled    types.Bool `tfsdk:"notebook_pipeline_run_enabled"`
 }
 
 func (to *highConcurrencyPropertiesModel) set(from *fabspark.HighConcurrencyProperties) {
 	to.NotebookInteractiveRunEnabled = types.BoolPointerValue(from.NotebookInteractiveRunEnabled)
+	to.NotebookPipelineRunEnabled = types.BoolPointerValue(from.NotebookPipelineRunEnabled)
+}
+
+type jobsPropertiesModel struct {
+	ConservativeJobAdmissionEnabled types.Bool  `tfsdk:"conservative_job_admission_enabled"`
+	SessionTimeoutInMinutes         types.Int32 `tfsdk:"session_timeout_in_minutes"`
+}
+
+func (to *jobsPropertiesModel) set(from *fabspark.JobsProperties) {
+	to.ConservativeJobAdmissionEnabled = types.BoolPointerValue(from.ConservativeJobAdmissionEnabled)
+	to.SessionTimeoutInMinutes = types.Int32PointerValue(from.SessionTimeoutInMinutes)
 }
 
 type poolPropertiesModel struct {
@@ -230,6 +256,27 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 			to.HighConcurrency = &fabspark.HighConcurrencyProperties{
 				NotebookInteractiveRunEnabled: highConcurrency.NotebookInteractiveRunEnabled.ValueBoolPointer(),
 			}
+		}
+	}
+
+	if !from.Jobs.IsNull() && !from.Jobs.IsUnknown() {
+		jobs, diags := from.Jobs.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		var reqJobs fabspark.JobsProperties
+
+		if !jobs.ConservativeJobAdmissionEnabled.IsNull() && !jobs.ConservativeJobAdmissionEnabled.IsUnknown() {
+			reqJobs.ConservativeJobAdmissionEnabled = jobs.ConservativeJobAdmissionEnabled.ValueBoolPointer()
+		}
+
+		if !jobs.SessionTimeoutInMinutes.IsNull() && !jobs.SessionTimeoutInMinutes.IsUnknown() {
+			reqJobs.SessionTimeoutInMinutes = jobs.SessionTimeoutInMinutes.ValueInt32Pointer()
+		}
+
+		if reqJobs != (fabspark.JobsProperties{}) {
+			to.Jobs = &reqJobs
 		}
 	}
 

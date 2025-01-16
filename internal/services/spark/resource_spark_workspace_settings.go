@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -138,6 +139,44 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
+					"notebook_pipeline_run_enabled": schema.BoolAttribute{
+						MarkdownDescription: "The status of the high concurrency for notebook pipeline run. `false` - Disabled, `true` - Enabled.",
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+			},
+			"jobs": schema.SingleNestedAttribute{
+				MarkdownDescription: "Jobs properties.",
+				Optional:            true,
+				Computed:            true,
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[jobsPropertiesModel](ctx),
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+					"conservative_job_admission_enabled": schema.BoolAttribute{
+						MarkdownDescription: "Reserve maximum cores for active Spark jobs. When this setting is enabled, your Fabric capacity reserves the maximum number of cores needed for active Spark jobs, ensuring job reliability by making sure that cores are available if a job scales up. When this setting is disabled, jobs are started based on the minimum number of cores needed, letting more jobs run at the same time. `false` - Disabled, `true` - Enabled.",
+						Optional:            true,
+						Computed:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"session_timeout_in_minutes": schema.Int32Attribute{
+						MarkdownDescription: "Time to terminate inactive Spark sessions. The maximum is 14 days (20160 minutes).",
+						Optional:            true,
+						Computed:            true,
+						Validators: []validator.Int32{
+							int32validator.AtMost(20160),
+						},
+						PlanModifiers: []planmodifier.Int32{
+							int32planmodifier.UseStateForUnknown(),
+						},
+					},
 				},
 			},
 			"pool": schema.SingleNestedAttribute{
@@ -259,6 +298,7 @@ func (r *resourceSparkWorkspaceSettings) ConfigValidators(_ context.Context) []r
 			path.MatchRoot("automatic_log"),
 			path.MatchRoot("environment"),
 			path.MatchRoot("high_concurrency"),
+			path.MatchRoot("jobs"),
 			path.MatchRoot("pool"),
 		),
 	}
