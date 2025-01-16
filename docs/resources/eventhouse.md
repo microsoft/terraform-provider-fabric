@@ -64,14 +64,14 @@ resource "fabric_eventhouse" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `EventhouseProperties.json`. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). Accepted path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventhouse description.
+- `format` (String) The Eventhouse format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `format` (String) The Eventhouse format. Possible values: `NotApplicable`
 - `id` (String) The Eventhouse ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
 

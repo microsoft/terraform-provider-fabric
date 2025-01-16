@@ -78,9 +78,7 @@ func NewDataSourceSparkJobDefinition() datasource.DataSource {
 				"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
 			IsDisplayNameUnique: true,
-			FormatTypeDefault:   ItemFormatTypeDefault,
-			FormatTypes:         ItemFormatTypes,
-			DefinitionPathKeys:  ItemDefinitionPaths,
+			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceSparkJobDefinitionPropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,

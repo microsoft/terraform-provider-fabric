@@ -66,6 +66,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Eventhouse display name.
+- `format` (String) The Eventhouse format. Possible values: `Default`
 - `id` (String) The Eventhouse ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -75,9 +76,8 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: `EventhouseProperties.json`. (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Eventhouse description.
-- `format` (String) The Eventhouse format. Possible values: `NotApplicable`
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

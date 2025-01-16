@@ -35,9 +35,13 @@ type fabricItemDefinition struct {
 	fabcore.ItemDefinition
 }
 
-func (to *fabricItemDefinition) setFormat(v types.String) {
-	if v.ValueString() != DefinitionFormatNotApplicable && v.ValueString() != "" {
-		to.Format = v.ValueStringPointer()
+func (to *fabricItemDefinition) setFormat(v types.String, definitionFormats []DefinitionFormat) {
+	if v.ValueString() != DefinitionFormatDefault && v.ValueString() != "" {
+		apiFormat := getDefinitionFormatAPI(definitionFormats, v.ValueString())
+
+		if apiFormat != "" {
+			to.Format = &apiFormat
+		}
 	}
 }
 
@@ -62,7 +66,7 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 		}
 
 		to.Parts = append(to.Parts, fabcore.ItemDefinitionPart{
-			Path:        azto.Ptr(definitionPaths[0]),
+			Path:        &definitionPaths[0],
 			Payload:     &content,
 			PayloadType: azto.Ptr(fabcore.PayloadTypeInlineBase64),
 		})
@@ -78,7 +82,7 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 			}
 
 			to.Parts = append(to.Parts, fabcore.ItemDefinitionPart{
-				Path:        azto.Ptr(defPartKey),
+				Path:        &defPartKey,
 				Payload:     payloadB64,
 				PayloadType: azto.Ptr(fabcore.PayloadTypeInlineBase64),
 			})
@@ -92,12 +96,14 @@ type requestUpdateFabricItemDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionPaths []string) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionFormats []DefinitionFormat) diag.Diagnostics {
 	var def fabricItemDefinition
 
-	def.setFormat(format)
+	def.setFormat(format, definitionFormats)
 
-	if diags := def.setParts(ctx, definition, definitionEmpty, definitionPaths, definitionUpdateEnabled, true); diags.HasError() {
+	definitionPathKeys := GetDefinitionFormatPaths(definitionFormats, format.ValueString())
+
+	if diags := def.setParts(ctx, definition, definitionEmpty, definitionPathKeys, definitionUpdateEnabled, true); diags.HasError() {
 		return diags
 	}
 
