@@ -31,13 +31,13 @@ func NewResourceReport() resource.Resource {
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtLeast(3),
 			mapvalidator.KeysAre(
-				fwvalidators.RegexpIfAttributeIsOneOf(
+				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
 					[]attr.Value{types.StringValue("PBIR-Legacy")},
 					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "PBIR-Legacy"),
 					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "PBIR-Legacy"), true, false),
 				),
-				fwvalidators.RegexpIfAttributeIsOneOf(
+				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
 					[]attr.Value{types.StringValue("PBIR")},
 					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "PBIR"),

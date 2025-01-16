@@ -31,13 +31,13 @@ func NewResourceSemanticModel() resource.Resource {
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtLeast(2),
 			mapvalidator.KeysAre(
-				fwvalidators.RegexpIfAttributeIsOneOf(
+				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
 					[]attr.Value{types.StringValue("TMSL")},
 					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMSL"),
 					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMSL"), true, false),
 				),
-				fwvalidators.RegexpIfAttributeIsOneOf(
+				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
 					[]attr.Value{types.StringValue("TMDL")},
 					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMDL"),
