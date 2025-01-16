@@ -4,6 +4,7 @@
 package fabricitem
 
 import (
+	"maps"
 	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -28,25 +29,18 @@ func getDefinitionFormats(values []DefinitionFormat) []string {
 		results[i] = value.Type
 	}
 
-	return results
+	return slices.Sorted(slices.Values(results))
 }
 
 func getDefinitionFormatsPaths(values []DefinitionFormat) map[string][]string {
-	results := make(map[string][]string)
+	results := make(map[string][]string, len(values))
 
-	for _, v := range values {
-		slices.Sort(v.Paths)
-		results[v.Type] = v.Paths
+	for v := range slices.Values(values) {
+		results[v.Type] = slices.Sorted(slices.Values(v.Paths))
 	}
 
-	keys := make([]string, 0, len(results))
-	for k := range results {
-		keys = append(keys, k)
-	}
-	slices.Sort(keys)
-
-	sortedResults := make(map[string][]string)
-	for _, k := range keys {
+	sortedResults := make(map[string][]string, len(results))
+	for _, k := range slices.Sorted(maps.Keys(results)) {
 		sortedResults[k] = results[k]
 	}
 
@@ -60,9 +54,9 @@ func getDefinitionFormatsPathsDocs(values []DefinitionFormat) string {
 
 	i := 0
 
-	for k, v := range elements {
+	for _, k := range slices.Sorted(maps.Keys(elements)) {
 		results += "**" + k + "** format: "
-		results += utils.ConvertStringSlicesToString(v, true, true)
+		results += utils.ConvertStringSlicesToString(elements[k], true, true)
 
 		if i != len(elements)-1 {
 			results += " "
