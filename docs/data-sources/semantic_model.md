@@ -63,7 +63,7 @@ output "example_definition_bim_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **TMSL** format: `definition.pbism`, `diagramLayp.json`, `model.bim` **TMDL** format: `definition.pbism`, `definition/database.tmdl`, `definition/model.tmdl`, `definition/tables/*.tmdl`, `diagramLayp.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **TMDL** format: `definition.pbism`, `definition/database.tmdl`, `definition/model.tmdl`, `definition/tables/*.tmdl`, `diagramLayp.json` **TMSL** format: `definition.pbism`, `diagramLayp.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Semantic Model description.
 - `display_name` (String) The Semantic Model display name.
 
