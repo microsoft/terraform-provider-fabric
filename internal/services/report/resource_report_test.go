@@ -68,6 +68,7 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -84,6 +85,7 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
 						"display_name":    "test",
 						"unexpected_attr": "test",
+						"format":          "PBIR-Legacy",
 						"definition":      testHelperDefinition,
 					},
 				)),
@@ -98,6 +100,7 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"display_name": "test",
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -112,6 +115,7 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -149,6 +153,7 @@ func TestUnit_ReportResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
+				"format":       "PBIR-Legacy",
 				"definition":   testHelperDefinition,
 			},
 		))
@@ -231,6 +236,7 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -246,6 +252,7 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -265,6 +272,7 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -300,6 +308,7 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -319,6 +328,7 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
+						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
 				)),

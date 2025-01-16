@@ -15,6 +15,7 @@ data "fabric_spark_job_definition" "example_by_name" {
 data "fabric_spark_job_definition" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "SparkJobDefinitionV1"
   output_definition = true
 }
 

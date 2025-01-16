@@ -78,9 +78,7 @@ func NewDataSourceEventhouse(ctx context.Context) datasource.DataSource {
 				"Use this data source to fetch an [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
 			IsDisplayNameUnique: true,
-			FormatTypeDefault:   ItemFormatTypeDefault,
-			FormatTypes:         ItemFormatTypes,
-			DefinitionPathKeys:  ItemDefinitionPaths,
+			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceEventhousePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,

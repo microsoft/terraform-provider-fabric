@@ -35,9 +35,7 @@ type DataSourceFabricItemDefinition struct {
 	TFName              string
 	MarkdownDescription string
 	IsDisplayNameUnique bool
-	FormatTypeDefault   string
-	FormatTypes         []string
-	DefinitionPathKeys  []string
+	DefinitionFormats   []DefinitionFormat
 	IsPreview           bool
 }
 
@@ -130,12 +128,6 @@ func (d *DataSourceFabricItemDefinition) Read(ctx context.Context, req datasourc
 		return
 	}
 
-	data.Format = types.StringNull()
-
-	if d.FormatTypeDefault != "" {
-		data.Format = types.StringValue(d.FormatTypeDefault)
-	}
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	if data.OutputDefinition.IsNull() || data.OutputDefinition.IsUnknown() {
@@ -213,7 +205,11 @@ func (d *DataSourceFabricItemDefinition) getDefinition(ctx context.Context, mode
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 
 	if !model.Format.IsNull() {
-		respGetOpts.Format = model.Format.ValueStringPointer()
+		apiFormat := getDefinitionFormatAPI(d.DefinitionFormats, model.Format.ValueString())
+
+		if apiFormat != "" {
+			respGetOpts.Format = &apiFormat
+		}
 	}
 
 	respGet, err := d.client.GetItemDefinition(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), respGetOpts)

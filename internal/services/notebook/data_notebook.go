@@ -18,9 +18,7 @@ func NewDataSourceNotebook() datasource.DataSource {
 			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: true,
-		FormatTypeDefault:   ItemFormatTypeDefault,
-		FormatTypes:         ItemFormatTypes,
-		DefinitionPathKeys:  ItemDefinitionPathsIPYNB,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
 	return fabricitem.NewDataSourceFabricItemDefinition(config)

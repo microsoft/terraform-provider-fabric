@@ -31,6 +31,7 @@ resource "fabric_notebook" "example_definition_bootstrap" {
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "ipynb"
   definition = {
     "notebook-content.ipynb" = {
       source = "${local.path}/notebook.ipynb.tmpl"
@@ -43,6 +44,7 @@ resource "fabric_notebook" "example_definition_update" {
   display_name = "example"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "ipynb"
   definition = {
     "notebook-content.ipynb" = {
       source = "${local.path}/notebook.ipynb.tmpl"
@@ -65,14 +67,14 @@ resource "fabric_notebook" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `notebook-content.ipynb`. Read more about [Notebook definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/notebook-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Notebook definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/notebook-definition). Accepted path keys: **ipynb** format: `notebook-content.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Notebook description.
+- `format` (String) The Notebook format. Possible values: `ipynb`, `py`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `format` (String) The Notebook format. Possible values: `ipynb`.
 - `id` (String) The Notebook ID.
 
 <a id="nestedatt--definition"></a>

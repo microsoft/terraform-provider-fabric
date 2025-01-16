@@ -23,16 +23,14 @@ func NewResourceDataPipeline() resource.Resource {
 			ItemDocsSPNSupport,
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
-		FormatTypeDefault:     "",
-		FormatTypes:           []string{},
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-		DefinitionPathKeys:    ItemDefinitionPaths,
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtMost(1),
-			mapvalidator.KeysAre(stringvalidator.OneOf(ItemDefinitionPaths...)),
+			mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
 		},
 		DefinitionRequired: false,
 		DefinitionEmpty:    ItemDefinitionEmpty,
+		DefinitionFormats:  itemDefinitionFormats,
 		IsPreview:          ItemPreview,
 	}
 

@@ -36,6 +36,7 @@ data "fabric_notebook" "example_by_id" {
 data "fabric_notebook" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "ipynb"
   output_definition = true
 }
 
@@ -68,6 +69,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Notebook display name.
+- `format` (String) The Notebook format. Possible values: `ipynb`, `py`
 - `id` (String) The Notebook ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -77,9 +79,8 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: `notebook-content.ipynb`. (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **ipynb** format: `notebook-content.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Notebook description.
-- `format` (String) The Notebook format. Possible values: `ipynb`.
 
 <a id="nestedatt--timeouts"></a>
 

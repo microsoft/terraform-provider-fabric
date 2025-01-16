@@ -156,6 +156,7 @@ func TestAcc_ReportDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
+					"format":            "PBIR-Legacy",
 					"output_definition": true,
 				},
 			),

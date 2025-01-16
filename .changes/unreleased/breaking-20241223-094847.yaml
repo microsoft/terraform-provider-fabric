@@ -1,0 +1,7 @@
+kind: breaking
+body: |
+  The `format` attribute is now REQUIRED for Resources/Data-Sources with definition support.
+  Currently applicable to the following Resources/Data-Sources: Report, Notebook, Semantic Model, and Spark Job Definition.
+time: 2024-12-23T09:48:47.1324573-08:00
+custom:
+  Issue: "111"

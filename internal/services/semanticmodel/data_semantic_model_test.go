@@ -156,6 +156,7 @@ func TestAcc_SemanticModelDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
+					"format":            "TMSL",
 					"output_definition": true,
 				},
 			),
