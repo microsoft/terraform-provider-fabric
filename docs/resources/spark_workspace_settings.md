@@ -41,6 +41,12 @@ resource "fabric_spark_workspace_settings" "example" {
    */
   }
 
+  jobs = {
+    /*
+   your settings here
+   */
+  }
+
   pool = {
     /*
    your settings here
