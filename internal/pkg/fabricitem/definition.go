@@ -4,6 +4,8 @@
 package fabricitem
 
 import (
+	"slices"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -33,10 +35,22 @@ func getDefinitionFormatsPaths(values []DefinitionFormat) map[string][]string {
 	results := make(map[string][]string)
 
 	for _, v := range values {
+		slices.Sort(v.Paths)
 		results[v.Type] = v.Paths
 	}
 
-	return results
+	keys := make([]string, 0, len(results))
+	for k := range results {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+
+	sortedResults := make(map[string][]string)
+	for _, k := range keys {
+		sortedResults[k] = results[k]
+	}
+
+	return sortedResults
 }
 
 func getDefinitionFormatsPathsDocs(values []DefinitionFormat) string {
