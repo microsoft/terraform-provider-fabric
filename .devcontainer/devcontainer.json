@@ -15,7 +15,7 @@
     },
     // "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
     "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.23.4"
+      "version": "1.23.5"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.12"
