@@ -97,7 +97,7 @@ resource "fabric_spark_workspace_settings" "example2" {
 - `automatic_log` (Attributes) Automatic Log properties. (see [below for nested schema](#nestedatt--automatic_log))
 - `environment` (Attributes) Environment properties. (see [below for nested schema](#nestedatt--environment))
 - `high_concurrency` (Attributes) High Concurrency properties. (see [below for nested schema](#nestedatt--high_concurrency))
-- `jobs` (Attributes) Jobs properties. (see [below for nested schema](#nestedatt--jobs))
+- `job` (Attributes) Jobs properties. (see [below for nested schema](#nestedatt--job))
 - `pool` (Attributes) Pool properties. (see [below for nested schema](#nestedatt--pool))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -131,9 +131,9 @@ Optional:
 - `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run. `false` - Disabled, `true` - Enabled.
 - `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run. `false` - Disabled, `true` - Enabled.
 
-<a id="nestedatt--jobs"></a>
+<a id="nestedatt--job"></a>
 
-### Nested Schema for `jobs`
+### Nested Schema for `job`
 
 Optional:
 

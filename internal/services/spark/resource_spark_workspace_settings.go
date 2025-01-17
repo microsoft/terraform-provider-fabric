@@ -149,11 +149,11 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 					},
 				},
 			},
-			"jobs": schema.SingleNestedAttribute{
+			"job": schema.SingleNestedAttribute{
 				MarkdownDescription: "Jobs properties.",
 				Optional:            true,
 				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[jobsPropertiesModel](ctx),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[jobPropertiesModel](ctx),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},

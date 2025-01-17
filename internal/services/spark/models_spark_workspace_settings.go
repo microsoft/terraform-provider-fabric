@@ -32,7 +32,7 @@ type baseSparkWorkspaceSettingsModel struct {
 	AutomaticLog    supertypes.SingleNestedObjectValueOf[automaticLogPropertiesModel]    `tfsdk:"automatic_log"`
 	Environment     supertypes.SingleNestedObjectValueOf[environmentPropertiesModel]     `tfsdk:"environment"`
 	HighConcurrency supertypes.SingleNestedObjectValueOf[highConcurrencyPropertiesModel] `tfsdk:"high_concurrency"`
-	Jobs            supertypes.SingleNestedObjectValueOf[jobsPropertiesModel]            `tfsdk:"jobs"`
+	Job             supertypes.SingleNestedObjectValueOf[jobPropertiesModel]             `tfsdk:"job"`
 	Pool            supertypes.SingleNestedObjectValueOf[poolPropertiesModel]            `tfsdk:"pool"`
 }
 
@@ -77,18 +77,18 @@ func (to *baseSparkWorkspaceSettingsModel) set(ctx context.Context, from fabspar
 
 	to.HighConcurrency = highConcurrency
 
-	jobs := supertypes.NewSingleNestedObjectValueOfNull[jobsPropertiesModel](ctx)
+	job := supertypes.NewSingleNestedObjectValueOfNull[jobPropertiesModel](ctx)
 
 	if from.Jobs != nil {
-		jobsModel := &jobsPropertiesModel{}
-		jobsModel.set(from.Jobs)
+		jobModel := &jobPropertiesModel{}
+		jobModel.set(from.Jobs)
 
-		if diags := jobs.Set(ctx, jobsModel); diags.HasError() {
+		if diags := job.Set(ctx, jobModel); diags.HasError() {
 			return diags
 		}
 	}
 
-	to.Jobs = jobs
+	to.Job = job
 
 	pool := supertypes.NewSingleNestedObjectValueOfNull[poolPropertiesModel](ctx)
 
@@ -137,12 +137,12 @@ func (to *highConcurrencyPropertiesModel) set(from *fabspark.HighConcurrencyProp
 	to.NotebookPipelineRunEnabled = types.BoolPointerValue(from.NotebookPipelineRunEnabled)
 }
 
-type jobsPropertiesModel struct {
+type jobPropertiesModel struct {
 	ConservativeJobAdmissionEnabled types.Bool  `tfsdk:"conservative_job_admission_enabled"`
 	SessionTimeoutInMinutes         types.Int32 `tfsdk:"session_timeout_in_minutes"`
 }
 
-func (to *jobsPropertiesModel) set(from *fabspark.JobsProperties) {
+func (to *jobPropertiesModel) set(from *fabspark.JobsProperties) {
 	to.ConservativeJobAdmissionEnabled = types.BoolPointerValue(from.ConservativeJobAdmissionEnabled)
 	to.SessionTimeoutInMinutes = types.Int32PointerValue(from.SessionTimeoutInMinutes)
 }
@@ -259,24 +259,24 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 		}
 	}
 
-	if !from.Jobs.IsNull() && !from.Jobs.IsUnknown() {
-		jobs, diags := from.Jobs.Get(ctx)
+	if !from.Job.IsNull() && !from.Job.IsUnknown() {
+		job, diags := from.Job.Get(ctx)
 		if diags.HasError() {
 			return diags
 		}
 
-		var reqJobs fabspark.JobsProperties
+		var reqJob fabspark.JobsProperties
 
-		if !jobs.ConservativeJobAdmissionEnabled.IsNull() && !jobs.ConservativeJobAdmissionEnabled.IsUnknown() {
-			reqJobs.ConservativeJobAdmissionEnabled = jobs.ConservativeJobAdmissionEnabled.ValueBoolPointer()
+		if !job.ConservativeJobAdmissionEnabled.IsNull() && !job.ConservativeJobAdmissionEnabled.IsUnknown() {
+			reqJob.ConservativeJobAdmissionEnabled = job.ConservativeJobAdmissionEnabled.ValueBoolPointer()
 		}
 
-		if !jobs.SessionTimeoutInMinutes.IsNull() && !jobs.SessionTimeoutInMinutes.IsUnknown() {
-			reqJobs.SessionTimeoutInMinutes = jobs.SessionTimeoutInMinutes.ValueInt32Pointer()
+		if !job.SessionTimeoutInMinutes.IsNull() && !job.SessionTimeoutInMinutes.IsUnknown() {
+			reqJob.SessionTimeoutInMinutes = job.SessionTimeoutInMinutes.ValueInt32Pointer()
 		}
 
-		if reqJobs != (fabspark.JobsProperties{}) {
-			to.Jobs = &reqJobs
+		if reqJob != (fabspark.JobsProperties{}) {
+			to.Jobs = &reqJob
 		}
 	}
 

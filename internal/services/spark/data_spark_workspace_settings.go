@@ -93,9 +93,9 @@ func (d *dataSourceSparkWorkspaceSettings) Schema(ctx context.Context, _ datasou
 					},
 				},
 			},
-			"jobs": schema.SingleNestedAttribute{
+			"job": schema.SingleNestedAttribute{
 				Computed:   true,
-				CustomType: supertypes.NewSingleNestedObjectTypeOf[jobsPropertiesModel](ctx),
+				CustomType: supertypes.NewSingleNestedObjectTypeOf[jobPropertiesModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"conservative_job_admission_enabled": schema.BoolAttribute{
 						MarkdownDescription: "Reserve maximum cores for active Spark jobs. When this setting is enabled, your Fabric capacity reserves the maximum number of cores needed for active Spark jobs, ensuring job reliability by making sure that cores are available if a job scales up. When this setting is disabled, jobs are started based on the minimum number of cores needed, letting more jobs run at the same time. `false` - Disabled, `true` - Enabled.",
