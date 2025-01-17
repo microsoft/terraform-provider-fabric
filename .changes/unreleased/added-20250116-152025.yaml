@@ -2,8 +2,8 @@ kind: added
 body: |
   Added additional properties for `fabric_spark_workspace_settings` Data-Source and Resource:
   - `high_concurrency.notebook_pipeline_run_enabled` (Boolean)
-  - `jobs.conservative_job_admission_enabled` (Boolen)
-  - `jobs.session_timeout_in_minutes` (Number)
+  - `job.conservative_job_admission_enabled` (Boolen)
+  - `job.session_timeout_in_minutes` (Number)
 time: 2025-01-16T15:20:25.9324812-08:00
 custom:
   Issue: "201"

@@ -298,7 +298,7 @@ func (r *resourceSparkWorkspaceSettings) ConfigValidators(_ context.Context) []r
 			path.MatchRoot("automatic_log"),
 			path.MatchRoot("environment"),
 			path.MatchRoot("high_concurrency"),
-			path.MatchRoot("jobs"),
+			path.MatchRoot("job"),
 			path.MatchRoot("pool"),
 		),
 	}

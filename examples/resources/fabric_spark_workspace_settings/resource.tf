@@ -20,7 +20,7 @@ resource "fabric_spark_workspace_settings" "example" {
 			*/
   }
 
-  jobs = {
+  job = {
     /*
 			your settings here
 			*/
