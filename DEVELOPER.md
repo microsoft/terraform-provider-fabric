@@ -107,14 +107,14 @@ Local development is still possible on Windows, Linux and macOS, but requires ad
 
 #### Requirements
 
-- [Git](https://git-scm.com/downloads) `>= 2.44.0`
-- [Go](https://go.dev/doc/install) `>= 1.23.4`
+- [Git](https://git-scm.com/downloads) `>= 2.47.1`
+- [Go](https://go.dev/doc/install) `>= 1.23.5`
   - We recommend you to use Go version manager [go-nv/goenv](https://github.com/go-nv/goenv/blob/master/INSTALL.md)
-    - `goenv install 1.23.4`
-- [Terraform](https://developer.hashicorp.com/terraform/downloads) `>= 1.8.1`
+    - `goenv install 1.23.5`
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) `>= 1.10.4`
   - We recommend you to use Terraform version manager [tfutils/tfenv](https://github.com/tfutils/tfenv/blob/master/README.md)
-    - `tfenv install 1.8.1`, `tfenv use 1.8.1`
-- [Task](https://taskfile.dev/installation) `>= 3.36.0`
+    - `tfenv install 1.10.4`, `tfenv use 1.10.4`
+- [Task](https://taskfile.dev/installation) `>= 3.40.1`
 
 #### Linux
 
