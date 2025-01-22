@@ -79,9 +79,9 @@ func (to *baseSparkWorkspaceSettingsModel) set(ctx context.Context, from fabspar
 
 	job := supertypes.NewSingleNestedObjectValueOfNull[jobPropertiesModel](ctx)
 
-	if from.Jobs != nil {
+	if from.Job != nil {
 		jobModel := &jobPropertiesModel{}
-		jobModel.set(from.Jobs)
+		jobModel.set(from.Job)
 
 		if diags := job.Set(ctx, jobModel); diags.HasError() {
 			return diags
@@ -276,7 +276,7 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 		}
 
 		if reqJob != (fabspark.JobsProperties{}) {
-			to.Jobs = &reqJob
+			to.Job = &reqJob
 		}
 	}
 
