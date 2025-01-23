@@ -44,6 +44,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
@@ -424,6 +425,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		gateway.NewDataSourceVirtualNetworkGateway,
+		gateway.NewDataSourceOnPremisesGateway,
 		kqldashboard.NewDataSourceKQLDashboard,
 		kqldashboard.NewDataSourceKQLDashboards,
 		kqldatabase.NewDataSourceKQLDatabase,

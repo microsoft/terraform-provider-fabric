@@ -35,6 +35,7 @@ func newFakeServer() *fakeServer {
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
 	handleEntity(server, configureEnvironment)
+	handleEntity(server, configureGateway)
 	handleEntity(server, configureKQLDatabase)
 	handleEntity(server, configureLakehouse)
 	handleEntity(server, configureNotebook)
