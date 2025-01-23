@@ -252,10 +252,18 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 			return diags
 		}
 
+		var reqHighConcurrency fabspark.HighConcurrencyProperties
+
 		if !highConcurrency.NotebookInteractiveRunEnabled.IsNull() && !highConcurrency.NotebookInteractiveRunEnabled.IsUnknown() {
-			to.HighConcurrency = &fabspark.HighConcurrencyProperties{
-				NotebookInteractiveRunEnabled: highConcurrency.NotebookInteractiveRunEnabled.ValueBoolPointer(),
-			}
+			reqHighConcurrency.NotebookInteractiveRunEnabled = highConcurrency.NotebookInteractiveRunEnabled.ValueBoolPointer()
+		}
+
+		if !highConcurrency.NotebookPipelineRunEnabled.IsNull() && !highConcurrency.NotebookPipelineRunEnabled.IsUnknown() {
+			reqHighConcurrency.NotebookPipelineRunEnabled = highConcurrency.NotebookPipelineRunEnabled.ValueBoolPointer()
+		}
+
+		if reqHighConcurrency != (fabspark.HighConcurrencyProperties{}) {
+			to.HighConcurrency = &reqHighConcurrency
 		}
 	}
 
