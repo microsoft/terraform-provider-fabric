@@ -41,6 +41,7 @@ data "fabric_spark_workspace_settings" "example" {
 - `environment` (Attributes) Environment properties. (see [below for nested schema](#nestedatt--environment))
 - `high_concurrency` (Attributes) High Concurrency properties. (see [below for nested schema](#nestedatt--high_concurrency))
 - `id` (String) The ID of this resource.
+- `job` (Attributes) (see [below for nested schema](#nestedatt--job))
 - `pool` (Attributes) Pool properties. (see [below for nested schema](#nestedatt--pool))
 
 <a id="nestedatt--timeouts"></a>
@@ -75,6 +76,16 @@ Read-Only:
 Read-Only:
 
 - `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run. `false` - Disabled, `true` - Enabled.
+- `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run. `false` - Disabled, `true` - Enabled.
+
+<a id="nestedatt--job"></a>
+
+### Nested Schema for `job`
+
+Read-Only:
+
+- `conservative_job_admission_enabled` (Boolean) Reserve maximum cores for active Spark jobs. When this setting is enabled, your Fabric capacity reserves the maximum number of cores needed for active Spark jobs, ensuring job reliability by making sure that cores are available if a job scales up. When this setting is disabled, jobs are started based on the minimum number of cores needed, letting more jobs run at the same time. `false` - Disabled, `true` - Enabled.
+- `session_timeout_in_minutes` (Number) Time to terminate inactive Spark sessions. The maximum is 14 days (20160 minutes).
 
 <a id="nestedatt--pool"></a>
 

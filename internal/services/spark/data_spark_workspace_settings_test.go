@@ -18,27 +18,31 @@ var (
 )
 
 func TestAcc_SparkWorkspaceSettingsDataSource(t *testing.T) {
-	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-	capacityID := capacity["id"].(string)
-
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceSparkWorkspaceSettingsFQN, nil, []resource.TestStep{
 		// read
 		{
 			ResourceName: testDataSourceSparkWorkspaceSettingsFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				at.CompileConfig(
-					testDataSourceSparkWorkspaceSettingsHeader,
-					map[string]any{
-						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
-					},
-				)),
+			Config: at.CompileConfig(
+				testDataSourceSparkWorkspaceSettingsHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceSparkWorkspaceSettingsFQN, "workspace_id"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceSparkWorkspaceSettingsFQN, "id"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "automatic_log.enabled", "true"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "high_concurrency.notebook_interactive_run_enabled", "true"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "high_concurrency.notebook_pipeline_run_enabled", "false"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "pool.customize_compute_enabled", "true"),
 				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "pool.default_pool.name", "Starter Pool"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "pool.default_pool.type", "Workspace"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "environment.runtime_version", "1.3"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "job.conservative_job_admission_enabled", "false"),
+				resource.TestCheckResourceAttr(testDataSourceSparkWorkspaceSettingsFQN, "job.session_timeout_in_minutes", "20"),
 			),
 		},
 	},
