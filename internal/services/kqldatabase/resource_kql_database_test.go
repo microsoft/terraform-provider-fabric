@@ -515,6 +515,7 @@ func TestAcc_KQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				),
@@ -537,6 +538,7 @@ func TestAcc_KQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				),
