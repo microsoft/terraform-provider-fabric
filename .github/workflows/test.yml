@@ -324,7 +324,7 @@ jobs:
           - cli: terraform
             version: "1.9"
           - cli: tofu
-            version: "1.8" 
+            version: "1.8"
           - cli: tofu
             version: "1.10"
     steps:
