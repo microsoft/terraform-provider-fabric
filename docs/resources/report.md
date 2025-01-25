@@ -24,6 +24,7 @@ resource "fabric_report" "example_bootstrap" {
   display_name              = "example"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "PBIR-Legacy"
   definition = {
     "report.json" = {
       source = "${local.path}/report.json"
@@ -44,6 +45,7 @@ resource "fabric_report" "example_bootstrap" {
 resource "fabric_report" "example_update" {
   display_name = "example with update"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "PBIR-Legacy"
   definition = {
     "report.json" = {
       source = "${local.path}/report.json"
@@ -66,8 +68,9 @@ resource "fabric_report" "example_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `report.json`, `definition.pbir`, `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). Accepted path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Report display name.
+- `format` (String) The Report format. Possible values: `PBIR`, `PBIR-Legacy`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
@@ -78,7 +81,6 @@ resource "fabric_report" "example_update" {
 
 ### Read-Only
 
-- `format` (String) The Report format. Possible values: `PBIR-Legacy`.
 - `id` (String) The Report ID.
 
 <a id="nestedatt--definition"></a>

@@ -237,6 +237,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
+					"format":            "Default",
 					"output_definition": true,
 				},
 			),

@@ -36,6 +36,7 @@ data "fabric_spark_job_definition" "example_by_name" {
 data "fabric_spark_job_definition" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "SparkJobDefinitionV1"
   output_definition = true
 }
 
@@ -68,6 +69,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Spark Job Definition display name.
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
 - `id` (String) The Spark Job Definition ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -77,9 +79,8 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: `SparkJobDefinitionV1.json`. (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Spark Job Definition description.
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

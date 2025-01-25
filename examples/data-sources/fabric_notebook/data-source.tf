@@ -15,6 +15,7 @@ data "fabric_notebook" "example_by_id" {
 data "fabric_notebook" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "ipynb"
   output_definition = true
 }
 

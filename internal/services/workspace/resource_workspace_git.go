@@ -336,7 +336,7 @@ func (r *resourceWorkspaceGit) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",

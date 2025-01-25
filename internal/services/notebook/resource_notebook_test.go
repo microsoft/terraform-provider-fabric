@@ -28,9 +28,15 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("notebook"),
 })
 
-var testHelperDefinition = map[string]any{
+var testHelperDefinitionIPYNB = map[string]any{
 	`"notebook-content.ipynb"`: map[string]any{
 		"source": "${local.path}/notebook.ipynb.tmpl",
+	},
+}
+
+var testHelperDefinitionPY = map[string]any{
+	`"notebook-content.py"`: map[string]any{
+		"source": "${local.path}/notebook.py.tmpl",
 	},
 }
 
@@ -58,7 +64,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -74,7 +81,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
 						"display_name":    "test",
 						"unexpected_attr": "test",
-						"definition":      testHelperDefinition,
+						"format":          "ipynb",
+						"definition":      testHelperDefinitionIPYNB,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
@@ -88,7 +96,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"display_name": "test",
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
@@ -102,7 +111,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
@@ -125,7 +135,8 @@ func TestUnit_NotebookResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
-				"definition":   testHelperDefinition,
+				"format":       "ipynb",
+				"definition":   testHelperDefinitionIPYNB,
 			},
 		))
 
@@ -202,7 +213,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
@@ -217,7 +229,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -236,7 +249,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -268,7 +282,56 @@ func TestAcc_NotebookResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_NotebookDefinitionIPYNBResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -288,7 +351,62 @@ func TestAcc_NotebookResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
-						"definition":   testHelperDefinition,
+						"format":       "ipynb",
+						"definition":   testHelperDefinitionIPYNB,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_NotebookDefinitionPYResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "py",
+						"definition":   testHelperDefinitionPY,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "py",
+						"definition":   testHelperDefinitionPY,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(

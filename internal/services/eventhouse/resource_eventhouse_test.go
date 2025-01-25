@@ -58,6 +58,7 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -74,6 +75,7 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
 						"display_name":    "test",
 						"unexpected_attr": "test",
+						"format":          "Default",
 						"definition":      testHelperDefinition,
 					},
 				)),
@@ -88,6 +90,7 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"display_name": "test",
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -102,6 +105,7 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -125,6 +129,7 @@ func TestUnit_EventhouseResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
+				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
 		))
@@ -202,6 +207,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -217,6 +223,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -239,6 +246,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -324,6 +332,7 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -347,6 +356,7 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
