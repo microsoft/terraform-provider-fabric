@@ -1,0 +1,5 @@
+kind: added
+body: Definition support in the `fabric_kql_database` Resource / Data-Source
+time: 2025-01-25T10:21:24.6864838+01:00
+custom:
+  Issue: "215"

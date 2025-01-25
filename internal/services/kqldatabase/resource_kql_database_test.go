@@ -477,72 +477,78 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 	))
 }
 
-// func TestAcc_KQLDatabaseDefinitionResource_CRUD(t *testing.T) {
-// 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-// 	workspaceID := workspace["id"].(string)
+func TestAcc_KQLDatabaseDefinitionResource_CRUD(t *testing.T) {
+	testHelperLocals := at.CompileLocalsConfig(map[string]any{
+		"path": testhelp.GetFixturesDirPath("kql_database"),
+	})
 
-// 	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
-// 	testHelperDefinition := map[string]any{
-// 		`"DatabaseProperties.json"`: map[string]any{
-// 			"source": "${local.path}/DatabaseProperties.json.tmpl",
-// 			"tokens": map[string]any{
-// 				"EventhouseID": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
-// 			},
-// 		},
-// 		`"DatabaseSchema.kql"`: map[string]any{
-// 			"source": "${local.path}/DatabaseSchema.kql",
-// 		},
-// 	}
+	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
 
-// 	entityCreateDisplayName := testhelp.RandomName()
-// 	entityUpdateDisplayName := testhelp.RandomName()
-// 	entityUpdateDescription := testhelp.RandomName()
+	testHelperDefinition := map[string]any{
+		`"DatabaseProperties.json"`: map[string]any{
+			"source": "${local.path}/DatabaseProperties.json.tmpl",
+			"tokens": map[string]any{
+				"EventhouseID": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
+			},
+		},
+		`"DatabaseSchema.kql"`: map[string]any{
+			"source": "${local.path}/DatabaseSchema.kql",
+		},
+	}
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				eventhouseResourceHCL,
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityCreateDisplayName,
-// 						"definition":   testHelperDefinition,
-// 					},
-// 				),
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				eventhouseResourceHCL,
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityUpdateDisplayName,
-// 						"description":  entityUpdateDescription,
-// 						"definition":   testHelperDefinition,
-// 					},
-// 				),
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				eventhouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				eventhouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	},
+	))
+}
