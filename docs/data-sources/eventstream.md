@@ -6,6 +6,7 @@ description: |-
   Get a Fabric Eventstream.
   Use this data source to fetch a Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
   -> This item supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_eventstream (Data Source)
@@ -15,6 +16,8 @@ Get a Fabric Eventstream.
 Use this data source to fetch a [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
 -> This item supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -48,11 +51,17 @@ data "fabric_eventstream" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The Eventstream display name.
+- `format` (String) The Eventstream format. Possible values: `Default`
 - `id` (String) The Eventstream ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `eventstream.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Eventstream description.
 
 <a id="nestedatt--timeouts"></a>
@@ -62,3 +71,12 @@ data "fabric_eventstream" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
