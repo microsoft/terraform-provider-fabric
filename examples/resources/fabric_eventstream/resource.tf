@@ -29,7 +29,7 @@ resource "fabric_eventstream" "example_definition_update" {
       source = "${local.path}/eventstream.json.tmpl"
       tokens = {
         "LakehouseWorkspaceID" = "11111111-1111-1111-1111-111111111111"
-        "LakehouseID" = "22222222-2222-2222-2222-222222222222"
+        "LakehouseID"          = "22222222-2222-2222-2222-222222222222"
       }
     }
   }
