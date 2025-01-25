@@ -73,16 +73,19 @@ resource "fabric_kql_database" "example4" {
 
 ### Required
 
-- `configuration` (Attributes) The KQL Database creation configuration.
-
-Any changes to this configuration will result in recreation of the KQL Database. (see [below for nested schema](#nestedatt--configuration))
-
 - `display_name` (String) The KQL Database display name.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
 
+- `configuration` (Attributes) The KQL Database creation configuration.
+
+Any changes to this configuration will result in recreation of the KQL Database. (see [below for nested schema](#nestedatt--configuration))
+
+- `definition` (Attributes Map) Definition parts. Read more about [KQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition). Accepted path keys: **Default** format: `DatabaseProperties.json`, `DatabaseSchema.kql` (see [below for nested schema](#nestedatt--definition))
+- `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The KQL Database description.
+- `format` (String) The KQL Database format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -109,6 +112,24 @@ Optional:
 - `invitation_token` (String, Sensitive) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
 - `source_cluster_uri` (String) The URI of the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 - `source_database_name` (String) The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Required:
+
+- `source` (String) Path to the file with source of the definition part.
+
+The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.
+
+Optional:
+
+- `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+
+Read-Only:
+
+- `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--timeouts"></a>
 

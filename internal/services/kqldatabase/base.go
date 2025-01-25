@@ -22,10 +22,10 @@ const (
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition"
 )
 
-// var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
-// 	{
-// 		Type:  fabricitem.DefinitionFormatDefault,
-// 		API:   "",
-// 		Paths: []string{"DatabaseProperties.json", "DatabaseSchema.kql"},
-// 	},
-// }
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  fabricitem.DefinitionFormatDefault,
+		API:   "",
+		Paths: []string{"DatabaseProperties.json", "DatabaseSchema.kql"},
+	},
+}
