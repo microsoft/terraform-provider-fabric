@@ -1,0 +1,49 @@
+{
+  "sources": [
+    {
+      "name": "SampleData",
+      "type": "SampleData",
+      "properties": {
+        "type": "Bicycles"
+      }
+    }
+  ],
+  "destinations": [
+    {
+      "name": "Lakehouse",
+      "type": "Lakehouse",
+      "properties": {
+        "workspaceId": "{{ .LakehouseWorkspaceID }}",
+        "itemId": "{{ .LakehouseID }}",
+        "schema": "",
+        "deltaTable": "streamTable",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      },
+      "inputNodes": [
+        {
+          "name": "stream"
+        }
+      ],
+      "inputSchemas": []
+    }
+  ],
+  "streams": [
+    {
+      "name": "stream",
+      "type": "DefaultStream",
+      "properties": {},
+      "inputNodes": [
+        {
+          "name": "SampleData"
+        }
+      ]
+    }
+  ],
+  "operators": [],
+  "compatibilityLevel": "1.0"
+}
