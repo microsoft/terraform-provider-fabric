@@ -1,0 +1,5 @@
+kind: added
+body: Definition support in the `fabric_eventstream` Resource
+time: 2025-01-25T12:25:42.2660272+01:00
+custom:
+  Issue: "159"
