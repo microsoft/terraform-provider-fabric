@@ -8,6 +8,7 @@ data "fabric_report" "example" {
 data "fabric_report" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "PBIR-Legacy"
   output_definition = true
 }
 

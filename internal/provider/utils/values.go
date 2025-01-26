@@ -16,10 +16,10 @@ import (
 func GetValueOrFileValue(attValue, attFile string, value, file types.String) (string, error) {
 	valueResult := value.ValueString()
 
-	if path := file.ValueString(); path != "" {
-		fileRaw, err := os.ReadFile(path)
+	if p := file.ValueString(); p != "" {
+		fileRaw, err := os.ReadFile(p)
 		if err != nil {
-			return "", fmt.Errorf("reading '%s' from file %q: %w", attFile, path, err)
+			return "", fmt.Errorf("reading '%s' from file %q: %w", attFile, p, err)
 		}
 
 		fileResult := strings.TrimSpace(string(fileRaw))
@@ -36,10 +36,10 @@ func GetValueOrFileValue(attValue, attFile string, value, file types.String) (st
 func GetCertOrFileCert(attValue, attFile string, value, file types.String) (string, error) {
 	valueResult := strings.TrimSpace(value.ValueString())
 
-	if path := file.ValueString(); path != "" {
-		b64, err := auth.ConvertFileToBase64(path)
+	if p := file.ValueString(); p != "" {
+		b64, err := auth.ConvertFileToBase64(p)
 		if err != nil {
-			return "", fmt.Errorf("reading '%s' from file %q: %w", attFile, path, err)
+			return "", fmt.Errorf("reading '%s' from file %q: %w", attFile, p, err)
 		}
 
 		fileResult := strings.TrimSpace(b64)

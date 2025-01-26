@@ -5,7 +5,6 @@ package notebook
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -23,16 +22,14 @@ func NewResourceNotebook() resource.Resource {
 			ItemDocsSPNSupport,
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
-		FormatTypeDefault:     ItemFormatTypeDefault,
-		FormatTypes:           ItemFormatTypes,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-		DefinitionPathKeys:    ItemDefinitionPathsIPYNB,
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtMost(1),
-			mapvalidator.KeysAre(stringvalidator.OneOf(ItemDefinitionPathsIPYNB...)),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
 		DefinitionRequired: false,
 		DefinitionEmpty:    ItemDefinitionEmptyIPYNB,
+		DefinitionFormats:  itemDefinitionFormats,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)

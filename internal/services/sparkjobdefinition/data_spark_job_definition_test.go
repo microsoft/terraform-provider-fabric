@@ -227,6 +227,7 @@ func TestAcc_SparkJobDefinitionDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
+					"format":            "SparkJobDefinitionV1",
 					"output_definition": true,
 				},
 			),

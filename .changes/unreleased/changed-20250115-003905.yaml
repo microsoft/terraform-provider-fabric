@@ -1,0 +1,5 @@
+kind: changed
+body: Enabled SPN support for Warehouse
+time: 2025-01-15T00:39:05.6386534-08:00
+custom:
+    Issue: "194"

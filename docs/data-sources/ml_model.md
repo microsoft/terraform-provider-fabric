@@ -6,6 +6,7 @@ description: |-
   Get a Fabric ML Model.
   Use this data source to fetch a ML Model https://learn.microsoft.com/fabric/data-science/machine-learning-model.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_ml_model (Data Source)
@@ -15,6 +16,8 @@ Get a Fabric ML Model.
 Use this data source to fetch a [ML Model](https://learn.microsoft.com/fabric/data-science/machine-learning-model).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

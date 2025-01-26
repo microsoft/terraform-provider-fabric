@@ -24,6 +24,7 @@ resource "fabric_semantic_model" "example_bootstrap" {
   display_name              = "example"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "TMSL"
   definition = {
     "model.bim" = {
       source = "${local.path}/model.bim.tmpl"
@@ -38,6 +39,7 @@ resource "fabric_semantic_model" "example_bootstrap" {
 resource "fabric_semantic_model" "example_update" {
   display_name = "example with update"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "TMSL"
   definition = {
     "model.bim" = {
       source = "${local.path}/model.bim.tmpl"
@@ -57,8 +59,9 @@ resource "fabric_semantic_model" "example_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Accepted path keys: `model.bim`, `definition.pbism`, `diagramLayout.json`. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). Accepted path keys: **TMDL** format: `definition.pbism`, `definition/database.tmdl`, `definition/model.tmdl`, `definition/tables/*.tmdl`, `diagramLayp.json` **TMSL** format: `definition.pbism`, `diagramLayp.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Semantic Model display name.
+- `format` (String) The Semantic Model format. Possible values: `TMDL`, `TMSL`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
@@ -69,7 +72,6 @@ resource "fabric_semantic_model" "example_update" {
 
 ### Read-Only
 
-- `format` (String) The Semantic Model format. Possible values: `TMSL`.
 - `id` (String) The Semantic Model ID.
 
 <a id="nestedatt--definition"></a>

@@ -5,7 +5,8 @@ subcategory: ""
 description: |-
   Manage a Fabric Warehouse.
   Use this resource to manage a Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Resource)
@@ -14,7 +15,9 @@ Manage a Fabric Warehouse.
 
 Use this resource to manage a [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

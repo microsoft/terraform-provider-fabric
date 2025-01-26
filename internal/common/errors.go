@@ -37,11 +37,15 @@ const (
 	ErrorBase64GzipEncodeHeader       string = "Base64 Gzip encode operation"
 	ErrorJSONNormalizeHeader          string = "JSON normalize operation"
 	ErrorFileReadHeader               string = "File read operation"
-	ErrorTmplParseHeader              string = "template parse operation"
+	ErrorTmplParseHeader              string = "Template parse operation"
+	ErrorPreviewModeHeader            string = "Preview mode not enabled"
+	ErrorPreviewModeDetails           string = "'%s' is not available without explicitly opt-in to the preview mode on the provider level configuration."
 )
 
 // Warnings.
 const (
 	WarningItemDefinitionUpdateHeader  = "Fabric Item definition update"
 	WarningItemDefinitionUpdateDetails = "%s definition update operation will overwrite the existing definition on the Fabric side."
+	WarningPreviewModeHeader           = "'%s' preview mode"
+	WarningPreviewModeDetails          = "The behavior of '%s' may change in future releases without notice."
 )

@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -17,11 +18,18 @@ const (
 	ItemType                  = fabcore.ItemTypeReport
 	ItemDocsSPNSupport        = common.DocsSPNSupported
 	ItemDocsURL               = "https://learn.microsoft.com/power-bi/developer/projects/projects-report"
-	ItemFormatTypeDefault     = "PBIR-Legacy"
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition"
 )
 
-var (
-	ItemFormatTypes               = []string{"PBIR-Legacy"}                                                                                                  //nolint:gochecknoglobals
-	ItemDefinitionPathsPBIRLegacy = []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"} //nolint:gochecknoglobals
-)
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  "PBIR-Legacy",
+		API:   "PBIR-Legacy",
+		Paths: []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
+	},
+	{
+		Type:  "PBIR",
+		API:   "PBIR",
+		Paths: []string{"definition/report.json", "definition/version.json", "definition.pbir", "definition/pages/*.json", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
+	},
+}

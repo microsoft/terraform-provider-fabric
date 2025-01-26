@@ -57,6 +57,7 @@ func NewResourceWarehouse() resource.Resource {
 				ItemDocsSPNSupport,
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
+			IsPreview:            ItemPreview,
 		},
 		PropertiesAttributes: getResourceWarehousePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,

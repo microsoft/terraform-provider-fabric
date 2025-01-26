@@ -16,4 +16,7 @@ const (
 	ItemDocsURL                      = "https://learn.microsoft.com/fabric/governance/domains"
 	DomainWorkspaceAssignmentsName   = "Domain Workspace Assignments"
 	DomainWorkspaceAssignmentsTFName = "domain_workspace_assignments"
+	DomainRoleAssignmentsName        = "Domain Role Assignments"
+	DomainRoleAssignmentsTFName      = "domain_role_assignments"
+	ItemPreview                      = true
 )

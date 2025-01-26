@@ -35,9 +35,8 @@ type DataSourceFabricItemDefinition struct {
 	TFName              string
 	MarkdownDescription string
 	IsDisplayNameUnique bool
-	FormatTypeDefault   string
-	FormatTypes         []string
-	DefinitionPathKeys  []string
+	DefinitionFormats   []DefinitionFormat
+	IsPreview           bool
 }
 
 func NewDataSourceFabricItemDefinition(config DataSourceFabricItemDefinition) datasource.DataSource {
@@ -86,6 +85,15 @@ func (d *DataSourceFabricItemDefinition) Configure(_ context.Context, req dataso
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *DataSourceFabricItemDefinition) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -118,12 +126,6 @@ func (d *DataSourceFabricItemDefinition) Read(ctx context.Context, req datasourc
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
-	}
-
-	data.Format = types.StringNull()
-
-	if d.FormatTypeDefault != "" {
-		data.Format = types.StringValue(d.FormatTypeDefault)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
@@ -203,7 +205,11 @@ func (d *DataSourceFabricItemDefinition) getDefinition(ctx context.Context, mode
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 
 	if !model.Format.IsNull() {
-		respGetOpts.Format = model.Format.ValueStringPointer()
+		apiFormat := getDefinitionFormatAPI(d.DefinitionFormats, model.Format.ValueString())
+
+		if apiFormat != "" {
+			respGetOpts.Format = &apiFormat
+		}
 	}
 
 	respGet, err := d.client.GetItemDefinition(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), respGetOpts)

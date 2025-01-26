@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -24,26 +25,39 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceDomains)(nil)
 
 type dataSourceDomains struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewDataSourceDomains() datasource.DataSource {
-	return &dataSourceDomains{}
+	markdownDescription := "List a Fabric " + ItemsName + ".\n\n" +
+		"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &dataSourceDomains{
+		Name:                ItemsName,
+		TFName:              ItemsTFName,
+		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (d *dataSourceDomains) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
+	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
 }
 
 func (d *dataSourceDomains) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
+		MarkdownDescription: "List a Fabric " + d.Name + ".\n\n" +
+			"Use this data source to list [" + d.Name + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
 			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of " + ItemsName + ".",
+				MarkdownDescription: "The list of " + d.Name + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDomainModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
@@ -95,6 +109,15 @@ func (d *dataSourceDomains) Configure(_ context.Context, req datasource.Configur
 
 	d.pConfigData = pConfigData
 	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *dataSourceDomains) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

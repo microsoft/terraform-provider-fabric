@@ -5,6 +5,7 @@ package utils
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -64,19 +65,13 @@ func GetBoolValue(value types.Bool, envVarKeys []string, defaultValue bool) type
 }
 
 func getEnvBool(envVarKeys []string, defaultValue bool) bool {
-	truthyValues := map[string]bool{
-		"true": true,
-		"1":    true,
-		"yes":  true,
-		"on":   true,
-		"y":    true,
-		"t":    true,
-	}
-
 	if v, ok := getMultiEnvVar(envVarKeys); ok {
-		_, ok := truthyValues[strings.ToLower(strings.TrimSpace(v))]
+		strBool, err := strconv.ParseBool(v)
+		if err != nil {
+			return defaultValue
+		}
 
-		return ok
+		return strBool
 	}
 
 	return defaultValue

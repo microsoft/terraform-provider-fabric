@@ -18,9 +18,7 @@ func NewDataSourceSemanticModel() datasource.DataSource {
 			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: false,
-		FormatTypeDefault:   ItemFormatTypeDefault,
-		FormatTypes:         ItemFormatTypes,
-		DefinitionPathKeys:  ItemDefinitionPathsTMSL,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
 	return fabricitem.NewDataSourceFabricItemDefinition(config)

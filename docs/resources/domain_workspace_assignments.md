@@ -4,17 +4,20 @@ page_title: "fabric_domain_workspace_assignments Resource - terraform-provider-f
 subcategory: ""
 description: |-
   Manage a Fabric Domain Workspace Assignments.
-  See Domain https://learn.microsoft.com/fabric/governance/domains for more information.
+  Use this resource to manage Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_workspace_assignments (Resource)
 
 Manage a Fabric Domain Workspace Assignments.
 
-See [Domain](https://learn.microsoft.com/fabric/governance/domains) for more information.
+Use this resource to manage [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -43,7 +46,7 @@ resource "fabric_domain_workspace_assignments" "example" {
 ### Required
 
 - `domain_id` (String) The Domain ID. Changing this forces a new resource to be created.
-- `workspace_ids` (Set of String) The list of Workspaces.
+- `workspace_ids` (Set of String) The set of Workspace IDs.
 
 ### Optional
 

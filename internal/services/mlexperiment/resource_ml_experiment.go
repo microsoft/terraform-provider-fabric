@@ -20,6 +20,7 @@ func NewResourceMLExperiment() resource.Resource {
 			ItemDocsSPNSupport,
 		DisplayNameMaxLength: 123,
 		DescriptionMaxLength: 256,
+		IsPreview:            ItemPreview,
 	}
 
 	return fabricitem.NewResourceFabricItem(config)

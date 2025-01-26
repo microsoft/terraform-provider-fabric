@@ -24,7 +24,7 @@ In the **API permissions** menu of your App Registration, add required API permi
   - Capacity.ReadWrite.All
   - ...
   - ...
-  - Workspace.Read.Al
+  - Workspace.Read.All
   - Workspace.ReadWrite.All
 
 - Microsoft Graph

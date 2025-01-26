@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -17,11 +18,14 @@ const (
 	ItemType                  = fabcore.ItemTypeKQLDatabase
 	ItemDocsSPNSupport        = common.DocsSPNSupported
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/create-database"
-	ItemFormatTypeDefault     = ""
+	ItemFormatTypeDefault     = fabricitem.DefinitionFormatDefault
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition"
 )
 
-var (
-	ItemFormatTypes     = []string{""}                                              //nolint:gochecknoglobals
-	ItemDefinitionPaths = []string{"DatabaseProperties.json", "DatabaseSchema.kql"} //nolint:gochecknoglobals
-)
+// var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+// 	{
+// 		Type:  fabricitem.DefinitionFormatDefault,
+// 		API:   "",
+// 		Paths: []string{"DatabaseProperties.json", "DatabaseSchema.kql"},
+// 	},
+// }

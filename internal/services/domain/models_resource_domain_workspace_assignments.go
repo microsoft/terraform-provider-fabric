@@ -21,11 +21,11 @@ type resourceDomainWorkspaceAssignmentsModel struct {
 	Timeouts     timeouts.Value   `tfsdk:"timeouts"`
 }
 
-func (to *resourceDomainWorkspaceAssignmentsModel) setWorkspaces(ctx context.Context, from []fabadmin.DomainWorkspace) diag.Diagnostics {
-	elements := []customtypes.UUID{}
+func (to *resourceDomainWorkspaceAssignmentsModel) setWorkspaces(ctx context.Context, from []string) diag.Diagnostics {
+	elements := make([]customtypes.UUID, 0, len(from))
 
-	for _, entity := range from {
-		elements = append(elements, customtypes.NewUUIDPointerValue(entity.ID))
+	for _, element := range from {
+		elements = append(elements, customtypes.NewUUIDValue(element))
 	}
 
 	values, diags := types.SetValueFrom(ctx, customtypes.UUIDType{}, elements)
@@ -69,14 +69,13 @@ func (to *requestDeleteDomainWorkspaceAssignments) set(ctx context.Context, from
 }
 
 func getWorkspaceIDs(ctx context.Context, from resourceDomainWorkspaceAssignmentsModel) ([]string, diag.Diagnostics) {
-	values := []string{}
-
 	elements := make([]customtypes.UUID, 0, len(from.WorkspaceIDs.Elements()))
 
-	diags := from.WorkspaceIDs.ElementsAs(ctx, &elements, false)
-	if diags.HasError() {
+	if diags := from.WorkspaceIDs.ElementsAs(ctx, &elements, false); diags.HasError() {
 		return nil, diags
 	}
+
+	values := make([]string, 0, len(elements))
 
 	for _, element := range elements {
 		values = append(values, element.ValueString())

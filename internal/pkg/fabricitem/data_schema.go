@@ -8,8 +8,14 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -19,7 +25,7 @@ func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -27,12 +33,12 @@ func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -42,7 +48,7 @@ func getDataSourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -51,12 +57,12 @@ func getDataSourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](c
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.FormatTypes, d.DefinitionPathKeys) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes:          attributes,
 	}
 }
@@ -105,21 +111,25 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 }
 
 // Helper function to get Fabric Item data-source definition attributes.
-func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name string, formatTypes, definitionPathKeys []string) map[string]schema.Attribute {
+func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name string, definitionFormats []DefinitionFormat) map[string]schema.Attribute {
 	attributes := make(map[string]schema.Attribute)
 
-	if len(formatTypes) > 0 {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: %s.", name, utils.ConvertStringSlicesToString(formatTypes, true, false)),
-			Computed:            true,
-		}
-	} else {
-		attributes["format"] = schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s format. Possible values: `%s`", name, DefinitionFormatNotApplicable),
-			Computed:            true,
-		}
+	formatTypes := getDefinitionFormats(definitionFormats)
+	definitionFormatsDocs := getDefinitionFormatsPathsDocs(definitionFormats)
+
+	// format attribute
+	attrFormat := schema.StringAttribute{}
+
+	attrFormat.MarkdownDescription = fmt.Sprintf("The %s format. Possible values: %s", name, utils.ConvertStringSlicesToString(formatTypes, true, true))
+	attrFormat.Optional = true
+	attrFormat.Validators = []validator.String{
+		stringvalidator.OneOf(formatTypes...),
+		superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("output_definition"), []attr.Value{types.BoolValue(true)}),
 	}
 
+	attributes["format"] = attrFormat
+
+	// output_definition attribute
 	attributes["output_definition"] = schema.BoolAttribute{
 		MarkdownDescription: "Output definition parts as gzip base64 content? Default: `false`\n\n" +
 			"!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.",
@@ -141,11 +151,7 @@ func getDataSourceFabricItemDefinitionAttributes(ctx context.Context, name strin
 		},
 	}
 
-	if len(definitionPathKeys) > 0 {
-		attrDefinition.MarkdownDescription = "Definition parts. Possible path keys: " + utils.ConvertStringSlicesToString(definitionPathKeys, true, false) + "."
-	} else {
-		attrDefinition.MarkdownDescription = "Definition parts."
-	}
+	attrDefinition.MarkdownDescription = "Definition parts. Possible path keys: " + definitionFormatsDocs
 
 	attributes["definition"] = attrDefinition
 

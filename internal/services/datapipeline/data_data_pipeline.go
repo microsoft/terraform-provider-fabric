@@ -18,6 +18,7 @@ func NewDataSourceDataPipeline() datasource.DataSource {
 			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: true,
+		IsPreview:           ItemPreview,
 	}
 
 	return fabricitem.NewDataSourceFabricItem(config)

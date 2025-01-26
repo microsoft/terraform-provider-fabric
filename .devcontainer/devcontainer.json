@@ -15,7 +15,7 @@
     },
     // "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
     "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.23.4"
+      "version": "1.23.5"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.12"
@@ -36,13 +36,13 @@
     // "ghcr.io/guiyomh/features/gomarkdoc:0": {},
     // "ghcr.io/guiyomh/features/gotestsum:0": {},
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.10.3",
+      "version": "1.10.4",
       "installSentinel": true,
       "installTFsec": true,
       "installTerraformDocs": true
     },
     "ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-      "version": "1.8.7"
+      "version": "1.9.0"
     },
     "ghcr.io/devcontainers-contrib/features/pipx-package:1": {},
     // "ghcr.io/devcontainers-contrib/features/mkdocs:2": {},

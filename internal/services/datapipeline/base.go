@@ -7,6 +7,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
 const (
@@ -19,6 +20,13 @@ const (
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines"
 	ItemDefinitionEmpty       = `{"properties":{"activities":[]}}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api"
+	ItemPreview               = true
 )
 
-var ItemDefinitionPaths = []string{"pipeline-content.json"} //nolint:gochecknoglobals
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  fabricitem.DefinitionFormatDefault,
+		API:   "",
+		Paths: []string{"pipeline-content.json"},
+	},
+}

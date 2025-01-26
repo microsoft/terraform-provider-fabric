@@ -1,0 +1,7 @@
+kind: added
+body: |
+  Added support for multi-format Report Resource/Data-Source.
+  By using `format` attribute, you can now define the format of the Report Resource/Data-Source. Accepted values are `PBIR`, and `PBIR-Legacy`.
+time: 2024-12-23T09:48:48.1324573-08:00
+custom:
+  Issue: "171"

@@ -34,6 +34,7 @@ type DataSourceFabricItem struct {
 	TFName              string
 	MarkdownDescription string
 	IsDisplayNameUnique bool
+	IsPreview           bool
 }
 
 func NewDataSourceFabricItem(config DataSourceFabricItem) datasource.DataSource {
@@ -82,6 +83,15 @@ func (d *DataSourceFabricItem) Configure(_ context.Context, req datasource.Confi
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *DataSourceFabricItem) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

@@ -4,17 +4,20 @@ page_title: "fabric_domain_role_assignments Resource - terraform-provider-fabric
 subcategory: ""
 description: |-
   Manage a Fabric Domain Role Assignments.
-  See Domain https://learn.microsoft.com/fabric/governance/domains for more information.
+  Use this resource to manage Domain Role Assignments https://learn.microsoft.com/fabric/governance/domains.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_role_assignments (Resource)
 
 Manage a Fabric Domain Role Assignments.
 
-See [Domain](https://learn.microsoft.com/fabric/governance/domains) for more information.
+Use this resource to manage [Domain Role Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -59,7 +62,7 @@ resource "fabric_domain_role_assignments" "example" {
 Required:
 
 - `id` (String) The Principal ID. Changing this forces a new resource to be created.
-- `type` (String) ThePrincipal type. Accepted values: `Group`, `User`. Changing this forces a new resource to be created.
+- `type` (String) The Principal type. Accepted values: `Group`, `User`. Changing this forces a new resource to be created.
 
 <a id="nestedatt--timeouts"></a>
 

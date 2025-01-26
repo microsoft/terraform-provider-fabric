@@ -6,6 +6,7 @@ package domain
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,6 +20,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -27,26 +29,37 @@ import (
 var _ resource.ResourceWithConfigure = (*resourceDomainWorkspaceAssignments)(nil)
 
 type resourceDomainWorkspaceAssignments struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabadmin.DomainsClient
+	pConfigData         *pconfig.ProviderData
+	client              *fabadmin.DomainsClient
+	Name                string
+	TFName              string
+	MarkdownDescription string
+	IsPreview           bool
 }
 
 func NewResourceDomainWorkspaceAssignments() resource.Resource {
-	return &resourceDomainWorkspaceAssignments{}
+	markdownDescription := "Manage a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
+		"Use this resource to manage [" + DomainWorkspaceAssignmentsName + "](" + ItemDocsURL + ").\n\n" +
+		ItemDocsSPNSupport
+
+	return &resourceDomainWorkspaceAssignments{
+		Name:                DomainWorkspaceAssignmentsName,
+		TFName:              DomainWorkspaceAssignmentsTFName,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, ItemPreview),
+		IsPreview:           ItemPreview,
+	}
 }
 
 func (r *resourceDomainWorkspaceAssignments) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + DomainWorkspaceAssignmentsTFName
+	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
 func (r *resourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + DomainWorkspaceAssignmentsName + ".\n\n" +
-			"See [" + ItemName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: r.MarkdownDescription,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + DomainWorkspaceAssignmentsName + " ID.",
+				MarkdownDescription: "The " + r.Name + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -62,7 +75,7 @@ func (r *resourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ resou
 				},
 			},
 			"workspace_ids": schema.SetAttribute{
-				MarkdownDescription: "The list of Workspaces.",
+				MarkdownDescription: "The set of Workspace IDs.",
 				Required:            true,
 				ElementType:         customtypes.UUIDType{},
 			},
@@ -88,6 +101,15 @@ func (r *resourceDomainWorkspaceAssignments) Configure(_ context.Context, req re
 
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
+
+	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (r *resourceDomainWorkspaceAssignments) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -309,15 +331,13 @@ func (r *resourceDomainWorkspaceAssignments) Delete(ctx context.Context, req res
 func (r *resourceDomainWorkspaceAssignments) diffWorkspaces(ctx context.Context, slice1, slice2 types.Set) (types.Set, diag.Diagnostics) {
 	s1 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
-	diags := slice1.ElementsAs(ctx, &s1, false)
-	if diags.HasError() {
+	if diags := slice1.ElementsAs(ctx, &s1, false); diags.HasError() {
 		return types.SetNull(customtypes.UUIDType{}), diags
 	}
 
 	s2 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
-	diags = slice2.ElementsAs(ctx, &s2, false)
-	if diags.HasError() {
+	if diags := slice2.ElementsAs(ctx, &s2, false); diags.HasError() {
 		return types.SetNull(customtypes.UUIDType{}), diags
 	}
 
@@ -350,5 +370,24 @@ func (r *resourceDomainWorkspaceAssignments) list(ctx context.Context, model *re
 		return diags
 	}
 
-	return model.setWorkspaces(ctx, respList)
+	workspaceIDs, diags := getWorkspaceIDs(ctx, *model)
+	if diags.HasError() {
+		return diags
+	}
+
+	elements := make([]string, 0, len(respList))
+
+	for _, element := range respList {
+		elements = append(elements, *element.ID)
+	}
+
+	var values []string
+
+	for _, workspaceID := range workspaceIDs {
+		if slices.Contains(elements, workspaceID) {
+			values = append(values, workspaceID)
+		}
+	}
+
+	return model.setWorkspaces(ctx, values)
 }

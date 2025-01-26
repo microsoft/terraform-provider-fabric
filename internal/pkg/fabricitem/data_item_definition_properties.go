@@ -83,6 +83,15 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) { //revive:disable-line:confusing-naming
@@ -115,12 +124,6 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx 
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
-	}
-
-	data.Format = types.StringNull()
-
-	if d.FormatTypeDefault != "" {
-		data.Format = types.StringValue(d.FormatTypeDefault)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
@@ -196,7 +199,11 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getDefini
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 
 	if !model.Format.IsNull() {
-		respGetOpts.Format = model.Format.ValueStringPointer()
+		apiFormat := getDefinitionFormatAPI(d.DefinitionFormats, model.Format.ValueString())
+
+		if apiFormat != "" {
+			respGetOpts.Format = &apiFormat
+		}
 	}
 
 	respGet, err := d.client.GetItemDefinition(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), respGetOpts)
