@@ -321,6 +321,10 @@ jobs:
         exclude:
           - cli: terraform
             version: "1.7"
+          - cli: terraform
+            version: "1.9"
+          - cli: tofu
+            version: "1.8" 
           - cli: tofu
             version: "1.10"
     steps:
@@ -477,7 +481,7 @@ jobs:
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       - name: 📤 Upload results to Codecov
-        uses: codecov/codecov-action@0da7aa657d958d32c117fc47e1f977e7524753c7 # v5.3.0
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
         with:
           use_oidc: true
           files: ./coverage.out
