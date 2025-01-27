@@ -321,6 +321,10 @@ jobs:
         exclude:
           - cli: terraform
             version: "1.7"
+          - cli: terraform
+            version: "1.9"
+          - cli: tofu
+            version: "1.8" 
           - cli: tofu
             version: "1.10"
     steps:
