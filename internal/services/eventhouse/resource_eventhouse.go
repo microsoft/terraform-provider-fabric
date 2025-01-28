@@ -18,15 +18,24 @@ import (
 )
 
 func NewResourceEventhouse(ctx context.Context) resource.Resource {
-	propertiesSetter := func(ctx context.Context, from *fabeventhouse.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[eventhousePropertiesModel, fabeventhouse.Properties]) diag.Diagnostics {
+	creationPayloadSetter := func(_ context.Context, from eventhouseConfigurationModel) (*fabeventhouse.CreationPayload, diag.Diagnostics) {
+		creationPayload := fabeventhouse.CreationPayload{}
+
+		if !from.MinimumConsumptionUnits.IsNull() && !from.MinimumConsumptionUnits.IsUnknown() {
+			creationPayload.MinimumConsumptionUnits = from.MinimumConsumptionUnits.ValueFloat64Pointer()
+		}
+
+		return &creationPayload, nil
+	}
+
+	propertiesSetter := func(ctx context.Context, from *fabeventhouse.Properties, to *fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[eventhousePropertiesModel, fabeventhouse.Properties, eventhouseConfigurationModel, fabeventhouse.CreationPayload]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[eventhousePropertiesModel](ctx)
 
 		if from != nil {
 			propertiesModel := &eventhousePropertiesModel{}
 			propertiesModel.set(ctx, from)
 
-			diags := properties.Set(ctx, propertiesModel)
-			if diags.HasError() {
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
 		}
@@ -36,7 +45,7 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemDefinitionPropertiesModel[eventhousePropertiesModel, fabeventhouse.Properties], fabricItem *fabricitem.FabricItemProperties[fabeventhouse.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[eventhousePropertiesModel, fabeventhouse.Properties, eventhouseConfigurationModel, fabeventhouse.CreationPayload], fabricItem *fabricitem.FabricItemProperties[fabeventhouse.Properties]) error {
 		client := fabeventhouse.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetEventhouse(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -49,7 +58,7 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 		return nil
 	}
 
-	config := fabricitem.ResourceFabricItemDefinitionProperties[eventhousePropertiesModel, fabeventhouse.Properties]{
+	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[eventhousePropertiesModel, fabeventhouse.Properties, eventhouseConfigurationModel, fabeventhouse.CreationPayload]{
 		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
 			Type:              ItemType,
 			Name:              ItemName,
@@ -69,10 +78,13 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 			DefinitionEmpty:    ItemDefinitionEmpty,
 			DefinitionFormats:  itemDefinitionFormats,
 		},
-		PropertiesAttributes: getResourceEventhousePropertiesAttributes(ctx),
-		PropertiesSetter:     propertiesSetter,
-		ItemGetter:           itemGetter,
+		IsConfigRequired:      false,
+		ConfigAttributes:      getResourceEventhouseConfigurationAttributes(),
+		CreationPayloadSetter: creationPayloadSetter,
+		PropertiesAttributes:  getResourceEventhousePropertiesAttributes(ctx),
+		PropertiesSetter:      propertiesSetter,
+		ItemGetter:            itemGetter,
 	}
 
-	return fabricitem.NewResourceFabricItemDefinitionProperties(config)
+	return fabricitem.NewResourceFabricItemConfigDefinitionProperties(config)
 }
