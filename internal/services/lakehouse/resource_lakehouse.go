@@ -103,7 +103,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
 		},
-		IsConfigRequired:      false,
+		ConfigRequired:        false,
 		ConfigAttributes:      getResourceLakehouseConfigurationAttributes(),
 		CreationPayloadSetter: creationPayloadSetter,
 		PropertiesAttributes:  getResourceLakehousePropertiesAttributes(ctx),

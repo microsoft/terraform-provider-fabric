@@ -78,12 +78,13 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 			DefinitionEmpty:    ItemDefinitionEmpty,
 			DefinitionFormats:  itemDefinitionFormats,
 		},
-		IsConfigRequired:      false,
-		ConfigAttributes:      getResourceEventhouseConfigurationAttributes(),
-		CreationPayloadSetter: creationPayloadSetter,
-		PropertiesAttributes:  getResourceEventhousePropertiesAttributes(ctx),
-		PropertiesSetter:      propertiesSetter,
-		ItemGetter:            itemGetter,
+		ConfigRequired:             false,
+		ConfigOrDefinitionRequired: false,
+		ConfigAttributes:           getResourceEventhouseConfigurationAttributes(),
+		CreationPayloadSetter:      creationPayloadSetter,
+		PropertiesAttributes:       getResourceEventhousePropertiesAttributes(ctx),
+		PropertiesSetter:           propertiesSetter,
+		ItemGetter:                 itemGetter,
 	}
 
 	return fabricitem.NewResourceFabricItemConfigDefinitionProperties(config)
