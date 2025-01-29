@@ -8,13 +8,15 @@ import (
 )
 
 const (
-	OnPremisesItemTFType       = "OnPremises"
-	OnPremisesPersonalItemType = "OnPremisesPersonal"
-	VirtualNetworkItemTFType   = "VirtualNetwork"
-	VirtualNetworkItemsTFType  = "VirtualNetworks"
-	ItemName                   = "Gateway"
-	ItemsName                  = "Gateways"
-	ItemsTFName                = "gateways"
-	ItemDocsSPNSupport         = common.DocsSPNSupported
-	ItemDocsURL                = "https://learn.microsoft.com/en-us/fabric/data-factory/how-to-access-on-premises-data"
+	OnPremisesItemTFType        = "OnPremisesGateway"
+	OnPremisesItemsTFType       = "OnPremisesGateways"
+	OnPremisesPersonalItemType  = "OnPremisesPersonalGateway"
+	OnPremisesPersonalItemsType = "OnPremisesPersonalGateways"
+	VirtualNetworkItemTFType    = "VirtualNetworkGateway"
+	VirtualNetworkItemsTFType   = "VirtualNetworkGateways"
+	ItemName                    = "Gateway"
+	ItemsName                   = "Gateways"
+	ItemsTFName                 = "gateways"
+	ItemDocsSPNSupport          = common.DocsSPNSupported
+	ItemDocsURL                 = "https://learn.microsoft.com/en-us/fabric/data-factory/how-to-access-on-premises-data"
 )

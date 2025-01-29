@@ -176,7 +176,7 @@ func NewRandomOnPremisesGateway() fabcore.OnPremisesGateway {
 	}
 }
 
-func NewRandomOnPermisesGatewayPersonal() fabcore.OnPremisesGatewayPersonal {
+func NewRandomOnPremisesGatewayPersonal() fabcore.OnPremisesGatewayPersonal {
 	return fabcore.OnPremisesGatewayPersonal{
 		ID:      to.Ptr(testhelp.RandomUUID()),
 		Type:    to.Ptr(fabcore.GatewayTypeOnPremisesPersonal),

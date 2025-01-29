@@ -85,7 +85,7 @@ func (d *dataSourceOnPremisesGateway) Schema(
 			"public_key": schema.SingleNestedAttribute{
 				MarkdownDescription: "The public key settings.",
 				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[PublicKeyModel](ctx),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[publicKeyModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"exponent": schema.StringAttribute{
 						MarkdownDescription: "The RSA exponent.",
@@ -148,7 +148,7 @@ func (d *dataSourceOnPremisesGateway) Read(ctx context.Context, req datasource.R
 		"config": req.Config,
 	})
 
-	var data OnPremisesGatewayModel
+	var data datasourceOnPremisesGatewayModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -183,7 +183,7 @@ func (d *dataSourceOnPremisesGateway) Read(ctx context.Context, req datasource.R
 	}
 }
 
-func (d *dataSourceOnPremisesGateway) getByID(ctx context.Context, model *OnPremisesGatewayModel) diag.Diagnostics {
+func (d *dataSourceOnPremisesGateway) getByID(ctx context.Context, model *datasourceOnPremisesGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET BY ID", map[string]any{
 		"id": model.ID.ValueString(),
 	})
@@ -203,7 +203,7 @@ func (d *dataSourceOnPremisesGateway) getByID(ctx context.Context, model *OnPrem
 	}
 }
 
-func (d *dataSourceOnPremisesGateway) getByDisplayName(ctx context.Context, model *OnPremisesGatewayModel) diag.Diagnostics {
+func (d *dataSourceOnPremisesGateway) getByDisplayName(ctx context.Context, model *datasourceOnPremisesGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by 'display_name'", ItemName))
 
 	gateways, err := d.client.ListGateways(ctx, nil)

@@ -22,11 +22,11 @@ var (
 )
 
 func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
-	entity := fakes.NewRandomOnPermisesGatewayPersonal()
+	entity := fakes.NewRandomOnPremisesGatewayPersonal()
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOnPermisesGatewayPersonal())
+	fakes.FakeServer.Upsert(fakes.NewRandomOnPremisesGatewayPersonal())
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOnPermisesGatewayPersonal())
+	fakes.FakeServer.Upsert(fakes.NewRandomOnPremisesGatewayPersonal())
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -87,7 +87,7 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 }
 
 func TestAcc_OnPremisesGatewayPersonalDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["OnPermisesGatewayPersonal"].(map[string]any)
+	entity := testhelp.WellKnown()["OnPremisesGatewayPersonal"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDescription := entity["description"].(string)
 

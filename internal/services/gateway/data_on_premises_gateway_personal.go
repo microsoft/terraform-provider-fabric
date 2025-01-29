@@ -19,7 +19,6 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-// dataSourceOnPremisesGatewayPersonal fetches the simplified on-prem gateway: OnPremisesGatewayPersonal.
 type dataSourceOnPremisesGatewayPersonal struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
@@ -29,12 +28,10 @@ func NewDataSourceOnPremisesGatewayPersonal() datasource.DataSource {
 	return &dataSourceOnPremisesGatewayPersonal{}
 }
 
-// Metadata sets the data source type name.
 func (d *dataSourceOnPremisesGatewayPersonal) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_on_premises_gateway_personal"
 }
 
-// Schema defines the attributes for OnPremisesGatewayPersonal.
 func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Retrieve an on-premises gateway in its 'personal' form (ID, public key, type, version).",
@@ -56,7 +53,7 @@ func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ data
 			"public_key": schema.SingleNestedAttribute{
 				MarkdownDescription: "The public key settings of the gateway.",
 				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[PublicKeyModel](ctx),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[publicKeyModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"exponent": schema.StringAttribute{
 						MarkdownDescription: "The RSA exponent.",
@@ -72,7 +69,6 @@ func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ data
 	}
 }
 
-// Configure stores provider data and creates a new GatewaysClient.
 func (d *dataSourceOnPremisesGatewayPersonal) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	pConfigData, ok := req.ProviderData.(*pconfig.ProviderData)
 	if !ok {
@@ -86,15 +82,13 @@ func (d *dataSourceOnPremisesGatewayPersonal) Configure(ctx context.Context, req
 	d.client = (*fabcore.GatewaysClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient())
 }
 
-// Read fetches the OnPremisesGateway from the Fabric service, then maps to the personal model.
 func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data OnPremisesGatewayPersonalModel
+	var data datasourceOnPremisesGatewayPersonalModel
 
-	// Parse config into data model
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
-	// If no ID was set, we can return early or handle lookups by name, etc. Here, handle if ID is blank
+
 	if data.ID.ValueString() == "" {
 		resp.Diagnostics.AddError(
 			"Missing ID",
@@ -110,15 +104,13 @@ func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req data
 		return
 	}
 
-	// Type-assert to OnPremisesGateway
-	realGw, ok := gatewayResp.GatewayClassification.(*fabcore.OnPremisesGateway)
+	realGw, ok := gatewayResp.GatewayClassification.(*fabcore.OnPremisesGatewayPersonal)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected Gateway Type", "Result is not an OnPremisesGateway.")
+		resp.Diagnostics.AddError("Unexpected Gateway Type", "Result is not an OnPremisesGatewayPersonal.")
 		return
 	}
 
-	// Map the returned gateway to the personal model
-	gateway := OnPremisesGatewayPersonalModel{}
+	gateway := datasourceOnPremisesGatewayPersonalModel{}
 	diags := gateway.set(ctx, *realGw)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

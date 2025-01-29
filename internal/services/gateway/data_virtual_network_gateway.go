@@ -78,7 +78,7 @@ func (d *dataSourceVirtualNetworkGateway) Schema(ctx context.Context, _ datasour
 			"virtual_network_azure_resource": schema.SingleNestedAttribute{
 				MarkdownDescription: "The Azure resource of the virtual network.",
 				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[VirtualNetworkAzureResourceModel](ctx),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[virtualNetworkAzureResourceModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"subscription_id": schema.StringAttribute{
 						MarkdownDescription: "The subscription ID.",
@@ -146,7 +146,7 @@ func (d *dataSourceVirtualNetworkGateway) Read(ctx context.Context, req datasour
 		"config": req.Config,
 	})
 
-	var data VirtualNetworkGatewayModel
+	var data datasourceVirtualNetworkGatewayModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -181,7 +181,7 @@ func (d *dataSourceVirtualNetworkGateway) Read(ctx context.Context, req datasour
 	}
 }
 
-func (d *dataSourceVirtualNetworkGateway) getByID(ctx context.Context, model *VirtualNetworkGatewayModel) diag.Diagnostics {
+func (d *dataSourceVirtualNetworkGateway) getByID(ctx context.Context, model *datasourceVirtualNetworkGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET BY ID", map[string]any{
 		"id": model.ID.ValueString(),
 	})
@@ -201,7 +201,7 @@ func (d *dataSourceVirtualNetworkGateway) getByID(ctx context.Context, model *Vi
 	}
 }
 
-func (d *dataSourceVirtualNetworkGateway) getByDisplayName(ctx context.Context, model *VirtualNetworkGatewayModel) diag.Diagnostics {
+func (d *dataSourceVirtualNetworkGateway) getByDisplayName(ctx context.Context, model *datasourceVirtualNetworkGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by 'display_name'", ItemName))
 
 	gateways, err := d.client.ListGateways(ctx, nil)

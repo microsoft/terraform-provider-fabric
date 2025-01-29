@@ -133,7 +133,7 @@ func TestUnit_OnPremisesGatewayDataSource(t *testing.T) {
 }
 
 func TestAcc_OnPremisesGatewayDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["OnPermisesGateway"].(map[string]any)
+	entity := testhelp.WellKnown()["OnPremisesGateway"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)

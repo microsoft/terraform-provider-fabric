@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	testDataSourceVirtualNetworkFQN    = testhelp.DataSourceFQN("fabric", virtualNetworkItemTFName, "test")
-	testVirtualNetworkDataSourceHeader = at.DataSourceHeader(testhelp.TypeName("fabric", virtualNetworkItemTFName), "test")
+	testDataSourceVirtualNetworkFQN    = testhelp.DataSourceFQN("fabric", VirtualNetworkItemTFName, "test")
+	testVirtualNetworkDataSourceHeader = at.DataSourceHeader(testhelp.TypeName("fabric", VirtualNetworkItemTFName), "test")
 )
 
 func TestUnit_VirtualNetworkGatewayDataSource(t *testing.T) {

@@ -22,7 +22,7 @@ type GatewayModelBase struct {
 	Type        types.String     `tfsdk:"type"`
 }
 
-type OnPremisesGatewayModel struct {
+type onPremisesGatewayModelBase struct {
 	GatewayModelBase
 
 	AllowCloudConnectionRefresh *bool `tfsdk:"allow_cloud_connection_refresh"`
@@ -33,14 +33,14 @@ type OnPremisesGatewayModel struct {
 
 	NumberOfMemberGateways *int32 `tfsdk:"number_of_member_gateways"`
 
-	PublicKey supertypes.SingleNestedObjectValueOf[PublicKeyModel] `tfsdk:"public_key"`
+	PublicKey supertypes.SingleNestedObjectValueOf[publicKeyModel] `tfsdk:"public_key"`
 
 	Version types.String `tfsdk:"version"`
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-type VirtualNetworkGatewayModel struct {
+type virtualNetworkGatewayModelBase struct {
 	GatewayModelBase
 
 	CapacityId customtypes.UUID `tfsdk:"capacity_id"`
@@ -49,19 +49,24 @@ type VirtualNetworkGatewayModel struct {
 
 	NumberOfMemberGateways *int32 `tfsdk:"number_of_member_gateways"`
 
-	VirtualNetworkAzureResource supertypes.SingleNestedObjectValueOf[VirtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`
+	VirtualNetworkAzureResource supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-type OnPremisesGatewayPersonalModel struct {
-	ID        customtypes.UUID                                     `tfsdk:"id"`
-	PublicKey supertypes.SingleNestedObjectValueOf[PublicKeyModel] `tfsdk:"public_key"`
-	Type      types.String                                         `tfsdk:"type"`
-	Version   types.String                                         `tfsdk:"version"`
+type onPremisesGatewayPersonalModelBase struct {
+	ID customtypes.UUID `tfsdk:"id"`
+
+	PublicKey supertypes.SingleNestedObjectValueOf[publicKeyModel] `tfsdk:"public_key"`
+
+	Type types.String `tfsdk:"type"`
+
+	Version types.String `tfsdk:"version"`
+
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-type VirtualNetworkAzureResourceModel struct {
+type virtualNetworkAzureResourceModel struct {
 	SubscriptionID customtypes.UUID `tfsdk:"subscription_id"`
 
 	ResourceGroupName types.String `tfsdk:"resource_group_name"`
@@ -69,21 +74,23 @@ type VirtualNetworkAzureResourceModel struct {
 	VirtualNetworkName types.String `tfsdk:"virtual_network_name"`
 
 	SubnetName types.String `tfsdk:"subnet_name"`
+
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-type PublicKeyModel struct {
+type publicKeyModel struct {
 	Exponent types.String `tfsdk:"exponent"`
 
 	Modulus types.String `tfsdk:"modulus"`
 }
 
-func (to *OnPremisesGatewayPersonalModel) set(ctx context.Context, from fabcore.OnPremisesGateway) diag.Diagnostics {
+func (to *onPremisesGatewayPersonalModelBase) set(ctx context.Context, from fabcore.OnPremisesGatewayPersonal) diag.Diagnostics {
 	var diags diag.Diagnostics
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 
-	publicKey := supertypes.NewSingleNestedObjectValueOfNull[PublicKeyModel](ctx)
+	publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
 	if from.PublicKey != nil {
-		publicKeyModel := &PublicKeyModel{}
+		publicKeyModel := &publicKeyModel{}
 		publicKeyModel.set(*from.PublicKey)
 
 		if pkDiags := publicKey.Set(ctx, publicKeyModel); pkDiags.HasError() {
@@ -99,7 +106,7 @@ func (to *OnPremisesGatewayPersonalModel) set(ctx context.Context, from fabcore.
 	return diags
 }
 
-func (to *OnPremisesGatewayModel) set(ctx context.Context, from fabcore.OnPremisesGateway) diag.Diagnostics {
+func (to *onPremisesGatewayModelBase) set(ctx context.Context, from fabcore.OnPremisesGateway) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Type = types.StringPointerValue((*string)(from.Type))
@@ -109,10 +116,10 @@ func (to *OnPremisesGatewayModel) set(ctx context.Context, from fabcore.OnPremis
 	to.NumberOfMemberGateways = from.NumberOfMemberGateways
 	to.Version = types.StringPointerValue(from.Version)
 
-	publicKey := supertypes.NewSingleNestedObjectValueOfNull[PublicKeyModel](ctx)
+	publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
 
 	if from.PublicKey != nil {
-		publicKeyModel := &PublicKeyModel{}
+		publicKeyModel := &publicKeyModel{}
 		publicKeyModel.set(*from.PublicKey)
 
 		if diags := publicKey.Set(ctx, publicKeyModel); diags.HasError() {
@@ -125,7 +132,7 @@ func (to *OnPremisesGatewayModel) set(ctx context.Context, from fabcore.OnPremis
 	return nil
 }
 
-func (to *VirtualNetworkGatewayModel) set(ctx context.Context, from fabcore.VirtualNetworkGateway) diag.Diagnostics {
+func (to *virtualNetworkGatewayModelBase) set(ctx context.Context, from fabcore.VirtualNetworkGateway) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Type = types.StringPointerValue((*string)(from.Type))
@@ -133,10 +140,10 @@ func (to *VirtualNetworkGatewayModel) set(ctx context.Context, from fabcore.Virt
 	to.InactivityMinutesBeforeSleep = from.InactivityMinutesBeforeSleep
 	to.NumberOfMemberGateways = from.NumberOfMemberGateways
 
-	virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[VirtualNetworkAzureResourceModel](ctx)
+	virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
 
 	if from.VirtualNetworkAzureResource != nil {
-		virtualNetworkAzureResourceModel := &VirtualNetworkAzureResourceModel{}
+		virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
 		virtualNetworkAzureResourceModel.set(*from.VirtualNetworkAzureResource)
 
 		if diags := virtualNetworkAzureResource.Set(ctx, virtualNetworkAzureResourceModel); diags.HasError() {
@@ -149,7 +156,7 @@ func (to *VirtualNetworkGatewayModel) set(ctx context.Context, from fabcore.Virt
 	return nil
 }
 
-func (to *VirtualNetworkAzureResourceModel) set(from fabcore.VirtualNetworkAzureResource) {
+func (to *virtualNetworkAzureResourceModel) set(from fabcore.VirtualNetworkAzureResource) {
 	to.SubscriptionID = customtypes.NewUUIDPointerValue(from.SubscriptionID)
 	to.ResourceGroupName = types.StringPointerValue(from.ResourceGroupName)
 	to.VirtualNetworkName = types.StringPointerValue(from.VirtualNetworkName)
@@ -162,7 +169,7 @@ func (to *VirtualNetworkAzureResourceModel) set(from fabcore.VirtualNetworkAzure
 // 	to.Type = types.StringPointerValue((*string)(from.Type))
 // }
 
-func (to *PublicKeyModel) set(from fabcore.PublicKey) {
+func (to *publicKeyModel) set(from fabcore.PublicKey) {
 	to.Exponent = types.StringPointerValue(from.Exponent)
 	to.Modulus = types.StringPointerValue(from.Modulus)
 }

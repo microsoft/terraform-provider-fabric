@@ -8,9 +8,12 @@ import (
 )
 
 const (
-	virtualNetworkItemTFName     = gateway.VirtualNetworkItemTFType
+	VirtualNetworkItemTFName     = gateway.VirtualNetworkItemTFType
+	VirtualNetworkItemsTFName    = gateway.VirtualNetworkItemsTFType
 	OnPremisesItemTFName         = gateway.OnPremisesItemTFType
+	OnPremisesItemsTFName        = gateway.OnPremisesItemsTFType
 	OnPremisesPersonalItemTFName = gateway.OnPremisesPersonalItemType
+	OnPremisesPersonalItemsType  = gateway.OnPremisesPersonalItemsType
 	itemsTFName                  = gateway.ItemsTFName
 	itemType                     = gateway.ItemName
 )
