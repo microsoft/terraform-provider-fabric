@@ -24,9 +24,11 @@ var (
 func TestUnit_VirtualNetworkGatewayDataSource(t *testing.T) {
 	entity := fakes.NewRandomVirtualNetworkGateway()
 
-	fakes.FakeServer.Upsert(fakes.NewRandomVirtualNetworkGateway())
+	vng1 := fakes.NewRandomVirtualNetworkGateway()
+	vng3 := fakes.NewRandomVirtualNetworkGateway()
+	fakes.FakeServer.Upsert(vng1)
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomVirtualNetworkGateway())
+	fakes.FakeServer.Upsert(vng3)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

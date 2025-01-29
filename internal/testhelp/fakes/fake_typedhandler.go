@@ -287,6 +287,12 @@ func (h *typedHandler[TEntity]) entityTypeIsFabricItem() bool {
 func (h *typedHandler[TEntity]) entityTypeCanBeConvertedToFabricItem() bool {
 	var entity TEntity
 
+	// if entity is an interface, return false
+	entityAsAny := (any)(entity)
+	if entityAsAny == nil {
+		return false
+	}
+
 	requiredPropertyNames := []string{"ID", "WorkspaceID", "DisplayName", "Description", "Type"}
 
 	for _, propertyName := range requiredPropertyNames {

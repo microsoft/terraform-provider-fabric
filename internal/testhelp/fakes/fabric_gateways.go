@@ -26,7 +26,7 @@ func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassificati
 		returnGateway.InactivityMinutesBeforeSleep = gateway.InactivityMinutesBeforeSleep
 		returnGateway.NumberOfMemberGateways = gateway.NumberOfMemberGateways
 		returnGateway.VirtualNetworkAzureResource = gateway.VirtualNetworkAzureResource
-		return &returnGateway
+		return returnGateway
 	default:
 		panic("unimplemented")
 	}
@@ -112,7 +112,19 @@ func (o *operationsGateway) TransformCreate(entity fabcore.GatewayClassification
 	}
 }
 
-func configureGateway(server *fakeServer) fabcore.VirtualNetworkGateway {
+func configureVirtualNetworkGateway(server *fakeServer) fabcore.VirtualNetworkGateway {
+	configureGatewayClassification(server)
+
+	return fabcore.VirtualNetworkGateway{}
+}
+
+func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGatewayPersonal {
+	configureGatewayClassification(server)
+
+	return fabcore.OnPremisesGatewayPersonal{}
+}
+
+func configureGatewayClassification(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
 			fabcore.GatewayClassification,
@@ -138,12 +150,10 @@ func configureGateway(server *fakeServer) fabcore.VirtualNetworkGateway {
 		handler,
 		entityOperations,
 		&handler.ServerFactory.Core.GatewaysServer.NewListGatewaysPager)
-
-	return fabcore.VirtualNetworkGateway{}
 }
 
-func NewRandomVirtualNetworkGateway() fabcore.VirtualNetworkGateway {
-	return fabcore.VirtualNetworkGateway{
+func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
+	return &fabcore.VirtualNetworkGateway{
 		ID:                           to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                  to.Ptr(testhelp.RandomName()),
 		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomInt32(100)),
@@ -159,8 +169,8 @@ func NewRandomVirtualNetworkGateway() fabcore.VirtualNetworkGateway {
 	}
 }
 
-func NewRandomOnPremisesGateway() fabcore.OnPremisesGateway {
-	return fabcore.OnPremisesGateway{
+func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
+	return &fabcore.OnPremisesGateway{
 		ID:                          to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                 to.Ptr(testhelp.RandomName()),
 		NumberOfMemberGateways:      to.Ptr(testhelp.RandomInt32(100)),

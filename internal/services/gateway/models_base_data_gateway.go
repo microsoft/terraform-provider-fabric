@@ -6,7 +6,6 @@ package gateway
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
@@ -36,8 +35,6 @@ type onPremisesGatewayModelBase struct {
 	PublicKey supertypes.SingleNestedObjectValueOf[publicKeyModel] `tfsdk:"public_key"`
 
 	Version types.String `tfsdk:"version"`
-
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 type virtualNetworkGatewayModelBase struct {
@@ -50,8 +47,6 @@ type virtualNetworkGatewayModelBase struct {
 	NumberOfMemberGateways *int32 `tfsdk:"number_of_member_gateways"`
 
 	VirtualNetworkAzureResource supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`
-
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 type onPremisesGatewayPersonalModelBase struct {
@@ -62,8 +57,6 @@ type onPremisesGatewayPersonalModelBase struct {
 	Type types.String `tfsdk:"type"`
 
 	Version types.String `tfsdk:"version"`
-
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 type virtualNetworkAzureResourceModel struct {
@@ -74,8 +67,6 @@ type virtualNetworkAzureResourceModel struct {
 	VirtualNetworkName types.String `tfsdk:"virtual_network_name"`
 
 	SubnetName types.String `tfsdk:"subnet_name"`
-
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 type publicKeyModel struct {
