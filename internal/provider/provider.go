@@ -368,6 +368,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
 		kqldatabase.NewResourceKQLDatabase,
+		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
