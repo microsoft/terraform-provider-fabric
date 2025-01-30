@@ -20,7 +20,7 @@ const (
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create"
 	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-dashboard-definition"
-	ItemPreview               = true
+	ItemPreview               = false
 )
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals

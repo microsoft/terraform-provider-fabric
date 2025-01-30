@@ -6,7 +6,6 @@ description: |-
   Get a Fabric KQL Dashboard.
   Use this data source to fetch a KQL Dashboard https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create.
   -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_kql_dashboard (Data Source)
@@ -16,8 +15,6 @@ Get a Fabric KQL Dashboard.
 Use this data source to fetch a [KQL Dashboard](https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create).
 
 -> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
