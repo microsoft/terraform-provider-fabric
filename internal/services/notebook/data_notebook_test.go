@@ -215,7 +215,7 @@ func TestAcc_NotebookDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by id with definition - default
+		// read by id with definition - no format
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
