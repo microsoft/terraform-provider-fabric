@@ -89,7 +89,7 @@ tasks:
   govulncheck:
     desc: Run govulncheck
     cmds:
-      - govulncheck ./...
+      - govulncheck -test -show verbose ./...
 
   golangci-lint:
     desc: Run golangci-lint
