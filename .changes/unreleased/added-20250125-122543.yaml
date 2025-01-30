@@ -1,5 +1,0 @@
-kind: added
-body: Definition support in the `fabric_eventstream` Data-Source
-time: 2025-01-25T12:25:43.2660272+01:00
-custom:
-  Issue: "160"

@@ -1,5 +1,0 @@
-kind: added
-body: New `configuration` attribute in the `fabric_eventhouse` Resource.
-time: 2025-01-28T09:38:11.8439891+01:00
-custom:
-  Issue: "224"

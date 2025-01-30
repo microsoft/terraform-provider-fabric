@@ -1,8 +1,0 @@
-kind: breaking
-body: |
-  Using preview resources or data sources now needs explicit opt-in at the provider level configuration by setting the `preview` attribute to `true`.
-  This is to ensure that users are aware of the risks of using preview resources or data sources in production environments.
-  Usage of any preview feature will result in a warning message in the Terraform output.
-time: 2025-01-07T23:36:38.8482843-08:00
-custom:
-  Issue: "185"

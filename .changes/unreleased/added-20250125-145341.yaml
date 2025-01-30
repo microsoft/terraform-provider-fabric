@@ -1,5 +1,0 @@
-kind: added
-body: Definition support in the `fabric_kql_queryset` Data-Source
-time: 2025-01-25T14:53:41.6482592+01:00
-custom:
-  Issue: "131"

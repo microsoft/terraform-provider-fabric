@@ -1,7 +1,0 @@
-kind: added
-body: |
-  Added support for multi-format Notebook Resource/Data-Source.
-  By using `format` attribute, you can now define the format of the Notebook Resource/Data-Source. Accepted values are `jpynb`, and `py`.
-time: 2024-12-23T09:48:47.1324573-08:00
-custom:
-  Issue: "168"

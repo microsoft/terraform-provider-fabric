@@ -1,7 +1,0 @@
-kind: added
-body: |
-  Added support for multi-format Semantic Model Resource/Data-Source.
-  By using `format` attribute, you can now define the format of the Semantic Model Resource/Data-Source. Accepted values are `TMSL`, and `TMDL`.
-time: 2024-12-23T09:48:49.1324573-08:00
-custom:
-  Issue: "171"
