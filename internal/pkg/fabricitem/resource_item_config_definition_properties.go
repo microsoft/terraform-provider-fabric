@@ -36,12 +36,13 @@ var (
 
 type ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
 	ResourceFabricItemDefinition
-	IsConfigRequired      bool
-	ConfigAttributes      map[string]schema.Attribute
-	PropertiesAttributes  map[string]schema.Attribute
-	PropertiesSetter      func(ctx context.Context, from *Titemprop, to *ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) diag.Diagnostics
-	CreationPayloadSetter func(ctx context.Context, from Ttfconfig) (*Titemconfig, diag.Diagnostics)
-	ItemGetter            func(ctx context.Context, fabricClient fabric.Client, model ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig], fabricItem *FabricItemProperties[Titemprop]) error
+	ConfigRequired             bool
+	ConfigOrDefinitionRequired bool
+	ConfigAttributes           map[string]schema.Attribute
+	PropertiesAttributes       map[string]schema.Attribute
+	PropertiesSetter           func(ctx context.Context, from *Titemprop, to *ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) diag.Diagnostics
+	CreationPayloadSetter      func(ctx context.Context, from Ttfconfig) (*Titemconfig, diag.Diagnostics)
+	ItemGetter                 func(ctx context.Context, fabricClient fabric.Client, model ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig], fabricItem *FabricItemProperties[Titemprop]) error
 }
 
 func NewResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](config ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) resource.Resource {
@@ -97,16 +98,21 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 }
 
 func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) ConfigValidators(_ context.Context) []resource.ConfigValidator { //revive:disable-line:confusing-naming
-	return []resource.ConfigValidator{
-		resourcevalidator.Conflicting(
+	result := []resource.ConfigValidator{}
+
+	if r.ConfigOrDefinitionRequired {
+		result = append(result, resourcevalidator.ExactlyOneOf(
 			path.MatchRoot("configuration"),
 			path.MatchRoot("definition"),
-		),
-		resourcevalidator.ExactlyOneOf(
-			path.MatchRoot("configuration"),
-			path.MatchRoot("definition"),
-		),
+		))
 	}
+
+	result = append(result, resourcevalidator.Conflicting(
+		path.MatchRoot("configuration"),
+		path.MatchRoot("definition"),
+	))
+
+	return result
 }
 
 func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) { //revive:disable-line:confusing-naming

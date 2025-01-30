@@ -32,7 +32,7 @@ var (
 
 type ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
 	ResourceFabricItem
-	IsConfigRequired      bool
+	ConfigRequired        bool
 	ConfigAttributes      map[string]schema.Attribute
 	PropertiesAttributes  map[string]schema.Attribute
 	PropertiesSetter      func(ctx context.Context, from *Titemprop, to *ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) diag.Diagnostics

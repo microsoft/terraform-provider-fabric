@@ -77,7 +77,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 
 func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.IsConfigRequired, r.ConfigAttributes)
+	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
 
 	return schema.Schema{
@@ -88,7 +88,7 @@ func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, 
 
 func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attrConfiguration := getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.IsConfigRequired, r.ConfigAttributes)
+	attrConfiguration := getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
 	attrConfiguration.Validators = []validator.Object{
 		objectvalidator.ConflictsWith(
 			path.MatchRoot("definition"),
