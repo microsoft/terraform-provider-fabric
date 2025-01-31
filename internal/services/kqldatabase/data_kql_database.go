@@ -17,7 +17,7 @@ import (
 )
 
 func NewDataSourceKQLDatabase() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.DataSourceFabricItemPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[kqlDatabasePropertiesModel](ctx)
 
 		if from != nil {
@@ -34,7 +34,7 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
 		client := fabkqldatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetKQLDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -47,7 +47,7 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
 		client := fabkqldatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		pager := client.NewListKQLDatabasesPager(model.WorkspaceID.ValueString(), nil)
@@ -69,8 +69,8 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties]{
+		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
 			Type:   ItemType,
 			Name:   ItemName,
 			TFName: ItemTFName,
@@ -78,9 +78,7 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 				"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
 			IsDisplayNameUnique: true,
-			// FormatTypeDefault:   ItemFormatTypeDefault,
-			// FormatTypes:         ItemFormatTypes,
-			// DefinitionPathKeys:  ItemDefinitionPaths,
+			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceKQLDatabasePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
@@ -88,5 +86,5 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 		ItemListGetter:       itemListGetter,
 	}
 
-	return fabricitem.NewDataSourceFabricItemProperties(config)
+	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)
 }

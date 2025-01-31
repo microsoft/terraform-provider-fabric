@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabkqldatabase "github.com/microsoft/fabric-sdk-go/fabric/kqldatabase"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -60,7 +62,7 @@ func NewResourceKQLDatabase() resource.Resource {
 		return &cp, nil
 	}
 
-	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[kqlDatabasePropertiesModel](ctx)
 
 		if from != nil {
@@ -77,7 +79,7 @@ func NewResourceKQLDatabase() resource.Resource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification], fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification], fabricItem *fabricitem.FabricItemProperties[fabkqldatabase.Properties]) error {
 		client := fabkqldatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetKQLDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -90,8 +92,8 @@ func NewResourceKQLDatabase() resource.Resource {
 		return nil
 	}
 
-	config := fabricitem.ResourceFabricItemConfigProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification]{
-		ResourceFabricItem: fabricitem.ResourceFabricItem{
+	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification]{
+		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
 			Type:              ItemType,
 			Name:              ItemName,
 			NameRenameAllowed: true,
@@ -99,27 +101,26 @@ func NewResourceKQLDatabase() resource.Resource {
 			MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
 				"Use this resource to manage a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
-			DisplayNameMaxLength: 123,
-			DescriptionMaxLength: 256,
-			// FormatTypeDefault:     ItemFormatTypeDefault,
-			// FormatTypes:           ItemFormatTypes,
-			// DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			// DefinitionPathKeys:    ItemDefinitionPaths,
-			// DefinitionPathKeysValidator: []validator.Map{
-			// 	mapvalidator.SizeAtLeast(2),
-			// 	mapvalidator.SizeAtMost(2),
-			// 	mapvalidator.KeysAre(stringvalidator.OneOf(ItemDefinitionPaths...)),
-			// },
-			// DefinitionRequired: false,
-			// DefinitionEmpty:    "",
+			DisplayNameMaxLength:  123,
+			DescriptionMaxLength:  256,
+			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+			DefinitionFormats:     itemDefinitionFormats,
+			DefinitionPathKeysValidator: []validator.Map{
+				mapvalidator.SizeAtLeast(2),
+				mapvalidator.SizeAtMost(2),
+				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
+			},
+			DefinitionRequired: false,
+			DefinitionEmpty:    "",
 		},
-		ConfigRequired:        true,
-		ConfigAttributes:      getResourceKQLDatabaseConfigurationAttributes(),
-		CreationPayloadSetter: creationPayloadSetter,
-		PropertiesAttributes:  getResourceKQLDatabasePropertiesAttributes(),
-		PropertiesSetter:      propertiesSetter,
-		ItemGetter:            itemGetter,
+		ConfigRequired:             false,
+		ConfigOrDefinitionRequired: true,
+		ConfigAttributes:           getResourceKQLDatabaseConfigurationAttributes(),
+		CreationPayloadSetter:      creationPayloadSetter,
+		PropertiesAttributes:       getResourceKQLDatabasePropertiesAttributes(),
+		PropertiesSetter:           propertiesSetter,
+		ItemGetter:                 itemGetter,
 	}
 
-	return fabricitem.NewResourceFabricItemConfigProperties(config)
+	return fabricitem.NewResourceFabricItemConfigDefinitionProperties(config)
 }
