@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -216,7 +217,9 @@ func (r *resourceGateway) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	state.set(ctx, respCreate.GatewayClassification)
+	if resp.Diagnostics.Append(state.set(ctx, respCreate.GatewayClassification)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -251,11 +254,9 @@ func (r *resourceGateway) Read(ctx context.Context, req resource.ReadRequest, re
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := r.get(ctx, &state)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
-			resp.State.RemoveResource(ctx)
-		}
+	diags = r.get(ctx, &state)
+	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+		resp.State.RemoveResource(ctx)
 
 		resp.Diagnostics.Append(diags...)
 
@@ -306,7 +307,9 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	plan.set(ctx, respUpdate.GatewayClassification)
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.GatewayClassification)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -375,15 +378,13 @@ func (r *resourceGateway) Delete(ctx context.Context, req resource.DeleteRequest
 // 	}
 // }
 
-func (r *resourceGateway) get(ctx context.Context, model *resourceGatewayModel) error {
+func (r *resourceGateway) get(ctx context.Context, model *resourceGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, "getting "+ItemName)
 
 	respGet, err := r.client.GetGateway(ctx, model.ID.ValueString(), nil)
-	if err != nil {
-		return err
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
 	}
 
-	model.set(ctx, respGet.GatewayClassification)
-
-	return nil
+	return model.set(ctx, respGet.GatewayClassification)
 }

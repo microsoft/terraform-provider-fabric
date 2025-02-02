@@ -22,7 +22,9 @@ func (to *dataSourceGatewaysModel) setValues(ctx context.Context, from []fabcore
 
 	for _, entity := range from {
 		var entityModel baseGatewayModel
-		entityModel.set(ctx, entity)
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
 		slice = append(slice, &entityModel)
 	}
 

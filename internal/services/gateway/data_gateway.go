@@ -214,7 +214,9 @@ func (d *dataSourceGateway) get(ctx context.Context, model *dataSourceGatewayMod
 		return diags
 	}
 
-	model.set(ctx, respGet.GatewayClassification)
+	if diags := model.set(ctx, respGet.GatewayClassification); diags.HasError() {
+		return diags
+	}
 
 	return nil
 }
