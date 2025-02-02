@@ -89,7 +89,7 @@ func TestUnit_KQLQuerysetDataSource(t *testing.T) {
 					"id": *entity.ID,
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
 		// read by id
 		{
@@ -200,6 +200,7 @@ func TestAcc_KQLQuerysetDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
 		// read by name - not found
@@ -212,6 +213,37 @@ func TestAcc_KQLQuerysetDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id with definition - no format
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
+		},
+		// read by id with definition
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+					"format":            "Default",
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.RealTimeQueryset.json.content"),
+			),
 		},
 	}))
 }

@@ -1,0 +1,28 @@
+{
+  "payload": {
+    "tabs": [
+      {
+        "id": "ad801b9d-1091-4264-8f7a-8e4928b9e138",
+        "queryRange": {
+          "startLineNumber": 1,
+          "startColumn": 1,
+          "endLineNumber": 1,
+          "endColumn": 9
+        },
+        "text": "print 10",
+        "commandInContext": "print 10",
+        "executionStatus": "notStarted",
+        "clientRequestId": null,
+        "commandType": "Query",
+        "commandWithoutLeadingComments": "print 10",
+        "hideEmptyColumns": false,
+        "cursorPosition": {
+          "lineNumber": 1,
+          "column": 9
+        }
+      }
+    ],
+    "tabInContext": "ad801b9d-1091-4264-8f7a-8e4928b9e138",
+    "connections": {}
+  }
+}

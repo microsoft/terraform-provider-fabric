@@ -1,0 +1,47 @@
+{
+  "schema_version": "55",
+  "title": "test",
+  "tiles": [
+    {
+      "id": "96b5d900-b54c-4e43-87e2-01ec73f52d26",
+      "title": "Test",
+      "visualType": "markdownCard",
+      "pageId": "c97171d0-c879-46dd-91ba-0d8e9cc0af79",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 9,
+        "height": 7
+      },
+      "markdownText": "Enter text in [markdown](https://github.github.com/gfm/) format\n",
+      "visualOptions": {}
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "beace802-8c95-4662-9f4b-63c9b97b108c",
+      "displayName": "Time range",
+      "description": "",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [],
+  "pages": [
+    {
+      "name": "Page 1",
+      "id": "c97171d0-c879-46dd-91ba-0d8e9cc0af79"
+    }
+  ],
+  "queries": []
+}

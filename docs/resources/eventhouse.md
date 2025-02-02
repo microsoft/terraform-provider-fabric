@@ -30,6 +30,7 @@ resource "fabric_eventhouse" "example_definition_bootstrap" {
   display_name              = "example2"
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
+  format                    = "Default"
   definition_update_enabled = false # <-- Disable definition update
   definition = {
     "EventhouseProperties.json" = {
@@ -43,6 +44,7 @@ resource "fabric_eventhouse" "example_definition_update" {
   display_name = "example3"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
   definition = {
     "EventhouseProperties.json" = {
       source = "${local.path}/EventhouseProperties.json.tmpl"
@@ -50,6 +52,16 @@ resource "fabric_eventhouse" "example_definition_update" {
         "MyKey" = "MyValue"
       }
     }
+  }
+}
+
+# Example 4 - Item with configuration, no definition - configuration and definition cannot be used together at the same time
+resource "fabric_eventhouse" "example_configuration" {
+  display_name = "example4"
+  description  = "example with configuration"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  configuration = {
+    minimum_consumption_units = "2.25"
   }
 }
 ```
@@ -64,6 +76,10 @@ resource "fabric_eventhouse" "example_definition_update" {
 
 ### Optional
 
+- `configuration` (Attributes) The Eventhouse creation configuration.
+
+Any changes to this configuration will result in recreation of the Eventhouse. (see [below for nested schema](#nestedatt--configuration))
+
 - `definition` (Attributes Map) Definition parts. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). Accepted path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventhouse description.
@@ -74,6 +90,14 @@ resource "fabric_eventhouse" "example_definition_update" {
 
 - `id` (String) The Eventhouse ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--configuration"></a>
+
+### Nested Schema for `configuration`
+
+Required:
+
+- `minimum_consumption_units` (Number) When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: `0`, `13`, `18`, `2.25`, `26`, `34`, `4.25`, `50`, `8.5` or any number between `51` and `322`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)
 
 <a id="nestedatt--definition"></a>
 
