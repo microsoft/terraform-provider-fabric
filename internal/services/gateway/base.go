@@ -13,7 +13,7 @@ const (
 	ItemsName          = "Gateways"
 	ItemsTFName        = "gateways"
 	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-implementation-planning-data-gateways"
+	ItemDocsURL        = "https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways"
 )
 
 var (

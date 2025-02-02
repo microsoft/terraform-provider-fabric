@@ -19,11 +19,16 @@ type baseGatewayModel struct {
 	ID   customtypes.UUID `tfsdk:"id"`
 	Type types.String     `tfsdk:"type"`
 
-	DisplayName                  types.String                                                           `tfsdk:"display_name"`
-	CapacityID                   customtypes.UUID                                                       `tfsdk:"capacity_id"`
-	InactivityMinutesBeforeSleep types.Int32                                                            `tfsdk:"inactivity_minutes_before_sleep"`
-	NumberOfMemberGateways       types.Int32                                                            `tfsdk:"number_of_member_gateways"`
-	VirtualNetworkAzureResource  supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`
+	DisplayName                  types.String                                                           `tfsdk:"display_name"`                    // VirtualNetwork & OnPremises
+	CapacityID                   customtypes.UUID                                                       `tfsdk:"capacity_id"`                     // VirtualNetwork
+	InactivityMinutesBeforeSleep types.Int32                                                            `tfsdk:"inactivity_minutes_before_sleep"` // VirtualNetwork
+	NumberOfMemberGateways       types.Int32                                                            `tfsdk:"number_of_member_gateways"`       // VirtualNetwork & OnPremises
+	VirtualNetworkAzureResource  supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`  // VirtualNetwork
+	AllowCloudConnectionRefresh  types.Bool                                                             `tfsdk:"allow_cloud_connection_refresh"`  // OnPremises
+	AllowCustomConnectors        types.Bool                                                             `tfsdk:"allow_custom_connectors"`         // OnPremises
+	LoadBalancingSetting         types.String                                                           `tfsdk:"load_balancing_setting"`          // OnPremises
+	PublicKey                    supertypes.SingleNestedObjectValueOf[publicKeyModel]                   `tfsdk:"public_key"`                      // OnPremises & OnPremisesPersonal
+	Version                      types.String                                                           `tfsdk:"version"`                         // OnPremises & OnPremisesPersonal
 }
 
 func (to *baseGatewayModel) set(ctx context.Context, from fabcore.GatewayClassification) diag.Diagnostics {
@@ -50,6 +55,45 @@ func (to *baseGatewayModel) set(ctx context.Context, from fabcore.GatewayClassif
 
 		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
+	case *fabcore.OnPremisesGateway:
+		to.ID = customtypes.NewUUIDPointerValue(gateway.ID)
+		to.Type = types.StringPointerValue((*string)(gateway.Type))
+		to.DisplayName = types.StringPointerValue(gateway.DisplayName)
+		to.NumberOfMemberGateways = types.Int32PointerValue(gateway.NumberOfMemberGateways)
+		to.AllowCloudConnectionRefresh = types.BoolPointerValue(gateway.AllowCloudConnectionRefresh)
+		to.AllowCustomConnectors = types.BoolPointerValue(gateway.AllowCustomConnectors)
+		to.LoadBalancingSetting = types.StringPointerValue((*string)(gateway.LoadBalancingSetting))
+		to.Version = types.StringPointerValue(gateway.Version)
+
+		publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
+		if gateway.PublicKey != nil {
+			publicKeyModel := &publicKeyModel{}
+			publicKeyModel.set(gateway.PublicKey)
+
+			if diags := publicKey.Set(ctx, publicKeyModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.PublicKey = publicKey
+
+	case *fabcore.OnPremisesGatewayPersonal:
+		to.ID = customtypes.NewUUIDPointerValue(gateway.ID)
+		to.Type = types.StringPointerValue((*string)(gateway.Type))
+		to.Version = types.StringPointerValue(gateway.Version)
+
+		publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
+		if gateway.PublicKey != nil {
+			publicKeyModel := &publicKeyModel{}
+			publicKeyModel.set(gateway.PublicKey)
+
+			if diags := publicKey.Set(ctx, publicKeyModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.PublicKey = publicKey
+
 	default:
 		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gateway))
 
@@ -71,4 +115,14 @@ func (to *virtualNetworkAzureResourceModel) set(from *fabcore.VirtualNetworkAzur
 	to.SubnetName = types.StringPointerValue(from.SubnetName)
 	to.SubscriptionID = customtypes.NewUUIDPointerValue(from.SubscriptionID)
 	to.VirtualNetworkName = types.StringPointerValue(from.VirtualNetworkName)
+}
+
+type publicKeyModel struct {
+	Exponent types.String `tfsdk:"exponent"`
+	Modulus  types.String `tfsdk:"modulus"`
+}
+
+func (to *publicKeyModel) set(from *fabcore.PublicKey) {
+	to.Exponent = types.StringPointerValue(from.Exponent)
+	to.Modulus = types.StringPointerValue(from.Modulus)
 }

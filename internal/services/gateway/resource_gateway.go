@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
@@ -105,11 +106,10 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				Required:            true,
 				Validators: []validator.Int32{
 					int32validator.OneOf(PossibleInactivityMinutesBeforeSleepValues...),
-					// TODO: There is only int64validator in the framework, figure out how to utilize it easily. In the meantime, I set Required to true.
-					// superint64validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-					// 	[]attr.Value{
-					// 		types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-					// 	}),
+					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+						}),
 				},
 			},
 			"number_of_member_gateways": schema.Int32Attribute{
@@ -117,11 +117,10 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				Required:            true,
 				Validators: []validator.Int32{
 					int32validator.Between(MinNumberOfMemberGatewaysValues, MaxNumberOfMemberGatewaysValues),
-					// TODO: There is only int64validator in the framework, figure out how to utilize it easily. In the meantime, I set Required to true.
-					// superint64validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-					// 	[]attr.Value{
-					// 		types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-					// 	}),
+					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+						}),
 				},
 			},
 			"virtual_network_azure_resource": schema.SetNestedAttribute{
