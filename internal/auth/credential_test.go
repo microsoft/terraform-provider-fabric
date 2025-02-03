@@ -14,12 +14,10 @@ import (
 )
 
 func TestUnit_NewCredential(t *testing.T) {
-	t.Parallel()
+	t.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
 
 	certPass := testhelp.RandomName()
 	cert, key, _ := auth.ConvertBase64ToCert(testhelp.RandomP12CertB64(certPass), certPass)
-
-	t.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
 
 	testCases := map[string]struct {
 		cfg         auth.Config

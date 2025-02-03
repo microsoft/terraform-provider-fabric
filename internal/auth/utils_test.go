@@ -75,9 +75,9 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 }
 
 func TestUnit_ConvertBase64ToCert(t *testing.T) {
-	t.Parallel()
-
 	certPass := testhelp.RandomName()
+
+	t.Parallel()
 
 	testCases := map[string]struct {
 		b64           string
