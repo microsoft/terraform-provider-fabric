@@ -14,8 +14,6 @@ import (
 )
 
 func TestUnit_NewCredential(t *testing.T) {
-	t.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
-
 	certPass := testhelp.RandomName()
 	cert, key, _ := auth.ConvertBase64ToCert(testhelp.RandomP12CertB64(certPass), certPass)
 
@@ -23,6 +21,7 @@ func TestUnit_NewCredential(t *testing.T) {
 		cfg         auth.Config
 		expected    auth.AuthenticationMethod
 		expectError bool
+		envs        map[string]string
 	}{
 		"AzureDevCLIAuth valid": {
 			cfg: auth.Config{
@@ -58,6 +57,9 @@ func TestUnit_NewCredential(t *testing.T) {
 			},
 			expected:    auth.AzureDevOpsWorkloadIdentityFederationAuth,
 			expectError: false,
+			envs: map[string]string{
+				"SYSTEM_OIDCREQUESTURI": "https://example.com",
+			},
 		},
 		"AzureDevOpsWorkloadIdentityFederationAuth invalid": {
 			cfg: auth.Config{
@@ -146,7 +148,9 @@ func TestUnit_NewCredential(t *testing.T) {
 
 	for name, testCase := range testCases {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
+			for k, v := range testCase.envs {
+				t.Setenv(k, v)
+			}
 
 			credResponse, err := auth.NewCredential(testCase.cfg)
 			if testCase.expectError {
