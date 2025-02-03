@@ -4,10 +4,10 @@
 package auth_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/auth"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -16,9 +16,10 @@ import (
 func TestUnit_NewCredential(t *testing.T) {
 	t.Parallel()
 
-	cert, key, _ := auth.ConvertBase64ToCert(testhelp.RandomP12CertB64("password"), "password")
+	certPass := testhelp.RandomName()
+	cert, key, _ := auth.ConvertBase64ToCert(testhelp.RandomP12CertB64(certPass), certPass)
 
-	os.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
+	t.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
 
 	testCases := map[string]struct {
 		cfg         auth.Config
@@ -151,9 +152,9 @@ func TestUnit_NewCredential(t *testing.T) {
 
 			credResponse, err := auth.NewCredential(testCase.cfg)
 			if testCase.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, testCase.expected, credResponse.AuthMethod)
 				assert.NotNil(t, credResponse.Cred)
 			}

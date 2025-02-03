@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/auth"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -41,7 +42,7 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 			t.Parallel()
 
 			// Create a temporary file
-			tmpfile, err := os.CreateTemp("", ".testfile-*.tmp")
+			tmpfile, err := os.CreateTemp(t.TempDir(), ".testfile-*.tmp")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -49,7 +50,7 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 
 			// Write content to the file if not expecting a read error
 			if !testCase.expectError {
-				if _, err := tmpfile.Write([]byte(testCase.fileContent)); err != nil {
+				if _, err := tmpfile.WriteString(testCase.fileContent); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -64,9 +65,9 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 
 			// Check for expected error
 			if testCase.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, testCase.expected, result, "they should be equal")
 			}
 		})
@@ -76,6 +77,8 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 func TestUnit_ConvertBase64ToCert(t *testing.T) {
 	t.Parallel()
 
+	certPass := testhelp.RandomName()
+
 	testCases := map[string]struct {
 		b64           string
 		password      string
@@ -84,8 +87,8 @@ func TestUnit_ConvertBase64ToCert(t *testing.T) {
 		expectError   bool
 	}{
 		"valid cert with password": {
-			b64:         testhelp.RandomP12CertB64("password"),
-			password:    "password",
+			b64:         testhelp.RandomP12CertB64(certPass),
+			password:    certPass,
 			expectError: false,
 		},
 		"valid cert without password": {
@@ -95,7 +98,7 @@ func TestUnit_ConvertBase64ToCert(t *testing.T) {
 		},
 		"invalid cert": {
 			b64:         "invalid base64",
-			password:    "password",
+			password:    certPass,
 			expectError: true,
 		},
 		"empty cert": {
@@ -104,8 +107,8 @@ func TestUnit_ConvertBase64ToCert(t *testing.T) {
 			expectError: true,
 		},
 		"invalid password": {
-			b64:         testhelp.RandomP12CertB64("password"),
-			password:    "wrongpassword",
+			b64:         testhelp.RandomP12CertB64(certPass),
+			password:    testhelp.RandomName(),
 			expectError: true,
 		},
 	}

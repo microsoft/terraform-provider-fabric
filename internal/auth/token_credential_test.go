@@ -10,6 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/auth"
 )
@@ -44,12 +45,12 @@ func TestUnit_TokenCredential_GetToken(t *testing.T) {
 
 			cred, err := auth.NewTokenCredential(testCase.token)
 			if testCase.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, testCase.expected, token, "they should be equal")
 			}
 		})
