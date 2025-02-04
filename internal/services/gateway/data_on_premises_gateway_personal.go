@@ -29,7 +29,7 @@ func NewDataSourceOnPremisesGatewayPersonal() datasource.DataSource {
 }
 
 func (d *dataSourceOnPremisesGatewayPersonal) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_on_premises_gateway_personal"
+	resp.TypeName = req.ProviderTypeName + "_" + OnPremisesPersonalItemType
 }
 
 func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -37,14 +37,10 @@ func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ data
 		MarkdownDescription: "Retrieve an on-premises gateway in its 'personal' form (ID, public key, type, version).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The gateway ID (UUID).",
+				MarkdownDescription: "The gateway ID.",
 				Optional:            true,
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "The type of the gateway.",
-				Computed:            true,
 			},
 			"version": schema.StringAttribute{
 				MarkdownDescription: "The gateway version.",
@@ -97,7 +93,6 @@ func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req data
 		return
 	}
 
-	// Do the actual GET call
 	gatewayResp, errResp := d.client.GetGateway(ctx, data.ID.ValueString(), nil)
 	if errResp != nil {
 		resp.Diagnostics.AddError("GetGateway failed", errResp.Error())
@@ -117,7 +112,6 @@ func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req data
 		return
 	}
 
-	// Save data back into state
 	if diags := resp.State.Set(ctx, gateway); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

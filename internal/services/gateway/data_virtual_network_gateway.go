@@ -58,20 +58,16 @@ func (d *dataSourceVirtualNetworkGateway) Schema(ctx context.Context, _ datasour
 				Optional:            true,
 				Computed:            true,
 			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s.", ItemName),
-				Computed:            true,
-			},
 			"capacity_id": schema.StringAttribute{
 				MarkdownDescription: fmt.Sprintf("The %s capacity Id.", ItemName),
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"inactivity_minutes_before_sleep": schema.NumberAttribute{
+			"inactivity_minutes_before_sleep": schema.Int32Attribute{
 				MarkdownDescription: "The number of minutes of inactivity before the gateway goes to sleep.",
 				Computed:            true,
 			},
-			"number_of_member_gateways": schema.NumberAttribute{
+			"number_of_member_gateways": schema.Int32Attribute{
 				MarkdownDescription: "The number of member gateways.",
 				Computed:            true,
 			},

@@ -15,22 +15,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type GatewayModelBase struct {
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Type        types.String     `tfsdk:"type"`
-}
-
 type onPremisesGatewayModelBase struct {
-	GatewayModelBase
+	ID customtypes.UUID `tfsdk:"id"`
 
-	AllowCloudConnectionRefresh *bool `tfsdk:"allow_cloud_connection_refresh"`
+	DisplayName types.String `tfsdk:"display_name"`
 
-	AllowCustomConnectors *bool `tfsdk:"allow_custom_connectors"`
+	AllowCloudConnectionRefresh types.Bool `tfsdk:"allow_cloud_connection_refresh"`
+
+	AllowCustomConnectors types.Bool `tfsdk:"allow_custom_connectors"`
 
 	LoadBalancingSetting types.String `tfsdk:"load_balancing_setting"`
 
-	NumberOfMemberGateways *int32 `tfsdk:"number_of_member_gateways"`
+	NumberOfMemberGateways types.Int32 `tfsdk:"number_of_member_gateways"`
 
 	PublicKey supertypes.SingleNestedObjectValueOf[publicKeyModel] `tfsdk:"public_key"`
 
@@ -38,13 +34,15 @@ type onPremisesGatewayModelBase struct {
 }
 
 type virtualNetworkGatewayModelBase struct {
-	GatewayModelBase
+	ID customtypes.UUID `tfsdk:"id"`
+
+	DisplayName types.String `tfsdk:"display_name"`
 
 	CapacityId customtypes.UUID `tfsdk:"capacity_id"`
 
-	InactivityMinutesBeforeSleep *int32 `tfsdk:"inactivity_minutes_before_sleep"`
+	InactivityMinutesBeforeSleep types.Int32 `tfsdk:"inactivity_minutes_before_sleep"`
 
-	NumberOfMemberGateways *int32 `tfsdk:"number_of_member_gateways"`
+	NumberOfMemberGateways types.Int32 `tfsdk:"number_of_member_gateways"`
 
 	VirtualNetworkAzureResource supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`
 }
@@ -53,8 +51,6 @@ type onPremisesGatewayPersonalModelBase struct {
 	ID customtypes.UUID `tfsdk:"id"`
 
 	PublicKey supertypes.SingleNestedObjectValueOf[publicKeyModel] `tfsdk:"public_key"`
-
-	Type types.String `tfsdk:"type"`
 
 	Version types.String `tfsdk:"version"`
 }
@@ -91,7 +87,6 @@ func (to *onPremisesGatewayPersonalModelBase) set(ctx context.Context, from fabc
 	}
 	to.PublicKey = publicKey
 
-	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.Version = types.StringPointerValue(from.Version)
 
 	return diags
@@ -100,11 +95,10 @@ func (to *onPremisesGatewayPersonalModelBase) set(ctx context.Context, from fabc
 func (to *onPremisesGatewayModelBase) set(ctx context.Context, from fabcore.OnPremisesGateway) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Type = types.StringPointerValue((*string)(from.Type))
-	to.AllowCloudConnectionRefresh = from.AllowCloudConnectionRefresh
-	to.AllowCustomConnectors = from.AllowCustomConnectors
+	to.AllowCloudConnectionRefresh = types.BoolPointerValue(from.AllowCloudConnectionRefresh)
+	to.AllowCustomConnectors = types.BoolPointerValue(from.AllowCustomConnectors)
 	to.LoadBalancingSetting = types.StringPointerValue((*string)(from.LoadBalancingSetting))
-	to.NumberOfMemberGateways = from.NumberOfMemberGateways
+	to.NumberOfMemberGateways = types.Int32PointerValue(from.NumberOfMemberGateways)
 	to.Version = types.StringPointerValue(from.Version)
 
 	publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
@@ -126,10 +120,9 @@ func (to *onPremisesGatewayModelBase) set(ctx context.Context, from fabcore.OnPr
 func (to *virtualNetworkGatewayModelBase) set(ctx context.Context, from fabcore.VirtualNetworkGateway) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.CapacityId = customtypes.NewUUIDPointerValue(from.CapacityID)
-	to.InactivityMinutesBeforeSleep = from.InactivityMinutesBeforeSleep
-	to.NumberOfMemberGateways = from.NumberOfMemberGateways
+	to.InactivityMinutesBeforeSleep = types.Int32PointerValue(from.InactivityMinutesBeforeSleep)
+	to.NumberOfMemberGateways = types.Int32PointerValue(from.NumberOfMemberGateways)
 
 	virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
 
@@ -153,12 +146,6 @@ func (to *virtualNetworkAzureResourceModel) set(from fabcore.VirtualNetworkAzure
 	to.VirtualNetworkName = types.StringPointerValue(from.VirtualNetworkName)
 	to.SubnetName = types.StringPointerValue(from.SubnetName)
 }
-
-// should I change my blablabla?
-// func (to *GatewayModelBase) set(from fabcore.Gateway) {
-// 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-// 	to.Type = types.StringPointerValue((*string)(from.Type))
-// }
 
 func (to *publicKeyModel) set(from fabcore.PublicKey) {
 	to.Exponent = types.StringPointerValue(from.Exponent)

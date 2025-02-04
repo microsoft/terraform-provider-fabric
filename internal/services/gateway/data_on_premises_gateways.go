@@ -36,7 +36,7 @@ func NewDataSourceOnPremisesGateways() datasource.DataSource {
 }
 
 func (d *dataSourceOnPremisesGateways) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_on_premises_gateways"
+	resp.TypeName = req.ProviderTypeName + "_" + OnPremisesItemsTFType
 }
 
 func (d *dataSourceOnPremisesGateways) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -58,16 +58,41 @@ func (d *dataSourceOnPremisesGateways) Schema(ctx context.Context, _ datasource.
 							MarkdownDescription: "The display name of the on-premises gateway.",
 							Computed:            true,
 						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The on-premises gateway type.",
+						"allow_custom_connectors": schema.BoolAttribute{
+							MarkdownDescription: "Allow custom connectors.",
 							Computed:            true,
 						},
 						"allow_cloud_connection_refresh": schema.BoolAttribute{
-							MarkdownDescription: "Allow cloud connection refresh.",
+							MarkdownDescription: "Allow custom connectors refresh.",
 							Computed:            true,
 						},
-						// Add any other on-premises gateway fields as needed,
-						// staying consistent with onPremisesGatewayModelBase.
+						"number_of_member_gateways": schema.Int64Attribute{
+							MarkdownDescription: "The number of member gateways.",
+							Computed:            true,
+						},
+						"load_balancing_setting": schema.StringAttribute{
+							MarkdownDescription: "The load balancing setting.",
+							Computed:            true,
+						},
+						"public_key": schema.SingleNestedAttribute{
+							MarkdownDescription: "The public key settings.",
+							Computed:            true,
+							CustomType:          supertypes.NewSingleNestedObjectTypeOf[publicKeyModel](ctx),
+							Attributes: map[string]schema.Attribute{
+								"exponent": schema.StringAttribute{
+									MarkdownDescription: "The RSA exponent.",
+									Computed:            true,
+								},
+								"modulus": schema.StringAttribute{
+									MarkdownDescription: "The RSA modulus.",
+									Computed:            true,
+								},
+							},
+						},
+						"version": schema.StringAttribute{
+							MarkdownDescription: "The gateway version.",
+							Computed:            true,
+						},
 					},
 				},
 			},

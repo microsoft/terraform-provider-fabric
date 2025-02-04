@@ -11,14 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
 var (
-	testDataSourceOnPremisesPresonalItemFabricFQN = testhelp.DataSourceFQN("fabric", OnPremisesItemTFName, "test")
-	testDataSourceOnPremisesPersonalItemHeader    = at.DataSourceHeader(testhelp.TypeName("fabric", OnPremisesItemTFName), "test")
+	testDataSourceOnPremisesPersonalFQN    = testhelp.DataSourceFQN("fabric", OnPremisesPersonalItemTFName, "test")
+	testDataSourceOnPremisesPersonalHeader = at.DataSourceHeader(testhelp.TypeName("fabric", OnPremisesPersonalItemTFName), "test")
 )
 
 func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
@@ -28,62 +27,58 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomOnPremisesGatewayPersonal())
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - no attributes
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
-				map[string]any{},
-			),
-			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured: \[id,display_name\]`),
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(
+		t,
+		nil,
+		fakes.FakeServer.ServerFactory,
+		nil,
+		[]resource.TestStep{
+			// Step 1: Unexpected attribute should trigger an error.
+			{
+				Config: at.CompileConfig(
+					testDataSourceOnPremisesPersonalHeader,
+					map[string]any{
+						"unexpected_attr": "test",
+					},
+				),
+				ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+			},
+			// Step 2: Missing ID should trigger an error since ID is required for lookup.
+			{
+				Config: at.CompileConfig(
+					testDataSourceOnPremisesPersonalHeader,
+					map[string]any{},
+				),
+				// "Missing ID" error is raised in Read when data.ID is empty.
+				ExpectError: regexp.MustCompile(`Missing ID`),
+			},
+			// Step 3: Invalid UUID string should trigger an error.
+			{
+				Config: at.CompileConfig(
+					testDataSourceOnPremisesPersonalHeader,
+					map[string]any{
+						"id": "not-a-valid-uuid",
+					},
+				),
+				ExpectError: regexp.MustCompile(`invalid UUID`),
+			},
+			// Step 4: Valid read test using the entity's ID.
+			{
+				Config: at.CompileConfig(
+					testDataSourceOnPremisesPersonalHeader,
+					map[string]any{
+						"id": *entity.ID,
+					},
+				),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "id", *entity.ID),
+					resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "version", *entity.Version),
+					resource.TestCheckResourceAttrSet(testDataSourceOnPremisesPersonalFQN, "public_key.exponent"),
+					resource.TestCheckResourceAttrSet(testDataSourceOnPremisesPersonalFQN, "public_key.modulus"),
+				),
+			},
 		},
-		// error - id - invalid UUID
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
-				map[string]any{
-					"id": "invalid uuid",
-				},
-			),
-			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
-		},
-		// error - unexpected attribute
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
-				map[string]any{
-					"id":              *entity.ID,
-					"unexpected_attr": "test",
-				},
-			),
-			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
-		},
-		// read by id - not found
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
-				map[string]any{
-					"id": testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		// read by id
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
-				map[string]any{
-					"id": *entity.ID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesPresonalItemFabricFQN, "id", *entity.ID),
-				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesPresonalItemFabricFQN, "public_key.exponent"),
-				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesPresonalItemFabricFQN, "public_key.modulus"),
-				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesPresonalItemFabricFQN, "version"),
-			),
-		},
-	}))
+	))
 }
 
 func TestAcc_OnPremisesGatewayPersonalDataSource(t *testing.T) {
@@ -94,20 +89,20 @@ func TestAcc_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		{
 			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
+				testDataSourceOnPremisesPersonalHeader,
 				map[string]any{
 					"id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesPresonalItemFabricFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesPresonalItemFabricFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "description", entityDescription),
 			),
 		},
 		// read by id - not found
 		{
 			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalItemHeader,
+				testDataSourceOnPremisesPersonalHeader,
 				map[string]any{
 					"id": testhelp.RandomUUID(),
 				},

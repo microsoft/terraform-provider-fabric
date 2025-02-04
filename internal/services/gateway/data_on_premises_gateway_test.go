@@ -125,7 +125,7 @@ func TestUnit_OnPremisesGatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "load_balancing_setting"),
 				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "number_of_member_gateways"),
 				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "public_key.exponent"),
-				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "public_key0.modulus"),
+				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "public_key.modulus"),
 				resource.TestCheckResourceAttrSet(testDataSourceOnPremisesItemFabricFQN, "version"),
 			),
 		},

@@ -33,8 +33,7 @@ func NewDataSourceOnPremisesGatewayPersonals() datasource.DataSource {
 }
 
 func (d *dataSourceOnPremisesGatewayPersonals) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	// e.g.: fabric_on_premises_gateway_personals
-	resp.TypeName = req.ProviderTypeName + "_on_premises_gateway_personals"
+	resp.TypeName = req.ProviderTypeName + "_" + OnPremisesPersonalItemsType
 }
 
 func (d *dataSourceOnPremisesGatewayPersonals) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -66,10 +65,6 @@ func (d *dataSourceOnPremisesGatewayPersonals) Schema(ctx context.Context, _ dat
 									Computed:            true,
 								},
 							},
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The on-premises personal gateway type.",
-							Computed:            true,
 						},
 						"version": schema.StringAttribute{
 							MarkdownDescription: "The personal gateway version.",

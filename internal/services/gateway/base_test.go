@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	VirtualNetworkItemTFName     = gateway.VirtualNetworkItemTFType
-	VirtualNetworkItemsTFName    = gateway.VirtualNetworkItemsTFType
-	OnPremisesItemTFName         = gateway.OnPremisesItemTFType
-	OnPremisesItemsTFName        = gateway.OnPremisesItemsTFType
-	OnPremisesPersonalItemTFName = gateway.OnPremisesPersonalItemType
-	OnPremisesPersonalItemsType  = gateway.OnPremisesPersonalItemsType
-	itemsTFName                  = gateway.ItemsTFName
-	itemType                     = gateway.ItemName
+	VirtualNetworkItemTFName      = gateway.VirtualNetworkItemTFType
+	VirtualNetworkItemsTFName     = gateway.VirtualNetworkItemsTFType
+	OnPremisesItemTFName          = gateway.OnPremisesItemTFType
+	OnPremisesItemsTFName         = gateway.OnPremisesItemsTFType
+	OnPremisesPersonalItemTFName  = gateway.OnPremisesPersonalItemType
+	OnPremisesPersonalItemsTFName = gateway.OnPremisesPersonalItemsType
+	itemsTFName                   = gateway.ItemsTFName
+	itemType                      = gateway.ItemName
 )

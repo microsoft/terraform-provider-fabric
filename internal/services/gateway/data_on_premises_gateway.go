@@ -62,10 +62,6 @@ func (d *dataSourceOnPremisesGateway) Schema(
 				Optional:            true,
 				Computed:            true,
 			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s type.", ItemName),
-				Computed:            true,
-			},
 			"allow_cloud_connection_refresh": schema.BoolAttribute{
 				MarkdownDescription: "Defines if cloud connection refresh is allowed.",
 				Computed:            true,
@@ -78,7 +74,7 @@ func (d *dataSourceOnPremisesGateway) Schema(
 				MarkdownDescription: "Gateway load balancing setting.",
 				Computed:            true,
 			},
-			"number_of_member_gateways": schema.NumberAttribute{
+			"number_of_member_gateways": schema.Int32Attribute{
 				MarkdownDescription: "The number of member gateways.",
 				Computed:            true,
 			},
@@ -222,6 +218,6 @@ func (d *dataSourceOnPremisesGateway) getByDisplayName(ctx context.Context, mode
 	}
 
 	var diags diag.Diagnostics
-	diags.AddError(common.ErrorReadHeader, "expected gateway to be an on-premises gateway")
+	diags.AddError(common.ErrorReadHeader, "no on-premises gateway with display name found")
 	return diags
 }

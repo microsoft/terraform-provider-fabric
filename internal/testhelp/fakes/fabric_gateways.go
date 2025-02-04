@@ -124,6 +124,12 @@ func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGa
 	return fabcore.OnPremisesGatewayPersonal{}
 }
 
+func configureOnPremisesGateway(server *fakeServer) fabcore.OnPremisesGateway {
+	configureGatewayClassification(server)
+
+	return fabcore.OnPremisesGateway{}
+}
+
 func configureGatewayClassification(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
@@ -186,8 +192,8 @@ func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 	}
 }
 
-func NewRandomOnPremisesGatewayPersonal() fabcore.OnPremisesGatewayPersonal {
-	return fabcore.OnPremisesGatewayPersonal{
+func NewRandomOnPremisesGatewayPersonal() *fabcore.OnPremisesGatewayPersonal {
+	return &fabcore.OnPremisesGatewayPersonal{
 		ID:      to.Ptr(testhelp.RandomUUID()),
 		Type:    to.Ptr(fabcore.GatewayTypeOnPremisesPersonal),
 		Version: to.Ptr("1.0"),

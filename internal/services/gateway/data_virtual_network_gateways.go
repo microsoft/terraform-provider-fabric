@@ -31,7 +31,7 @@ func NewDataSourceVirtualNetworkGateways() datasource.DataSource {
 }
 
 func (d *dataSourceVirtualNetworkGateways) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_virtual_network_gateways"
+	resp.TypeName = req.ProviderTypeName + "_" + VirtualNetworkItemsTFType
 }
 
 func (d *dataSourceVirtualNetworkGateways) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -51,10 +51,6 @@ func (d *dataSourceVirtualNetworkGateways) Schema(ctx context.Context, _ datasou
 						},
 						"display_name": schema.StringAttribute{
 							MarkdownDescription: "The display name of the gateway.",
-							Computed:            true,
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The gateway type.",
 							Computed:            true,
 						},
 						"capacity_id": schema.StringAttribute{
