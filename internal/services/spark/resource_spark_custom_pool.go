@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -18,10 +19,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabspark "github.com/microsoft/fabric-sdk-go/fabric/spark"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -130,11 +133,33 @@ func (r *resourceSparkCustomPool) Schema(ctx context.Context, _ resource.SchemaR
 					},
 					"min_executors": schema.Int32Attribute{
 						MarkdownDescription: "The minimum executors.",
-						Required:            true,
+						Computed:            true,
+						Optional:            true,
+						Validators: []validator.Int32{
+							superint32validator.NullIfAttributeIsOneOf(
+								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+								[]attr.Value{types.BoolValue(false)},
+							),
+							superint32validator.RequireIfAttributeIsOneOf(
+								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+								[]attr.Value{types.BoolValue(true)},
+							),
+						},
 					},
 					"max_executors": schema.Int32Attribute{
 						MarkdownDescription: "The maximum executors.",
-						Required:            true,
+						Computed:            true,
+						Optional:            true,
+						Validators: []validator.Int32{
+							superint32validator.NullIfAttributeIsOneOf(
+								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+								[]attr.Value{types.BoolValue(false)},
+							),
+							superint32validator.RequireIfAttributeIsOneOf(
+								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+								[]attr.Value{types.BoolValue(true)},
+							),
+						},
 					},
 				},
 			},
