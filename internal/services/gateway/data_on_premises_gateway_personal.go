@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
@@ -61,12 +62,18 @@ func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ data
 					},
 				},
 			},
+			"timeouts": timeouts.Attributes(ctx),
 		},
 	}
 }
 
 func (d *dataSourceOnPremisesGatewayPersonal) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
 	pConfigData, ok := req.ProviderData.(*pconfig.ProviderData)
+
 	if !ok {
 		resp.Diagnostics.AddError(
 			common.ErrorDataSourceConfigType,

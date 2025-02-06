@@ -66,6 +66,7 @@ func (to *requestUpdateGateway) set(from ResourceVirtualNetworkGatewayModel) dia
 			DisplayName:                  from.DisplayName.ValueStringPointer(),
 			CapacityID:                   from.CapacityId.ValueStringPointer(),
 			InactivityMinutesBeforeSleep: from.InactivityMinutesBeforeSleep.ValueInt32Pointer(),
+			NumberOfMemberGateways:       from.NumberOfMemberGateways.ValueInt32Pointer(),
 		}
 	default:
 		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gatewayType))

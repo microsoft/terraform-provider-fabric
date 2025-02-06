@@ -57,10 +57,10 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 				Config: at.CompileConfig(
 					testDataSourceOnPremisesPersonalHeader,
 					map[string]any{
-						"id": "not-a-valid-uuid",
+						"id": "invalid uuid",
 					},
 				),
-				ExpectError: regexp.MustCompile(`invalid UUID`),
+				ExpectError: regexp.MustCompile(`invalid uuid`),
 			},
 			// Step 4: Valid read test using the entity's ID.
 			{

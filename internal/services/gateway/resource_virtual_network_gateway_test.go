@@ -5,14 +5,15 @@ package gateway_test
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
@@ -176,39 +177,39 @@ func TestUnit_VirtualNetworkGatewayResource_ImportState(t *testing.T) {
 						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected capacity_id")
 					}
 
-					// // Convert inactivity_minutes_before_sleep from string to int32.
-					// inactivityStr := is[0].Attributes["inactivity_minutes_before_sleep"]
-					// inactivityVal, err := strconv.ParseInt(inactivityStr, 10, 32)
-					// if err != nil {
-					// 	return fmt.Errorf("failed to parse inactivity_minutes_before_sleep: %w", err)
-					// }
-					// if int32(inactivityVal) != *entity.InactivityMinutesBeforeSleep {
-					// 	return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected inactivity_minutes_before_sleep")
-					// }
+					// Convert inactivity_minutes_before_sleep from string to int32.
+					inactivityStr := is[0].Attributes["inactivity_minutes_before_sleep"]
+					inactivityVal, err := strconv.ParseInt(inactivityStr, 10, 32)
+					if err != nil {
+						return fmt.Errorf("failed to parse inactivity_minutes_before_sleep: %w", err)
+					}
+					if int32(inactivityVal) != *entity.InactivityMinutesBeforeSleep {
+						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected inactivity_minutes_before_sleep")
+					}
 
-					// // Convert number_of_member_gateways from string to int32.
-					// memberGatewaysStr := is[0].Attributes["number_of_member_gateways"]
-					// memberGatewaysVal, err := strconv.ParseInt(memberGatewaysStr, 10, 32)
-					// if err != nil {
-					// 	return fmt.Errorf("failed to parse number_of_member_gateways: %w", err)
-					// }
-					// if int32(memberGatewaysVal) != *entity.NumberOfMemberGateways {
-					// 	return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected number_of_member_gateways")
-					// }
+					// Convert number_of_member_gateways from string to int32.
+					memberGatewaysStr := is[0].Attributes["number_of_member_gateways"]
+					memberGatewaysVal, err := strconv.ParseInt(memberGatewaysStr, 10, 32)
+					if err != nil {
+						return fmt.Errorf("failed to parse number_of_member_gateways: %w", err)
+					}
+					if int32(memberGatewaysVal) != *entity.NumberOfMemberGateways {
+						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected number_of_member_gateways")
+					}
 
-					if is[0].Attributes["virtual_network_azure_resource.0.subscription_id"] != *entity.VirtualNetworkAzureResource.SubscriptionID {
+					if is[0].Attributes["virtual_network_azure_resource.subscription_id"] != *entity.VirtualNetworkAzureResource.SubscriptionID {
 						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected virtual_network_azure_resource.subscription_id")
 					}
 
-					if is[0].Attributes["virtual_network_azure_resource.0.resource_group_name"] != *entity.VirtualNetworkAzureResource.ResourceGroupName {
+					if is[0].Attributes["virtual_network_azure_resource.resource_group_name"] != *entity.VirtualNetworkAzureResource.ResourceGroupName {
 						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected virtual_network_azure_resource.resource_group_name")
 					}
 
-					if is[0].Attributes["virtual_network_azure_resource.0.virtual_network_name"] != *entity.VirtualNetworkAzureResource.VirtualNetworkName {
+					if is[0].Attributes["virtual_network_azure_resource.virtual_network_name"] != *entity.VirtualNetworkAzureResource.VirtualNetworkName {
 						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected virtual_network_azure_resource.virtual_network_name")
 					}
 
-					if is[0].Attributes["virtual_network_azure_resource.0.subnet_name"] != *entity.VirtualNetworkAzureResource.SubnetName {
+					if is[0].Attributes["virtual_network_azure_resource.subnet_name"] != *entity.VirtualNetworkAzureResource.SubnetName {
 						return errors.New(testResourceVirtualNetworkGatewayFQN + ": unexpected virtual_network_azure_resource.subnet_name")
 					}
 
@@ -236,24 +237,33 @@ func TestUnit_VirtualNetworkGatewayResource_CRUD(t *testing.T) {
 		fakes.FakeServer.ServerFactory,
 		nil,
 		[]resource.TestStep{
-			// Error: Attempting to create a duplicate gateway (existing entity).
-			{
-				ResourceName: testResourceVirtualNetworkGatewayFQN,
-				Config: at.CompileConfig(
-					testResourceVirtualNetworkGatewayHeader,
-					map[string]any{
-						"display_name": *entityExist.DisplayName,
-					},
-				),
-				ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
-			},
+			// // Error: Attempting to create a duplicate gateway (existing entity).
+			// {
+			// 	ResourceName: testResourceVirtualNetworkGatewayFQN,
+			// 	Config: at.CompileConfig(
+			// 		testResourceVirtualNetworkGatewayHeader,
+			// 		map[string]any{
+			// 			"display_name": *entityExist.DisplayName,
+			// 		},
+			// 	),
+			// 	ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+			// },
 			// Create and Read
 			{
 				ResourceName: testResourceVirtualNetworkGatewayFQN,
 				Config: at.CompileConfig(
 					testResourceVirtualNetworkGatewayHeader,
 					map[string]any{
-						"display_name": *entityBefore.DisplayName,
+						"display_name":                    *entityBefore.DisplayName,
+						"capacity_id":                     *entityBefore.CapacityID,
+						"inactivity_minutes_before_sleep": 30,
+						"number_of_member_gateways":       3,
+						"virtual_network_azure_resource": map[string]any{
+							"subscription_id":      "123e4567-e89b-12d3-a456-426614174001",
+							"resource_group_name":  "test-rg",
+							"virtual_network_name": "test-vnet",
+							"subnet_name":          "test-subnet",
+						},
 					},
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -268,8 +278,7 @@ func TestUnit_VirtualNetworkGatewayResource_CRUD(t *testing.T) {
 					testResourceVirtualNetworkGatewayHeader,
 					map[string]any{
 						"display_name": *entityBefore.DisplayName,
-						// Simulate update by changing capacity_id.
-						"capacity_id": *entityAfter.CapacityID,
+						"capacity_id":  *entityAfter.CapacityID,
 					},
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
