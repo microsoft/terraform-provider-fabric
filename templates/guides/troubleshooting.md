@@ -15,7 +15,7 @@ The guide provides troubleshooting steps for common issues that you might encoun
 
 ---
 
-## Logging
+## Terraform Logging
 
 The Microsoft Fabric Terraform Provider outputs logs that you can enable by setting the `TF_LOG` environment variable to `DEBUG` or any other log level that Terraform supports.
 
@@ -23,11 +23,37 @@ By default, logs are sent to `stderr`. To send logs to a file, set the `TF_LOG_P
 
 For example, you can run the following command to enable logging at the debug level, and to output logs in monochrome format to a file named `tf.log` relative to the current working directory, while the `terraform apply` command runs:
 
-```bash
+```sh
+# sh
 TF_LOG=DEBUG TF_LOG_PATH=tf.log terraform apply -no-color
 ```
 
+```powershell
+# PowerShell
+$env:TF_LOG="DEBUG"
+$env:TF_LOG_PATH="tf.log"
+terraform apply -no-color
+```
+
 For more information about Terraform logging, see [Debugging Terraform](https://developer.hashicorp.com/terraform/internals/debugging).
+
+## Fabric API logging
+
+Low-level logging is possible which will handle API calls. This type of logging can be very useful for debugging issues related to API interactions. By setting the logging level to `TRACE`, you can capture detailed information about the API calls made by Terraform. This includes request and response details, which can help in diagnosing problems or understanding the behavior of the API.
+
+To enable low-level logging for API calls, you need to setup environment variables `TF_LOG` and `FABRIC_SDK_GO_LOGGING` with `TRACE` value.
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE terraform apply -no-color
+```
+
+```powershell
+# PowerShell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+terraform apply -no-color
+```
 
 ## FAQ
 
