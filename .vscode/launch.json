@@ -9,7 +9,7 @@
       "program": "${workspaceFolder}",
       "env": {
         "FABRIC_PREVIEW": "true",
-        "FABRIC_SDK_GO_LOGGING": "trace",
+        "FABRIC_SDK_GO_LOGGING": "trace"
       },
       "args": [
         "-debug"
