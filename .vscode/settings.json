@@ -62,6 +62,7 @@
   "go.testEnvVars": {
     "TF_LOG": "ERROR",
     "TF_ACC": "1",
+    "FABRIC_PREVIEW": "true"
   },
   "go.formatTool": "goimports",
   "go.formatFlags": [

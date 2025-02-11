@@ -312,7 +312,7 @@ func TestAcc_NotebookResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_NotebookDefinitionIPYNBResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -366,7 +366,7 @@ func TestAcc_NotebookDefinitionIPYNBResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_NotebookDefinitionPYResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["Workspace"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()

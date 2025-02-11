@@ -47,5 +47,5 @@ const (
 	WarningItemDefinitionUpdateHeader  = "Fabric Item definition update"
 	WarningItemDefinitionUpdateDetails = "%s definition update operation will overwrite the existing definition on the Fabric side."
 	WarningPreviewModeHeader           = "'%s' preview mode"
-	WarningPreviewModeDetails          = "The behavior of '%s' may change in future releases without notice."
+	WarningPreviewModeDetails          = "The behavior of '%s' may change in future releases without notice or backward compatibility."
 )

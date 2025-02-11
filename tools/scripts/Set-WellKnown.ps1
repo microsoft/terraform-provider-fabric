@@ -525,7 +525,7 @@ Write-Log -Message "Fabric Capacity - Name: $($Env:FABRIC_TESTACC_WELLKNOWN_FABR
 $wellKnown['Capacity'] = @{
   id          = $capacity.id
   displayName = $capacity.displayName
-  definition  = $capacity.sku
+  sku         = $capacity.sku
 }
 
 $itemNaming = @{

@@ -3,7 +3,7 @@ schema_version = 1
 project {
   license          = "MPL-2.0"
   copyright_holder = "Microsoft Corporation"
-  copyright_year   = 2024
+  copyright_year   = 2025
 
   header_ignore = [
     ".changes/**",

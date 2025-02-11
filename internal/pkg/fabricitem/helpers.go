@@ -41,7 +41,7 @@ func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Di
 
 	if itemIsPreview && providerPreviewMode {
 		diags.AddWarning(
-			common.WarningPreviewModeHeader,
+			fmt.Sprintf(common.WarningPreviewModeHeader, name),
 			fmt.Sprintf(common.WarningPreviewModeDetails, name),
 		)
 

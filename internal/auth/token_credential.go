@@ -5,6 +5,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -27,5 +28,9 @@ func (c *TokenCredential) GetToken(_ context.Context, _ policy.TokenRequestOptio
 
 // NewTokenCredential creates a new instance of TokenCredential.
 func NewTokenCredential(token string) (*TokenCredential, error) {
+	if token == "" {
+		return nil, errors.New("token cannot be empty")
+	}
+
 	return &TokenCredential{token: token}, nil
 }

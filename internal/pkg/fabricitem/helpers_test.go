@@ -69,7 +69,7 @@ func TestUnit_IsPreviewMode_ItemIsPreview_ProviderPreviewModeEnabled(t *testing.
 
 	assert.Len(t, diags, 1)
 	assert.Equal(t, diag.SeverityWarning, diags[0].Severity())
-	assert.Equal(t, common.WarningPreviewModeHeader, diags[0].Summary())
+	assert.Equal(t, fmt.Sprintf(common.WarningPreviewModeHeader, name), diags[0].Summary())
 	assert.Equal(t, fmt.Sprintf(common.WarningPreviewModeDetails, name), diags[0].Detail())
 }
 

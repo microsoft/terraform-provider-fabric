@@ -22,7 +22,7 @@ concurrency:
 
 env:
   FABRIC_TESTACC_SKIP_NO_SPN: true
-  FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN_NEW }}
+  FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
   FABRIC_TIMEOUT: 20m
 
 permissions:
@@ -216,7 +216,7 @@ jobs:
           task govulncheck || (echo "::warning::govulncheck found issues" && exit 0)
 
       - name: ✔️ Run Go linters
-        uses: golangci/golangci-lint-action@ec5d18412c0aeab7936cb16880d708ba2a64e1ae # v6.2.0
+        uses: golangci/golangci-lint-action@051d91933864810ecd5e2ea2cfd98f6a5bca5347 # v6.3.2
         with:
           version: latest
           only-new-issues: true
