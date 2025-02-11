@@ -47,7 +47,7 @@ func (to *baseResourceGatewayModel) set(ctx context.Context, from fabcore.Gatewa
 		virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
 		if gateway.VirtualNetworkAzureResource != nil {
 			virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
-			virtualNetworkAzureResourceModel.set(gateway.VirtualNetworkAzureResource)
+			virtualNetworkAzureResourceModel.set(*gateway.VirtualNetworkAzureResource)
 
 			if diags := virtualNetworkAzureResource.Set(ctx, virtualNetworkAzureResourceModel); diags.HasError() {
 				return diags

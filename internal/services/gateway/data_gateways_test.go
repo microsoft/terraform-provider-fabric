@@ -4,7 +4,6 @@
 package gateway_test
 
 import (
-	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -20,39 +19,39 @@ var (
 )
 
 func TestUnit_GatewaysDataSource(t *testing.T) {
-	// virtualNetworkGateway := fakes.NewRandomVirtualNetworkGateway()
-	// onPremisesGateway := fakes.NewRandomOnPremisesGateway()
-	// onPremisesGatewayPersonalGateway := fakes.NewRandomOnPremisesGatewayPersonal()
+	virtualNetworkGateway := fakes.NewRandomVirtualNetworkGateway()
+	onPremisesGateway := fakes.NewRandomOnPremisesGateway()
+	onPremisesGatewayPersonalGateway := fakes.NewRandomOnPremisesGatewayPersonal()
 
-	// fakes.FakeServer.Upsert(fakes.NewRandomGateway())
-	// fakes.FakeServer.Upsert(virtualNetworkGateway)
-	// fakes.FakeServer.Upsert(onPremisesGateway)
-	// fakes.FakeServer.Upsert(onPremisesGatewayPersonalGateway)
-	// fakes.FakeServer.Upsert(fakes.NewRandomGateway())
+	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
+	fakes.FakeServer.Upsert(virtualNetworkGateway)
+	fakes.FakeServer.Upsert(onPremisesGateway)
+	fakes.FakeServer.Upsert(onPremisesGatewayPersonalGateway)
+	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemsHeader,
-				map[string]any{
-					"unexpected_attr": "test",
-				},
-			),
-			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
-		},
-		// read
 		// {
 		// 	Config: at.CompileConfig(
 		// 		testDataSourceItemsHeader,
-		// 		map[string]any{},
+		// 		map[string]any{
+		// 			"unexpected_attr": "test",
+		// 		},
 		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-		// resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.2.id"),
-		// resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.3.id"),
-		// ),
+		// 	ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		// },
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.2.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.3.id"),
+			),
+		},
 	}))
 }
 

@@ -17,7 +17,7 @@ type virtualNetworkAzureResourceModel struct {
 	VirtualNetworkName types.String     `tfsdk:"virtual_network_name"` // Rename to just 'name' or 'display_name'?
 }
 
-func (to *virtualNetworkAzureResourceModel) set(from *fabcore.VirtualNetworkAzureResource) {
+func (to *virtualNetworkAzureResourceModel) set(from fabcore.VirtualNetworkAzureResource) {
 	to.ResourceGroupName = types.StringPointerValue(from.ResourceGroupName)
 	to.SubnetName = types.StringPointerValue(from.SubnetName)
 	to.SubscriptionID = customtypes.NewUUIDPointerValue(from.SubscriptionID)
