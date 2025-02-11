@@ -23,6 +23,9 @@ vars:
 
 env:
   FABRIC_PREVIEW: true
+  TF_CLI_ARGS_plan: "-parallelism=3"
+  TF_CLI_ARGS_apply: "-parallelism=3"
+  TF_CLI_ARGS_destroy: "-parallelism=3"
 
 tasks:
   # ----------------------
