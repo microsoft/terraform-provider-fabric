@@ -45,12 +45,12 @@ func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequ
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: "The list of " + ItemsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseGatewayModel](ctx),
+				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDataSourceGatewayModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
 							MarkdownDescription: "The " + ItemName + " ID.",
-							Computed:            true,
+							Required:            true,
 							CustomType:          customtypes.UUIDType{},
 						},
 						"display_name": schema.StringAttribute{
@@ -97,6 +97,37 @@ func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequ
 									Computed:            true,
 								},
 							},
+						},
+						"allow_cloud_connection_refresh": schema.BoolAttribute{
+							MarkdownDescription: "Allow cloud connection refresh.",
+							Computed:            true,
+						},
+						"allow_custom_connectors": schema.BoolAttribute{
+							MarkdownDescription: "Allow custom connectors.",
+							Computed:            true,
+						},
+						"load_balancing_setting": schema.StringAttribute{
+							MarkdownDescription: "The load balancing setting. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleLoadBalancingSettingValues(), true, true),
+							Computed:            true,
+						},
+						"public_key": schema.SingleNestedAttribute{
+							MarkdownDescription: "The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections.",
+							Computed:            true,
+							CustomType:          supertypes.NewSingleNestedObjectTypeOf[publicKeyModel](ctx),
+							Attributes: map[string]schema.Attribute{
+								"exponent": schema.StringAttribute{
+									MarkdownDescription: "The exponent.",
+									Computed:            true,
+								},
+								"modulus": schema.StringAttribute{
+									MarkdownDescription: "The modulus.",
+									Computed:            true,
+								},
+							},
+						},
+						"version": schema.StringAttribute{
+							MarkdownDescription: "The " + ItemName + " version.",
+							Computed:            true,
 						},
 					},
 				},

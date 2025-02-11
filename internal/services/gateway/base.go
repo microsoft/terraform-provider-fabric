@@ -8,12 +8,17 @@ import (
 )
 
 const (
-	ItemName           = "Gateway"
-	ItemTFName         = "gateway"
-	ItemsName          = "Gateways"
-	ItemsTFName        = "gateways"
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways"
+	ItemName                     = "Gateway"
+	ItemTFName                   = "gateway"
+	ItemsName                    = "Gateways"
+	ItemsTFName                  = "gateways"
+	ItemDocsSPNSupport           = common.DocsSPNSupported
+	ItemDocsURL                  = "https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways"
+	GatewayRoleAssignmentName    = "Gateway Role Assignment"
+	GatewayRoleAssignmentTFName  = "gateway_role_assignment"
+	GatewayRoleAssignmentsName   = "Gateway Role Assignments"
+	GatewayRoleAssignmentsTFName = "gateway_role_assignments"
+	ItemPreview                  = true
 )
 
 var (

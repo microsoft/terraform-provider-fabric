@@ -8,11 +8,9 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -23,10 +21,8 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var (
-	_ datasource.DataSourceWithConfigValidators = (*dataSourceGateway)(nil)
-	_ datasource.DataSourceWithConfigure        = (*dataSourceGateway)(nil)
-)
+// _ datasource.DataSourceWithConfigValidators = (*dataSourceGateway)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceGateway)(nil)
 
 type dataSourceGateway struct {
 	pConfigData *pconfig.ProviderData
@@ -49,13 +45,11 @@ func (d *dataSourceGateway) Schema(ctx context.Context, _ datasource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The " + ItemName + " ID.",
-				Optional:            true,
-				Computed:            true,
+				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"display_name": schema.StringAttribute{
 				MarkdownDescription: "The " + ItemName + " display name.",
-				Optional:            true,
 				Computed:            true,
 			},
 			"type": schema.StringAttribute{
@@ -135,18 +129,18 @@ func (d *dataSourceGateway) Schema(ctx context.Context, _ datasource.SchemaReque
 	}
 }
 
-func (d *dataSourceGateway) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
-	return []datasource.ConfigValidator{
-		datasourcevalidator.Conflicting(
-			path.MatchRoot("id"),
-			path.MatchRoot("display_name"),
-		),
-		datasourcevalidator.ExactlyOneOf(
-			path.MatchRoot("id"),
-			path.MatchRoot("display_name"),
-		),
-	}
-}
+// func (d *dataSourceGateway) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
+// 	return []datasource.ConfigValidator{
+// 		datasourcevalidator.Conflicting(
+// 			path.MatchRoot("id"),
+// 			path.MatchRoot("display_name"),
+// 		),
+// 		datasourcevalidator.ExactlyOneOf(
+// 			path.MatchRoot("id"),
+// 			path.MatchRoot("display_name"),
+// 		),
+// 	}
+// }
 
 func (d *dataSourceGateway) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {

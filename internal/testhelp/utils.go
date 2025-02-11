@@ -27,10 +27,23 @@ func RandomName(length ...int) string {
 	return acctest.RandStringFromCharSet(size, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 }
 
+// RandomInt returns a random integer between minInt (inclusive) and maxInt (exclusive)
+func RandomInt(minInt int, maxInt int) int {
+	return acctest.RandIntRange(minInt, maxInt)
+}
+
+func RandomBool() bool {
+	return acctest.RandIntRange(0, 2) == 1
+}
+
 func RandomUUID() string {
 	result, _ := uuid.GenerateUUID()
 
 	return result
+}
+
+func RandomElement[T any](elements []T) T {
+	return elements[RandomInt(0, len(elements))]
 }
 
 func RandomURI() string {

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package workspace
+package gateway
 
 import (
 	"context"
@@ -21,36 +21,36 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceWorkspaceRoleAssignments)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceGatewayRoleAssignments)(nil)
 
-type dataSourceWorkspaceRoleAssignments struct {
+type dataSourceGatewayRoleAssignments struct {
 	pConfigData *pconfig.ProviderData
-	client      *fabcore.WorkspacesClient
+	client      *fabcore.GatewaysClient
 }
 
-func NewDataSourceWorkspaceRoleAssignments() datasource.DataSource {
-	return &dataSourceWorkspaceRoleAssignments{}
+func NewDataSourceGatewayRoleAssignments() datasource.DataSource {
+	return &dataSourceGatewayRoleAssignments{}
 }
 
-func (d *dataSourceWorkspaceRoleAssignments) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + WorkspaceRoleAssignmentsTFName
+func (d *dataSourceGatewayRoleAssignments) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + GatewayRoleAssignmentsTFName
 }
 
-func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List Fabric " + WorkspaceRoleAssignmentsName + ".\n\n" +
-			"Use this data source to list [" + WorkspaceRoleAssignmentsName + "](" + WorkspaceRoleAssignmentDocsURL + ").\n\n" +
+		MarkdownDescription: "List Fabric " + GatewayRoleAssignmentsName + ".\n\n" +
+			"Use this data source to list [" + GatewayRoleAssignmentsName + "].\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
-			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace ID.",
+			"gateway_id": schema.StringAttribute{
+				MarkdownDescription: "The Gateway ID.",
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of " + WorkspaceRoleAssignmentsName + ".",
+				MarkdownDescription: "The list of " + GatewayRoleAssignmentsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[workspaceRoleAssignmentModel](ctx),
+				CustomType:          supertypes.NewListNestedObjectTypeOf[gatewayRoleAssignmentModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
@@ -59,7 +59,7 @@ func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datas
 							CustomType:          customtypes.UUIDType{},
 						},
 						"role": schema.StringAttribute{
-							MarkdownDescription: "The workspace role of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleWorkspaceRoleValues(), true, true) + ".",
+							MarkdownDescription: "The gateway role of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayRoleValues(), true, true) + ".",
 							Computed:            true,
 						},
 						"display_name": schema.StringAttribute{
@@ -103,7 +103,7 @@ func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datas
 	}
 }
 
-func (d *dataSourceWorkspaceRoleAssignments) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *dataSourceGatewayRoleAssignments) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -119,10 +119,10 @@ func (d *dataSourceWorkspaceRoleAssignments) Configure(_ context.Context, req da
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 
-func (d *dataSourceWorkspaceRoleAssignments) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *dataSourceGatewayRoleAssignments) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -130,7 +130,7 @@ func (d *dataSourceWorkspaceRoleAssignments) Read(ctx context.Context, req datas
 		"config": req.Config,
 	})
 
-	var data dataSourceWorkspaceRoleAssignmentsModel
+	var data dataSourceGatewayRoleAssignmentsModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -159,10 +159,10 @@ func (d *dataSourceWorkspaceRoleAssignments) Read(ctx context.Context, req datas
 	}
 }
 
-func (d *dataSourceWorkspaceRoleAssignments) list(ctx context.Context, model *dataSourceWorkspaceRoleAssignmentsModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+WorkspaceRoleAssignmentsName)
+func (d *dataSourceGatewayRoleAssignments) list(ctx context.Context, model *dataSourceGatewayRoleAssignmentsModel) diag.Diagnostics {
+	tflog.Trace(ctx, "getting "+GatewayRoleAssignmentsName)
 
-	respList, err := d.client.ListWorkspaceRoleAssignments(ctx, model.WorkspaceID.ValueString(), nil)
+	respList, err := d.client.ListGatewayRoleAssignments(ctx, model.GatewayID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}

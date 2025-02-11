@@ -15,15 +15,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
-	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
+	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,6 +70,7 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 			"display_name": schema.StringAttribute{
 				MarkdownDescription: "The " + ItemName + " display name.",
 				Optional:            true,
+				Computed:            true,
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(200),
 					superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
@@ -85,12 +86,13 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGatewayTypeValues(), false)...),
+					stringvalidator.OneOf(string(fabcore.GatewayTypeVirtualNetwork)),
 				},
 			},
 			"capacity_id": schema.StringAttribute{
 				MarkdownDescription: "The " + ItemName + " capacity ID.",
 				Optional:            true,
+				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -104,7 +106,8 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 			},
 			"inactivity_minutes_before_sleep": schema.Int32Attribute{
 				MarkdownDescription: "The " + ItemName + " inactivity minutes before sleep.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Int32{
 					int32validator.OneOf(PossibleInactivityMinutesBeforeSleepValues...),
 					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
@@ -115,7 +118,8 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 			},
 			"number_of_member_gateways": schema.Int32Attribute{
 				MarkdownDescription: "The " + ItemName + " number of member gateways.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Int32{
 					int32validator.Between(MinNumberOfMemberGatewaysValues, MaxNumberOfMemberGatewaysValues),
 					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
@@ -124,38 +128,37 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						}),
 				},
 			},
-			"virtual_network_azure_resource": schema.SetNestedAttribute{
+			"virtual_network_azure_resource": schema.SingleNestedAttribute{
 				MarkdownDescription: "The " + ItemName + " virtual network Azure resource.",
 				Optional:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[virtualNetworkAzureResourceModel](ctx),
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.RequiresReplace(),
+				Computed:            true,
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[virtualNetworkAzureResourceModel](ctx),
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
 				},
-				Validators: []validator.Set{
-					supersetvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
+				Validators: []validator.Object{
+					superobjectvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
 						}),
 				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"virtual_network_name": schema.StringAttribute{
-							MarkdownDescription: "The virtual network name.",
-							Required:            true,
-						},
-						"subnet_name": schema.StringAttribute{
-							MarkdownDescription: "The subnet name.",
-							Required:            true,
-						},
-						"resource_group_name": schema.StringAttribute{
-							MarkdownDescription: "The resource group name.",
-							Required:            true,
-						},
-						"subscription_id": schema.StringAttribute{
-							MarkdownDescription: "The subscription ID.",
-							Required:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
+				Attributes: map[string]schema.Attribute{
+					"virtual_network_name": schema.StringAttribute{
+						MarkdownDescription: "The virtual network name.",
+						Required:            true,
+					},
+					"subnet_name": schema.StringAttribute{
+						MarkdownDescription: "The subnet name.",
+						Required:            true,
+					},
+					"resource_group_name": schema.StringAttribute{
+						MarkdownDescription: "The resource group name.",
+						Required:            true,
+					},
+					"subscription_id": schema.StringAttribute{
+						MarkdownDescription: "The subscription ID.",
+						Required:            true,
+						CustomType:          customtypes.UUIDType{},
 					},
 				},
 			},
@@ -354,29 +357,29 @@ func (r *resourceGateway) Delete(ctx context.Context, req resource.DeleteRequest
 	})
 }
 
-// func (r *resourceGateway) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-// 	tflog.Debug(ctx, "IMPORT", map[string]any{
-// 		"action": "start",
-// 	})
-// 	tflog.Trace(ctx, "IMPORT", map[string]any{
-// 		"id": req.ID,
-// 	})
+func (r *resourceGateway) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "IMPORT", map[string]any{
+		"id": req.ID,
+	})
 
-// 	_, diags := customtypes.NewUUIDValueMust(req.ID)
-// 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-// 		return
-// 	}
+	_, diags := customtypes.NewUUIDValueMust(req.ID)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
-// 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 
-// 	tflog.Debug(ctx, "IMPORT", map[string]any{
-// 		"action": "end",
-// 	})
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "end",
+	})
 
-// 	if resp.Diagnostics.HasError() {
-// 		return
-// 	}
-// }
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
 
 func (r *resourceGateway) get(ctx context.Context, model *resourceGatewayModel) diag.Diagnostics {
 	tflog.Trace(ctx, "getting "+ItemName)
