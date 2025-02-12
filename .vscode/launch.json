@@ -8,7 +8,8 @@
       "mode": "debug",
       "program": "${workspaceFolder}",
       "env": {
-        "FABRIC_PREVIEW": "true"
+        "FABRIC_PREVIEW": "true",
+        "FABRIC_SDK_GO_LOGGING": "trace"
       },
       "args": [
         "-debug"
