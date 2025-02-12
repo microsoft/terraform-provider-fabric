@@ -229,10 +229,11 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: ✔️ Run tfproviderlintx
-        run: |
-          task install:tfproviderlintx
-          task tfproviderlintx
+      # temporarily disabled due to incompatibliity with Go 1.24
+      # - name: ✔️ Run tfproviderlintx
+      #   run: |
+      #     task install:tfproviderlintx
+      #     task tfproviderlintx
 
       - name: ✔️ Run Terraform linters
         run: |
