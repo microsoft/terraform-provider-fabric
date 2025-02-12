@@ -1,5 +1,5 @@
 {
-  "name": "CY24SU06",
+  "name": "CY24SU10",
   "dataColors": [
     "#118DFF",
     "#12239E",
@@ -326,6 +326,19 @@
           {
             "maxTiles": 3
           }
+        ],
+        "overflow": [
+          {
+            "type": 0
+          }
+        ],
+        "image": [
+          {
+            "fixedSize": false
+          },
+          {
+            "imageAreaSize": 50
+          }
         ]
       }
     },
@@ -554,9 +567,30 @@
             "responsive": true
           }
         ],
+        "smallMultiplesLayout": [
+          {
+            "backgroundTransparency": 0,
+            "gridLineType": "inner"
+          }
+        ],
         "valueAxis": [
           {
             "show": true
+          }
+        ]
+      }
+    },
+    "hundredPercentStackedAreaChart": {
+      "*": {
+        "general": [
+          {
+            "responsive": true
+          }
+        ],
+        "smallMultiplesLayout": [
+          {
+            "backgroundTransparency": 0,
+            "gridLineType": "inner"
           }
         ]
       }

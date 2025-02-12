@@ -91,15 +91,17 @@ func Base64Decode(content *string) error {
 	return nil
 }
 
-func Base64Encode(content *string) error {
-	if content == nil {
-		return nil
+func Base64Encode[T string | []byte](content T) (string, error) {
+	var payload string
+
+	switch v := any(content).(type) {
+	case string:
+		payload = byteToBase64([]byte(v))
+	case []byte:
+		payload = byteToBase64(v)
 	}
 
-	payload := byteToBase64([]byte(*content))
-	*content = strings.TrimSpace(payload)
-
-	return nil
+	return payload, nil
 }
 
 func Base64GzipEncode(content *string) error {
