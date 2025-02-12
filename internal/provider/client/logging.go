@@ -17,7 +17,7 @@ func NewFabricSDKLoggerSubsystem(ctx context.Context) (context.Context, hclog.Le
 	targetLevel := hclog.LevelFromString(os.Getenv("FABRIC_SDK_GO_LOGGING"))
 
 	// If the level is not set, or is set to "off", disable logging
-	if targetLevel == hclog.NoLevel || targetLevel == hclog.Off {
+	if targetLevel == hclog.NoLevel {
 		targetLevel = hclog.Off
 	} else {
 		// Enable azcore logging
