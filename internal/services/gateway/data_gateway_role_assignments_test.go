@@ -50,31 +50,31 @@ func TestUnit_GatewayRoleAssignmentsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignments, "gateway_id", gatewayID),
 				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.role", (*string)(entity.Role)),
-				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.display_name", entity.Principal.DisplayName),
+				// resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.display_name", entity.Principal.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.type", (*string)(entity.Principal.Type)),
 			),
 		},
 	}))
 }
 
-// func TestAcc_GatewayRoleAssignmentsDataSource(t *testing.T) {
-// 	gateway := testhelp.WellKnown()["GatewayDS"].(map[string]any)
-// 	gatewayID := gateway["id"].(string)
+func TestAcc_GatewayRoleAssignmentsDataSource(t *testing.T) {
+	gateway := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
+	gatewayID := gateway["id"].(string)
 
-// 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-// 		// read
-// 		{
-// 			Config: at.CompileConfig(
-// 				testDataSourceGatewayRoleAssignmentsHeader,
-// 				map[string]any{
-// 					"gateway_id": gatewayID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignments, "gateway_id", gatewayID),
-// 				resource.TestCheckResourceAttrSet(testDataSourceGatewayRoleAssignments, "values.0.id"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceGatewayRoleAssignmentsHeader,
+				map[string]any{
+					"gateway_id": gatewayID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignments, "gateway_id", gatewayID),
+				resource.TestCheckResourceAttrSet(testDataSourceGatewayRoleAssignments, "values.0.id"),
+			),
+		},
+	},
+	))
+}

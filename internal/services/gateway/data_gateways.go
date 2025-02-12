@@ -50,11 +50,13 @@ func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequ
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
 							MarkdownDescription: "The " + ItemName + " ID.",
-							Required:            true,
+							Optional:            true,
+							Computed:            true,
 							CustomType:          customtypes.UUIDType{},
 						},
 						"display_name": schema.StringAttribute{
 							MarkdownDescription: "The " + ItemName + " display name.",
+							Optional:            true,
 							Computed:            true,
 						},
 						"type": schema.StringAttribute{

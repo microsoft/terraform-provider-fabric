@@ -39,8 +39,9 @@ Optional:
 
 ### Nested Schema for `values`
 
-Required:
+Optional:
 
+- `display_name` (String) The Gateway display name.
 - `id` (String) The Gateway ID.
 
 Read-Only:
@@ -48,7 +49,6 @@ Read-Only:
 - `allow_cloud_connection_refresh` (Boolean) Allow cloud connection refresh.
 - `allow_custom_connectors` (Boolean) Allow custom connectors.
 - `capacity_id` (String) The Gateway capacity ID.
-- `display_name` (String) The Gateway display name.
 - `inactivity_minutes_before_sleep` (Number) The Gateway inactivity minutes before sleep. Possible values: `120`, `1440`, `150`, `240`, `30`, `360`, `480`, `60`, `720`, `90`
 - `load_balancing_setting` (String) The load balancing setting. Possible values: `DistributeEvenly`, `Failover`
 - `number_of_member_gateways` (Number) The number of member gateways. Possible values: 1 to 7.

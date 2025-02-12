@@ -40,7 +40,7 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{},
 			),
-			ExpectError: regexp.MustCompile(`Missing required argument`),
+			ExpectError: regexp.MustCompile(`Missing Attribute Configuration`),
 		},
 		// error - id - invalid UUID
 		{
@@ -63,7 +63,7 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
-		// read by id
+		// read by id - virtual network
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -84,6 +84,28 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.virtual_network_name", virtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName),
 			),
 		},
+		// read by name - virtual network
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": *virtualNetworkGateway.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", virtualNetworkGateway.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(virtualNetworkGateway.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", virtualNetworkGateway.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "capacity_id", virtualNetworkGateway.CapacityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(*virtualNetworkGateway.InactivityMinutesBeforeSleep))),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(*virtualNetworkGateway.NumberOfMemberGateways))),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.resource_group_name", virtualNetworkGateway.VirtualNetworkAzureResource.ResourceGroupName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subnet_name", virtualNetworkGateway.VirtualNetworkAzureResource.SubnetName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subscription_id", virtualNetworkGateway.VirtualNetworkAzureResource.SubscriptionID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.virtual_network_name", virtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName),
+			),
+		},
+		// read by id - on premises
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -104,6 +126,28 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "public_key.modulus", onPremisesGateway.PublicKey.Modulus),
 			),
 		},
+		// read by name - on premises
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": *onPremisesGateway.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", onPremisesGateway.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(onPremisesGateway.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", onPremisesGateway.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "allow_cloud_connection_refresh", strconv.FormatBool(*onPremisesGateway.AllowCloudConnectionRefresh)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "allow_custom_connectors", strconv.FormatBool(*onPremisesGateway.AllowCustomConnectors)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(*onPremisesGateway.NumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "load_balancing_setting", string(*onPremisesGateway.LoadBalancingSetting)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "version", onPremisesGateway.Version),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "public_key.exponent", onPremisesGateway.PublicKey.Exponent),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "public_key.modulus", onPremisesGateway.PublicKey.Modulus),
+			),
+		},
+		// read by id - on premises personal
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -119,26 +163,6 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "public_key.modulus", onPremisesGatewayPersonalGateway.PublicKey.Modulus),
 			),
 		},
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"id": *virtualNetworkGateway.ID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", virtualNetworkGateway.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(virtualNetworkGateway.Type)),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", virtualNetworkGateway.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "capacity_id", virtualNetworkGateway.CapacityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(*virtualNetworkGateway.InactivityMinutesBeforeSleep))),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(*virtualNetworkGateway.NumberOfMemberGateways))),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.resource_group_name", virtualNetworkGateway.VirtualNetworkAzureResource.ResourceGroupName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subnet_name", virtualNetworkGateway.VirtualNetworkAzureResource.SubnetName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subscription_id", virtualNetworkGateway.VirtualNetworkAzureResource.SubscriptionID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.virtual_network_name", virtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName),
-			),
-		},
 		// read by id - not found
 		{
 			Config: at.CompileConfig(
@@ -149,38 +173,96 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
+		// read by name - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
 	}))
 }
 
-// func TestAcc_GatewayDataSource(t *testing.T) {
-// 	entity := testhelp.WellKnown()["GatewayParent"].(map[string]any)
-// 	entityID := entity["id"].(string)
-// 	entityDisplayName := entity["displayName"].(string)
-// 	entityDescription := entity["description"].(string)
+func TestAcc_GatewayDataSource(t *testing.T) {
+	entityVirtualNetwork := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
+	entityVirtualNetworkID := entityVirtualNetwork["id"].(string)
+	entityVirtualNetworkDisplayName := entityVirtualNetwork["displayName"].(string)
+	entityVirtualNetworkType := entityVirtualNetwork["type"].(string)
 
-// 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-// 		{
-// 			Config: at.CompileConfig(
-// 				testDataSourceItemHeader,
-// 				map[string]any{
-// 					"id": entityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-// 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-// 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-// 			),
-// 		},
-// 		// read by id - not found
-// 		{
-// 			Config: at.CompileConfig(
-// 				testDataSourceItemHeader,
-// 				map[string]any{
-// 					"id": testhelp.RandomUUID(),
-// 				},
-// 			),
-// 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-// 		},
-// 	}))
-// }
+	entityOnPremises := testhelp.WellKnown()["GatewayOnPremises"].(map[string]any)
+	entityOnPremisesID := entityOnPremises["id"].(string)
+	entityOnPremisesDisplayName := entityOnPremises["displayName"].(string)
+	entityOnPremisesType := entityOnPremises["type"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id - virtual network
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": entityVirtualNetworkID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityVirtualNetworkID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityVirtualNetworkDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityVirtualNetworkType),
+			),
+		},
+		// read by name- virtual network
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": entityVirtualNetworkDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityVirtualNetworkID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityVirtualNetworkDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityVirtualNetworkType),
+			),
+		},
+		// read by id - on premises
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": entityOnPremisesID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityOnPremisesID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityOnPremisesDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityOnPremisesType),
+			),
+		},
+		// read by name - on premises
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": entityOnPremisesDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityOnPremisesID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityOnPremisesDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityOnPremisesType),
+			),
+		},
+	}))
+}

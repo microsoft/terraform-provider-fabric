@@ -426,238 +426,125 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 	}))
 }
 
-// func TestAcc_GatewayResource_CRUD(t *testing.T) {
-// 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-// 	capacityID := capacity["id"].(string)
+func TestAcc_GatewayResource_CRUD(t *testing.T) {
+	entityType := string(fabcore.GatewayTypeVirtualNetwork)
+	entityCreateDisplayName := testhelp.RandomName()
+	entityCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
+	entityCreateNumberOfMemberGateways := testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues))
 
-// 	entityCreateDisplayName := testhelp.RandomName()
-// 	entityUpdateDisplayName := testhelp.RandomName()
-// 	entityUpdateDescription := testhelp.RandomName()
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityCreateDisplayName,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 			),
-// 		},
-// 		// Update - unassign capacity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
-// 			),
-// 		},
-// 		// Update - assign capacity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 			),
-// 		},
-// 		// Update - assign identity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 					"identity": map[string]any{
-// 						"type": "SystemAssigned",
-// 					},
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-// 			),
-// 		},
-// 		// Update - unassign identity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "identity"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	virtualNetworkAzureResource01 := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
+	vNET01VirtualNetworkName := virtualNetworkAzureResource01["name"].(string)
+	vNET01ResourceGroupName := virtualNetworkAzureResource01["resourceGroupName"].(string)
+	vNET01SubnetName := virtualNetworkAzureResource01["subnetName"].(string)
+	vNET01SubscriptionID := virtualNetworkAzureResource01["subscriptionId"].(string)
 
-// func TestAcc_GatewayResource_Identity_CRUD(t *testing.T) {
-// 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-// 	capacityID := capacity["id"].(string)
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
+	entityUpdateNumberOfMemberGateways := testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues))
 
-// 	entityCreateDisplayName := testhelp.RandomName()
-// 	entityUpdateDisplayName := testhelp.RandomName()
-// 	entityUpdateDescription := testhelp.RandomName()
+	virtualNetworkAzureResource02 := testhelp.WellKnown()["VirtualNetwork02"].(map[string]any)
+	vNET02VirtualNetworkName := virtualNetworkAzureResource02["name"].(string)
+	vNET02ResourceGroupName := virtualNetworkAzureResource02["resourceGroupName"].(string)
+	vNET02SubnetName := virtualNetworkAzureResource02["subnetName"].(string)
+	vNET02SubscriptionID := virtualNetworkAzureResource02["subscriptionId"].(string)
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityCreateDisplayName,
-// 					"capacity_id":  capacityID,
-// 					"identity": map[string]any{
-// 						"type": "SystemAssigned",
-// 					},
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 			),
-// 		},
-// 		// Update - unassign capacity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
-// 			),
-// 		},
-// 		// Update - assign capacity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
-// 			),
-// 		},
-// 		// Update - unassign identity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "identity"),
-// 			),
-// 		},
-// 		// Update - assign identity
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.CompileConfig(
-// 				testResourceItemHeader,
-// 				map[string]any{
-// 					"display_name": entityUpdateDisplayName,
-// 					"description":  entityUpdateDescription,
-// 					"capacity_id":  capacityID,
-// 					"identity": map[string]any{
-// 						"type": "SystemAssigned",
-// 					},
-// 				},
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityCreateDisplayName,
+					"inactivity_minutes_before_sleep": entityCreateInactivityMinutesBeforeSleep,
+					"number_of_member_gateways":       entityCreateNumberOfMemberGateways,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET01VirtualNetworkName,
+						"resource_group_name":  vNET01ResourceGroupName,
+						"subnet_name":          vNET01SubnetName,
+						"subscription_id":      vNET01SubscriptionID,
+					},
+					"capacity_id": capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityCreateInactivityMinutesBeforeSleep))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityCreateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET01ResourceGroupName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", vNET01SubscriptionID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+			),
+		},
+		// Update and Read - no replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityUpdateDisplayName,
+					"inactivity_minutes_before_sleep": entityUpdateInactivityMinutesBeforeSleep,
+					"number_of_member_gateways":       entityUpdateNumberOfMemberGateways,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET01VirtualNetworkName,
+						"resource_group_name":  vNET01ResourceGroupName,
+						"subnet_name":          vNET01SubnetName,
+						"subscription_id":      vNET01SubscriptionID,
+					},
+					"capacity_id": capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityUpdateInactivityMinutesBeforeSleep))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityUpdateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET01ResourceGroupName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", vNET01SubscriptionID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+			),
+		},
+		// Update and Read - with replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityUpdateDisplayName,
+					"inactivity_minutes_before_sleep": entityUpdateInactivityMinutesBeforeSleep,
+					"number_of_member_gateways":       entityUpdateNumberOfMemberGateways,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET02VirtualNetworkName,
+						"resource_group_name":  vNET02ResourceGroupName,
+						"subnet_name":          vNET02SubnetName,
+						"subscription_id":      vNET02SubscriptionID,
+					},
+					"capacity_id": capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityUpdateInactivityMinutesBeforeSleep))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityUpdateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET02VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET02ResourceGroupName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET02SubnetName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", vNET02SubscriptionID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+			),
+		},
+	},
+	))
+}

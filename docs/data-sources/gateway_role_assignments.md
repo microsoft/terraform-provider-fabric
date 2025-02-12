@@ -45,19 +45,6 @@ Optional:
 
 Read-Only:
 
-- `details` (Attributes) The principal details. (see [below for nested schema](#nestedatt--values--details))
-- `display_name` (String) The principal's display name.
 - `id` (String) The Principal ID.
 - `role` (String) The gateway role of the principal. Possible values: `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
 - `type` (String) The type of the principal. Possible values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
-
-<a id="nestedatt--values--details"></a>
-
-### Nested Schema for `values.details`
-
-Read-Only:
-
-- `app_id` (String) The service principal's Microsoft Entra App ID.
-- `group_type` (String) The type of the group. Possible values: `DistributionList`, `SecurityGroup`, `Unknown`.
-- `parent_principal_id` (String) The parent principal ID of Service Principal Profile.
-- `user_principal_name` (String) The user principal name.

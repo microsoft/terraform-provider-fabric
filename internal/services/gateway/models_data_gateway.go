@@ -40,19 +40,25 @@ type baseDataSourceGatewayModel struct {
 func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.GatewayClassification) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	switch gateway := from.(type) {
-	case *fabcore.VirtualNetworkGateway:
-		to.ID = customtypes.NewUUIDPointerValue(gateway.ID)
-		to.Type = types.StringPointerValue((*string)(gateway.Type))
-		to.DisplayName = types.StringPointerValue(gateway.DisplayName)
-		to.CapacityID = customtypes.NewUUIDPointerValue(gateway.CapacityID)
-		to.InactivityMinutesBeforeSleep = types.Int32PointerValue(gateway.InactivityMinutesBeforeSleep)
-		to.NumberOfMemberGateways = types.Int32PointerValue(gateway.NumberOfMemberGateways)
+	virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
+	publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
 
-		virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
-		if gateway.VirtualNetworkAzureResource != nil {
+	gw := from.GetGateway()
+	to.ID = customtypes.NewUUIDPointerValue(gw.ID)
+	to.Type = types.StringPointerValue((*string)(gw.Type))
+
+	switch *gw.Type {
+	case fabcore.GatewayTypeVirtualNetwork:
+		entity := from.(*fabcore.VirtualNetworkGateway)
+
+		to.DisplayName = types.StringPointerValue(entity.DisplayName)
+		to.CapacityID = customtypes.NewUUIDPointerValue(entity.CapacityID)
+		to.InactivityMinutesBeforeSleep = types.Int32PointerValue(entity.InactivityMinutesBeforeSleep)
+		to.NumberOfMemberGateways = types.Int32PointerValue(entity.NumberOfMemberGateways)
+
+		if entity.VirtualNetworkAzureResource != nil {
 			virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
-			virtualNetworkAzureResourceModel.set(gateway.VirtualNetworkAzureResource)
+			virtualNetworkAzureResourceModel.set(*entity.VirtualNetworkAzureResource)
 
 			if diags := virtualNetworkAzureResource.Set(ctx, virtualNetworkAzureResourceModel); diags.HasError() {
 				return diags
@@ -61,20 +67,21 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 
 		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
-	case *fabcore.OnPremisesGateway:
-		to.ID = customtypes.NewUUIDPointerValue(gateway.ID)
-		to.Type = types.StringPointerValue((*string)(gateway.Type))
-		to.DisplayName = types.StringPointerValue(gateway.DisplayName)
-		to.NumberOfMemberGateways = types.Int32PointerValue(gateway.NumberOfMemberGateways)
-		to.AllowCloudConnectionRefresh = types.BoolPointerValue(gateway.AllowCloudConnectionRefresh)
-		to.AllowCustomConnectors = types.BoolPointerValue(gateway.AllowCustomConnectors)
-		to.LoadBalancingSetting = types.StringPointerValue((*string)(gateway.LoadBalancingSetting))
-		to.Version = types.StringPointerValue(gateway.Version)
+		to.PublicKey = publicKey
 
-		publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
-		if gateway.PublicKey != nil {
+	case fabcore.GatewayTypeOnPremises:
+		entity := from.(*fabcore.OnPremisesGateway)
+
+		to.DisplayName = types.StringPointerValue(entity.DisplayName)
+		to.NumberOfMemberGateways = types.Int32PointerValue(entity.NumberOfMemberGateways)
+		to.AllowCloudConnectionRefresh = types.BoolPointerValue(entity.AllowCloudConnectionRefresh)
+		to.AllowCustomConnectors = types.BoolPointerValue(entity.AllowCustomConnectors)
+		to.LoadBalancingSetting = types.StringPointerValue((*string)(entity.LoadBalancingSetting))
+		to.Version = types.StringPointerValue(entity.Version)
+
+		if entity.PublicKey != nil {
 			publicKeyModel := &publicKeyModel{}
-			publicKeyModel.set(gateway.PublicKey)
+			publicKeyModel.set(*entity.PublicKey)
 
 			if diags := publicKey.Set(ctx, publicKeyModel); diags.HasError() {
 				return diags
@@ -83,15 +90,16 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 
 		to.PublicKey = publicKey
 
-	case *fabcore.OnPremisesGatewayPersonal:
-		to.ID = customtypes.NewUUIDPointerValue(gateway.ID)
-		to.Type = types.StringPointerValue((*string)(gateway.Type))
-		to.Version = types.StringPointerValue(gateway.Version)
+		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
-		publicKey := supertypes.NewSingleNestedObjectValueOfNull[publicKeyModel](ctx)
-		if gateway.PublicKey != nil {
+	case fabcore.GatewayTypeOnPremisesPersonal:
+		entity := from.(*fabcore.OnPremisesGatewayPersonal)
+
+		to.Version = types.StringPointerValue(entity.Version)
+
+		if entity.PublicKey != nil {
 			publicKeyModel := &publicKeyModel{}
-			publicKeyModel.set(gateway.PublicKey)
+			publicKeyModel.set(*entity.PublicKey)
 
 			if diags := publicKey.Set(ctx, publicKeyModel); diags.HasError() {
 				return diags
@@ -99,9 +107,11 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 		}
 
 		to.PublicKey = publicKey
+
+		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
 	default:
-		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gateway))
+		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%s' is not supported.", (string)(*gw.Type)))
 
 		return diags
 	}
@@ -114,7 +124,7 @@ type publicKeyModel struct {
 	Modulus  types.String `tfsdk:"modulus"`
 }
 
-func (to *publicKeyModel) set(from *fabcore.PublicKey) {
+func (to *publicKeyModel) set(from fabcore.PublicKey) {
 	to.Exponent = types.StringPointerValue(from.Exponent)
 	to.Modulus = types.StringPointerValue(from.Modulus)
 }

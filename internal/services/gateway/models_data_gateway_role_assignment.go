@@ -27,7 +27,7 @@ func (to *dataSourceGatewayRoleAssignmentsModel) setValues(ctx context.Context, 
 	for _, entity := range from {
 		var entityModel gatewayRoleAssignmentModel
 
-		if diags := entityModel.set(ctx, entity); diags.HasError() {
+		if diags := entityModel.set(entity); diags.HasError() {
 			return diags
 		}
 
@@ -38,51 +38,15 @@ func (to *dataSourceGatewayRoleAssignmentsModel) setValues(ctx context.Context, 
 }
 
 type gatewayRoleAssignmentModel struct {
-	ID          customtypes.UUID                                            `tfsdk:"id"`
-	Role        types.String                                                `tfsdk:"role"`
-	DisplayName types.String                                                `tfsdk:"display_name"`
-	Type        types.String                                                `tfsdk:"type"`
-	Details     supertypes.SingleNestedObjectValueOf[principalDetailsModel] `tfsdk:"details"`
+	ID   customtypes.UUID `tfsdk:"id"`
+	Role types.String     `tfsdk:"role"`
+	Type types.String     `tfsdk:"type"`
 }
 
-func (to *gatewayRoleAssignmentModel) set(ctx context.Context, from fabcore.GatewayRoleAssignment) diag.Diagnostics {
+func (to *gatewayRoleAssignmentModel) set(from fabcore.GatewayRoleAssignment) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Role = types.StringPointerValue((*string)(from.Role))
-
-	detailsModel := &principalDetailsModel{}
-	detailsModel.set(from.Principal, to)
-
-	if diags := to.Details.Set(ctx, detailsModel); diags.HasError() {
-		return diags
-	}
+	to.Type = types.StringPointerValue((*string)(from.Principal.Type))
 
 	return nil
-}
-
-type principalDetailsModel struct {
-	UserPrincipalName types.String     `tfsdk:"user_principal_name"`
-	GroupType         types.String     `tfsdk:"group_type"`
-	AppID             customtypes.UUID `tfsdk:"app_id"`
-	ParentPrincipalID customtypes.UUID `tfsdk:"parent_principal_id"`
-}
-
-func (to *principalDetailsModel) set(from *fabcore.Principal, roleAssignment *gatewayRoleAssignmentModel) {
-	to.UserPrincipalName = types.StringNull()
-	to.GroupType = types.StringNull()
-	to.AppID = customtypes.NewUUIDNull()
-	to.ParentPrincipalID = customtypes.NewUUIDNull()
-
-	roleAssignment.DisplayName = types.StringPointerValue(from.DisplayName)
-	roleAssignment.Type = types.StringPointerValue((*string)(from.Type))
-
-	switch *from.Type {
-	case fabcore.PrincipalTypeUser:
-		to.UserPrincipalName = types.StringPointerValue(from.UserDetails.UserPrincipalName)
-	case fabcore.PrincipalTypeGroup:
-		to.GroupType = types.StringPointerValue((*string)(from.GroupDetails.GroupType))
-	case fabcore.PrincipalTypeServicePrincipal:
-		to.AppID = customtypes.NewUUIDPointerValue(from.ServicePrincipalDetails.AADAppID)
-	case fabcore.PrincipalTypeServicePrincipalProfile:
-		to.ParentPrincipalID = customtypes.NewUUIDPointerValue(from.ServicePrincipalProfileDetails.ParentPrincipal.ID)
-	}
 }

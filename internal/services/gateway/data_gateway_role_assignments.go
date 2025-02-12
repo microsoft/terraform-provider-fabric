@@ -62,39 +62,39 @@ func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasou
 							MarkdownDescription: "The gateway role of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayRoleValues(), true, true) + ".",
 							Computed:            true,
 						},
-						"display_name": schema.StringAttribute{
-							MarkdownDescription: "The principal's display name.",
-							Computed:            true,
-						},
+						// "display_name": schema.StringAttribute{
+						// 	MarkdownDescription: "The principal's display name.",
+						// 	Computed:            true,
+						// },
 						"type": schema.StringAttribute{
 							MarkdownDescription: "The type of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrincipalTypeValues(), true, true) + ".",
 							Computed:            true,
 						},
-						"details": schema.SingleNestedAttribute{
-							MarkdownDescription: "The principal details.",
-							Computed:            true,
-							CustomType:          supertypes.NewSingleNestedObjectTypeOf[principalDetailsModel](ctx),
-							Attributes: map[string]schema.Attribute{
-								"user_principal_name": schema.StringAttribute{
-									MarkdownDescription: "The user principal name.",
-									Computed:            true,
-								},
-								"group_type": schema.StringAttribute{
-									MarkdownDescription: "The type of the group. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGroupTypeValues(), true, true) + ".",
-									Computed:            true,
-								},
-								"app_id": schema.StringAttribute{
-									MarkdownDescription: "The service principal's Microsoft Entra App ID.",
-									Computed:            true,
-									CustomType:          customtypes.UUIDType{},
-								},
-								"parent_principal_id": schema.StringAttribute{
-									MarkdownDescription: "The parent principal ID of Service Principal Profile.",
-									Computed:            true,
-									CustomType:          customtypes.UUIDType{},
-								},
-							},
-						},
+						// "details": schema.SingleNestedAttribute{
+						// 	MarkdownDescription: "The principal details.",
+						// 	Computed:            true,
+						// 	CustomType:          supertypes.NewSingleNestedObjectTypeOf[principalDetailsModel](ctx),
+						// 	Attributes: map[string]schema.Attribute{
+						// 		"user_principal_name": schema.StringAttribute{
+						// 			MarkdownDescription: "The user principal name.",
+						// 			Computed:            true,
+						// 		},
+						// 		"group_type": schema.StringAttribute{
+						// 			MarkdownDescription: "The type of the group. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGroupTypeValues(), true, true) + ".",
+						// 			Computed:            true,
+						// 		},
+						// 		"app_id": schema.StringAttribute{
+						// 			MarkdownDescription: "The service principal's Microsoft Entra App ID.",
+						// 			Computed:            true,
+						// 			CustomType:          customtypes.UUIDType{},
+						// 		},
+						// 		"parent_principal_id": schema.StringAttribute{
+						// 			MarkdownDescription: "The parent principal ID of Service Principal Profile.",
+						// 			Computed:            true,
+						// 			CustomType:          customtypes.UUIDType{},
+						// 		},
+						// 	},
+						// },
 					},
 				},
 			},
