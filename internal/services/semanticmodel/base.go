@@ -30,6 +30,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  "TMDL",
 		API:   "TMDL",
-		Paths: []string{"definition/database.tmdl", "definition/model.tmdl", "definition.pbism", "diagramLayp.json", "definition/tables/*.tmdl"},
+		Paths: []string{"definition/database.tmdl", "definition/model.tmdl", "definition/expressions.tmdl", "definition/relationships.tmdl", "definition.pbism", "diagramLayp.json", "definition/tables/*.tmdl"},
 	},
 }
