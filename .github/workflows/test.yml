@@ -245,13 +245,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
+        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # v6.1.0
+        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
