@@ -104,7 +104,7 @@ You can find more information on how to do this in the following guides:
 - `use_msi` (Boolean) Allow Managed Service Identity (MSI) to be used for authentication.
 - `use_oidc` (Boolean) Allow OpenID Connect to be used for authentication.
 
-## Know limitations
+## Known limitations
 
 - **Capacity**: [Microsoft Fabric trial capacity](https://learn.microsoft.com/fabric/get-started/fabric-trial) is not supported. Only self-provisioned [Fabric Capacity](https://learn.microsoft.com/fabric/enterprise/plan-capacity) on Azure is supported. You can setup your capacity in the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities).
 - **Service Principal**: Not all Fabric resources support Service Principals yet. For Provider evaluation, we recommend using the [Azure CLI for authentication with User context](guides/auth_app_reg_user.md).

@@ -55,4 +55,5 @@ For more information about Terraform logging, see [Debugging Terraform](https://
 
 You can observe some Terraform operations take time to complete with the messages like `Still creating...`, `Still reading...`, etc. or end up with a timeout error. This can happen due to various reasons such as network latency or [Fabric API throttling](https://learn.microsoft.com/rest/api/fabric/articles/throttling).
 
-Try to increase the global timeout for the operations by setting the [`timeout`](../index.md#timeout) attribute in the Provider block, or you can set the timeout for the specific Resource or Data-Source using the `timeouts` attribute.
+- Try to increase the global timeout for the operations by setting the [`timeout`](../index.md#timeout) attribute in the Provider block, or you can set the timeout for the specific Resource or Data-Source using the `timeouts` attribute.
+- Change [Terraform parallelism](https://developer.hashicorp.com/terraform/internals/graph#walking-the-graph) to lower number than default (10x).
