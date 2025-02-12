@@ -11,7 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-const FabricSDKLoggerName = "fabric-sdk-go"
+const (
+	FabricSDKLoggerName   = "fabric-sdk-go"
+	AzureSDKLoggingEnvVar = "AZURE_SDK_GO_LOGGING"
+	AzureSDKLoggingAll    = "all"
+)
 
 func NewFabricSDKLoggerSubsystem(ctx context.Context) (context.Context, hclog.Level, error) {
 	targetLevel := hclog.LevelFromString(os.Getenv("FABRIC_SDK_GO_LOGGING"))
@@ -21,7 +25,7 @@ func NewFabricSDKLoggerSubsystem(ctx context.Context) (context.Context, hclog.Le
 		targetLevel = hclog.Off
 	} else {
 		// Enable azcore logging
-		err := os.Setenv("AZURE_SDK_GO_LOGGING", "all")
+		err := os.Setenv(AzureSDKLoggingEnvVar, AzureSDKLoggingAll)
 		if err != nil {
 			return ctx, targetLevel, err
 		}

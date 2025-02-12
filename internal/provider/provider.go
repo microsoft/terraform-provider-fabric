@@ -136,7 +136,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 		return nil, err
 	}
 
-	if cls := os.Getenv("AZURE_SDK_GO_LOGGING"); cls == "all" && lvl != hclog.Off {
+	if cls := os.Getenv(pclient.AzureSDKLoggingEnvVar); cls == pclient.AzureSDKLoggingAll && lvl != hclog.Off {
 		azlog.SetListener(func(ev azlog.Event, msg string) {
 			tflog.SubsystemTrace(ctx, pclient.FabricSDKLoggerName, "SDK", map[string]any{
 				"event":   ev,
