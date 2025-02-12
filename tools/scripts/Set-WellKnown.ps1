@@ -710,8 +710,13 @@ $definition = @{
       payloadType = 'InlineBase64'
     },
     @{
-      path        = 'StaticResources/SharedResources/BaseThemes/CY24SU06.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/StaticResources/SharedResources/BaseThemes/CY24SU06.json'
+      path        = 'StaticResources/SharedResources/BaseThemes/CY24SU10.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/StaticResources/SharedResources/BaseThemes/CY24SU10.json'
+      payloadType = 'InlineBase64'
+    }
+    @{
+      path        = 'StaticResources/RegisteredResources/fabric_48_color10148978481469717.png'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/StaticResources/RegisteredResources/fabric_48_color10148978481469717.png'
       payloadType = 'InlineBase64'
     }
   )

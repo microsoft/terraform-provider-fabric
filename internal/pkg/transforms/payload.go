@@ -6,8 +6,10 @@ package transforms
 import (
 	"bytes"
 	"context"
+	"os"
 	"path/filepath"
 	"text/template"
+	"unicode/utf8"
 
 	"github.com/go-sprout/sprout"
 	sproutchecksum "github.com/go-sprout/sprout/registry/checksum"
@@ -35,8 +37,8 @@ func getTmplFuncs() (template.FuncMap, error) {
 	handler := sprout.New()
 
 	err := handler.AddRegistries(
-		sproutconversion.NewRegistry(),
 		sproutchecksum.NewRegistry(),
+		sproutconversion.NewRegistry(),
 		sproutencoding.NewRegistry(),
 		sproutmaps.NewRegistry(),
 		sproutnumeric.NewRegistry(),
@@ -67,15 +69,7 @@ func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens super
 
 	source := srcPath.ValueString()
 
-	tmplFuncs, err := getTmplFuncs()
-	if err != nil {
-		diags.AddError(
-			"Template functions error",
-			err.Error(),
-		)
-	}
-
-	tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(source)
+	content, err := os.ReadFile(srcPath.ValueString())
 	if err != nil {
 		diags.AddError(
 			common.ErrorFileReadHeader,
@@ -85,31 +79,80 @@ func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens super
 		return nil, nil, diags
 	}
 
-	tokensData := map[string]string{}
+	var contentSha256 string
+	var contentB64 string
 
-	if !tokens.IsNull() && !tokens.IsUnknown() {
-		tokensData, diags = tokens.Get(ctx)
-		if diags.HasError() {
+	if utf8.Valid(content) { //nolint:nestif
+		tmplFuncs, err := getTmplFuncs()
+		if err != nil {
+			diags.AddError(
+				"Template functions error",
+				err.Error(),
+			)
+
 			return nil, nil, diags
 		}
-	}
 
-	var contentBuf bytes.Buffer
-	if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(source), tokensData); err != nil {
-		diags.AddError(
-			common.ErrorTmplParseHeader,
-			err.Error(),
-		)
-
-		return nil, nil, diags
-	}
-
-	content := contentBuf.String()
-
-	if IsJSON(content) {
-		if err := JSONNormalize(&content); err != nil {
+		tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(source)
+		if err != nil {
 			diags.AddError(
-				common.ErrorJSONNormalizeHeader,
+				common.ErrorFileReadHeader,
+				err.Error(),
+			)
+
+			return nil, nil, diags
+		}
+
+		tokensData := map[string]string{}
+
+		if !tokens.IsNull() && !tokens.IsUnknown() {
+			tokensData, diags = tokens.Get(ctx)
+			if diags.HasError() {
+				return nil, nil, diags
+			}
+		}
+
+		var contentBuf bytes.Buffer
+		if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(source), tokensData); err != nil {
+			diags.AddError(
+				common.ErrorTmplParseHeader,
+				err.Error(),
+			)
+
+			return nil, nil, diags
+		}
+
+		content := contentBuf.String()
+
+		if IsJSON(content) {
+			if err := JSONNormalize(&content); err != nil {
+				diags.AddError(
+					common.ErrorJSONNormalizeHeader,
+					err.Error(),
+				)
+
+				return nil, nil, diags
+			}
+		}
+
+		contentSha256 = utils.Sha256(content)
+
+		contentB64, err = Base64Encode(content)
+		if err != nil {
+			diags.AddError(
+				common.ErrorBase64EncodeHeader,
+				err.Error(),
+			)
+
+			return nil, nil, diags
+		}
+	} else {
+		contentSha256 = utils.Sha256(content)
+
+		contentB64, err = Base64Encode(content)
+		if err != nil {
+			diags.AddError(
+				common.ErrorBase64EncodeHeader,
 				err.Error(),
 			)
 
@@ -117,18 +160,7 @@ func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens super
 		}
 	}
 
-	contentSha256 := utils.Sha256(content)
-
-	if err := Base64Encode(&content); err != nil {
-		diags.AddError(
-			common.ErrorBase64EncodeHeader,
-			err.Error(),
-		)
-
-		return nil, nil, diags
-	}
-
-	return &content, &contentSha256, diags
+	return &contentB64, &contentSha256, nil
 }
 
 func PayloadToGzip(content *string) diag.Diagnostics {
