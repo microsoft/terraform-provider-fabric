@@ -1,0 +1,5 @@
+kind: fixed
+body: Add support for missing `definition/expressions.tmdl` and `definition/relationships.tmdl` paths in the Semantic Model TMDL format.
+time: 2025-02-12T12:29:40.6415539+01:00
+custom:
+  Issue: "247"
