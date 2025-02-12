@@ -6,12 +6,15 @@ package provider
 import (
 	"context"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
+	azlog "github.com/Azure/azure-sdk-for-go/sdk/azcore/log"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -105,7 +108,7 @@ func NewFunc(version string) func() provider.Provider {
 func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fabric.Client, error) {
 	resp, err := auth.NewCredential(*cfg.Auth)
 	if err != nil {
-		tflog.Error(ctx, "Failed to initialize authentication", map[string]any{"error": err})
+		tflog.Error(ctx, "Failed to initialize authentication", map[string]any{"error": err.Error()})
 
 		return nil, err
 	}
@@ -127,9 +130,25 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	// A value less than zero means there is no cap.
 	fabricClientOpt.Retry.MaxRetryDelay = -1
 
+	ctx, lvl, err := pclient.NewFabricSDKLoggerSubsystem(ctx)
+	if err != nil {
+		tflog.Error(ctx, "Failed to initialize Microsoft Fabric SDK logger subsystem", map[string]any{"error": err.Error()})
+
+		return nil, err
+	}
+
+	if cls := os.Getenv(pclient.AzureSDKLoggingEnvVar); cls == pclient.AzureSDKLoggingAll && lvl != hclog.Off {
+		azlog.SetListener(func(ev azlog.Event, msg string) {
+			tflog.SubsystemTrace(ctx, pclient.FabricSDKLoggerName, "SDK", map[string]any{
+				"event":   ev,
+				"message": msg,
+			})
+		})
+	}
+
 	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
 	if err != nil {
-		tflog.Error(ctx, "Failed to initialize Microsoft Fabric client", map[string]any{"error": err})
+		tflog.Error(ctx, "Failed to initialize Microsoft Fabric client", map[string]any{"error": err.Error()})
 
 		return nil, err
 	}
