@@ -742,7 +742,6 @@ $itemNaming = @{
   'VirtualNetwork02'      = 'vnet02'
   'VirtualNetworkSubnet'  = 'subnet'
   'GatewayVirtualNetwork' = 'gvnet'
-  'GatewayOnPremises'     = 'gop'
 }
 
 $baseName = Get-BaseName
@@ -1093,19 +1092,6 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   id          = $gateway.id
   displayName = $gateway.displayName
   type        = $gateway.type
-}
-
-# Check if GatewayOnPremises
-$displayNameTemp = "${displayName}_$($itemNaming['GatewayOnPremises'])"
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "gateways"
-$result = $results.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
-if (!$result) {
-  Write-Log -Message "!!! Please create an On-Premises Gateway manually (with Display Name: ${displayNameTemp}), and update details in the well-known file !!!" -Level 'ERROR' -Stop $false
-}
-$wellKnown['GatewayOnPremises'] = @{
-  id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
-  displayName = if ($result) { $result.displayName } else { $displayNameTemp }
-  type        = 'OnPremises'
 }
 
 # Save wellknown.json file

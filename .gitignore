@@ -37,7 +37,6 @@ testresults.xml
 golangci-report.xml
 .wellknown.json
 .wellknown.*.json
-!.wellknown.template.json
 changie.md
 .lycheecache
 *.env

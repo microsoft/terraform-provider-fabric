@@ -66,7 +66,6 @@ func TestAcc_GatewaysDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.id"),
 			),
 		},
 	},

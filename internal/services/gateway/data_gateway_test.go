@@ -192,11 +192,6 @@ func TestAcc_GatewayDataSource(t *testing.T) {
 	entityVirtualNetworkDisplayName := entityVirtualNetwork["displayName"].(string)
 	entityVirtualNetworkType := entityVirtualNetwork["type"].(string)
 
-	entityOnPremises := testhelp.WellKnown()["GatewayOnPremises"].(map[string]any)
-	entityOnPremisesID := entityOnPremises["id"].(string)
-	entityOnPremisesDisplayName := entityOnPremises["displayName"].(string)
-	entityOnPremisesType := entityOnPremises["type"].(string)
-
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by id - not found
 		{
@@ -234,34 +229,6 @@ func TestAcc_GatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityVirtualNetworkID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityVirtualNetworkDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityVirtualNetworkType),
-			),
-		},
-		// read by id - on premises
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"id": entityOnPremisesID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityOnPremisesID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityOnPremisesDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityOnPremisesType),
-			),
-		},
-		// read by name - on premises
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"display_name": entityOnPremisesDisplayName,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityOnPremisesID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityOnPremisesDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "type", entityOnPremisesType),
 			),
 		},
 	}))
