@@ -562,7 +562,8 @@ function Set-FabricGatewayVirtualNetwork {
     }
 
     Write-Log -Message "Creating Virtual Network Gateway: $DisplayName" -Level 'WARN'
-    $result = Invoke-FabricRest -Method 'POST' -Endpoint "gateways" -Payload $payload
+    $newGateway = Invoke-FabricRest -Method 'POST' -Endpoint "gateways" -Payload $payload
+    $result = $newGateway.Response
   }
 
   Write-Log -Message "Gateway Virtual Network - Name: $($result.displayName) / ID: $($result.id)"
@@ -592,8 +593,10 @@ function Set-AzureVirtualNetwork {
   )
 
   # Attempt to get the existing Virtual Network
-  $vnet = Get-AzVirtualNetwork -Name $VNetName -ResourceGroupName $ResourceGroupName -ErrorAction Stop
-  if (!$vnet) {
+  try {
+    $vnet = Get-AzVirtualNetwork -Name $VNetName -ResourceGroupName $ResourceGroupName -ErrorAction Stop
+  }
+  catch {
     # VNet does not exist, so create it
     Write-Log -Message "Creating VNet: $VNetName in Resource Group: $ResourceGroupName" -Level 'WARN'
     $subnetConfig = New-AzVirtualNetworkSubnetConfig `
@@ -615,7 +618,6 @@ function Set-AzureVirtualNetwork {
     # Commit creation
     $vnet = $vnet | Set-AzVirtualNetwork
     Write-Log -Message "Created VNet: $VNetName" -Level 'INFO'
-    return $vnet
   }
 
   # If the VNet already exists, check for the subnet
@@ -650,6 +652,19 @@ function Set-AzureVirtualNetwork {
     }
   }
   Write-Log -Message "Az Virtual Network - Name: $($vnet.Name)"
+
+  $userPrincipalName = $azContext.Account.Id
+  $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
+
+  $existingAssignment = Get-AzRoleAssignment -Scope $vnet.Id -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Network Contributor"
+  }
+
+  Write-Log "Assigning Network Contributor role to the principal on the virtual network $($VNetName)"
+  if (!$existingAssignment) {
+    New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Network Contributor" -Scope $vnet.Id
+  }
+
   return $vnet
 }
 
@@ -1029,6 +1044,10 @@ if ($SPN) {
   $azdoSPN = Invoke-ADOPSRestMethod -Uri "https://vssps.dev.azure.com/$($azdoContext.Organization)/_apis/graph/serviceprincipals?api-version=7.2-preview.1" -Method Post -Body $bodyJson
   $result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSPN.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
 }
+
+# Register the Microsoft.PowerPlatform resource provider
+Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
+Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
 
 # Create Azure Virtual Network 1 if not exists
 $vnetName = "${displayName}_$($itemNaming['VirtualNetwork01'])"
