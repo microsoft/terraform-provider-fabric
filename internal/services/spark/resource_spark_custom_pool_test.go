@@ -22,15 +22,8 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 	capacityID := capacity["id"].(string)
 
 	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
-	testHelperSparkCustomPoolResource := getSparkCustomPoolResourceAttr(t, testhelp.RefByFQN(workspaceResourceFQN, "id"), "test")
-
 	entityCreateName := testhelp.RandomName()
-	testCaseCreate := testhelp.CopyMap(testHelperSparkCustomPoolResource)
-	testCaseCreate["name"] = entityCreateName
-
 	entityUpdateName := testhelp.RandomName()
-	testCaseUpdate := testhelp.CopyMap(testHelperSparkCustomPoolResource)
-	testCaseUpdate["name"] = entityUpdateName
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceSparkCustomPoolFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -40,10 +33,32 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 				workspaceResourceHCL,
 				at.CompileConfig(
 					testResourceSparkCustomPoolHeader,
-					testCaseCreate,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"name":         entityCreateName,
+						"type":         "Workspace",
+						"node_family":  "MemoryOptimized",
+						"node_size":    "Small",
+						"auto_scale": map[string]any{
+							"enabled":        true,
+							"min_node_count": 1,
+							"max_node_count": 3,
+						},
+						"dynamic_executor_allocation": map[string]any{
+							"enabled":       true,
+							"min_executors": 1,
+							"max_executors": 2,
+						},
+					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "name", entityCreateName),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.min_node_count", "1"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.max_node_count", "3"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.min_executors", "1"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.max_executors", "2"),
 			),
 		},
 		// Update and Read
@@ -53,10 +68,30 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 				workspaceResourceHCL,
 				at.CompileConfig(
 					testResourceSparkCustomPoolHeader,
-					testCaseUpdate,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"name":         entityUpdateName,
+						"type":         "Workspace",
+						"node_family":  "MemoryOptimized",
+						"node_size":    "Small",
+						"auto_scale": map[string]any{
+							"enabled":        false,
+							"min_node_count": 1,
+							"max_node_count": 3,
+						},
+						"dynamic_executor_allocation": map[string]any{
+							"enabled": false,
+						},
+					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "name", entityUpdateName),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.enabled", "false"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.min_node_count", "1"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "auto_scale.max_node_count", "3"),
+				resource.TestCheckResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.enabled", "false"),
+				resource.TestCheckNoResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.min_executors"),
+				resource.TestCheckNoResourceAttr(testResourceSparkCustomPoolFQN, "dynamic_executor_allocation.max_executors"),
 			),
 		},
 	},

@@ -234,27 +234,28 @@ func TestAcc_KQLDatabaseDataSource(t *testing.T) {
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
 		// read by id with definition
-		// {
-		// 	ResourceName: testDataSourceItemFQN,
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"workspace_id":      workspaceID,
-		// 			"id":                entityID,
-		// 			"output_definition": true,
-		// 		},
-		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.eventhouse_id"),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_type"),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.DatabaseProperties.json.content"),
-		// 	),
-		// },
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "Default",
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.eventhouse_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.DatabaseProperties.json.content"),
+			),
+		},
 	}))
 }

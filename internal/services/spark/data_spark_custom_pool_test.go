@@ -32,7 +32,23 @@ func TestAcc_SparkCustomPoolDataSource(t *testing.T) {
 				workspaceResourceHCL,
 				at.CompileConfig(
 					testResourceSparkCustomPoolHeader,
-					getSparkCustomPoolResourceAttr(t, testhelp.RefByFQN(workspaceResourceFQN, "id"), entityName),
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"name":         entityName,
+						"type":         "Workspace",
+						"node_family":  "MemoryOptimized",
+						"node_size":    "Small",
+						"auto_scale": map[string]any{
+							"enabled":        true,
+							"min_node_count": 1,
+							"max_node_count": 3,
+						},
+						"dynamic_executor_allocation": map[string]any{
+							"enabled":       true,
+							"min_executors": 1,
+							"max_executors": 2,
+						},
+					},
 				),
 				at.CompileConfig(
 					testDataSourceSparkCustomPoolHeader,

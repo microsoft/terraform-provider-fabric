@@ -54,9 +54,8 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 	}
 
 	if (len(defParts) == 0) && len(definitionPaths) > 0 && update {
-		content := definitionEmpty
-
-		if err := transforms.Base64Encode(&content); err != nil {
+		contentB64, err := transforms.Base64Encode(definitionEmpty)
+		if err != nil {
 			diags.AddError(
 				common.ErrorBase64EncodeHeader,
 				err.Error(),
@@ -67,7 +66,7 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 
 		to.Parts = append(to.Parts, fabcore.ItemDefinitionPart{
 			Path:        &definitionPaths[0],
-			Payload:     &content,
+			Payload:     &contentB64,
 			PayloadType: azto.Ptr(fabcore.PayloadTypeInlineBase64),
 		})
 

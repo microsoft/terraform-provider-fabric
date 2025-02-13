@@ -48,11 +48,17 @@ data "fabric_kql_database" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The KQL Database display name.
+- `format` (String) The KQL Database format. Possible values: `Default`
 - `id` (String) The KQL Database ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `DatabaseProperties.json`, `DatabaseSchema.kql` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The KQL Database description.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
@@ -63,6 +69,15 @@ data "fabric_kql_database" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
 
 <a id="nestedatt--properties"></a>
 

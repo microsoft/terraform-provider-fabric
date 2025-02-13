@@ -1,0 +1,5 @@
+kind: fixed
+body: Error when referencing non-text source for Fabric Item Definition part.
+time: 2025-02-06T14:04:22.220999+01:00
+custom:
+  Issue: "235"
