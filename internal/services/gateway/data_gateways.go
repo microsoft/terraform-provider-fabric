@@ -6,6 +6,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -73,7 +74,7 @@ func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequ
 							Computed:            true,
 						},
 						"number_of_member_gateways": schema.Int32Attribute{
-							MarkdownDescription: "The number of member gateways. Possible values: " + fmt.Sprint(MinNumberOfMemberGatewaysValues) + " to " + fmt.Sprint(MaxNumberOfMemberGatewaysValues) + ".",
+							MarkdownDescription: "The number of member gateways. Possible values: " + strconv.Itoa(int(MinNumberOfMemberGatewaysValues)) + " to " + strconv.Itoa(int(MaxNumberOfMemberGatewaysValues)) + ".",
 							Computed:            true,
 						},
 						"virtual_network_azure_resource": schema.SingleNestedAttribute{

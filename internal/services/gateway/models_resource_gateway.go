@@ -45,6 +45,7 @@ func (to *baseResourceGatewayModel) set(ctx context.Context, from fabcore.Gatewa
 		to.NumberOfMemberGateways = types.Int32PointerValue(gateway.NumberOfMemberGateways)
 
 		virtualNetworkAzureResource := supertypes.NewSingleNestedObjectValueOfNull[virtualNetworkAzureResourceModel](ctx)
+
 		if gateway.VirtualNetworkAzureResource != nil {
 			virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
 			virtualNetworkAzureResourceModel.set(*gateway.VirtualNetworkAzureResource)
@@ -57,6 +58,7 @@ func (to *baseResourceGatewayModel) set(ctx context.Context, from fabcore.Gatewa
 		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 	default:
 		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gateway))
+
 		return diags
 	}
 

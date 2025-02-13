@@ -6,6 +6,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
@@ -72,7 +73,7 @@ func (d *dataSourceGateway) Schema(ctx context.Context, _ datasource.SchemaReque
 				Computed:            true,
 			},
 			"number_of_member_gateways": schema.Int32Attribute{
-				MarkdownDescription: "The number of member gateways. Possible values: " + fmt.Sprint(MinNumberOfMemberGatewaysValues) + " to " + fmt.Sprint(MaxNumberOfMemberGatewaysValues) + ".",
+				MarkdownDescription: "The number of member gateways. Possible values: " + strconv.Itoa(int(MinNumberOfMemberGatewaysValues)) + " to " + strconv.Itoa(int(MaxNumberOfMemberGatewaysValues)) + ".",
 				Computed:            true,
 			},
 			"virtual_network_azure_resource": schema.SingleNestedAttribute{
@@ -242,14 +243,13 @@ func (d *dataSourceGateway) getByDisplayName(ctx context.Context, model *dataSou
 		}
 
 		for _, entity := range page.Value {
-			gateway := entity.GetGateway()
 			var entityDisplayName string
 
-			switch *gateway.Type {
-			case fabcore.GatewayTypeVirtualNetwork:
-				entityDisplayName = *(entity.(*fabcore.VirtualNetworkGateway).DisplayName)
-			case fabcore.GatewayTypeOnPremises:
-				entityDisplayName = *(entity.(*fabcore.OnPremisesGateway).DisplayName)
+			switch gateway := entity.(type) {
+			case *fabcore.VirtualNetworkGateway:
+				entityDisplayName = *(gateway.DisplayName)
+			case *fabcore.OnPremisesGateway:
+				entityDisplayName = *(gateway.DisplayName)
 			default:
 				continue
 			}

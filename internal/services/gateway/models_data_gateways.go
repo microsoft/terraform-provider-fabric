@@ -25,6 +25,7 @@ func (to *dataSourceGatewaysModel) setValues(ctx context.Context, from []fabcore
 		if diags := entityModel.set(ctx, entity); diags.HasError() {
 			return diags
 		}
+
 		slice = append(slice, &entityModel)
 	}
 

@@ -443,7 +443,7 @@ function Set-FabricWorkspaceCapacity {
     $payload = @{
       capacityId = $CapacityId
     }
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/assignToCapacity" -Payload $payload).Response
+    _ = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/assignToCapacity" -Payload $payload).Response
     $workspace.Response.capacityId = $CapacityId
   }
 

@@ -47,10 +47,8 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 	to.ID = customtypes.NewUUIDPointerValue(gw.ID)
 	to.Type = types.StringPointerValue((*string)(gw.Type))
 
-	switch *gw.Type {
-	case fabcore.GatewayTypeVirtualNetwork:
-		entity := from.(*fabcore.VirtualNetworkGateway)
-
+	switch entity := from.(type) {
+	case *fabcore.VirtualNetworkGateway:
 		to.DisplayName = types.StringPointerValue(entity.DisplayName)
 		to.CapacityID = customtypes.NewUUIDPointerValue(entity.CapacityID)
 		to.InactivityMinutesBeforeSleep = types.Int32PointerValue(entity.InactivityMinutesBeforeSleep)
@@ -69,9 +67,7 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 
 		to.PublicKey = publicKey
 
-	case fabcore.GatewayTypeOnPremises:
-		entity := from.(*fabcore.OnPremisesGateway)
-
+	case *fabcore.OnPremisesGateway:
 		to.DisplayName = types.StringPointerValue(entity.DisplayName)
 		to.NumberOfMemberGateways = types.Int32PointerValue(entity.NumberOfMemberGateways)
 		to.AllowCloudConnectionRefresh = types.BoolPointerValue(entity.AllowCloudConnectionRefresh)
@@ -92,9 +88,7 @@ func (to *baseDataSourceGatewayModel) set(ctx context.Context, from fabcore.Gate
 
 		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
-	case fabcore.GatewayTypeOnPremisesPersonal:
-		entity := from.(*fabcore.OnPremisesGatewayPersonal)
-
+	case *fabcore.OnPremisesGatewayPersonal:
 		to.Version = types.StringPointerValue(entity.Version)
 
 		if entity.PublicKey != nil {

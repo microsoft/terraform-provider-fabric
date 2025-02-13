@@ -10,7 +10,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	gw "github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
@@ -27,6 +27,7 @@ func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassificati
 		entity.InactivityMinutesBeforeSleep = gateway.InactivityMinutesBeforeSleep
 		entity.NumberOfMemberGateways = gateway.NumberOfMemberGateways
 		entity.VirtualNetworkAzureResource = gateway.VirtualNetworkAzureResource
+
 		return entity
 	default:
 		panic("Unsupported Gateway type")
@@ -60,13 +61,18 @@ func (o *operationsGateway) TransformUpdate(entity fabcore.GatewayClassification
 }
 
 func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabcore.UpdateGatewayRequestClassification) fabcore.GatewayClassification {
-	switch request := data.(type) {
-	case *fabcore.UpdateVirtualNetworkGatewayRequest:
-		gateway, _ := base.(*fabcore.VirtualNetworkGateway)
+	switch gateway := base.(type) {
+	case *fabcore.VirtualNetworkGateway:
+		request, ok := data.(*fabcore.UpdateVirtualNetworkGatewayRequest)
+		if !ok {
+			panic("Invalid update data for VirtualNetworkGateway")
+		}
+
 		gateway.CapacityID = request.CapacityID
 		gateway.DisplayName = request.DisplayName
 		gateway.InactivityMinutesBeforeSleep = request.InactivityMinutesBeforeSleep
 		gateway.NumberOfMemberGateways = request.NumberOfMemberGateways
+
 		return gateway
 	default:
 		panic("Unsupported Gateway type")
@@ -78,12 +84,10 @@ func (o *operationsGateway) Validate(newEntity fabcore.GatewayClassification, ex
 		if *(existingGateway.GetGateway().Type) != *(newEntity.GetGateway().Type) {
 			continue
 		}
-		switch gateway := newEntity.(type) {
-		case *fabcore.VirtualNetworkGateway:
-			vng := existingGateway.(*fabcore.VirtualNetworkGateway)
-			if *vng.DisplayName == *gateway.DisplayName {
-				// TODO(badeamarjieh):  add error code to GO SDK
-				return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, "DuplicateGatewayName", fabcore.ErrWorkspace.WorkspaceNameAlreadyExists.Error())
+
+		if newVNG, ok := newEntity.(*fabcore.VirtualNetworkGateway); ok {
+			if existingVNG, ok := existingGateway.(*fabcore.VirtualNetworkGateway); ok && *existingVNG.DisplayName == *newVNG.DisplayName {
+				return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrGateway.DuplicateGatewayName.Error(), fabcore.ErrGateway.DuplicateGatewayName.Error())
 			}
 		}
 	}
@@ -97,16 +101,19 @@ func (o *operationsGateway) GetID(entity fabcore.GatewayClassification) string {
 
 func configureVirtualNetworkGateway(server *fakeServer) fabcore.VirtualNetworkGateway {
 	configureGateway(server)
+
 	return fabcore.VirtualNetworkGateway{}
 }
 
 func configureOnPremisesGateway(server *fakeServer) fabcore.OnPremisesGateway {
 	configureGateway(server)
+
 	return fabcore.OnPremisesGateway{}
 }
 
 func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGatewayPersonal {
 	configureGateway(server)
+
 	return fabcore.OnPremisesGatewayPersonal{}
 }
 
@@ -158,7 +165,7 @@ func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 		DisplayName:                 to.Ptr(testhelp.RandomName()),
 		AllowCloudConnectionRefresh: to.Ptr(testhelp.RandomBool()),
 		AllowCustomConnectors:       to.Ptr(testhelp.RandomBool()),
-		NumberOfMemberGateways:      to.Ptr(int32(testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues)))),
+		NumberOfMemberGateways:      to.Ptr(testhelp.RandomInt(gw.MinNumberOfMemberGatewaysValues, gw.MaxNumberOfMemberGatewaysValues)),
 		LoadBalancingSetting:        to.Ptr(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
 		Version:                     to.Ptr(testhelp.RandomName()),
 		PublicKey:                   NewRadomPublicKey(),
@@ -180,8 +187,8 @@ func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 		Type:                         to.Ptr(fabcore.GatewayTypeVirtualNetwork),
 		DisplayName:                  to.Ptr(testhelp.RandomName()),
 		CapacityID:                   to.Ptr(testhelp.RandomUUID()),
-		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
-		NumberOfMemberGateways:       to.Ptr(int32(testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues)))),
+		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gw.PossibleInactivityMinutesBeforeSleepValues)),
+		NumberOfMemberGateways:       to.Ptr(testhelp.RandomInt(gw.MinNumberOfMemberGatewaysValues, gw.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
 	}
 }

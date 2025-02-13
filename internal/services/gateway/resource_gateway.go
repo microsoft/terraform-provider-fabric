@@ -19,14 +19,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
-
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -37,7 +36,7 @@ import (
 // Ensure the implementation satisfies the expected interfaces.
 var (
 	_ resource.ResourceWithConfigure = (*resourceGateway)(nil)
-	// _ resource.ResourceWithImportState = (*resourceGateway)(nil)
+	// _ resource.ResourceWithImportState = (*resourceGateway)(nil).
 )
 
 type resourceGateway struct {

@@ -13,7 +13,6 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -430,7 +429,7 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 	entityType := string(fabcore.GatewayTypeVirtualNetwork)
 	entityCreateDisplayName := testhelp.RandomName()
 	entityCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	entityCreateNumberOfMemberGateways := testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues))
+	entityCreateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
@@ -443,7 +442,7 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	entityUpdateNumberOfMemberGateways := testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues))
+	entityUpdateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	virtualNetworkAzureResource02 := testhelp.WellKnown()["VirtualNetwork02"].(map[string]any)
 	vNET02VirtualNetworkName := virtualNetworkAzureResource02["name"].(string)
@@ -474,8 +473,8 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityCreateInactivityMinutesBeforeSleep))),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityCreateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(entityCreateInactivityMinutesBeforeSleep)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(entityCreateNumberOfMemberGateways)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET01ResourceGroupName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
@@ -505,8 +504,8 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityUpdateInactivityMinutesBeforeSleep))),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityUpdateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(entityUpdateInactivityMinutesBeforeSleep)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(entityUpdateNumberOfMemberGateways)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET01ResourceGroupName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
@@ -536,8 +535,8 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(int(entityUpdateInactivityMinutesBeforeSleep))),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(entityUpdateNumberOfMemberGateways))),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep", strconv.Itoa(entityUpdateInactivityMinutesBeforeSleep)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(entityUpdateNumberOfMemberGateways)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET02VirtualNetworkName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET02ResourceGroupName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET02SubnetName),

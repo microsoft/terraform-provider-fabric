@@ -10,7 +10,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -151,16 +150,16 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 	gatewayType := string(fabcore.GatewayTypeVirtualNetwork)
 	gatewayCreateDisplayName := testhelp.RandomName()
 	gatewayCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	gatewayCreateNumberOfMemberGateways := testhelp.RandomInt(int(gateway.MinNumberOfMemberGatewaysValues), int(gateway.MaxNumberOfMemberGatewaysValues))
+	gatewayCreateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
 	virtualNetworkAzureResource := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
-	VirtualNetworkName := virtualNetworkAzureResource["name"].(string)
-	ResourceGroupName := virtualNetworkAzureResource["resourceGroupName"].(string)
-	SubnetName := virtualNetworkAzureResource["subnetName"].(string)
-	SubscriptionID := virtualNetworkAzureResource["subscriptionId"].(string)
+	virtualNetworkName := virtualNetworkAzureResource["name"].(string)
+	resourceGroupName := virtualNetworkAzureResource["resourceGroupName"].(string)
+	subnetName := virtualNetworkAzureResource["subnetName"].(string)
+	subscriptionID := virtualNetworkAzureResource["subscriptionId"].(string)
 
 	gatewayResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
@@ -170,10 +169,10 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 			"inactivity_minutes_before_sleep": gatewayCreateInactivityMinutesBeforeSleep,
 			"number_of_member_gateways":       gatewayCreateNumberOfMemberGateways,
 			"virtual_network_azure_resource": map[string]any{
-				"virtual_network_name": VirtualNetworkName,
-				"resource_group_name":  ResourceGroupName,
-				"subnet_name":          SubnetName,
-				"subscription_id":      SubscriptionID,
+				"virtual_network_name": virtualNetworkName,
+				"resource_group_name":  resourceGroupName,
+				"subnet_name":          subnetName,
+				"subscription_id":      subscriptionID,
 			},
 			"capacity_id": capacityID,
 		},
