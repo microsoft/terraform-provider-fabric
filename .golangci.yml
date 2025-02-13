@@ -64,7 +64,7 @@ linters:
     - mnd
     - goheader
     - cyclop
-    - exportloopref
+    - tenv
 
 linters-settings:
   exhaustive:

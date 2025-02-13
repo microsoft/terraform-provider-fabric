@@ -4,7 +4,6 @@
 package validators_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
@@ -269,7 +268,7 @@ func TestUnit_PatternsIfAttributeIsOneOfValidator(t *testing.T) { //nolint:maint
 
 			resp := &validators.PatternsIfAttributeIsOneOfResponse{}
 
-			validators.PatternsIfAttributeIsOneOf(test.in, test.exceptedValues, test.patterns, test.message).Validate(context.TODO(), test.req, resp)
+			validators.PatternsIfAttributeIsOneOf(test.in, test.exceptedValues, test.patterns, test.message).Validate(t.Context(), test.req, resp)
 
 			if test.expError && resp.Diagnostics.HasError() {
 				d1 := validatordiag.InvalidAttributeValueDiagnostic(test.inPath, test.expErrorMessage, test.req.ConfigValue.ValueString())

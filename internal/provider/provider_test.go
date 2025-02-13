@@ -138,8 +138,8 @@ func TestUnit_Provider_AuthOIDC(t *testing.T) {
 		// OIDC auth OK
 		{
 			PreConfig: func() {
-				os.Setenv(pconfig.GetEnvVarsOIDCRequestURL()[0], "https://localhost")
-				os.Setenv(pconfig.GetEnvVarsOIDCRequestToken()[0], testhelp.RandomUUID())
+				t.Setenv(pconfig.GetEnvVarsOIDCRequestURL()[0], "https://localhost")
+				t.Setenv(pconfig.GetEnvVarsOIDCRequestToken()[0], testhelp.RandomUUID())
 			},
 			// lintignore:AT004
 			Config: `
@@ -186,8 +186,8 @@ func TestUnit_Provider_AuthAzDevOpsWI(t *testing.T) {
 		// OIDC auth OK
 		{
 			PreConfig: func() {
-				os.Setenv("SYSTEM_OIDCREQUESTURI", "https://localhost")
-				os.Setenv(pconfig.GetEnvVarsOIDCRequestToken()[0], testhelp.RandomUUID())
+				t.Setenv("SYSTEM_OIDCREQUESTURI", "https://localhost")
+				t.Setenv(pconfig.GetEnvVarsOIDCRequestToken()[0], testhelp.RandomUUID())
 			},
 			// lintignore:AT004
 			Config: `
