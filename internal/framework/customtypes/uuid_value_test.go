@@ -4,7 +4,6 @@
 package customtypes_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -92,7 +91,7 @@ func TestUnit_UUIDValidateAttribute(t *testing.T) {
 			resp := xattr.ValidateAttributeResponse{}
 
 			testCase.uuidValue.ValidateAttribute(
-				context.Background(),
+				t.Context(),
 				xattr.ValidateAttributeRequest{Path: path.Root("test")},
 				&resp,
 			)
@@ -166,7 +165,7 @@ func TestUnit_UUIDValidateParameter(t *testing.T) {
 			resp := function.ValidateParameterResponse{}
 
 			testCase.uuidValue.ValidateParameter(
-				context.Background(),
+				t.Context(),
 				function.ValidateParameterRequest{
 					Position: 0,
 				},

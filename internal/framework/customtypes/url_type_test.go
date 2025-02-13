@@ -4,7 +4,6 @@
 package customtypes_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -42,7 +41,7 @@ func TestUnit_URLTypeValueFromTerraform(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			ctx := context.Background()
+			ctx := t.Context()
 
 			got, err := customtypes.URLType{}.ValueFromTerraform(ctx, testCase.in)
 			if err != nil {

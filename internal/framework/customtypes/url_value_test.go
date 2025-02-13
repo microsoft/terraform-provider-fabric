@@ -4,7 +4,6 @@
 package customtypes_test
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 	"testing"
@@ -95,7 +94,7 @@ func TestUnit_URLValidateAttribute(t *testing.T) {
 			resp := xattr.ValidateAttributeResponse{}
 
 			testCase.urlValue.ValidateAttribute(
-				context.Background(),
+				t.Context(),
 				xattr.ValidateAttributeRequest{Path: path.Root("test")},
 				&resp,
 			)
@@ -172,7 +171,7 @@ func TestUnit_URLValidateParameter(t *testing.T) {
 			resp := function.ValidateParameterResponse{}
 
 			testCase.urlValue.ValidateParameter(
-				context.Background(),
+				t.Context(),
 				function.ValidateParameterRequest{
 					Position: 0,
 				},

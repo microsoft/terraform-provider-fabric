@@ -4,7 +4,6 @@
 package utils_test
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -115,7 +114,7 @@ func TestUnit_IsErrNotFound(t *testing.T) {
 }
 
 func TestUnit_GetDiagsFromError(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	t.Run("nil error", func(t *testing.T) {
 		diags := utils.GetDiagsFromError(ctx, nil, utils.OperationRead, nil)

@@ -4,7 +4,6 @@
 package typeutils_test
 
 import (
-	"context"
 	"math/big"
 	"testing"
 
@@ -443,7 +442,7 @@ func TestUnit_JSONToDynamic(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			actual, err := typeutils.JSONToDynamic([]byte(tt.input), tt.expect.UnderlyingValue().Type(context.TODO()))
+			actual, err := typeutils.JSONToDynamic([]byte(tt.input), tt.expect.UnderlyingValue().Type(t.Context()))
 			require.NoError(t, err)
 			require.Equal(t, tt.expect, actual)
 		})
