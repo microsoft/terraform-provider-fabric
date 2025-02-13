@@ -31,6 +31,7 @@ func newFakeServer() *fakeServer {
 	// Register entities.
 	handleEntity(server, configureItem)
 	handleEntity(server, configureCapacity)
+	handleEntity(server, configureConnection)
 	handleEntity(server, configureDataPipeline)
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
@@ -57,7 +58,12 @@ func handleEntity[TEntity any](server *fakeServer, configureFunction func(server
 // SupportsType returns true if the server supports the given type.
 func (s *fakeServer) isSupportedType(t reflect.Type) bool {
 	for _, supportedType := range s.types {
-		if supportedType == t {
+		// if supportedType is an interface, check if t implements it
+		if supportedType.Kind() == reflect.Interface {
+			if t.Implements(supportedType) {
+				return true
+			}
+		} else if supportedType == t {
 			return true
 		}
 	}
@@ -68,7 +74,12 @@ func (s *fakeServer) isSupportedType(t reflect.Type) bool {
 // Upsert inserts or updates an element in the server.
 // It panics if the element type is not supported.
 func (s *fakeServer) Upsert(element any) {
-	if !s.isSupportedType(reflect.TypeOf(element)) {
+	elementType := reflect.TypeOf(element)
+	// if elementType is a pointer, get the underlying type
+	if elementType.Kind() == reflect.Ptr {
+		elementType = elementType.Elem()
+	}
+	if !s.isSupportedType(elementType) {
 		panic("Unsupported type: " + reflect.TypeOf(element).String() + ". Did you forget to call HandleEntity in NewFakeServer?") // lintignore:R009
 	}
 
