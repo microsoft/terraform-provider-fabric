@@ -4,7 +4,6 @@
 package auth_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -49,7 +48,7 @@ func TestUnit_TokenCredential_GetToken(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 
-				token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{})
+				token, err := cred.GetToken(t.Context(), policy.TokenRequestOptions{})
 				require.NoError(t, err)
 				assert.Equal(t, testCase.expected, token, "they should be equal")
 			}

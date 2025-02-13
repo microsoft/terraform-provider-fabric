@@ -339,14 +339,14 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	p.setConfig(&ctx, &config, resp)
+	ctx = p.setConfig(ctx, &config, resp)
 	tflog.Debug(ctx, "Setting configuration")
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	p.mapConfig(&ctx, &config, resp)
+	p.mapConfig(ctx, &config, resp)
 	tflog.Debug(ctx, "Mapping configuration")
 
 	if resp.Diagnostics.HasError() {
@@ -473,10 +473,10 @@ func (p *FabricProvider) Functions(_ context.Context) []func() function.Function
 	}
 }
 
-func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.ProviderConfigModel, resp *provider.ConfigureResponse) {
-	timeout, diags := config.Timeout.ToStringValue(*ctx)
+func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.ProviderConfigModel, resp *provider.ConfigureResponse) context.Context {
+	timeout, diags := config.Timeout.ToStringValue(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
+		return ctx
 	}
 
 	config.Timeout = timetypes.NewGoDurationValueFromStringMust(putils.GetStringValue(timeout, pconfig.GetEnvVarsTimeout(), pconfig.DefaultTimeout).ValueString())
@@ -488,14 +488,14 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the "+utils.ConvertStringSlicesToString(pconfig.GetEnvVarsTimeout(), false, false)+" environment variables.",
 		)
 
-		return
+		return ctx
 	}
 
-	*ctx = tflog.SetField(*ctx, "timeout", config.Timeout)
+	ctx = tflog.SetField(ctx, "timeout", config.Timeout)
 
-	endpoint, diags := config.Endpoint.ToStringValue(*ctx)
+	endpoint, diags := config.Endpoint.ToStringValue(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
+		return ctx
 	}
 
 	config.Endpoint = customtypes.NewURLValue(putils.GetStringValue(endpoint, pconfig.GetEnvVarsEndpoint(), pconfig.DefaultFabricEndpointURL).ValueString())
@@ -507,10 +507,10 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the "+utils.ConvertStringSlicesToString(pconfig.GetEnvVarsEndpoint(), false, false)+" environment variables.",
 		)
 
-		return
+		return ctx
 	}
 
-	*ctx = tflog.SetField(*ctx, "endpoint", config.Endpoint)
+	ctx = tflog.SetField(ctx, "endpoint", config.Endpoint)
 
 	config.Environment = putils.GetStringValue(config.Environment, pconfig.GetEnvVarsEnvironment(), "public")
 	environmentAllowedValues := map[string]bool{
@@ -527,87 +527,87 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the "+strings.Join(pconfig.GetEnvVarsEnvironment(), ",")+" environment variables.",
 		)
 
-		return
+		return ctx
 	}
 
-	*ctx = tflog.SetField(*ctx, "environment", config.Environment.ValueString())
+	ctx = tflog.SetField(ctx, "environment", config.Environment.ValueString())
 
-	tenantID, diags := config.TenantID.ToStringValue(*ctx)
+	tenantID, diags := config.TenantID.ToStringValue(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
+		return ctx
 	}
 
 	config.TenantID = customtypes.NewUUIDValue(putils.GetStringValue(tenantID, pconfig.GetEnvVarsTenantID(), "").ValueString())
-	*ctx = tflog.SetField(*ctx, "tenant_id", config.TenantID.ValueString())
+	ctx = tflog.SetField(ctx, "tenant_id", config.TenantID.ValueString())
 
 	config.AuxiliaryTenantIDs = putils.GetListStringValues(config.AuxiliaryTenantIDs, pconfig.GetEnvVarsAuxiliaryTenantIDs(), []string{})
-	*ctx = tflog.SetField(*ctx, "auxiliary_tenant_ids", config.AuxiliaryTenantIDs.String())
+	ctx = tflog.SetField(ctx, "auxiliary_tenant_ids", config.AuxiliaryTenantIDs.String())
 
-	clientID, diags := config.ClientID.ToStringValue(*ctx)
+	clientID, diags := config.ClientID.ToStringValue(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
+		return ctx
 	}
 
 	config.ClientID = customtypes.NewUUIDValue(putils.GetStringValue(clientID, pconfig.GetEnvVarsClientID(), "").ValueString())
-	*ctx = tflog.SetField(*ctx, "client_id", config.ClientID.ValueString())
+	ctx = tflog.SetField(ctx, "client_id", config.ClientID.ValueString())
 
 	config.ClientIDFilePath = putils.GetStringValue(config.ClientIDFilePath, pconfig.GetEnvVarsClientIDFilePath(), "")
-	*ctx = tflog.SetField(*ctx, "client_id_file_path", config.ClientIDFilePath.ValueString())
+	ctx = tflog.SetField(ctx, "client_id_file_path", config.ClientIDFilePath.ValueString())
 
 	config.ClientSecret = putils.GetStringValue(config.ClientSecret, pconfig.GetEnvVarsClientSecret(), "")
-	*ctx = tflog.SetField(*ctx, "client_secret", config.ClientSecret.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "client_secret")
+	ctx = tflog.SetField(ctx, "client_secret", config.ClientSecret.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "client_secret")
 
 	config.ClientSecretFilePath = putils.GetStringValue(config.ClientSecretFilePath, pconfig.GetEnvVarsClientSecretFilePath(), "")
-	*ctx = tflog.SetField(*ctx, "client_secret_file_path", config.ClientSecretFilePath.ValueString())
+	ctx = tflog.SetField(ctx, "client_secret_file_path", config.ClientSecretFilePath.ValueString())
 
 	config.ClientCertificate = putils.GetStringValue(config.ClientCertificate, pconfig.GetEnvVarsClientCertificate(), "")
-	*ctx = tflog.SetField(*ctx, "client_certificate", config.ClientCertificate.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "client_certificate")
+	ctx = tflog.SetField(ctx, "client_certificate", config.ClientCertificate.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "client_certificate")
 
 	config.ClientCertificateFilePath = putils.GetStringValue(config.ClientCertificateFilePath, pconfig.GetEnvVarsClientCertificateFilePath(), "")
-	*ctx = tflog.SetField(*ctx, "client_certificate_file_path", config.ClientCertificateFilePath.ValueString())
+	ctx = tflog.SetField(ctx, "client_certificate_file_path", config.ClientCertificateFilePath.ValueString())
 
 	config.ClientCertificatePassword = putils.GetStringValue(config.ClientCertificatePassword, pconfig.GetEnvVarsClientCertificatePassword(), "")
-	*ctx = tflog.SetField(*ctx, "client_certificate_password", config.ClientCertificatePassword.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "client_certificate_password")
+	ctx = tflog.SetField(ctx, "client_certificate_password", config.ClientCertificatePassword.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "client_certificate_password")
 
 	config.OIDCRequestURL = putils.GetStringValue(config.OIDCRequestURL, pconfig.GetEnvVarsOIDCRequestURL(), "")
-	*ctx = tflog.SetField(*ctx, "oidc_request_url", config.OIDCRequestURL.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "oidc_request_url")
+	ctx = tflog.SetField(ctx, "oidc_request_url", config.OIDCRequestURL.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "oidc_request_url")
 
 	config.OIDCRequestToken = putils.GetStringValue(config.OIDCRequestToken, pconfig.GetEnvVarsOIDCRequestToken(), "")
-	*ctx = tflog.SetField(*ctx, "oidc_request_token", config.OIDCRequestToken.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "oidc_request_token")
+	ctx = tflog.SetField(ctx, "oidc_request_token", config.OIDCRequestToken.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "oidc_request_token")
 
 	config.OIDCToken = putils.GetStringValue(config.OIDCToken, pconfig.GetEnvVarsOIDCToken(), "")
-	*ctx = tflog.SetField(*ctx, "oidc_token", config.OIDCToken.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "oidc_token")
+	ctx = tflog.SetField(ctx, "oidc_token", config.OIDCToken.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "oidc_token")
 
 	config.OIDCTokenFilePath = putils.GetStringValue(config.OIDCTokenFilePath, pconfig.GetEnvVarsOIDCTokenFilePath(), "")
-	*ctx = tflog.SetField(*ctx, "oidc_token_file_path", config.OIDCTokenFilePath.ValueString())
+	ctx = tflog.SetField(ctx, "oidc_token_file_path", config.OIDCTokenFilePath.ValueString())
 
 	config.AzureDevOpsServiceConnectionID = putils.GetStringValue(config.AzureDevOpsServiceConnectionID, pconfig.GetEnvVarsAzureDevOpsServiceConnectionID(), "")
-	*ctx = tflog.SetField(*ctx, "azure_devops_service_connection_id", config.AzureDevOpsServiceConnectionID.ValueString())
+	ctx = tflog.SetField(ctx, "azure_devops_service_connection_id", config.AzureDevOpsServiceConnectionID.ValueString())
 
 	config.Token = putils.GetStringValue(config.Token, pconfig.GetEnvVarsToken(), "")
-	*ctx = tflog.SetField(*ctx, "token", config.Token.ValueString())
-	*ctx = tflog.MaskFieldValuesWithFieldKeys(*ctx, "token")
+	ctx = tflog.SetField(ctx, "token", config.Token.ValueString())
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "token")
 
 	config.TokenFilePath = putils.GetStringValue(config.TokenFilePath, pconfig.GetEnvVarsTokenFilePath(), "")
-	*ctx = tflog.SetField(*ctx, "token_file_path", config.TokenFilePath.ValueString())
+	ctx = tflog.SetField(ctx, "token_file_path", config.TokenFilePath.ValueString())
 
 	config.UseOIDC = putils.GetBoolValue(config.UseOIDC, pconfig.GetEnvVarsUseOIDC(), false)
-	*ctx = tflog.SetField(*ctx, "use_oidc", config.UseOIDC.ValueBool())
+	ctx = tflog.SetField(ctx, "use_oidc", config.UseOIDC.ValueBool())
 
 	config.UseMSI = putils.GetBoolValue(config.UseMSI, pconfig.GetEnvVarsUseMSI(), false)
-	*ctx = tflog.SetField(*ctx, "use_msi", config.UseMSI.ValueBool())
+	ctx = tflog.SetField(ctx, "use_msi", config.UseMSI.ValueBool())
 
 	config.UseDevCLI = putils.GetBoolValue(config.UseDevCLI, pconfig.GetEnvVarsUseDevCLI(), false)
-	*ctx = tflog.SetField(*ctx, "use_dev_cli", config.UseDevCLI.ValueBool())
+	ctx = tflog.SetField(ctx, "use_dev_cli", config.UseDevCLI.ValueBool())
 
 	config.UseCLI = putils.GetBoolValue(config.UseCLI, pconfig.GetEnvVarsUseCLI(), false)
-	*ctx = tflog.SetField(*ctx, "use_cli", config.UseCLI.ValueBool())
+	ctx = tflog.SetField(ctx, "use_cli", config.UseCLI.ValueBool())
 
 	trueCount := 0
 	if config.UseOIDC.ValueBool() {
@@ -637,11 +637,11 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 				"\tuse_oidc: "+config.UseOIDC.String(),
 		)
 
-		return
+		return ctx
 	}
 
 	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
-	*ctx = tflog.SetField(*ctx, "preview", config.Preview.ValueBool())
+	ctx = tflog.SetField(ctx, "preview", config.Preview.ValueBool())
 
 	if config.Preview.ValueBool() {
 		resp.Diagnostics.AddWarning(
@@ -650,9 +650,11 @@ func (p *FabricProvider) setConfig(ctx *context.Context, config *pconfig.Provide
 				"Production use is not recommended. Use at your own risk!",
 		)
 	}
+
+	return ctx
 }
 
-func (p *FabricProvider) mapConfig(ctx *context.Context, config *pconfig.ProviderConfigModel, resp *provider.ConfigureResponse) {
+func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.ProviderConfigModel, resp *provider.ConfigureResponse) {
 	// Map the provider configuration model the configuration provider configuration
 	var err error
 
@@ -678,10 +680,10 @@ func (p *FabricProvider) mapConfig(ctx *context.Context, config *pconfig.Provide
 
 	var auxiliaryTenantIDs []string
 
-	resp.Diagnostics.Append(config.AuxiliaryTenantIDs.ElementsAs(*ctx, &auxiliaryTenantIDs, true)...)
+	resp.Diagnostics.Append(config.AuxiliaryTenantIDs.ElementsAs(ctx, &auxiliaryTenantIDs, true)...)
 	p.config.Auth.AuxiliaryTenantIDs = auxiliaryTenantIDs
 
-	clientID, diags := config.ClientID.ToStringValue(*ctx)
+	clientID, diags := config.ClientID.ToStringValue(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}

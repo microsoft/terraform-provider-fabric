@@ -64,7 +64,7 @@ func getTmplFuncs() (template.FuncMap, error) {
 	return handler.Build(), nil
 }
 
-func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens supertypes.MapValueOf[string]) (*string, *string, diag.Diagnostics) {
+func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens supertypes.MapValueOf[string]) (*string, *string, diag.Diagnostics) { //revive:disable-line:confusing-results
 	var diags diag.Diagnostics
 
 	source := srcPath.ValueString()
