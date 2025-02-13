@@ -26,7 +26,7 @@ func (to *lakehousePropertiesModel) set(ctx context.Context, from *fablakehouse.
 
 	if from.SQLEndpointProperties != nil {
 		sqlEndpointPropertiesModel := &lakehouseSQLEndpointPropertiesModel{}
-		sqlEndpointPropertiesModel.set(from.SQLEndpointProperties)
+		sqlEndpointPropertiesModel.set(*from.SQLEndpointProperties)
 
 		if diags := sqlEndpointProperties.Set(ctx, sqlEndpointPropertiesModel); diags.HasError() {
 			return diags
@@ -47,7 +47,7 @@ type lakehouseSQLEndpointPropertiesModel struct {
 	ProvisioningStatus types.String     `tfsdk:"provisioning_status"`
 }
 
-func (to *lakehouseSQLEndpointPropertiesModel) set(from *fablakehouse.SQLEndpointProperties) {
+func (to *lakehouseSQLEndpointPropertiesModel) set(from fablakehouse.SQLEndpointProperties) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.ConnectionString = types.StringPointerValue(from.ConnectionString)
 	to.ProvisioningStatus = types.StringPointerValue((*string)(from.ProvisioningStatus))

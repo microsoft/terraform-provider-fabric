@@ -13,6 +13,6 @@ type sparkJobDefinitionPropertiesModel struct {
 	OneLakeRootPath customtypes.URL `tfsdk:"onelake_root_path"`
 }
 
-func (to *sparkJobDefinitionPropertiesModel) set(from *fabsparkjobdefinition.Properties) {
+func (to *sparkJobDefinitionPropertiesModel) set(from fabsparkjobdefinition.Properties) {
 	to.OneLakeRootPath = customtypes.NewURLPointerValue(from.OneLakeRootPath)
 }

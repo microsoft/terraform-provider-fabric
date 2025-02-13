@@ -23,7 +23,7 @@ func NewResourceSparkJobDefinition() resource.Resource {
 
 		if from != nil {
 			propertiesModel := &sparkJobDefinitionPropertiesModel{}
-			propertiesModel.set(from)
+			propertiesModel.set(*from)
 
 			diags := properties.Set(ctx, propertiesModel)
 			if diags.HasError() {
