@@ -14,8 +14,11 @@ resource "fabric_report" "example_bootstrap" {
         "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
       }
     }
-    "StaticResources/SharedResources/BaseThemes/CY24SU06.json" = {
-      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU06.json"
+    "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
+      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"
+    }
+    "StaticResources/RegisteredResources/fabric_48_color10148978481469717.png" = {
+      source = "${local.path}/StaticResources/RegisteredResources/fabric_48_color10148978481469717.png"
     }
   }
 }
@@ -35,8 +38,8 @@ resource "fabric_report" "example_update" {
         "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
       }
     }
-    "StaticResources/SharedResources/BaseThemes/CY24SU06.json" = {
-      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU06.json"
+    "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
+      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"
     }
   }
 }

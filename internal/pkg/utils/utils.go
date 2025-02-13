@@ -85,8 +85,15 @@ func SortMapStringByKeys[T any](m map[string]T) map[string]T {
 	return result
 }
 
-func Sha256(content string) string {
-	hash := sha256.Sum256([]byte(content))
+func Sha256[T string | []byte](content T) string {
+	var hash [32]byte
+
+	switch v := any(content).(type) {
+	case string:
+		hash = sha256.Sum256([]byte(v))
+	case []byte:
+		hash = sha256.Sum256(v)
+	}
 
 	return hex.EncodeToString(hash[:])
 }

@@ -78,6 +78,9 @@ Required:
 Required:
 
 - `enabled` (Boolean) The status of the dynamic executor allocation. Accepted values: `false` - Disabled, `true` - Enabled.
+
+Optional:
+
 - `max_executors` (Number) The maximum executors.
 - `min_executors` (Number) The minimum executors.
 

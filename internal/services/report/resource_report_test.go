@@ -39,8 +39,11 @@ var testHelperDefinition = map[string]any{
 			"SemanticModelID": "00000000-0000-0000-0000-000000000000",
 		},
 	},
-	`"StaticResources/SharedResources/BaseThemes/CY24SU06.json"`: map[string]any{
-		"source": "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU06.json",
+	`"StaticResources/SharedResources/BaseThemes/CY24SU10.json"`: map[string]any{
+		"source": "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json",
+	},
+	`"StaticResources/RegisteredResources/fabric_48_color10148978481469717.png"`: map[string]any{
+		"source": "${local.path}/StaticResources/RegisteredResources/fabric_48_color10148978481469717.png",
 	},
 }
 
