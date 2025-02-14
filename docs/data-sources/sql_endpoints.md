@@ -6,6 +6,7 @@ description: |-
   List a Fabric SQL Endpoints.
   Use this data source to list SQL Endpoints https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_endpoints (Data Source)
@@ -15,6 +16,8 @@ List a Fabric SQL Endpoints.
 Use this data source to list [SQL Endpoints](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
