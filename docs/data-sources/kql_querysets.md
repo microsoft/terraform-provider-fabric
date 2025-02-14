@@ -6,6 +6,7 @@ description: |-
   List a Fabric KQL Querysets.
   Use this data source to list KQL Querysets https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set.
   -> This item supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_kql_querysets (Data Source)
@@ -15,6 +16,8 @@ List a Fabric KQL Querysets.
 Use this data source to list [KQL Querysets](https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set).
 
 -> This item supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

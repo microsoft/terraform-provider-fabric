@@ -133,13 +133,8 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	diags := IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-
-		if diags.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
 	}
 }
 
