@@ -122,3 +122,47 @@ func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
 		return nil
 	}
 }
+
+type baseWorkspaceManagedPrivateEndpointModel struct {
+	ID                          customtypes.UUID                                           `tfsdk:"id"`
+	Name                        types.String                                               `tfsdk:"name"`
+	ProvisioningState           types.String                                               `tfsdk:"provisioning_state"`
+	TargetPrivateLinkResourceID types.String                                               `tfsdk:"target_private_link_resource_id"`
+	TargetSubresourceType       types.String                                               `tfsdk:"target_subresource_type"`
+	ConnectionState             supertypes.SingleNestedObjectValueOf[connectionStateModel] `tfsdk:"connection_state"`
+}
+
+func (to *baseWorkspaceManagedPrivateEndpointModel) set(ctx context.Context, from fabcore.ManagedPrivateEndpoint) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Name = types.StringPointerValue(from.Name)
+	to.ProvisioningState = types.StringPointerValue((*string)(from.ProvisioningState))
+	to.TargetPrivateLinkResourceID = types.StringPointerValue(from.TargetPrivateLinkResourceID)
+	to.TargetSubresourceType = types.StringPointerValue((*string)(from.TargetSubresourceType))
+
+	connectionState := supertypes.NewSingleNestedObjectValueOfNull[connectionStateModel](ctx)
+
+	if from.ConnectionState != nil {
+		connectionStateModel := &connectionStateModel{}
+		connectionStateModel.set(*from.ConnectionState)
+
+		if diags := connectionState.Set(ctx, connectionStateModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	to.ConnectionState = connectionState
+
+	return nil
+}
+
+type connectionStateModel struct {
+	ActionsRequired types.String `tfsdk:"actions_required"`
+	Status          types.String `tfsdk:"status"`
+	Description     types.String `tfsdk:"description"`
+}
+
+func (to *connectionStateModel) set(from fabcore.PrivateEndpointConnectionState) {
+	to.ActionsRequired = types.StringPointerValue(from.ActionsRequired)
+	to.Status = types.StringPointerValue((*string)(from.Status))
+	to.Description = types.StringPointerValue(from.Description)
+}

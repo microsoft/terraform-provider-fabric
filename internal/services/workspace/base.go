@@ -8,20 +8,25 @@ import (
 )
 
 const (
-	ItemName                       = "Workspace"
-	ItemTFName                     = "workspace"
-	ItemsName                      = "Workspaces"
-	ItemsTFName                    = "workspaces"
-	ItemDocsSPNSupport             = common.DocsSPNSupported
-	ItemDocsURL                    = "https://learn.microsoft.com/fabric/get-started/workspaces"
-	WorkspaceRoleAssignmentName    = "Workspace Role Assignment"
-	WorkspaceRoleAssignmentTFName  = "workspace_role_assignment"
-	WorkspaceRoleAssignmentsName   = "Workspace Role Assignments"
-	WorkspaceRoleAssignmentsTFName = "workspace_role_assignments"
-	WorkspaceRoleAssignmentDocsURL = "https://learn.microsoft.com/power-bi/collaborate-share/service-roles-new-workspaces"
-	WorkspaceGitName               = "Workspace Git integration"
-	WorkspaceGitTFName             = "workspace_git"
-	WorkspaceGitDocsURL            = "https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration"
+	ItemName                               = "Workspace"
+	ItemTFName                             = "workspace"
+	ItemsName                              = "Workspaces"
+	ItemsTFName                            = "workspaces"
+	ItemDocsSPNSupport                     = common.DocsSPNSupported
+	ItemDocsURL                            = "https://learn.microsoft.com/fabric/get-started/workspaces"
+	WorkspaceRoleAssignmentName            = "Workspace Role Assignment"
+	WorkspaceRoleAssignmentTFName          = "workspace_role_assignment"
+	WorkspaceRoleAssignmentsName           = "Workspace Role Assignments"
+	WorkspaceRoleAssignmentsTFName         = "workspace_role_assignments"
+	WorkspaceRoleAssignmentDocsURL         = "https://learn.microsoft.com/power-bi/collaborate-share/service-roles-new-workspaces"
+	WorkspaceGitName                       = "Workspace Git integration"
+	WorkspaceGitTFName                     = "workspace_git"
+	WorkspaceGitDocsURL                    = "https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration"
+	WorkspaceManagedPrivateEndpointName    = "Workspace Managed Private Endpoint"
+	WorkspaceManagedPrivateEndpointTFName  = "workspace_managed_private_endpoint"
+	WorkspaceManagedPrivateEndpointsName   = "Workspace Managed Private Endpoints"
+	WorkspaceManagedPrivateEndpointsTFName = "workspace_managed_private_endpoints"
+	WorkspaceManagedPrivateEndpointDocsURL = "https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview"
 )
 
 var workspaceIdentityTypes = []string{"SystemAssigned"} //nolint:gochecknoglobals
