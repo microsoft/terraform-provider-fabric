@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -92,6 +93,12 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Schema(ctx context.Context, _ 
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^/subscriptions/[a-f0-9-]+/resourceGroups/[a-zA-Z0-9-]+/providers/[a-zA-Z0-9.]+/[a-zA-Z0-9-]+$`),
+						"Resource ID must be in the format '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}'.",
+					),
 				},
 			},
 			"target_subresource_type": schema.StringAttribute{
