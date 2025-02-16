@@ -406,6 +406,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		workspace.NewResourceWorkspace,
 		workspace.NewResourceWorkspaceRoleAssignment,
 		workspace.NewResourceWorkspaceGit,
+		workspace.NewResourceWorkspaceManagedPrivateEndpoint,
 	}
 }
 
@@ -462,6 +463,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspace.NewDataSourceWorkspaces,
 		workspace.NewDataSourceWorkspaceRoleAssignments,
 		workspace.NewDataSourceWorkspaceGit,
+		workspace.NewDataSourceWorkspaceManagedPrivateEndpoint,
+		workspace.NewDataSourceWorkspaceManagedPrivateEndpoints,
 	}
 }
 
@@ -644,8 +647,8 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	if config.Preview.ValueBool() {
 		resp.Diagnostics.AddWarning(
 			"Preview mode enabled",
-			"Features available in preview mode are not yet generally available and may change without notice include breaking changes. "+
-				"Production use is not recommended. Use at your own risk!",
+			"Preview features are subject to change, including breaking changes. "+
+				"They are not recommended for production use. Use at your own risk!",
 		)
 	}
 
