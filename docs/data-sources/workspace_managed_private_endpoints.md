@@ -54,13 +54,10 @@ Optional:
 
 ### Nested Schema for `values`
 
-Required:
-
-- `id` (String) The Workspace Managed Private Endpoint ID.
-
 Read-Only:
 
 - `connection_state` (Attributes) Endpoint connection state of provisioned endpoints. (see [below for nested schema](#nestedatt--values--connection_state))
+- `id` (String) The Workspace Managed Private Endpoint ID.
 - `name` (String) The Workspace Managed Private Endpoint name.
 - `provisioning_state` (String) Provisioning state of endpoint. Possible values: `Deleting`, `Failed`, `Provisioning`, `Succeeded`, `Updating`
 - `target_private_link_resource_id` (String) Resource Id of data source for which private endpoint is created.
