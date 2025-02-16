@@ -19,7 +19,7 @@ func getDataSourceWorkspaceManagedPrivateEndpointAttributes(ctx context.Context,
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			MarkdownDescription: fmt.Sprintf("The %s ID.", name),
-			Required:            true,
+			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 		"name": schema.StringAttribute{
