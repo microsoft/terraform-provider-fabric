@@ -132,10 +132,9 @@ func (d *dataSourceOnPremisesGateway) Configure(_ context.Context, req datasourc
 	}
 
 	d.pConfigData = pConfigData
-	d.client = (*fabcore.GatewaysClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient())
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 
-// Read refreshes the Terraform state with the latest data.
 func (d *dataSourceOnPremisesGateway) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
@@ -209,15 +208,13 @@ func (d *dataSourceOnPremisesGateway) getByDisplayName(ctx context.Context, mode
 	}
 
 	for _, gw := range gateways {
-		if OnPremisesGateway, ok := gw.(*fabcore.OnPremisesGateway); ok {
-			if *OnPremisesGateway.DisplayName == model.DisplayName.ValueString() {
-				model.set(ctx, *OnPremisesGateway)
+		if onPremisesGateway, ok := gw.(*fabcore.OnPremisesGateway); ok {
+			if *onPremisesGateway.DisplayName == model.DisplayName.ValueString() {
+				model.set(ctx, *onPremisesGateway)
 				return nil
 			}
 		}
 	}
 
-	var diags diag.Diagnostics
-	diags.AddError(common.ErrorReadHeader, "no on-premises gateway with display name found")
-	return diags
+	return diag.Diagnostics{diag.NewErrorDiagnostic(common.ErrorReadHeader, "on-premises gateway not found")}
 }

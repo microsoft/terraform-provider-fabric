@@ -130,7 +130,7 @@ func (d *dataSourceVirtualNetworkGateway) Configure(_ context.Context, req datas
 	}
 
 	d.pConfigData = pConfigData
-	d.client = (*fabcore.GatewaysClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient())
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 
 // Read refreshes the Terraform state with the latest data.
@@ -190,10 +190,13 @@ func (d *dataSourceVirtualNetworkGateway) getByID(ctx context.Context, model *da
 	if gw, ok := respGet.GatewayClassification.(*fabcore.VirtualNetworkGateway); ok {
 		model.set(ctx, *gw)
 		return nil
-	} else {
-		var diags diag.Diagnostics
-		diags.AddError(common.ErrorReadHeader, "expected gateway to be an on-premises gateway")
-		return diags
+	}
+
+	return diag.Diagnostics{
+		diag.NewErrorDiagnostic(
+			common.ErrorReadHeader,
+			"expected gateway to be a virtual network gateway",
+		),
 	}
 }
 
@@ -215,7 +218,5 @@ func (d *dataSourceVirtualNetworkGateway) getByDisplayName(ctx context.Context, 
 		}
 	}
 
-	var diags diag.Diagnostics
-	diags.AddError(common.ErrorReadHeader, "expected gateway to be an on-premises gateway")
-	return diags
+	return diag.Diagnostics{diag.NewErrorDiagnostic(common.ErrorReadHeader, "virtual network gateway not found")}
 }

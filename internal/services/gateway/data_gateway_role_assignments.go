@@ -71,31 +71,6 @@ func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasou
 							MarkdownDescription: "The type of the principal.",
 							Computed:            true,
 						},
-						"details": schema.SingleNestedAttribute{
-							MarkdownDescription: "The principal details.",
-							Computed:            true,
-							CustomType:          supertypes.NewSingleNestedObjectTypeOf[principalDetailsModel](ctx),
-							Attributes: map[string]schema.Attribute{
-								"user_principal_name": schema.StringAttribute{
-									MarkdownDescription: "The user principal name.",
-									Computed:            true,
-								},
-								"group_type": schema.StringAttribute{
-									MarkdownDescription: "The group type.",
-									Computed:            true,
-								},
-								"app_id": schema.StringAttribute{
-									MarkdownDescription: "The Service Principal's Microsoft Entra App ID.",
-									Computed:            true,
-									CustomType:          customtypes.UUIDType{},
-								},
-								"parent_principal_id": schema.StringAttribute{
-									MarkdownDescription: "The parent principal ID of Service Principal Profile.",
-									Computed:            true,
-									CustomType:          customtypes.UUIDType{},
-								},
-							},
-						},
 					},
 				},
 			},

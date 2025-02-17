@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -38,9 +39,8 @@ func (d *dataSourceOnPremisesGatewayPersonal) Schema(ctx context.Context, _ data
 		MarkdownDescription: "Retrieve an on-premises gateway in its 'personal' form (ID, public key, type, version).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
+				Required:            true,
 				MarkdownDescription: "The gateway ID.",
-				Optional:            true,
-				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"version": schema.StringAttribute{
@@ -73,7 +73,6 @@ func (d *dataSourceOnPremisesGatewayPersonal) Configure(ctx context.Context, req
 	}
 
 	pConfigData, ok := req.ProviderData.(*pconfig.ProviderData)
-
 	if !ok {
 		resp.Diagnostics.AddError(
 			common.ErrorDataSourceConfigType,
@@ -82,27 +81,33 @@ func (d *dataSourceOnPremisesGatewayPersonal) Configure(ctx context.Context, req
 		return
 	}
 	d.pConfigData = pConfigData
-	d.client = (*fabcore.GatewaysClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient())
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 
 func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data datasourceOnPremisesGatewayPersonalModel
+	tflog.Debug(ctx, "READ", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "READ", map[string]any{
+		"config": req.Config,
+	})
 
+	var data datasourceOnPremisesGatewayPersonalModel
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if data.ID.ValueString() == "" {
-		resp.Diagnostics.AddError(
-			"Missing ID",
-			"An ID is required to look up a personal on-premises gateway.",
-		)
+	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	gatewayResp, errResp := d.client.GetGateway(ctx, data.ID.ValueString(), nil)
-	if errResp != nil {
-		resp.Diagnostics.AddError("GetGateway failed", errResp.Error())
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	gatewayResp, err := d.client.GetGateway(ctx, data.ID.ValueString(), nil)
+	if err != nil {
+		resp.Diagnostics.AddError("GetGateway failed", err.Error())
 		return
 	}
 
@@ -112,14 +117,17 @@ func (d *dataSourceOnPremisesGatewayPersonal) Read(ctx context.Context, req data
 		return
 	}
 
-	gateway := datasourceOnPremisesGatewayPersonalModel{}
-	diags := gateway.set(ctx, *realGw)
+	data.set(ctx, *realGw)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	if diags := resp.State.Set(ctx, gateway); diags.HasError() {
+	tflog.Debug(ctx, "READ", map[string]any{
+		"action": "end",
+	})
+
+	if diags := resp.State.Set(ctx, data); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}

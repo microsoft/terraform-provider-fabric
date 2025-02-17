@@ -31,7 +31,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 				map[string]any{
 					"principal_id":   "00000000-0000-0000-0000-000000000000",
 					"principal_type": "User",
-					"role":           "Member",
+					"role":           "ConnectionCreator",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "gateway_id" is required, but no definition was found.`),
@@ -44,7 +44,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 				map[string]any{
 					"gateway_id":     "00000000-0000-0000-0000-000000000000",
 					"principal_type": "User",
-					"role":           "Member",
+					"role":           "Admin",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "principal_id" is required, but no definition was found.`),
@@ -57,7 +57,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 				map[string]any{
 					"gateway_id":   "00000000-0000-0000-0000-000000000000",
 					"principal_id": "00000000-0000-0000-0000-000000000000",
-					"role":         "Member",
+					"role":         "ConnectionCreator",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "principal_type" is required, but no definition was found.`),
@@ -70,7 +70,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 				map[string]any{
 					"gateway_id":     "00000000-0000-0000-0000-000000000000",
 					"principal_id":   "00000000-0000-0000-0000-000000000000",
-					"principal_type": "User",
+					"principal_type": "Admin",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "role" is required, but no definition was found.`),
@@ -84,7 +84,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 					"gateway_id":     "invalid uuid",
 					"principal_id":   "00000000-0000-0000-0000-000000000000",
 					"principal_type": "User",
-					"role":           "Member",
+					"role":           "ConnectionCreator",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -98,7 +98,7 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 					"gateway_id":     "00000000-0000-0000-0000-000000000000",
 					"principal_id":   "invalid uuid",
 					"principal_type": "User",
-					"role":           "Member",
+					"role":           "ConnectionCreator",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -146,7 +146,7 @@ func TestUnit_GatewayRoleAssignmentResource_ImportState(t *testing.T) {
 
 func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 	// Assume a well-known gateway is defined in the test environment.
-	gateway := testhelp.WellKnown()["Gateway"].(map[string]any)
+	gateway := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
 	gatewayID := gateway["id"].(string)
 
 	// Assume a known principal is available.
@@ -164,14 +164,14 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 					"gateway_id":     gatewayID,
 					"principal_id":   principalID,
 					"principal_type": principalType,
-					"role":           "Member",
+					"role":           "ConnectionCreator",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "gateway_id", gatewayID),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_id", principalID),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_type", principalType),
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "Member"),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "ConnectionCreator"),
 			),
 		},
 		// Update and Read
@@ -183,14 +183,14 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 					"gateway_id":     gatewayID,
 					"principal_id":   principalID,
 					"principal_type": principalType,
-					"role":           "Viewer",
+					"role":           "Admin",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "gateway_id", gatewayID),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_id", principalID),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_type", principalType),
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "Viewer"),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "Admin"),
 			),
 		},
 	}))

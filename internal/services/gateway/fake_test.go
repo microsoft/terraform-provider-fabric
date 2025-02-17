@@ -46,7 +46,7 @@ func NewRandomGatewayRoleAssignments() fabcore.GatewayRoleAssignments {
 			},
 			{
 				ID:   azto.Ptr(assignmentID1),
-				Role: azto.Ptr(fabcore.GatewayRoleAdmin),
+				Role: azto.Ptr(fabcore.GatewayRoleConnectionCreator),
 				Principal: &fabcore.Principal{
 					ID:          azto.Ptr(principalID1),
 					Type:        azto.Ptr(fabcore.PrincipalTypeUser),

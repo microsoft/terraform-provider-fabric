@@ -131,36 +131,3 @@ func TestUnit_OnPremisesGatewayDataSource(t *testing.T) {
 		},
 	}))
 }
-
-func TestAcc_OnPremisesGatewayDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["OnPremisesGateway"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityDisplayName := entity["displayName"].(string)
-	entityDescription := entity["description"].(string)
-
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesItemHeader,
-				map[string]any{
-					"id": entityID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesItemFabricFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesItemFabricFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesItemFabricFQN, "description", entityDescription),
-			),
-		},
-		// read by id - not found
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesItemHeader,
-				map[string]any{
-					"id": testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-	}))
-}

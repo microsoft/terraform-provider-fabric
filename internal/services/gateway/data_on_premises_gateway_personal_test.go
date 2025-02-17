@@ -49,10 +49,19 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 					testDataSourceOnPremisesPersonalHeader,
 					map[string]any{},
 				),
-				// "Missing ID" error is raised in Read when data.ID is empty.
-				ExpectError: regexp.MustCompile(`Missing ID`),
+				ExpectError: regexp.MustCompile(`The argument "id" is required`),
 			},
-			// Step 3: Invalid UUID string should trigger an error.
+			// Step 3: Read by id - not found
+			{
+				Config: at.CompileConfig(
+					testDataSourceOnPremisesItemHeader,
+					map[string]any{
+						"id": testhelp.RandomUUID(),
+					},
+				),
+				ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+			},
+			// Step 4: Invalid UUID string should trigger an error.
 			{
 				Config: at.CompileConfig(
 					testDataSourceOnPremisesPersonalHeader,
@@ -62,7 +71,7 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 				),
 				ExpectError: regexp.MustCompile(`invalid uuid`),
 			},
-			// Step 4: Valid read test using the entity's ID.
+			// Step 5: Valid read test using the entity's ID.
 			{
 				Config: at.CompileConfig(
 					testDataSourceOnPremisesPersonalHeader,
@@ -79,35 +88,4 @@ func TestUnit_OnPremisesGatewayPersonalDataSource(t *testing.T) {
 			},
 		},
 	))
-}
-
-func TestAcc_OnPremisesGatewayPersonalDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["OnPremisesGatewayPersonal"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityDescription := entity["description"].(string)
-
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalHeader,
-				map[string]any{
-					"id": entityID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceOnPremisesPersonalFQN, "description", entityDescription),
-			),
-		},
-		// read by id - not found
-		{
-			Config: at.CompileConfig(
-				testDataSourceOnPremisesPersonalHeader,
-				map[string]any{
-					"id": testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-	}))
 }

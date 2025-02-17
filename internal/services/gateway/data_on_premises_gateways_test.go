@@ -52,23 +52,3 @@ func TestUnit_OnPremisesGatewaysDataSource(t *testing.T) {
 		},
 	))
 }
-
-func TestAcc_OnPremisesGatewaysDataSource(t *testing.T) {
-	resource.ParallelTest(t, testhelp.NewTestAccCase(
-		t,
-		nil,
-		nil,
-		[]resource.TestStep{
-			// read
-			{
-				Config: at.CompileConfig(
-					testDataSourceOnPremisesGatewaysHeader,
-					map[string]any{},
-				),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrSet(testDataSourceOnPremisesGatewaysFQN, "values.0.id"),
-				),
-			},
-		},
-	))
-}

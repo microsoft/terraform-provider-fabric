@@ -10,6 +10,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
@@ -85,9 +86,6 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 // Validate implements concreteEntityOperations.
 func (o *operationsGateway) Validate(newEntity fabcore.GatewayClassification, existing []fabcore.GatewayClassification) (statusCode int, err error) {
 	for _, existingGateway := range existing {
-		if existingGateway.GetGateway().Type != newEntity.GetGateway().Type {
-			continue
-		}
 		switch gateway := newEntity.(type) {
 		case *fabcore.VirtualNetworkGateway:
 			vng := existingGateway.(*fabcore.VirtualNetworkGateway)
@@ -162,8 +160,8 @@ func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 	return &fabcore.VirtualNetworkGateway{
 		ID:                           to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                  to.Ptr(testhelp.RandomName()),
-		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomInt32(100)),
-		NumberOfMemberGateways:       to.Ptr(testhelp.RandomInt32(100)),
+		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
+		NumberOfMemberGateways:       to.Ptr(testhelp.RandomInt32Max(7)),
 		CapacityID:                   to.Ptr(testhelp.RandomUUID()),
 		Type:                         to.Ptr(fabcore.GatewayTypeVirtualNetwork),
 		VirtualNetworkAzureResource: &fabcore.VirtualNetworkAzureResource{
@@ -179,7 +177,7 @@ func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 	return &fabcore.OnPremisesGateway{
 		ID:                          to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                 to.Ptr(testhelp.RandomName()),
-		NumberOfMemberGateways:      to.Ptr(testhelp.RandomInt32(100)),
+		NumberOfMemberGateways:      to.Ptr(testhelp.RandomInt32Max(7)),
 		Type:                        to.Ptr(fabcore.GatewayTypeOnPremises),
 		AllowCloudConnectionRefresh: to.Ptr(true),
 		AllowCustomConnectors:       to.Ptr(false),

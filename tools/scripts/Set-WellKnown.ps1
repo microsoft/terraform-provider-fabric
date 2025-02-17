@@ -474,8 +474,152 @@ function Set-FabricWorkspaceRoleAssignment {
   }
 }
 
+function Set-FabricGatewayVirtualNetwork {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$CapacityId,
+
+    # Inactivity time (in minutes) before the gateway goes to auto-sleep.
+    # Allowed values: 30, 60, 90, 120, 150, 240, 360, 480, 720, 1440.
+    [Parameter(Mandatory = $true)]
+    [int]$InactivityMinutesBeforeSleep,
+
+    # Number of member gateways (between 1 and 7).
+    [Parameter(Mandatory = $true)]
+    [int]$NumberOfMemberGateways,
+
+    # Azure virtual network details:
+    [Parameter(Mandatory = $true)]
+    [string]$SubscriptionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ResourceGroupName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$VirtualNetworkName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$SubnetName
+  )
+
+  # Attempt to check for an existing gateway with the same display name.
+  $existingGateways = Invoke-FabricRest -Method 'GET' -Endpoint "gateways"
+  $result = $existingGateways.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+  if (!$result) {
+    # Construct the payload for creating a Virtual Network gateway.
+    # Refer to the API documentation for details on the request format :contentReference[oaicite:1]{index=1} and the Virtual Network Azure Resource :contentReference[oaicite:2]{index=2}.
+    $payload = @{
+      type                         = "VirtualNetwork"
+      displayName                  = $DisplayName
+      capacityId                   = $CapacityId
+      inactivityMinutesBeforeSleep = $InactivityMinutesBeforeSleep
+      numberOfMemberGateways       = $NumberOfMemberGateways
+      virtualNetworkAzureResource  = @{
+        subscriptionId     = $SubscriptionId
+        resourceGroupName  = $ResourceGroupName
+        virtualNetworkName = $VirtualNetworkName
+        subnetName         = $SubnetName
+      }
+    }
+
+    Write-Log -Message "Creating Virtual Network Gateway: $DisplayName" -Level 'WARN'
+    $result = Invoke-FabricRest -Method 'POST' -Endpoint "gateways" -Payload $payload
+  }
+
+  Write-Log -Message "Gateway Virtual Network - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
+
+function Set-AzureVirtualNetwork {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ResourceGroupName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$VNetName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Location,
+
+    [Parameter(Mandatory = $true)]
+    [string[]]$AddressPrefixes,
+
+    [Parameter(Mandatory = $true)]
+    [string]$SubnetName,
+
+    [Parameter(Mandatory = $true)]
+    [string[]]$SubnetAddressPrefixes
+  )
+
+  # Attempt to get the existing Virtual Network
+  $vnet = Get-AzVirtualNetwork -Name $VNetName -ResourceGroupName $ResourceGroupName
+  if (!$vnet) {
+    # VNet does not exist, so create it
+    Write-Log -Message "Creating VNet: $VNetName in Resource Group: $ResourceGroupName" -Level 'WARN'
+    $subnetConfig = New-AzVirtualNetworkSubnetConfig `
+      -Name $SubnetName `
+      -AddressPrefix $SubnetAddressPrefixes `
+
+    $subnetConfig = Add-AzDelegation `
+      -Name 'PowerPlatformVnetAccess' `
+      -ServiceName 'Microsoft.PowerPlatform/vnetaccesslinks' `
+      -Subnet $subnetConfig
+
+    $vnet = New-AzVirtualNetwork `
+      -Name $VNetName `
+      -ResourceGroupName $ResourceGroupName `
+      -Location $Location `
+      -AddressPrefix $AddressPrefixes `
+      -Subnet $subnetConfig
+
+    # Commit creation
+    $vnet = $vnet | Set-AzVirtualNetwork
+    Write-Log -Message "Created VNet: $VNetName" -Level 'INFO'
+    return $vnet
+  }
+
+  # If the VNet already exists, check for the subnet
+  $subnet = $vnet.Subnets | Where-Object { $_.Name -eq $SubnetName }
+  if (-not $subnet) {
+    # Subnet does not exist; add one with the delegation
+    Write-Log -Message "Adding subnet '$SubnetName' with delegation 'Microsoft.PowerPlatform/vnetaccesslinks' to VNet '$VNetName'." -Level 'WARN'
+    $subnetConfig = New-AzVirtualNetworkSubnetConfig `
+      -Name $SubnetName `
+      -AddressPrefix $SubnetAddressPrefixes `
+
+    $subnetConfig = Add-AzDelegation `
+      -Name 'PowerPlatformVnetAccess' `
+      -ServiceName 'Microsoft.PowerPlatform/vnetaccesslinks' `
+      -Subnet $subnetConfig
+
+    $vnet = $vnet | Set-AzVirtualNetwork
+  }
+  else {
+    # Subnet exists; ensure it has the correct delegation
+    $existingDelegation = $subnet.Delegations | Where-Object { $_.ServiceName -eq 'Microsoft.PowerPlatform/vnetaccesslinks' }
+    if (-not $existingDelegation) {
+      Write-Log -Message "Subnet '$SubnetName' found but missing delegation to 'Microsoft.PowerPlatform/vnetaccesslinks'. Adding Microsoft.PowerPlatform/vnetaccesslinks delegation..." -Level 'WARN'
+
+      $subnetConfig = Add-AzDelegation `
+        -Name 'PowerPlatformVnetAccess' `
+        -ServiceName 'Microsoft.PowerPlatform/vnetaccesslinks' `
+        -Subnet $subnet
+
+      $vnet = $vnet | Set-AzVirtualNetwork
+      Write-Log -Message "Added missing delegation to subnet '$SubnetName'." -Level 'INFO'
+    }
+  }
+  Write-Log -Message "Az Virtual Network - Name: $($vnet.Name)"
+  return $vnet
+}
+
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS')
+$modules = @('Az.Accounts', 'Az.Network', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -488,8 +632,8 @@ if (Test-Path -Path './wellknown.env') {
   Import-Dotenv -Path ./wellknown.env -AllowClobber
 }
 
-if (!$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX) {
-  Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME and FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX are required environment variables.' -Level 'ERROR'
+if (!$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION) {
+  Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME and FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX and FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME and FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION are required environment variables.' -Level 'ERROR'
 }
 
 # Check if already logged in to Azure, if not then login
@@ -521,7 +665,7 @@ $capacity = $capacities.Response.value | Where-Object { $_.displayName -eq $Env:
 if (!$capacity) {
   Write-Log -Message "Fabric Capacity: $($Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME)"
 }
-Write-Log -Message "Fabric Capacity - Name: $($Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME) / ID: $($capacity.id)"
+Write-Log -Message "Fabric Capacity - Name: $($Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME) / ID: $($capacity.ID)"
 $wellKnown['Capacity'] = @{
   id          = $capacity.id
   displayName = $capacity.displayName
@@ -535,6 +679,7 @@ $itemNaming = @{
   'Environment'           = 'env'
   'Eventhouse'            = 'eh'
   'Eventstream'           = 'es'
+  'GatewayVirtualNetwork' = 'gvn'
   'KQLDashboard'          = 'kqldash'
   'KQLDatabase'           = 'kqldb'
   'KQLQueryset'           = 'kqlqs'
@@ -559,6 +704,9 @@ $itemNaming = @{
   'EntraServicePrincipal' = 'sp'
   'EntraGroup'            = 'grp'
   'AzDOProject'           = 'proj'
+  'VirtualNetworkSubnet'  = 'subnet'
+  'VirtualNetworkInitial' = 'vneti'
+  'VirtualNetworkUpdate'  = 'vnetu'
 }
 
 $baseName = Get-BaseName
@@ -568,6 +716,8 @@ $Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE = $baseName
 $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID',
   'FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID',
+  'FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME'
+  'FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION',
   'FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME',
   'FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME',
   'FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX',
@@ -660,7 +810,7 @@ $definition = @{
   parts = @(
     @{
       path        = "mirroring.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mirrored_database/mirroring.json'
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/mirrored_database/mirroring.json'
       payloadType = 'InlineBase64'
     }
   )
@@ -678,12 +828,12 @@ $definition = @{
   parts = @(
     @{
       path        = 'definition.pbism'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/semantic_model_tmsl/definition.pbism'
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/semantic_model_tmsl/definition.pbism'
       payloadType = 'InlineBase64'
     }
     @{
       path        = 'model.bim'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/semantic_model_tmsl/model.bim.tmpl' -Values @(@{ key = '{{ .ColumnName }}'; value = 'ColumnTest1' })
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/semantic_model_tmsl/model.bim.tmpl' -Values @(@{ key = '{{ .ColumnName }}'; value = 'ColumnTest1' })
       payloadType = 'InlineBase64'
     }
   )
@@ -701,22 +851,22 @@ $definition = @{
   parts = @(
     @{
       path        = 'definition.pbir'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/definition.pbir.tmpl' -Values @(@{ key = '{{ .SemanticModelID }}'; value = $semanticModel.id })
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/report_pbir_legacy/definition.pbir.tmpl' -Values @(@{ key = '{{ .SemanticModelID }}'; value = $semanticModel.id })
       payloadType = 'InlineBase64'
     },
     @{
       path        = 'report.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/report.json'
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/report_pbir_legacy/report.json'
       payloadType = 'InlineBase64'
     },
     @{
       path        = 'StaticResources/SharedResources/BaseThemes/CY24SU10.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/StaticResources/SharedResources/BaseThemes/CY24SU10.json'
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/report_pbir_legacy/StaticResources/SharedResources/BaseThemes/CY24SU10.json'
       payloadType = 'InlineBase64'
     }
     @{
       path        = 'StaticResources/RegisteredResources/fabric_48_color10148978481469717.png'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/report_pbir_legacy/StaticResources/RegisteredResources/fabric_48_color10148978481469717.png'
+      payload     = Get-DefinitionPartBase64 -Path './internal/testhelp/fixtures/report_pbir_legacy/StaticResources/RegisteredResources/fabric_48_color10148978481469717.png'
       payloadType = 'InlineBase64'
     }
   )
@@ -744,6 +894,76 @@ $wellKnown['DomainChild'] = @{
   id          = $childDomain.id
   displayName = $childDomain.displayName
   description = $childDomain.description
+}
+
+
+# Register the Microsoft.PowerPlatform resource provider
+Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
+Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+
+# Create Azure initial Virtual Network if not exists
+$vnetName = "${displayName}_$($itemNaming['VirtualNetworkInitial'])"
+$addrRange = "10.10.0.0/16"
+$subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
+$subRange = "10.10.1.0/24"
+
+$vnet = Set-AzureVirtualNetwork `
+  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -VNetName $vnetName `
+  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -AddressPrefixes $addrRange `
+  -SubnetName $subName `
+  -SubnetAddressPrefixes $subRange
+
+$wellKnown['VirtualNetworkInitial'] = @{
+  name              = $vnet.Name
+  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
+  subnetName        = $subName
+  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+}
+
+
+# Create Azure update Virtual Network if not exists
+$vnetName = "${displayName}_$($itemNaming['VirtualNetworkUpdate'])"
+$addrRange = "10.10.0.0/16"
+$subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
+$subRange = "10.10.1.0/24"
+
+$vnet = Set-AzureVirtualNetwork `
+  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -VNetName $vnetName `
+  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -AddressPrefixes $addrRange `
+  -SubnetName $subName `
+  -SubnetAddressPrefixes $subRange
+
+$wellKnown['VirtualNetworkUpdate'] = @{
+  name              = $vnet.Name
+  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
+  subnetName        = $subName
+  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+}
+
+# Create Fabric Gateway Virtual Network if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['GatewayVirtualNetwork'])"
+$inactivityMinutesBeforeSleep = 30
+$numberOfMemberGateways = 1
+
+$gateway = Set-FabricGatewayVirtualNetwork `
+  -DisplayName $displayNameTemp `
+  -CapacityId $capacity.id `
+  -InactivityMinutesBeforeSleep $inactivityMinutesBeforeSleep `
+  -NumberOfMemberGateways $numberOfMemberGateways `
+  -SubscriptionId $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID `
+  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -VirtualNetworkName $wellKnown['VirtualNetworkInitial'].name `
+  -SubnetName $wellKnown['VirtualNetworkInitial'].subnetName
+
+$wellKnown['GatewayVirtualNetwork'] = @{
+  id          = $gateway.id
+  displayName = $gateway.displayName
+  type        = $gateway.type
+  description = $gateway.description
 }
 
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($workspace.id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"

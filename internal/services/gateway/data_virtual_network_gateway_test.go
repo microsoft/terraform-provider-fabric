@@ -133,10 +133,9 @@ func TestUnit_VirtualNetworkGatewayDataSource(t *testing.T) {
 }
 
 func TestAcc_VirtualNetworkGatewayDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["VirtualNetworkGateway"].(map[string]any)
+	entity := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
-	entityDescription := entity["description"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		{
@@ -149,7 +148,13 @@ func TestAcc_VirtualNetworkGatewayDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceVirtualNetworkFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceVirtualNetworkFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceVirtualNetworkFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "inactivity_minutes_before_sleep"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "capacity_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "number_of_member_gateways"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "virtual_network_azure_resource.subscription_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "virtual_network_azure_resource.resource_group_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "virtual_network_azure_resource.virtual_network_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceVirtualNetworkFQN, "virtual_network_azure_resource.subnet_name"),
 			),
 		},
 		// read by id - not found
