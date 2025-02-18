@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -68,6 +69,7 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoint) Schema(ctx context.Context, 
 		Computed:            true,
 		Optional:            true,
 	}
+	attributes["timeouts"] = timeouts.Attributes(ctx)
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("Get a Fabric "+d.Name+".\n\n"+
@@ -163,7 +165,7 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoint) getByID(ctx context.Context,
 	})
 
 	respGet, err := d.client.GetWorkspaceManagedPrivateEndpoint(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
