@@ -39,6 +39,7 @@ data "fabric_workspace_managed_private_endpoint" "example" {
 
 - `id` (String) The Workspace Managed Private Endpoint ID.
 - `name` (String) The Workspace Managed Private Endpoint name.
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
@@ -46,6 +47,14 @@ data "fabric_workspace_managed_private_endpoint" "example" {
 - `provisioning_state` (String) Provisioning state of endpoint. Possible values: `Deleting`, `Failed`, `Provisioning`, `Succeeded`, `Updating`
 - `target_private_link_resource_id` (String) Resource Id of data source for which private endpoint is created.
 - `target_subresource_type` (String) Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource).
+
+<a id="nestedatt--timeouts"></a>
+
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 <a id="nestedatt--connection_state"></a>
 

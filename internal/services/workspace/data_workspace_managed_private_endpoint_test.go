@@ -18,15 +18,15 @@ import (
 )
 
 var (
-	testWorkspaceManagedPrivateEndpointFQN    = testhelp.DataSourceFQN("fabric", workspaceManagedPrivateEndpointsTFName, "test")
-	testWorkspaceManagedPrivateEndpointHeader = at.DataSourceHeader(testhelp.TypeName("fabric", workspaceManagedPrivateEndpointsTFName), "test")
+	testWorkspaceManagedPrivateEndpointFQN    = testhelp.DataSourceFQN("fabric", workspaceManagedPrivateEndpointTFName, "test")
+	testWorkspaceManagedPrivateEndpointHeader = at.DataSourceHeader(testhelp.TypeName("fabric", workspaceManagedPrivateEndpointTFName), "test")
 )
 
 func TestAcc_WorkspaceManagedPrivateEndpointDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceMPE"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["WorkspaceManagedPrivateEndpoint"].(map[string]any)
+	entity := testhelp.WellKnown()["ManagedPrivateEndpoint"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityName := entity["name"].(string)
 
