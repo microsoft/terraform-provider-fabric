@@ -1,0 +1,5 @@
+kind: changed
+body: Added missing example for `fabric_kql_database` resource/data-source.
+time: 2025-02-14T16:21:08.4928042+01:00
+custom:
+  Issue: "258"

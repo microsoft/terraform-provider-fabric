@@ -19,7 +19,7 @@ Use this resource to manage a [KQL Database](https://learn.microsoft.com/fabric/
 ## Example Usage
 
 ```terraform
-# Example 1 - Create a ReadWrite KQL database
+# Example 1 - Item with configuration, no definition - create a ReadWrite KQL database
 resource "fabric_kql_database" "example1" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -30,7 +30,7 @@ resource "fabric_kql_database" "example1" {
   }
 }
 
-# Example 2 - Create a Shortcut KQL database to source Azure Data Explorer cluster
+# Example 2 - Item with configuration, no definition - create a Shortcut KQL database to source Azure Data Explorer cluster
 resource "fabric_kql_database" "example2" {
   display_name = "example2"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -43,7 +43,7 @@ resource "fabric_kql_database" "example2" {
   }
 }
 
-# Example 3 - Create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
+# Example 3 - Item with configuration, no definition - create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
 resource "fabric_kql_database" "example3" {
   display_name = "example3"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -55,7 +55,7 @@ resource "fabric_kql_database" "example3" {
   }
 }
 
-# Example 4 - Create a Shortcut KQL database to source KQL database
+# Example 4 - Item with configuration, no definition - create a Shortcut KQL database to source KQL database
 resource "fabric_kql_database" "example4" {
   display_name = "example4"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -64,6 +64,37 @@ resource "fabric_kql_database" "example4" {
     database_type        = "Shortcut"
     eventhouse_id        = "11111111-1111-1111-1111-111111111111"
     source_database_name = "MyDatabase"
+  }
+}
+
+
+# Example 5 - Item with definition bootstrapping only
+resource "fabric_kql_database" "example5" {
+  display_name              = "example5"
+  description               = "example with definition bootstrapping"
+  workspace_id              = "00000000-0000-0000-0000-000000000000"
+  format                    = "Default"
+  definition_update_enabled = false # <-- Disable definition update
+  definition = {
+    "DatabaseProperties.json" = {
+      source = "${local.path}/DatabaseProperties.json.tmpl"
+    }
+  }
+}
+
+# Example 6 - Item with definition update when source or tokens changed
+resource "fabric_kql_database" "example6" {
+  display_name = "example5"
+  description  = "example with definition update when source or tokens changed"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "DatabaseProperties.json" = {
+      source = "${local.path}/DatabaseProperties.json.tmpl"
+      tokens = {
+        "MyKey" = "MyValue"
+      }
+    }
   }
 }
 ```
