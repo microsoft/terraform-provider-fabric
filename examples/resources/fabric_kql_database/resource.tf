@@ -63,7 +63,7 @@ resource "fabric_kql_database" "example5" {
 
 # Example 6 - Item with definition update when source or tokens changed
 resource "fabric_kql_database" "example6" {
-  display_name = "example5"
+  display_name = "example6"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
