@@ -13,7 +13,7 @@ func NewResourceGraphQLApi() resource.Resource {
 	config := fabricitem.ResourceFabricItem{
 		Type:              ItemType,
 		Name:              ItemName,
-		NameRenameAllowed: false,
+		NameRenameAllowed: true,
 		TFName:            ItemTFName,
 		MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
 			"Use this resource to manage [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
