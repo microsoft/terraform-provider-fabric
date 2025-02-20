@@ -1,0 +1,5 @@
+kind: changed
+body: Added missing example for `fabric_ml_model` resource.
+time: 2025-02-14T16:20:24.7564261+01:00
+custom:
+  Issue: "258"

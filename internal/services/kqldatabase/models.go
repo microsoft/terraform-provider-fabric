@@ -19,7 +19,7 @@ type kqlDatabasePropertiesModel struct {
 	// OneLakeCachingPeriod         types.String     `tfsdk:"onelake_caching_period"`
 }
 
-func (to *kqlDatabasePropertiesModel) set(from *fabkqldatabase.Properties) {
+func (to *kqlDatabasePropertiesModel) set(from fabkqldatabase.Properties) {
 	to.DatabaseType = types.StringPointerValue((*string)(from.DatabaseType))
 	to.EventhouseID = customtypes.NewUUIDPointerValue(from.ParentEventhouseItemID)
 	to.IngestionServiceURI = customtypes.NewURLPointerValue(from.IngestionServiceURI)

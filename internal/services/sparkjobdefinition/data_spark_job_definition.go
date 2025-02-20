@@ -22,7 +22,7 @@ func NewDataSourceSparkJobDefinition() datasource.DataSource {
 
 		if from != nil {
 			propertiesModel := &sparkJobDefinitionPropertiesModel{}
-			propertiesModel.set(from)
+			propertiesModel.set(*from)
 
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
