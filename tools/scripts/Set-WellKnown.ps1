@@ -843,9 +843,12 @@ $managedPrivateEndpoint = $managedPrivateEndpoints.Response.value | Where-Object
 if (!$managedPrivateEndpoint) {
   Write-Log -Message "Creating Managed Private Endpoint: $displayNameTemp" -Level 'WARN'
   # TODO
-  # $payload = @{
-  #   name = $displayNameTemp
-  # }
+  $payload = @{
+    name                        = $displayNameTemp
+    targetPrivateLinkResourceId = $wellKnown['StorageAccount']['id']
+    targetSubresourceType       = 'blob'
+    requestMessage              = $displayNameTemp
+  }
   # $managedPrivateEndpoint = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/managedPrivateEndpoints" -Payload $payload).Response
 }
 Write-Log -Message "Managed Private Endpoint - Name: $($managedPrivateEndpoint.name) / ID: $($managedPrivateEndpoint.id)"
