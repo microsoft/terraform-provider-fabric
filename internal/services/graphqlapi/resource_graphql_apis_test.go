@@ -197,12 +197,12 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityBefore.DisplayName,
+					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 			),
 		},
@@ -215,6 +215,7 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
@@ -240,12 +241,12 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
+					"display_name": entityUpdateDisplayName,
 					"description":  entityUpdateDescription,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 			),
 		},
