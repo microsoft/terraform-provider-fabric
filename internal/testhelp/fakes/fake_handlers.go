@@ -154,7 +154,7 @@ func handleUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse 
 	}
 }
 
-func handleCreate[TEntity, TOptions, TCreateRequest, TResponse any](handler *typedHandler[TEntity], creator creator[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse any](handler *typedHandler[TEntity], creator creator[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
 	if f == nil {
 		return
 	}
@@ -176,6 +176,38 @@ func handleCreate[TEntity, TOptions, TCreateRequest, TResponse any](handler *typ
 		} else {
 			handler.Upsert(newEntity)
 
+			respValue := createTransformer.TransformCreate(newEntity)
+			resp.SetResponse(statusCode, respValue, nil)
+		}
+
+		return resp, errResp
+	}
+}
+
+func handleNonLROCreate[TEntity, TOptions, TCreateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	creator creatorWithParentID[TCreateRequest, TEntity],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(_ context.Context, parentID string, createRequest TCreateRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+		var resp azfake.Responder[TResponse]
+		var errResp azfake.ErrorResponder
+
+		newEntity := creator.CreateWithParentID(parentID, createRequest)
+
+		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+			var empty TEntity
+			respValue := createTransformer.TransformCreate(empty)
+			resp.SetResponse(statusCode, respValue, nil)
+			errResp.SetError(err)
+		} else {
+			handler.Upsert(newEntity)
 			respValue := createTransformer.TransformCreate(newEntity)
 			resp.SetResponse(statusCode, respValue, nil)
 		}
