@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -48,6 +49,18 @@ func RandomP12Cert(password string) []byte {
 	p12, _ := createP12Bundle(certPEM, privateKeyPEM, password)
 
 	return p12
+}
+
+func RandomInt32Max(max int32) int32 {
+	return rand.Int31n(max)
+}
+
+func RandomInt32Range(min int32, max int32) int32 {
+	return min + rand.Int31n(max-min+1)
+}
+
+func RandomElement[T any](slice []T) T {
+	return slice[rand.Intn(len(slice))]
 }
 
 func createP12Bundle(certPEMStr, privateKeyPEMStr, password string) ([]byte, error) {
