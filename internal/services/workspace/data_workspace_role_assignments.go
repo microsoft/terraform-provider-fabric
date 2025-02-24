@@ -38,7 +38,7 @@ func (d *dataSourceWorkspaceRoleAssignments) Metadata(_ context.Context, req dat
 
 func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + WorkspaceRoleAssignmentsName + ".\n\n" +
+		MarkdownDescription: "List Fabric " + WorkspaceRoleAssignmentsName + ".\n\n" +
 			"Use this data source to list [" + WorkspaceRoleAssignmentsName + "](" + WorkspaceRoleAssignmentDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{

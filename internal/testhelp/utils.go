@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -27,10 +28,30 @@ func RandomName(length ...int) string {
 	return acctest.RandStringFromCharSet(size, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 }
 
+// RandomInt returns a random integer between minInt (inclusive) and maxInt (exclusive).
+func RandomInt(minInt, maxInt int32) int32 {
+	// #nosec G115 -- safe cast because we know minInt/maxInt fit in int32
+	return int32(acctest.RandIntRange(int(minInt), int(maxInt)))
+}
+
+func RandomBool() bool {
+	return acctest.RandIntRange(0, 2) == 1
+}
+
 func RandomUUID() string {
 	result, _ := uuid.GenerateUUID()
 
 	return result
+}
+
+func RandomElement[T any](elements []T) T {
+	elementsLen := len(elements)
+
+	if elementsLen < math.MinInt32 || elementsLen > math.MaxInt32 {
+		panic(fmt.Sprintf("random number %d out of int32 bounds", elementsLen))
+	}
+
+	return elements[RandomInt(0, int32(elementsLen))]
 }
 
 func RandomURI() string {
