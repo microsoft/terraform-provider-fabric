@@ -49,6 +49,6 @@ Read-Only:
 
 - `capacity_id` (String) The Workspace capacity ID.
 - `description` (String) The Workspace description.
-- `display_name` (String) The Workspace display name.
+- `display_name` (String) The Workspace display name .
 - `id` (String) The Workspace ID.
 - `type` (String) The Workspace type.
