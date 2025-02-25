@@ -6,6 +6,7 @@ description: |-
   List a Fabric GraphQL APIs.
   Use this data source to list GraphQL APIs https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
   -> This item supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_graphql_apis (Data Source)
@@ -15,6 +16,8 @@ List a Fabric GraphQL APIs.
 Use this data source to list [GraphQL APIs](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
 
 -> This item supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
