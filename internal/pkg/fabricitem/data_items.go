@@ -48,7 +48,7 @@ func (d *DataSourceFabricItems) Metadata(_ context.Context, req datasource.Metad
 
 func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
 		Attributes: map[string]schema.Attribute{
 			"workspace_id": schema.StringAttribute{
 				MarkdownDescription: "The Workspace ID.",
@@ -105,13 +105,8 @@ func (d *DataSourceFabricItems) Configure(_ context.Context, req datasource.Conf
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	diags := IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-
-		if diags.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
 	}
 }
 

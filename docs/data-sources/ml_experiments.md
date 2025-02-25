@@ -6,6 +6,7 @@ description: |-
   List a Fabric ML Experiments.
   Use this data source to list ML Experiments https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_ml_experiments (Data Source)
@@ -15,6 +16,8 @@ List a Fabric ML Experiments.
 Use this data source to list [ML Experiments](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
