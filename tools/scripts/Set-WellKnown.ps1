@@ -474,41 +474,6 @@ function Set-FabricWorkspaceRoleAssignment {
   }
 }
 
-function Set-FabricDomain {
-  param (
-    [Parameter(Mandatory = $true)]
-    [string]$DisplayName,
-
-    [Parameter(Mandatory = $false)]
-    [string]$ParentDomainId
-  )
-
-  $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/domains"
-  $result = $results.Response.domains | Where-Object { $_.displayName -eq $DisplayName }
-  if (!$result) {
-    Write-Log -Message "Creating Domain: $DisplayName" -Level 'WARN'
-    $payload = @{
-      displayName = $DisplayName
-      description = $DisplayName
-    }
-
-    if ($ParentDomainId) {
-      $payload['parentDomainId'] = $ParentDomainId
-    }
-
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/domains" -Payload $payload).Response
-  }
-
-  if ($ParentDomainId) {
-    Write-Log -Message "Child Domain - Name: $($result.displayName) / ID: $($result.id)"
-  }
-  else {
-    Write-Log -Message "Parent Domain - Name: $($result.displayName) / ID: $($result.id)"
-  }
-
-  return $result
-}
-
 function Set-FabricGatewayVirtualNetwork {
   [CmdletBinding()]
   param(

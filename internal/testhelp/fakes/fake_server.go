@@ -81,6 +81,7 @@ func (s *fakeServer) Upsert(element any) {
 	if elementType.Kind() == reflect.Ptr {
 		elementType = elementType.Elem()
 	}
+
 	if !s.isSupportedType(elementType) {
 		panic("Unsupported type: " + reflect.TypeOf(element).String() + ". Did you forget to call HandleEntity in NewFakeServer?") // lintignore:R009
 	}
