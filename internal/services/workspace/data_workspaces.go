@@ -54,7 +54,7 @@ func (d *dataSourceWorkspaces) Schema(ctx context.Context, _ datasource.SchemaRe
 							CustomType:          customtypes.UUIDType{},
 						},
 						"display_name": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s display name.", ItemName),
+							MarkdownDescription: fmt.Sprintf("The %s display name .", ItemName),
 							Computed:            true,
 						},
 						"description": schema.StringAttribute{
