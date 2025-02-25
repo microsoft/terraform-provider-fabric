@@ -6,7 +6,6 @@ package connection
 import (
 	"context"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -125,7 +124,7 @@ type rsCredentialDetailsModel struct {
 	ServicePrincipalCredentials      supertypes.SingleNestedObjectValueOf[credentialsServicePrincipalModel]      `tfsdk:"service_principal_credentials"`
 	SharedAccessSignatureCredentials supertypes.SingleNestedObjectValueOf[credentialsSharedAccessSignatureModel] `tfsdk:"shared_access_signature_credentials"`
 	WindowsCredentials               supertypes.SingleNestedObjectValueOf[credentialsWindowsModel]               `tfsdk:"windows_credentials"`
-	EncryptedCredentials             supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel]             `tfsdk:"encrypted_credentials"`
+	// EncryptedCredentials             supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel]             `tfsdk:"encrypted_credentials"`
 	// WindowsWithoutImpersonationCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsWithoutImpersonationModel] `tfsdk:"windows_without_impersonation_credentials"`
 	// WorkspaceIdentityCredentials           supertypes.SingleNestedObjectValueOf[credentialsWorkspaceIdentityModel]           `tfsdk:"workspace_identity_credentials"`
 }
@@ -376,20 +375,20 @@ func (to *requestCreateOnPremisesCredentialDetails) set(ctx context.Context, gat
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	encryptedCredentials, diags := credentialDetails.EncryptedCredentials.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
+	// encryptedCredentials, diags := credentialDetails.EncryptedCredentials.Get(ctx)
+	// if diags.HasError() {
+	// 	return diags
+	// }
 
-	to.Credentials = &fabcore.OnPremisesGatewayCredentials{
-		CredentialType: (*fabcore.CredentialType)(azto.Ptr("OnPremisesGatewayCredentials")),
-		Values: []fabcore.OnPremisesCredentialEntry{
-			{
-				EncryptedCredentials: encryptedCredentials.Value.ValueStringPointer(),
-				GatewayID:            gatewayID.ValueStringPointer(),
-			},
-		},
-	}
+	// to.Credentials = &fabcore.OnPremisesGatewayCredentials{
+	// 	CredentialType: (*fabcore.CredentialType)(azto.Ptr("OnPremisesGatewayCredentials")),
+	// 	Values: []fabcore.OnPremisesCredentialEntry{
+	// 		{
+	// 			EncryptedCredentials: encryptedCredentials.Value.ValueStringPointer(),
+	// 			GatewayID:            gatewayID.ValueStringPointer(),
+	// 		},
+	// 	},
+	// }
 
 	return nil
 }
@@ -514,20 +513,20 @@ func (to *requestUpdateOnPremisesCredentialDetails) set(ctx context.Context, gat
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	encryptedCredentials, diags := credentialDetails.EncryptedCredentials.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
+	// encryptedCredentials, diags := credentialDetails.EncryptedCredentials.Get(ctx)
+	// if diags.HasError() {
+	// 	return diags
+	// }
 
-	to.Credentials = &fabcore.OnPremisesGatewayCredentials{
-		CredentialType: (*fabcore.CredentialType)(azto.Ptr("OnPremisesGatewayCredentials")),
-		Values: []fabcore.OnPremisesCredentialEntry{
-			{
-				EncryptedCredentials: encryptedCredentials.Value.ValueStringPointer(),
-				GatewayID:            gatewayID.ValueStringPointer(),
-			},
-		},
-	}
+	// to.Credentials = &fabcore.OnPremisesGatewayCredentials{
+	// 	CredentialType: (*fabcore.CredentialType)(azto.Ptr("OnPremisesGatewayCredentials")),
+	// 	Values: []fabcore.OnPremisesCredentialEntry{
+	// 		{
+	// 			EncryptedCredentials: encryptedCredentials.Value.ValueStringPointer(),
+	// 			GatewayID:            gatewayID.ValueStringPointer(),
+	// 		},
+	// 	},
+	// }
 
 	return nil
 }
