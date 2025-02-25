@@ -52,7 +52,7 @@ resource "fabric_connection" "example" {
 ### Required
 
 - `connection_details` (Attributes) The connection details of the connection. (see [below for nested schema](#nestedatt--connection_details))
-- `connectivity_type` (String) The connectivity type of the connection. Accepted values: `Automatic`, `None`, `OnPremisesGateway`, `ShareableCloud`, `VirtualNetworkGateway`
+- `connectivity_type` (String) The connectivity type of the connection. Accepted values: `Automatic`, `None`, `ShareableCloud`, `VirtualNetworkGateway`
 - `credential_details` (Attributes) The credential details of the connection. (see [below for nested schema](#nestedatt--credential_details))
 - `display_name` (String) The display name of the connection.
 - `privacy_level` (String) The privacy level of the connection. Accepted values: `None`, `Organizational`, `Private`, `Public`
@@ -97,7 +97,6 @@ Optional:
 
 - `basic_credentials` (Attributes, Sensitive) The basic credentials. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
 - `credential_type` (String) The credential type of the connection. Possible values: `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`
-- `encrypted_credentials` (Attributes, Sensitive) The encrypted serialized .json of the list of name value pairs. Name is a credential name and value is a credential value. Encryption is performed using the Rivest-Shamir-Adleman (RSA) encryption algorithm with the on-premises gateway member's public key. (see [below for nested schema](#nestedatt--credential_details--encrypted_credentials))
 - `key_credentials` (Attributes, Sensitive) The key credentials. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
 - `service_principal_credentials` (Attributes, Sensitive) The service principal credentials. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
 - `shared_access_signature_credentials` (Attributes, Sensitive) The shared access signature credentials. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
@@ -111,14 +110,6 @@ Required:
 
 - `password` (String, Sensitive) The password.
 - `username` (String, Sensitive) The username.
-
-<a id="nestedatt--credential_details--encrypted_credentials"></a>
-
-### Nested Schema for `credential_details.encrypted_credentials`
-
-Required:
-
-- `value` (String, Sensitive) The value.
 
 <a id="nestedatt--credential_details--key_credentials"></a>
 

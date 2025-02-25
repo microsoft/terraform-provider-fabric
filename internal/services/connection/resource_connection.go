@@ -68,7 +68,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 		"See [" + r.Name + "](" + ItemDocsURL + ") for more information.\n\n" +
 		ItemDocsSPNSupport
 
-	possibleConnectivityTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleConnectivityTypeValues(), []fabcore.ConnectivityType{fabcore.ConnectivityTypeOnPremisesGatewayPersonal, fabcore.ConnectivityTypePersonalCloud})
+	possibleConnectivityTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleConnectivityTypeValues(), []fabcore.ConnectivityType{fabcore.ConnectivityTypeOnPremisesGateway, fabcore.ConnectivityTypeOnPremisesGatewayPersonal, fabcore.ConnectivityTypePersonalCloud})
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, r.IsPreview),
@@ -212,7 +212,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								path.MatchRelative().AtParent().AtName("encrypted_credentials"),
+								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
 							),
 							superobjectvalidator.RequireIfAttributeIsOneOf(
 								path.MatchRelative().AtParent().AtName("credential_type"),
@@ -240,7 +240,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								path.MatchRelative().AtParent().AtName("encrypted_credentials"),
+								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
 							),
 							superobjectvalidator.RequireIfAttributeIsOneOf(
 								path.MatchRelative().AtParent().AtName("credential_type"),
@@ -278,7 +278,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 								path.MatchRelative().AtParent().AtName("key_credentials"),
 								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								path.MatchRelative().AtParent().AtName("encrypted_credentials"),
+								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
 							),
 							superobjectvalidator.RequireIfAttributeIsOneOf(
 								path.MatchRelative().AtParent().AtName("credential_type"),
@@ -306,7 +306,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 								path.MatchRelative().AtParent().AtName("key_credentials"),
 								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								path.MatchRelative().AtParent().AtName("encrypted_credentials"),
+								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
 							),
 							superobjectvalidator.RequireIfAttributeIsOneOf(
 								path.MatchRelative().AtParent().AtName("credential_type"),
@@ -339,7 +339,7 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 								path.MatchRelative().AtParent().AtName("key_credentials"),
 								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-								path.MatchRelative().AtParent().AtName("encrypted_credentials"),
+								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
 							),
 							superobjectvalidator.RequireIfAttributeIsOneOf(
 								path.MatchRelative().AtParent().AtName("credential_type"),
@@ -349,35 +349,35 @@ func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaReques
 							),
 						},
 					},
-					"encrypted_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The encrypted serialized .json of the list of name value pairs. Name is a credential name and value is a credential value. Encryption is performed using the Rivest-Shamir-Adleman (RSA) encryption algorithm with the on-premises gateway member's public key.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsEncryptedModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"value": schema.StringAttribute{
-								MarkdownDescription: "The value.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("basic_credentials"),
-								path.MatchRelative().AtParent().AtName("key_credentials"),
-								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRoot("connectivity_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
-									// types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGatewayPersonal)),
-								},
-							),
-						},
-					},
+					// "encrypted_credentials": schema.SingleNestedAttribute{
+					// 	MarkdownDescription: "The encrypted serialized .json of the list of name value pairs. Name is a credential name and value is a credential value. Encryption is performed using the Rivest-Shamir-Adleman (RSA) encryption algorithm with the on-premises gateway member's public key.",
+					// 	Optional:            true,
+					// 	Sensitive:           true,
+					// 	CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsEncryptedModel](ctx),
+					// 	Attributes: map[string]schema.Attribute{
+					// 		"value": schema.StringAttribute{
+					// 			MarkdownDescription: "The value.",
+					// 			Required:            true,
+					// 			Sensitive:           true,
+					// 		},
+					// 	},
+					// 	Validators: []validator.Object{
+					// 		objectvalidator.ConflictsWith(
+					// 			path.MatchRelative().AtParent().AtName("basic_credentials"),
+					// 			path.MatchRelative().AtParent().AtName("key_credentials"),
+					// 			path.MatchRelative().AtParent().AtName("service_principal_credentials"),
+					// 			path.MatchRelative().AtParent().AtName("windows_credentials"),
+					// 			path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
+					// 		),
+					// 		superobjectvalidator.RequireIfAttributeIsOneOf(
+					// 			path.MatchRoot("connectivity_type"),
+					// 			[]attr.Value{
+					// 				types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
+					// 				// types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGatewayPersonal)),
+					// 			},
+					// 		),
+					// 	},
+					// },
 				},
 			},
 			"timeouts": timeouts.AttributesAll(ctx),
