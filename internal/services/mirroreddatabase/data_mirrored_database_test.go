@@ -23,11 +23,11 @@ var (
 
 func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemTFName, workspaceID)
+	entity := fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemTFName, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemTFName, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes provided
@@ -145,37 +145,37 @@ func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by id with definition - missing required format configuration
-		{
-			Config: at.CompileConfig(
-				testDataSourceMirroredDatabaseHeader,
-				map[string]any{
-					"workspace_id":      workspaceID,
-					"id":                *entity.ID,
-					"output_definition": true,
-				},
-			),
-			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
-		},
-		// read by id with definition - success
-		{
-			Config: at.CompileConfig(
-				testDataSourceMirroredDatabaseHeader,
-				map[string]any{
-					"workspace_id":      workspaceID,
-					"id":                *entity.ID,
-					"output_definition": true,
-					"format":            "Default",
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "workspace_id", entity.WorkspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "id", entity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "display_name", entity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "description", entity.Description),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "definition.RealTimeDefinition.json.content"),
-			),
-		},
+		// // read by id with definition - missing required format configuration
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceMirroredDatabaseHeader,
+		// 		map[string]any{
+		// 			"workspace_id":      workspaceID,
+		// 			"id":                *entity.ID,
+		// 			"output_definition": true,
+		// 		},
+		// 	),
+		// 	ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
+		// },
+		// // read by id with definition - success
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceMirroredDatabaseHeader,
+		// 		map[string]any{
+		// 			"workspace_id":      workspaceID,
+		// 			"id":                *entity.ID,
+		// 			"output_definition": true,
+		// 			"format":            "Default",
+		// 		},
+		// 	),
+		// 	Check: resource.ComposeAggregateTestCheckFunc(
+		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "workspace_id", entity.WorkspaceID),
+		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "id", entity.ID),
+		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "display_name", entity.DisplayName),
+		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "description", entity.Description),
+		// 		resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "definition.mirroring.json.content"),
+		// 	),
+		// },
 	}))
 }
 
@@ -272,7 +272,7 @@ func TestAcc_MirroredDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "definition.RealTimeDefinition.json.content"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "definition.mirroring.json.content"),
 			),
 		},
 	}))

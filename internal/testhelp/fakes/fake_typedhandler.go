@@ -100,8 +100,8 @@ func configureEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutp
 	handleDeleteWithParentID(handler, deleteFunction)
 }
 
-// ConfigureEntityWithParentID configures an entity with a parent ID.
-func configureEntityWithParentIDNonLROCreation[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
+// ConfigureEntityWithParentID configures an entity with a parent ID with sync creation
+func configureNonLROEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
 	handler *typedHandler[TEntity],
 	operations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
 	getFunction *func(ctx context.Context, parentID, childID string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
@@ -131,15 +131,14 @@ func configureDefinitions[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TLi
 	handleUpdateDefinition(handler, definitionOperations, updateDefinitionsFunction)
 }
 
-func configureDefinitionsNonLROCreation[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TCreateOptions, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput, TGetDefinitionsOptions any](
+// ConfigureDefinitionsNonLROCreation configures the definitions for an entity with non-LRO creation
+// This handles the case where entity creation doesn't involve long-running operations
+func ConfigureDefinitionsNonLROCreation[TEntity, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput any, TGetDefinitionsOptions any](
 	handler *typedHandler[TEntity],
-	entityOperations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
-	definitionOperations definitionOperations[TDefinition, TCreationData, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput],
-	createFunction *func(ctx context.Context, parentID string, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
-	getDefinitionsFunction *func(ctx context.Context, parentID, childID string, options *TGetDefinitionsOptions) (resp azfake.Responder[TDefinitionTransformerOutput], errResp azfake.ErrorResponder),
-	updateDefinitionsFunction *func(ctx context.Context, parentID, childID string, updateRequest TDefinitionUpdateData, options *TUpdateDefinitionOptions) (resp azfake.Responder[TUpdateDefinitionTransformerOutput], errResp azfake.ErrorResponder),
+	definitionOperations definitionOperationsNonLROCreation[TDefinition, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput],
+	getDefinitionsFunction *func(ctx context.Context, parentID, childID string, options *TGetDefinitionsOptions) (resp azfake.PollerResponder[TDefinitionTransformerOutput], errResp azfake.ErrorResponder),
+	updateDefinitionsFunction *func(ctx context.Context, parentID, childID string, updateRequest TDefinitionUpdateData, options *TUpdateDefinitionOptions) (resp azfake.PollerResponder[TUpdateDefinitionTransformerOutput], errResp azfake.ErrorResponder),
 ) {
-	handleNonLROCreate(handler, entityOperations, entityOperations, entityOperations, createFunction)
 	handleGetDefinition(handler, definitionOperations, getDefinitionsFunction)
 	handleUpdateDefinition(handler, definitionOperations, updateDefinitionsFunction)
 }
