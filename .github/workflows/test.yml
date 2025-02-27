@@ -318,16 +318,20 @@ jobs:
       fail-fast: false
       matrix:
         cli: [terraform, tofu]
-        version: ["1.7", "1.8", "1.9", "1.10"]
+        version: ["1.7", "1.8", "1.9", "1.10", "1.11"]
         exclude:
           - cli: terraform
             version: "1.7"
           - cli: terraform
             version: "1.9"
+          - cli: terraform
+            version: "1.10"
           - cli: tofu
             version: "1.8"
           - cli: tofu
             version: "1.10"
+          - cli: tofu
+            version: "1.11"
     steps:
       - name: ⤵️ Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
