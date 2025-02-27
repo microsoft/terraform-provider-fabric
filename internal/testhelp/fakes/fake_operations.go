@@ -59,3 +59,13 @@ type definitionOperations[
 	definitionUpdater[TDefinitionUpdateRequest, TDefinition]
 	definitionTransformer[TDefinition, TGetDefinitionResponse]
 }
+
+// Operations that apply to entities with a definition non LRO creation.
+type definitionOperationsNonLROCreation[
+	TDefinition,
+	TDefinitionUpdateRequest,
+	TGetDefinitionResponse,
+	TUpdateDefinitionResponse any] interface {
+	definitionUpdater[TDefinitionUpdateRequest, TDefinition]
+	definitionTransformer[TDefinition, TGetDefinitionResponse]
+}

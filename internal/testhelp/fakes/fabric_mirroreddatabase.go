@@ -33,24 +33,21 @@ func (o *operationsMirroredDatabase) ConvertItemToEntity(item fabcore.Item) mirr
 }
 
 // CreateDefinition implements concreteDefinitionOperations.
-// It simply returns the Definition provided in the Create request.
-func (o *operationsMirroredDatabase) CreateDefinition(data mirroreddatabase.CreateMirroredDatabaseRequest) *mirroreddatabase.Definition {
+func (o *operationsMirroredDatabase) CreateDefinition(data fabcore.CreateItemRequest) *fabcore.ItemDefinition {
 	return data.Definition
 }
 
 // TransformDefinition implements concreteDefinitionOperations.
-// It wraps the public definition into the GetDefinition response.
-func (o *operationsMirroredDatabase) TransformDefinition(entity *mirroreddatabase.Definition) mirroreddatabase.ItemsClientGetMirroredDatabaseDefinitionResponse {
-	return mirroreddatabase.ItemsClientGetMirroredDatabaseDefinitionResponse{
-		DefinitionResponse: mirroreddatabase.DefinitionResponse{
+func (o *operationsMirroredDatabase) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
+	return fabcore.ItemsClientGetItemDefinitionResponse{
+		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
 			Definition: entity,
 		},
 	}
 }
 
 // UpdateDefinition implements concreteDefinitionOperations.
-// It returns the updated definition as provided in the Update request.
-func (o *operationsMirroredDatabase) UpdateDefinition(_ *mirroreddatabase.Definition, data mirroreddatabase.UpdateMirroredDatabaseDefinitionRequest) *mirroreddatabase.Definition {
+func (o *operationsMirroredDatabase) UpdateDefinition(_ *fabcore.ItemDefinition, data fabcore.UpdateItemDefinitionRequest) *fabcore.ItemDefinition {
 	return data.Definition
 }
 
@@ -154,13 +151,11 @@ func configureMirroredDatabase(server *fakeServer) mirroreddatabase.MirroredData
 
 	// Define the definition operations interface for MirroredDatabase.
 	type concreteDefinitionOperations interface {
-		definitionOperations[
-			mirroreddatabase.Definition,
-			mirroreddatabase.CreateMirroredDatabaseRequest,
-			mirroreddatabase.UpdateMirroredDatabaseDefinitionRequest,
-			mirroreddatabase.ItemsClientGetMirroredDatabaseDefinitionResponse,
-			mirroreddatabase.ItemsClientUpdateMirroredDatabaseDefinitionResponse,
-		]
+		definitionOperationsNonLROCreation[
+			fabcore.ItemDefinition,
+			fabcore.UpdateItemDefinitionRequest,
+			fabcore.ItemsClientGetItemDefinitionResponse,
+			fabcore.ItemsClientUpdateItemDefinitionResponse]
 	}
 
 	var entityOperations concreteEntityOperations = &operationsMirroredDatabase{}
@@ -169,13 +164,7 @@ func configureMirroredDatabase(server *fakeServer) mirroreddatabase.MirroredData
 
 	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
-	// handleGetWithParentID(handler, entityOperations, &handler.ServerFactory.MirroredDatabase.ItemsServer.GetMirroredDatabase)
-	// handleUpdateWithParentID(handler, entityOperations, entityOperations, &handler.ServerFactory.MirroredDatabase.ItemsServer.UpdateMirroredDatabase)
-	// handleNonLROCreate(handler, entityOperations, entityOperations, entityOperations, &handler.ServerFactory.MirroredDatabase.ItemsServer.CreateMirroredDatabase)
-	// handleListPagerWithParentID(handler, entityOperations, entityOperations, &handler.ServerFactory.MirroredDatabase.ItemsServer.NewListMirroredDatabasesPager)
-	// handleDeleteWithParentID(handler, &handler.ServerFactory.MirroredDatabase.ItemsServer.DeleteMirroredDatabase)
-
-	configureEntityWithParentID(
+	configureNonLROEntityWithParentID(
 		handler,
 		entityOperations,
 		&server.ServerFactory.MirroredDatabase.ItemsServer.GetMirroredDatabase,
@@ -185,13 +174,11 @@ func configureMirroredDatabase(server *fakeServer) mirroreddatabase.MirroredData
 		&server.ServerFactory.MirroredDatabase.ItemsServer.DeleteMirroredDatabase,
 	)
 
-	configureDefinitions(
+	ConfigureDefinitionsNonLROCreation(
 		handler,
-		entityOperations,
 		definitionOperations,
-		&server.ServerFactory.MirroredDatabase.ItemsServer.CreateMirroredDatabase,
-		&server.ServerFactory.MirroredDatabase.ItemsServer.GetMirroredDatabaseDefinition,
-		&server.ServerFactory.MirroredDatabase.ItemsServer.UpdateMirroredDatabaseDefinition,
+		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,
+		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition,
 	)
 
 	return mirroreddatabase.MirroredDatabase{}

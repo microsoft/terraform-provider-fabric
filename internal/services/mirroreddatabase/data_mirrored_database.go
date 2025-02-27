@@ -30,7 +30,6 @@ func NewDataSourceMirroredDatabase() datasource.DataSource {
 		return nil
 	}
 
-	// itemGetter retrieves a single mirrored database item.
 	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], fabricItem *fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
 		client := mirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 		respGet, err := client.GetMirroredDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -41,7 +40,6 @@ func NewDataSourceMirroredDatabase() datasource.DataSource {
 		return nil
 	}
 
-	// itemListGetter searches for a mirrored database by its display name.
 	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
 		client := mirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 		pager := client.NewListMirroredDatabasesPager(model.WorkspaceID.ValueString(), nil)
@@ -62,11 +60,12 @@ func NewDataSourceMirroredDatabase() datasource.DataSource {
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]{
 		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			Type:   "MirroredDatabase",
-			Name:   "Mirrored Database",
-			TFName: "mirrored_database",
-			MarkdownDescription: "Get a Fabric Mirrored Database.\n\n" +
-				"Use this data source to fetch a Mirrored Database.\n\n",
+			Type:   ItemType,
+			Name:   ItemName,
+			TFName: ItemTFName,
+			MarkdownDescription: "Get a Fabric " + ItemName + ".\n\n" +
+				"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
+				ItemDocsSPNSupport,
 			IsDisplayNameUnique: true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
