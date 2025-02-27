@@ -9,7 +9,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceReflexes() datasource.DataSource {
+func NewDataSourceActivators() datasource.DataSource {
 	config := fabricitem.DataSourceFabricItems{
 		Type:   ItemType,
 		Name:   ItemName,

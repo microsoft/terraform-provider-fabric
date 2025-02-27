@@ -11,7 +11,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewResourceReflex() resource.Resource {
+func NewResourceActivator() resource.Resource {
 	config := fabricitem.ResourceFabricItemDefinition{
 		Type:              ItemType,
 		Name:              ItemName,
