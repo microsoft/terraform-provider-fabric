@@ -6,6 +6,7 @@ description: |-
   List a Fabric Paginated Reports.
   Use this data source to list Paginated Reports https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table.
   -> This item does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_paginated_reports (Data Source)
@@ -15,6 +16,8 @@ List a Fabric Paginated Reports.
 Use this data source to list [Paginated Reports](https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table).
 
 -> This item does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

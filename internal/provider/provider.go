@@ -36,6 +36,7 @@ import (
 	pclient "github.com/microsoft/terraform-provider-fabric/internal/provider/client"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
@@ -396,6 +397,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
 		notebook.NewResourceNotebook,
+		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		spark.NewResourceSparkCustomPool,
@@ -446,6 +448,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
 		paginatedreport.NewDataSourcePaginatedReports,
+		activator.NewDataSourceActivator,
+		activator.NewDataSourceActivators,
 		report.NewDataSourceReport,
 		report.NewDataSourceReports,
 		semanticmodel.NewDataSourceSemanticModel,
