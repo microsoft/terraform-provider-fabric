@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new resource/data-source `fabric_sql_database`.
+time: 2025-02-28T09:26:31.2402351-08:00
+custom:
+  Issue: "255"
