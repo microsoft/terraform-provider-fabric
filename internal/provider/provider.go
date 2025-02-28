@@ -59,6 +59,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/spark"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
@@ -404,6 +405,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		spark.NewResourceSparkEnvironmentSettings,
 		spark.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
+		sqldatabase.NewResourceSQLDatabase,
 		warehouse.NewResourceWarehouse,
 		workspace.NewResourceWorkspace,
 		workspace.NewResourceWorkspaceRoleAssignment,
@@ -459,6 +461,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		spark.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		sqldatabase.NewDataSourceSQLDatabase,
+		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
