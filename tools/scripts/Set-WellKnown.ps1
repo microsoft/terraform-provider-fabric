@@ -42,7 +42,7 @@ function Install-ModuleIfNotInstalled {
   if (-not (Get-Module -Name $ModuleName -ListAvailable)) {
     try {
       Write-Log -Message "Installing module: $ModuleName" -Level 'DEBUG'
-      Install-Module -Name $ModuleName -AllowClobber -Force -Scope CurrentUser -Repository PSGallery
+      Install-Module -Name $ModuleName -AllowClobber -Force -Scope CurrentUser -Repository PSGallery -Confirm:$false -SkipPublisherCheck -AcceptLicense
     }
     catch {
       Write-Error $_.Exception.Message
