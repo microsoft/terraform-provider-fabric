@@ -75,10 +75,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]
 
@@ -173,11 +169,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan, state ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]
 
@@ -224,9 +215,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]

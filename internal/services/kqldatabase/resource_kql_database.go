@@ -37,9 +37,17 @@ func NewResourceKQLDatabase() resource.Resource {
 			creationPayload.DatabaseType = &kqlDatabaseType
 			creationPayload.ParentEventhouseItemID = from.EventhouseID.ValueStringPointer()
 
-			if !from.InvitationToken.IsNull() && !from.InvitationToken.IsUnknown() {
-				creationPayload.InvitationToken = from.InvitationToken.ValueStringPointer()
+			var invitationToken *string
+
+			if !from.InvitationTokenWO.IsNull() && !from.InvitationTokenWO.IsUnknown() {
+				invitationToken = from.InvitationTokenWO.ValueStringPointer()
+			} else if !from.InvitationToken.IsNull() && !from.InvitationToken.IsUnknown() {
+				invitationToken = from.InvitationToken.ValueStringPointer()
+			} else {
+				invitationToken = nil
 			}
+
+			creationPayload.InvitationToken = invitationToken
 
 			if !from.SourceClusterURI.IsNull() && !from.SourceClusterURI.IsUnknown() {
 				creationPayload.SourceClusterURI = from.SourceClusterURI.ValueStringPointer()
