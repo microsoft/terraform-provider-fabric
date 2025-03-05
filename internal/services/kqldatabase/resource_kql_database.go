@@ -39,11 +39,12 @@ func NewResourceKQLDatabase() resource.Resource {
 
 			var invitationToken *string
 
-			if !from.InvitationTokenWO.IsNull() && !from.InvitationTokenWO.IsUnknown() {
+			switch {
+			case !from.InvitationTokenWO.IsNull() && !from.InvitationTokenWO.IsUnknown():
 				invitationToken = from.InvitationTokenWO.ValueStringPointer()
-			} else if !from.InvitationToken.IsNull() && !from.InvitationToken.IsUnknown() {
+			case !from.InvitationToken.IsNull() && !from.InvitationToken.IsUnknown():
 				invitationToken = from.InvitationToken.ValueStringPointer()
-			} else {
+			default:
 				invitationToken = nil
 			}
 
