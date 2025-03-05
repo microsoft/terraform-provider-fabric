@@ -1,0 +1,14 @@
+{
+  "properties": {
+    "source": {
+      "type": "GenericMirror"
+    },
+    "target": {
+      "type": "MountedRelationalDatabase",
+      "typeProperties": {
+        "format": "Delta",
+        "defaultSchema": "updated_schema"
+      }
+    }
+  }
+}

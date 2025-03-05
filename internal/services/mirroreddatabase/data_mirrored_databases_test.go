@@ -72,6 +72,8 @@ func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.default_schema"),
 				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.provisioning_status"),
 			),
 		},
 	}))
