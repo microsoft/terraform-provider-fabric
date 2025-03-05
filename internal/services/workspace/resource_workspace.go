@@ -199,10 +199,6 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan, state resourceWorkspaceModel
 
@@ -330,11 +326,6 @@ func (r *resourceWorkspace) Read(ctx context.Context, req resource.ReadRequest, 
 func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //nolint:gocognit
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan, state, intermediary resourceWorkspaceModel
@@ -496,9 +487,6 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 func (r *resourceWorkspace) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceWorkspaceModel

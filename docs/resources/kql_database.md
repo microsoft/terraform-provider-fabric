@@ -140,7 +140,9 @@ Required:
 
 Optional:
 
-- `invitation_token` (String, Sensitive) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token` (String, Sensitive, Deprecated) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token_wo` (String) Invitation token (WO) to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token_wo_version` (String) The version of the invitation_token_wo
 - `source_cluster_uri` (String) The URI of the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 - `source_database_name` (String) The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 

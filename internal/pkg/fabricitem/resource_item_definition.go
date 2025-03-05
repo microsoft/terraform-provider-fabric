@@ -61,11 +61,6 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "MODIFY PLAN", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	if !req.State.Raw.IsNull() && !req.Plan.Raw.IsNull() {
 		var plan, state resourceFabricItemDefinitionModel
@@ -127,10 +122,6 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
 	})
 
 	var plan resourceFabricItemDefinitionModel
@@ -225,11 +216,6 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan, state resourceFabricItemDefinitionModel
 
@@ -293,9 +279,6 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 func (r *ResourceFabricItemDefinition) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceFabricItemDefinitionModel
