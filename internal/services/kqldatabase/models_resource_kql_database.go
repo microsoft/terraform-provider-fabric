@@ -14,7 +14,7 @@ type kqlDatabaseConfigurationModel struct {
 	EventhouseID             customtypes.UUID `tfsdk:"eventhouse_id"`
 	InvitationToken          types.String     `tfsdk:"invitation_token"`
 	InvitationTokenWO        types.String     `tfsdk:"invitation_token_wo"`
-	InvitationTokenWOVersion types.String     `tfsdk:"invitation_token_wo_version"`
+	InvitationTokenWOVersion types.Int32      `tfsdk:"invitation_token_wo_version"`
 	SourceClusterURI         customtypes.URL  `tfsdk:"source_cluster_uri"`
 	SourceDatabaseName       types.String     `tfsdk:"source_database_name"`
 }

@@ -4,10 +4,12 @@
 package kqldatabase
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -107,19 +109,19 @@ func getResourceKQLDatabaseConfigurationAttributes() map[string]schema.Attribute
 				),
 			},
 		},
-		"invitation_token_wo_version": schema.StringAttribute{
+		"invitation_token_wo_version": schema.Int32Attribute{
 			MarkdownDescription: "The version of the `invitation_token_wo`",
 			Optional:            true,
-			Validators: []validator.String{
-				stringvalidator.ConflictsWith(
+			Validators: []validator.Int32{
+				int32validator.ConflictsWith(
 					path.MatchRelative().AtParent().AtName("invitation_token"),
 				),
-				stringvalidator.AlsoRequires(
+				int32validator.AlsoRequires(
 					path.MatchRelative().AtParent().AtName("invitation_token_wo"),
 				),
 			},
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.RequiresReplace(),
+			PlanModifiers: []planmodifier.Int32{
+				int32planmodifier.RequiresReplace(),
 			},
 		},
 		"source_cluster_uri": schema.StringAttribute{
