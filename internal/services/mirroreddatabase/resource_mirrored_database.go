@@ -67,7 +67,7 @@ func NewResourceMirroredDatabase() resource.Resource {
 				mapvalidator.SizeAtMost(1),
 				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 			},
-			DefinitionRequired: false,
+			DefinitionRequired: true,
 			DefinitionEmpty:    ItemDefinitionEmpty,
 			DefinitionFormats:  itemDefinitionFormats,
 		},

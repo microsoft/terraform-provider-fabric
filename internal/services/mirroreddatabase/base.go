@@ -18,20 +18,20 @@ const (
 	ItemType            = fabcore.ItemTypeMirroredDatabase
 	ItemDocsSPNSupport  = common.DocsSPNSupported
 	ItemDocsURL         = "https://learn.microsoft.com/en-us/fabric/database/mirrored-database/overview"
-	ItemDefinitionEmpty = `{
-  "properties": {
+	ItemDefinitionEmpty = `
+{
+	"properties": {
     "source": {
-      "type": "",
-      "typeProperties": null
+      "type": "GenericMirror"
     },
     "target": {
-      "type": "",
+      "type": "MountedRelationalDatabase",
       "typeProperties": {
-        "format": "",
-        "defaultSchema": ""
+        "format": "Delta",
+        "defaultSchema": "dbo"
       }
     }
-  }
+	}
 }`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mirrored-database-definition"
 )

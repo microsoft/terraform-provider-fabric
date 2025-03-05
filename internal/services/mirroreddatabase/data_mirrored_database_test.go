@@ -105,6 +105,11 @@ func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
 		// read by id - not found
@@ -132,6 +137,11 @@ func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
 		// read by display name - not found
@@ -145,37 +155,6 @@ func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// // read by id with definition - missing required format configuration
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceMirroredDatabaseHeader,
-		// 		map[string]any{
-		// 			"workspace_id":      workspaceID,
-		// 			"id":                *entity.ID,
-		// 			"output_definition": true,
-		// 		},
-		// 	),
-		// 	ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
-		// },
-		// // read by id with definition - success
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceMirroredDatabaseHeader,
-		// 		map[string]any{
-		// 			"workspace_id":      workspaceID,
-		// 			"id":                *entity.ID,
-		// 			"output_definition": true,
-		// 			"format":            "Default",
-		// 		},
-		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "workspace_id", entity.WorkspaceID),
-		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "id", entity.ID),
-		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "display_name", entity.DisplayName),
-		// 		resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabaseFQN, "description", entity.Description),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "definition.mirroring.json.content"),
-		// 	),
-		// },
 	}))
 }
 
@@ -203,6 +182,11 @@ func TestAcc_MirroredDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceMirroredDatabaseFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabaseFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
 		// read by id - not found
