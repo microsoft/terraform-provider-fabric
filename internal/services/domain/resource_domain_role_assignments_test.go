@@ -146,73 +146,71 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 // HOWEVER, AFTER CREATING A ROLE ASSIGNMENT, TRYING TO DELETE IT WILL RESULT IN AN ERROR.
 // IN ITS CURRENT STATE, THE TEST WILL FAIL WHEN RUNNING THE DESTROY OPERATION AFTER THE PLAN.
 
-// func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
-//  if testhelp.ShouldSkipTest(t) {
-// 	 t.Skip("No SPN support")
-//  }
-// 	domainResourceHCL := at.CompileConfig(
-// 		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
-// 		map[string]any{
-// 			"display_name":       testhelp.RandomName(),
-// 			"contributors_scope": string(admin.ContributorsScopeTypeSpecificUsersAndGroups),
-// 		},
-// 	)
+func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
+	domainResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
+		map[string]any{
+			"display_name":       testhelp.RandomName(),
+			"contributors_scope": string(admin.ContributorsScopeTypeSpecificUsersAndGroups),
+		},
+	)
 
-// 	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
+	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
 
-// 	entity := testhelp.WellKnown().Group
+	entity := testhelp.WellKnown()["Group"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityType := entity["type"].(string)
 
-//nolint:dupword
-// 	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceDomainRoleAssignments,
-// 			Config: at.JoinConfigs(
-// 				domainResourceHCL,
-// 				at.CompileConfig(
-// 					testResourceDomainRoleAssignmentsHeader,
-// 					map[string]any{
-// 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
-// 						"role":      string(admin.DomainRoleContributors),
-// 						"principals": []map[string]any{
-// 							{
-// 								"id":   *entity.ID,
-// 								"type": *entity.Type,
-// 							},
-// 						},
-// 					},
-// 				),
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttrPtr(testResourceDomainRoleAssignments, "principals.0.id", entity.ID),
-// 				resource.TestCheckResourceAttrPtr(testResourceDomainRoleAssignments, "principals.0.type", entity.Type),
-// 				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "role", string(admin.DomainRoleContributors)),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceDomainRoleAssignments,
-// 			Config: at.JoinConfigs(
-// 				domainResourceHCL,
-// 				at.CompileConfig(
-// 					testResourceDomainRoleAssignmentsHeader,
-// 					map[string]any{
-// 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
-// 						"role":      string(admin.DomainRoleAdmins),
-// 						"principals": []map[string]any{
-// 							{
-// 								"id":   *entity.ID,
-// 								"type": *entity.Type,
-// 							},
-// 						},
-// 					},
-// 				),
-// 			),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttrPtr(testResourceDomainRoleAssignments, "principals.0.id", entity.ID),
-// 				resource.TestCheckResourceAttrPtr(testResourceDomainRoleAssignments, "principals.0.type", entity.Type),
-// 				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "role", string(admin.DomainRoleAdmins)),
-// 			),
-// 		},
-// 	}))
-// }
+	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceDomainRoleAssignments,
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				at.CompileConfig(
+					testResourceDomainRoleAssignmentsHeader,
+					map[string]any{
+						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+						"role":      string(admin.DomainRoleContributors),
+						"principals": []map[string]any{
+							{
+								"id":   entityID,
+								"type": entityType,
+							},
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "principals.0.id", entityID),
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "principals.0.type", entityType),
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "role", string(admin.DomainRoleContributors)),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceDomainRoleAssignments,
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				at.CompileConfig(
+					testResourceDomainRoleAssignmentsHeader,
+					map[string]any{
+						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+						"role":      string(admin.DomainRoleAdmins),
+						"principals": []map[string]any{
+							{
+								"id":   entityID,
+								"type": entityType,
+							},
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "principals.0.id", entityID),
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "principals.0.type", entityType),
+				resource.TestCheckResourceAttr(testResourceDomainRoleAssignments, "role", string(admin.DomainRoleAdmins)),
+			),
+		},
+	}))
+}

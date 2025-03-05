@@ -75,10 +75,6 @@ func TestUnit_DomainWorkspaceAssignmentsResource_Attributes(t *testing.T) {
 }
 
 func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	domainResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
 		map[string]any{
