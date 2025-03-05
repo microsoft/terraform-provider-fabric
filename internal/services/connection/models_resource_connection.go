@@ -140,7 +140,7 @@ type requestCreateConnection struct {
 	fabcore.CreateConnectionRequestClassification
 }
 
-func (to *requestCreateConnection) set(ctx context.Context, from resourceConnectionModel) diag.Diagnostics {
+func (to *requestCreateConnection) set(ctx context.Context, plan, config resourceConnectionModel) diag.Diagnostics {
 	// cType := (fabcore.ConnectivityType)(from.ConnectivityType.ValueString())
 
 	// var cp fabcore.CreateConnectionRequestClassification
@@ -168,22 +168,22 @@ func (to *requestCreateConnection) set(ctx context.Context, from resourceConnect
 	// 	return diags
 	// }
 
-	connectivityType := (fabcore.ConnectivityType)(from.ConnectivityType.ValueString())
+	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
 
 	var requestCreateConnectionDetails requestCreateConnectionDetails
-	if diags := requestCreateConnectionDetails.set(ctx, from.ConnectionDetails); diags.HasError() {
+	if diags := requestCreateConnectionDetails.set(ctx, plan.ConnectionDetails); diags.HasError() {
 		return diags
 	}
 
 	var requestCreateCredentialDetails requestCreateCredentialDetails
 	if connectivityType == fabcore.ConnectivityTypeShareableCloud { // || connectivityType == fabcore.ConnectivityTypePersonalCloud || connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway {
-		if diags := requestCreateCredentialDetails.set(ctx, from.CredentialDetails); diags.HasError() {
+		if diags := requestCreateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
 			return diags
 		}
 	}
 
-	displayName := from.DisplayName.ValueStringPointer()
-	privacyLevel := (*fabcore.PrivacyLevel)(from.PrivacyLevel.ValueStringPointer())
+	displayName := plan.DisplayName.ValueStringPointer()
+	privacyLevel := (*fabcore.PrivacyLevel)(plan.PrivacyLevel.ValueStringPointer())
 
 	var requestCreateConnection fabcore.CreateConnectionRequestClassification
 
@@ -203,12 +203,12 @@ func (to *requestCreateConnection) set(ctx context.Context, from resourceConnect
 			ConnectivityType:  &connectivityType,
 			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
 			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
-			GatewayID:         from.GatewayID.ValueStringPointer(),
+			GatewayID:         plan.GatewayID.ValueStringPointer(),
 		}
 	case fabcore.ConnectivityTypeOnPremisesGateway: //, fabcore.ConnectivityTypeOnPremisesGatewayPersonal:
 		var credentialDetails requestCreateOnPremisesCredentialDetails
 
-		if diags := credentialDetails.set(ctx, from.GatewayID, from.CredentialDetails); diags.HasError() {
+		if diags := credentialDetails.set(ctx, plan.GatewayID, plan.CredentialDetails); diags.HasError() {
 			return diags
 		}
 
@@ -218,7 +218,7 @@ func (to *requestCreateConnection) set(ctx context.Context, from resourceConnect
 			ConnectivityType:  &connectivityType,
 			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
 			CredentialDetails: &credentialDetails.CreateOnPremisesCredentialDetails,
-			GatewayID:         from.GatewayID.ValueStringPointer(),
+			GatewayID:         plan.GatewayID.ValueStringPointer(),
 		}
 
 	case fabcore.ConnectivityTypeAutomatic, fabcore.ConnectivityTypeNone:
@@ -288,10 +288,18 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var password *string
+
+		if !cred.PasswordWO.IsNull() && !cred.PasswordWO.IsUnknown() {
+			password = cred.PasswordWO.ValueStringPointer()
+		} else {
+			password = cred.Password.ValueStringPointer()
+		}
+
 		requestCreateCredential = &fabcore.BasicCredentials{
 			CredentialType: &credentialType,
 			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.Password.ValueStringPointer(),
+			Password:       password,
 		}
 
 	case fabcore.CredentialTypeKey:
@@ -300,9 +308,17 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var key *string
+
+		if !cred.KeyWO.IsNull() && !cred.KeyWO.IsUnknown() {
+			key = cred.KeyWO.ValueStringPointer()
+		} else {
+			key = cred.Key.ValueStringPointer()
+		}
+
 		requestCreateCredential = &fabcore.KeyCredentials{
 			CredentialType: &credentialType,
-			Key:            cred.Key.ValueStringPointer(),
+			Key:            key,
 		}
 
 	case fabcore.CredentialTypeOAuth2:
@@ -316,11 +332,19 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var clientSecret *string
+
+		if !cred.ClientSecretWO.IsNull() && !cred.ClientSecretWO.IsUnknown() {
+			clientSecret = cred.ClientSecretWO.ValueStringPointer()
+		} else {
+			clientSecret = cred.ClientSecret.ValueStringPointer()
+		}
+
 		requestCreateCredential = &fabcore.ServicePrincipalCredentials{
 			CredentialType:           &credentialType,
 			TenantID:                 cred.TenantID.ValueStringPointer(),
 			ServicePrincipalClientID: cred.ClientID.ValueStringPointer(),
-			ServicePrincipalSecret:   cred.ClientSecret.ValueStringPointer(),
+			ServicePrincipalSecret:   clientSecret,
 		}
 
 	case fabcore.CredentialTypeSharedAccessSignature:
@@ -329,9 +353,17 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var token *string
+
+		if !cred.TokenWO.IsNull() && !cred.TokenWO.IsUnknown() {
+			token = cred.TokenWO.ValueStringPointer()
+		} else {
+			token = cred.Token.ValueStringPointer()
+		}
+
 		requestCreateCredential = &fabcore.SharedAccessSignatureCredentials{
 			CredentialType: &credentialType,
-			Token:          cred.Token.ValueStringPointer(),
+			Token:          token,
 		}
 
 	case fabcore.CredentialTypeWindows:
@@ -340,10 +372,18 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var password *string
+
+		if !cred.PasswordWO.IsNull() && !cred.PasswordWO.IsUnknown() {
+			password = cred.PasswordWO.ValueStringPointer()
+		} else {
+			password = cred.Password.ValueStringPointer()
+		}
+
 		requestCreateCredential = &fabcore.WindowsCredentials{
 			CredentialType: &credentialType,
 			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.Password.ValueStringPointer(),
+			Password:       password,
 		}
 
 	case fabcore.CredentialTypeWindowsWithoutImpersonation:
@@ -423,10 +463,18 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var password *string
+
+		if !cred.PasswordWO.IsNull() && !cred.PasswordWO.IsUnknown() {
+			password = cred.PasswordWO.ValueStringPointer()
+		} else {
+			password = cred.Password.ValueStringPointer()
+		}
+
 		requestUpdateCredential = &fabcore.BasicCredentials{
 			CredentialType: &credentialType,
 			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.Password.ValueStringPointer(),
+			Password:       password,
 		}
 
 	case fabcore.CredentialTypeKey:
@@ -435,9 +483,17 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var key *string
+
+		if !cred.KeyWO.IsNull() && !cred.KeyWO.IsUnknown() {
+			key = cred.KeyWO.ValueStringPointer()
+		} else {
+			key = cred.Key.ValueStringPointer()
+		}
+
 		requestUpdateCredential = &fabcore.KeyCredentials{
 			CredentialType: &credentialType,
-			Key:            cred.Key.ValueStringPointer(),
+			Key:            key,
 		}
 
 	case fabcore.CredentialTypeOAuth2:
@@ -451,11 +507,19 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var clientSecret *string
+
+		if !cred.ClientSecretWO.IsNull() && !cred.ClientSecretWO.IsUnknown() {
+			clientSecret = cred.ClientSecretWO.ValueStringPointer()
+		} else {
+			clientSecret = cred.ClientSecret.ValueStringPointer()
+		}
+
 		requestUpdateCredential = &fabcore.ServicePrincipalCredentials{
 			CredentialType:           &credentialType,
 			TenantID:                 cred.TenantID.ValueStringPointer(),
 			ServicePrincipalClientID: cred.ClientID.ValueStringPointer(),
-			ServicePrincipalSecret:   cred.ClientSecret.ValueStringPointer(),
+			ServicePrincipalSecret:   clientSecret,
 		}
 
 	case fabcore.CredentialTypeSharedAccessSignature:
@@ -464,10 +528,17 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var token *string
+
+		if !cred.TokenWO.IsNull() && !cred.TokenWO.IsUnknown() {
+			token = cred.TokenWO.ValueStringPointer()
+		} else {
+			token = cred.Token.ValueStringPointer()
+		}
+
 		requestUpdateCredential = &fabcore.SharedAccessSignatureCredentials{
 			CredentialType: &credentialType,
-
-			Token: cred.Token.ValueStringPointer(),
+			Token:          token,
 		}
 
 	case fabcore.CredentialTypeWindows:
@@ -476,10 +547,18 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		var password *string
+
+		if !cred.PasswordWO.IsNull() && !cred.PasswordWO.IsUnknown() {
+			password = cred.PasswordWO.ValueStringPointer()
+		} else {
+			password = cred.Password.ValueStringPointer()
+		}
+
 		requestUpdateCredential = &fabcore.WindowsCredentials{
 			CredentialType: &credentialType,
 			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.Password.ValueStringPointer(),
+			Password:       password,
 		}
 
 	case fabcore.CredentialTypeWindowsWithoutImpersonation:

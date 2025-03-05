@@ -40,7 +40,9 @@ resource "fabric_connection" "example" {
     skip_test_connection  = false
     basic_credentials = {
       username = "user"
-      password = "password"
+      # password    = "password"
+      password_wo         = "password"
+      password_wo_version = "1"
     }
   }
 }
@@ -95,12 +97,12 @@ Required:
 
 Optional:
 
-- `basic_credentials` (Attributes, Sensitive) The basic credentials. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
-- `credential_type` (String) The credential type of the connection. Possible values: `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`
-- `key_credentials` (Attributes, Sensitive) The key credentials. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
-- `service_principal_credentials` (Attributes, Sensitive) The service principal credentials. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
-- `shared_access_signature_credentials` (Attributes, Sensitive) The shared access signature credentials. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
-- `windows_credentials` (Attributes, Sensitive) The Windows credentials. (see [below for nested schema](#nestedatt--credential_details--windows_credentials))
+- `basic_credentials` (Attributes) The basic credentials. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
+- `credential_type` (String) The credential type of the connection. Possible values: `Anonymous`, `Basic`, `Key`, `OAuth2`, `OnPremisesGateway`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`
+- `key_credentials` (Attributes) The key credentials. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
+- `service_principal_credentials` (Attributes) The service principal credentials. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
+- `shared_access_signature_credentials` (Attributes) The shared access signature credentials. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
+- `windows_credentials` (Attributes) The Windows credentials. (see [below for nested schema](#nestedatt--credential_details--windows_credentials))
 
 <a id="nestedatt--credential_details--basic_credentials"></a>
 
@@ -108,16 +110,23 @@ Optional:
 
 Required:
 
+- `username` (String) The username.
+
+Optional:
+
 - `password` (String, Sensitive) The password.
-- `username` (String, Sensitive) The username.
+- `password_wo` (String) The password (WO).
+- `password_wo_version` (String) The version of the password_wo.
 
 <a id="nestedatt--credential_details--key_credentials"></a>
 
 ### Nested Schema for `credential_details.key_credentials`
 
-Required:
+Optional:
 
 - `key` (String, Sensitive) The key.
+- `key_wo` (String) The key (WO).
+- `key_wo_version` (String) The version of the key_wo.
 
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
@@ -125,17 +134,24 @@ Required:
 
 Required:
 
-- `client_id` (String, Sensitive) The client ID.
+- `client_id` (String) The client ID.
+- `tenant_id` (String) The tenant ID.
+
+Optional:
+
 - `client_secret` (String, Sensitive) The client secret.
-- `tenant_id` (String, Sensitive) The tenant ID.
+- `client_secret_wo` (String) The client secret (WO).
+- `client_secret_wo_version` (String) The version of the client_secret_wo.
 
 <a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
 
 ### Nested Schema for `credential_details.shared_access_signature_credentials`
 
-Required:
+Optional:
 
 - `token` (String, Sensitive) The token.
+- `token_wo` (String) The token (WO).
+- `token_wo_version` (String) The version of the token_wo.
 
 <a id="nestedatt--credential_details--windows_credentials"></a>
 
@@ -143,8 +159,13 @@ Required:
 
 Required:
 
+- `username` (String) The username.
+
+Optional:
+
 - `password` (String, Sensitive) The password.
-- `username` (String, Sensitive) The username.
+- `password_wo` (String) The password (WO).
+- `password_wo_version` (String) The version of the password_wo.
 
 <a id="nestedatt--timeouts"></a>
 

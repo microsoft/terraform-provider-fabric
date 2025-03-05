@@ -13,25 +13,14 @@ import (
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
-	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
-	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
@@ -64,324 +53,16 @@ func (r *resourceConnection) Metadata(_ context.Context, req resource.MetadataRe
 }
 
 func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	attributes := getResourceConnectionAttributes(ctx)
+	attributes["timeouts"] = timeouts.AttributesAll(ctx)
+
 	markdownDescription := "Manage a Fabric " + r.Name + ".\n\n" +
 		"See [" + r.Name + "](" + ItemDocsURL + ") for more information.\n\n" +
 		ItemDocsSPNSupport
 
-	possibleConnectivityTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleConnectivityTypeValues(), []fabcore.ConnectivityType{fabcore.ConnectivityTypeOnPremisesGateway, fabcore.ConnectivityTypeOnPremisesGatewayPersonal, fabcore.ConnectivityTypePersonalCloud})
-
 	resp.Schema = schema.Schema{
 		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, r.IsPreview),
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The object ID of the connection.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The display name of the connection.",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(123),
-				},
-			},
-			"connectivity_type": schema.StringAttribute{
-				MarkdownDescription: "The connectivity type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(possibleConnectivityTypeValues, true, true),
-				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possibleConnectivityTypeValues, false)...),
-				},
-			},
-			"privacy_level": schema.StringAttribute{
-				MarkdownDescription: "The privacy level of the connection. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrivacyLevelValues(), true, true),
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossiblePrivacyLevelValues(), false)...),
-				},
-			},
-			"gateway_id": schema.StringAttribute{
-				MarkdownDescription: "The gateway object ID of the connection.",
-				Optional:            true,
-				CustomType:          customtypes.UUIDType{},
-				Validators: []validator.String{
-					superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
-							types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
-							// types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGatewayPersonal)),
-						}),
-					superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.ConnectivityTypeAutomatic)),
-							types.StringValue(string(fabcore.ConnectivityTypeNone)),
-							// types.StringValue(string(fabcore.ConnectivityTypePersonalCloud)),
-							types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
-						}),
-				},
-			},
-			"connection_details": schema.SingleNestedAttribute{
-				MarkdownDescription: "The connection details of the connection.",
-				Required:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[rsConnectionDetailsModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"path": schema.StringAttribute{
-						MarkdownDescription: "The path of the connection.",
-						Computed:            true,
-					},
-					"type": schema.StringAttribute{
-						MarkdownDescription: "The type of the connection.",
-						Required:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
-					},
-					"creation_method": schema.StringAttribute{
-						MarkdownDescription: "The creation method used to create the connection.",
-						Required:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
-					},
-					"parameters": schema.MapAttribute{
-						MarkdownDescription: "A map of key/value pairs of connection parameters.",
-						Optional:            true,
-						CustomType:          supertypes.NewMapTypeOf[string](ctx),
-					},
-				},
-			},
-			"credential_details": schema.SingleNestedAttribute{
-				MarkdownDescription: "The credential details of the connection.",
-				Required:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[rsCredentialDetailsModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"connection_encryption": schema.StringAttribute{
-						MarkdownDescription: "The connection encryption type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleConnectionEncryptionValues(), true, true),
-						Required:            true,
-						Validators: []validator.String{
-							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleConnectionEncryptionValues(), false)...),
-						},
-					},
-					"single_sign_on_type": schema.StringAttribute{
-						MarkdownDescription: "The single sign-on type of the connection. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleSingleSignOnTypeValues(), true, true),
-						Required:            true,
-						Validators: []validator.String{
-							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleSingleSignOnTypeValues(), false)...),
-						},
-					},
-					"skip_test_connection": schema.BoolAttribute{
-						MarkdownDescription: "Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.",
-						Required:            true,
-					},
-					"credential_type": schema.StringAttribute{
-						MarkdownDescription: "The credential type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCredentialTypeValues(), true, true),
-						Optional:            true,
-						Validators: []validator.String{
-							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), false)...),
-							superstringvalidator.NullIfAttributeIsOneOf(
-								path.MatchRoot("connectivity_type"),
-								[]attr.Value{types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway))},
-							),
-						},
-					},
-					"basic_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The basic credentials.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsBasicModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
-								MarkdownDescription: "The username.",
-								Required:            true,
-								Sensitive:           true,
-							},
-							"password": schema.StringAttribute{
-								MarkdownDescription: "The password.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("key_credentials"),
-								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRelative().AtParent().AtName("credential_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.CredentialTypeBasic)),
-								},
-							),
-						},
-					},
-					"key_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The key credentials.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsKeyModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"key": schema.StringAttribute{
-								MarkdownDescription: "The key.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("basic_credentials"),
-								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRelative().AtParent().AtName("credential_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.CredentialTypeKey)),
-								},
-							),
-						},
-					},
-					"service_principal_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The service principal credentials.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsServicePrincipalModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"tenant_id": schema.StringAttribute{
-								MarkdownDescription: "The tenant ID.",
-								Required:            true,
-								Sensitive:           true,
-							},
-							"client_id": schema.StringAttribute{
-								MarkdownDescription: "The client ID.",
-								Required:            true,
-								Sensitive:           true,
-							},
-							"client_secret": schema.StringAttribute{
-								MarkdownDescription: "The client secret.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("basic_credentials"),
-								path.MatchRelative().AtParent().AtName("key_credentials"),
-								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRelative().AtParent().AtName("credential_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.CredentialTypeServicePrincipal)),
-								},
-							),
-						},
-					},
-					"shared_access_signature_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The shared access signature credentials.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsSharedAccessSignatureModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"token": schema.StringAttribute{
-								MarkdownDescription: "The token.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("basic_credentials"),
-								path.MatchRelative().AtParent().AtName("key_credentials"),
-								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-								path.MatchRelative().AtParent().AtName("windows_credentials"),
-								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRelative().AtParent().AtName("credential_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.CredentialTypeSharedAccessSignature)),
-								},
-							),
-						},
-					},
-					"windows_credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "The Windows credentials.",
-						Optional:            true,
-						Sensitive:           true,
-						CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsWindowsModel](ctx),
-						Attributes: map[string]schema.Attribute{
-							"username": schema.StringAttribute{
-								MarkdownDescription: "The username.",
-								Required:            true,
-								Sensitive:           true,
-							},
-							"password": schema.StringAttribute{
-								MarkdownDescription: "The password.",
-								Required:            true,
-								Sensitive:           true,
-							},
-						},
-						Validators: []validator.Object{
-							objectvalidator.ConflictsWith(
-								path.MatchRelative().AtParent().AtName("basic_credentials"),
-								path.MatchRelative().AtParent().AtName("key_credentials"),
-								path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-								path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-								// path.MatchRelative().AtParent().AtName("encrypted_credentials"),
-							),
-							superobjectvalidator.RequireIfAttributeIsOneOf(
-								path.MatchRelative().AtParent().AtName("credential_type"),
-								[]attr.Value{
-									types.StringValue(string(fabcore.CredentialTypeWindows)),
-								},
-							),
-						},
-					},
-					// "encrypted_credentials": schema.SingleNestedAttribute{
-					// 	MarkdownDescription: "The encrypted serialized .json of the list of name value pairs. Name is a credential name and value is a credential value. Encryption is performed using the Rivest-Shamir-Adleman (RSA) encryption algorithm with the on-premises gateway member's public key.",
-					// 	Optional:            true,
-					// 	Sensitive:           true,
-					// 	CustomType:          supertypes.NewSingleNestedObjectTypeOf[credentialsEncryptedModel](ctx),
-					// 	Attributes: map[string]schema.Attribute{
-					// 		"value": schema.StringAttribute{
-					// 			MarkdownDescription: "The value.",
-					// 			Required:            true,
-					// 			Sensitive:           true,
-					// 		},
-					// 	},
-					// 	Validators: []validator.Object{
-					// 		objectvalidator.ConflictsWith(
-					// 			path.MatchRelative().AtParent().AtName("basic_credentials"),
-					// 			path.MatchRelative().AtParent().AtName("key_credentials"),
-					// 			path.MatchRelative().AtParent().AtName("service_principal_credentials"),
-					// 			path.MatchRelative().AtParent().AtName("windows_credentials"),
-					// 			path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-					// 		),
-					// 		superobjectvalidator.RequireIfAttributeIsOneOf(
-					// 			path.MatchRoot("connectivity_type"),
-					// 			[]attr.Value{
-					// 				types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
-					// 				// types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGatewayPersonal)),
-					// 			},
-					// 		),
-					// 	},
-					// },
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
+		Attributes:          attributes,
 	}
 }
 
@@ -461,7 +142,11 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 		"plan":   req.Plan,
 	})
 
-	var plan resourceConnectionModel
+	var plan, config resourceConnectionModel
+
+	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -488,7 +173,7 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 
 	var reqCreate requestCreateConnection
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
 		return
 	}
 

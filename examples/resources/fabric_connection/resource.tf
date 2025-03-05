@@ -16,7 +16,9 @@ resource "fabric_connection" "example" {
     skip_test_connection  = false
     basic_credentials = {
       username = "user"
-      password = "password"
+      # password    = "password"
+      password_wo         = "password"
+      password_wo_version = "1"
     }
   }
 }
