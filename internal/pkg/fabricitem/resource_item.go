@@ -210,7 +210,7 @@ func (r *ResourceFabricItem) Delete(ctx context.Context, req resource.DeleteRequ
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
-	
+
 	var state resourceFabricItemModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
