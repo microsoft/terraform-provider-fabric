@@ -98,13 +98,8 @@ func (d *dataSourceDomain) Configure(_ context.Context, req datasource.Configure
 	d.pConfigData = pConfigData
 	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 
-	diags := fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-
-		if diags.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
 	}
 }
 
