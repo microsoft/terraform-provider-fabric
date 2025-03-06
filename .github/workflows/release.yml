@@ -54,7 +54,7 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ github.event.client_payload.tag }}
 
       - name: 📝 Attest Archives
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           subject-path: |
             dist/*.zip
