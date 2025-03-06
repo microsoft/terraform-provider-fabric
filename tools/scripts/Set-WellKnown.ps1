@@ -813,7 +813,7 @@ if (!$entraGroup) {
 }
 Write-Log -Message "Group - Name: $($entraGroup.DisplayName) / ID: $($entraGroup.Id)"
 $wellKnown['Group'] = @{
-  type = 'group'
+  type = 'Group'
   id   = $entraGroup.Id
   name = $entraGroup.DisplayName
 }

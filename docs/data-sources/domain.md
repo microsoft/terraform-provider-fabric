@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Get a Fabric Domain.
   Use this data source to get Domain https://learn.microsoft.com/fabric/governance/domains.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -15,7 +15,7 @@ Get a Fabric Domain.
 
 Use this data source to get [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
