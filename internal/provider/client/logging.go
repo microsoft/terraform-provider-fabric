@@ -27,8 +27,7 @@ func NewFabricSDKLoggerSubsystem(ctx context.Context) (context.Context, hclog.Le
 
 	// Enable azcore logging if the target level is not "off"
 	if targetLevel != hclog.Off {
-		err := os.Setenv(AzureSDKLoggingEnvVar, AzureSDKLoggingAll)
-		if err != nil {
+		if err := os.Setenv(AzureSDKLoggingEnvVar, AzureSDKLoggingAll); err != nil {
 			return ctx, targetLevel, err
 		}
 	}

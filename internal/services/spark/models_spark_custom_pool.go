@@ -48,7 +48,7 @@ func (to *baseSparkCustomPoolModel) set(ctx context.Context, from fabspark.Custo
 
 	if from.AutoScale != nil {
 		autoScaleModel := &sparkCustomPoolAutoScaleModel{}
-		autoScaleModel.set(from.AutoScale)
+		autoScaleModel.set(*from.AutoScale)
 
 		if diags := autoScale.Set(ctx, autoScaleModel); diags.HasError() {
 			return diags
@@ -61,7 +61,7 @@ func (to *baseSparkCustomPoolModel) set(ctx context.Context, from fabspark.Custo
 
 	if from.DynamicExecutorAllocation != nil {
 		dynamicExecutorAllocationModel := &sparkCustomPoolDynamicExecutorAllocationModel{}
-		dynamicExecutorAllocationModel.set(from.DynamicExecutorAllocation)
+		dynamicExecutorAllocationModel.set(*from.DynamicExecutorAllocation)
 
 		if diags := dynamicExecutorAllocation.Set(ctx, dynamicExecutorAllocationModel); diags.HasError() {
 			return diags
@@ -79,7 +79,7 @@ type sparkCustomPoolAutoScaleModel struct {
 	MaxNodeCount types.Int32 `tfsdk:"max_node_count"`
 }
 
-func (to *sparkCustomPoolAutoScaleModel) set(from *fabspark.AutoScaleProperties) {
+func (to *sparkCustomPoolAutoScaleModel) set(from fabspark.AutoScaleProperties) {
 	to.Enabled = types.BoolPointerValue(from.Enabled)
 	to.MinNodeCount = types.Int32PointerValue(from.MinNodeCount)
 	to.MaxNodeCount = types.Int32PointerValue(from.MaxNodeCount)
@@ -91,7 +91,7 @@ type sparkCustomPoolDynamicExecutorAllocationModel struct {
 	MaxExecutors types.Int32 `tfsdk:"max_executors"`
 }
 
-func (to *sparkCustomPoolDynamicExecutorAllocationModel) set(from *fabspark.DynamicExecutorAllocationProperties) {
+func (to *sparkCustomPoolDynamicExecutorAllocationModel) set(from fabspark.DynamicExecutorAllocationProperties) {
 	to.Enabled = types.BoolPointerValue(from.Enabled)
 	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
 	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)

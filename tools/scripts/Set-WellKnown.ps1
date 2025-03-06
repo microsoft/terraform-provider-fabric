@@ -219,6 +219,9 @@ function Set-FabricItem {
     'Eventstream' {
       $itemEndpoint = 'eventstreams'
     }
+    'GraphQLApi' {
+      $itemEndpoint = 'GraphQLApis'
+    }
     'KQLDashboard' {
       $itemEndpoint = 'kqlDashboards'
     }
@@ -254,6 +257,9 @@ function Set-FabricItem {
     }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
+    }
+    'SQLDatabase' {
+      $itemEndpoint = 'sqlDatabases'
     }
     'Warehouse' {
       $itemEndpoint = 'warehouses'
@@ -694,6 +700,7 @@ $itemNaming = @{
   'Environment'           = 'env'
   'Eventhouse'            = 'eh'
   'Eventstream'           = 'es'
+  'GraphQLApi'            = 'gql'
   'KQLDashboard'          = 'kqldash'
   'KQLDatabase'           = 'kqldb'
   'KQLQueryset'           = 'kqlqs'
@@ -792,7 +799,7 @@ if ($SPN) {
 }
 
 # Define an array of item types to create
-$itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'Warehouse')
+$itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {

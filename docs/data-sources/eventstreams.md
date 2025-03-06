@@ -6,6 +6,7 @@ description: |-
   List a Fabric Eventstreams.
   Use this data source to list Eventstreams https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
   -> This item supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_eventstreams (Data Source)
@@ -15,6 +16,8 @@ List a Fabric Eventstreams.
 Use this data source to list [Eventstreams](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
 -> This item supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

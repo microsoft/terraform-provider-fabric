@@ -22,7 +22,7 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 
 		if from != nil {
 			propertiesModel := &kqlDatabasePropertiesModel{}
-			propertiesModel.set(from)
+			propertiesModel.set(*from)
 
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags

@@ -45,7 +45,7 @@ func (to *baseWorkspaceGitModel) set(ctx context.Context, from fabcore.GitConnec
 
 	if from.GitSyncDetails != nil {
 		syncDetailsModel := &gitSyncDetailsModel{}
-		syncDetailsModel.set(from.GitSyncDetails)
+		syncDetailsModel.set(*from.GitSyncDetails)
 
 		if diags := syncDetails.Set(ctx, syncDetailsModel); diags.HasError() {
 			return diags
@@ -77,7 +77,7 @@ type gitSyncDetailsModel struct {
 	LastSyncTime timetypes.RFC3339 `tfsdk:"last_sync_time"`
 }
 
-func (to *gitSyncDetailsModel) set(from *fabcore.GitSyncDetails) {
+func (to *gitSyncDetailsModel) set(from fabcore.GitSyncDetails) {
 	to.Head = types.StringPointerValue(from.Head)
 	to.LastSyncTime = timetypes.NewRFC3339TimePointerValue(from.LastSyncTime)
 }

@@ -37,7 +37,7 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 
 	if from.OneLakeEndpoints != nil {
 		oneLakeEndpointsModel := &oneLakeEndpointsModel{}
-		oneLakeEndpointsModel.set(from.OneLakeEndpoints)
+		oneLakeEndpointsModel.set(*from.OneLakeEndpoints)
 
 		if diags := oneLakeEndpoints.Set(ctx, oneLakeEndpointsModel); diags.HasError() {
 			return diags
@@ -50,7 +50,7 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 
 	if from.WorkspaceIdentity != nil {
 		workspaceIdentityModel := &workspaceIdentityModel{}
-		workspaceIdentityModel.set(from.WorkspaceIdentity)
+		workspaceIdentityModel.set(*from.WorkspaceIdentity)
 
 		if diags := workspaceIdentity.Set(ctx, workspaceIdentityModel); diags.HasError() {
 			return diags
@@ -84,7 +84,7 @@ type workspaceIdentityModel struct {
 	ServicePrincipalID customtypes.UUID `tfsdk:"service_principal_id"`
 }
 
-func (to *workspaceIdentityModel) set(from *fabcore.WorkspaceIdentity) {
+func (to *workspaceIdentityModel) set(from fabcore.WorkspaceIdentity) {
 	to.Type = types.StringValue(workspaceIdentityTypes[0])
 	to.ApplicationID = customtypes.NewUUIDPointerValue(from.ApplicationID)
 	to.ServicePrincipalID = customtypes.NewUUIDPointerValue(from.ServicePrincipalID)
@@ -95,7 +95,7 @@ type oneLakeEndpointsModel struct {
 	DfsEndpoint  customtypes.URL `tfsdk:"dfs_endpoint"`
 }
 
-func (to *oneLakeEndpointsModel) set(from *fabcore.OneLakeEndpoints) {
+func (to *oneLakeEndpointsModel) set(from fabcore.OneLakeEndpoints) {
 	to.BlobEndpoint = customtypes.NewURLPointerValue(from.BlobEndpoint)
 	to.DfsEndpoint = customtypes.NewURLPointerValue(from.DfsEndpoint)
 }

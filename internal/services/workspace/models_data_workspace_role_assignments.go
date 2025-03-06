@@ -50,7 +50,7 @@ func (to *workspaceRoleAssignmentModel) set(ctx context.Context, from fabcore.Wo
 	to.Role = types.StringPointerValue((*string)(from.Role))
 
 	detailsModel := &principalDetailsModel{}
-	detailsModel.set(from.Principal, to)
+	detailsModel.set(*from.Principal, to)
 
 	if diags := to.Details.Set(ctx, detailsModel); diags.HasError() {
 		return diags
@@ -66,7 +66,7 @@ type principalDetailsModel struct {
 	ParentPrincipalID customtypes.UUID `tfsdk:"parent_principal_id"`
 }
 
-func (to *principalDetailsModel) set(from *fabcore.Principal, roleAssignment *workspaceRoleAssignmentModel) {
+func (to *principalDetailsModel) set(from fabcore.Principal, roleAssignment *workspaceRoleAssignmentModel) {
 	to.UserPrincipalName = types.StringNull()
 	to.GroupType = types.StringNull()
 	to.AppID = customtypes.NewUUIDNull()

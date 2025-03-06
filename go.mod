@@ -1,27 +1,27 @@
 module github.com/microsoft/terraform-provider-fabric
 
-go 1.24.0
+go 1.24.1
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.17.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
 	github.com/dcarbone/terraform-plugin-framework-utils/v3 v3.8.0
 	github.com/go-sprout/sprout v1.0.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-uuid v1.0.3
-	github.com/hashicorp/terraform-plugin-framework v1.13.0
+	github.com/hashicorp/terraform-plugin-framework v1.14.1
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0
 	github.com/hashicorp/terraform-plugin-framework-timetypes v0.5.0
-	github.com/hashicorp/terraform-plugin-framework-validators v0.16.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.17.0
 	github.com/hashicorp/terraform-plugin-go v0.26.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
-	github.com/microsoft/fabric-sdk-go v0.1.0-beta.12
+	github.com/microsoft/fabric-sdk-go v0.1.0-beta.13
 	github.com/ohler55/ojg v1.26.1
 	github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v0.5.0
-	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.13.0
+	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.14.0
 	github.com/stretchr/testify v1.10.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )

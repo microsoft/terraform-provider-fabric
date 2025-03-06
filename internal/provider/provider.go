@@ -36,6 +36,7 @@ import (
 	pclient "github.com/microsoft/terraform-provider-fabric/internal/provider/client"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
@@ -45,6 +46,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
@@ -58,6 +60,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/spark"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
@@ -390,6 +393,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		eventstream.NewResourceEventstream,
 		gateway.NewResourceGateway,
 		gateway.NewResourceGatewayRoleAssignment,
+		graphqlapi.NewResourceGraphQLApi,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
@@ -397,12 +401,14 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
 		notebook.NewResourceNotebook,
+		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		spark.NewResourceSparkCustomPool,
 		spark.NewResourceSparkEnvironmentSettings,
 		spark.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
+		sqldatabase.NewResourceSQLDatabase,
 		warehouse.NewResourceWarehouse,
 		workspace.NewResourceWorkspace,
 		workspace.NewResourceWorkspaceRoleAssignment,
@@ -448,6 +454,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
 		paginatedreport.NewDataSourcePaginatedReports,
+		activator.NewDataSourceActivator,
+		activator.NewDataSourceActivators,
 		report.NewDataSourceReport,
 		report.NewDataSourceReports,
 		semanticmodel.NewDataSourceSemanticModel,
@@ -457,6 +465,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		spark.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		sqldatabase.NewDataSourceSQLDatabase,
+		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,

@@ -82,7 +82,7 @@ func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *f
 
 	if from.SparkLibraries != nil {
 		sparkLibrariesModel := &environmentSparkLibrariesModel{}
-		sparkLibrariesModel.set(from.SparkLibraries)
+		sparkLibrariesModel.set(*from.SparkLibraries)
 
 		if diags := sparkLibraries.Set(ctx, sparkLibrariesModel); diags.HasError() {
 			return diags
@@ -95,7 +95,7 @@ func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *f
 
 	if from.SparkSettings != nil {
 		sparkSettingsModel := &environmentSparkSettingsModel{}
-		sparkSettingsModel.set(from.SparkSettings)
+		sparkSettingsModel.set(*from.SparkSettings)
 
 		if diags := sparkSettings.Set(ctx, sparkSettingsModel); diags.HasError() {
 			return diags
@@ -111,7 +111,7 @@ type environmentSparkLibrariesModel struct {
 	State types.String `tfsdk:"state"`
 }
 
-func (to *environmentSparkLibrariesModel) set(from *fabenvironment.SparkLibraries) {
+func (to *environmentSparkLibrariesModel) set(from fabenvironment.SparkLibraries) {
 	to.State = types.StringPointerValue((*string)(from.State))
 }
 
@@ -119,6 +119,6 @@ type environmentSparkSettingsModel struct {
 	State types.String `tfsdk:"state"`
 }
 
-func (to *environmentSparkSettingsModel) set(from *fabenvironment.SparkSettings) {
+func (to *environmentSparkSettingsModel) set(from fabenvironment.SparkSettings) {
 	to.State = types.StringPointerValue((*string)(from.State))
 }

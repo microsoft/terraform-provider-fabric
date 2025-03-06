@@ -88,7 +88,7 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 
 	if from.DynamicExecutorAllocation != nil {
 		dynamicExecutorAllocationModel := &dynamicExecutorAllocationPropertiesModel{}
-		dynamicExecutorAllocationModel.set(from.DynamicExecutorAllocation)
+		dynamicExecutorAllocationModel.set(*from.DynamicExecutorAllocation)
 
 		if diags := dynamicExecutorAllocation.Set(ctx, dynamicExecutorAllocationModel); diags.HasError() {
 			return diags
@@ -101,7 +101,7 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 
 	if from.InstancePool != nil {
 		instancePoolModel := &instancePoolPropertiesModel{}
-		instancePoolModel.set(from.InstancePool)
+		instancePoolModel.set(*from.InstancePool)
 
 		if diags := instancePool.Set(ctx, instancePoolModel); diags.HasError() {
 			return diags
@@ -119,7 +119,7 @@ type dynamicExecutorAllocationPropertiesModel struct {
 	MaxExecutors types.Int32 `tfsdk:"max_executors"`
 }
 
-func (to *dynamicExecutorAllocationPropertiesModel) set(from *fabenvironment.DynamicExecutorAllocationProperties) {
+func (to *dynamicExecutorAllocationPropertiesModel) set(from fabenvironment.DynamicExecutorAllocationProperties) {
 	to.Enabled = types.BoolPointerValue(from.Enabled)
 	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
 	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
@@ -131,7 +131,7 @@ type instancePoolPropertiesModel struct {
 	Type types.String     `tfsdk:"type"`
 }
 
-func (to *instancePoolPropertiesModel) set(from *fabenvironment.InstancePool) {
+func (to *instancePoolPropertiesModel) set(from fabenvironment.InstancePool) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Name = types.StringPointerValue(from.Name)
 	to.Type = types.StringPointerValue((*string)(from.Type))

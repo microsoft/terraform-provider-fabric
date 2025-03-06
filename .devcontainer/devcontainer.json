@@ -9,13 +9,13 @@
     // "ghcr.io/devcontainers/features/git:1": {
     //   "version": "latest"
     // },
-    "ghcr.io/meaningful-ooo/devcontainer-features/fish:1": {},
+    "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     },
     // "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
     "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.24.0"
+      "version": "1.24.1"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.12"
@@ -36,7 +36,7 @@
     // "ghcr.io/guiyomh/features/gomarkdoc:0": {},
     // "ghcr.io/guiyomh/features/gotestsum:0": {},
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.10.5",
+      "version": "1.11.1",
       "installSentinel": true,
       "installTFsec": true,
       "installTerraformDocs": true
