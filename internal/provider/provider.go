@@ -436,6 +436,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gateway.NewDataSourceGatewayRoleAssignments,
+		graphqlapi.NewDataSourceGraphQLApi,
+		graphqlapi.NewDataSourceGraphQLApis,
 		kqldashboard.NewDataSourceKQLDashboard,
 		kqldashboard.NewDataSourceKQLDashboards,
 		kqldatabase.NewDataSourceKQLDatabase,
