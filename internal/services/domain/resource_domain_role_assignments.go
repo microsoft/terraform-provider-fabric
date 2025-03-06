@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -131,13 +133,8 @@ func (r *resourceDomainRoleAssignments) Configure(_ context.Context, req resourc
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 
-	diags := fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-
-		if diags.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
 	}
 }
 
@@ -335,8 +332,28 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 	}
 
 	_, err := r.client.RoleAssignmentsBulkUnassign(ctx, state.DomainID.ValueString(), reqDelete.DomainRoleUnassignmentRequest, nil)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrGit.WorkspaceNotConnectedToGit)
+
+	if diags.HasError() && !utils.IsErr(diags, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError) {
+		resp.Diagnostics.Append(diags...)
+
 		return
+	}
+
+	if diags.HasError() && utils.IsErr(diags, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError) {
+		_, err := r.client.UpdateDomain(ctx, state.DomainID.ValueString(), fabadmin.UpdateDomainRequest{
+			ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeAllTenant),
+		}, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		_, err = r.client.UpdateDomain(ctx, state.DomainID.ValueString(), fabadmin.UpdateDomainRequest{
+			ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
+		}, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.State.RemoveResource(ctx)
