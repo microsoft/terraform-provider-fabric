@@ -308,10 +308,6 @@ func (r *resourceSparkWorkspaceSettings) Create(ctx context.Context, req resourc
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceSparkWorkspaceSettingsModel
 
@@ -407,11 +403,6 @@ func (r *resourceSparkWorkspaceSettings) Update(ctx context.Context, req resourc
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan resourceSparkWorkspaceSettingsModel
 
@@ -458,9 +449,6 @@ func (r *resourceSparkWorkspaceSettings) Update(ctx context.Context, req resourc
 func (r *resourceSparkWorkspaceSettings) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	resp.Diagnostics.AddWarning(
