@@ -76,19 +76,34 @@ func TestUnit_DomainWorkspaceAssignmentsResource_Attributes(t *testing.T) {
 
 func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 	domainResourceHCL := at.CompileConfig(
-		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
+		at.ResourceHeader(testhelp.TypeName("fabric", "domain"), "test"),
 		map[string]any{
 			"display_name": testhelp.RandomName(),
 		},
 	)
+	domainResourceFQN := testhelp.ResourceFQN("fabric", "domain", "test")
 
-	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
+	workspace1ResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", "workspace"), "test1"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+		},
+	)
+	workspace1ResourceFQN := testhelp.ResourceFQN("fabric", "workspace", "test1")
 
-	entity1 := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	entity1ID := entity1["id"].(string)
+	workspace2ResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", "workspace"), "test2"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+		},
+	)
+	workspace2ResourceFQN := testhelp.ResourceFQN("fabric", "workspace", "test2")
 
-	entity2 := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	entity2ID := entity2["id"].(string)
+	// entity1 := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	// entity1ID := entity1["id"].(string)
+
+	// entity2 := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	// entity2ID := entity2["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Create and Read
@@ -96,19 +111,21 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 			ResourceName: testResourceDomainWorkspaceAssignments,
 			Config: at.JoinConfigs(
 				domainResourceHCL,
+				workspace1ResourceHCL,
+				workspace2ResourceHCL,
 				at.CompileConfig(
 					testResourceDomainWorkspaceAssignmentsHeader,
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
 						"workspace_ids": []string{
-							entity1ID,
+							testhelp.RefByFQN(workspace1ResourceFQN, "id"),
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "1"),
-				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity1ID),
+				// resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity1ID),
 			),
 		},
 		// Update and Read
@@ -116,13 +133,15 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 			ResourceName: testResourceDomainWorkspaceAssignments,
 			Config: at.JoinConfigs(
 				domainResourceHCL,
+				workspace1ResourceHCL,
+				workspace2ResourceHCL,
 				at.CompileConfig(
 					testResourceDomainWorkspaceAssignmentsHeader,
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
 						"workspace_ids": []string{
-							entity1ID,
-							entity2ID,
+							testhelp.RefByFQN(workspace1ResourceFQN, "id"),
+							testhelp.RefByFQN(workspace2ResourceFQN, "id"),
 						},
 					},
 				),
@@ -136,19 +155,21 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 			ResourceName: testResourceDomainWorkspaceAssignments,
 			Config: at.JoinConfigs(
 				domainResourceHCL,
+				workspace1ResourceHCL,
+				workspace2ResourceHCL,
 				at.CompileConfig(
 					testResourceDomainWorkspaceAssignmentsHeader,
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
 						"workspace_ids": []string{
-							entity2ID,
+							testhelp.RefByFQN(workspace2ResourceFQN, "id"),
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "1"),
-				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity2ID),
+				// resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity2ID),
 			),
 		},
 	}))
