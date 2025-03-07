@@ -45,6 +45,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
@@ -390,6 +391,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		gateway.NewResourceGateway,
+		gateway.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
@@ -430,6 +433,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		gateway.NewDataSourceGateway,
+		gateway.NewDataSourceGateways,
+		gateway.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
 		kqldashboard.NewDataSourceKQLDashboard,

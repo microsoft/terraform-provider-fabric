@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package workspace
+package gateway
 
 import (
 	"context"
@@ -27,31 +27,30 @@ import (
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var (
-	_ resource.ResourceWithConfigure   = (*resourceWorkspaceRoleAssignment)(nil)
-	_ resource.ResourceWithImportState = (*resourceWorkspaceRoleAssignment)(nil)
+	_ resource.ResourceWithConfigure   = (*resourceGatewayRoleAssignment)(nil)
+	_ resource.ResourceWithImportState = (*resourceGatewayRoleAssignment)(nil)
 )
 
-type resourceWorkspaceRoleAssignment struct {
+type resourceGatewayRoleAssignment struct {
 	pConfigData *pconfig.ProviderData
-	client      *fabcore.WorkspacesClient
+	client      *fabcore.GatewaysClient
 }
 
-func NewResourceWorkspaceRoleAssignment() resource.Resource {
-	return &resourceWorkspaceRoleAssignment{}
+func NewResourceGatewayRoleAssignment() resource.Resource {
+	return &resourceGatewayRoleAssignment{}
 }
 
-func (r *resourceWorkspaceRoleAssignment) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + WorkspaceRoleAssignmentTFName
+func (r *resourceGatewayRoleAssignment) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + GatewayRoleAssignmentTFName
 }
 
-func (r *resourceWorkspaceRoleAssignment) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *resourceGatewayRoleAssignment) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a " + WorkspaceRoleAssignmentName + ".\n\n" +
-			"See [Roles in Workspaces](https://learn.microsoft.com/fabric/get-started/roles-workspaces) for more information.\n\n" +
+		MarkdownDescription: "Manage a " + GatewayRoleAssignmentName + ".\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace Role Assignment ID.",
+				MarkdownDescription: "The " + GatewayRoleAssignmentName + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -77,14 +76,14 @@ func (r *resourceWorkspaceRoleAssignment) Schema(ctx context.Context, _ resource
 				},
 			},
 			"role": schema.StringAttribute{
-				MarkdownDescription: "The Workspace Role of the principal. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleWorkspaceRoleValues(), true, true) + ".",
+				MarkdownDescription: "The Gateway Role of the principal. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayRoleValues(), true, true) + ".",
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleWorkspaceRoleValues(), false)...),
+					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGatewayRoleValues(), false)...),
 				},
 			},
-			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace ID.",
+			"gateway_id": schema.StringAttribute{
+				MarkdownDescription: "The " + ItemName + " ID.",
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -96,7 +95,7 @@ func (r *resourceWorkspaceRoleAssignment) Schema(ctx context.Context, _ resource
 	}
 }
 
-func (r *resourceWorkspaceRoleAssignment) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *resourceGatewayRoleAssignment) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -113,10 +112,10 @@ func (r *resourceWorkspaceRoleAssignment) Configure(_ context.Context, req resou
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 
-func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *resourceGatewayRoleAssignment) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
@@ -125,7 +124,7 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 		"plan":   req.Plan,
 	})
 
-	var plan resourceWorkspaceRoleAssignmentModel
+	var plan resourceGatewayRoleAssignmentModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -139,16 +138,16 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqCreate requestCreateWorkspaceRoleAssignment
+	var reqCreate requestCreateGatewayRoleAssignment
 
 	reqCreate.set(plan)
 
-	respCreate, err := r.client.AddWorkspaceRoleAssignment(ctx, plan.WorkspaceID.ValueString(), reqCreate.AddWorkspaceRoleAssignmentRequest, nil)
+	respCreate, err := r.client.AddGatewayRoleAssignment(ctx, plan.GatewayID.ValueString(), reqCreate.AddGatewayRoleAssignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	plan.set(respCreate.WorkspaceRoleAssignment)
+	plan.set(respCreate.GatewayRoleAssignment)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -161,7 +160,7 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 	}
 }
 
-func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *resourceGatewayRoleAssignment) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -169,7 +168,7 @@ func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource
 		"state": req.State,
 	})
 
-	var state resourceWorkspaceRoleAssignmentModel
+	var state resourceGatewayRoleAssignmentModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -205,7 +204,7 @@ func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource
 	}
 }
 
-func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceGatewayRoleAssignment) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -215,7 +214,7 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 		"state":  req.State,
 	})
 
-	var plan resourceWorkspaceRoleAssignmentModel
+	var plan resourceGatewayRoleAssignmentModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -229,16 +228,16 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqUpdate requestUpdateWorkspaceRoleAssignment
+	var reqUpdate requestUpdateGatewayRoleAssignment
 
 	reqUpdate.set(plan)
 
-	respUpdate, err := r.client.UpdateWorkspaceRoleAssignment(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateWorkspaceRoleAssignmentRequest, nil)
+	respUpdate, err := r.client.UpdateGatewayRoleAssignment(ctx, plan.GatewayID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateGatewayRoleAssignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	plan.set(respUpdate.WorkspaceRoleAssignment)
+	plan.set(respUpdate.GatewayRoleAssignment)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -251,7 +250,7 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 	}
 }
 
-func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceGatewayRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
@@ -259,7 +258,7 @@ func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resour
 		"state": req.State,
 	})
 
-	var state resourceWorkspaceRoleAssignmentModel
+	var state resourceGatewayRoleAssignmentModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -273,7 +272,7 @@ func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err := r.client.DeleteWorkspaceRoleAssignment(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
+	_, err := r.client.DeleteGatewayRoleAssignment(ctx, state.GatewayID.ValueString(), state.ID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -283,7 +282,7 @@ func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resour
 	})
 }
 
-func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *resourceGatewayRoleAssignment) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -291,20 +290,20 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 		"id": req.ID,
 	})
 
-	workspaceID, workspaceRoleAssignmentID, found := strings.Cut(req.ID, "/")
+	gatewayID, gatewayRoleAssignmentID, found := strings.Cut(req.ID, "/")
 	if !found {
 		resp.Diagnostics.AddError(
 			common.ErrorImportIdentifierHeader,
-			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/WorkspaceRoleAssignmentID"),
+			fmt.Sprintf(common.ErrorImportIdentifierDetails, "GatewayID/GatewayRoleAssignmentID"),
 		)
 
 		return
 	}
 
-	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
+	uuidGatewayID, diags := customtypes.NewUUIDValueMust(gatewayID)
 	resp.Diagnostics.Append(diags...)
 
-	uuidWorkspaceRoleAssignmentID, diags := customtypes.NewUUIDValueMust(workspaceRoleAssignmentID)
+	uuidGatewayRoleAssignmentID, diags := customtypes.NewUUIDValueMust(gatewayRoleAssignmentID)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -316,10 +315,10 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 		return
 	}
 
-	state := resourceWorkspaceRoleAssignmentModel{
-		ID:          uuidWorkspaceRoleAssignmentID,
-		WorkspaceID: uuidWorkspaceID,
-		Timeouts:    timeout,
+	state := resourceGatewayRoleAssignmentModel{
+		ID:        uuidGatewayRoleAssignmentID,
+		GatewayID: uuidGatewayID,
+		Timeouts:  timeout,
 	}
 
 	err := r.get(ctx, &state)
@@ -338,15 +337,15 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 	}
 }
 
-func (r *resourceWorkspaceRoleAssignment) get(ctx context.Context, model *resourceWorkspaceRoleAssignmentModel) error {
-	tflog.Trace(ctx, "getting Workspace Role Assignment")
+func (r *resourceGatewayRoleAssignment) get(ctx context.Context, model *resourceGatewayRoleAssignmentModel) error {
+	tflog.Trace(ctx, "getting Gateway Role Assignment")
 
-	respGetInfo, err := r.client.GetWorkspaceRoleAssignment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+	respGetInfo, err := r.client.GetGatewayRoleAssignment(ctx, model.GatewayID.ValueString(), model.ID.ValueString(), nil)
 	if err != nil {
 		return err
 	}
 
-	model.set(respGetInfo.WorkspaceRoleAssignment)
+	model.set(respGetInfo.GatewayRoleAssignment)
 
 	return nil
 }
