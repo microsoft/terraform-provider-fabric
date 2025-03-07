@@ -84,8 +84,11 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 
 	domainResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
 
-	entity := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	entityID := entity["id"].(string)
+	entity1 := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	entity1ID := entity1["id"].(string)
+
+	entity2 := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	entity2ID := entity2["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Create and Read
@@ -98,14 +101,14 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
 						"workspace_ids": []string{
-							entityID,
+							entity1ID,
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "1"),
-				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entityID),
+				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity1ID),
 			),
 		},
 		// Update and Read
@@ -116,13 +119,36 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceDomainWorkspaceAssignmentsHeader,
 					map[string]any{
-						"domain_id":     testhelp.RefByFQN(domainResourceFQN, "id"),
-						"workspace_ids": []string{},
+						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+						"workspace_ids": []string{
+							entity1ID,
+							entity2ID,
+						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "0"),
+				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "2"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceDomainWorkspaceAssignments,
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				at.CompileConfig(
+					testResourceDomainWorkspaceAssignmentsHeader,
+					map[string]any{
+						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+						"workspace_ids": []string{
+							entity2ID,
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.#", "1"),
+				resource.TestCheckResourceAttr(testResourceDomainWorkspaceAssignments, "workspace_ids.0", entity2ID),
 			),
 		},
 	}))
