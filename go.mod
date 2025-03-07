@@ -21,7 +21,7 @@ require (
 	github.com/microsoft/fabric-sdk-go v0.1.0-beta.13
 	github.com/ohler55/ojg v1.26.1
 	github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v0.5.0
-	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.14.0
+	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.14.1
 	github.com/stretchr/testify v1.10.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
