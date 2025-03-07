@@ -9,11 +9,13 @@ import (
 	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
@@ -78,6 +80,9 @@ func (r *resourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ resou
 				MarkdownDescription: "The set of Workspace IDs.",
 				Required:            true,
 				ElementType:         customtypes.UUIDType{},
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+				},
 			},
 			"timeouts": timeouts.AttributesAll(ctx),
 		},
