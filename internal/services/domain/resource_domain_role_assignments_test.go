@@ -142,10 +142,6 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 	}))
 }
 
-// TEST COMMENTED OUT FOR NOW. WHEN A DOMAIN IS CREATED, IT HAS NO ROLE ASSIGNMENTS.
-// HOWEVER, AFTER CREATING A ROLE ASSIGNMENT, TRYING TO DELETE IT WILL RESULT IN AN ERROR.
-// IN ITS CURRENT STATE, THE TEST WILL FAIL WHEN RUNNING THE DESTROY OPERATION AFTER THE PLAN.
-
 func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 	domainResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
