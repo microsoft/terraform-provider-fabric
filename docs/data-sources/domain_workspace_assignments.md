@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   List a Fabric Domain Workspace Assignments.
   Use this data source to list Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -15,7 +15,7 @@ List a Fabric Domain Workspace Assignments.
 
 Use this data source to list [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

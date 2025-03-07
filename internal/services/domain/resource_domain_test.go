@@ -201,10 +201,6 @@ func TestUnit_DomainResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DomainResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()

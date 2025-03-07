@@ -1,0 +1,5 @@
+kind: changed
+body: SPN is now supported for Domain resources/data-sources
+time: 2025-03-05T15:49:33.2641607-08:00
+custom:
+  Issue: "286"
