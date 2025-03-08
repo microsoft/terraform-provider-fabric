@@ -11,25 +11,25 @@ changeFormat: "* [#{{.Custom.Issue}}](https://github.com/{{.Env.GITHUB_REPOSITOR
 kinds:
   - label: 💥 Breaking
     key: breaking
-    # auto: major
+    auto: minor
   - label: ✨ Added
     key: added
-    # auto: minor
+    auto: minor
   - label: 💫 Changed
     key: changed
-    # auto: minor
+    auto: minor
   - label: ⚰️ Deprecated
     key: deprecated
-    # auto: minor
+    auto: minor
   - label: 🗑️ Removed
     key: removed
-    # auto: major
+    auto: minor
   - label: 🪲 Fixed
     key: fixed
-    # auto: patch
+    auto: patch
   - label: 🚨 Security
     key: security
-    # auto: patch
+    auto: patch
 newlines:
   afterChangelogHeader: 1
   beforeChangelogVersion: 1
