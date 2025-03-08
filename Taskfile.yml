@@ -128,7 +128,6 @@ tasks:
     cmds:
       - for:
           [
-            semver,
             copywrite,
             changie,
             tfplugindocs,
@@ -142,6 +141,7 @@ tasks:
             mkdocs,
             yamllint,
             markdownlint,
+            gh,
           ]
         task: install:{{.ITEM}}
       - task: test:tools
@@ -359,35 +359,61 @@ tasks:
   # Release
   # ----------------------
   release:prep:
-    desc: Prepare release
+    desc: Prepare the project for a new release
+    preconditions:
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} 'if ((git rev-parse --abbrev-ref HEAD) -ne "main") { exit 1 }'
+          {{else}}
+            test $(git rev-parse --abbrev-ref HEAD) = "main"
+          {{end}}
+        msg: You must be on the main branch to release
+      - sh: |
+          {{if eq OS "windows"}}
+            {{.PWSH}} 'if (-not (git diff --shortstat main)) { exit 0 } else { exit 1 }'
+          {{else}}
+            "[[ -z $(git diff --shortstat main) ]]"
+          {{end}}
+        msg: You must have a clean working tree to release
+      - sh: |
+          {{if ne .CLI_ARGS ""}}
+            {{if (regexMatch "^v[0-9]+\\.[0-9]+\\.[0-9]+$" .CLI_ARGS) }}
+              exit 0
+            {{else}}
+              exit 1
+            {{end}}
+          {{end}}
+        msg: "Version must be in the valid semver format vX.Y.Z"
     vars:
-      SEMVER:
-        sh: semver up beta
-
+      VERSION:
+        sh: |
+          {{if eq .CLI_ARGS ""}}
+            changie next auto
+          {{else}}
+            echo {{.CLI_ARGS}}
+          {{end}}
     env:
       CHANGIE_GITHUB_REPOSITORY: "microsoft/terraform-provider-fabric"
     cmds:
-      - echo "{{.SEMVER}}"
+      - echo "{{.VERSION}}"
       - cmd: |
           git checkout main && git fetch && git pull
-          git checkout -b "release/{{.SEMVER}}"
-      - changie batch {{.SEMVER}}
+          git checkout -b "release/{{.VERSION}}"
+      - changie batch {{.VERSION}}
       - changie merge
       - task: docs
       - cmd: |
-          git add .
-          git commit -a -m "feat(release): {{.SEMVER}}"
+          git add --all
+          git commit -a -m "chore(release): {{.VERSION}}"
+          git push --set-upstream origin "release/{{.VERSION}}"
       - cmd: |
-          gh pr create --title "feat(release): {{.SEMVER}}" --body-file ".changes/{{.SEMVER}}.md" --label "skip-changelog"
+          gh pr create --base main --title "chore(release): {{.VERSION}}" --body-file ".changes/{{.VERSION}}.md" --label "skip-changelog"
+          gh pr merge --auto --delete-branch --squash
+      - git checkout main
 
   # ----------------------
   # Install Helpers
   # ----------------------
-  install:semver:
-    desc: Install semver
-    cmds:
-      - go install github.com/maykonlsf/semver-cli/cmd/semver@latest
-
   install:copywrite:
     desc: Install copywrite
     cmds:
@@ -524,3 +550,21 @@ tasks:
         platforms: [linux]
       - cmd: brew install lychee
         platforms: [darwin]
+
+  install:gh:
+    desc: Install GitHub CLI
+    cmds:
+      - cmd: winget install GitHub.cli
+        platforms: [windows]
+      - cmd: brew install gh
+        platforms: [darwin]
+      - cmd: |
+          (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+            && sudo mkdir -p -m 755 /etc/apt/keyrings \
+            && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+            && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+            && sudo apt update \
+            && sudo apt install gh -y
+        platforms: [linux]
