@@ -16,7 +16,7 @@ const (
 	ItemsName                 = "Data Pipelines"
 	ItemsTFName               = "data_pipelines"
 	ItemType                  = fabcore.ItemTypeDataPipeline
-	ItemDocsSPNSupport        = common.DocsSPNNotSupported
+	ItemDocsSPNSupport        = common.DocsSPNSupported
 	ItemDocsURL               = "https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines"
 	ItemDefinitionEmpty       = `{"properties":{"activities":[]}}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api"
