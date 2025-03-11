@@ -35,7 +35,7 @@ func RandomIntRange[T ~int | ~int8 | ~int16 | ~int32 | ~int64](minInt, maxInt T)
 	}
 
 	// Generate a random integer in the range [minInt, maxInt)
-	return T(rand.N(maxInt-minInt) + minInt) // #nosec G404
+	return rand.N(maxInt-minInt) + minInt // #nosec G404
 }
 
 func RandomBool() bool {
