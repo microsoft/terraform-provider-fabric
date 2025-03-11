@@ -1,0 +1,103 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package workspace_test
+
+import (
+	"regexp"
+	"testing"
+
+	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
+)
+
+var (
+	testDataSourceWorkspaceRoleAssignmentFQN    = testhelp.DataSourceFQN("fabric", workspaceRoleAssignmentTFName, "test")
+	testDataSourceWorkspaceRoleAssignmentHeader = at.DataSourceHeader(testhelp.TypeName("fabric", workspaceRoleAssignmentTFName), "test")
+)
+
+func TestUnit_WorkspaceRoleAssignmentDataSource(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entity := NewRandomWorkspaceRoleAssignment()
+	fakes.FakeServer.ServerFactory.Core.WorkspacesServer.GetWorkspaceRoleAssignment = fakeWorkspaceRoleAssignment(entity)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - unexpected_attr
+		{
+			Config: at.CompileConfig(
+				testDataSourceWorkspaceRoleAssignmentHeader,
+				map[string]any{
+					"workspace_id":    workspaceID,
+					"unexpected_attr": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceWorkspaceRoleAssignmentHeader,
+				map[string]any{
+					"id":           entity.ID,
+					"workspace_id": workspaceID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignmentFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignmentFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignmentFQN, "principal_id", entity.Principal.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignmentFQN, "role", (*string)(entity.Role)),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignmentFQN, "principal_display_name", entity.Principal.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignmentFQN, "principal_type", (*string)(entity.Principal.Type)),
+			),
+		},
+	}))
+}
+
+func TestAcc_WorkspaceRoleAssignmentDataSource(t *testing.T) {
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+
+	principal := testhelp.WellKnown()["Principal"].(map[string]any)
+	principalID := principal["id"].(string)
+	principalType := principal["type"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read
+		{
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceWorkspaceRoleAssignmentHeader,
+					map[string]any{
+						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"principal_id":   principalID,
+						"principal_type": principalType,
+						"role":           "Member",
+					},
+				),
+				at.CompileConfig(
+					testDataSourceWorkspaceRoleAssignmentHeader,
+					map[string]any{
+						"id":           principalID,
+						"workspace_id": testhelp.RefByFQN(testResourceWorkspaceRoleAssignmentFQN, "workspace_id"),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignmentFQN, "id", principalID),
+				resource.TestCheckResourceAttrSet(testDataSourceWorkspaceRoleAssignmentFQN, "workspace_id"),
+				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignmentFQN, "principal_id", principalID),
+				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignmentFQN, "role", "Member"),
+				// resource.TestCheckResourceAttrSet(testDataSourceWorkspaceRoleAssignmentFQN, "principal_display_name"),
+				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignmentFQN, "principal_type", principalType),
+			),
+		},
+	},
+	))
+}

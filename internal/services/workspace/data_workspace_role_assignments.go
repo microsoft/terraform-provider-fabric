@@ -50,10 +50,15 @@ func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datas
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: "The list of " + WorkspaceRoleAssignmentsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[workspaceRoleAssignmentModel](ctx),
+				CustomType:          supertypes.NewListNestedObjectTypeOf[baseWorkspaceRoleAssignmentModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
+							MarkdownDescription: "The " + WorkspaceRoleAssignmentName + " ID.",
+							Computed:            true,
+							CustomType:          customtypes.UUIDType{},
+						},
+						"principal_id": schema.StringAttribute{
 							MarkdownDescription: "The Principal ID.",
 							Computed:            true,
 							CustomType:          customtypes.UUIDType{},
@@ -62,15 +67,15 @@ func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datas
 							MarkdownDescription: "The workspace role of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleWorkspaceRoleValues(), true, true) + ".",
 							Computed:            true,
 						},
-						"display_name": schema.StringAttribute{
+						"principal_display_name": schema.StringAttribute{
 							MarkdownDescription: "The principal's display name.",
 							Computed:            true,
 						},
-						"type": schema.StringAttribute{
+						"principal_type": schema.StringAttribute{
 							MarkdownDescription: "The type of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrincipalTypeValues(), true, true) + ".",
 							Computed:            true,
 						},
-						"details": schema.SingleNestedAttribute{
+						"principal_details": schema.SingleNestedAttribute{
 							MarkdownDescription: "The principal details.",
 							Computed:            true,
 							CustomType:          supertypes.NewSingleNestedObjectTypeOf[principalDetailsModel](ctx),

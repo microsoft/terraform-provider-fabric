@@ -17,15 +17,15 @@ import (
 )
 
 var (
-	testResourceWorkspaceRoleAssignment       = testhelp.ResourceFQN("fabric", workspaceRoleAssignmentTFName, "test")
+	testResourceWorkspaceRoleAssignmentFQN    = testhelp.ResourceFQN("fabric", workspaceRoleAssignmentTFName, "test")
 	testResourceWorkspaceRoleAssignmentHeader = at.ResourceHeader(testhelp.TypeName("fabric", workspaceRoleAssignmentTFName), "test")
 )
 
 func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceWorkspaceRoleAssignment, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceWorkspaceRoleAssignmentFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no required attributes - workspace_id
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -38,7 +38,7 @@ func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
 		},
 		// error - no required attributes - principal_id
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -51,7 +51,7 @@ func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
 		},
 		// error - no required attributes - principal_type
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -64,7 +64,7 @@ func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
 		},
 		// error - no required attributes - role
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -77,7 +77,7 @@ func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
 		},
 		// error - invalid UUID - workspace_id
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -91,7 +91,7 @@ func TestUnit_WorkspaceRoleAssignmentResource_Attributes(t *testing.T) {
 		},
 		// error - invalid UUID - principal_id
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.CompileConfig(
 				testResourceWorkspaceRoleAssignmentHeader,
 				map[string]any{
@@ -112,30 +112,30 @@ func TestUnit_WorkspaceRoleAssignmentResource_ImportState(t *testing.T) {
 		map[string]any{},
 	)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceWorkspaceRoleAssignment, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceWorkspaceRoleAssignmentFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
-			ResourceName:  testResourceWorkspaceRoleAssignment,
+			ResourceName:  testResourceWorkspaceRoleAssignmentFQN,
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile("WorkspaceID/WorkspaceRoleAssignmentID"),
 		},
 		{
-			ResourceName:  testResourceWorkspaceRoleAssignment,
+			ResourceName:  testResourceWorkspaceRoleAssignmentFQN,
 			Config:        testCase,
 			ImportStateId: "test/id",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		{
-			ResourceName:  testResourceWorkspaceRoleAssignment,
+			ResourceName:  testResourceWorkspaceRoleAssignmentFQN,
 			Config:        testCase,
 			ImportStateId: fmt.Sprintf("%s/%s", "test", "00000000-0000-0000-0000-000000000000"),
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		{
-			ResourceName:  testResourceWorkspaceRoleAssignment,
+			ResourceName:  testResourceWorkspaceRoleAssignmentFQN,
 			Config:        testCase,
 			ImportStateId: fmt.Sprintf("%s/%s", "00000000-0000-0000-0000-000000000000", "test"),
 			ImportState:   true,
@@ -154,10 +154,10 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceWorkspaceRoleAssignment, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceWorkspaceRoleAssignmentFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.JoinConfigs(
 				workspaceResourceHCL,
 				at.CompileConfig(
@@ -171,14 +171,14 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_id", entityID),
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_type", entityType),
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "role", "Member"),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "principal_id", entityID),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "principal_type", entityType),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "role", "Member"),
 			),
 		},
 		// Update and Read
 		{
-			ResourceName: testResourceWorkspaceRoleAssignment,
+			ResourceName: testResourceWorkspaceRoleAssignmentFQN,
 			Config: at.JoinConfigs(
 				workspaceResourceHCL,
 				at.CompileConfig(
@@ -192,9 +192,9 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_id", entityID),
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "principal_type", entityType),
-				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignment, "role", "Viewer"),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "principal_id", entityID),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "principal_type", entityType),
+				resource.TestCheckResourceAttr(testResourceWorkspaceRoleAssignmentFQN, "role", "Viewer"),
 			),
 		},
 	}))
