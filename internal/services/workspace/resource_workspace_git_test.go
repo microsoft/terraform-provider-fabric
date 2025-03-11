@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -20,13 +21,14 @@ var (
 	testResourceWorkspaceGitHeader = at.ResourceHeader(testhelp.TypeName("fabric", workspaceGitTFName), "test")
 )
 
-func TestUnit_WorkspaceGitResource(t *testing.T) {
-	gitConnection := NewRandomGitConnection()
+func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
+	gitConnection := NewRandomGitConnection(fabcore.GitProviderTypeAzureDevOps)
+	gitCredentials := NewRandomGitCredentialsResponse(fabcore.GitCredentialsSourceAutomatic)
 	gitProviderDetails := gitConnection.GitProviderDetails.GetGitProviderDetails()
-
 	gitInit := NewRandomGitInitializeGitConnection()
 
 	fakes.FakeServer.ServerFactory.Core.GitServer.GetConnection = fakeGitGetConnection(gitConnection)
+	fakes.FakeServer.ServerFactory.Core.GitServer.GetMyGitCredentials = fakeGitGetMyGitCredentials(gitCredentials)
 	fakes.FakeServer.ServerFactory.Core.GitServer.Connect = fakeGitConnect()
 	fakes.FakeServer.ServerFactory.Core.GitServer.BeginInitializeConnection = fakeGitInitializeGitConnection(gitInit)
 	fakes.FakeServer.ServerFactory.Core.GitServer.BeginCommitToGit = fakeGitCommitToGit()
@@ -43,10 +45,13 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 	}
 
 	testCaseInvalidGitProviderType := testhelp.CopyMap(testHelperGitProviderDetails)
-	testCaseInvalidGitProviderType["git_provider_type"] = "test"
+	testCaseInvalidGitProviderType["git_provider_type"] = "test1"
 
 	testCaseInvalidDirectoryName := testhelp.CopyMap(testHelperGitProviderDetails)
-	testCaseInvalidDirectoryName["directory_name"] = "test"
+	testCaseInvalidDirectoryName["directory_name"] = "test2"
+
+	testCaseInvalidOwnerName := testhelp.CopyMap(testHelperGitProviderDetails)
+	testCaseInvalidOwnerName["owner_name"] = "test3"
 
 	testCaseMissingBranchName := testhelp.CopyMap(testHelperGitProviderDetails)
 	delete(testCaseMissingBranchName, "branch_name")
@@ -124,6 +129,19 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
+		// error - invalid owner_name
+		{
+			ResourceName: testResourceWorkspaceGitFQN,
+			Config: at.CompileConfig(
+				testResourceWorkspaceGitHeader,
+				map[string]any{
+					"workspace_id":            "00000000-0000-0000-0000-000000000000",
+					"initialization_strategy": "PreferWorkspace",
+					"git_provider_details":    testCaseInvalidOwnerName,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute git_provider_details.owner_name"),
+		},
 		// error - missing branch_name
 		{
 			ResourceName: testResourceWorkspaceGitFQN,
@@ -170,7 +188,7 @@ func TestUnit_WorkspaceGitResource(t *testing.T) {
 	}))
 }
 
-func TestAcc_WorkspaceGitResource(t *testing.T) {
+func TestAcc_WorkspaceGitResource_AzDO(t *testing.T) {
 	if testhelp.ShouldSkipTest(t) {
 		t.Skip("No SPN support")
 	}
@@ -178,10 +196,10 @@ func TestAcc_WorkspaceGitResource(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
-	azdo := testhelp.WellKnown()["AzDO"].(map[string]any)
-	azdoOrganization := azdo["organizationName"].(string)
-	azdoProject := azdo["projectName"].(string)
-	azdoRepository := azdo["repositoryName"].(string)
+	doPlatform := testhelp.WellKnown()["AzDO"].(map[string]any)
+	azdoOrganization := doPlatform["organizationName"].(string)
+	azdoProject := doPlatform["projectName"].(string)
+	azdoRepository := doPlatform["repositoryName"].(string)
 
 	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
@@ -208,6 +226,54 @@ func TestAcc_WorkspaceGitResource(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceWorkspaceGitFQN, "git_sync_details.head"),
+				resource.TestCheckResourceAttr(testResourceWorkspaceGitFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_WorkspaceGitResource_GitHub(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	doPlatform := testhelp.WellKnown()["GitHub"].(map[string]any)
+	ghOwner := doPlatform["ownerName"].(string)
+	ghRepository := doPlatform["repositoryName"].(string)
+	ghConnectionID := doPlatform["connectionId"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceWorkspaceGitFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceWorkspaceGitFQN,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceWorkspaceGitHeader,
+					map[string]any{
+						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"initialization_strategy": "PreferWorkspace",
+						"git_provider_details": map[string]any{
+							"git_provider_type": "GitHub",
+							"owner_name":        ghOwner,
+							"repository_name":   ghRepository,
+							"branch_name":       "main",
+							"directory_name":    "/",
+						},
+						"git_credentials": map[string]any{
+							"connection_id": ghConnectionID,
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceWorkspaceGitFQN, "git_sync_details.head"),
+				resource.TestCheckResourceAttr(testResourceWorkspaceGitFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
 			),
 		},
 	},
