@@ -6,7 +6,6 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -17,7 +16,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -27,10 +26,17 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceGateways)(nil)
 type dataSourceGateways struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
+	Names       string
+	Name        string
+	IsPreview   bool
 }
 
 func NewDataSourceGateways() datasource.DataSource {
-	return &dataSourceGateways{}
+	return &dataSourceGateways{
+		Names:     ItemsName,
+		Name:      ItemName,
+		IsPreview: ItemPreview,
+	}
 }
 
 func (d *dataSourceGateways) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -38,101 +44,19 @@ func (d *dataSourceGateways) Metadata(_ context.Context, req datasource.Metadata
 }
 
 func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	attributes := getDataSourceGatewayAttributes(ctx)
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("List a Fabric "+ItemsName+".\n\n"+
+			"Use this data source to list ["+ItemsName+"]("+ItemDocsURL+").\n\n"+
+			ItemDocsSPNSupport, d.IsPreview),
 		Attributes: map[string]schema.Attribute{
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: "The list of " + ItemsName + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDataSourceGatewayModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " ID.",
-							Optional:            true,
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"display_name": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " display name.",
-							Optional:            true,
-							Computed:            true,
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " type. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayTypeValues(), true, true),
-							Computed:            true,
-						},
-						"capacity_id": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " capacity ID.",
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"inactivity_minutes_before_sleep": schema.Int32Attribute{
-							MarkdownDescription: "The " + ItemName + " inactivity minutes before sleep. Possible values: " + utils.ConvertStringSlicesToString(PossibleInactivityMinutesBeforeSleepValues, true, true),
-							Computed:            true,
-						},
-						"number_of_member_gateways": schema.Int32Attribute{
-							MarkdownDescription: "The number of member gateways. Possible values: " + strconv.Itoa(int(MinNumberOfMemberGatewaysValues)) + " to " + strconv.Itoa(int(MaxNumberOfMemberGatewaysValues)) + ".",
-							Computed:            true,
-						},
-						"virtual_network_azure_resource": schema.SingleNestedAttribute{
-							MarkdownDescription: "The Azure virtual network resource.",
-							Computed:            true,
-							CustomType:          supertypes.NewSingleNestedObjectTypeOf[virtualNetworkAzureResourceModel](ctx),
-							Attributes: map[string]schema.Attribute{
-								"resource_group_name": schema.StringAttribute{
-									MarkdownDescription: "The resource group name.",
-									Computed:            true,
-								},
-								"subnet_name": schema.StringAttribute{
-									MarkdownDescription: "The subnet name.",
-									Computed:            true,
-								},
-								"subscription_id": schema.StringAttribute{
-									MarkdownDescription: "The subscription ID.",
-									Computed:            true,
-									CustomType:          customtypes.UUIDType{},
-								},
-								"virtual_network_name": schema.StringAttribute{
-									MarkdownDescription: "The virtual network name.",
-									Computed:            true,
-								},
-							},
-						},
-						"allow_cloud_connection_refresh": schema.BoolAttribute{
-							MarkdownDescription: "Allow cloud connection refresh.",
-							Computed:            true,
-						},
-						"allow_custom_connectors": schema.BoolAttribute{
-							MarkdownDescription: "Allow custom connectors.",
-							Computed:            true,
-						},
-						"load_balancing_setting": schema.StringAttribute{
-							MarkdownDescription: "The load balancing setting. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleLoadBalancingSettingValues(), true, true),
-							Computed:            true,
-						},
-						"public_key": schema.SingleNestedAttribute{
-							MarkdownDescription: "The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections.",
-							Computed:            true,
-							CustomType:          supertypes.NewSingleNestedObjectTypeOf[publicKeyModel](ctx),
-							Attributes: map[string]schema.Attribute{
-								"exponent": schema.StringAttribute{
-									MarkdownDescription: "The exponent.",
-									Computed:            true,
-								},
-								"modulus": schema.StringAttribute{
-									MarkdownDescription: "The modulus.",
-									Computed:            true,
-								},
-							},
-						},
-						"version": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " version.",
-							Computed:            true,
-						},
-					},
+					Attributes: attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),
@@ -156,6 +80,11 @@ func (d *dataSourceGateways) Configure(_ context.Context, req datasource.Configu
 	}
 
 	d.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 

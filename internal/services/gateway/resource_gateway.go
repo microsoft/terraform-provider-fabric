@@ -29,6 +29,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -42,10 +43,15 @@ var (
 type resourceGateway struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewResourceGateway() resource.Resource {
-	return &resourceGateway{}
+	return &resourceGateway{
+		Name:      ItemName,
+		IsPreview: ItemPreview,
+	}
 }
 
 func (r *resourceGateway) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,10 +59,12 @@ func (r *resourceGateway) Metadata(_ context.Context, req resource.MetadataReque
 }
 
 func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	possibleGatewayTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleGatewayTypeValues(), []fabcore.GatewayType{fabcore.GatewayTypeOnPremises, fabcore.GatewayTypeOnPremisesPersonal})
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "This resource manages a Fabric " + ItemName + ".\n\n" +
-			"See [" + ItemName + "s](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote("This resource manages a Fabric "+ItemName+".\n\n"+
+			"See ["+ItemName+"]("+ItemDocsURL+") for more information.\n\n"+
+			ItemDocsSPNSupport, r.IsPreview),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The " + ItemName + " ID.",
@@ -76,16 +84,21 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
 						}),
+					superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+						}),
 				},
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " type. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayTypeValues(), true, true),
+				MarkdownDescription: "The " + ItemName + " type. Accepted values: " + utils.ConvertStringSlicesToString(possibleGatewayTypeValues, true, true),
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(string(fabcore.GatewayTypeVirtualNetwork)),
+					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possibleGatewayTypeValues, false)...),
 				},
 			},
 			"capacity_id": schema.StringAttribute{
@@ -101,6 +114,11 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
 						}),
+					superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+						}),
 				},
 			},
 			"inactivity_minutes_before_sleep": schema.Int32Attribute{
@@ -113,6 +131,11 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
 						}),
+					superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+						}),
 				},
 			},
 			"number_of_member_gateways": schema.Int32Attribute{
@@ -124,6 +147,11 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+						}),
+					superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
 						}),
 				},
 			},
@@ -139,6 +167,11 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 					superobjectvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
 						[]attr.Value{
 							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+						}),
+					superobjectvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+						[]attr.Value{
+							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
 						}),
 				},
 				Attributes: map[string]schema.Attribute{
@@ -182,6 +215,11 @@ func (r *resourceGateway) Configure(_ context.Context, req resource.ConfigureReq
 	}
 
 	r.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 

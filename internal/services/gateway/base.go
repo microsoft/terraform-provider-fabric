@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	PossibleInactivityMinutesBeforeSleepValues = []int32{30, 60, 90, 120, 150, 240, 360, 480, 720, 1440} //nolint:gochecknoglobals
-	MinNumberOfMemberGatewaysValues            = int32(1)                                                //nolint:gochecknoglobals
-	MaxNumberOfMemberGatewaysValues            = int32(7)                                                //nolint:gochecknoglobals
+	PossibleInactivityMinutesBeforeSleepValues       = []int32{30, 60, 90, 120, 150, 240, 360, 480, 720, 1440} //nolint:gochecknoglobals
+	MinNumberOfMemberGatewaysValues            int32 = 1                                                       //nolint:gochecknoglobals
+	MaxNumberOfMemberGatewaysValues            int32 = 7                                                       //nolint:gochecknoglobals
 )

@@ -21,6 +21,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -34,10 +35,15 @@ var (
 type resourceGatewayRoleAssignment struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewResourceGatewayRoleAssignment() resource.Resource {
-	return &resourceGatewayRoleAssignment{}
+	return &resourceGatewayRoleAssignment{
+		Name:      GatewayRoleAssignmentName,
+		IsPreview: ItemPreview,
+	}
 }
 
 func (r *resourceGatewayRoleAssignment) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -46,8 +52,8 @@ func (r *resourceGatewayRoleAssignment) Metadata(_ context.Context, req resource
 
 func (r *resourceGatewayRoleAssignment) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a " + GatewayRoleAssignmentName + ".\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: fabricitem.GetResourcePreviewNote("Manage a "+GatewayRoleAssignmentName+".\n\n"+
+			ItemDocsSPNSupport, r.IsPreview),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The " + GatewayRoleAssignmentName + " ID.",
@@ -112,6 +118,11 @@ func (r *resourceGatewayRoleAssignment) Configure(_ context.Context, req resourc
 	}
 
 	r.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 

@@ -154,7 +154,7 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 	gatewayType := string(fabcore.GatewayTypeVirtualNetwork)
 	gatewayCreateDisplayName := testhelp.RandomName()
 	gatewayCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	gatewayCreateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
+	gatewayCreateNumberOfMemberGateways := int(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)

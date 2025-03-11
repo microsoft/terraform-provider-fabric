@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,10 +27,17 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceGatewayRoleAssignments)(n
 type dataSourceGatewayRoleAssignments struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
+	Names       string
+	Name        string
+	IsPreview   bool
 }
 
 func NewDataSourceGatewayRoleAssignments() datasource.DataSource {
-	return &dataSourceGatewayRoleAssignments{}
+	return &dataSourceGatewayRoleAssignments{
+		Names:     GatewayRoleAssignmentsName,
+		Name:      GatewayRoleAssignmentName,
+		IsPreview: ItemPreview,
+	}
 }
 
 func (d *dataSourceGatewayRoleAssignments) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -38,9 +46,9 @@ func (d *dataSourceGatewayRoleAssignments) Metadata(_ context.Context, req datas
 
 func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List Fabric " + GatewayRoleAssignmentsName + ".\n\n" +
-			"Use this data source to list [" + GatewayRoleAssignmentsName + "].\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("List Fabric "+GatewayRoleAssignmentsName+".\n\n"+
+			"Use this data source to list ["+GatewayRoleAssignmentsName+"].\n\n"+
+			ItemDocsSPNSupport, d.IsPreview),
 		Attributes: map[string]schema.Attribute{
 			"gateway_id": schema.StringAttribute{
 				MarkdownDescription: "The Gateway ID.",
@@ -119,6 +127,11 @@ func (d *dataSourceGatewayRoleAssignments) Configure(_ context.Context, req data
 	}
 
 	d.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 }
 

@@ -10,7 +10,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
-	gw "github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
@@ -18,15 +18,15 @@ import (
 type operationsGateway struct{}
 
 func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassification) fabcore.GatewayClassification {
-	switch gateway := data.(type) {
+	switch data := data.(type) {
 	case *fabcore.CreateVirtualNetworkGatewayRequest:
 		entity := NewRandomVirtualNetworkGateway()
-		entity.Type = gateway.Type
-		entity.DisplayName = gateway.DisplayName
-		entity.CapacityID = gateway.CapacityID
-		entity.InactivityMinutesBeforeSleep = gateway.InactivityMinutesBeforeSleep
-		entity.NumberOfMemberGateways = gateway.NumberOfMemberGateways
-		entity.VirtualNetworkAzureResource = gateway.VirtualNetworkAzureResource
+		entity.Type = data.Type
+		entity.DisplayName = data.DisplayName
+		entity.CapacityID = data.CapacityID
+		entity.InactivityMinutesBeforeSleep = data.InactivityMinutesBeforeSleep
+		entity.NumberOfMemberGateways = data.NumberOfMemberGateways
+		entity.VirtualNetworkAzureResource = data.VirtualNetworkAzureResource
 
 		return entity
 	default:
@@ -61,19 +61,19 @@ func (o *operationsGateway) TransformUpdate(entity fabcore.GatewayClassification
 }
 
 func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabcore.UpdateGatewayRequestClassification) fabcore.GatewayClassification {
-	switch gateway := base.(type) {
+	switch base := base.(type) {
 	case *fabcore.VirtualNetworkGateway:
 		request, ok := data.(*fabcore.UpdateVirtualNetworkGatewayRequest)
 		if !ok {
 			panic("Invalid update data for VirtualNetworkGateway")
 		}
 
-		gateway.CapacityID = request.CapacityID
-		gateway.DisplayName = request.DisplayName
-		gateway.InactivityMinutesBeforeSleep = request.InactivityMinutesBeforeSleep
-		gateway.NumberOfMemberGateways = request.NumberOfMemberGateways
+		base.CapacityID = request.CapacityID
+		base.DisplayName = request.DisplayName
+		base.InactivityMinutesBeforeSleep = request.InactivityMinutesBeforeSleep
+		base.NumberOfMemberGateways = request.NumberOfMemberGateways
 
-		return gateway
+		return base
 	default:
 		panic("Unsupported Gateway type")
 	}
@@ -165,7 +165,7 @@ func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 		DisplayName:                 to.Ptr(testhelp.RandomName()),
 		AllowCloudConnectionRefresh: to.Ptr(testhelp.RandomBool()),
 		AllowCustomConnectors:       to.Ptr(testhelp.RandomBool()),
-		NumberOfMemberGateways:      to.Ptr(testhelp.RandomInt(gw.MinNumberOfMemberGatewaysValues, gw.MaxNumberOfMemberGatewaysValues)),
+		NumberOfMemberGateways:      to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		LoadBalancingSetting:        to.Ptr(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
 		Version:                     to.Ptr(testhelp.RandomName()),
 		PublicKey:                   NewRadomPublicKey(),
@@ -187,8 +187,8 @@ func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 		Type:                         to.Ptr(fabcore.GatewayTypeVirtualNetwork),
 		DisplayName:                  to.Ptr(testhelp.RandomName()),
 		CapacityID:                   to.Ptr(testhelp.RandomUUID()),
-		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gw.PossibleInactivityMinutesBeforeSleepValues)),
-		NumberOfMemberGateways:       to.Ptr(testhelp.RandomInt(gw.MinNumberOfMemberGatewaysValues, gw.MaxNumberOfMemberGatewaysValues)),
+		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
+		NumberOfMemberGateways:       to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
 	}
 }

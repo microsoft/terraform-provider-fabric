@@ -429,7 +429,7 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 	entityType := string(fabcore.GatewayTypeVirtualNetwork)
 	entityCreateDisplayName := testhelp.RandomName()
 	entityCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	entityCreateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
+	entityCreateNumberOfMemberGateways := int(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
@@ -442,7 +442,7 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	entityUpdateNumberOfMemberGateways := int(testhelp.RandomInt(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
+	entityUpdateNumberOfMemberGateways := int(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
 
 	virtualNetworkAzureResource02 := testhelp.WellKnown()["VirtualNetwork02"].(map[string]any)
 	vNET02VirtualNetworkName := virtualNetworkAzureResource02["name"].(string)
