@@ -15,11 +15,11 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type dataSourceWorkspaceRoleAssignmentModel struct {
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	baseWorkspaceRoleAssignmentModel
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-}
+// type dataSourceWorkspaceRoleAssignmentModel struct {
+// 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
+// 	baseWorkspaceRoleAssignmentModel
+// 	Timeouts timeouts.Value `tfsdk:"timeouts"`
+// }
 
 type dataSourceWorkspaceRoleAssignmentsModel struct {
 	WorkspaceID customtypes.UUID                                                     `tfsdk:"workspace_id"`
