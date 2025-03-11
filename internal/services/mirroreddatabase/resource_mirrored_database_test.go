@@ -32,14 +32,20 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 var testHelperDefinition = map[string]any{
 	`"mirroring.json"`: map[string]any{
 		"source": "${local.path}/mirroring.json",
+		"tokens": map[string]any{
+			"DEFAULT_SCHEMA": "dbo",
+		},
 	},
 }
 
-// var testHelperDefinitionUpdate = map[string]any{
-// 	`"mirroring.json"`: map[string]any{
-// 		"source": "${local.path}/mirroring_update.json",
-// 	},
-// }
+var testHelperDefinitionUpdate = map[string]any{
+	`"mirroring.json"`: map[string]any{
+		"source": "${local.path}/mirroring.json",
+		"tokens": map[string]any{
+			"DEFAULT_SCHEMA": "updated_schema",
+		},
+	},
+}
 
 func TestUnit_MirroredDatabaseResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -363,70 +369,70 @@ func TestAcc_MirroredDatabaseResource_CRUD(t *testing.T) {
 	))
 }
 
-// func TestAcc_MirroredDatabaseResource_UpdateDefinition(t *testing.T) {
-// 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-// 	workspaceID := workspace["id"].(string)
+func TestAcc_MirroredDatabaseResource_UpdateDefinition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
-// 	entityDisplayName := testhelp.RandomName()
-// 	entityDescription := testhelp.RandomName()
+	entityDisplayName := testhelp.RandomName()
+	entityDescription := testhelp.RandomName()
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create with initial definition and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityDisplayName,
-// 						"description":  entityDescription,
-// 						"format":       "Default",
-// 						"definition":   testHelperDefinition,
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create with initial definition and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityDisplayName,
+						"description":  entityDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
 
-// 				// wait before updating definition
-// 				func(s *terraform.State) error {
-// 					// Add a 30-second sleep between test steps in order to allow the Fabric service to complete the provisioning
-// 					t.Log("Sleeping for 30 seconds before updating the definition...")
-// 					time.Sleep(30 * time.Second)
-// 					return nil
-// 				},
-// 			),
-// 		},
-// 		// Update definition and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id":              workspaceID,
-// 						"display_name":              entityDisplayName,
-// 						"description":               entityDescription,
-// 						"format":                    "Default",
-// 						"definition":                testHelperDefinitionUpdate, // updated definition
-// 						"definition_update_enabled": true,
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.default_schema", "dbo"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
-// 			),
-// 		},
-// 	}))
-// }
+				// wait before updating definition
+				func(s *terraform.State) error {
+					// Add a 30-second sleep between test steps in order to allow the Fabric service to complete the provisioning
+					t.Log("Sleeping for 30 seconds before updating the definition...")
+					time.Sleep(30 * time.Second)
+					return nil
+				},
+			),
+		},
+		// Update definition and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":              workspaceID,
+						"display_name":              entityDisplayName,
+						"description":               entityDescription,
+						"format":                    "Default",
+						"definition":                testHelperDefinitionUpdate,
+						"definition_update_enabled": true,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.default_schema", "updated_schema"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
+			),
+		},
+	}))
+}
