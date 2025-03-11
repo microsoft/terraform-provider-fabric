@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Manage a Fabric Data Pipeline.
   Use this resource to manage Data Pipeline https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  -> This item supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -15,7 +15,7 @@ Manage a Fabric Data Pipeline.
 
 Use this resource to manage [Data Pipeline](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
 
--> This item does not support Service Principal. Please use a User context authentication.
+-> This item supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

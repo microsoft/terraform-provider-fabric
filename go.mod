@@ -18,8 +18,8 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.26.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
-	github.com/microsoft/fabric-sdk-go v0.1.0-beta.13
-	github.com/ohler55/ojg v1.26.1
+	github.com/microsoft/fabric-sdk-go v0.1.0-beta.14
+	github.com/ohler55/ojg v1.26.2
 	github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v1.0.0
 	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.14.1
 	github.com/stretchr/testify v1.10.0

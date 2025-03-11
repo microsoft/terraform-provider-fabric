@@ -159,8 +159,8 @@ github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27k
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/microsoft/fabric-sdk-go v0.1.0-beta.13 h1:PVbxe2aAJmPsdPAm2qQaaBd0Kc02CaJgTqFYX//70Z4=
-github.com/microsoft/fabric-sdk-go v0.1.0-beta.13/go.mod h1:cTwqDokDKfiwZrLKiCwI8Zgc8hkSrS2MDcT6Rshpx1c=
+github.com/microsoft/fabric-sdk-go v0.1.0-beta.14 h1:t1WwkOoThxUaGrFEsX16sBuFWfi5AocIy+MBMR0oZIs=
+github.com/microsoft/fabric-sdk-go v0.1.0-beta.14/go.mod h1:cTwqDokDKfiwZrLKiCwI8Zgc8hkSrS2MDcT6Rshpx1c=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
 github.com/mitchellh/go-testing-interface v1.14.1 h1:jrgshOhYAUVNMAJiKbEu7EqAwgJJ2JqpQmpLJOu07cU=
@@ -171,8 +171,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/ohler55/ojg v1.26.1 h1:J5TaLmVEuvnpVH7JMdT1QdbpJU545Yp6cKiCO4aQILc=
-github.com/ohler55/ojg v1.26.1/go.mod h1:gQhDVpQLqrmnd2eqGAvJtn+NfKoYJbe/A4Sj3/Vro4o=
+github.com/ohler55/ojg v1.26.2 h1:e0BHIgsihnU+I47tpgwFDk0xYCVygrTjYHyyNAQ9NXg=
+github.com/ohler55/ojg v1.26.2/go.mod h1:ogZ8vVK07fpsAQ898C5QfXDOk5hxzLbkP/Htr7RYs40=
 github.com/oklog/run v1.1.0 h1:GEenZ1cK0+q0+wsJew9qUg/DyD8k3JzYsZAi5gYi2mA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
 github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v1.0.0 h1:HvbMI4JHsl1HmTIVU2N50t7H4qbIXpM7y2ljl3oOKyE=
