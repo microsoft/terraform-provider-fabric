@@ -38,6 +38,10 @@ resource "fabric_warehouse" "example" {
 
 ### Optional
 
+- `configuration` (Attributes) The Warehouse creation configuration.
+
+Any changes to this configuration will result in recreation of the Warehouse. (see [below for nested schema](#nestedatt--configuration))
+
 - `description` (String) The Warehouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -45,6 +49,14 @@ resource "fabric_warehouse" "example" {
 
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--configuration"></a>
+
+### Nested Schema for `configuration`
+
+Required:
+
+- `collation_type` (String) The default collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -63,6 +75,7 @@ Optional:
 
 Read-Only:
 
+- `collation_type` (String) The collation type of the warehouse. Possible values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.

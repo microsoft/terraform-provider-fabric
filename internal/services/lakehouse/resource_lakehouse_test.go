@@ -201,6 +201,9 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
 			),
 		},
 		// Update and Read
@@ -217,6 +220,9 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -271,7 +277,7 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 	))
 }
 
-func TestAcc_LakehouseConfigurationResource_CRUD(t *testing.T) {
+func TestAcc_LakehouseResource_CRUD_Configuration(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
