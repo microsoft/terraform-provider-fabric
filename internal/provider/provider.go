@@ -435,6 +435,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstreams,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
+		gateway.NewDataSourceGatewayRoleAssignment,
 		gateway.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,

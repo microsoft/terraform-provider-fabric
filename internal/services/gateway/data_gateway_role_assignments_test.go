@@ -50,8 +50,8 @@ func TestUnit_GatewayRoleAssignmentsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignments, "gateway_id", gatewayID),
 				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.role", (*string)(entity.Role)),
-				// resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.display_name", entity.Principal.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.type", (*string)(entity.Principal.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.principal.id", entity.Principal.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceGatewayRoleAssignments, "values.1.principal.type", (*string)(entity.Principal.Type)),
 			),
 		},
 	}))

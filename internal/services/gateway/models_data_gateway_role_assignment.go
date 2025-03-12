@@ -8,26 +8,35 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
+type dataSourceGatewayRoleAssignmentModel struct {
+	GatewayID customtypes.UUID `tfsdk:"gateway_id"`
+	baseGatewayRoleAssignmentModel
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
+}
+
+func (to *dataSourceGatewayRoleAssignmentModel) set(ctx context.Context, from fabcore.GatewayRoleAssignment) diag.Diagnostics {
+	return to.baseGatewayRoleAssignmentModel.set(ctx, from)
+}
+
 type dataSourceGatewayRoleAssignmentsModel struct {
-	GatewayID customtypes.UUID                                               `tfsdk:"gateway_id"`
-	Values    supertypes.ListNestedObjectValueOf[gatewayRoleAssignmentModel] `tfsdk:"values"`
-	Timeouts  timeouts.Value                                                 `tfsdk:"timeouts"`
+	GatewayID customtypes.UUID                                                   `tfsdk:"gateway_id"`
+	Values    supertypes.ListNestedObjectValueOf[baseGatewayRoleAssignmentModel] `tfsdk:"values"`
+	Timeouts  timeouts.Value                                                     `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceGatewayRoleAssignmentsModel) setValues(ctx context.Context, from []fabcore.GatewayRoleAssignment) diag.Diagnostics {
-	slice := make([]*gatewayRoleAssignmentModel, 0, len(from))
+	slice := make([]*baseGatewayRoleAssignmentModel, 0, len(from))
 
 	for _, entity := range from {
-		var entityModel gatewayRoleAssignmentModel
+		var entityModel baseGatewayRoleAssignmentModel
 
-		if diags := entityModel.set(entity); diags.HasError() {
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
 			return diags
 		}
 
@@ -35,18 +44,4 @@ func (to *dataSourceGatewayRoleAssignmentsModel) setValues(ctx context.Context, 
 	}
 
 	return to.Values.Set(ctx, slice)
-}
-
-type gatewayRoleAssignmentModel struct {
-	ID   customtypes.UUID `tfsdk:"id"`
-	Role types.String     `tfsdk:"role"`
-	Type types.String     `tfsdk:"type"`
-}
-
-func (to *gatewayRoleAssignmentModel) set(from fabcore.GatewayRoleAssignment) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Role = types.StringPointerValue((*string)(from.Role))
-	to.Type = types.StringPointerValue((*string)(from.Principal.Type))
-
-	return nil
 }

@@ -31,38 +31,44 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"principal_id":   "00000000-0000-0000-0000-000000000000",
-					"principal_type": "User",
-					"role":           "ConnectionCreatorWithResharing",
+					"principal": map[string]any{
+						"id":   "00000000-0000-0000-0000-000000000000",
+						"type": "User",
+					},
+					"role": "ConnectionCreatorWithResharing",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "gateway_id" is required, but no definition was found.`),
 		},
-		// error - no required attributes - principal_id
+		// error - no required attributes - principal.id
 		{
 			ResourceName: testResourceGatewayRoleAssignment,
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"gateway_id":     "00000000-0000-0000-0000-000000000000",
-					"principal_type": "User",
-					"role":           "ConnectionCreatorWithResharing",
+					"gateway_id": "00000000-0000-0000-0000-000000000000",
+					"principal": map[string]any{
+						"type": "User",
+					},
+					"role": "ConnectionCreatorWithResharing",
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "principal_id" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "principal": attribute "id" is required.`),
 		},
-		// error - no required attributes - principal_type
+		// error - no required attributes - principal.type
 		{
 			ResourceName: testResourceGatewayRoleAssignment,
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"gateway_id":   "00000000-0000-0000-0000-000000000000",
-					"principal_id": "00000000-0000-0000-0000-000000000000",
-					"role":         "ConnectionCreatorWithResharing",
+					"gateway_id": "00000000-0000-0000-0000-000000000000",
+					"principal": map[string]any{
+						"id": "00000000-0000-0000-0000-000000000000",
+					},
+					"role": "ConnectionCreatorWithResharing",
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "principal_type" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "principal": attribute "type" is required.`),
 		},
 		// error - no required attributes - role
 		{
@@ -70,9 +76,11 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"gateway_id":     "00000000-0000-0000-0000-000000000000",
-					"principal_id":   "00000000-0000-0000-0000-000000000000",
-					"principal_type": "User",
+					"gateway_id": "00000000-0000-0000-0000-000000000000",
+					"principal": map[string]any{
+						"id":   "00000000-0000-0000-0000-000000000000",
+						"type": "User",
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "role" is required, but no definition was found.`),
@@ -83,24 +91,28 @@ func TestUnit_GatewayRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"gateway_id":     "invalid uuid",
-					"principal_id":   "00000000-0000-0000-0000-000000000000",
-					"principal_type": "User",
-					"role":           "ConnectionCreatorWithResharing",
+					"gateway_id": "invalid uuid",
+					"principal": map[string]any{
+						"id":   "00000000-0000-0000-0000-000000000000",
+						"type": "User",
+					},
+					"role": "ConnectionCreatorWithResharing",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - invalid UUID - principal_id
+		// error - invalid UUID - principal.id
 		{
 			ResourceName: testResourceGatewayRoleAssignment,
 			Config: at.CompileConfig(
 				testResourceGatewayRoleAssignmentHeader,
 				map[string]any{
-					"gateway_id":     "00000000-0000-0000-0000-000000000000",
-					"principal_id":   "invalid uuid",
-					"principal_type": "User",
-					"role":           "ConnectionCreatorWithResharing",
+					"gateway_id": "00000000-0000-0000-0000-000000000000",
+					"principal": map[string]any{
+						"id":   "invalid uuid",
+						"type": "User",
+					},
+					"role": "ConnectionCreatorWithResharing",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -196,16 +208,18 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceGatewayRoleAssignmentHeader,
 					map[string]any{
-						"gateway_id":     testhelp.RefByFQN(gatewayResourceFQN, "id"),
-						"principal_id":   entityID,
-						"principal_type": entityType,
-						"role":           "ConnectionCreatorWithResharing",
+						"gateway_id": testhelp.RefByFQN(gatewayResourceFQN, "id"),
+						"principal": map[string]any{
+							"id":   entityID,
+							"type": entityType,
+						},
+						"role": "ConnectionCreatorWithResharing",
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_id", entityID),
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_type", entityType),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal.id", entityID),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal.type", entityType),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "ConnectionCreatorWithResharing"),
 			),
 		},
@@ -217,16 +231,18 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceGatewayRoleAssignmentHeader,
 					map[string]any{
-						"gateway_id":     testhelp.RefByFQN(gatewayResourceFQN, "id"),
-						"principal_id":   entityID,
-						"principal_type": entityType,
-						"role":           "ConnectionCreator",
+						"gateway_id": testhelp.RefByFQN(gatewayResourceFQN, "id"),
+						"principal": map[string]any{
+							"id":   entityID,
+							"type": entityType,
+						},
+						"role": "ConnectionCreator",
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_id", entityID),
-				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal_type", entityType),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal.id", entityID),
+				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "principal.type", entityType),
 				resource.TestCheckResourceAttr(testResourceGatewayRoleAssignment, "role", "ConnectionCreator"),
 			),
 		},

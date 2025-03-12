@@ -4,36 +4,39 @@
 package gateway
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type resourceGatewayRoleAssignmentModel struct {
-	ID            customtypes.UUID `tfsdk:"id"`
-	PrincipalID   customtypes.UUID `tfsdk:"principal_id"`
-	PrincipalType types.String     `tfsdk:"principal_type"`
-	Role          types.String     `tfsdk:"role"`
-	GatewayID     customtypes.UUID `tfsdk:"gateway_id"`
-	Timeouts      timeouts.Value   `tfsdk:"timeouts"`
+	baseGatewayRoleAssignmentModel
+	GatewayID customtypes.UUID `tfsdk:"gateway_id"`
+	Timeouts  timeouts.Value   `tfsdk:"timeouts"`
 }
 
-func (to *resourceGatewayRoleAssignmentModel) set(from fabcore.GatewayRoleAssignment) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.PrincipalID = customtypes.NewUUIDPointerValue(from.Principal.ID)
-	to.PrincipalType = types.StringPointerValue((*string)(from.Principal.Type))
-	to.Role = types.StringPointerValue((*string)(from.Role))
+func (to *resourceGatewayRoleAssignmentModel) set(ctx context.Context, from fabcore.GatewayRoleAssignment) diag.Diagnostics {
+	return to.baseGatewayRoleAssignmentModel.set(ctx, from)
 }
 
 type requestCreateGatewayRoleAssignment struct {
 	fabcore.AddGatewayRoleAssignmentRequest
 }
 
-func (to *requestCreateGatewayRoleAssignment) set(from resourceGatewayRoleAssignmentModel) {
-	to.Principal = &fabcore.Principal{ID: from.PrincipalID.ValueStringPointer(), Type: (*fabcore.PrincipalType)(from.PrincipalType.ValueStringPointer())}
+func (to *requestCreateGatewayRoleAssignment) set(ctx context.Context, from resourceGatewayRoleAssignmentModel) diag.Diagnostics {
+	principal, diags := from.Principal.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.Principal = &fabcore.Principal{ID: principal.ID.ValueStringPointer(), Type: (*fabcore.PrincipalType)(principal.Type.ValueStringPointer())}
 	to.Role = (*fabcore.GatewayRole)(from.Role.ValueStringPointer())
+
+	return nil
 }
 
 type requestUpdateGatewayRoleAssignment struct {

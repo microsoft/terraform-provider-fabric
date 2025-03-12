@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -63,22 +65,29 @@ func (r *resourceGatewayRoleAssignment) Schema(ctx context.Context, _ resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"principal_id": schema.StringAttribute{
-				MarkdownDescription: "The Principal ID.",
+			"principal": schema.SingleNestedAttribute{
+				MarkdownDescription: "The principal.",
 				Required:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"principal_type": schema.StringAttribute{
-				MarkdownDescription: "The type of the principal. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrincipalTypeValues(), true, true) + ".",
-				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossiblePrincipalTypeValues(), false)...),
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[gatewayRoleAssignmentPrincipalModel](ctx),
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						MarkdownDescription: "The principal ID.",
+						Required:            true,
+						CustomType:          customtypes.UUIDType{},
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"type": schema.StringAttribute{
+						MarkdownDescription: "The type of the principal. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrincipalTypeValues(), true, true) + ".",
+						Required:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossiblePrincipalTypeValues(), false)...),
+						},
+					},
 				},
 			},
 			"role": schema.StringAttribute{
@@ -151,14 +160,16 @@ func (r *resourceGatewayRoleAssignment) Create(ctx context.Context, req resource
 
 	var reqCreate requestCreateGatewayRoleAssignment
 
-	reqCreate.set(plan)
+	reqCreate.set(ctx, plan)
 
 	respCreate, err := r.client.AddGatewayRoleAssignment(ctx, plan.GatewayID.ValueString(), reqCreate.AddGatewayRoleAssignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	plan.set(respCreate.GatewayRoleAssignment)
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.GatewayRoleAssignment)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -193,8 +204,7 @@ func (r *resourceGatewayRoleAssignment) Read(ctx context.Context, req resource.R
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := r.get(ctx, &state)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); resp.Diagnostics.HasError() {
+	if diags := r.get(ctx, &state); resp.Diagnostics.HasError() {
 		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 			resp.State.RemoveResource(ctx)
 		}
@@ -248,7 +258,9 @@ func (r *resourceGatewayRoleAssignment) Update(ctx context.Context, req resource
 		return
 	}
 
-	plan.set(respUpdate.GatewayRoleAssignment)
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.GatewayRoleAssignment)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -327,13 +339,14 @@ func (r *resourceGatewayRoleAssignment) ImportState(ctx context.Context, req res
 	}
 
 	state := resourceGatewayRoleAssignmentModel{
-		ID:        uuidGatewayRoleAssignmentID,
+		baseGatewayRoleAssignmentModel: baseGatewayRoleAssignmentModel{
+			ID: uuidGatewayRoleAssignmentID,
+		},
 		GatewayID: uuidGatewayID,
 		Timeouts:  timeout,
 	}
 
-	err := r.get(ctx, &state)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationImport, nil)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -348,15 +361,13 @@ func (r *resourceGatewayRoleAssignment) ImportState(ctx context.Context, req res
 	}
 }
 
-func (r *resourceGatewayRoleAssignment) get(ctx context.Context, model *resourceGatewayRoleAssignmentModel) error {
+func (r *resourceGatewayRoleAssignment) get(ctx context.Context, model *resourceGatewayRoleAssignmentModel) diag.Diagnostics {
 	tflog.Trace(ctx, "getting Gateway Role Assignment")
 
 	respGetInfo, err := r.client.GetGatewayRoleAssignment(ctx, model.GatewayID.ValueString(), model.ID.ValueString(), nil)
-	if err != nil {
-		return err
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
 	}
 
-	model.set(respGetInfo.GatewayRoleAssignment)
-
-	return nil
+	return model.set(ctx, respGetInfo.GatewayRoleAssignment)
 }

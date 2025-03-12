@@ -20,10 +20,12 @@ Manage a Gateway Role Assignment.
 
 ```terraform
 resource "fabric_gateway_role_assignment" "example" {
-  gateway_id     = "00000000-0000-0000-0000-000000000000"
-  principal_id   = "11111111-1111-1111-1111-111111111111"
-  principal_type = "User"
-  role           = "ConnectionCreatorWithResharing"
+  gateway_id = "00000000-0000-0000-0000-000000000000"
+  principal = {
+    id   = "11111111-1111-1111-1111-111111111111"
+    type = "User"
+  }
+  role = "ConnectionCreatorWithResharing"
 }
 ```
 
@@ -33,8 +35,7 @@ resource "fabric_gateway_role_assignment" "example" {
 ### Required
 
 - `gateway_id` (String) The Gateway ID.
-- `principal_id` (String) The Principal ID.
-- `principal_type` (String) The type of the principal. Accepted values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
 - `role` (String) The Gateway Role of the principal. Accepted values: `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
 
 ### Optional
@@ -44,6 +45,15 @@ resource "fabric_gateway_role_assignment" "example" {
 ### Read-Only
 
 - `id` (String) The Gateway Role Assignment ID.
+
+<a id="nestedatt--principal"></a>
+
+### Nested Schema for `principal`
+
+Required:
+
+- `id` (String) The principal ID.
+- `type` (String) The type of the principal. Accepted values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

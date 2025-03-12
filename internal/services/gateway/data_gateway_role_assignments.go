@@ -45,6 +45,8 @@ func (d *dataSourceGatewayRoleAssignments) Metadata(_ context.Context, req datas
 }
 
 func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	attributes := getDataSourceGatewayRoleAssignmentAttributes(ctx, true)
+
 	resp.Schema = schema.Schema{
 		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("List Fabric "+GatewayRoleAssignmentsName+".\n\n"+
 			"Use this data source to list ["+GatewayRoleAssignmentsName+"].\n\n"+
@@ -58,52 +60,9 @@ func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasou
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: "The list of " + GatewayRoleAssignmentsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[gatewayRoleAssignmentModel](ctx),
+				CustomType:          supertypes.NewListNestedObjectTypeOf[baseGatewayRoleAssignmentModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							MarkdownDescription: "The Principal ID.",
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"role": schema.StringAttribute{
-							MarkdownDescription: "The gateway role of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGatewayRoleValues(), true, true) + ".",
-							Computed:            true,
-						},
-						// "display_name": schema.StringAttribute{
-						// 	MarkdownDescription: "The principal's display name.",
-						// 	Computed:            true,
-						// },
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The type of the principal. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossiblePrincipalTypeValues(), true, true) + ".",
-							Computed:            true,
-						},
-						// "details": schema.SingleNestedAttribute{
-						// 	MarkdownDescription: "The principal details.",
-						// 	Computed:            true,
-						// 	CustomType:          supertypes.NewSingleNestedObjectTypeOf[principalDetailsModel](ctx),
-						// 	Attributes: map[string]schema.Attribute{
-						// 		"user_principal_name": schema.StringAttribute{
-						// 			MarkdownDescription: "The user principal name.",
-						// 			Computed:            true,
-						// 		},
-						// 		"group_type": schema.StringAttribute{
-						// 			MarkdownDescription: "The type of the group. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGroupTypeValues(), true, true) + ".",
-						// 			Computed:            true,
-						// 		},
-						// 		"app_id": schema.StringAttribute{
-						// 			MarkdownDescription: "The service principal's Microsoft Entra App ID.",
-						// 			Computed:            true,
-						// 			CustomType:          customtypes.UUIDType{},
-						// 		},
-						// 		"parent_principal_id": schema.StringAttribute{
-						// 			MarkdownDescription: "The parent principal ID of Service Principal Profile.",
-						// 			Computed:            true,
-						// 			CustomType:          customtypes.UUIDType{},
-						// 		},
-						// 	},
-						// },
-					},
+					Attributes: attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),
