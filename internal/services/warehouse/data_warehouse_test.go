@@ -105,6 +105,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// read by id - not found
@@ -136,6 +137,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// read by name - not found
@@ -179,6 +181,7 @@ func TestAcc_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// read by id - not found
@@ -209,6 +212,7 @@ func TestAcc_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// read by name - not found

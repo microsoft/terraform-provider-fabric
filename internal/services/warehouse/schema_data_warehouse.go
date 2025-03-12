@@ -6,6 +6,9 @@ package warehouse
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	fabwarehouse "github.com/microsoft/fabric-sdk-go/fabric/warehouse"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func getDataSourceWarehousePropertiesAttributes() map[string]schema.Attribute {
@@ -23,6 +26,10 @@ func getDataSourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 			MarkdownDescription: "The date and time the warehouse was last updated.",
 			Computed:            true,
 			CustomType:          timetypes.RFC3339Type{},
+		},
+		"collation_type": schema.StringAttribute{
+			MarkdownDescription: "The collation type of the warehouse. Possible values: " + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, false) + ".",
+			Computed:            true,
 		},
 	}
 
