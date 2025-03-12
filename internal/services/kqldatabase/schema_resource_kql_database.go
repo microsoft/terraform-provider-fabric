@@ -81,6 +81,7 @@ func getResourceKQLDatabaseConfigurationAttributes() map[string]schema.Attribute
 				),
 				stringvalidator.ConflictsWith(
 					path.MatchRelative().AtParent().AtName("invitation_token_wo"),
+					path.MatchRelative().AtParent().AtName("invitation_token_wo_version"),
 					path.MatchRelative().AtParent().AtName("source_cluster_uri"),
 					path.MatchRelative().AtParent().AtName("source_database_name"),
 				),
