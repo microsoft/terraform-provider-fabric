@@ -146,6 +146,7 @@ func NewRandomWarehouse() fabwarehouse.Warehouse {
 			ConnectionString: to.Ptr(testhelp.RandomURI()),
 			CreatedDate:      to.Ptr(time.Now()),
 			LastUpdatedTime:  to.Ptr(time.Now()),
+			CollationType:    to.Ptr(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
 		},
 	}
 }

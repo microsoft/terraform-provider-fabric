@@ -14,6 +14,7 @@ type warehousePropertiesModel struct {
 	ConnectionString types.String      `tfsdk:"connection_string"`
 	CreatedDate      timetypes.RFC3339 `tfsdk:"created_date"`
 	LastUpdatedTime  timetypes.RFC3339 `tfsdk:"last_updated_time"`
+	CollationType    types.String      `tfsdk:"collation_type"`
 }
 
 type warehouseConfigurationModel struct {
@@ -25,4 +26,9 @@ func (to *warehousePropertiesModel) set(from fabwarehouse.Properties) {
 	to.ConnectionString = types.StringPointerValue(from.ConnectionString)
 	to.CreatedDate = timetypes.NewRFC3339TimePointerValue(from.CreatedDate)
 	to.LastUpdatedTime = timetypes.NewRFC3339TimePointerValue(from.LastUpdatedTime)
+	to.CollationType = types.StringPointerValue((*string)(from.CollationType))
+}
+
+type warehouseConfigurationModel struct {
+	CollationType types.String `tfsdk:"collation_type"`
 }
