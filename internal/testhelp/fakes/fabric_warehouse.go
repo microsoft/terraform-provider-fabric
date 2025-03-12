@@ -142,7 +142,7 @@ func NewRandomWarehouse() fabwarehouse.Warehouse {
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties: &fabwarehouse.Properties{
-			ConnectionString: to.Ptr(testhelp.RandomName()),
+			ConnectionString: to.Ptr(testhelp.RandomURI()),
 			CreatedDate:      to.Ptr(time.Now()),
 			LastUpdatedTime:  to.Ptr(time.Now()),
 		},

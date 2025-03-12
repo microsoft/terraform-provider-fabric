@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
-	"time"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,7 +30,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 
 var testHelperDefinition = map[string]any{
 	`"mirroring.json"`: map[string]any{
-		"source": "${local.path}/mirroring.json",
+		"source": "${local.path}/mirroring.json.tmpl",
 		"tokens": map[string]any{
 			"DEFAULT_SCHEMA": "dbo",
 		},
@@ -40,7 +39,7 @@ var testHelperDefinition = map[string]any{
 
 var testHelperDefinitionUpdate = map[string]any{
 	`"mirroring.json"`: map[string]any{
-		"source": "${local.path}/mirroring.json",
+		"source": "${local.path}/mirroring.json.tmpl",
 		"tokens": map[string]any{
 			"DEFAULT_SCHEMA": "updated_schema",
 		},
@@ -329,14 +328,6 @@ func TestAcc_MirroredDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityCreateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-
-				// wait before update definition
-				func(s *terraform.State) error {
-					// Add a 30-second sleep between test steps in order to allow the Fabric service to complete the provisioning
-					t.Log("Sleeping for 30 seconds before the next step...")
-					time.Sleep(30 * time.Second)
-					return nil
-				},
 			),
 		},
 		// Update and Read
@@ -365,48 +356,6 @@ func TestAcc_MirroredDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
-	},
-	))
-}
-
-func TestAcc_MirroredDatabaseResource_UpdateDefinition(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	entityDisplayName := testhelp.RandomName()
-	entityDescription := testhelp.RandomName()
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create with initial definition and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityDisplayName,
-						"description":  entityDescription,
-						"format":       "Default",
-						"definition":   testHelperDefinition,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
-
-				// wait before updating definition
-				func(s *terraform.State) error {
-					// Add a 30-second sleep between test steps in order to allow the Fabric service to complete the provisioning
-					t.Log("Sleeping for 30 seconds before updating the definition...")
-					time.Sleep(30 * time.Second)
-					return nil
-				},
-			),
-		},
 		// Update definition and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -416,16 +365,16 @@ func TestAcc_MirroredDatabaseResource_UpdateDefinition(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id":              workspaceID,
-						"display_name":              entityDisplayName,
-						"description":               entityDescription,
+						"display_name":              entityUpdateDisplayName,
+						"description":               entityUpdateDescription,
 						"format":                    "Default",
 						"definition":                testHelperDefinitionUpdate,
 						"definition_update_enabled": true,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.default_schema", "updated_schema"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
@@ -434,5 +383,6 @@ func TestAcc_MirroredDatabaseResource_UpdateDefinition(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
-	}))
+	},
+	))
 }

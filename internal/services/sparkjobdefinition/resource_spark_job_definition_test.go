@@ -61,7 +61,8 @@ func TestUnit_SparkJobDefinitionResource_Attributes(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -78,7 +79,8 @@ func TestUnit_SparkJobDefinitionResource_Attributes(t *testing.T) {
 						"format":          "SparkJobDefinitionV1",
 						"definition":      testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -190,10 +192,12 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
+	entityNoDefinition := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(entityNoDefinition)
 	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -213,7 +217,7 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
-		// Create and Read
+		// Create and Read with definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -223,13 +227,14 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
+						"description":  *entityBefore.Description,
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
@@ -243,12 +248,14 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
@@ -262,7 +269,9 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
+	entityCreateDescription := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -275,13 +284,14 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"description":  entityCreateDescription,
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityCreateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
@@ -296,12 +306,14 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),

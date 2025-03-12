@@ -5,53 +5,84 @@ package mirroreddatabase
 
 import (
 	"context"
+	"net/http"
+	"time"
 
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
-	"github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fabmirroreddatabase "github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewResourceMirroredDatabase() resource.Resource {
-	propertiesSetter := func(ctx context.Context, from *mirroreddatabase.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]) diag.Diagnostics {
+func NewResourceMirroredDatabase(ctx context.Context) resource.Resource {
+	propertiesSetter := func(ctx context.Context, from *fabmirroreddatabase.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[mirroredDatabasePropertiesModel](ctx)
 
-		if from == nil {
-			return nil
-		}
+		if from != nil {
+			propertiesModel := &mirroredDatabasePropertiesModel{}
 
-		propertiesModel := &mirroredDatabasePropertiesModel{}
-		if diags := propertiesModel.set(ctx, *from); diags.HasError() {
-			return diags
-		}
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
+				return diags
+			}
 
-		diags := properties.Set(ctx, propertiesModel)
-		if diags.HasError() {
-			return diags
+			diags := properties.Set(ctx, propertiesModel)
+			if diags.HasError() {
+				return diags
+			}
 		}
 
 		to.Properties = properties
+
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, client fabric.Client, model fabricitem.ResourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], fabricItem *fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
-		mirroredDbClient := mirroreddatabase.NewClientFactoryWithClient(client).NewItemsClient()
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabmirroreddatabase.Properties]) error {
+		client := fabmirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
-		resp, err := mirroredDbClient.GetMirroredDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-		if err != nil {
-			return err
+		for {
+			respGet, err := client.GetMirroredDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+			if err != nil {
+				return err
+			}
+
+			if respGet.Properties == nil || respGet.Properties.SQLEndpointProperties == nil {
+				tflog.Info(ctx, "Mirrored Database provisioning not done, waiting 30 seconds before retrying")
+				time.Sleep(30 * time.Second) // lintignore:R018
+
+				continue
+			}
+
+			switch *respGet.Properties.SQLEndpointProperties.ProvisioningStatus {
+			case fabmirroreddatabase.SQLEndpointProvisioningStatusFailed:
+				return &fabcore.ResponseError{
+					ErrorCode:  (string)(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed),
+					StatusCode: http.StatusBadRequest,
+					ErrorResponse: &fabcore.ErrorResponse{
+						ErrorCode: azto.Ptr((string)(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed)),
+						Message:   azto.Ptr("Mirrored Database SQL endpoint provisioning failed"),
+					},
+				}
+
+			case fabmirroreddatabase.SQLEndpointProvisioningStatusSuccess:
+				fabricItem.Set(respGet.MirroredDatabase)
+
+				return nil
+			default:
+				tflog.Info(ctx, "Mirrored Database provisioning in progress, waiting 30 seconds before retrying")
+				time.Sleep(30 * time.Second) // lintignore:R018
+			}
 		}
-
-		fabricItem.Set(resp.MirroredDatabase)
-		return nil
 	}
 
-	config := fabricitem.ResourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]{
+	config := fabricitem.ResourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
 		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
 			Type:              ItemType,
 			Name:              ItemName,
@@ -71,7 +102,7 @@ func NewResourceMirroredDatabase() resource.Resource {
 			DefinitionEmpty:    ItemDefinitionEmpty,
 			DefinitionFormats:  itemDefinitionFormats,
 		},
-		PropertiesAttributes: getResourceMirroredDatabasePropertiesAttributes(),
+		PropertiesAttributes: getResourceMirroredDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,
 	}

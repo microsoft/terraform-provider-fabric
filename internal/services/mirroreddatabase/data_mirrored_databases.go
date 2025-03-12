@@ -9,14 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/microsoft/fabric-sdk-go/fabric"
-	"github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
+	fabmirroreddatabase "github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceMirroredDatabases() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *mirroreddatabase.Properties, to *fabricitem.FabricItemPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]) diag.Diagnostics {
+func NewDataSourceMirroredDatabases(ctx context.Context) datasource.DataSource {
+	propertiesSetter := func(ctx context.Context, from *fabmirroreddatabase.Properties, to *fabricitem.FabricItemPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[mirroredDatabasePropertiesModel](ctx)
 
 		if from != nil {
@@ -33,10 +33,10 @@ func NewDataSourceMirroredDatabases() datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemsPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], fabricItems *[]fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
-		client := mirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemsPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties], fabricItems *[]fabricitem.FabricItemProperties[fabmirroreddatabase.Properties]) error {
+		client := fabmirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
-		fabItems := make([]fabricitem.FabricItemProperties[mirroreddatabase.Properties], 0)
+		fabItems := make([]fabricitem.FabricItemProperties[fabmirroreddatabase.Properties], 0)
 
 		respList, err := client.ListMirroredDatabases(ctx, model.WorkspaceID.ValueString(), nil)
 		if err != nil {
@@ -44,7 +44,7 @@ func NewDataSourceMirroredDatabases() datasource.DataSource {
 		}
 
 		for _, entity := range respList {
-			var fabricItem fabricitem.FabricItemProperties[mirroreddatabase.Properties]
+			var fabricItem fabricitem.FabricItemProperties[fabmirroreddatabase.Properties]
 			fabricItem.Set(entity)
 			fabItems = append(fabItems, fabricItem)
 		}
@@ -54,7 +54,7 @@ func NewDataSourceMirroredDatabases() datasource.DataSource {
 		return nil
 	}
 
-	config := fabricitem.DataSourceFabricItemsProperties[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]{
+	config := fabricitem.DataSourceFabricItemsProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
 		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
 			Type:   ItemType,
 			Name:   ItemName,
@@ -64,7 +64,7 @@ func NewDataSourceMirroredDatabases() datasource.DataSource {
 				"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
 				ItemDocsSPNSupport,
 		},
-		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(),
+		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,
 	}

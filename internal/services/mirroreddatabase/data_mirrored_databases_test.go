@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	testDataSourceMirroredDatabasesFQN    = testhelp.DataSourceFQN("fabric", "mirrored_databases", "test")
-	testDataSourceMirroredDatabasesHeader = at.DataSourceHeader(testhelp.TypeName("fabric", "mirrored_databases"), "test")
+	testDataSourceItemsFQN    = testhelp.DataSourceFQN("fabric", itemsTFName, "test")
+	testDataSourceItemsHeader = at.DataSourceHeader(testhelp.TypeName("fabric", itemsTFName), "test")
 )
 
 func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
@@ -32,7 +32,7 @@ func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
-				testDataSourceMirroredDatabasesHeader,
+				testDataSourceItemsHeader,
 				map[string]any{},
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
@@ -40,7 +40,7 @@ func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
 		// error - workspace_id - invalid UUID
 		{
 			Config: at.CompileConfig(
-				testDataSourceMirroredDatabasesHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
 				},
@@ -50,7 +50,7 @@ func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
 		// error - unexpected_attr
 		{
 			Config: at.CompileConfig(
-				testDataSourceMirroredDatabasesHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id":    workspaceID,
 					"unexpected_attr": "test",
@@ -61,19 +61,19 @@ func TestUnit_MirroredDatabasesDataSource(t *testing.T) {
 		// read
 		{
 			Config: at.CompileConfig(
-				testDataSourceMirroredDatabasesHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabasesFQN, "workspace_id", entity.WorkspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceMirroredDatabasesFQN, "values.1.id", entity.ID),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.default_schema"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.onelake_tables_path"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.1.properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sql_endpoint_properties.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sql_endpoint_properties.provisioning_status"),
 			),
 		},
 	}))
@@ -87,17 +87,18 @@ func TestAcc_MirroredDatabasesDataSource(t *testing.T) {
 		// read
 		{
 			Config: at.CompileConfig(
-				testDataSourceMirroredDatabasesHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceMirroredDatabasesFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.0.properties.default_schema"),
-				resource.TestCheckResourceAttrSet(testDataSourceMirroredDatabasesFQN, "values.0.properties.onelake_tables_path"),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_tables_path"),
 			),
 		},
-	}))
+	},
+	))
 }

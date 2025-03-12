@@ -216,60 +216,60 @@ func handleNonLROCreate[TEntity, TOptions, TCreateRequest, TResponse any](
 	}
 }
 
-func handleNonLROUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse any](handler *typedHandler[TEntity], definitionUpdater definitionUpdater[TRequest, TDefinition], function *func(ctx context.Context, parentID, childID string, request TRequest, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
-	if function == nil {
-		return
-	}
+// func handleNonLROUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse any](handler *typedHandler[TEntity], definitionUpdater definitionUpdater[TRequest, TDefinition], function *func(ctx context.Context, parentID, childID string, request TRequest, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
+// 	if function == nil {
+// 		return
+// 	}
 
-	*function = func(_ context.Context, parentID, childID string, request TRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
-		var resp azfake.Responder[TResponse]
+// 	*function = func(_ context.Context, parentID, childID string, request TRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
+// 		var resp azfake.Responder[TResponse]
 
-		var errResp azfake.ErrorResponder
+// 		var errResp azfake.ErrorResponder
 
-		id := generateID(parentID, childID)
+// 		id := generateID(parentID, childID)
 
-		typedDefinition := getDefinition[TDefinition](handler, id)
+// 		typedDefinition := getDefinition[TDefinition](handler, id)
 
-		updatedDefinition := definitionUpdater.UpdateDefinition(typedDefinition, request)
-		upsertDefinition(handler, id, updatedDefinition)
+// 		updatedDefinition := definitionUpdater.UpdateDefinition(typedDefinition, request)
+// 		upsertDefinition(handler, id, updatedDefinition)
 
-		var respValue TResponse
+// 		var respValue TResponse
 
-		resp.SetResponse(http.StatusOK, respValue, nil)
+// 		resp.SetResponse(http.StatusOK, respValue, nil)
 
-		return resp, errResp
-	}
-}
+// 		return resp, errResp
+// 	}
+// }
 
-func handleNonLROGetDefinition[TEntity, TDefinition, TOptions, TResponse any](handler *typedHandler[TEntity], definitionTransformer definitionTransformer[TDefinition, TResponse], function *func(ctx context.Context, parentID, childID string, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
-	if function == nil {
-		return
-	}
+// func handleNonLROGetDefinition[TEntity, TDefinition, TOptions, TResponse any](handler *typedHandler[TEntity], definitionTransformer definitionTransformer[TDefinition, TResponse], function *func(ctx context.Context, parentID, childID string, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
+// 	if function == nil {
+// 		return
+// 	}
 
-	*function = func(_ context.Context, parentID, childID string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
-		var resp azfake.Responder[TResponse]
+// 	*function = func(_ context.Context, parentID, childID string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
+// 		var resp azfake.Responder[TResponse]
 
-		var errResp azfake.ErrorResponder
+// 		var errResp azfake.ErrorResponder
 
-		id := generateID(parentID, childID)
+// 		id := generateID(parentID, childID)
 
-		if definition, ok := handler.definitions[id]; ok {
-			typedDefinition, ok := definition.(TDefinition)
+// 		if definition, ok := handler.definitions[id]; ok {
+// 			typedDefinition, ok := definition.(TDefinition)
 
-			if !ok {
-				panic("Definition not of the expected type") // lintignore:R009
-			}
+// 			if !ok {
+// 				panic("Definition not of the expected type") // lintignore:R009
+// 			}
 
-			respValue := definitionTransformer.TransformDefinition(&typedDefinition)
-			resp.SetResponse(http.StatusOK, respValue, nil)
-		} else {
-			respValue := definitionTransformer.TransformDefinition(nil)
-			resp.SetResponse(http.StatusOK, respValue, nil)
-		}
+// 			respValue := definitionTransformer.TransformDefinition(&typedDefinition)
+// 			resp.SetResponse(http.StatusOK, respValue, nil)
+// 		} else {
+// 			respValue := definitionTransformer.TransformDefinition(nil)
+// 			resp.SetResponse(http.StatusOK, respValue, nil)
+// 		}
 
-		return resp, errResp
-	}
-}
+// 		return resp, errResp
+// 	}
+// }
 
 func handleCreateLRO[TEntity, TOptions, TCreateRequest, TResponse any](h *typedHandler[TEntity], creator creatorWithParentID[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder)) {
 	if f == nil {

@@ -11,29 +11,15 @@ import (
 )
 
 const (
-	ItemName            = "Mirrored Database"
-	ItemTFName          = "mirrored_database"
-	ItemsName           = "Mirrored Databases"
-	ItemsTFName         = "mirrored_databases"
-	ItemType            = fabcore.ItemTypeMirroredDatabase
-	ItemDocsSPNSupport  = common.DocsSPNSupported
-	ItemDocsURL         = "https://learn.microsoft.com/en-us/fabric/database/mirrored-database/overview"
-	ItemDefinitionEmpty = `
-{
-	"properties": {
-    "source": {
-      "type": "GenericMirror"
-    },
-    "target": {
-      "type": "MountedRelationalDatabase",
-      "typeProperties": {
-        "format": "Delta",
-        "defaultSchema": "dbo"
-      }
-    }
-	}
-}`
-	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mirrored-database-definition"
+	ItemName                  = "Mirrored Database"
+	ItemTFName                = "mirrored_database"
+	ItemsName                 = "Mirrored Databases"
+	ItemsTFName               = "mirrored_databases"
+	ItemType                  = fabcore.ItemTypeMirroredDatabase
+	ItemDocsSPNSupport        = common.DocsSPNSupported
+	ItemDocsURL               = "https://learn.microsoft.com/fabric/database/mirrored-database/overview"
+	ItemDefinitionEmpty       = `{"properties":{"source":{"type":"GenericMirror"},"target":{"type":"MountedRelationalDatabase","typeProperties":{"defaultSchema":"dbo","format":"Delta"}}}}`
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mirrored-database-definition"
 )
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals

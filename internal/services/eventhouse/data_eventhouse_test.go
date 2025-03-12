@@ -121,7 +121,6 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-
 		// read by name
 		{
 			Config: at.CompileConfig(
@@ -228,6 +227,18 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id with definition - missing format error
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
 		},
 		// read by id with definition
 		{

@@ -41,6 +41,7 @@ golangci-report.xml
 changie.md
 .lycheecache
 *.env
+.vs/
 
 # Terraform
 .terraform/

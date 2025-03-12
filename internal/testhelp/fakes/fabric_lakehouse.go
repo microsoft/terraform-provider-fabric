@@ -148,7 +148,7 @@ func NewRandomLakehouse() fablakehouse.Lakehouse {
 			SQLEndpointProperties: &fablakehouse.SQLEndpointProperties{
 				ID:                 to.Ptr(testhelp.RandomUUID()),
 				ProvisioningStatus: to.Ptr(fablakehouse.SQLEndpointProvisioningStatusSuccess),
-				ConnectionString:   to.Ptr(testhelp.RandomName()),
+				ConnectionString:   to.Ptr(testhelp.RandomURI()),
 			},
 		},
 	}

@@ -10,55 +10,69 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	"github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
+	fabmirroreddatabase "github.com/microsoft/fabric-sdk-go/fabric/mirroreddatabase"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceMirroredDatabase() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *mirroreddatabase.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]) diag.Diagnostics {
+func NewDataSourceMirroredDatabase(ctx context.Context) datasource.DataSource {
+	propertiesSetter := func(ctx context.Context, from *fabmirroreddatabase.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[mirroredDatabasePropertiesModel](ctx)
+
 		if from != nil {
 			propertiesModel := &mirroredDatabasePropertiesModel{}
-			propertiesModel.set(ctx, *from)
+
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
+				return diags
+			}
+
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
 		}
+
 		to.Properties = properties
+
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], fabricItem *fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
-		client := mirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabmirroreddatabase.Properties]) error {
+		client := fabmirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
 		respGet, err := client.GetMirroredDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 		if err != nil {
 			return err
 		}
+
 		fabricItem.Set(respGet.MirroredDatabase)
+
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, mirroreddatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[mirroreddatabase.Properties]) error {
-		client := mirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabmirroreddatabase.Properties]) error {
+		client := fabmirroreddatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
 		pager := client.NewListMirroredDatabasesPager(model.WorkspaceID.ValueString(), nil)
 		for pager.More() {
 			page, err := pager.NextPage(ctx)
 			if err != nil {
 				return err
 			}
+
 			for _, entity := range page.Value {
 				if *entity.DisplayName == model.DisplayName.ValueString() {
 					fabricItem.Set(entity)
+
 					return nil
 				}
 			}
 		}
+
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, mirroreddatabase.Properties]{
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
 		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
 			Type:   ItemType,
 			Name:   ItemName,
@@ -69,7 +83,7 @@ func NewDataSourceMirroredDatabase() datasource.DataSource {
 			IsDisplayNameUnique: true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
-		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(), // define this function to return schema attributes
+		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(ctx), // define this function to return schema attributes
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,
 		ItemListGetter:       itemListGetter,
