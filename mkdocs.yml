@@ -45,7 +45,7 @@ theme:
 
 plugins:
   - search
-  - awesome-pages
+  - awesome-nav
 
 validation:
   links:
