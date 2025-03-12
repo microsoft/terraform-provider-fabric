@@ -50,6 +50,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
@@ -395,6 +396,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
 		notebook.NewResourceNotebook,
@@ -442,6 +444,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehouse.NewDataSourceLakehouseTable,
 		lakehouse.NewDataSourceLakehouseTables,
+		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
+		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
 		mlexperiment.NewDataSourceMLExperiment,
 		mlexperiment.NewDataSourceMLExperiments,

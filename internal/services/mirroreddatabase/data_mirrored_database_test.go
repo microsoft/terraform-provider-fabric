@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package eventhouse_test
+package mirroreddatabase_test
 
 import (
 	"regexp"
@@ -21,16 +21,16 @@ var (
 	testDataSourceItemHeader = at.DataSourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
 )
 
-func TestUnit_EventhouseDataSource(t *testing.T) {
+func TestUnit_MirroredDatabaseDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomEventhouseWithWorkspace(workspaceID)
+	entity := fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomEventhouseWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomEventhouseWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredDatabaseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - no attributes
+		// error - no attributes provided
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -38,7 +38,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
-		// error - workspace_id - invalid UUID
+		// error - invalid workspace_id UUID
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -59,7 +59,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
-		// error - conflicting attributes
+		// error - conflicting attributes provided together
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -71,7 +71,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`These attributes cannot be configured together: \[id,display_name\]`),
 		},
-		// error - no required attributes
+		// error - missing one of required attributes (neither id nor display_name provided)
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -81,7 +81,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured: \[id,display_name\]`),
 		},
-		// error - no required attributes
+		// error - id provided without workspace_id
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -91,7 +91,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
-		// read by id
+		// read by id - success
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -105,9 +105,11 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
 		// read by id - not found
@@ -121,7 +123,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by name
+		// read by display name - success
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -135,12 +137,14 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
-		// read by name - not found
+		// read by display name - not found
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -154,19 +158,18 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_EventhouseDataSource(t *testing.T) {
+func TestAcc_MirroredDatabaseDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["Eventhouse"].(map[string]any)
+	entity := testhelp.WellKnown()["MirroredDatabase"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
 
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
-		// read by id
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id - success
 		{
-			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -179,14 +182,15 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
 		// read by id - not found
 		{
-			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -196,9 +200,8 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by name
+		// read by display name - success
 		{
-			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -211,14 +214,11 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
-		// read by name - not found
+		// read by display name - not found
 		{
-			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
@@ -240,16 +240,15 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
 		},
-		// read by id with definition
+		// read by id with definition - success
 		{
-			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
-					"format":            "Default",
 					"output_definition": true,
+					"format":            "Default",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -257,7 +256,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.EventhouseProperties.json.content"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.mirroring.json.content"),
 			),
 		},
 	}))
