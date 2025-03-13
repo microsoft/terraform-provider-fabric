@@ -1,0 +1,5 @@
+kind: added
+body: New data-source `fabric_gateway`
+time: 2025-03-13T12:14:51.315779-07:00
+custom:
+    Issue: "172"

@@ -3,7 +3,7 @@
 page_title: "fabric_workspace_role_assignments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Workspace Role Assignments.
+  List Fabric Workspace Role Assignments.
   Use this data source to list Workspace Role Assignments https://learn.microsoft.com/fabric/fundamentals/roles-workspaces.
   -> This item supports Service Principal authentication.
 ---
