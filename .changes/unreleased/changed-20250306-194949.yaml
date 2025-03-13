@@ -1,5 +1,5 @@
 kind: changed
-body: SPN is now supported for Data Pipeline resources/data-sources
+body: SPN supported for Data Pipeline resources/data-sources
 time: 2025-03-06T19:49:49.0668654-08:00
 custom:
-    Issue: "291"
+  Issue: "291"
