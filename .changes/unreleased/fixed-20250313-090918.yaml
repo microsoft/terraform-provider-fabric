@@ -1,0 +1,5 @@
+kind: fixed
+body: Add missing required `format` attribute to the `fabric_data_pipeline` Resource example.
+time: 2025-03-13T09:09:18.9310599-07:00
+custom:
+    Issue: "303"
