@@ -197,10 +197,6 @@ func (r *resourceWorkspaceGit) Create(ctx context.Context, req resource.CreateRe
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceWorkspaceGitModel
 
@@ -346,11 +342,6 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	// in real world, this should not reach here
 	resp.Diagnostics.AddError(
@@ -370,9 +361,6 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 func (r *resourceWorkspaceGit) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceWorkspaceGitModel

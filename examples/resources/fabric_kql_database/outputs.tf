@@ -17,3 +17,18 @@ output "example4" {
   value     = resource.fabric_kql_database.example4
   sensitive = true
 }
+
+output "example5" {
+  value     = resource.fabric_kql_database.example5
+  sensitive = true
+}
+
+output "example6" {
+  value     = resource.fabric_kql_database.example6
+  sensitive = true
+}
+
+output "example7" {
+  value     = resource.fabric_kql_database.example7
+  sensitive = true
+}

@@ -44,8 +44,25 @@ resource "fabric_kql_database" "example2" {
 }
 
 # Example 3 - Item with configuration, no definition - create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
+# Example below uses Write-only Arguments (https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only) and let you securely pass temporary values to Terraform's managed resources during an operation without persisting those values to state or plan files.
+# Require Terraform 1.11 and later.
 resource "fabric_kql_database" "example3" {
   display_name = "example3"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+
+  configuration = {
+    database_type               = "Shortcut"
+    eventhouse_id               = "11111111-1111-1111-1111-111111111111"
+    invitation_token_wo         = "eyJ0...InvitationToken...iJKV"
+    invitation_token_wo_version = 1
+  }
+}
+
+# Example 4 - Item with configuration, no definition - create a Shortcut KQL database to source Azure Data Explorer cluster with invitation token
+# Example below does NOT use Write-only Arguments and secret values are persisted to state and plan files. Recommended to use Write-only Arguments instead.
+# Works on Terraform 1.10 and below.
+resource "fabric_kql_database" "example4" {
+  display_name = "example4"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 
   configuration = {
@@ -55,9 +72,9 @@ resource "fabric_kql_database" "example3" {
   }
 }
 
-# Example 4 - Item with configuration, no definition - create a Shortcut KQL database to source KQL database
-resource "fabric_kql_database" "example4" {
-  display_name = "example4"
+# Example 5 - Item with configuration, no definition - create a Shortcut KQL database to source KQL database
+resource "fabric_kql_database" "example5" {
+  display_name = "example5"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 
   configuration = {
@@ -68,9 +85,9 @@ resource "fabric_kql_database" "example4" {
 }
 
 
-# Example 5 - Item with definition bootstrapping only
-resource "fabric_kql_database" "example5" {
-  display_name              = "example5"
+# Example 6 - Item with definition bootstrapping only
+resource "fabric_kql_database" "example6" {
+  display_name              = "example6"
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   format                    = "Default"
@@ -82,9 +99,9 @@ resource "fabric_kql_database" "example5" {
   }
 }
 
-# Example 6 - Item with definition update when source or tokens changed
-resource "fabric_kql_database" "example6" {
-  display_name = "example6"
+# Example 7 - Item with definition update when source or tokens changed
+resource "fabric_kql_database" "example7" {
+  display_name = "example7"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
@@ -140,7 +157,9 @@ Required:
 
 Optional:
 
-- `invitation_token` (String, Sensitive) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token` (String, Sensitive, Deprecated) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Invitation token (WO) to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token_wo_version` (Number) The version of the `invitation_token_wo`
 - `source_cluster_uri` (String) The URI of the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 - `source_database_name` (String) The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 
