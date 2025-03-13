@@ -370,9 +370,9 @@ tasks:
         msg: You must be on the main branch to release
       - sh: |
           {{if eq OS "windows"}}
-            {{.PWSH}} 'if (-not (git diff --shortstat main)) { exit 0 } else { exit 1 }'
+            {{.PWSH}} 'if (-not (git --no-pager diff --shortstat main)) { exit 0 } else { exit 1 }'
           {{else}}
-            "[[ -z $(git diff --shortstat main) ]]"
+            "[[ -z $(git --no-pager diff --shortstat main) ]]"
           {{end}}
         msg: You must have a clean working tree to release
       - sh: |
