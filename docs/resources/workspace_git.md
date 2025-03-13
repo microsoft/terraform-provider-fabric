@@ -22,7 +22,8 @@ See [Workspace Git integration](https://learn.microsoft.com/fabric/cicd/git-inte
 ## Example Usage
 
 ```terraform
-resource "fabric_workspace_git" "example" {
+# Example of Azure DevOps integration
+resource "fabric_workspace_git" "azdo" {
   workspace_id            = "00000000-0000-0000-0000-000000000000"
   initialization_strategy = "PreferWorkspace"
   git_provider_details = {
@@ -32,6 +33,22 @@ resource "fabric_workspace_git" "example" {
     repository_name   = "ExampleRepo"
     branch_name       = "ExampleBranch"
     directory_name    = "/ExampleDirectory"
+  }
+}
+
+# Example of GitHub integration
+resource "fabric_workspace_git" "github" {
+  workspace_id            = "00000000-0000-0000-0000-000000000000"
+  initialization_strategy = "PreferWorkspace"
+  git_provider_details = {
+    git_provider_type = "GitHub"
+    owner_name        = "ExampleOwner"
+    repository_name   = "ExampleRepo"
+    branch_name       = "ExampleBranch"
+    directory_name    = "/ExampleDirectory"
+  }
+  git_credentials = {
+    connection_id = "11111111-1111-1111-1111-111111111111"
   }
 }
 ```
@@ -47,6 +64,7 @@ resource "fabric_workspace_git" "example" {
 
 ### Optional
 
+- `git_credentials` (Attributes) The Git credentials details. (see [below for nested schema](#nestedatt--git_credentials))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -63,10 +81,26 @@ Required:
 
 - `branch_name` (String) The branch name.
 - `directory_name` (String) The directory name.
-- `git_provider_type` (String) The Git provider type. Accepted values: `AzureDevOps`
-- `organization_name` (String) The organization name.
-- `project_name` (String) The project name.
+- `git_provider_type` (String) The Git provider type. Accepted values: `AzureDevOps`, `GitHub`
 - `repository_name` (String) The repository name.
+
+Optional:
+
+- `organization_name` (String) The Azure DevOps organization name.
+- `owner_name` (String) The GitHub owner name.
+- `project_name` (String) The Azure DevOps project name.
+
+<a id="nestedatt--git_credentials"></a>
+
+### Nested Schema for `git_credentials`
+
+Optional:
+
+- `connection_id` (String) The object ID of the connection.
+
+Read-Only:
+
+- `source` (String) The Git credentials source. Possible values: `Automatic`, `ConfiguredConnection`, `None`
 
 <a id="nestedatt--timeouts"></a>
 

@@ -116,10 +116,6 @@ func (r *resourceDomainWorkspaceAssignments) Create(ctx context.Context, req res
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceDomainWorkspaceAssignmentsModel
 
@@ -167,9 +163,6 @@ func (r *resourceDomainWorkspaceAssignments) Read(ctx context.Context, req resou
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceDomainWorkspaceAssignmentsModel
 
@@ -203,11 +196,6 @@ func (r *resourceDomainWorkspaceAssignments) Read(ctx context.Context, req resou
 func (r *resourceDomainWorkspaceAssignments) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan, state resourceDomainWorkspaceAssignmentsModel
@@ -287,9 +275,6 @@ func (r *resourceDomainWorkspaceAssignments) Update(ctx context.Context, req res
 func (r *resourceDomainWorkspaceAssignments) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceDomainWorkspaceAssignmentsModel

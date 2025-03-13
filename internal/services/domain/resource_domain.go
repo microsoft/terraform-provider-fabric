@@ -139,10 +139,6 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan, state resourceDomainModel
 
@@ -201,9 +197,6 @@ func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, res
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceDomainModel
 
@@ -245,11 +238,6 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan resourceDomainModel
 
@@ -290,9 +278,6 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 func (r *resourceDomain) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceDomainModel

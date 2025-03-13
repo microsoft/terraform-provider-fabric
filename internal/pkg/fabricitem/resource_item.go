@@ -79,10 +79,6 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceFabricItemModel
 
@@ -125,9 +121,6 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 func (r *ResourceFabricItem) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceFabricItemModel
@@ -172,11 +165,6 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan resourceFabricItemModel
 
@@ -218,9 +206,6 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 func (r *ResourceFabricItem) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceFabricItemModel

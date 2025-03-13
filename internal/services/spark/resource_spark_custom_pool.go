@@ -191,10 +191,6 @@ func (r *resourceSparkCustomPool) Create(ctx context.Context, req resource.Creat
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceSparkCustomPoolModel
 
@@ -240,9 +236,6 @@ func (r *resourceSparkCustomPool) Read(ctx context.Context, req resource.ReadReq
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceSparkCustomPoolModel
 
@@ -285,11 +278,6 @@ func (r *resourceSparkCustomPool) Read(ctx context.Context, req resource.ReadReq
 func (r *resourceSparkCustomPool) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan resourceSparkCustomPoolModel
@@ -336,9 +324,6 @@ func (r *resourceSparkCustomPool) Delete(ctx context.Context, req resource.Delet
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceSparkCustomPoolModel
 
@@ -367,9 +352,6 @@ func (r *resourceSparkCustomPool) Delete(ctx context.Context, req resource.Delet
 func (r *resourceSparkCustomPool) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"id": req.ID,
 	})
 
 	workspaceID, poolID, found := strings.Cut(req.ID, "/")

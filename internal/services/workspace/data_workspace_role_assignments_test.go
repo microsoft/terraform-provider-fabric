@@ -49,9 +49,10 @@ func TestUnit_WorkspaceRoleAssignmentsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignments, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.principal_id", entity.Principal.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.role", (*string)(entity.Role)),
-				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.display_name", entity.Principal.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.type", (*string)(entity.Principal.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.principal_display_name", entity.Principal.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceWorkspaceRoleAssignments, "values.1.principal_type", (*string)(entity.Principal.Type)),
 			),
 		},
 	}))
@@ -72,7 +73,7 @@ func TestAcc_WorkspaceRoleAssignmentsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceWorkspaceRoleAssignments, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrSet(testDataSourceWorkspaceRoleAssignments, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceWorkspaceRoleAssignments, "values.0.principal_id"),
 			),
 		},
 	},

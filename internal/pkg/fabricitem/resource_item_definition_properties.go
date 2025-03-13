@@ -51,11 +51,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "MODIFY PLAN", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	if !req.State.Raw.IsNull() && !req.Plan.Raw.IsNull() {
 		var plan, state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
@@ -118,10 +113,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
 
@@ -174,9 +165,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx co
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
 
@@ -219,11 +207,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx co
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan, state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
@@ -294,9 +277,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) { //revive:disable-line:confusing-naming
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]

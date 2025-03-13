@@ -293,10 +293,6 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceSparkEnvironmentSettingsModel
 
@@ -348,9 +344,6 @@ func (r *resourceSparkEnvironmentSettings) Read(ctx context.Context, req resourc
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceSparkEnvironmentSettingsModel
 
@@ -395,11 +388,6 @@ func (r *resourceSparkEnvironmentSettings) Read(ctx context.Context, req resourc
 func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan resourceSparkEnvironmentSettingsModel
@@ -451,9 +439,6 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 func (r *resourceSparkEnvironmentSettings) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	resp.Diagnostics.AddWarning(

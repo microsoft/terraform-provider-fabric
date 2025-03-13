@@ -4,8 +4,10 @@
 package testhelp
 
 import (
+	"crypto/sha1" //nolint:gosec
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -57,6 +59,12 @@ func RandomElement[T any](elements []T) T {
 
 func RandomURI() string {
 	return fmt.Sprintf("https://%s.com", strings.ToLower(RandomName()))
+}
+
+func RandomSHA1() string {
+	hash := sha1.Sum([]byte(RandomUUID())) //nolint:gosec
+
+	return hex.EncodeToString(hash[:])
 }
 
 func RandomP12CertB64(password string) string {

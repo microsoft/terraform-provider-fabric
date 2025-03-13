@@ -47,11 +47,11 @@ func (r *resourceWorkspaceRoleAssignment) Metadata(_ context.Context, req resour
 func (r *resourceWorkspaceRoleAssignment) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage a " + WorkspaceRoleAssignmentName + ".\n\n" +
-			"See [Roles in Workspaces](https://learn.microsoft.com/fabric/get-started/roles-workspaces) for more information.\n\n" +
+			"See [" + WorkspaceRoleAssignmentName + "](" + WorkspaceRoleAssignmentDocsURL + ") for more information.\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace Role Assignment ID.",
+				MarkdownDescription: "The " + WorkspaceRoleAssignmentName + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -120,10 +120,6 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceWorkspaceRoleAssignmentModel
 
@@ -164,9 +160,6 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceWorkspaceRoleAssignmentModel
@@ -209,11 +202,6 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan resourceWorkspaceRoleAssignmentModel
 
@@ -254,9 +242,6 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceWorkspaceRoleAssignmentModel
@@ -339,7 +324,7 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 }
 
 func (r *resourceWorkspaceRoleAssignment) get(ctx context.Context, model *resourceWorkspaceRoleAssignmentModel) error {
-	tflog.Trace(ctx, "getting Workspace Role Assignment")
+	tflog.Trace(ctx, "getting "+WorkspaceRoleAssignmentName)
 
 	respGetInfo, err := r.client.GetWorkspaceRoleAssignment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 	if err != nil {

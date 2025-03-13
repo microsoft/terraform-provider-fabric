@@ -3,8 +3,8 @@
 page_title: "fabric_workspace_role_assignments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List Fabric Workspace Role Assignments.
-  Use this data source to list Workspace Role Assignments https://learn.microsoft.com/power-bi/collaborate-share/service-roles-new-workspaces.
+  List a Fabric Workspace Role Assignments.
+  Use this data source to list Workspace Role Assignments https://learn.microsoft.com/fabric/fundamentals/roles-workspaces.
   -> This item supports Service Principal authentication.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 List Fabric Workspace Role Assignments.
 
-Use this data source to list [Workspace Role Assignments](https://learn.microsoft.com/power-bi/collaborate-share/service-roles-new-workspaces).
+Use this data source to list [Workspace Role Assignments](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces).
 
 -> This item supports Service Principal authentication.
 
@@ -53,15 +53,16 @@ Optional:
 
 Read-Only:
 
-- `details` (Attributes) The principal details. (see [below for nested schema](#nestedatt--values--details))
-- `display_name` (String) The principal's display name.
-- `id` (String) The Principal ID.
+- `id` (String) The Workspace Role Assignment ID.
+- `principal_details` (Attributes) The principal details. (see [below for nested schema](#nestedatt--values--principal_details))
+- `principal_display_name` (String) The principal's display name.
+- `principal_id` (String) The Principal ID.
+- `principal_type` (String) The type of the principal. Possible values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 - `role` (String) The workspace role of the principal. Possible values: `Admin`, `Contributor`, `Member`, `Viewer`.
-- `type` (String) The type of the principal. Possible values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
-<a id="nestedatt--values--details"></a>
+<a id="nestedatt--values--principal_details"></a>
 
-### Nested Schema for `values.details`
+### Nested Schema for `values.principal_details`
 
 Read-Only:
 
