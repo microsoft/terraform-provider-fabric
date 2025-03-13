@@ -9,7 +9,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
