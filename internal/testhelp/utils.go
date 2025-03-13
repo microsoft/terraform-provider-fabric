@@ -39,11 +39,14 @@ func RandomIntRange[T ~int | ~int8 | ~int16 | ~int32 | ~int64](minInt, maxInt T)
 }
 
 func RandomBool() bool {
-	return acctest.RandIntRange(0, 2) == 1
+	return RandomIntRange(0, 2) == 1
 }
 
 func RandomUUID() string {
-	result, _ := uuid.GenerateUUID()
+	result, err := uuid.GenerateUUID()
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate UUID: %s", err.Error()))
+	}
 
 	return result
 }
@@ -63,8 +66,15 @@ func RandomP12CertB64(password string) string {
 }
 
 func RandomP12Cert(password string) []byte {
-	certPEM, privateKeyPEM, _ := acctest.RandTLSCert("test")
-	p12, _ := createP12Bundle(certPEM, privateKeyPEM, password)
+	certPEM, privateKeyPEM, err := acctest.RandTLSCert("test")
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate random TLS cert: %s", err.Error()))
+	}
+
+	p12, err := createP12Bundle(certPEM, privateKeyPEM, password)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create p12 bundle: %s", err.Error()))
+	}
 
 	return p12
 }
