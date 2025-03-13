@@ -472,6 +472,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehouse.NewDataSourceWarehouses,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		// workspace.NewDataSourceWorkspaceRoleAssignment,
 		workspace.NewDataSourceWorkspaceRoleAssignments,
 		workspace.NewDataSourceWorkspaceGit,
 	}

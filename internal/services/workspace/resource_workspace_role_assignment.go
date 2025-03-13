@@ -46,12 +46,12 @@ func (r *resourceWorkspaceRoleAssignment) Metadata(_ context.Context, req resour
 
 func (r *resourceWorkspaceRoleAssignment) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Workspace Role Assignment.\n\n" +
-			"See [Roles in Workspaces](https://learn.microsoft.com/fabric/get-started/roles-workspaces) for more information.\n\n" +
+		MarkdownDescription: "Manage a " + WorkspaceRoleAssignmentName + ".\n\n" +
+			"See [" + WorkspaceRoleAssignmentName + "](" + WorkspaceRoleAssignmentDocsURL + ") for more information.\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace Role Assignment ID.",
+				MarkdownDescription: "The " + WorkspaceRoleAssignmentName + " ID.",
 				Computed:            true,
 				CustomType:          customtypes.UUIDType{},
 				PlanModifiers: []planmodifier.String{
@@ -327,7 +327,7 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 }
 
 func (r *resourceWorkspaceRoleAssignment) get(ctx context.Context, model *resourceWorkspaceRoleAssignmentModel) error {
-	tflog.Trace(ctx, "getting Workspace Role Assignment")
+	tflog.Trace(ctx, "getting "+WorkspaceRoleAssignmentName)
 
 	respGetInfo, err := r.client.GetWorkspaceRoleAssignment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 	if err != nil {

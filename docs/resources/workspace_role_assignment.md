@@ -4,7 +4,7 @@ page_title: "fabric_workspace_role_assignment Resource - terraform-provider-fabr
 subcategory: ""
 description: |-
   Manage a Workspace Role Assignment.
-  See Roles in Workspaces https://learn.microsoft.com/fabric/get-started/roles-workspaces for more information.
+  See Workspace Role Assignment https://learn.microsoft.com/fabric/fundamentals/roles-workspaces for more information.
   -> This item supports Service Principal authentication.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 Manage a Workspace Role Assignment.
 
-See [Roles in Workspaces](https://learn.microsoft.com/fabric/get-started/roles-workspaces) for more information.
+See [Workspace Role Assignment](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces) for more information.
 
 -> This item supports Service Principal authentication.
 
