@@ -384,6 +384,9 @@ tasks:
             {{end}}
           {{end}}
         msg: "Version must be in the valid semver format vX.Y.Z"
+      - sh: |
+          gh auth status
+        msg: "You must be authenticated to GitHub CLI"
     vars:
       VERSION:
         sh: |
