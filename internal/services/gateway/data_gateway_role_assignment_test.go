@@ -9,9 +9,10 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -59,74 +60,40 @@ func TestUnit_GatewayRoleAssignmentDataSource(t *testing.T) {
 }
 
 func TestAcc_GatewayRoleAssignmentDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
-	gatewayType := string(fabcore.GatewayTypeVirtualNetwork)
-	gatewayCreateDisplayName := testhelp.RandomName()
-	gatewayCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
-	gatewayCreateNumberOfMemberGateways := int(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues))
-
-	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-	capacityID := capacity["id"].(string)
-
-	virtualNetworkAzureResource := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
-	virtualNetworkName := virtualNetworkAzureResource["name"].(string)
-	resourceGroupName := virtualNetworkAzureResource["resourceGroupName"].(string)
-	subnetName := virtualNetworkAzureResource["subnetName"].(string)
-	subscriptionID := virtualNetworkAzureResource["subscriptionId"].(string)
-
-	gatewayResourceHCL := at.CompileConfig(
-		at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test"),
-		map[string]any{
-			"type":                            gatewayType,
-			"display_name":                    gatewayCreateDisplayName,
-			"inactivity_minutes_before_sleep": gatewayCreateInactivityMinutesBeforeSleep,
-			"number_of_member_gateways":       gatewayCreateNumberOfMemberGateways,
-			"virtual_network_azure_resource": map[string]any{
-				"virtual_network_name": virtualNetworkName,
-				"resource_group_name":  resourceGroupName,
-				"subnet_name":          subnetName,
-				"subscription_id":      subscriptionID,
-			},
-			"capacity_id": capacityID,
-		},
-	)
-	gatewayResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
-
 	principal := testhelp.WellKnown()["Principal"].(map[string]any)
 	principalID := principal["id"].(string)
 	principalType := principal["type"].(string)
 
+	group := testhelp.WellKnown()["Group"].(map[string]any)
+	groupID := group["id"].(string)
+
+	gw := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
+	gwID := gw["id"].(string)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{
-			Config: at.JoinConfigs(
-				gatewayResourceHCL,
-				at.CompileConfig(
-					testResourceGatewayRoleAssignmentHeader,
-					map[string]any{
-						"gateway_id": testhelp.RefByFQN(gatewayResourceFQN, "id"),
-						"principal": map[string]any{
-							"id":   principalID,
-							"type": principalType,
-						},
-						"role": "ConnectionCreatorWithResharing",
-					},
-				),
-				at.CompileConfig(
-					testDataSourceGatewayRoleAssignmentHeader,
-					map[string]any{
-						"id":         principalID,
-						"gateway_id": testhelp.RefByFQN(testResourceGatewayRoleAssignment, "gateway_id"),
-					},
-				),
+			Config: at.CompileConfig(
+				testDataSourceGatewayRoleAssignmentHeader,
+				map[string]any{
+					"id":         groupID,
+					"gateway_id": gwID,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		{
+			Config: at.CompileConfig(
+				testDataSourceGatewayRoleAssignmentHeader,
+				map[string]any{
+					"id":         principalID,
+					"gateway_id": gwID,
+				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceGatewayRoleAssignmentFQN, "gateway_id"),
 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignmentFQN, "id", principalID),
-				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignmentFQN, "role", "ConnectionCreatorWithResharing"),
+				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignmentFQN, "role", string(fabcore.GatewayRoleConnectionCreator)),
 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignmentFQN, "principal.id", principalID),
 				resource.TestCheckResourceAttr(testDataSourceGatewayRoleAssignmentFQN, "principal.type", principalType),
 			),
