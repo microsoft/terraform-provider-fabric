@@ -40,6 +40,7 @@ func newFakeServer() *fakeServer {
 	handleEntity(server, configureOnPremisesGatewayPersonal)
 	handleEntity(server, configureKQLDatabase)
 	handleEntity(server, configureLakehouse)
+	handleEntity(server, configureMirroredDatabase)
 	handleEntity(server, configureNotebook)
 	handleEntity(server, configureReport)
 	handleEntity(server, configureSemanticModel)

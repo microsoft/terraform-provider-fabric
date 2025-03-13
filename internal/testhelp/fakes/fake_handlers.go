@@ -154,7 +154,7 @@ func handleUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse 
 	}
 }
 
-func handleCreate[TEntity, TOptions, TCreateRequest, TResponse any](handler *typedHandler[TEntity], creator creator[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse any](handler *typedHandler[TEntity], creator creator[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
 	if f == nil {
 		return
 	}
@@ -183,6 +183,93 @@ func handleCreate[TEntity, TOptions, TCreateRequest, TResponse any](handler *typ
 		return resp, errResp
 	}
 }
+
+func handleNonLROCreate[TEntity, TOptions, TCreateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	creator creatorWithParentID[TCreateRequest, TEntity],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(_ context.Context, parentID string, createRequest TCreateRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+		var resp azfake.Responder[TResponse]
+		var errResp azfake.ErrorResponder
+
+		newEntity := creator.CreateWithParentID(parentID, createRequest)
+
+		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+			var empty TEntity
+			respValue := createTransformer.TransformCreate(empty)
+			resp.SetResponse(statusCode, respValue, nil)
+			errResp.SetError(err)
+		} else {
+			handler.Upsert(newEntity)
+			respValue := createTransformer.TransformCreate(newEntity)
+			resp.SetResponse(statusCode, respValue, nil)
+		}
+
+		return resp, errResp
+	}
+}
+
+// func handleNonLROUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse any](handler *typedHandler[TEntity], definitionUpdater definitionUpdater[TRequest, TDefinition], function *func(ctx context.Context, parentID, childID string, request TRequest, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
+// 	if function == nil {
+// 		return
+// 	}
+
+// 	*function = func(_ context.Context, parentID, childID string, request TRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
+// 		var resp azfake.Responder[TResponse]
+
+// 		var errResp azfake.ErrorResponder
+
+// 		id := generateID(parentID, childID)
+
+// 		typedDefinition := getDefinition[TDefinition](handler, id)
+
+// 		updatedDefinition := definitionUpdater.UpdateDefinition(typedDefinition, request)
+// 		upsertDefinition(handler, id, updatedDefinition)
+
+// 		var respValue TResponse
+
+// 		resp.SetResponse(http.StatusOK, respValue, nil)
+
+// 		return resp, errResp
+// 	}
+// }
+
+// func handleNonLROGetDefinition[TEntity, TDefinition, TOptions, TResponse any](handler *typedHandler[TEntity], definitionTransformer definitionTransformer[TDefinition, TResponse], function *func(ctx context.Context, parentID, childID string, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder)) {
+// 	if function == nil {
+// 		return
+// 	}
+
+// 	*function = func(_ context.Context, parentID, childID string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) { //nolint:unparam
+// 		var resp azfake.Responder[TResponse]
+
+// 		var errResp azfake.ErrorResponder
+
+// 		id := generateID(parentID, childID)
+
+// 		if definition, ok := handler.definitions[id]; ok {
+// 			typedDefinition, ok := definition.(TDefinition)
+
+// 			if !ok {
+// 				panic("Definition not of the expected type") // lintignore:R009
+// 			}
+
+// 			respValue := definitionTransformer.TransformDefinition(&typedDefinition)
+// 			resp.SetResponse(http.StatusOK, respValue, nil)
+// 		} else {
+// 			respValue := definitionTransformer.TransformDefinition(nil)
+// 			resp.SetResponse(http.StatusOK, respValue, nil)
+// 		}
+
+// 		return resp, errResp
+// 	}
+// }
 
 func handleCreateLRO[TEntity, TOptions, TCreateRequest, TResponse any](h *typedHandler[TEntity], creator creatorWithParentID[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder)) {
 	if f == nil {

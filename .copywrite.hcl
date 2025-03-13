@@ -12,8 +12,8 @@ project {
     ".github/**",
     ".devcontainer/**",
     ".vscode/**",
-    "*.yaml",
-    "*.yml",
+    "**/*.yaml",
+    "**/*.yml",
     "**/*.ps1"
   ]
 }

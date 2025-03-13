@@ -274,6 +274,10 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)

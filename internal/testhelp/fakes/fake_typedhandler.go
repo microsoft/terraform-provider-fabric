@@ -62,7 +62,7 @@ func configureEntityPagerWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreat
 ) {
 	handleGetWithSimpleID(handler, operations, getFunction)
 	handleUpdateWithSimpleID(handler, operations, operations, updateFunction)
-	handleCreate(handler, operations, operations, operations, createFunction)
+	handleCreateWithoutWorkspace(handler, operations, operations, operations, createFunction)
 	handleListPager(handler, operations, listFunction)
 	handleDeleteWithSimpleID(handler, deleteFunction)
 }
@@ -78,7 +78,7 @@ func configureEntityWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreateOutp
 ) {
 	handleGetWithSimpleID(handler, operations, getFunction)
 	handleUpdateWithSimpleID(handler, operations, operations, updateFunction)
-	handleCreate(handler, operations, operations, operations, createFunction)
+	handleCreateWithoutWorkspace(handler, operations, operations, operations, createFunction)
 	handleList(handler, operations, listFunction)
 	handleDeleteWithSimpleID(handler, deleteFunction)
 }
@@ -100,6 +100,23 @@ func configureEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutp
 	handleDeleteWithParentID(handler, deleteFunction)
 }
 
+// ConfigureEntityWithParentID configures an entity with a parent ID with sync creation.
+func configureNonLROEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
+	handler *typedHandler[TEntity],
+	operations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
+	getFunction *func(ctx context.Context, parentID, childID string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
+	updateFunction *func(ctx context.Context, parentID, childID string, updateRequest TUpdateData, options *TUpdateOptions) (resp azfake.Responder[TUpdateOutput], errResp azfake.ErrorResponder),
+	createFunction *func(ctx context.Context, parentID string, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
+	listFunction *func(parentID string, options *TListOptions) (resp azfake.PagerResponder[TListOutput]),
+	deleteFunction *func(ctx context.Context, parentID, childID string, options *TDeleteOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
+) {
+	handleGetWithParentID(handler, operations, getFunction)
+	handleUpdateWithParentID(handler, operations, operations, updateFunction)
+	handleNonLROCreate(handler, operations, operations, operations, createFunction)
+	handleListPagerWithParentID(handler, operations, operations, listFunction)
+	handleDeleteWithParentID(handler, deleteFunction)
+}
+
 // ConfigureDefinitions configures the definitions for an entity.
 func configureDefinitions[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TCreateOptions, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput, TGetDefinitionsOptions any](
 	handler *typedHandler[TEntity],
@@ -110,6 +127,17 @@ func configureDefinitions[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TLi
 	updateDefinitionsFunction *func(ctx context.Context, parentID, childID string, updateRequest TDefinitionUpdateData, options *TUpdateDefinitionOptions) (resp azfake.PollerResponder[TUpdateDefinitionTransformerOutput], errResp azfake.ErrorResponder),
 ) {
 	handleCreateLROWithDefinitions(handler, entityOperations, definitionOperations, entityOperations, entityOperations, createFunction)
+	handleGetDefinition(handler, definitionOperations, getDefinitionsFunction)
+	handleUpdateDefinition(handler, definitionOperations, updateDefinitionsFunction)
+}
+
+// This handles the case where entity creation doesn't involve long-running operations.
+func ConfigureDefinitionsNonLROCreation[TEntity, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput, TGetDefinitionsOptions any](
+	handler *typedHandler[TEntity],
+	definitionOperations definitionOperationsNonLROCreation[TDefinition, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput],
+	getDefinitionsFunction *func(ctx context.Context, parentID, childID string, options *TGetDefinitionsOptions) (resp azfake.PollerResponder[TDefinitionTransformerOutput], errResp azfake.ErrorResponder),
+	updateDefinitionsFunction *func(ctx context.Context, parentID, childID string, updateRequest TDefinitionUpdateData, options *TUpdateDefinitionOptions) (resp azfake.PollerResponder[TUpdateDefinitionTransformerOutput], errResp azfake.ErrorResponder),
+) {
 	handleGetDefinition(handler, definitionOperations, getDefinitionsFunction)
 	handleUpdateDefinition(handler, definitionOperations, updateDefinitionsFunction)
 }
