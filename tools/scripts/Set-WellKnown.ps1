@@ -492,10 +492,12 @@ function Set-FabricGatewayVirtualNetwork {
     # Inactivity time (in minutes) before the gateway goes to auto-sleep.
     # Allowed values: 30, 60, 90, 120, 150, 240, 360, 480, 720, 1440.
     [Parameter(Mandatory = $true)]
+    [ValidateSet(30, 60, 90, 120, 150, 240, 360, 480, 720, 1440)]
     [int]$InactivityMinutesBeforeSleep,
 
     # Number of member gateways (between 1 and 7).
     [Parameter(Mandatory = $true)]
+    [ValidateRange(1, 7)]
     [int]$NumberOfMemberGateways,
 
     # Azure virtual network details:

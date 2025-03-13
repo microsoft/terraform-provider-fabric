@@ -159,10 +159,6 @@ func TestUnit_GatewayRoleAssignmentResource_ImportState(t *testing.T) {
 }
 
 func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	gatewayType := string(fabcore.GatewayTypeVirtualNetwork)
 	gatewayCreateDisplayName := testhelp.RandomName()
 	gatewayCreateInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
