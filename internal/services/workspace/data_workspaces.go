@@ -101,9 +101,6 @@ func (d *dataSourceWorkspaces) Read(ctx context.Context, req datasource.ReadRequ
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data dataSourceWorkspacesModel
 
@@ -137,7 +134,6 @@ func (d *dataSourceWorkspaces) Read(ctx context.Context, req datasource.ReadRequ
 func (d *dataSourceWorkspaces) list(ctx context.Context, model *dataSourceWorkspacesModel) diag.Diagnostics {
 	tflog.Trace(ctx, "LIST", map[string]any{
 		"action": "start",
-		"model":  model,
 	})
 
 	respList, err := d.client.ListWorkspaces(ctx, nil)

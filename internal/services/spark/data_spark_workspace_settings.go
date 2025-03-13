@@ -181,9 +181,6 @@ func (d *dataSourceSparkWorkspaceSettings) Read(ctx context.Context, req datasou
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data dataSourceSparkWorkspaceSettingsModel
 

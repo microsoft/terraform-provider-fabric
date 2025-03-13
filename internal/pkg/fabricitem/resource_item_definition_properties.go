@@ -165,9 +165,6 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx co
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
 

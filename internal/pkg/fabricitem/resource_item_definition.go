@@ -170,9 +170,6 @@ func (r *ResourceFabricItemDefinition) Read(ctx context.Context, req resource.Re
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceFabricItemDefinitionModel
 

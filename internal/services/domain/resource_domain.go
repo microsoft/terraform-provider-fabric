@@ -197,9 +197,6 @@ func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, res
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceDomainModel
 

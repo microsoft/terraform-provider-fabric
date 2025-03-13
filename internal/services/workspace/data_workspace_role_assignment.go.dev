@@ -122,9 +122,6 @@ func (d *dataSourceWorkspaceRoleAssignment) Read(ctx context.Context, req dataso
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data dataSourceWorkspaceRoleAssignmentModel
 

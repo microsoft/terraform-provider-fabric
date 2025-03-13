@@ -93,9 +93,6 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]
 

@@ -108,9 +108,6 @@ func (d *dataSourceDomainWorkspaceAssignments) Read(ctx context.Context, req dat
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data dataSourceDomainWorkspaceAssignmentsModel
 
