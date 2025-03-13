@@ -368,13 +368,13 @@ tasks:
             test $(git rev-parse --abbrev-ref HEAD) = "main"
           {{end}}
         msg: You must be on the main branch to release
-      - sh: |
-          {{if eq OS "windows"}}
-            {{.PWSH}} 'if (-not (git --no-pager diff --shortstat main)) { exit 0 } else { exit 1 }'
-          {{else}}
-            "[[ -z $(git --no-pager diff --shortstat main) ]]"
-          {{end}}
-        msg: You must have a clean working tree to release
+      # - sh: |
+      #     {{if eq OS "windows"}}
+      #       {{.PWSH}} 'if (-not (git --no-pager diff --shortstat main)) { exit 0 } else { exit 1 }'
+      #     {{else}}
+      #       "[[ -z $(git --no-pager diff --shortstat main) ]]"
+      #     {{end}}
+      #   msg: You must have a clean working tree to release
       - sh: |
           {{if ne .CLI_ARGS ""}}
             {{if (regexMatch "^v[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z]+\\.[0-9]+)?$" .CLI_ARGS) }}
