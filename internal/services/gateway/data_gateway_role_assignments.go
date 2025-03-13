@@ -98,10 +98,6 @@ func (d *dataSourceGatewayRoleAssignments) Read(ctx context.Context, req datasou
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
-
 	var data dataSourceGatewayRoleAssignmentsModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {

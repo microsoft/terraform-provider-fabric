@@ -70,8 +70,6 @@ type requestCreateGateway struct {
 }
 
 func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	gatewayType := (fabcore.GatewayType)(from.Type.ValueString())
 
 	switch gatewayType {
@@ -95,6 +93,8 @@ func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayMod
 			},
 		}
 	default:
+		var diags diag.Diagnostics
+
 		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gatewayType))
 
 		return diags
@@ -108,8 +108,6 @@ type requestUpdateGateway struct {
 }
 
 func (to *requestUpdateGateway) set(from resourceGatewayModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	gatewayType := (fabcore.GatewayType)(from.Type.ValueString())
 
 	switch gatewayType {
@@ -122,6 +120,8 @@ func (to *requestUpdateGateway) set(from resourceGatewayModel) diag.Diagnostics 
 			NumberOfMemberGateways:       from.NumberOfMemberGateways.ValueInt32Pointer(),
 		}
 	default:
+		var diags diag.Diagnostics
+
 		diags.AddError("Unsupported Gateway type", fmt.Sprintf("The Gateway type '%T' is not supported.", gatewayType))
 
 		return diags

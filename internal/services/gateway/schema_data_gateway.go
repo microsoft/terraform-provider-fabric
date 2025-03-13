@@ -53,6 +53,7 @@ func getDataSourceGatewayAttributes(ctx context.Context) map[string]schema.Attri
 				"resource_group_name": schema.StringAttribute{
 					MarkdownDescription: "The resource group name.",
 					Computed:            true,
+					CustomType:          customtypes.CaseInsensitiveStringType{},
 				},
 				"subnet_name": schema.StringAttribute{
 					MarkdownDescription: "The subnet name.",

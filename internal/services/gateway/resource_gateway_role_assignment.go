@@ -139,10 +139,6 @@ func (r *resourceGatewayRoleAssignment) Create(ctx context.Context, req resource
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan resourceGatewayRoleAssignmentModel
 
@@ -186,9 +182,6 @@ func (r *resourceGatewayRoleAssignment) Read(ctx context.Context, req resource.R
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceGatewayRoleAssignmentModel
 
@@ -228,11 +221,6 @@ func (r *resourceGatewayRoleAssignment) Read(ctx context.Context, req resource.R
 func (r *resourceGatewayRoleAssignment) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
 	})
 
 	var plan resourceGatewayRoleAssignmentModel
@@ -276,9 +264,6 @@ func (r *resourceGatewayRoleAssignment) Update(ctx context.Context, req resource
 func (r *resourceGatewayRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceGatewayRoleAssignmentModel

@@ -92,9 +92,6 @@ func (d *dataSourceGateways) Read(ctx context.Context, req datasource.ReadReques
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
-	})
 
 	var data dataSourceGatewaysModel
 

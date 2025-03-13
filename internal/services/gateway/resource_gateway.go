@@ -186,6 +186,7 @@ func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, 
 					"resource_group_name": schema.StringAttribute{
 						MarkdownDescription: "The resource group name.",
 						Required:            true,
+						CustomType:          customtypes.CaseInsensitiveStringType{},
 					},
 					"subscription_id": schema.StringAttribute{
 						MarkdownDescription: "The subscription ID.",
@@ -227,10 +228,6 @@ func (r *resourceGateway) Create(ctx context.Context, req resource.CreateRequest
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "CREATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-	})
 
 	var plan, state resourceGatewayModel
 
@@ -250,7 +247,9 @@ func (r *resourceGateway) Create(ctx context.Context, req resource.CreateRequest
 
 	var reqCreate requestCreateGateway
 
-	reqCreate.set(ctx, plan)
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	respCreate, err := r.client.CreateGateway(ctx, reqCreate.CreateGatewayRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -275,9 +274,6 @@ func (r *resourceGateway) Create(ctx context.Context, req resource.CreateRequest
 func (r *resourceGateway) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceGatewayModel
@@ -318,11 +314,6 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "UPDATE", map[string]any{
-		"config": req.Config,
-		"plan":   req.Plan,
-		"state":  req.State,
-	})
 
 	var plan resourceGatewayModel
 
@@ -340,7 +331,9 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 
 	var reqUpdate requestUpdateGateway
 
-	reqUpdate.set(plan)
+	if resp.Diagnostics.Append(reqUpdate.set(plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	respUpdate, err := r.client.UpdateGateway(ctx, plan.ID.ValueString(), reqUpdate.UpdateGatewayRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -365,9 +358,6 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 func (r *resourceGateway) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "DELETE", map[string]any{
-		"state": req.State,
 	})
 
 	var state resourceGatewayModel
