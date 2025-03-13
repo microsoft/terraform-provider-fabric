@@ -191,7 +191,7 @@ func TestAcc_GatewayRoleAssignmentResource_CRUD(t *testing.T) {
 	)
 	gatewayResourceFQN := testhelp.ResourceFQN("fabric", itemTFName, "test")
 
-	entity := testhelp.WellKnown()["Principal"].(map[string]any)
+	entity := testhelp.WellKnown()["Group"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
 
