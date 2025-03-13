@@ -45,7 +45,7 @@ func RandomBool() bool {
 func RandomUUID() string {
 	result, err := uuid.GenerateUUID()
 	if err != nil {
-		panic(fmt.Sprintf("failed to generate UUID: %s", err.Error()))
+		panic("failed to generate UUID: " + err.Error())
 	}
 
 	return result
@@ -68,12 +68,12 @@ func RandomP12CertB64(password string) string {
 func RandomP12Cert(password string) []byte {
 	certPEM, privateKeyPEM, err := acctest.RandTLSCert("test")
 	if err != nil {
-		panic(fmt.Sprintf("failed to generate random TLS cert: %s", err.Error()))
+		panic("failed to generate random TLS cert: " + err.Error())
 	}
 
 	p12, err := createP12Bundle(certPEM, privateKeyPEM, password)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create p12 bundle: %s", err.Error()))
+		panic("failed to create p12 bundle: " + err.Error())
 	}
 
 	return p12
