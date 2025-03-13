@@ -30,7 +30,7 @@ func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassificati
 
 		return entity
 	default:
-		panic("Unsupported Gateway type")
+		panic("Unsupported Gateway type") // lintignore:R009
 	}
 }
 
@@ -65,7 +65,7 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 	case *fabcore.VirtualNetworkGateway:
 		request, ok := data.(*fabcore.UpdateVirtualNetworkGatewayRequest)
 		if !ok {
-			panic("Invalid update data for VirtualNetworkGateway")
+			panic("Invalid update data for VirtualNetworkGateway") // lintignore:R009
 		}
 
 		base.CapacityID = request.CapacityID
@@ -75,7 +75,7 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 
 		return base
 	default:
-		panic("Unsupported Gateway type")
+		panic("Unsupported Gateway type") // lintignore:R009
 	}
 }
 
@@ -154,7 +154,7 @@ func NewRandomGateway() fabcore.GatewayClassification {
 	case fabcore.GatewayTypeVirtualNetwork:
 		return NewRandomVirtualNetworkGateway()
 	default:
-		panic("Unsupported Gateway type")
+		panic("Unsupported Gateway type") // lintignore:R009
 	}
 }
 

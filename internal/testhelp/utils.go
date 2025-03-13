@@ -31,7 +31,7 @@ func RandomName(length ...int) string {
 // RandomIntRange returns a random integer between minInt (inclusive) and maxInt (exclusive).
 func RandomIntRange[T ~int | ~int8 | ~int16 | ~int32 | ~int64](minInt, maxInt T) T {
 	if minInt >= maxInt {
-		panic(fmt.Sprintf("minInt %d must be less than maxInt %d", minInt, maxInt))
+		panic(fmt.Sprintf("minInt %d must be less than maxInt %d", minInt, maxInt)) // lintignore:R009
 	}
 
 	// Generate a random integer in the range [minInt, maxInt)
@@ -45,7 +45,7 @@ func RandomBool() bool {
 func RandomUUID() string {
 	result, err := uuid.GenerateUUID()
 	if err != nil {
-		panic("failed to generate UUID: " + err.Error())
+		panic("failed to generate UUID: " + err.Error()) // lintignore:R009
 	}
 
 	return result
@@ -68,12 +68,12 @@ func RandomP12CertB64(password string) string {
 func RandomP12Cert(password string) []byte {
 	certPEM, privateKeyPEM, err := acctest.RandTLSCert("test")
 	if err != nil {
-		panic("failed to generate random TLS cert: " + err.Error())
+		panic("failed to generate random TLS cert: " + err.Error()) // lintignore:R009
 	}
 
 	p12, err := createP12Bundle(certPEM, privateKeyPEM, password)
 	if err != nil {
-		panic("failed to create p12 bundle: " + err.Error())
+		panic("failed to create p12 bundle: " + err.Error()) // lintignore:R009
 	}
 
 	return p12
