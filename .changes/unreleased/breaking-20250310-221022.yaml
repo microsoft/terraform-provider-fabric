@@ -1,6 +1,0 @@
-kind: breaking
-body: |
-  `fabric_workspace_role_assignments` principal schema changed and aligned between data-sources and resource
-time: 2025-03-10T22:10:22.311019-07:00
-custom:
-  Issue: "111"

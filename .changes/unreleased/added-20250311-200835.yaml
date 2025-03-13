@@ -1,6 +1,0 @@
-kind: added
-body: |
-  New resource: `fabric_mirrored_database`.
-time: 2025-03-11T20:08:35.94764424Z
-custom:
-  Issue: "283"

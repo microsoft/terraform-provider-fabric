@@ -1,5 +1,0 @@
-kind: changed
-body: Introduction of the write-only attribute for Invitation Token in the KQL Database resource.
-time: 2025-03-04T20:45:46.9774432-08:00
-custom:
-  Issue: "281"
