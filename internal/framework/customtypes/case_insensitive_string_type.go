@@ -13,18 +13,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-var _ basetypes.StringTypable = (*UUIDType)(nil)
+var _ basetypes.StringTypable = (*CaseInsensitiveStringType)(nil)
 
-type UUIDType struct {
+type CaseInsensitiveStringType struct {
 	basetypes.StringType
 }
 
-func (t UUIDType) String() string {
-	return "UUIDType"
+func (CaseInsensitiveStringType) String() string {
+	return "CaseInsensitiveStringType"
 }
 
-func (t UUIDType) Equal(o attr.Type) bool {
-	other, ok := o.(UUIDType)
+func (t CaseInsensitiveStringType) Equal(o attr.Type) bool {
+	other, ok := o.(CaseInsensitiveStringType)
 	if !ok {
 		return false
 	}
@@ -32,27 +32,27 @@ func (t UUIDType) Equal(o attr.Type) bool {
 	return t.StringType.Equal(other.StringType)
 }
 
-func (t UUIDType) ValueType(_ context.Context) attr.Value {
-	return UUIDValue{}
+func (CaseInsensitiveStringType) ValueType(context.Context) attr.Value {
+	return CaseInsensitiveString{}
 }
 
-func (t UUIDType) ValueFromString(_ context.Context, in basetypes.StringValue) (basetypes.StringValuable, diag.Diagnostics) {
+func (t CaseInsensitiveStringType) ValueFromString(_ context.Context, in basetypes.StringValue) (basetypes.StringValuable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if in.IsNull() {
-		return NewUUIDNull(), diags
+		return NewCaseInsensitiveStringNull(), diags
 	}
 
 	if in.IsUnknown() {
-		return NewUUIDUnknown(), diags
+		return NewCaseInsensitiveStringUnknown(), diags
 	}
 
-	return UUIDValue{
+	return CaseInsensitiveStringValue{
 		StringValue: in,
 	}, diags
 }
 
-func (t UUIDType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+func (t CaseInsensitiveStringType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
 	attrValue, err := t.StringType.ValueFromTerraform(ctx, in)
 	if err != nil {
 		return nil, err

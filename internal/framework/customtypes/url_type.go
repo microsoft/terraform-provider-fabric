@@ -37,6 +37,16 @@ func (t URLType) ValueType(_ context.Context) attr.Value {
 }
 
 func (t URLType) ValueFromString(_ context.Context, in basetypes.StringValue) (basetypes.StringValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if in.IsNull() {
+		return NewURLNull(), diags
+	}
+
+	if in.IsUnknown() {
+		return NewURLUnknown(), diags
+	}
+
 	return URLValue{
 		StringValue: in,
 	}, nil
