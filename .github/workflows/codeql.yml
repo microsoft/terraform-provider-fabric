@@ -63,35 +63,35 @@ jobs:
               - 'go.sum'
 
       - name: 🚧 Setup Go
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version-file: go.mod
           cache: false
 
       - name: 🚧 Setup Task
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
         with:
           repo-token: ${{ github.token }}
 
       - name: 💫 Initialize CodeQL
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         uses: github/codeql-action/init@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
       - name: 🔨 Setup tools
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         run: task install:goreleaser
 
       - name: 🏗️ Build binary
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         run: task build
 
       - name: 🩺 Perform CodeQL Analysis
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         uses: github/codeql-action/analyze@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
         with:
           category: "/language:${{matrix.language}}"
@@ -99,7 +99,7 @@ jobs:
           output: codeql-results
 
       - name: 📤 Upload CodeQL result
-        if: github.event_name != 'pull_request' || github.event_name != 'pull_request_target' || steps.filter.outputs.src == 'true'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
         uses: github/codeql-action/upload-sarif@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
         with:
           sarif_file: codeql-results
