@@ -11,16 +11,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -59,6 +64,10 @@ func (r *resourceWorkspaceGit) Metadata(_ context.Context, req resource.Metadata
 
 func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	possibleInitializationStrategyValues := utils.RemoveSliceByValue(fabcore.PossibleInitializationStrategyValues(), fabcore.InitializationStrategyNone)
+
+	gitProviderTypeAttPath := path.MatchRoot("git_provider_details").AtName("git_provider_type")
+	gitProviderTypeAzureDevOps := types.StringValue(string(fabcore.GitProviderTypeAzureDevOps))
+	gitProviderTypeGitHub := types.StringValue(string(fabcore.GitProviderTypeGitHub))
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: r.MarkdownDescription,
@@ -113,24 +122,58 @@ func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequ
 				},
 				Attributes: map[string]schema.Attribute{
 					"git_provider_type": schema.StringAttribute{
-						MarkdownDescription: "The Git provider type. Accepted values: " + utils.ConvertStringSlicesToString(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true, true),
+						MarkdownDescription: "The Git provider type. Accepted values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitProviderTypeValues(), true, true),
 						Required:            true,
 						Validators: []validator.String{
-							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true)...),
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitProviderTypeValues(), true)...),
 						},
 					},
 					"organization_name": schema.StringAttribute{
-						MarkdownDescription: "The organization name.",
-						Required:            true,
+						MarkdownDescription: "The Azure DevOps organization name.",
+						Computed:            true,
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.LengthAtMost(100),
+							superstringvalidator.NullIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeGitHub},
+							),
+							superstringvalidator.RequireIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeAzureDevOps},
+							),
 						},
 					},
 					"project_name": schema.StringAttribute{
-						MarkdownDescription: "The project name.",
-						Required:            true,
+						MarkdownDescription: "The Azure DevOps project name.",
+						Computed:            true,
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.LengthAtMost(100),
+							superstringvalidator.NullIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeGitHub},
+							),
+							superstringvalidator.RequireIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeAzureDevOps},
+							),
+						},
+					},
+					"owner_name": schema.StringAttribute{
+						MarkdownDescription: "The GitHub owner name.",
+						Computed:            true,
+						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(100),
+							superstringvalidator.NullIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeAzureDevOps},
+							),
+							superstringvalidator.RequireIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeGitHub},
+							),
 						},
 					},
 					"repository_name": schema.StringAttribute{
@@ -155,6 +198,44 @@ func (r *resourceWorkspaceGit) Schema(ctx context.Context, _ resource.SchemaRequ
 							stringvalidator.RegexMatches(
 								regexp.MustCompile(`^/.*`),
 								"Directory name path must starts with forward slash '/'.",
+							),
+						},
+					},
+				},
+			},
+			"git_credentials": schema.SingleNestedAttribute{
+				MarkdownDescription: "The Git credentials details.",
+				Computed:            true,
+				Optional:            true,
+				Validators: []validator.Object{
+					superobjectvalidator.NullIfAttributeIsOneOf(
+						gitProviderTypeAttPath,
+						[]attr.Value{gitProviderTypeAzureDevOps},
+					),
+					superobjectvalidator.RequireIfAttributeIsOneOf(
+						gitProviderTypeAttPath,
+						[]attr.Value{gitProviderTypeGitHub},
+					),
+				},
+				CustomType: supertypes.NewSingleNestedObjectTypeOf[gitCredentialsModel](ctx),
+				Attributes: map[string]schema.Attribute{
+					"source": schema.StringAttribute{
+						MarkdownDescription: "The Git credentials source. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitCredentialsSourceValues(), true, true),
+						Computed:            true,
+					},
+					"connection_id": schema.StringAttribute{
+						MarkdownDescription: "The object ID of the connection.",
+						Computed:            true,
+						Optional:            true,
+						CustomType:          customtypes.UUIDType{},
+						Validators: []validator.String{
+							superstringvalidator.NullIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeAzureDevOps},
+							),
+							superstringvalidator.RequireIfAttributeIsOneOf(
+								gitProviderTypeAttPath,
+								[]attr.Value{gitProviderTypeGitHub},
 							),
 						},
 					},
@@ -285,9 +366,6 @@ func (r *resourceWorkspaceGit) Read(ctx context.Context, req resource.ReadReques
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceWorkspaceGitModel
 
@@ -343,11 +421,36 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 		"action": "start",
 	})
 
-	// in real world, this should not reach here
-	resp.Diagnostics.AddError(
-		common.ErrorUpdateHeader,
-		"Update is not supported. Requires delete and recreate.",
-	)
+	var plan resourceWorkspaceGitModel
+
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	timeout, diags := plan.Timeouts.Update(ctx, r.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var reqUpdate requestUpdateGitCredentials
+
+	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate, nil)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(plan.setCredentials(ctx, respUpdate.GitCredentialsConfigurationResponseClassification)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "end",
@@ -402,5 +505,18 @@ func (r *resourceWorkspaceGit) get(ctx context.Context, model *resourceWorkspace
 		return diags
 	}
 
-	return model.set(ctx, respGet.GitConnection)
+	if diags := model.set(ctx, respGet.GitConnection); diags.HasError() {
+		return diags
+	}
+
+	respGetCredentials, err := r.client.GetMyGitCredentials(ctx, model.WorkspaceID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
+	}
+
+	if diags := model.setCredentials(ctx, respGetCredentials.GitCredentialsConfigurationResponseClassification); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }

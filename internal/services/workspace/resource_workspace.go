@@ -281,9 +281,6 @@ func (r *resourceWorkspace) Read(ctx context.Context, req resource.ReadRequest, 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceWorkspaceModel
 

@@ -161,9 +161,6 @@ func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceWorkspaceRoleAssignmentModel
 

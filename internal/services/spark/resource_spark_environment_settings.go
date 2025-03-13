@@ -344,9 +344,6 @@ func (r *resourceSparkEnvironmentSettings) Read(ctx context.Context, req resourc
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceSparkEnvironmentSettingsModel
 

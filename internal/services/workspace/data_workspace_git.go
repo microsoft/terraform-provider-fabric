@@ -72,15 +72,19 @@ func (d *dataSourceWorkspaceGit) Schema(ctx context.Context, _ datasource.Schema
 				CustomType:          supertypes.NewSingleNestedObjectTypeOf[gitProviderDetailsModel](ctx),
 				Attributes: map[string]schema.Attribute{
 					"git_provider_type": schema.StringAttribute{
-						MarkdownDescription: "The Git provider type. Possible values: " + utils.ConvertStringSlicesToString(utils.RemoveSliceByValue(fabcore.PossibleGitProviderTypeValues(), fabcore.GitProviderTypeGitHub), true, true),
+						MarkdownDescription: "The Git provider type. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitProviderTypeValues(), true, true),
 						Computed:            true,
 					},
 					"organization_name": schema.StringAttribute{
-						MarkdownDescription: "The organization name.",
+						MarkdownDescription: "The Azure DevOps organization name.",
 						Computed:            true,
 					},
 					"project_name": schema.StringAttribute{
-						MarkdownDescription: "The project name.",
+						MarkdownDescription: "The Azure DevOps project name.",
+						Computed:            true,
+					},
+					"owner_name": schema.StringAttribute{
+						MarkdownDescription: "The GitHub owner name.",
 						Computed:            true,
 					},
 					"repository_name": schema.StringAttribute{
@@ -94,6 +98,22 @@ func (d *dataSourceWorkspaceGit) Schema(ctx context.Context, _ datasource.Schema
 					"directory_name": schema.StringAttribute{
 						MarkdownDescription: "The directory name.",
 						Computed:            true,
+					},
+				},
+			},
+			"git_credentials": schema.SingleNestedAttribute{
+				MarkdownDescription: "The Git credentials details.",
+				Computed:            true,
+				CustomType:          supertypes.NewSingleNestedObjectTypeOf[gitCredentialsModel](ctx),
+				Attributes: map[string]schema.Attribute{
+					"source": schema.StringAttribute{
+						MarkdownDescription: "The Git credentials source. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleGitCredentialsSourceValues(), true, true),
+						Computed:            true,
+					},
+					"connection_id": schema.StringAttribute{
+						MarkdownDescription: "The object ID of the connection.",
+						Computed:            true,
+						CustomType:          customtypes.UUIDType{},
 					},
 				},
 			},
@@ -124,9 +144,6 @@ func (d *dataSourceWorkspaceGit) Configure(_ context.Context, req datasource.Con
 func (d *dataSourceWorkspaceGit) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
-	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"config": req.Config,
 	})
 
 	var data dataSourceWorkspaceGitModel
@@ -166,5 +183,18 @@ func (d *dataSourceWorkspaceGit) get(ctx context.Context, model *dataSourceWorks
 		return diags
 	}
 
-	return model.set(ctx, respGet.GitConnection)
+	if diags := model.set(ctx, respGet.GitConnection); diags.HasError() {
+		return diags
+	}
+
+	respGetCredentials, err := d.client.GetMyGitCredentials(ctx, model.WorkspaceID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
+	}
+
+	if diags := model.setCredentials(ctx, respGetCredentials.GitCredentialsConfigurationResponseClassification); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }

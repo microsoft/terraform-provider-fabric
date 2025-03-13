@@ -32,6 +32,7 @@ data "fabric_workspace_git" "example" {
 ### Read-Only
 
 - `git_connection_state` (String) The git connection state. Possible values: `Connected`, `ConnectedAndInitialized`, `NotConnected`
+- `git_credentials` (Attributes) The Git credentials details. (see [below for nested schema](#nestedatt--git_credentials))
 - `git_provider_details` (Attributes) The Git provider details. (see [below for nested schema](#nestedatt--git_provider_details))
 - `git_sync_details` (Attributes) The git sync details. (see [below for nested schema](#nestedatt--git_sync_details))
 
@@ -43,6 +44,15 @@ Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
+<a id="nestedatt--git_credentials"></a>
+
+### Nested Schema for `git_credentials`
+
+Read-Only:
+
+- `connection_id` (String) The object ID of the connection.
+- `source` (String) The Git credentials source. Possible values: `Automatic`, `ConfiguredConnection`, `None`
+
 <a id="nestedatt--git_provider_details"></a>
 
 ### Nested Schema for `git_provider_details`
@@ -51,9 +61,10 @@ Read-Only:
 
 - `branch_name` (String) The branch name.
 - `directory_name` (String) The directory name.
-- `git_provider_type` (String) The Git provider type. Possible values: `AzureDevOps`
-- `organization_name` (String) The organization name.
-- `project_name` (String) The project name.
+- `git_provider_type` (String) The Git provider type. Possible values: `AzureDevOps`, `GitHub`
+- `organization_name` (String) The Azure DevOps organization name.
+- `owner_name` (String) The GitHub owner name.
+- `project_name` (String) The Azure DevOps project name.
 - `repository_name` (String) The repository name.
 
 <a id="nestedatt--git_sync_details"></a>

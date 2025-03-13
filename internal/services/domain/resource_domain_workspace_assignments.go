@@ -163,9 +163,6 @@ func (r *resourceDomainWorkspaceAssignments) Read(ctx context.Context, req resou
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "READ", map[string]any{
-		"state": req.State,
-	})
 
 	var state resourceDomainWorkspaceAssignmentsModel
 

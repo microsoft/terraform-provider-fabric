@@ -1,0 +1,5 @@
+kind: added
+body: '`GitHub` git provider type for `fabric_workspace_git` Resource'
+time: 2025-03-10T17:59:01.6175731-07:00
+custom:
+    Issue: "112"
