@@ -30,6 +30,9 @@ kinds:
   - label: 🚨 Security
     key: security
     auto: patch
+  - label: 📚 Documentation
+    key: documentation
+    auto: patch
 newlines:
   afterChangelogHeader: 1
   beforeChangelogVersion: 1

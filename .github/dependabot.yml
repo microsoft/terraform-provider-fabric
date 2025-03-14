@@ -15,6 +15,9 @@ updates:
     labels:
       - "deps/github-actions"
       - dependencies
+    groups:
+      all:
+        patterns: ["*"]
 
   - package-ecosystem: devcontainers
     directory: /
@@ -39,3 +42,23 @@ updates:
     labels:
       - "deps/go"
       - dependencies
+    groups:
+      all:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directories:
+      - "/examples/resources/*"
+      - "/examples/data-sources/*"
+      - "/examples/provider/*"
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: chore
+      include: scope
+    labels:
+      - "deps/terraform"
+      - dependencies
+    groups:
+      all:
+        patterns: ["*"]

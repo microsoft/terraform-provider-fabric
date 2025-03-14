@@ -72,12 +72,12 @@
     "github.com/microsoft/terraform-provider-fabric"
   ],
   "go.diagnostic.vulncheck": "Imports",
-  "go.testTimeout": "3m",
-  // "go.lintTool": "golangci-lint",
-  // "go.lintFlags": [
-  //   "--fast",
-  //   "--fix"
-  // ],
+  "go.testTimeout": "5m",
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--fast",
+    "--fix"
+  ],
   // lint
   "linter.linters": {
     "yamllint": {
