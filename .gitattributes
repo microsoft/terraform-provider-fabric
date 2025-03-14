@@ -1,9 +1,5 @@
-# Set default behaviour to automatically normalize line endings.
-* text=auto
-
-# Declare files that will always have LF line endings on checkout.
-*.sh text eol=lf
-*.go text eol=lf
+# Force the following filetypes to have unix eols, so Windows does not break them
+* text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.{cmd,[cC][mM][dD]} text eol=crlf
