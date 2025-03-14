@@ -31,7 +31,7 @@ data "fabric_workspaces" "example" {}
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Workspaces. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Workspaces. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

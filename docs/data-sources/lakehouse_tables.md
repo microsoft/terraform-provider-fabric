@@ -39,7 +39,7 @@ data "fabric_lakehouse_tables" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Lakehouse Tables. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Lakehouse Tables. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

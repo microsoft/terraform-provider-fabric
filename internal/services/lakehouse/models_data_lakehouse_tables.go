@@ -15,10 +15,10 @@ import (
 )
 
 type dataSourceLakehouseTablesModel struct {
-	LakehouseID customtypes.UUID                                        `tfsdk:"lakehouse_id"`
-	WorkspaceID customtypes.UUID                                        `tfsdk:"workspace_id"`
-	Values      supertypes.ListNestedObjectValueOf[lakehouseTableModel] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                          `tfsdk:"timeouts"`
+	LakehouseID customtypes.UUID                                       `tfsdk:"lakehouse_id"`
+	WorkspaceID customtypes.UUID                                       `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[lakehouseTableModel] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                         `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceLakehouseTablesModel) setValues(ctx context.Context, from []fablakehouse.Table) diag.Diagnostics {

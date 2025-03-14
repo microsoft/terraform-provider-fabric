@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GetListStringValues(value types.List, envVarKeys, defaultValue []string) types.List {
+func GetListStringValues(value types.Set, envVarKeys, defaultValue []string) types.Set {
 	if value.IsUnknown() || value.IsNull() {
 		values := []attr.Value{}
 
@@ -26,7 +26,7 @@ func GetListStringValues(value types.List, envVarKeys, defaultValue []string) ty
 			}
 		}
 
-		return types.ListValueMust(types.StringType, values)
+		return types.SetValueMust(types.StringType, values)
 	}
 
 	return value
