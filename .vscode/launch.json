@@ -10,7 +10,8 @@
       "env": {
         "FABRIC_PREVIEW": "true",
         "FABRIC_SDK_GO_LOGGING": "trace",
-        "FABRIC_SDK_GO_LOGGING_INCLUDE_BODY": "true"
+        "FABRIC_SDK_GO_LOGGING_INCLUDE_BODY": "true",
+        "FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS": "requestid;x-ms-operation-id;x-ms-public-api-error-code;home-cluster-uri;location;date;retry-after"
       },
       "args": [
         "-debug"

@@ -7,6 +7,7 @@ import (
 	"context"
 	"math"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -144,8 +145,8 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	if cls := os.Getenv(pclient.AzureSDKLoggingEnvVar); cls == pclient.AzureSDKLoggingAll && lvl != hclog.Off {
 		var logOptions policy.LogOptions
 
-		if includeBody, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"); ok {
-			includeBodyBool, err := strconv.ParseBool(includeBody)
+		if includeBodyEnv, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"); ok && includeBodyEnv != "" {
+			includeBodyBool, err := strconv.ParseBool(includeBodyEnv)
 			if err != nil {
 				return nil, err
 			}
@@ -153,7 +154,33 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 			logOptions.IncludeBody = includeBodyBool
 		}
 
-		logOptions.AllowedHeaders = []string{"requestid", "x-ms-operation-id", "x-ms-public-api-error-code", "home-cluster-uri", "location", "date", "retry-after"}
+		// Example useful headers
+		// requestid;x-ms-operation-id;x-ms-public-api-error-code;home-cluster-uri;location;date;retry-after
+
+		if allowedHeadersEnv, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS"); ok && allowedHeadersEnv != "" {
+			headers := strings.Split(allowedHeadersEnv, ";")
+			validHeaders := make([]string, 0, len(headers))
+
+			// Simple validation to prevent injection: only accept standard header format
+			headerRegex := regexp.MustCompile(`^[a-zA-Z0-9\-]+$`)
+			for _, header := range headers {
+				h := strings.ToLower(strings.TrimSpace(header))
+				if h != "" && headerRegex.MatchString(h) {
+					validHeaders = append(validHeaders, h)
+				} else {
+					tflog.Warn(ctx, "Skipping invalid header format", map[string]any{
+						"header": header,
+					})
+				}
+			}
+
+			if len(validHeaders) > 0 {
+				logOptions.AllowedHeaders = validHeaders
+				tflog.Debug(ctx, "Using custom allowed headers", map[string]any{
+					"headers": validHeaders,
+				})
+			}
+		}
 
 		fabricClientOpt.Logging = logOptions
 
