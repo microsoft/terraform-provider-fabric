@@ -52,10 +52,10 @@ func (d *dataSourceLakehouseTables) Schema(ctx context.Context, _ datasource.Sch
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of Lakehouse Tables.",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[lakehouseTableModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[lakehouseTableModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{

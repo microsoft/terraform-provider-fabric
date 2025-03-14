@@ -13,8 +13,8 @@ import (
 )
 
 type dataSourceCapacitiesModel struct {
-	Values   supertypes.ListNestedObjectValueOf[baseCapacityModel] `tfsdk:"values"`
-	Timeouts timeouts.Value                                        `tfsdk:"timeouts"`
+	Values   supertypes.SetNestedObjectValueOf[baseCapacityModel] `tfsdk:"values"`
+	Timeouts timeouts.Value                                       `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceCapacitiesModel) setValues(ctx context.Context, from []fabcore.Capacity) diag.Diagnostics {

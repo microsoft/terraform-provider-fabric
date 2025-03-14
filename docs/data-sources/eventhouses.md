@@ -37,7 +37,7 @@ data "fabric_eventhouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Eventhouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Eventhouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -65,6 +65,6 @@ Read-Only:
 
 Read-Only:
 
-- `database_ids` (List of String) List of all KQL Database children IDs.
+- `database_ids` (Set of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.

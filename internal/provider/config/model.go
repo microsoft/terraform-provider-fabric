@@ -32,7 +32,7 @@ type ProviderConfigModel struct {
 	Timeout                        timetypes.GoDuration `tfsdk:"timeout"`
 	Endpoint                       customtypes.URL      `tfsdk:"endpoint"`
 	Environment                    types.String         `tfsdk:"environment"`
-	AuxiliaryTenantIDs             types.List           `tfsdk:"auxiliary_tenant_ids"`
+	AuxiliaryTenantIDs             types.Set            `tfsdk:"auxiliary_tenant_ids"`
 	TenantID                       customtypes.UUID     `tfsdk:"tenant_id"`
 	ClientID                       customtypes.UUID     `tfsdk:"client_id"`
 	ClientIDFilePath               types.String         `tfsdk:"client_id_file_path"`

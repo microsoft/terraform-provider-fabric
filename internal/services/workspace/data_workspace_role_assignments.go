@@ -47,10 +47,10 @@ func (d *dataSourceWorkspaceRoleAssignments) Schema(ctx context.Context, _ datas
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of " + WorkspaceRoleAssignmentsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseWorkspaceRoleAssignmentModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseWorkspaceRoleAssignmentModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{

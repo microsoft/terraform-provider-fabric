@@ -27,10 +27,10 @@ func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]s
 			MarkdownDescription: "Query service URI.",
 			Computed:            true,
 		},
-		"database_ids": schema.ListAttribute{
+		"database_ids": schema.SetAttribute{
 			MarkdownDescription: "List of all KQL Database children IDs.",
 			Computed:            true,
-			CustomType:          supertypes.NewListTypeOf[string](ctx),
+			CustomType:          supertypes.NewSetTypeOf[string](ctx),
 		},
 	}
 

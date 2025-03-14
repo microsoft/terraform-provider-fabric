@@ -73,10 +73,10 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The list of %s.", d.Names),
-				CustomType:          supertypes.NewListNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},
