@@ -77,7 +77,7 @@ You can find more information on how to do this in the following guides:
 
 ### Optional
 
-- `auxiliary_tenant_ids` (List of String) The Auxiliary Tenant IDs which should be used.
+- `auxiliary_tenant_ids` (Set of String) The Auxiliary Tenant IDs which should be used.
 - `azure_devops_service_connection_id` (String) The Azure DevOps Service Connection ID that uses Workload Identity Federation.
 - `client_certificate` (String, Sensitive) Base64 encoded PKCS#12 certificate bundle. For use when authenticating as a Service Principal using a Client Certificate.
 - `client_certificate_file_path` (String) The path to the Client Certificate associated with the Service Principal for use when authenticating as a Service Principal using a Client Certificate.

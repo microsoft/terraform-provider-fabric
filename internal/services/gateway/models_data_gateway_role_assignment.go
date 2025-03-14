@@ -25,9 +25,9 @@ func (to *dataSourceGatewayRoleAssignmentModel) set(ctx context.Context, from fa
 }
 
 type dataSourceGatewayRoleAssignmentsModel struct {
-	GatewayID customtypes.UUID                                                   `tfsdk:"gateway_id"`
-	Values    supertypes.ListNestedObjectValueOf[baseGatewayRoleAssignmentModel] `tfsdk:"values"`
-	Timeouts  timeouts.Value                                                     `tfsdk:"timeouts"`
+	GatewayID customtypes.UUID                                                  `tfsdk:"gateway_id"`
+	Values    supertypes.SetNestedObjectValueOf[baseGatewayRoleAssignmentModel] `tfsdk:"values"`
+	Timeouts  timeouts.Value                                                    `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceGatewayRoleAssignmentsModel) setValues(ctx context.Context, from []fabcore.GatewayRoleAssignment) diag.Diagnostics {

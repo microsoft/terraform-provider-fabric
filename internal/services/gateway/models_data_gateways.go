@@ -13,8 +13,8 @@ import (
 )
 
 type dataSourceGatewaysModel struct {
-	Values   supertypes.ListNestedObjectValueOf[baseDataSourceGatewayModel] `tfsdk:"values"`
-	Timeouts timeouts.Value                                                 `tfsdk:"timeouts"`
+	Values   supertypes.SetNestedObjectValueOf[baseDataSourceGatewayModel] `tfsdk:"values"`
+	Timeouts timeouts.Value                                                `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceGatewaysModel) setValues(ctx context.Context, from []fabcore.GatewayClassification) diag.Diagnostics {

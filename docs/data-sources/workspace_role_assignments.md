@@ -37,7 +37,7 @@ data "fabric_workspace_role_assignments" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Workspace Role Assignments. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Workspace Role Assignments. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

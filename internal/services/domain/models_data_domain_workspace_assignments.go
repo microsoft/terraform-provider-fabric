@@ -15,9 +15,9 @@ import (
 )
 
 type dataSourceDomainWorkspaceAssignmentsModel struct {
-	DomainID customtypes.UUID                                   `tfsdk:"domain_id"`
-	Values   supertypes.ListNestedObjectValueOf[workspaceModel] `tfsdk:"values"`
-	Timeouts timeouts.Value                                     `tfsdk:"timeouts"`
+	DomainID customtypes.UUID                                  `tfsdk:"domain_id"`
+	Values   supertypes.SetNestedObjectValueOf[workspaceModel] `tfsdk:"values"`
+	Timeouts timeouts.Value                                    `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceDomainWorkspaceAssignmentsModel) setValues(ctx context.Context, from []fabadmin.DomainWorkspace) diag.Diagnostics {

@@ -56,10 +56,10 @@ func (d *dataSourceDomains) Schema(ctx context.Context, _ datasource.SchemaReque
 			"Use this data source to list [" + d.Name + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of " + d.Name + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDomainModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseDomainModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{

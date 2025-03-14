@@ -59,10 +59,10 @@ func (d *dataSourceDomainWorkspaceAssignments) Schema(ctx context.Context, _ dat
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of " + d.Name + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[workspaceModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[workspaceModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{

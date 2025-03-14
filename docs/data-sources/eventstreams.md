@@ -40,7 +40,7 @@ data "fabric_eventstreams" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Eventstreams. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Eventstreams. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

@@ -15,9 +15,9 @@ import (
 )
 
 type dataSourceFabricItemsModel struct {
-	WorkspaceID customtypes.UUID                                    `tfsdk:"workspace_id"`
-	Values      supertypes.ListNestedObjectValueOf[fabricItemModel] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                      `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                   `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[fabricItemModel] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                     `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabcore.Item) diag.Diagnostics {

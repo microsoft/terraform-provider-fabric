@@ -51,10 +51,10 @@ func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequ
 			"Use this data source to list ["+ItemsName+"]("+ItemDocsURL+").\n\n"+
 			ItemDocsSPNSupport, d.IsPreview),
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of " + ItemsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDataSourceGatewayModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseDataSourceGatewayModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},

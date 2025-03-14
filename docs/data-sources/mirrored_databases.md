@@ -37,7 +37,7 @@ data "fabric_mirrored_databases" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Mirrored Databases. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Mirrored Databases. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
