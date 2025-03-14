@@ -443,7 +443,7 @@ func (r *resourceSparkWorkspaceSettings) Update(ctx context.Context, req resourc
 	}
 }
 
-func (r *resourceSparkWorkspaceSettings) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceSparkWorkspaceSettings) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})

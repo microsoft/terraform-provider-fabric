@@ -142,6 +142,21 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	}
 
 	if cls := os.Getenv(pclient.AzureSDKLoggingEnvVar); cls == pclient.AzureSDKLoggingAll && lvl != hclog.Off {
+		var logOptions policy.LogOptions
+
+		if includeBody, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"); ok {
+			includeBodyBool, err := strconv.ParseBool(includeBody)
+			if err != nil {
+				return nil, err
+			}
+
+			logOptions.IncludeBody = includeBodyBool
+		}
+
+		logOptions.AllowedHeaders = []string{"requestid", "x-ms-operation-id", "x-ms-public-api-error-code", "home-cluster-uri", "location", "date", "retry-after"}
+
+		fabricClientOpt.Logging = logOptions
+
 		azlog.SetListener(func(ev azlog.Event, msg string) {
 			tflog.SubsystemTrace(ctx, pclient.FabricSDKLoggerName, "SDK", map[string]any{
 				"event":   ev,
