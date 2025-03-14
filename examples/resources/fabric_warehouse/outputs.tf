@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_warehouse.example
+  value = fabric_warehouse.example
 }

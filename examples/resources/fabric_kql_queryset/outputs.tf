@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_kql_queryset.example
+  value = fabric_kql_queryset.example
 }

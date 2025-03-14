@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_ml_model.example
+  value = fabric_ml_model.example
 }

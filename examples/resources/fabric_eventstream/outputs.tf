@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_eventstream.example
+  value = fabric_eventstream.example
 }

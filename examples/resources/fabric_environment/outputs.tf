@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_environment.example
+  value = fabric_environment.example
 }

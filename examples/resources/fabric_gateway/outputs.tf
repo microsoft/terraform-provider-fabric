@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_gateway.example
+  value = fabric_gateway.example
 }
