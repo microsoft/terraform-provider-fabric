@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_activator.example
+  value = fabric_activator.example
 }

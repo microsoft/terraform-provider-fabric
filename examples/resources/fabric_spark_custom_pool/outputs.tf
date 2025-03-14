@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_spark_custom_pool.example
+  value = fabric_spark_custom_pool.example
 }

@@ -1,3 +1,3 @@
 output "example" {
-  value = resource.fabric_workspace_role_assignment.example
+  value = fabric_workspace_role_assignment.example
 }

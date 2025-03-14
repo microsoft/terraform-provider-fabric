@@ -1,7 +1,7 @@
 output "parent" {
-  value = resource.fabric_domain.parent
+  value = fabric_domain.parent
 }
 
 output "parent" {
-  value = resource.fabric_domain.child
+  value = fabric_domain.child
 }
