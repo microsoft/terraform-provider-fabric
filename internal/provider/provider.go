@@ -163,6 +163,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 			// Simple validation to prevent injection: only accept standard header format
 			headerRegex := regexp.MustCompile(`^[a-zA-Z0-9\-]+$`)
+
 			for _, header := range headers {
 				h := strings.ToLower(strings.TrimSpace(header))
 				if h != "" && headerRegex.MatchString(h) {
