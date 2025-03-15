@@ -7,7 +7,6 @@ import (
 	"context"
 	"math"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -143,47 +142,16 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	}
 
 	if cls := os.Getenv(pclient.AzureSDKLoggingEnvVar); cls == pclient.AzureSDKLoggingAll && lvl != hclog.Off {
-		var logOptions policy.LogOptions
+		logOptions, err := pclient.ConfigureLoggingOptions(ctx, lvl)
+		if err != nil {
+			tflog.Error(ctx, "Failed to configure logging options", map[string]any{"error": err.Error()})
 
-		if includeBodyEnv, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"); ok && includeBodyEnv != "" {
-			includeBodyBool, err := strconv.ParseBool(includeBodyEnv)
-			if err != nil {
-				return nil, err
-			}
-
-			logOptions.IncludeBody = includeBodyBool
+			return nil, err
 		}
 
-		// Example useful headers
-		// requestid;x-ms-operation-id;x-ms-public-api-error-code;home-cluster-uri;location;date;retry-after
-
-		if allowedHeadersEnv, ok := os.LookupEnv("FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS"); ok && allowedHeadersEnv != "" {
-			headers := strings.Split(allowedHeadersEnv, ";")
-			validHeaders := make([]string, 0, len(headers))
-
-			// Simple validation to prevent injection: only accept standard header format
-			headerRegex := regexp.MustCompile(`^[a-zA-Z0-9\-]+$`)
-
-			for _, header := range headers {
-				h := strings.ToLower(strings.TrimSpace(header))
-				if h != "" && headerRegex.MatchString(h) {
-					validHeaders = append(validHeaders, h)
-				} else {
-					tflog.Warn(ctx, "Skipping invalid header format", map[string]any{
-						"header": header,
-					})
-				}
-			}
-
-			if len(validHeaders) > 0 {
-				logOptions.AllowedHeaders = validHeaders
-				tflog.Debug(ctx, "Using custom allowed headers", map[string]any{
-					"headers": validHeaders,
-				})
-			}
+		if logOptions != nil {
+			fabricClientOpt.Logging = *logOptions
 		}
-
-		fabricClientOpt.Logging = logOptions
 
 		azlog.SetListener(func(ev azlog.Event, msg string) {
 			tflog.SubsystemTrace(ctx, pclient.FabricSDKLoggerName, "SDK", map[string]any{
