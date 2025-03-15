@@ -4,18 +4,18 @@
 package client_test
 
 import (
-	"context"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	pclient "github.com/microsoft/terraform-provider-fabric/internal/provider/client"
 )
 
 func TestUnit_GetLoggingIncludeBodyOption(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testCases := []struct {
 		name           string
@@ -77,9 +77,9 @@ func TestUnit_GetLoggingIncludeBodyOption(t *testing.T) {
 
 			// Verify
 			if tc.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.expectedResult, result)
 			}
 		})
@@ -87,7 +87,7 @@ func TestUnit_GetLoggingIncludeBodyOption(t *testing.T) {
 }
 
 func TestUnit_GetLoggingAllowedHeadersOption(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testCases := []struct {
 		name           string
@@ -155,9 +155,9 @@ func TestUnit_GetLoggingAllowedHeadersOption(t *testing.T) {
 
 			// Verify
 			if tc.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.expectedResult, result)
 			}
 		})
@@ -165,7 +165,7 @@ func TestUnit_GetLoggingAllowedHeadersOption(t *testing.T) {
 }
 
 func TestUnit_ConfigureLoggingOptions(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testCases := []struct {
 		name              string
@@ -256,10 +256,10 @@ func TestUnit_ConfigureLoggingOptions(t *testing.T) {
 
 			// Verify
 			if tc.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				if tc.expectLogOptions {
 					assert.NotNil(t, result)
@@ -333,7 +333,7 @@ func TestUnit_NewFabricSDKLoggerSubsystem(t *testing.T) {
 			newCtx, level, err := pclient.NewFabricSDKLoggerSubsystem(ctx)
 
 			// Verify
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tc.expectedLevel, level)
 			assert.NotNil(t, newCtx)
 

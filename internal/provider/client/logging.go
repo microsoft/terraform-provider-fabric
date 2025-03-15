@@ -101,7 +101,7 @@ func GetLoggingAllowedHeadersOption(ctx context.Context) ([]string, error) {
 // ConfigureLoggingOptions configures the logging options for the Fabric SDK based on the environment variables.
 func ConfigureLoggingOptions(ctx context.Context, logLevel hclog.Level) (*policy.LogOptions, error) {
 	if logLevel == hclog.Off {
-		return nil, nil
+		return nil, nil //nolint:nilnil
 	}
 
 	logOptions := &policy.LogOptions{}
