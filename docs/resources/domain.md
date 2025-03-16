@@ -3,19 +3,16 @@
 page_title: "fabric_domain Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Domain.
-  Use this resource to manage Domain https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  The Domain resource allows you to manage Domain https://learn.microsoft.com/fabric/governance/domains.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain (Resource)
 
-Manage a Fabric Domain.
+The Domain resource allows you to manage [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
-Use this resource to manage [Domain](https://learn.microsoft.com/fabric/governance/domains).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -38,16 +35,13 @@ resource "fabric_domain" "child" {
 
 ### Required
 
-- `display_name` (String) The Domain display name.
+- `display_name` (String) The Domain display name. String length must be at most 40.
 
 ### Optional
 
-- `contributors_scope` (String) The Domain contributors scope. Possible values: `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`.
-
--> Contributors scope can only be set at the root domain level.
-
-- `description` (String) The Domain description.
-- `parent_domain_id` (String) The Domain parent ID.
+- `contributors_scope` (String) The Domain contributors scope. Value must be one of : `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`. Ensure that if an attribute is set, these are not set: "[parent_domain_id]".
+- `description` (String) The Domain description. Value defaults to ``. String length must be at most 256.
+- `parent_domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain parent ID. Ensure that if an attribute is set, these are not set: "[contributors_scope]".
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

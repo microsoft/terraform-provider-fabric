@@ -4,7 +4,11 @@
 package fabricitem
 
 const (
-	DefinitionFormatDefault = "Default"
-	PreviewDataSource       = "\n\n~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
-	PreviewResource         = "\n\n~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
+	DefinitionFormatDefault   = "Default"
+	SPNSupportedDataSource    = "\n\n-> This data-source supports Service Principal authentication."
+	SPNNotSupportedDataSource = "\n\n-> This data-source does not support Service Principal. Please use a User context authentication."
+	SPNSupportedResource      = "\n\n-> This resource supports Service Principal authentication."
+	SPNNotSupportedResource   = "\n\n-> This resource does not support Service Principal. Please use a User context authentication."
+	PreviewDataSource         = "\n\n~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
+	PreviewResource           = "\n\n~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
 )

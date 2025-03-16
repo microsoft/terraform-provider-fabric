@@ -7,15 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -34,24 +27,18 @@ var (
 )
 
 type resourceDomain struct {
-	pConfigData         *pconfig.ProviderData
-	client              *fabadmin.DomainsClient
-	Name                string
-	TFName              string
-	MarkdownDescription string
-	IsPreview           bool
+	pConfigData *pconfig.ProviderData
+	client      *fabadmin.DomainsClient
+	Name        string
+	TFName      string
+	IsPreview   bool
 }
 
 func NewResourceDomain() resource.Resource {
-	markdownDescription := "Manage a Fabric " + ItemName + ".\n\n" +
-		"Use this resource to manage [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-		ItemDocsSPNSupport
-
 	return &resourceDomain{
-		Name:                ItemName,
-		TFName:              ItemTFName,
-		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, ItemPreview),
-		IsPreview:           ItemPreview,
+		Name:      ItemName,
+		TFName:    ItemTFName,
+		IsPreview: ItemPreview,
 	}
 }
 
@@ -60,56 +47,7 @@ func (r *resourceDomain) Metadata(_ context.Context, req resource.MetadataReques
 }
 
 func (r *resourceDomain) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: r.MarkdownDescription,
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + r.Name + " ID.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The " + r.Name + " display name.",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(40),
-				},
-			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The " + r.Name + " description.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(256),
-				},
-			},
-			"parent_domain_id": schema.StringAttribute{
-				MarkdownDescription: "The " + r.Name + " parent ID.",
-				Optional:            true,
-				CustomType:          customtypes.UUIDType{},
-				Validators: []validator.String{
-					stringvalidator.ConflictsWith(path.MatchRoot("contributors_scope")),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"contributors_scope": schema.StringAttribute{
-				MarkdownDescription: "The " + r.Name + " contributors scope. Possible values: " + utils.ConvertStringSlicesToString(fabadmin.PossibleContributorsScopeTypeValues(), true, true) + ".\n\n" +
-					"-> Contributors scope can only be set at the root domain level.",
-				Optional: true,
-				Computed: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleContributorsScopeTypeValues(), false)...),
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
-	}
+	resp.Schema = domainSchema(false).GetResource(ctx)
 }
 
 func (r *resourceDomain) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

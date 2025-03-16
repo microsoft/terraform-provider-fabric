@@ -3,18 +3,18 @@
 page_title: "fabric_domains Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Domains.
-  Use this data source to list Domains https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  The Domain data-source allows you to read a list of Domain https://learn.microsoft.com/fabric/governance/domains details.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domains (Data Source)
 
-List a Fabric Domains.
+The Domain data-source allows you to read a list of [Domain](https://learn.microsoft.com/fabric/governance/domains) details.
 
-Use this data source to list [Domains](https://learn.microsoft.com/fabric/governance/domains).
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -47,7 +47,7 @@ Optional:
 
 Read-Only:
 
-- `contributors_scope` (String) The Domain contributors scope. Possible values: `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`.
+- `contributors_scope` (String) The Domain contributors scope. Value must be one of : `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`.
 - `description` (String) The Domain description.
 - `display_name` (String) The Domain display name.
 - `id` (String) The Domain ID.

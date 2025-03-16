@@ -11,6 +11,22 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 )
 
+func GetDataSourceSPNSupportNote(md string, spn bool) string { //revive:disable-line:flag-parameter
+	if spn {
+		return md + SPNSupportedDataSource
+	}
+
+	return md + SPNNotSupportedDataSource
+}
+
+func GetResourceSPNSupportNote(md string, spn bool) string { //revive:disable-line:flag-parameter
+	if spn {
+		return md + SPNSupportedResource
+	}
+
+	return md + SPNNotSupportedResource
+}
+
 func GetDataSourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter
 	if preview {
 		return md + PreviewDataSource
