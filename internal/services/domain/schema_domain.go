@@ -49,7 +49,7 @@ func domainSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-p
 			MarkdownDescription: markdownDescriptionD,
 		},
 		Attributes: map[string]superschema.Attribute{
-			"id": superschema.StringAttribute{
+			"id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemName + " ID.",
 					CustomType:          customtypes.UUIDType{},
@@ -95,7 +95,7 @@ func domainSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-p
 					Computed: true,
 				},
 			},
-			"parent_domain_id": superschema.StringAttribute{
+			"parent_domain_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemName + " parent ID.",
 					CustomType:          customtypes.UUIDType{},
