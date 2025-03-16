@@ -54,13 +54,12 @@ type dataSourceFabricItemDefinitionPartModel struct {
 }
 
 func (to *dataSourceFabricItemDefinitionPartModel) set(from string) diag.Diagnostics {
-	content := from
-
-	if diags := transforms.PayloadToGzip(&content); diags.HasError() {
+	content, diags := transforms.PayloadToGzip(from)
+	if diags.HasError() {
 		return diags
 	}
 
-	to.Content = types.StringPointerValue(&content)
+	to.Content = types.StringValue(content)
 
 	return nil
 }

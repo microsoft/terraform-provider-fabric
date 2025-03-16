@@ -5,7 +5,6 @@ package transforms
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -26,13 +25,12 @@ import (
 	sprouttime "github.com/go-sprout/sprout/registry/time"
 	sproutuniqueid "github.com/go-sprout/sprout/registry/uniqueid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
+// getTmplFuncs initializes and returns template functions from the sprout library.
 func getTmplFuncs() (template.FuncMap, error) {
 	handler := sprout.New()
 
@@ -64,136 +62,120 @@ func getTmplFuncs() (template.FuncMap, error) {
 	return handler.Build(), nil
 }
 
-func SourceFileToPayload(ctx context.Context, srcPath types.String, tokens supertypes.MapValueOf[string]) (*string, *string, diag.Diagnostics) { //revive:disable-line:confusing-results
+// SourceFileToPayload transforms a source file into a base64 encoded payload and calculates its SHA256 hash.
+// It optionally processes the file as a template with the provided tokens.
+func SourceFileToPayload(srcPath string, tokens map[string]string) (string, string, diag.Diagnostics) { //revive:disable-line:confusing-results
 	var diags diag.Diagnostics
 
-	source := srcPath.ValueString()
-
-	content, err := os.ReadFile(srcPath.ValueString())
+	content, err := os.ReadFile(srcPath)
 	if err != nil {
-		diags.AddError(
-			common.ErrorFileReadHeader,
-			err.Error(),
-		)
+		diags.AddError(common.ErrorFileReadHeader, err.Error())
 
-		return nil, nil, diags
+		return "", "", diags
 	}
 
-	var contentSha256 string
-	var contentB64 string
+	var contentB64, contentSha256 string
 
 	if utf8.Valid(content) { //nolint:nestif
 		tmplFuncs, err := getTmplFuncs()
 		if err != nil {
-			diags.AddError(
-				"Template functions error",
-				err.Error(),
-			)
+			diags.AddError("Template functions error", err.Error())
 
-			return nil, nil, diags
+			return "", "", diags
 		}
 
-		tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(source)
+		tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
 		if err != nil {
-			diags.AddError(
-				common.ErrorFileReadHeader,
-				err.Error(),
-			)
+			diags.AddError(common.ErrorFileReadHeader, err.Error())
 
-			return nil, nil, diags
+			return "", "", diags
 		}
 
+		// Process template with tokens if provided
 		tokensData := map[string]string{}
-
-		if !tokens.IsNull() && !tokens.IsUnknown() {
-			tokensData, diags = tokens.Get(ctx)
-			if diags.HasError() {
-				return nil, nil, diags
-			}
+		if len(tokens) > 0 {
+			tokensData = tokens
 		}
 
+		// Execute template
 		var contentBuf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(source), tokensData); err != nil {
-			diags.AddError(
-				common.ErrorTmplParseHeader,
-				err.Error(),
-			)
+		if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData); err != nil {
+			diags.AddError(common.ErrorTmplParseHeader, err.Error())
 
-			return nil, nil, diags
+			return "", "", diags
 		}
 
-		content := contentBuf.String()
+		contentStr := contentBuf.String()
 
-		if IsJSON(content) {
-			if err := JSONNormalize(&content); err != nil {
-				diags.AddError(
-					common.ErrorJSONNormalizeHeader,
-					err.Error(),
-				)
+		// If content is JSON, normalize it
+		if IsJSON(contentStr) {
+			normalizedContent, err := JSONNormalize(contentStr)
+			if err != nil {
+				diags.AddError(common.ErrorJSONNormalizeHeader, err.Error())
 
-				return nil, nil, diags
+				return "", "", diags
 			}
+
+			contentStr = normalizedContent
 		}
 
-		contentSha256 = utils.Sha256(content)
+		contentSha256 = utils.Sha256(contentStr)
 
-		contentB64, err = Base64Encode(content)
+		contentB64, err = Base64Encode(contentStr)
 		if err != nil {
-			diags.AddError(
-				common.ErrorBase64EncodeHeader,
-				err.Error(),
-			)
+			diags.AddError(common.ErrorBase64EncodeHeader, err.Error())
 
-			return nil, nil, diags
+			return "", "", diags
 		}
 	} else {
+		// Handle binary file
 		contentSha256 = utils.Sha256(content)
 
 		contentB64, err = Base64Encode(content)
 		if err != nil {
-			diags.AddError(
-				common.ErrorBase64EncodeHeader,
-				err.Error(),
-			)
+			diags.AddError(common.ErrorBase64EncodeHeader, err.Error())
 
-			return nil, nil, diags
+			return "", "", diags
 		}
 	}
 
-	return &contentB64, &contentSha256, nil
+	return contentB64, contentSha256, nil
 }
 
-func PayloadToGzip(content *string) diag.Diagnostics {
+// PayloadToGzip transforms a base64 encoded content string to a gzip compressed base64 string.
+// If the content is valid JSON, it uses JSON-specific encoding.
+func PayloadToGzip(content string) (string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if err := Base64Decode(content); err != nil {
-		diags.AddError(
-			common.ErrorBase64DecodeHeader,
-			err.Error(),
-		)
-
-		return diags
+	if content == "" {
+		return "", diags
 	}
 
-	if IsJSON(*content) {
-		if err := JSONBase64GzipEncode(content); err != nil {
-			diags.AddError(
-				common.ErrorBase64GzipEncodeHeader,
-				err.Error(),
-			)
+	// Decode the base64 content first
+	decoded, err := Base64Decode(content)
+	if err != nil {
+		diags.AddError(common.ErrorBase64DecodeHeader, err.Error())
 
-			return diags
+		return "", diags
+	}
+
+	// Re-encode with compression based on content type
+	var encoded string
+	if IsJSON(decoded) {
+		encoded, err = JSONBase64GzipEncode(decoded)
+		if err != nil {
+			diags.AddError(common.ErrorBase64GzipEncodeHeader, err.Error())
+
+			return "", diags
 		}
 	} else {
-		if err := Base64GzipEncode(content); err != nil {
-			diags.AddError(
-				common.ErrorBase64GzipEncodeHeader,
-				err.Error(),
-			)
+		encoded, err = Base64GzipEncode(decoded)
+		if err != nil {
+			diags.AddError(common.ErrorBase64GzipEncodeHeader, err.Error())
 
-			return diags
+			return "", diags
 		}
 	}
 
-	return nil
+	return encoded, diags
 }

@@ -511,18 +511,14 @@ func SemanticallyEqual(a, b types.Dynamic) bool {
 		return false
 	}
 
-	aJSONStr := string(aJSON)
-
-	err = transforms.JSONNormalize(&aJSONStr)
+	aJSONStr, err := transforms.JSONNormalize(string(aJSON))
 	if err != nil {
 		return false
 	}
 
 	aJSONValue := jsontypes.NewNormalizedValue(aJSONStr)
 
-	bJSONStr := string(bJSON)
-
-	err = transforms.JSONNormalize(&bJSONStr)
+	bJSONStr, err := transforms.JSONNormalize(string(bJSON))
 	if err != nil {
 		return false
 	}

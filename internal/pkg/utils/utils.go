@@ -29,7 +29,7 @@ func RemoveSliceByValue[T comparable](slice []T, value T) []T {
 	}
 
 	// Make a copy of the slice
-	sliceCopy := append([]T(nil), slice...)
+	sliceCopy := slices.Clone(slice)
 
 	return slices.Delete(sliceCopy, index, index+1)
 }

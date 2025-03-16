@@ -72,18 +72,17 @@ func (f *functionContentDecode) Run(ctx context.Context, req function.RunRequest
 		return
 	}
 
-	contentPtr := &inputContent
-
-	if err := transforms.Base64GzipDecode(contentPtr); err != nil {
+	contentDecoded, err := transforms.Base64GzipDecode(inputContent)
+	if err != nil {
 		resp.Error = function.NewFuncError("Failed to decode content: " + err.Error())
 
 		return
 	}
 
-	if transforms.IsJSON(*contentPtr) { //nolint:nestif
+	if transforms.IsJSON(contentDecoded) { //nolint:nestif
 		var contentJSON any
 
-		if err := json.Unmarshal([]byte(*contentPtr), &contentJSON); err != nil {
+		if err := json.Unmarshal([]byte(contentDecoded), &contentJSON); err != nil {
 			resp.Error = function.NewFuncError("Failed to unmarshal JSON: " + err.Error())
 
 			return
@@ -100,6 +99,13 @@ func (f *functionContentDecode) Run(ctx context.Context, req function.RunRequest
 			}
 
 			jpIter := jpExpression.Get(contentJSON)
+
+			// Add error check for empty results
+			if len(jpIter) == 0 {
+				resp.Error = function.NewFuncError("JSONPath expression did not match any elements")
+
+				return
+			}
 
 			for _, v := range jpIter {
 				jsonPretty, err := json.MarshalIndent(v, "", "  ")
@@ -131,7 +137,7 @@ func (f *functionContentDecode) Run(ctx context.Context, req function.RunRequest
 			return
 		}
 	} else {
-		dResult = types.DynamicValue(types.StringPointerValue(contentPtr))
+		dResult = types.DynamicValue(types.StringValue(contentDecoded))
 	}
 
 	resp.Error = function.ConcatFuncErrors(resp.Error, resp.Result.Set(ctx, dResult))

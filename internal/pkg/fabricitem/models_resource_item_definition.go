@@ -75,14 +75,19 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 
 	for defPartKey, defPartValue := range defParts {
 		if !update || (update && definitionUpdateEnabled.ValueBool()) {
-			payloadB64, _, diags := transforms.SourceFileToPayload(ctx, defPartValue.Source, defPartValue.Tokens)
+			tokens, diags := defPartValue.Tokens.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), tokens)
 			if diags.HasError() {
 				return diags
 			}
 
 			to.Parts = append(to.Parts, fabcore.ItemDefinitionPart{
 				Path:        &defPartKey,
-				Payload:     payloadB64,
+				Payload:     &payloadB64,
 				PayloadType: azto.Ptr(fabcore.PayloadTypeInlineBase64),
 			})
 		}
