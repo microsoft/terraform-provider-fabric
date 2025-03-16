@@ -25,35 +25,126 @@ For example, you can run the following command to enable logging at the debug le
 
 ```sh
 # sh
-TF_LOG=DEBUG TF_LOG_PATH=tf.log terraform apply -no-color
+TF_LOG=DEBUG TF_LOG_PATH=tf.log terraform apply
 ```
 
 ```powershell
 # PowerShell
 $env:TF_LOG="DEBUG"
 $env:TF_LOG_PATH="tf.log"
-terraform apply -no-color
+terraform apply
 ```
 
 For more information about Terraform logging, see [Debugging Terraform](https://developer.hashicorp.com/terraform/internals/debugging).
 
 ## Fabric API logging
 
-Low-level logging is possible which will handle API calls. This type of logging can be very useful for debugging issues related to API interactions. By setting the logging level to `TRACE`, you can capture detailed information about the API calls made by Terraform. This includes request and response details, which can help in diagnosing problems or understanding the behavior of the API.
+Low-level logging is possible which will handle API calls. This type of logging can be very useful for debugging issues related to API interactions. By setting the logging level to `TRACE`, you can capture detailed information about the API calls made by Terraform. This includes basic request and response details, which can help in diagnosing problems or understanding the behavior of the API.
 
 To enable low-level logging for API calls, you need to setup environment variables `TF_LOG` and `FABRIC_SDK_GO_LOGGING` with `TRACE` value.
 
 ```sh
 # sh
-TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE terraform apply -no-color
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE terraform apply
 ```
 
 ```powershell
 # PowerShell
 $env:TF_LOG="TRACE"
 $env:FABRIC_SDK_GO_LOGGING="TRACE"
-terraform apply -no-color
+terraform apply
 ```
+
+## Advanced Fabric API logging
+
+The provider supports additional logging options for deeper troubleshooting of API interactions:
+
+### Include Request and Response Bodies
+
+By default, request and response bodies are excluded from logs.
+
+~> Enabling this can lead to disclosure of sensitive information, use with care.
+
+For detailed debugging, you can include these bodies in your logs using the `FABRIC_SDK_GO_LOGGING_INCLUDE_BODY` environment variable:
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_INCLUDE_BODY=true terraform apply
+```
+
+```powershell
+# PowerShell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+$env:FABRIC_SDK_GO_LOGGING_INCLUDE_BODY="true"
+terraform apply
+```
+
+#### Expose HTTP Headers values
+
+By default, headers are redacted in logs.
+
+~> Enabling this can lead to disclosure of sensitive information, use with care.
+
+You can specify which headers to include in logs using the `FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS` environment variable:
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;x-ms-public-api-error-code" terraform apply
+```
+
+```powershell
+# PowerShell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;x-ms-public-api-error-code"
+terraform apply
+```
+
+Headers must be specified in a semicolon-separated list and must contain valid header names (alphanumeric characters and hyphens only).
+
+#### Expose URL Query Parameters values
+
+By default, URL query parameters are redacted in logs.
+
+~> Enabling this can lead to disclosure of sensitive information, use with care.
+
+You can specify which query parameters to include in logs using the `FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS` environment variable:
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type" terraform apply
+```
+
+```powershell
+# PowerShell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type"
+terraform apply
+```
+
+Query parameters must be specified in a semicolon-separated list and must contain valid parameter names (alphanumeric characters and hyphens only).
+
+#### Combining Advanced Logging Options
+
+For the most comprehensive troubleshooting of API calls, you can combine all logging options:
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_INCLUDE_BODY=true FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;content-type" FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type" terraform apply
+```
+
+```powershell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+$env:FABRIC_SDK_GO_LOGGING_INCLUDE_BODY="true"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;content-type"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type"
+terraform apply
+```
+
+~> Combining these options produces very verbose logs that include sensitive information. Use this configuration only in a secure environment and make sure to redact any sensitive data before sharing logs.
 
 ## FAQ
 
