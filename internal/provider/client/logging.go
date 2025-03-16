@@ -16,12 +16,13 @@ import (
 )
 
 const (
-	FabricSDKLoggerName                  = "fabric-sdk-go"
-	AzureSDKLoggingEnvVar                = "AZURE_SDK_GO_LOGGING"
-	AzureSDKLoggingAll                   = "all"
-	FabricSDKLoggingEnvVar               = "FABRIC_SDK_GO_LOGGING"
-	FabricSDKLoggingIncludeBodyEnvVar    = "FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"
-	FabricSDKLoggingAllowedHeadersEnvVar = "FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS"
+	FabricSDKLoggerName                      = "fabric-sdk-go"
+	AzureSDKLoggingEnvVar                    = "AZURE_SDK_GO_LOGGING"
+	AzureSDKLoggingAll                       = "all"
+	FabricSDKLoggingEnvVar                   = "FABRIC_SDK_GO_LOGGING"
+	FabricSDKLoggingIncludeBodyEnvVar        = "FABRIC_SDK_GO_LOGGING_INCLUDE_BODY"
+	FabricSDKLoggingAllowedHeadersEnvVar     = "FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS"
+	FabricSDKLoggingAllowedQueryParamsEnvVar = "FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS"
 )
 
 // NewFabricSDKLoggerSubsystem initializes the logger subsystem for the Fabric SDK.
@@ -98,6 +99,37 @@ func GetLoggingAllowedHeadersOption(ctx context.Context) ([]string, error) {
 	return nil, nil
 }
 
+func GetLoggingAllowedQueryParamsOption(ctx context.Context) ([]string, error) {
+	if allowedQueryParamsEnv, ok := os.LookupEnv(FabricSDKLoggingAllowedQueryParamsEnvVar); ok && allowedQueryParamsEnv != "" {
+		queryParams := strings.Split(allowedQueryParamsEnv, ";")
+		validQueryParams := make([]string, 0, len(queryParams))
+
+		// Simple validation to prevent injection: only accept standard query param format
+		queryParamRegex := regexp.MustCompile(`^[a-zA-Z0-9\-]+$`)
+
+		for _, queryParam := range queryParams {
+			qp := strings.ToLower(strings.TrimSpace(queryParam))
+			if qp != "" && queryParamRegex.MatchString(qp) {
+				validQueryParams = append(validQueryParams, qp)
+			} else if qp != "" {
+				tflog.Warn(ctx, "Skipping invalid query param format", map[string]any{
+					"query_param": queryParam,
+				})
+			}
+		}
+
+		if len(validQueryParams) > 0 {
+			tflog.Debug(ctx, "Using custom allowed query params", map[string]any{
+				"query_params": validQueryParams,
+			})
+
+			return validQueryParams, nil
+		}
+	}
+
+	return nil, nil
+}
+
 // ConfigureLoggingOptions configures the logging options for the Fabric SDK based on the environment variables.
 func ConfigureLoggingOptions(ctx context.Context, logLevel hclog.Level) (*policy.LogOptions, error) {
 	if logLevel == hclog.Off {
@@ -120,6 +152,15 @@ func ConfigureLoggingOptions(ctx context.Context, logLevel hclog.Level) (*policy
 
 	if len(allowedHeaders) > 0 {
 		logOptions.AllowedHeaders = allowedHeaders
+	}
+
+	allowedQueryParams, err := GetLoggingAllowedQueryParamsOption(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(allowedQueryParams) > 0 {
+		logOptions.AllowedQueryParams = allowedQueryParams
 	}
 
 	return logOptions, nil

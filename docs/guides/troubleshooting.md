@@ -103,13 +103,36 @@ terraform apply
 
 Headers must be specified in a semicolon-separated list and must contain valid header names (alphanumeric characters and hyphens only).
 
-#### Combining Body and Header Logging
+#### Expose URL Query Parameters values
 
-For the most comprehensive troubleshooting of API calls, you can combine both body and header logging options:
+By default, URL query parameters are redacted in logs.
+
+~> Enabling this can lead to disclosure of sensitive information, use with care.
+
+You can specify which query parameters to include in logs using the `FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS` environment variable:
 
 ```sh
 # sh
-TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_INCLUDE_BODY=true FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;content-type" terraform apply
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type" terraform apply
+```
+
+```powershell
+# PowerShell
+$env:TF_LOG="TRACE"
+$env:FABRIC_SDK_GO_LOGGING="TRACE"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type"
+terraform apply
+```
+
+Query parameters must be specified in a semicolon-separated list and must contain valid parameter names (alphanumeric characters and hyphens only).
+
+#### Combining Advanced Logging Options
+
+For the most comprehensive troubleshooting of API calls, you can combine all logging options:
+
+```sh
+# sh
+TF_LOG=TRACE FABRIC_SDK_GO_LOGGING=TRACE FABRIC_SDK_GO_LOGGING_INCLUDE_BODY=true FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;content-type" FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type" terraform apply
 ```
 
 ```powershell
@@ -117,6 +140,7 @@ $env:TF_LOG="TRACE"
 $env:FABRIC_SDK_GO_LOGGING="TRACE"
 $env:FABRIC_SDK_GO_LOGGING_INCLUDE_BODY="true"
 $env:FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS="requestid;x-ms-operation-id;content-type"
+$env:FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS="format;type"
 terraform apply
 ```
 
