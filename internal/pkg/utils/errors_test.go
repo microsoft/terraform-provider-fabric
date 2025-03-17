@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
@@ -236,4 +237,287 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 		assert.Equal(t, "unknown error", diags[0].Summary())
 		assert.Equal(t, "unexpected error", diags[0].Detail())
 	})
+}
+
+func TestUnit_HasError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	testErr := errors.New("test error")
+
+	tests := []struct {
+		name     string
+		diags    diag.Diagnostics
+		err      error
+		expected bool
+	}{
+		{
+			name:     "no errors in diagnostics",
+			diags:    diag.Diagnostics{},
+			err:      testErr,
+			expected: false,
+		},
+		{
+			name: "error matches",
+			diags: func() diag.Diagnostics {
+				var d diag.Diagnostics
+				d.AddError(testErr.Error(), testErr.Error())
+				return d
+			}(),
+			err:      testErr,
+			expected: true,
+		},
+		{
+			name: "error doesn't match",
+			diags: func() diag.Diagnostics {
+				var d diag.Diagnostics
+				d.AddError("different error", "different error")
+				return d
+			}(),
+			err:      testErr,
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := handler.HasError(tt.diags, tt.err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestUnit_IsNotFoundError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	testErr := errors.New("resource not found")
+
+	tests := []struct {
+		name       string
+		resourceID string
+		diags      *diag.Diagnostics
+		err        error
+		expected   bool
+		checkDiags bool
+	}{
+		{
+			name:       "no errors in diagnostics",
+			resourceID: "test-resource",
+			diags:      &diag.Diagnostics{},
+			err:        testErr,
+			expected:   false,
+			checkDiags: false,
+		},
+		{
+			name:       "nil error",
+			resourceID: "test-resource",
+			diags: func() *diag.Diagnostics {
+				var d diag.Diagnostics
+				d.AddError("some error", "some error")
+				return &d
+			}(),
+			err:        nil,
+			expected:   false,
+			checkDiags: false,
+		},
+		{
+			name:       "error matches",
+			resourceID: "test-resource",
+			diags: func() *diag.Diagnostics {
+				var d diag.Diagnostics
+				d.AddError(testErr.Error(), testErr.Error())
+				return &d
+			}(),
+			err:        testErr,
+			expected:   true,
+			checkDiags: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := handler.IsNotFoundError(tt.resourceID, tt.diags, tt.err)
+			assert.Equal(t, tt.expected, result)
+
+			if tt.checkDiags {
+				// Check if diagnostics was updated with warning
+				warnings := tt.diags.Warnings()
+				assert.Equal(t, 1, len(warnings))
+				assert.Contains(t, warnings[0].Summary(), "Resource not found")
+				assert.Contains(t, warnings[0].Detail(), tt.resourceID)
+			}
+		})
+	}
+}
+
+func TestUnit_GetDiagsFromError_OperationMessages(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+	testErr := errors.New("test error")
+
+	tests := []struct {
+		name           string
+		operation      utils.Operation
+		expectSummary  string
+		expectDetailIn string
+	}{
+		{
+			name:           "create operation",
+			operation:      utils.OperationCreate,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "read operation",
+			operation:      utils.OperationRead,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "update operation",
+			operation:      utils.OperationUpdate,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "delete operation",
+			operation:      utils.OperationDelete,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "list operation",
+			operation:      utils.OperationList,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "import operation",
+			operation:      utils.OperationImport,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
+			name:           "undefined operation",
+			operation:      utils.OperationUndefined,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := handler.GetDiagsFromError(ctx, testErr, tt.operation, nil)
+
+			assert.True(t, diags.HasError())
+			errors := diags.Errors()
+			assert.Equal(t, 1, len(errors))
+			assert.Equal(t, tt.expectSummary, errors[0].Summary())
+			assert.Contains(t, errors[0].Detail(), tt.expectDetailIn)
+		})
+	}
+}
+
+func createFabricError(statusCode int, errorCode, message, requestID string) *fabcore.ResponseError {
+	resp := httptest.NewRecorder().Result()
+	resp.StatusCode = statusCode
+
+	errCode := errorCode
+	errMsg := message
+	errReqID := requestID
+
+	return &fabcore.ResponseError{
+		RawResponse: resp,
+		StatusCode:  statusCode,
+		ErrorResponse: &fabcore.ErrorResponse{
+			ErrorCode: &errCode,
+			Message:   &errMsg,
+			RequestID: &errReqID,
+		},
+	}
+}
+
+func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+
+	fabricErr := createFabricError(400, "InvalidParameter", "The parameter is invalid", "req-123")
+
+	diags := handler.GetDiagsFromError(ctx, fabricErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	errors := diags.Errors()
+	assert.Equal(t, 1, len(errors))
+	assert.Contains(t, errors[0].Detail(), "InvalidParameter")
+	assert.Contains(t, errors[0].Detail(), "The parameter is invalid")
+	assert.Contains(t, errors[0].Detail(), "req-123")
+}
+
+func createAuthFailedError() *azidentity.AuthenticationFailedError {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{
+			"error": "invalid_client",
+			"error_description": "Client authentication failed",
+			"error_codes": [700016],
+			"timestamp": "2023-08-01T12:00:00Z",
+			"trace_id": "trace-123",
+			"correlation_id": "corr-456",
+			"error_uri": "https://login.microsoftonline.com/error"
+		}`))
+	}))
+
+	resp, _ := http.DefaultClient.Get(server.URL)
+	err := &azidentity.AuthenticationFailedError{
+		RawResponse: resp,
+	}
+
+	return err
+}
+
+func TestUnit_GetDiagsFromError_AuthFailedError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+	authErr := createAuthFailedError()
+
+	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	errors := diags.Errors()
+	assert.Equal(t, 1, len(errors))
+	assert.Equal(t, "invalid_client", errors[0].Summary())
+	assert.Contains(t, errors[0].Detail(), "Client authentication failed")
+	assert.Contains(t, errors[0].Detail(), "700016")
+}
+
+func TestUnit_GetDiagsFromError_AuthRequiredError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+
+	authErr := &azidentity.AuthenticationRequiredError{}
+
+	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	errors := diags.Errors()
+	assert.Equal(t, 1, len(errors))
+	assert.Equal(t, "authentication required", errors[0].Summary())
+}
+
+// Test backward compatibility functions
+func TestUnit_BackwardCompatibility(t *testing.T) {
+	ctx := t.Context()
+	testErr := errors.New("test error")
+
+	// Test IsErr
+	var diags diag.Diagnostics
+	diags.AddError(testErr.Error(), testErr.Error())
+	assert.True(t, utils.IsErr(diags, testErr))
+
+	// Test IsErrNotFound
+	diags = diag.Diagnostics{}
+	diags.AddError(testErr.Error(), testErr.Error())
+	assert.True(t, utils.IsErrNotFound("test-resource", &diags, testErr))
+
+	// Test GetDiagsFromError
+	result := utils.GetDiagsFromError(ctx, testErr, utils.OperationCreate, nil)
+	assert.True(t, result.HasError())
 }
