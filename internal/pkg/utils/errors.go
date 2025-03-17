@@ -25,7 +25,7 @@ import (
 // Operation represents the type of operation being performed by the provider.
 type Operation string
 
-// Supported operation types
+// Supported operation types.
 const (
 	OperationCreate    Operation = "create"
 	OperationRead      Operation = "read"
@@ -36,15 +36,15 @@ const (
 	OperationUndefined Operation = "undefined"
 )
 
-// DefaultErrorHandler implements the ErrorHandler interface with standard error handling logic
+// DefaultErrorHandler implements the ErrorHandler interface with standard error handling logic.
 type ErrorHandler struct{}
 
-// NewErrorHandler creates a new default error handler
+// NewErrorHandler creates a new default error handler.
 func NewErrorHandler() *ErrorHandler {
 	return &ErrorHandler{}
 }
 
-// HasError checks if diagnostics contains a specific error
+// HasError checks if diagnostics contains a specific error.
 func (h *ErrorHandler) HasError(diags diag.Diagnostics, err error) bool {
 	if !diags.HasError() {
 		return false
@@ -53,7 +53,7 @@ func (h *ErrorHandler) HasError(diags diag.Diagnostics, err error) bool {
 	return diags.Errors().Contains(diag.NewErrorDiagnostic(err.Error(), err.Error()))
 }
 
-// IsNotFoundError checks if an error represents a resource not found condition and updates diagnostics accordingly
+// IsNotFoundError checks if an error represents a resource not found condition and updates diagnostics accordingly.
 func (h *ErrorHandler) IsNotFoundError(resourceID string, diags *diag.Diagnostics, err error) bool {
 	if !diags.HasError() || err == nil {
 		return false
@@ -77,7 +77,7 @@ func (h *ErrorHandler) IsNotFoundError(resourceID string, diags *diag.Diagnostic
 	return false
 }
 
-// GetDiagsFromError converts an error to Terraform diagnostic messages
+// GetDiagsFromError converts an error to Terraform diagnostic messages.
 func (h *ErrorHandler) GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics {
 	if err == nil {
 		return nil
@@ -96,8 +96,8 @@ func (h *ErrorHandler) GetDiagsFromError(ctx context.Context, err error, operati
 	return diags
 }
 
-// getOperationErrorMessages returns appropriate error messages based on operation type
-func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, detail string) {
+// getOperationErrorMessages returns appropriate error messages based on operation type.
+func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, detail string) { //nolint:nonamedreturns
 	switch operation {
 	case OperationCreate:
 		return common.ErrorCreateHeader, common.ErrorCreateDetails
@@ -116,8 +116,8 @@ func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, 
 	}
 }
 
-// processError examines an error and returns appropriate diagnostic messages
-func (h *ErrorHandler) processError(ctx context.Context, err error, errIs error, defaultSummary, defaultDetail string) (summary, detail string) {
+// processError examines an error and returns appropriate diagnostic messages.
+func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defaultSummary, defaultDetail string) (summary, detail string) { //nolint:nonamedreturns
 	// Convert Azure Core error to Fabric error if needed
 	var errRespAzCore *azcore.ResponseError
 	if errors.As(err, &errRespAzCore) {
@@ -133,16 +133,16 @@ func (h *ErrorHandler) processError(ctx context.Context, err error, errIs error,
 	case errors.As(err, &errRespFabric):
 		return h.processFabricError(ctx, errRespFabric, errIs, defaultSummary, defaultDetail)
 	case errors.As(err, &errAuthFailed):
-		return h.processAuthFailedError(ctx, errAuthFailed, defaultSummary, defaultDetail)
+		return h.processAuthFailedError(ctx, errAuthFailed)
 	case errors.As(err, &errAuthRequired):
-		return h.processAuthRequiredError(ctx, errAuthRequired, defaultSummary, defaultDetail)
+		return h.processAuthRequiredError(ctx, errAuthRequired)
 	default:
-		return h.processGenericError(ctx, err, defaultSummary, defaultDetail)
+		return h.processGenericError(ctx, err)
 	}
 }
 
-// processFabricError handles Fabric-specific response errors
-func (h *ErrorHandler) processFabricError(ctx context.Context, errResp *fabcore.ResponseError, errIs error, defaultSummary, defaultDetail string) (string, string) {
+// processFabricError handles Fabric-specific response errors.
+func (h *ErrorHandler) processFabricError(ctx context.Context, errResp *fabcore.ResponseError, errIs error, defaultSummary, defaultDetail string) (string, string) { //revive:disable-line:confusing-results
 	tflog.Debug(ctx, "FABRIC ERROR", map[string]any{
 		"StatusCode": errResp.StatusCode,
 		"ErrorCode":  errResp.ErrorResponse.ErrorCode,
@@ -202,8 +202,8 @@ func (h *ErrorHandler) processFabricError(ctx context.Context, errResp *fabcore.
 	return summary, detail
 }
 
-// processAuthFailedError handles Azure authentication failure errors
-func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed *azidentity.AuthenticationFailedError, defaultSummary, defaultDetail string) (string, string) {
+// processAuthFailedError handles Azure authentication failure errors.
+func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed *azidentity.AuthenticationFailedError) (string, string) { //revive:disable-line:confusing-results
 	var errAuthResp authErrorResponse
 
 	err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
@@ -236,8 +236,8 @@ func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed
 	return summary, detail
 }
 
-// processAuthRequiredError handles Azure authentication required errors
-func (h *ErrorHandler) processAuthRequiredError(ctx context.Context, errAuthRequired *azidentity.AuthenticationRequiredError, defaultSummary, defaultDetail string) (string, string) {
+// processAuthRequiredError handles Azure authentication required errors.
+func (h *ErrorHandler) processAuthRequiredError(ctx context.Context, errAuthRequired *azidentity.AuthenticationRequiredError) (string, string) { //revive:disable-line:confusing-results
 	tflog.Debug(ctx, "AUTH REQUIRED ERROR", map[string]any{
 		"Error": errAuthRequired.Error(),
 	})
@@ -245,8 +245,8 @@ func (h *ErrorHandler) processAuthRequiredError(ctx context.Context, errAuthRequ
 	return "authentication required", errAuthRequired.Error()
 }
 
-// processGenericError handles unknown error types
-func (h *ErrorHandler) processGenericError(ctx context.Context, err error, defaultSummary, defaultDetail string) (string, string) {
+// processGenericError handles unknown error types.
+func (h *ErrorHandler) processGenericError(ctx context.Context, err error) (string, string) { //revive:disable-line:confusing-results
 	tflog.Debug(ctx, "UNKNOWN ERROR", map[string]any{
 		"Error": err.Error(),
 	})
@@ -254,7 +254,7 @@ func (h *ErrorHandler) processGenericError(ctx context.Context, err error, defau
 	return "unknown error", err.Error()
 }
 
-// authErrorResponse represents the structure of an Azure authentication error response
+// authErrorResponse represents the structure of an Azure authentication error response.
 type authErrorResponse struct {
 	Error            string `json:"error"`
 	ErrorDescription string `json:"error_description"` //nolint:tagliatelle
@@ -265,7 +265,7 @@ type authErrorResponse struct {
 	ErrorURI         string `json:"error_uri"`      //nolint:tagliatelle
 }
 
-// getErrFromResp parses an HTTP response body into an authErrorResponse
+// getErrFromResp parses an HTTP response body into an authErrorResponse.
 func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	if resp.Body == nil {
 		return nil
@@ -289,7 +289,7 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	return nil
 }
 
-// For backward compatibility
+// For backward compatibility.
 func IsErr(diags diag.Diagnostics, err error) bool {
 	return NewErrorHandler().HasError(diags, err)
 }

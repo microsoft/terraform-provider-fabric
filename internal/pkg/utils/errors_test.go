@@ -260,6 +260,7 @@ func TestUnit_HasError(t *testing.T) {
 			diags: func() diag.Diagnostics {
 				var d diag.Diagnostics
 				d.AddError(testErr.Error(), testErr.Error())
+
 				return d
 			}(),
 			err:      testErr,
@@ -270,6 +271,7 @@ func TestUnit_HasError(t *testing.T) {
 			diags: func() diag.Diagnostics {
 				var d diag.Diagnostics
 				d.AddError("different error", "different error")
+
 				return d
 			}(),
 			err:      testErr,
@@ -311,6 +313,7 @@ func TestUnit_IsNotFoundError(t *testing.T) {
 			diags: func() *diag.Diagnostics {
 				var d diag.Diagnostics
 				d.AddError("some error", "some error")
+
 				return &d
 			}(),
 			err:        nil,
@@ -323,6 +326,7 @@ func TestUnit_IsNotFoundError(t *testing.T) {
 			diags: func() *diag.Diagnostics {
 				var d diag.Diagnostics
 				d.AddError(testErr.Error(), testErr.Error())
+
 				return &d
 			}(),
 			err:        testErr,
@@ -339,7 +343,7 @@ func TestUnit_IsNotFoundError(t *testing.T) {
 			if tt.checkDiags {
 				// Check if diagnostics was updated with warning
 				warnings := tt.diags.Warnings()
-				assert.Equal(t, 1, len(warnings))
+				assert.Len(t, warnings, 1)
 				assert.Contains(t, warnings[0].Summary(), "Resource not found")
 				assert.Contains(t, warnings[0].Detail(), tt.resourceID)
 			}
@@ -408,14 +412,81 @@ func TestUnit_GetDiagsFromError_OperationMessages(t *testing.T) {
 
 			assert.True(t, diags.HasError())
 			errors := diags.Errors()
-			assert.Equal(t, 1, len(errors))
+			assert.Len(t, errors, 1)
 			assert.Equal(t, tt.expectSummary, errors[0].Summary())
 			assert.Contains(t, errors[0].Detail(), tt.expectDetailIn)
 		})
 	}
 }
 
-func createFabricError(statusCode int, errorCode, message, requestID string) *fabcore.ResponseError {
+func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+
+	fabricErr := createFabricError(t, 400, "InvalidParameter", "The parameter is invalid", "req-123")
+
+	diags := handler.GetDiagsFromError(ctx, fabricErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	diagErrs := diags.Errors()
+	assert.Len(t, diagErrs, 1)
+	assert.Contains(t, diagErrs[0].Detail(), "InvalidParameter")
+	assert.Contains(t, diagErrs[0].Detail(), "The parameter is invalid")
+	assert.Contains(t, diagErrs[0].Detail(), "req-123")
+}
+
+func TestUnit_GetDiagsFromError_AuthFailedError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+	authErr := createAuthFailedError(t)
+
+	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	diagErrs := diags.Errors()
+	assert.Len(t, diagErrs, 1)
+	assert.Equal(t, "invalid_client", diagErrs[0].Summary())
+	assert.Contains(t, diagErrs[0].Detail(), "Client authentication failed")
+	assert.Contains(t, diagErrs[0].Detail(), "700016")
+}
+
+func TestUnit_GetDiagsFromError_AuthRequiredError(t *testing.T) {
+	handler := utils.NewErrorHandler()
+	ctx := t.Context()
+
+	authErr := &azidentity.AuthenticationRequiredError{}
+
+	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
+
+	assert.True(t, diags.HasError())
+	diagErrs := diags.Errors()
+	assert.Len(t, diagErrs, 1)
+	assert.Equal(t, "authentication required", diagErrs[0].Summary())
+}
+
+// Test backward compatibility functions.
+func TestUnit_BackwardCompatibility(t *testing.T) {
+	ctx := t.Context()
+	testErr := errors.New("test error")
+
+	// Test IsErr
+	var diags diag.Diagnostics
+	diags.AddError(testErr.Error(), testErr.Error())
+	assert.True(t, utils.IsErr(diags, testErr))
+
+	// Test IsErrNotFound
+	diags = diag.Diagnostics{}
+	diags.AddError(testErr.Error(), testErr.Error())
+	assert.True(t, utils.IsErrNotFound("test-resource", &diags, testErr))
+
+	// Test GetDiagsFromError
+	result := utils.GetDiagsFromError(ctx, testErr, utils.OperationCreate, nil)
+	assert.True(t, result.HasError())
+}
+
+func createFabricError(t *testing.T, statusCode int, errorCode, message, requestID string) *fabcore.ResponseError {
+	t.Helper()
+
 	resp := httptest.NewRecorder().Result()
 	resp.StatusCode = statusCode
 
@@ -434,27 +505,14 @@ func createFabricError(statusCode int, errorCode, message, requestID string) *fa
 	}
 }
 
-func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
-	handler := utils.NewErrorHandler()
-	ctx := t.Context()
+func createAuthFailedError(t *testing.T) *azidentity.AuthenticationFailedError {
+	t.Helper()
 
-	fabricErr := createFabricError(400, "InvalidParameter", "The parameter is invalid", "req-123")
-
-	diags := handler.GetDiagsFromError(ctx, fabricErr, utils.OperationCreate, nil)
-
-	assert.True(t, diags.HasError())
-	errors := diags.Errors()
-	assert.Equal(t, 1, len(errors))
-	assert.Contains(t, errors[0].Detail(), "InvalidParameter")
-	assert.Contains(t, errors[0].Detail(), "The parameter is invalid")
-	assert.Contains(t, errors[0].Detail(), "req-123")
-}
-
-func createAuthFailedError() *azidentity.AuthenticationFailedError {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{
+
+		if _, err := w.Write([]byte(`{
 			"error": "invalid_client",
 			"error_description": "Client authentication failed",
 			"error_codes": [700016],
@@ -462,62 +520,16 @@ func createAuthFailedError() *azidentity.AuthenticationFailedError {
 			"trace_id": "trace-123",
 			"correlation_id": "corr-456",
 			"error_uri": "https://login.microsoftonline.com/error"
-		}`))
+		}`)); err != nil {
+			t.Fatalf("failed to write response: %v", err)
+		}
 	}))
 
-	resp, _ := http.DefaultClient.Get(server.URL)
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, server.URL, nil)
+	resp, _ := http.DefaultClient.Do(req) //nolint:bodyclose
 	err := &azidentity.AuthenticationFailedError{
 		RawResponse: resp,
 	}
 
 	return err
-}
-
-func TestUnit_GetDiagsFromError_AuthFailedError(t *testing.T) {
-	handler := utils.NewErrorHandler()
-	ctx := t.Context()
-	authErr := createAuthFailedError()
-
-	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
-
-	assert.True(t, diags.HasError())
-	errors := diags.Errors()
-	assert.Equal(t, 1, len(errors))
-	assert.Equal(t, "invalid_client", errors[0].Summary())
-	assert.Contains(t, errors[0].Detail(), "Client authentication failed")
-	assert.Contains(t, errors[0].Detail(), "700016")
-}
-
-func TestUnit_GetDiagsFromError_AuthRequiredError(t *testing.T) {
-	handler := utils.NewErrorHandler()
-	ctx := t.Context()
-
-	authErr := &azidentity.AuthenticationRequiredError{}
-
-	diags := handler.GetDiagsFromError(ctx, authErr, utils.OperationCreate, nil)
-
-	assert.True(t, diags.HasError())
-	errors := diags.Errors()
-	assert.Equal(t, 1, len(errors))
-	assert.Equal(t, "authentication required", errors[0].Summary())
-}
-
-// Test backward compatibility functions
-func TestUnit_BackwardCompatibility(t *testing.T) {
-	ctx := t.Context()
-	testErr := errors.New("test error")
-
-	// Test IsErr
-	var diags diag.Diagnostics
-	diags.AddError(testErr.Error(), testErr.Error())
-	assert.True(t, utils.IsErr(diags, testErr))
-
-	// Test IsErrNotFound
-	diags = diag.Diagnostics{}
-	diags.AddError(testErr.Error(), testErr.Error())
-	assert.True(t, utils.IsErrNotFound("test-resource", &diags, testErr))
-
-	// Test GetDiagsFromError
-	result := utils.GetDiagsFromError(ctx, testErr, utils.OperationCreate, nil)
-	assert.True(t, result.HasError())
 }
