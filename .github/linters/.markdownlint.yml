@@ -20,7 +20,7 @@ MD024: false
 # MD033/no-inline-html - Inline HTML
 MD033:
   # Allowed elements
-  allowed_elements: ["br", "a"]
+  allowed_elements: ["br", "a", "i"]
 
 # MD046/code-block-style - Code block style
 MD046:
