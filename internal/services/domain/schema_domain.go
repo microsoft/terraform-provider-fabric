@@ -28,14 +28,14 @@ func domainSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-p
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 	var markdownDescriptionD string
 
-	if !dsList {
+	if dsList {
+		markdownDescriptionD = "The " + ItemName + " data-source allows you to read a list of [" + ItemName + "](" + ItemDocsURL + ") details."
+	} else {
 		dsTimeout = &superschema.DatasourceTimeoutAttribute{
 			Read: true,
 		}
 
 		markdownDescriptionD = "The " + ItemName + " data-source allows you to read [" + ItemName + "](" + ItemDocsURL + ") details."
-	} else {
-		markdownDescriptionD = "The " + ItemName + " data-source allows you to read a list of [" + ItemName + "](" + ItemDocsURL + ") details."
 	}
 
 	markdownDescriptionD = fabricitem.GetDataSourceSPNSupportNote(markdownDescriptionD, ItemSPNSupport)
