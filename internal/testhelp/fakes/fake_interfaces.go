@@ -10,6 +10,11 @@ type identifier[TEntity any] interface {
 	GetID(entity TEntity) string
 }
 
+type identifierParentID[TEntity any] interface {
+	// GetID returns the ID of the entity.
+	GetIDWithParentID(parentID string, entity TEntity) string
+}
+
 type itemConverter[TEntity any] interface {
 	// ConvertItemToEntity converts an fabcore.Item into an specific entity.
 	ConvertItemToEntity(item fabcore.Item) TEntity
