@@ -3,16 +3,12 @@
 
 package connection
 
-import (
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
-)
-
 const (
-	ItemName           = "Connection"
-	ItemTFName         = "connection"
-	ItemsName          = "Connections"
-	ItemsTFName        = "connections"
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse"
-	ItemPreview        = true
+	ItemName       = "Connection"
+	ItemTFName     = "connection"
+	ItemsName      = "Connections"
+	ItemsTFName    = "connections"
+	ItemDocsURL    = "TODO"
+	ItemPreview    = true
+	ItemSPNSupport = true
 )

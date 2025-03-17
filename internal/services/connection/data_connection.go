@@ -7,10 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -49,17 +47,17 @@ func (d *dataSourceConnection) Metadata(_ context.Context, req datasource.Metada
 }
 
 func (d *dataSourceConnection) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	attributes := getDataSourceConnectionAttributes(ctx)
-	attributes["timeouts"] = timeouts.Attributes(ctx)
-
-	markdownDescription := "Get a Fabric " + d.Name + ".\n\n" +
-		"Use this data source to fetch a [" + d.Name + "](" + ItemDocsURL + ").\n\n" +
-		ItemDocsSPNSupport
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, d.IsPreview),
-		Attributes:          attributes,
-	}
+	resp.Schema = connectionSchema(ctx, false).GetDataSource(ctx)
+	// attributes := getDataSourceConnectionAttributes(ctx)
+	// attributes["timeouts"] = timeouts.Attributes(ctx)
+	// markdownDescription := "Get a Fabric " + d.Name + ".\n\n" +
+	//
+	//	"Use this data source to fetch a [" + d.Name + "](" + ItemDocsURL + ").\n\n"
+	//
+	//	resp.Schema = schema.Schema{
+	//		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, d.IsPreview),
+	//		Attributes:          attributes,
+	//	}
 }
 
 func (d *dataSourceConnection) ConfigValidators(_ context.Context) []datasource.ConfigValidator {

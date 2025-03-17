@@ -26,7 +26,7 @@ import (
 
 const (
 	CredentialTypeOnPremisesGateway fabcore.CredentialType = "OnPremisesGateway"
-	// CredentialTypeOnPremisesGatewayPersonal fabcore.CredentialType = "OnPremisesGatewayPersonal"
+	// CredentialTypeOnPremisesGatewayPersonal fabcore.CredentialType = "OnPremisesGatewayPersonal".
 )
 
 func getResourceConnectionAttributes(ctx context.Context) map[string]schema.Attribute {
@@ -569,6 +569,7 @@ func getResourceConnectionAttributes(ctx context.Context) map[string]schema.Attr
 						),
 					},
 				},
+
 				// "encrypted_credentials": schema.SingleNestedAttribute{
 				// 	MarkdownDescription: "The encrypted serialized .json of the list of name value pairs. Name is a credential name and value is a credential value. Encryption is performed using the Rivest-Shamir-Adleman (RSA) encryption algorithm with the on-premises gateway member's public key.",
 				// 	Optional:            true,

@@ -64,16 +64,16 @@ func getDataSourceConnectionAttributes(ctx context.Context) map[string]schema.At
 					MarkdownDescription: "The connection encryption type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleConnectionEncryptionValues(), true, true),
 					Computed:            true,
 				},
-				"credential_type": schema.StringAttribute{
-					MarkdownDescription: "The credential type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCredentialTypeValues(), true, true),
-					Computed:            true,
-				},
 				"single_sign_on_type": schema.StringAttribute{
 					MarkdownDescription: "The single sign-on type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleSingleSignOnTypeValues(), true, true),
 					Computed:            true,
 				},
 				"skip_test_connection": schema.BoolAttribute{
 					MarkdownDescription: "Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.",
+					Computed:            true,
+				},
+				"credential_type": schema.StringAttribute{
+					MarkdownDescription: "The credential type of the connection. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCredentialTypeValues(), true, true),
 					Computed:            true,
 				},
 			},

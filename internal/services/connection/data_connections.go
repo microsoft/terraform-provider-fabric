@@ -44,19 +44,17 @@ func (d *dataSourceConnections) Metadata(_ context.Context, req datasource.Metad
 }
 
 func (d *dataSourceConnections) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	markdownDescription := "List a Fabric " + d.Name + ".\n\n" +
-		"Use this data source to list [" + d.Name + "](" + ItemDocsURL + ") for more information.\n\n" +
-		ItemDocsSPNSupport
+	s := connectionSchema(ctx, true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, d.IsPreview),
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: fmt.Sprintf("The list of %s.", ItemsName),
 				Computed:            true,
 				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDataSourceConnectionModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: getDataSourceConnectionAttributes(ctx),
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),

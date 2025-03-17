@@ -142,32 +142,25 @@ type requestCreateConnection struct {
 
 func (to *requestCreateConnection) set(ctx context.Context, plan, config resourceConnectionModel) diag.Diagnostics {
 	// cType := (fabcore.ConnectivityType)(from.ConnectivityType.ValueString())
-
 	// var cp fabcore.CreateConnectionRequestClassification
-
 	// switch cType {
 	// 	case fabcore.ConnectivityTypeShareableCloud, fabcore.ConnectivityTypePersonalCloud:
 	// }
-
 	// to.DisplayName = from.DisplayName.ValueStringPointer()
 	// to.PrivacyLevel = (*fabcore.PrivacyLevel)(from.PrivacyLevel.ValueStringPointer())
 	// connectivityType := (fabcore.ConnectivityType)(from.ConnectivityType.ValueString())
-
 	// connectionDetails, diags := from.ConnectionDetails.Get(ctx)
 	// if diags.HasError() {
 	// 	return diags
 	// }
-
 	// connectionDetailsParameters, diags := connectionDetails.Parameters.Get(ctx)
 	// if diags.HasError() {
 	// 	return diags
 	// }
-
 	// credentialDetails, diags := from.CredentialDetails.Get(ctx)
 	// if diags.HasError() {
 	// 	return diags
 	// }
-
 	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
 
 	var requestCreateConnectionDetails requestCreateConnectionDetails
@@ -570,7 +563,6 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 		requestUpdateCredential = &fabcore.WorkspaceIdentityCredentials{
 			CredentialType: &credentialType,
 		}
-
 	}
 
 	to.Credentials = requestUpdateCredential

@@ -12,11 +12,9 @@ import (
 	"time"
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -53,17 +51,17 @@ func (r *resourceConnection) Metadata(_ context.Context, req resource.MetadataRe
 }
 
 func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	attributes := getResourceConnectionAttributes(ctx)
-	attributes["timeouts"] = timeouts.AttributesAll(ctx)
-
-	markdownDescription := "Manage a Fabric " + r.Name + ".\n\n" +
-		"See [" + r.Name + "](" + ItemDocsURL + ") for more information.\n\n" +
-		ItemDocsSPNSupport
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, r.IsPreview),
-		Attributes:          attributes,
-	}
+	resp.Schema = connectionSchema(ctx, false).GetResource(ctx)
+	// attributes := getResourceConnectionAttributes(ctx)
+	// attributes["timeouts"] = timeouts.AttributesAll(ctx)
+	// markdownDescription := "Manage a Fabric " + r.Name + ".\n\n" +
+	//
+	//	"See [" + r.Name + "](" + ItemDocsURL + ") for more information.\n\n"
+	//
+	//	resp.Schema = schema.Schema{
+	//		MarkdownDescription: fabricitem.GetResourcePreviewNote(markdownDescription, r.IsPreview),
+	//		Attributes:          attributes,
+	//	}
 }
 
 func (r *resourceConnection) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
