@@ -32,6 +32,8 @@ issues:
         - gochecknoglobals
         - nonamedreturns
         - forcetypeassert
+        - goconst
+        - gocognit
     - path: "internal/testhelp/fakes"
       linters:
         - dupl

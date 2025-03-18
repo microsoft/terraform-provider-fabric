@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -243,8 +246,10 @@ func TestAcc_NotebookDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.notebook-content.py.content"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("notebook-content.py").AtMapKey("content"), knownvalue.NotNull()),
+			},
 		},
 		// read by id with definition - ipynb
 		{
@@ -262,8 +267,10 @@ func TestAcc_NotebookDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.notebook-content.ipynb.content"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("notebook-content.ipynb").AtMapKey("content"), knownvalue.NotNull()),
+			},
 		},
 	}))
 }

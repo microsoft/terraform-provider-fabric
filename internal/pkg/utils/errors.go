@@ -22,8 +22,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 )
 
+// Operation represents the type of operation being performed by the provider.
 type Operation string
 
+// Supported operation types.
 const (
 	OperationCreate    Operation = "create"
 	OperationRead      Operation = "read"
@@ -34,19 +36,25 @@ const (
 	OperationUndefined Operation = "undefined"
 )
 
-func IsErr(diags diag.Diagnostics, err error) bool {
+// DefaultErrorHandler implements the ErrorHandler interface with standard error handling logic.
+type ErrorHandler struct{}
+
+// NewErrorHandler creates a new default error handler.
+func NewErrorHandler() *ErrorHandler {
+	return &ErrorHandler{}
+}
+
+// HasError checks if diagnostics contains a specific error.
+func (h *ErrorHandler) HasError(diags diag.Diagnostics, err error) bool {
 	if !diags.HasError() {
 		return false
 	}
 
-	if diags.Errors().Contains(diag.NewErrorDiagnostic(err.Error(), err.Error())) {
-		return true
-	}
-
-	return false
+	return diags.Errors().Contains(diag.NewErrorDiagnostic(err.Error(), err.Error()))
 }
 
-func IsErrNotFound(resourceID string, diags *diag.Diagnostics, err error) bool {
+// IsNotFoundError checks if an error represents a resource not found condition and updates diagnostics accordingly.
+func (h *ErrorHandler) IsNotFoundError(resourceID string, diags *diag.Diagnostics, err error) bool {
 	if !diags.HasError() || err == nil {
 		return false
 	}
@@ -69,157 +77,184 @@ func IsErrNotFound(resourceID string, diags *diag.Diagnostics, err error) bool {
 	return false
 }
 
-func GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics { //nolint:gocognit, gocognit
+// GetDiagsFromError converts an error to Terraform diagnostic messages.
+func (h *ErrorHandler) GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics {
 	if err == nil {
 		return nil
 	}
 
-	var diagErrSummary, diagErrDetail string
+	diagErrSummary, diagErrDetail := h.getOperationErrorMessages(operation)
 
-	switch operation {
-	case OperationCreate:
-		diagErrSummary = common.ErrorCreateHeader
-		diagErrDetail = common.ErrorCreateDetails
-	case OperationRead:
-		diagErrSummary = common.ErrorReadHeader
-		diagErrDetail = common.ErrorReadDetails
-	case OperationUpdate:
-		diagErrSummary = common.ErrorUpdateHeader
-		diagErrDetail = common.ErrorUpdateDetails
-	case OperationDelete:
-		diagErrSummary = common.ErrorDeleteHeader
-		diagErrDetail = common.ErrorDeleteDetails
-	case OperationList:
-		diagErrSummary = common.ErrorListHeader
-		diagErrDetail = common.ErrorListDetails
-	case OperationImport:
-		diagErrSummary = common.ErrorImportHeader
-		diagErrDetail = common.ErrorImportDetails
-	default:
-		diagErrSummary = ""
-		diagErrDetail = ""
-	}
-
-	var errRespAzCore *azcore.ResponseError
-	if errors.As(err, &errRespAzCore) {
-		err = fabcore.NewResponseError(errRespAzCore.RawResponse)
-	}
-
-	var errRespFabric *fabcore.ResponseError
-	var errAuthFailed *azidentity.AuthenticationFailedError
-	var errAuthRequired *azidentity.AuthenticationRequiredError
-
-	switch {
-	case errors.As(err, &errRespFabric):
-		tflog.Debug(ctx, "FABRIC ERROR", map[string]any{
-			"StatusCode": errRespFabric.StatusCode,
-			"ErrorCode":  errRespFabric.ErrorResponse.ErrorCode,
-			"Message":    errRespFabric.ErrorResponse.Message,
-			"RequestID":  errRespFabric.ErrorResponse.RequestID,
-		})
-
-		if (errIs != nil && errors.Is(err, errIs)) || (errIs != nil && errRespFabric.RawResponse.StatusCode == http.StatusNotFound) {
-			diagErrSummary = errIs.Error()
-			diagErrDetail = errIs.Error()
-
-			break
-		}
-
-		var errCodes []string
-		var errMessages []string
-
-		if errRespFabric.ErrorResponse.ErrorCode != nil {
-			errCodes = append(errCodes, *errRespFabric.ErrorResponse.ErrorCode)
-		}
-
-		if errRespFabric.ErrorResponse.Message != nil {
-			errMessages = append(errMessages, *errRespFabric.ErrorResponse.Message)
-		}
-
-		errRequestID := ""
-		if errRespFabric.ErrorResponse.RequestID != nil {
-			errRequestID = *errRespFabric.ErrorResponse.RequestID
-		}
-
-		if len(errRespFabric.ErrorResponse.MoreDetails) > 0 {
-			for _, errMoreDetail := range errRespFabric.ErrorResponse.MoreDetails {
-				if errMoreDetail.ErrorCode != nil {
-					errCodes = append(errCodes, *errMoreDetail.ErrorCode)
-				}
-
-				if errMoreDetail.Message != nil {
-					errMessages = append(errMessages, *errMoreDetail.Message)
-				}
-			}
-		}
-
-		errCode := strings.Join(errCodes, " / ")
-		errMessage := strings.Join(errMessages, " / ")
-
-		if diagErrSummary == "" {
-			diagErrSummary = errCode
-		}
-
-		if diagErrDetail == "" {
-			diagErrDetail = fmt.Sprintf("%s\n\nError Code: %s\nRequest ID: %s", errMessage, errCode, errRequestID)
-		} else {
-			diagErrDetail = fmt.Sprintf("%s: %s\n\nError Code: %s\nRequest ID: %s", diagErrDetail, errMessage, errCode, errRequestID)
-		}
-	case errors.As(err, &errAuthFailed):
-		var errAuthResp authErrorResponse
-
-		err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
-		if err != nil {
-			diagErrSummary = "Failed to parse authentication error response"
-			diagErrDetail = err.Error()
-		} else {
-			tflog.Debug(ctx, "AUTH FAILED ERROR", map[string]any{
-				"CorrelationID":    errAuthResp.CorrelationID,
-				"Error":            errAuthResp.Error,
-				"ErrorDescription": errAuthResp.ErrorDescription,
-				"ErrorURI":         errAuthResp.ErrorURI,
-				"ErrorCodes":       errAuthResp.ErrorCodes,
-				"Timestamp":        errAuthResp.Timestamp,
-				"TraceID":          errAuthResp.TraceID,
-			})
-
-			diagErrSummary = errAuthResp.Error
-
-			errCodes := make([]string, len(errAuthResp.ErrorCodes))
-			for i, code := range errAuthResp.ErrorCodes {
-				errCodes[i] = strconv.Itoa(code)
-			}
-
-			diagErrDetail = fmt.Sprintf("%s\n\nErrorCode: %s\nErrorURI: %s", errAuthResp.ErrorDescription, strings.Join(errCodes, " / "), errAuthResp.ErrorURI)
-		}
-	case errors.As(err, &errAuthRequired):
-		tflog.Debug(ctx, "AUTH REQUIRED ERROR", map[string]any{
-			"Error": err.Error(),
-		})
-
-		diagErrSummary = "authentication required"
-		diagErrDetail = err.Error()
-	default:
-		tflog.Debug(ctx, "UNKNOWN ERROR", map[string]any{
-			"Error": err.Error(),
-		})
-
-		diagErrSummary = "unknown error"
-		diagErrDetail = err.Error()
-	}
+	// Check for known error types and extract appropriate details
+	diagErrSummary, diagErrDetail = h.processError(ctx, err, errIs, diagErrSummary, diagErrDetail)
 
 	var diags diag.Diagnostics
-
-	diags.AddError(
-		diagErrSummary,
-		diagErrDetail,
-	)
+	diags.AddError(diagErrSummary, diagErrDetail)
 
 	tflog.Debug(ctx, err.Error())
 
 	return diags
 }
 
+// getOperationErrorMessages returns appropriate error messages based on operation type.
+func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, detail string) { //nolint:nonamedreturns
+	switch operation {
+	case OperationCreate:
+		return common.ErrorCreateHeader, common.ErrorCreateDetails
+	case OperationRead:
+		return common.ErrorReadHeader, common.ErrorReadDetails
+	case OperationUpdate:
+		return common.ErrorUpdateHeader, common.ErrorUpdateDetails
+	case OperationDelete:
+		return common.ErrorDeleteHeader, common.ErrorDeleteDetails
+	case OperationList:
+		return common.ErrorListHeader, common.ErrorListDetails
+	case OperationImport:
+		return common.ErrorImportHeader, common.ErrorImportDetails
+	default:
+		return "", ""
+	}
+}
+
+// processError examines an error and returns appropriate diagnostic messages.
+func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defaultSummary, defaultDetail string) (summary, detail string) { //nolint:nonamedreturns
+	// Convert Azure Core error to Fabric error if needed
+	var errRespAzCore *azcore.ResponseError
+	if errors.As(err, &errRespAzCore) {
+		err = fabcore.NewResponseError(errRespAzCore.RawResponse)
+	}
+
+	// Handle different error types
+	var errRespFabric *fabcore.ResponseError
+	var errAuthFailed *azidentity.AuthenticationFailedError
+	var errAuthRequired *azidentity.AuthenticationRequiredError
+
+	switch {
+	case errors.As(err, &errRespFabric):
+		return h.processFabricError(ctx, errRespFabric, errIs, defaultSummary, defaultDetail)
+	case errors.As(err, &errAuthFailed):
+		return h.processAuthFailedError(ctx, errAuthFailed)
+	case errors.As(err, &errAuthRequired):
+		return h.processAuthRequiredError(ctx, errAuthRequired)
+	default:
+		return h.processGenericError(ctx, err)
+	}
+}
+
+// processFabricError handles Fabric-specific response errors.
+func (h *ErrorHandler) processFabricError(ctx context.Context, errResp *fabcore.ResponseError, errIs error, defaultSummary, defaultDetail string) (string, string) { //revive:disable-line:confusing-results
+	tflog.Debug(ctx, "FABRIC ERROR", map[string]any{
+		"StatusCode": errResp.StatusCode,
+		"ErrorCode":  errResp.ErrorResponse.ErrorCode,
+		"Message":    errResp.ErrorResponse.Message,
+		"RequestID":  errResp.ErrorResponse.RequestID,
+	})
+
+	// Handle special case for error identity check or not found errors
+	if (errIs != nil && errors.Is(errResp, errIs)) || (errIs != nil && errResp.RawResponse.StatusCode == http.StatusNotFound) {
+		return errIs.Error(), errIs.Error()
+	}
+
+	var errCodes []string
+	var errMessages []string
+
+	if errResp.ErrorResponse.ErrorCode != nil {
+		errCodes = append(errCodes, *errResp.ErrorResponse.ErrorCode)
+	}
+
+	if errResp.ErrorResponse.Message != nil {
+		errMessages = append(errMessages, *errResp.ErrorResponse.Message)
+	}
+
+	errRequestID := ""
+	if errResp.ErrorResponse.RequestID != nil {
+		errRequestID = *errResp.ErrorResponse.RequestID
+	}
+
+	// Collect additional error details
+	if len(errResp.ErrorResponse.MoreDetails) > 0 {
+		for _, errMoreDetail := range errResp.ErrorResponse.MoreDetails {
+			if errMoreDetail.ErrorCode != nil {
+				errCodes = append(errCodes, *errMoreDetail.ErrorCode)
+			}
+
+			if errMoreDetail.Message != nil {
+				errMessages = append(errMessages, *errMoreDetail.Message)
+			}
+		}
+	}
+
+	errCode := strings.Join(errCodes, " / ")
+	errMessage := strings.Join(errMessages, " / ")
+
+	summary := defaultSummary
+	if summary == "" {
+		summary = errCode
+	}
+
+	detail := defaultDetail
+	if detail == "" {
+		detail = fmt.Sprintf("%s\n\nError Code: %s\nRequest ID: %s", errMessage, errCode, errRequestID)
+	} else {
+		detail = fmt.Sprintf("%s: %s\n\nError Code: %s\nRequest ID: %s", detail, errMessage, errCode, errRequestID)
+	}
+
+	return summary, detail
+}
+
+// processAuthFailedError handles Azure authentication failure errors.
+func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed *azidentity.AuthenticationFailedError) (string, string) { //revive:disable-line:confusing-results
+	var errAuthResp authErrorResponse
+
+	err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
+	if err != nil {
+		return "Failed to parse authentication error response", err.Error()
+	}
+
+	tflog.Debug(ctx, "AUTH FAILED ERROR", map[string]any{
+		"CorrelationID":    errAuthResp.CorrelationID,
+		"Error":            errAuthResp.Error,
+		"ErrorDescription": errAuthResp.ErrorDescription,
+		"ErrorURI":         errAuthResp.ErrorURI,
+		"ErrorCodes":       errAuthResp.ErrorCodes,
+		"Timestamp":        errAuthResp.Timestamp,
+		"TraceID":          errAuthResp.TraceID,
+	})
+
+	summary := errAuthResp.Error
+
+	errCodes := make([]string, len(errAuthResp.ErrorCodes))
+	for i, code := range errAuthResp.ErrorCodes {
+		errCodes[i] = strconv.Itoa(code)
+	}
+
+	detail := fmt.Sprintf("%s\n\nErrorCode: %s\nErrorURI: %s",
+		errAuthResp.ErrorDescription,
+		strings.Join(errCodes, " / "),
+		errAuthResp.ErrorURI)
+
+	return summary, detail
+}
+
+// processAuthRequiredError handles Azure authentication required errors.
+func (h *ErrorHandler) processAuthRequiredError(ctx context.Context, errAuthRequired *azidentity.AuthenticationRequiredError) (string, string) { //revive:disable-line:confusing-results
+	tflog.Debug(ctx, "AUTH REQUIRED ERROR", map[string]any{
+		"Error": errAuthRequired.Error(),
+	})
+
+	return "authentication required", errAuthRequired.Error()
+}
+
+// processGenericError handles unknown error types.
+func (h *ErrorHandler) processGenericError(ctx context.Context, err error) (string, string) { //revive:disable-line:confusing-results
+	tflog.Debug(ctx, "UNKNOWN ERROR", map[string]any{
+		"Error": err.Error(),
+	})
+
+	return "unknown error", err.Error()
+}
+
+// authErrorResponse represents the structure of an Azure authentication error response.
 type authErrorResponse struct {
 	Error            string `json:"error"`
 	ErrorDescription string `json:"error_description"` //nolint:tagliatelle
@@ -230,10 +265,9 @@ type authErrorResponse struct {
 	ErrorURI         string `json:"error_uri"`      //nolint:tagliatelle
 }
 
+// getErrFromResp parses an HTTP response body into an authErrorResponse.
 func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	if resp.Body == nil {
-		// this shouldn't happen in real-world scenarios as a
-		// response with no body should set it to http.NoBody
 		return nil
 	}
 
@@ -253,4 +287,17 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	}
 
 	return nil
+}
+
+// For backward compatibility.
+func IsErr(diags diag.Diagnostics, err error) bool {
+	return NewErrorHandler().HasError(diags, err)
+}
+
+func IsErrNotFound(resourceID string, diags *diag.Diagnostics, err error) bool {
+	return NewErrorHandler().IsNotFoundError(resourceID, diags, err)
+}
+
+func GetDiagsFromError(ctx context.Context, err error, operation Operation, errIs error) diag.Diagnostics {
+	return NewErrorHandler().GetDiagsFromError(ctx, err, operation, errIs)
 }

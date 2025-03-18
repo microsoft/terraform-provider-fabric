@@ -72,10 +72,19 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 		}
 	}
 
-	_, sha256Value, diags := transforms.SourceFileToPayload(ctx, sourceFile, tokens)
+	var tokensData map[string]string
+
+	if !tokens.IsNull() && !tokens.IsUnknown() {
+		tokensData, diags = tokens.Get(ctx)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	_, sha256Value, diags := transforms.SourceFileToPayload(sourceFile.ValueString(), tokensData)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.PlanValue = types.StringPointerValue(sha256Value)
+	resp.PlanValue = types.StringValue(sha256Value)
 }
