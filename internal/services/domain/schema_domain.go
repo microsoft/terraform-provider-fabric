@@ -115,20 +115,21 @@ func domainSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-p
 			},
 			"contributors_scope": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemName + " contributors scope.",
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleContributorsScopeTypeValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
-					Optional: true,
-					Computed: true,
+					MarkdownDescription: "The " + ItemName + " contributors scope (Contributors scope can only be set at the root domain level!)",
+					Optional:            true,
+					Computed:            true,
 					Validators: []validator.String{
 						stringvalidator.ConflictsWith(path.MatchRoot("parent_domain_id")),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					MarkdownDescription: "The " + ItemName + " contributors scope.",
+					Computed:            true,
 				},
 			},
 			"timeouts": superschema.TimeoutAttribute{

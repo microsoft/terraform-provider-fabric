@@ -39,7 +39,7 @@ resource "fabric_domain" "child" {
 
 ### Optional
 
-- `contributors_scope` (String) The Domain contributors scope. Value must be one of : `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`. Ensure that if an attribute is set, these are not set: "[parent_domain_id]".
+- `contributors_scope` (String) The Domain contributors scope. (Contributors scope can only be set at the root domain level!). Value must be one of : `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`. Ensure that if an attribute is set, these are not set: "[parent_domain_id]".
 - `description` (String) The Domain description. Value defaults to ``. String length must be at most 256.
 - `parent_domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain parent ID. Ensure that if an attribute is set, these are not set: "[contributors_scope]".
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
