@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
@@ -43,9 +46,12 @@ func TestUnit_CapacitiesDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
-			),
+			// Check: resource.ComposeAggregateTestCheckFunc(
+			// 	resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.1.id", entity.ID),
+			// ),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemsFQN, tfjsonpath.New("values").AtSliceIndex(1).AtMapKey("id"), knownvalue.StringExact(*entity.ID)),
+			},
 		},
 	}))
 }

@@ -75,11 +75,11 @@
   ],
   "go.diagnostic.vulncheck": "Imports",
   "go.testTimeout": "5m",
-  "go.lintTool": "golangci-lint",
-  "go.lintFlags": [
-    "--fast",
-    "--fix"
-  ],
+  // "go.lintTool": "golangci-lint",
+  // "go.lintFlags": [
+  //   "--fast",
+  //   "--fix"
+  // ],
   // lint
   "linter.linters": {
     "yamllint": {
