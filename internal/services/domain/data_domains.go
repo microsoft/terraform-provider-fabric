@@ -16,7 +16,6 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
@@ -51,40 +50,17 @@ func (d *dataSourceDomains) Metadata(_ context.Context, req datasource.MetadataR
 }
 
 func (d *dataSourceDomains) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	s := domainSchema(true).GetDataSource(ctx)
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + d.Name + ".\n\n" +
-			"Use this data source to list [" + d.Name + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
 			"values": schema.ListNestedAttribute{
 				MarkdownDescription: "The list of " + d.Name + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDomainModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " ID.",
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"display_name": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " display name.",
-							Computed:            true,
-						},
-						"description": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " description.",
-							Computed:            true,
-						},
-						"parent_domain_id": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " parent ID.",
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"contributors_scope": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " contributors scope. Possible values: " + utils.ConvertStringSlicesToString(fabadmin.PossibleContributorsScopeTypeValues(), true, true) + ".",
-							Computed:            true,
-						},
-					},
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),

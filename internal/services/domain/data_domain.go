@@ -7,15 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
@@ -24,24 +21,18 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceDomain)(nil)
 
 type dataSourceDomain struct {
-	pConfigData         *pconfig.ProviderData
-	client              *fabadmin.DomainsClient
-	Name                string
-	TFName              string
-	MarkdownDescription string
-	IsPreview           bool
+	pConfigData *pconfig.ProviderData
+	client      *fabadmin.DomainsClient
+	Name        string
+	TFName      string
+	IsPreview   bool
 }
 
 func NewDataSourceDomain() datasource.DataSource {
-	markdownDescription := "Get a Fabric " + ItemName + ".\n\n" +
-		"Use this data source to get [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-		ItemDocsSPNSupport
-
 	return &dataSourceDomain{
-		Name:                ItemName,
-		TFName:              ItemTFName,
-		MarkdownDescription: fabricitem.GetDataSourcePreviewNote(markdownDescription, ItemPreview),
-		IsPreview:           ItemPreview,
+		Name:      ItemName,
+		TFName:    ItemTFName,
+		IsPreview: ItemPreview,
 	}
 }
 
@@ -50,34 +41,7 @@ func (d *dataSourceDomain) Metadata(_ context.Context, req datasource.MetadataRe
 }
 
 func (d *dataSourceDomain) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + d.Name + " ID.",
-				Required:            true,
-				CustomType:          customtypes.UUIDType{},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The " + d.Name + " display name.",
-				Computed:            true,
-			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The " + d.Name + " description.",
-				Computed:            true,
-			},
-			"parent_domain_id": schema.StringAttribute{
-				MarkdownDescription: "The " + d.Name + " parent ID.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-			},
-			"contributors_scope": schema.StringAttribute{
-				MarkdownDescription: "The " + d.Name + " contributors scope. Possible values: " + utils.ConvertStringSlicesToString(fabadmin.PossibleContributorsScopeTypeValues(), true, true) + ".",
-				Computed:            true,
-			},
-			"timeouts": timeouts.Attributes(ctx),
-		},
-	}
+	resp.Schema = domainSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceDomain) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

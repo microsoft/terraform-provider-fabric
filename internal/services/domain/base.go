@@ -19,4 +19,5 @@ const (
 	DomainRoleAssignmentsName        = "Domain Role Assignments"
 	DomainRoleAssignmentsTFName      = "domain_role_assignments"
 	ItemPreview                      = true
+	ItemSPNSupport                   = true
 )
