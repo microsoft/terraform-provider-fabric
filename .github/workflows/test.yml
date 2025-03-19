@@ -476,7 +476,13 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - name: 📥 Download
+      - name: 📥 Download test results
+        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
+        with:
+          pattern: terraform-1_11-test-results
+          merge-multiple: true
+
+      - name: 📥 Download test coverage results
         uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
         with:
           pattern: terraform-1_11-test-coverage*
@@ -485,7 +491,13 @@ jobs:
       - name: 📝 Publish
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
-      - name: 📤 Upload results to Codecov
+      - name: 📤 Upload test results to Codecov
+        uses: codecov/test-results-action@f2dba722c67b86c6caa034178c6e4d35335f6706 # v1.1.0
+        with:
+          use_oidc: true
+          files: ./testresults.xml
+
+      - name: 📤 Upload coverage to Codecov
         uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
         with:
           use_oidc: true
