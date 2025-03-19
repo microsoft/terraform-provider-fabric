@@ -122,7 +122,7 @@ func (d *dataSourceSparkWorkspaceSettings) Schema(ctx context.Context, _ datasou
 						CustomType:          supertypes.NewSingleNestedObjectTypeOf[defaultPoolPropertiesModel](ctx),
 						Attributes: map[string]schema.Attribute{
 							"id": schema.StringAttribute{
-								MarkdownDescription: "The Pool ID.",
+								MarkdownDescription: "The Pool ID. `00000000-0000-0000-0000-000000000000` means using the starter pool.",
 								Computed:            true,
 								CustomType:          customtypes.UUIDType{},
 							},

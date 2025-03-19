@@ -156,12 +156,9 @@ Optional:
 
 Optional:
 
-- `name` (String) The Pool name. It should be a valid custom pool name. `Starter Pool` means use starter pool.
+- `id` (String) The Pool ID. `00000000-0000-0000-0000-000000000000` means use the starter pool.
+- `name` (String) The Pool name. It should be a valid custom pool name. `Starter Pool` means use the starter pool.
 - `type` (String) The Pool type. Accepted values: `Capacity`, `Workspace`.
-
-Read-Only:
-
-- `id` (String) The Pool ID.
 
 <a id="nestedatt--pool--starter_pool"></a>
 
