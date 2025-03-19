@@ -64,7 +64,7 @@ resource "fabric_eventstream" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Eventstream definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventstream-definition). Accepted path keys: **Default** format: `eventstream.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Eventstream definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventstream-definition). Accepted path keys: **Default** format: `eventstream.json`, `eventstreamProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventstream description.
 - `format` (String) The Eventstream format. Possible values: `Default`
