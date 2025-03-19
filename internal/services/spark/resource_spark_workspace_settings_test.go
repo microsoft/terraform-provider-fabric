@@ -91,8 +91,10 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 						"automatic_log": map[string]any{
 							"enabled": true,
 						},
-						"default_pool": map[string]any{
-							"id": "00000000-0000-0000-0000-000000000000",
+						"pool": map[string]any{
+							"default_pool": map[string]any{
+								"id": "00000000-0000-0000-0000-000000000000",
+							},
 						},
 					},
 				)),
@@ -114,8 +116,11 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 						"automatic_log": map[string]any{
 							"enabled": true,
 						},
-						"default_pool": map[string]any{
-							"name": "Starter Pool",
+						"pool": map[string]any{
+							"default_pool": map[string]any{
+								"name": "Starter Pool",
+								"type": "Workspace",
+							},
 						},
 					},
 				)),
