@@ -3,12 +3,18 @@
 ---
 blank_issues_enabled: false
 contact_links:
-  - name: Security Bug Report
+  - name: ❓ Question
+    url: https://github.com/microsoft/terraform-provider-fabric/discussions/categories/q-a
+    about: Please ask and answer questions here.
+  - name: 💬 Community Support and Discussions
+    url: https://aka.ms/FabricTF/discussions
+    about: Connect with Terraform for Microsoft Fabric community members, ask questions, and learn more about Terraform for Microsoft Fabric.
+  - name: 🚨 Security Bug Report
     url: https://aka.ms/opensource/security/create-report
     about: Please report security vulnerabilities here. DO NOT post via Issues.
-  - name: Microsoft Fabric Community
+  - name: ✨ Microsoft Fabric Community
     url: https://aka.ms/FabricCommunity
-    about: Connect with community members, ask questions, and learn more about Fabric.
-  - name: Microsoft Fabric Ideas
+    about: Connect with Fabric community members, ask questions, and learn more about Fabric.
+  - name: 💡 Microsoft Fabric Ideas
     url: https://aka.ms/FabricIdeas
     about: Share ideas and feature requests for Fabric.
