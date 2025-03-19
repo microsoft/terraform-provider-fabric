@@ -5,6 +5,7 @@ name: 🐛 Bug Report
 description: If something isn't working 🔧
 title: "[BUG] "
 labels: ["bug"]
+type: Bug
 projects: ["microsoft/1018"]
 body:
   - type: markdown

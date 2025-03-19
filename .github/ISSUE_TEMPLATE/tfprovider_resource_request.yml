@@ -2,9 +2,10 @@
 # https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
 ---
 name: 🔼 Provider Resource Request
-description: Request a new resource to be added to the Terraform Provider 📢
+description: Request a new resource to be added to the Terraform Provider
 title: "[RS] "
 labels: ["tf/resource"]
+type: Feature
 projects: ["microsoft/1018"]
 body:
   - type: textarea

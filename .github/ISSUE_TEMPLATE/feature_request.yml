@@ -2,9 +2,10 @@
 # https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
 ---
 name: 🚀 Feature Request
-description: Suggest an idea for this project 📢
+description: Suggest a feature idea for this project
 title: "[FEAT] "
 labels: [feature]
+type: Feature
 projects: ["microsoft/1018"]
 body:
   - type: markdown
