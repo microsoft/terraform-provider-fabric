@@ -14,6 +14,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 )
 
@@ -26,9 +27,9 @@ type resourceFabricItemDefinitionModel struct {
 }
 
 type resourceFabricItemDefinitionPartModel struct {
-	Source              types.String                  `tfsdk:"source"`
-	Tokens              supertypes.MapValueOf[string] `tfsdk:"tokens"`
-	SourceContentSha256 types.String                  `tfsdk:"source_content_sha256"`
+	Source              types.String            `tfsdk:"source"`
+	Tokens              customtypes.MapOfString `tfsdk:"tokens"`
+	SourceContentSha256 types.String            `tfsdk:"source_content_sha256"`
 }
 
 type fabricItemDefinition struct {
@@ -80,7 +81,15 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 				return diags
 			}
 
-			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), tokens)
+			tokensValue := make(map[string]string)
+
+			for k, v := range tokens {
+				if !v.IsNull() && !v.IsUnknown() {
+					tokensValue[k] = v.ValueString()
+				}
+			}
+
+			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), tokensValue)
 			if diags.HasError() {
 				return diags
 			}
