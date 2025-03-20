@@ -220,7 +220,6 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				//nolint
 				return element.(TEntity)
 			}
 		}
@@ -273,7 +272,9 @@ func (h *typedHandler[TEntity]) Contains(id string) bool {
 func (h *typedHandler[TEntity]) getPointer(id string) *TEntity {
 	for _, element := range h.elements {
 		if typedElement, ok := element.(TEntity); ok {
-			if h.identifier.GetID(typedElement) == id {
+			typedElementID := h.identifier.GetID(typedElement)
+			if id == typedElementID ||
+				(!strings.Contains(typedElementID, "/") && strings.HasSuffix(id, typedElementID)) {
 				return &typedElement
 			}
 		}

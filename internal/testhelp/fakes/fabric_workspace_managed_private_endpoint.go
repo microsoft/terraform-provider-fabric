@@ -18,13 +18,11 @@ type operationsWorkspaceManagedPrivateEndpoint struct{}
 
 // GetID implements concreteOperations.
 func (o *operationsWorkspaceManagedPrivateEndpoint) GetID(entity fabcore.ManagedPrivateEndpoint) string {
-	// TODO ?
 	return *entity.ID
 }
 
 func (o *operationsWorkspaceManagedPrivateEndpoint) GetIDWithParentID(parentId string, entity fabcore.ManagedPrivateEndpoint) string {
-	// TODO ?
-	return generateID(parentId, *entity.ID)
+	return *entity.ID
 }
 
 func (o *operationsWorkspaceManagedPrivateEndpoint) Create(data fabcore.CreateManagedPrivateEndpointRequest) fabcore.ManagedPrivateEndpoint {
@@ -49,8 +47,6 @@ func (o *operationsWorkspaceManagedPrivateEndpoint) CreateWithParentID(_ string,
 // Filter implements concreteOperations.
 func (o *operationsWorkspaceManagedPrivateEndpoint) Filter(entities []fabcore.ManagedPrivateEndpoint, _ string) []fabcore.ManagedPrivateEndpoint {
 	ret := make([]fabcore.ManagedPrivateEndpoint, 0)
-
-	// TODO
 
 	ret = append(ret, entities...)
 
