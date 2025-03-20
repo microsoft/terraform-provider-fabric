@@ -306,11 +306,19 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 				return diags
 			}
 
+			var reqDefaultPool fabspark.InstancePool
+
+			if !defaultPool.ID.IsNull() && !defaultPool.ID.IsUnknown() {
+				reqDefaultPool.ID = defaultPool.ID.ValueStringPointer()
+			}
+
 			if !defaultPool.Name.IsNull() && !defaultPool.Name.IsUnknown() {
-				reqPool.DefaultPool = &fabspark.InstancePool{
-					Name: defaultPool.Name.ValueStringPointer(),
-					Type: (*fabspark.CustomPoolType)(defaultPool.Type.ValueStringPointer()),
-				}
+				reqDefaultPool.Name = defaultPool.Name.ValueStringPointer()
+				reqDefaultPool.Type = (*fabspark.CustomPoolType)(defaultPool.Type.ValueStringPointer())
+			}
+
+			if reqDefaultPool != (fabspark.InstancePool{}) {
+				reqPool.DefaultPool = &reqDefaultPool
 			}
 		}
 

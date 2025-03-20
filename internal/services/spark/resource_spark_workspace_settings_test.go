@@ -79,6 +79,57 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "automatic_log.enabled", "true"),
 			),
 		},
+		// Update and Read
+		{
+			ResourceName: testResourceSparkWorkspaceSettingsFQN,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceSparkWorkspaceSettingsHeader,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"automatic_log": map[string]any{
+							"enabled": true,
+						},
+						"pool": map[string]any{
+							"default_pool": map[string]any{
+								"id": "00000000-0000-0000-0000-000000000000",
+							},
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "pool.default_pool.id", "00000000-0000-0000-0000-000000000000"),
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "pool.default_pool.name", "Starter Pool"),
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "automatic_log.enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceSparkWorkspaceSettingsFQN,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceSparkWorkspaceSettingsHeader,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"automatic_log": map[string]any{
+							"enabled": true,
+						},
+						"pool": map[string]any{
+							"default_pool": map[string]any{
+								"name": "Starter Pool",
+								"type": "Workspace",
+							},
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "pool.default_pool.id", "00000000-0000-0000-0000-000000000000"),
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "pool.default_pool.name", "Starter Pool"),
+				resource.TestCheckResourceAttr(testResourceSparkWorkspaceSettingsFQN, "automatic_log.enabled", "true"),
+			),
+		},
 	},
 	))
 }

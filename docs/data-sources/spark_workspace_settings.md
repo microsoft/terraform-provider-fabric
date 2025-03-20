@@ -103,7 +103,7 @@ Read-Only:
 
 Read-Only:
 
-- `id` (String) The Pool ID.
+- `id` (String) The Pool ID. `00000000-0000-0000-0000-000000000000` means using the starter pool.
 - `name` (String) The Pool name. `Starter Pool` means using the starting pool.
 - `type` (String) The Pool type. Possible values: `Capacity`, `Workspace`.
 

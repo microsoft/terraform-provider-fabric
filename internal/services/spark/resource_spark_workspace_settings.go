@@ -206,15 +206,22 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 						},
 						Attributes: map[string]schema.Attribute{
 							"id": schema.StringAttribute{
-								MarkdownDescription: "The Pool ID.",
+								MarkdownDescription: "The Pool ID. `00000000-0000-0000-0000-000000000000` means use the starter pool.",
+								Optional:            true,
 								Computed:            true,
 								CustomType:          customtypes.UUIDType{},
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.ConflictsWith(
+										path.MatchRelative().AtParent().AtName("name"),
+										path.MatchRelative().AtParent().AtName("type"),
+									),
+								},
 							},
 							"name": schema.StringAttribute{
-								MarkdownDescription: "The Pool name. It should be a valid custom pool name. `Starter Pool` means use starter pool.",
+								MarkdownDescription: "The Pool name. It should be a valid custom pool name. `Starter Pool` means use the starter pool.",
 								Optional:            true,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
@@ -222,6 +229,7 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 								},
 								Validators: []validator.String{
 									stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("type")),
+									stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("id")),
 								},
 							},
 							"type": schema.StringAttribute{
@@ -233,6 +241,7 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 								},
 								Validators: []validator.String{
 									stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("name")),
+									stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("id")),
 									stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabspark.PossibleCustomPoolTypeValues(), false)...),
 								},
 							},
