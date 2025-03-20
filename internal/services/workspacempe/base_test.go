@@ -7,5 +7,5 @@ import "github.com/microsoft/terraform-provider-fabric/internal/services/workspa
 
 const (
 	ItemTFName  = workspacempe.ItemTFName
-	ItemTFNames = workspacempe.ItemTFNames
+	ItemsTFName = workspacempe.ItemsTFName
 )

@@ -37,7 +37,7 @@ func NewDataSourceWorkspaceManagedPrivateEndpoints() datasource.DataSource {
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoints) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFNames
+	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoints) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
