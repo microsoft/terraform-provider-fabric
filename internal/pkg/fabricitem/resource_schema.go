@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
@@ -253,7 +254,7 @@ func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, defini
 }
 
 // Helper function to get Fabric Item data-source definition part attributes.
-func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.NestedAttributeObject {
+func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: map[string]schema.Attribute{
 			"source": schema.StringAttribute{
@@ -264,7 +265,8 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 			"tokens": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of tokens substitutes in the source.",
 				Optional:            true,
-				CustomType:          supertypes.NewMapTypeOf[string](ctx),
+				CustomType:          customtypes.MapOfStringType,
+				ElementType:         types.StringType,
 				Validators: []validator.Map{
 					mapvalidator.KeysAre(stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$`),
