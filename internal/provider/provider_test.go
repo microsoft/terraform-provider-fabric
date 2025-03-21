@@ -69,7 +69,7 @@ func TestUnit_Provider_AuthAttributes(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Not allowed multiple auth methods
 		{
 			// lintignore:AT004
@@ -221,7 +221,7 @@ func TestUnit_Provider_AuthMSI(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing tenant_id
 		{
 			// lintignore:AT004
@@ -268,7 +268,7 @@ func TestUnit_Provider_AuthCLI(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// if auth is not explicitly set, use cli should be true
 		{
 			// lintignore:AT004
@@ -314,7 +314,7 @@ func TestUnit_Provider_AuthDevCLI(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// explicitly setting use dev cli to true
 		{
 			// lintignore:AT004
@@ -350,7 +350,7 @@ func TestUnit_Provider_AuthSecret(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing client_id
 		{
 			// lintignore:AT004
@@ -400,7 +400,7 @@ func TestUnit_Provider_AuthCertificate(t *testing.T) {
 		t.Setenv(ev, "false")
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing client_id
 		{
 			// lintignore:AT004
