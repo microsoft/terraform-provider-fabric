@@ -56,7 +56,7 @@ func TestUnitPreCheckNoEnvs(t *testing.T) {
 
 	for _, env := range os.Environ() {
 		envPair := strings.SplitN(env, "=", 2) // Split into key and value
-		if strings.HasPrefix(envPair[0], "FABRIC_") && !strings.HasPrefix(envPair[0], "FABRIC_TESTACC_") {
+		if (strings.HasPrefix(envPair[0], "FABRIC_") && !strings.HasPrefix(envPair[0], "FABRIC_TESTACC_")) || strings.HasPrefix(envPair[0], "ARM_") {
 			os.Unsetenv(envPair[0]) //revive:disable-line:unhandled-error
 		}
 	}
