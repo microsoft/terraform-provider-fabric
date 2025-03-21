@@ -834,7 +834,7 @@ $definition = @{
   parts = @(
     @{
       path        = "mirroring.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mirrored_database/mirroring.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mirrored_database/mirroring.json.tmpl' -Values @(@{ key = '{{ .DEFAULT_SCHEMA }}'; value = 'dbo' })
       payloadType = 'InlineBase64'
     }
   )
