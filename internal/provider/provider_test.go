@@ -65,6 +65,10 @@ func TestUnit_Provider_AuthAttributes(t *testing.T) {
 
 	fakes.FakeServer.Upsert(testHelperEntity)
 
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
+
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Not allowed multiple auth methods
 		{
@@ -160,6 +164,10 @@ func TestUnit_Provider_AuthAzDevOpsWI(t *testing.T) {
 
 	fakes.FakeServer.Upsert(testHelperEntity)
 
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
+
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing OIDC details
 		{
@@ -209,6 +217,10 @@ func TestUnit_Provider_AuthMSI(t *testing.T) {
 
 	fakes.FakeServer.Upsert(testHelperEntity)
 
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
+
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing tenant_id
 		{
@@ -252,6 +264,10 @@ func TestUnit_Provider_AuthCLI(t *testing.T) {
 
 	fakes.FakeServer.Upsert(testHelperEntity)
 
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
+
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// if auth is not explicitly set, use cli should be true
 		{
@@ -294,6 +310,10 @@ func TestUnit_Provider_AuthDevCLI(t *testing.T) {
 
 	fakes.FakeServer.Upsert(testHelperEntity)
 
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
+
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// explicitly setting use dev cli to true
 		{
@@ -325,6 +345,10 @@ func TestUnit_Provider_AuthSecret(t *testing.T) {
 	testState := testhelp.NewTestState()
 
 	fakes.FakeServer.Upsert(testHelperEntity)
+
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing client_id
@@ -371,6 +395,10 @@ func TestUnit_Provider_AuthCertificate(t *testing.T) {
 	certPass := testhelp.RandomUUID()
 	certWithPass := testhelp.RandomP12CertB64(certPass)
 	certNoPass := testhelp.RandomP12CertB64("")
+
+	for _, ev := range pconfig.GetEnvVarsUseOIDC() {
+		t.Setenv(ev, "false")
+	}
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
 		// Missing client_id

@@ -21,7 +21,7 @@ func (o *operationsWorkspaceManagedPrivateEndpoint) GetID(entity fabcore.Managed
 	return *entity.ID
 }
 
-func (o *operationsWorkspaceManagedPrivateEndpoint) GetIDWithParentID(parentId string, entity fabcore.ManagedPrivateEndpoint) string {
+func (o *operationsWorkspaceManagedPrivateEndpoint) GetIDWithParentID(_ string, entity fabcore.ManagedPrivateEndpoint) string {
 	return *entity.ID
 }
 

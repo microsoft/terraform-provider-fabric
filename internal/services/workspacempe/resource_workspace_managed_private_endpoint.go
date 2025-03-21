@@ -160,7 +160,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Read(ctx context.Context, req 
 	}
 }
 
-func (r *resourceWorkspaceManagedPrivateEndpoint) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceWorkspaceManagedPrivateEndpoint) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
