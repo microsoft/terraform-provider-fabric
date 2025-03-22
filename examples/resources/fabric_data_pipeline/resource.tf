@@ -15,7 +15,7 @@ resource "fabric_data_pipeline" "example_definition_bootstrap" {
     "pipeline-content.json" = {
       source = "${local.path}/pipeline-content.json"
       tokens = {
-        "MyValue" = "World"
+        "MyKey" = "MyValue"
       }
     }
   }
@@ -31,7 +31,7 @@ resource "fabric_data_pipeline" "example_definition_update" {
     "pipeline-content.json" = {
       source = "${local.path}/pipeline-content.json"
       tokens = {
-        "MyValue" = "World"
+        "MyKey" = "MyValue"
       }
     }
   }

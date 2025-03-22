@@ -4,7 +4,7 @@ page_title: "fabric_data_pipeline Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   Manage a Fabric Data Pipeline.
-  Use this resource to manage Data Pipeline https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
+  Use this resource to manage Data Pipeline https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition.
   -> This item supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
@@ -13,7 +13,7 @@ description: |-
 
 Manage a Fabric Data Pipeline.
 
-Use this resource to manage [Data Pipeline](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
+Use this resource to manage [Data Pipeline](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition).
 
 -> This item supports Service Principal authentication.
 
@@ -39,7 +39,7 @@ resource "fabric_data_pipeline" "example_definition_bootstrap" {
     "pipeline-content.json" = {
       source = "${local.path}/pipeline-content.json"
       tokens = {
-        "MyValue" = "World"
+        "MyKey" = "MyValue"
       }
     }
   }
@@ -55,7 +55,7 @@ resource "fabric_data_pipeline" "example_definition_update" {
     "pipeline-content.json" = {
       source = "${local.path}/pipeline-content.json"
       tokens = {
-        "MyValue" = "World"
+        "MyKey" = "MyValue"
       }
     }
   }

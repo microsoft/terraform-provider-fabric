@@ -4,7 +4,7 @@ page_title: "fabric_data_pipeline Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   Get a Fabric Data Pipeline.
-  Use this data source to fetch a Data Pipeline https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
+  Use this data source to fetch a Data Pipeline https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition.
   -> This item supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
@@ -13,7 +13,7 @@ description: |-
 
 Get a Fabric Data Pipeline.
 
-Use this data source to fetch a [Data Pipeline](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
+Use this data source to fetch a [Data Pipeline](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition).
 
 -> This item supports Service Principal authentication.
 
@@ -28,14 +28,33 @@ data "fabric_data_pipeline" "example_by_id" {
 }
 
 data "fabric_data_pipeline" "example_by_name" {
-  display_name = "dp_example"
+  display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Get item details with definition
+# Examples uses `id` but `display_name` can be used as well
+data "fabric_data_pipeline" "example_definition" {
+  id                = "11111111-1111-1111-1111-111111111111"
+  workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "Default"
+  output_definition = true
+}
+
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_data_pipeline.example_definition.definition["pipeline-content.json"].content, ".properties.activities[0].name")
+}
+
+# Access the content of the definition as JSON object
+output "example_definition_content_object" {
+  value = provider::fabric::content_decode(data.fabric_data_pipeline.example_definition.definition["pipeline-content.json"].content).properties.activities[0].name
 }
 
 # This is an invalid data source
 # Do not specify `id` and `display_name` in the same data source block
 # data "fabric_data_pipeline" "example" {
-#   display_name = "dp_example"
+#   display_name = "example"
 #   id           = "11111111-1111-1111-1111-111111111111"
 #   workspace_id = "00000000-0000-0000-0000-000000000000"
 # }
@@ -51,11 +70,17 @@ data "fabric_data_pipeline" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The Data Pipeline display name.
+- `format` (String) The Data Pipeline format. Possible values: `Default`
 - `id` (String) The Data Pipeline ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `pipeline-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Data Pipeline description.
 
 <a id="nestedatt--timeouts"></a>
@@ -65,3 +90,12 @@ data "fabric_data_pipeline" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
