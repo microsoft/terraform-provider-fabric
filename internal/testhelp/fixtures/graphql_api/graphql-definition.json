@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphqlApi/definition/1.0.0/schema.json",
+  "datasources": [
+    {
+      "artifactType": "SqlDbNative",
+      "objects": [
+        {
+          "actions": {
+            "Query": "Enabled",
+            "Query_by_pk": "Enabled",
+            "Create": "Enabled",
+            "Update": "Enabled",
+            "Delete": "Enabled"
+          },
+          "fieldMappings": {
+            "AuthorID": "AuthorID",
+            "FirstName": "FirstName",
+            "LastName": "LastName"
+          },
+          "graphqlType": "Authors",
+          "relationships": [],
+          "sourceObject": "dbo.Authors",
+          "sourceObjectType": "Table"
+        }
+      ],
+      "sourceArtifactId": "2c66ff1a-1e0b-494a-9eaa-089b2f8590d0",
+      "sourceWorkspaceId": "fdea524a-75eb-4321-af1d-f83d5ec61176"
+    }
+  ]
+}

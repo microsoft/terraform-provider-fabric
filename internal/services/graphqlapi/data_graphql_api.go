@@ -10,7 +10,7 @@ import (
 )
 
 func NewDataSourceGraphQLApi() datasource.DataSource {
-	config := fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinition{
 		Type:   ItemType,
 		Name:   ItemName,
 		TFName: ItemTFName,
@@ -18,8 +18,9 @@ func NewDataSourceGraphQLApi() datasource.DataSource {
 			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
 			ItemDocsSPNSupport,
 		IsDisplayNameUnique: true,
+		DefinitionFormats:   itemDefinitionFormats,
 		IsPreview:           ItemPreview,
 	}
 
-	return fabricitem.NewDataSourceFabricItem(config)
+	return fabricitem.NewDataSourceFabricItemDefinition(config)
 }
