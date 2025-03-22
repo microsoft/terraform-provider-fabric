@@ -47,6 +47,7 @@ func newFakeServer() *fakeServer {
 	handleEntity(server, configureSparkJobDefinition)
 	handleEntity(server, configureWarehouse)
 	handleEntity(server, configureWorkspace)
+	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
 
 	return server
 }

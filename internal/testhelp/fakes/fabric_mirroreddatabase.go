@@ -169,7 +169,7 @@ func configureMirroredDatabase(server *fakeServer) fabmirroreddatabase.MirroredD
 
 	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
-	configureNonLROEntityWithParentID(
+	configureEntityWithParentIDNoLRO(
 		handler,
 		entityOperations,
 		&server.ServerFactory.MirroredDatabase.ItemsServer.GetMirroredDatabase,
@@ -179,7 +179,7 @@ func configureMirroredDatabase(server *fakeServer) fabmirroreddatabase.MirroredD
 		&server.ServerFactory.MirroredDatabase.ItemsServer.DeleteMirroredDatabase,
 	)
 
-	ConfigureDefinitionsNonLROCreation(
+	configureDefinitionsNonLROCreation(
 		handler,
 		definitionOperations,
 		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -66,8 +67,13 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 
 			return nil
 		},
-		ProtoV6ProviderFactories: GetTestAccProtoV6ProviderFactories(),
-		Steps:                    steps,
+		ProtoV6ProviderFactories: getTestAccProtoV6ProviderFactories(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"azurerm": {
+				Source: "hashicorp/azurerm",
+			},
+		},
+		Steps: steps,
 	}
 }
 
@@ -75,7 +81,7 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 // acceptance testing. The factory function will be invoked for every Terraform
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
-func GetTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
+func getTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
 	}
@@ -89,6 +95,7 @@ func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, res
 		at.ResourceHeader(TypeName("fabric", "workspace"), "test"),
 		map[string]any{
 			"display_name": RandomName(),
+			"description":  "testacc",
 			"capacity_id":  capacityID,
 		},
 	)
@@ -102,7 +109,16 @@ func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, res
 func ShouldSkipTest(t *testing.T) bool {
 	t.Helper()
 
-	return strings.EqualFold(os.Getenv("FABRIC_TESTACC_SKIP_NO_SPN"), "true")
+	if skip, ok := os.LookupEnv("FABRIC_TESTACC_SKIP_NO_SPN"); ok && skip != "" {
+		skipBool, err := strconv.ParseBool(skip)
+		if err != nil {
+			return false
+		}
+
+		return skipBool
+	}
+
+	return false
 }
 
 func GetFixturesDirPath(fixtureDir ...string) string {
