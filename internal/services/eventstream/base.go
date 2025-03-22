@@ -27,6 +27,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"eventstream.json"},
+		Paths: []string{"eventstream.json", "eventstreamProperties.json"},
 	},
 }
