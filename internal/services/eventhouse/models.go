@@ -12,13 +12,13 @@ import (
 )
 
 type eventhousePropertiesModel struct {
-	IngestionServiceURI types.String                   `tfsdk:"ingestion_service_uri"`
-	QueryServiceURI     types.String                   `tfsdk:"query_service_uri"`
-	DatabaseIDs         supertypes.ListValueOf[string] `tfsdk:"database_ids"`
+	IngestionServiceURI types.String                  `tfsdk:"ingestion_service_uri"`
+	QueryServiceURI     types.String                  `tfsdk:"query_service_uri"`
+	DatabaseIDs         supertypes.SetValueOf[string] `tfsdk:"database_ids"`
 }
 
 func (to *eventhousePropertiesModel) set(ctx context.Context, from *fabeventhouse.Properties) {
 	to.IngestionServiceURI = types.StringPointerValue(from.IngestionServiceURI)
 	to.QueryServiceURI = types.StringPointerValue(from.QueryServiceURI)
-	to.DatabaseIDs = supertypes.NewListValueOfSlice(ctx, from.DatabasesItemIDs)
+	to.DatabaseIDs = supertypes.NewSetValueOfSlice(ctx, from.DatabasesItemIDs)
 }

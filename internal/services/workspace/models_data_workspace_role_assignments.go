@@ -22,9 +22,9 @@ import (
 // }
 
 type dataSourceWorkspaceRoleAssignmentsModel struct {
-	WorkspaceID customtypes.UUID                                                     `tfsdk:"workspace_id"`
-	Values      supertypes.ListNestedObjectValueOf[baseWorkspaceRoleAssignmentModel] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                                       `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                                    `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[baseWorkspaceRoleAssignmentModel] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                                      `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceWorkspaceRoleAssignmentsModel) setValues(ctx context.Context, from []fabcore.WorkspaceRoleAssignment) diag.Diagnostics {

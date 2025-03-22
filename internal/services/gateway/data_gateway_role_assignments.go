@@ -57,10 +57,10 @@ func (d *dataSourceGatewayRoleAssignments) Schema(ctx context.Context, _ datasou
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The list of " + GatewayRoleAssignmentsName + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseGatewayRoleAssignmentModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseGatewayRoleAssignmentModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},

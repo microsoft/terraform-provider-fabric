@@ -14,9 +14,9 @@ import (
 )
 
 type DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop any] struct {
-	WorkspaceID customtypes.UUID                                                                  `tfsdk:"workspace_id"`
-	Values      supertypes.ListNestedObjectValueOf[FabricItemPropertiesModel[Ttfprop, Titemprop]] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                                                    `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                                                 `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[FabricItemPropertiesModel[Ttfprop, Titemprop]] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                                                   `tfsdk:"timeouts"`
 }
 
 func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(ctx context.Context, from []FabricItemProperties[Titemprop], propertiesSetter func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics) diag.Diagnostics {
