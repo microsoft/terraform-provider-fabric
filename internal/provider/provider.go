@@ -65,6 +65,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 )
 
 // Ensure FabricProvider satisfies various provider interfaces.
@@ -413,6 +414,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		mounteddatafactory.NewResourceMountedDataFactory,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
@@ -469,6 +471,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mlexperiment.NewDataSourceMLExperiments,
 		mlmodel.NewDataSourceMLModel,
 		mlmodel.NewDataSourceMLModels,
+		mounteddatafactory.NewDataSourceMountedDataFactory,
+		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
 		paginatedreport.NewDataSourcePaginatedReports,

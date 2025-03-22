@@ -642,7 +642,7 @@ function Set-AzureVirtualNetwork {
 }
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'Az.DataFactory', 'Az.Network', 'pwsh-dotenv', 'ADOPS')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -731,6 +731,7 @@ $itemNaming = @{
   'VirtualNetwork02'      = 'vnet02'
   'VirtualNetworkSubnet'  = 'subnet'
   'GatewayVirtualNetwork' = 'gvnet'
+  'AzureDataFactory'      = 'df'
 }
 
 $baseName = Get-BaseName
@@ -1044,7 +1045,6 @@ $wellKnown['VirtualNetwork01'] = @{
   subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
 }
 
-
 # Create Azure Virtual Network 2 if not exists
 $vnetName = "${displayName}_$($itemNaming['VirtualNetwork02'])"
 $addrRange = "10.10.0.0/16"
@@ -1085,6 +1085,45 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   id          = $gateway.id
   displayName = $gateway.displayName
   type        = $gateway.type
+}
+
+
+# Register the Microsoft.DataFactory resource provider
+Write-Log -Message 'Registering Microsoft.DataFactory resource provider' -Level 'WARN'
+Register-AzResourceProvider -ProviderNamespace 'Microsoft.DataFactory'
+
+# Create Azure Data Factory if not exists
+$displayNameTemp = "${displayName}$($itemNaming['AzureDataFactory'])"
+$displayNameTemp = $displayNameTemp -replace '_', ''
+
+try {
+  $azDataFactory = Get-AzDataFactoryV2 -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -Name $displayNameTemp -ErrorAction Stop
+}
+catch {
+  Write-Log -Message "Creating Azure Data Factory: $displayNameTemp" -Level 'WARN'
+  $azDataFactory = New-AzDataFactoryV2 -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -Name $displayNameTemp -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+
+$wellKnown['AzureDataFactory'] = @{
+  id   = $azDataFactory.DataFactoryId
+  name = $azDataFactory.DataFactoryName
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = 'definition.pbir'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl' -Values @(@{ key = '{{ .DataFactoryResourceId }}'; value = $azDataFactory.DataFactoryId })
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$report = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MountedDataFactory' -Definition $definition
+$wellKnown['MountedDataFactory'] = @{
+  id          = $report.id
+  displayName = $report.displayName
+  description = $report.description
 }
 
 # Save wellknown.json file
