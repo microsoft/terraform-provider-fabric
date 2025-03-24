@@ -240,6 +240,9 @@ function Set-FabricItem {
     'MLExperiment' {
       $itemEndpoint = 'mlExperiments'
     }
+    'MountedDataFactory' {
+      $itemEndpoint = 'mountedDataFactories'
+    }
     'MLModel' {
       $itemEndpoint = 'mlModels'
     }
@@ -711,6 +714,7 @@ $itemNaming = @{
   'MirroredWarehouse'     = 'mwh'
   'MLExperiment'          = 'mle'
   'MLModel'               = 'mlm'
+  'MountedDataFactory'    = 'mdf'
   'Notebook'              = 'nb'
   'PaginatedReport'       = 'prpt'
   'Reflex'                = 'rx'
@@ -801,7 +805,7 @@ if ($SPN) {
 }
 
 # Define an array of item types to create
-$itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'MountedDataFactory', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -844,6 +848,24 @@ $wellKnown['MirroredDatabase'] = @{
   id          = $mirroredDatabase.id
   displayName = $mirroredDatabase.displayName
   description = $mirroredDatabase.description
+}
+
+# Create Mounted Data Factory if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "MountedDataFactoryProperties.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounteddatafactory/MountedDataFactoryProperties.json'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MountedDataFactory' -Definition $definition
+$wellKnown['MountedDataFactory'] = @{
+  id          = $mountedDataFactory.id
+  displayName = $mountedDataFactory.displayName
+  description = $mountedDataFactory.description
 }
 
 # Create SemanticModel if not exists
