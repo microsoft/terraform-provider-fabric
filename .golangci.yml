@@ -1,134 +1,129 @@
 # yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
 # Visit https://golangci-lint.run/ for usage documentation and information on other useful linters
 ---
+version: "2"
 run:
   allow-parallel-runners: true
   allow-serial-runners: true
-  timeout: 10m
-
 output:
-  sort-results: true
   sort-order:
     - linter
     - severity
-    - file # filepath, line, and column
-  show-stats: true
-
-  # formats:
-  #   - format: checkstyle
-  #     path: golangci-report.xml
-  #   - format: colored-line-number
-
+    - file
+linters:
+  default: all
+  disable:
+    - cyclop
+    - depguard
+    - err113
+    - exhaustruct
+    - funlen
+    - goheader
+    - gomoddirectives
+    - ireturn
+    - lll
+    - mnd
+    - paralleltest
+    - wrapcheck
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+    godot:
+      capital: true
+    nestif:
+      min-complexity: 10
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: line-length-limit
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: add-constant
+          disabled: true
+        - name: bare-return
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: unused-receiver
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: if-return
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+    varnamelen:
+      min-name-length: 1
+    wsl:
+      allow-trailing-comment: true
+      allow-cuddle-declarations: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: (.+)_test\.go
+        text: unchecked-type-assertion
+      - linters:
+          - dupl
+          - forcetypeassert
+          - gochecknoglobals
+          - gocognit
+          - goconst
+          - nonamedreturns
+        path: (.+)_test\.go
+      - linters:
+          - dupl
+        path: internal/testhelp/fakes
+      - linters:
+          - gochecknoglobals
+          - godox
+        path: internal/testhelp
+      - linters:
+          - dupl
+        path: internal/services
+      - linters:
+          - dupl
+        path: internal/pkg/fabricitem
+      - linters:
+          - dupl
+        path: internal/framework/customtypes
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   fix: true
-  exclude-rules:
-    - path: '(.+)_test\.go'
-      text: "unchecked-type-assertion"
-    - path: '(.+)_test\.go'
-      linters:
-        - dupl
-        - gochecknoglobals
-        - nonamedreturns
-        - forcetypeassert
-        - goconst
-        - gocognit
-    - path: "internal/testhelp/fakes"
-      linters:
-        - dupl
-    - path: "internal/testhelp"
-      linters:
-        - gochecknoglobals
-        - godox
-    - path: "internal/services"
-      linters:
-        - dupl
-    - path: "internal/pkg/fabricitem"
-      linters:
-        - dupl
-    - path: "internal/framework/customtypes"
-      linters:
-        - dupl
-
-linters:
-  enable-all: true
-  disable:
-    - depguard
-    - exhaustruct
-    - lll
-    - paralleltest
-    - ireturn
-    - wrapcheck
-    - funlen
-    - gomoddirectives
-    - err113
-    - mnd
-    - goheader
-    - cyclop
-    - tenv
-
-linters-settings:
-  exhaustive:
-    # Presence of "default" case in switch statements satisfies exhaustiveness,
-    # even if all enum members are not listed.
-    # Default: false
-    default-signifies-exhaustive: true
-
-  # goheader:
-  #   values:
-  #     const:
-  #       COMPANY: Microsoft Corporation
-  #       LICENSE: MPL-2.0
-  #   template: |-
-  #     Copyright (c) {{ COMPANY }}.
-  #     Licensed under the {{ LICENSE }} license.
-  #     SPDX-License-Identifier: {{ LICENSE }}
-  godot:
-    capital: true
-
-  revive:
-    ignore-generated-header: true
-    enable-all-rules: true
-    rules:
-      - name: line-length-limit
-        disabled: true
-      - name: cognitive-complexity
-        disabled: true
-      - name: add-constant
-        disabled: true
-      - name: bare-return
-        disabled: true
-      - name: function-length
-        disabled: true
-      - name: unused-receiver
-        disabled: true
-      - name: cyclomatic
-        disabled: true
-      - name: if-return
-        disabled: true
-      - name: max-public-structs
-        disabled: true
-
-  nestif:
-    min-complexity: 10
-
-  varnamelen:
-    min-name-length: 1
-
-  wsl:
-    allow-cuddle-declarations: true
-    allow-trailing-comment: true
-
-  gofumpt:
-    module-path: github.com/microsoft/terraform-provider-fabric
-    extra-rules: true
-
-  goimports:
-    local-prefixes: github.com/microsoft/terraform-provider-fabric
-
-  gci:
-    sections:
-      - standard
-      - default
-      - localmodule
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+    gofumpt:
+      module-path: github.com/microsoft/terraform-provider-fabric
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        - github.com/microsoft/terraform-provider-fabric
+    golines:
+      max-len: 200
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
