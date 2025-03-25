@@ -4,7 +4,7 @@ page_title: "fabric_mounted_data_factory Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   Manage a Fabric Mounted Data Factory.
-  Use this resource to manage a Mounted Data Factory https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview.
+  Use this resource to manage a Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
   -> This item supports Service Principal authentication.
 ---
 
@@ -12,19 +12,25 @@ description: |-
 
 Manage a Fabric Mounted Data Factory.
 
-Use this resource to manage a [Mounted Data Factory](https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview).
+Use this resource to manage a [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
 -> This item supports Service Principal authentication.
 
 ## Example Usage
 
 ```terraform
+# Example 1 - Item without definition
+resource "fabric_mounted_data_factory" "example" {
+  display_name = "example1"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+}
 
-# Example 1 - Mounted Data Factory with definition bootstrapping only
+# Example 2 - Item with definition bootstrapping only
 resource "fabric_mounted_data_factory" "example_definition_bootstrap" {
-  display_name              = "example"
+  display_name              = "example2"
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
+  definition_update_enabled = false
   format                    = "Default"
   definition = {
     "mountedDataFactory-content.json" = {
@@ -33,9 +39,9 @@ resource "fabric_mounted_data_factory" "example_definition_bootstrap" {
   }
 }
 
-# Example 2 - Mounted Data Factory with definition update when source or tokens changed
+# Example 3 - Item with definition update when source or tokens changed
 resource "fabric_mounted_data_factory" "example_definition_update" {
-  display_name = "example"
+  display_name = "example3"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
@@ -43,8 +49,9 @@ resource "fabric_mounted_data_factory" "example_definition_update" {
     "mountedDataFactory-content.json" = {
       source = "${local.path}/mountedDataFactory-content.json"
       tokens = {
-        "MESSAGE" = "World"
-        "MyValue" = "Lorem Ipsum"
+        "subscriptionId" : "00000000-0000-0000-0000-000000000000",
+        "resourceGroupName" : "my-resource-group",
+        "factoryName" : "factory-name",
       }
     }
   }
@@ -56,15 +63,15 @@ resource "fabric_mounted_data_factory" "example_definition_update" {
 
 ### Required
 
+- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Mounted Data Factory display name.
+- `format` (String) The Mounted Data Factory format. Possible values: `Default`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mounted Data Factory description.
-- `format` (String) The Mounted Data Factory format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

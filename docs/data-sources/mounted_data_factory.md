@@ -27,7 +27,7 @@ data "fabric_mounted_data_factory" "example_by_id" {
 
 # Get item details by name
 data "fabric_mounted_data_factory" "example_by_name" {
-  display_name = "test1"
+  display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 

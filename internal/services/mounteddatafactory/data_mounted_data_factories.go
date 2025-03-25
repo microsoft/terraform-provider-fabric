@@ -4,14 +4,12 @@
 package mounteddatafactory
 
 import (
-	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceMountedDataFactories(ctx context.Context) datasource.DataSource {
+func NewDataSourceMountedDataFactories() datasource.DataSource {
 	config := fabricitem.DataSourceFabricItems{
 		Type:   ItemType,
 		Name:   ItemName,
