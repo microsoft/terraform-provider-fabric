@@ -11,14 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var (
-	testDataSourceItemsFQN    = testhelp.DataSourceFQN("fabric", itemsTFName, "test")
-	testDataSourceItemsHeader = at.DataSourceHeader(testhelp.TypeName("fabric", itemsTFName), "test")
-)
+var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_WorkspacesDataSource(t *testing.T) {
 	entity := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace)

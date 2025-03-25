@@ -43,11 +43,15 @@ func NewResourceFabricItemDefinitionProperties[Ttfprop, Titemprop any](config Re
 	return &config
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
+	ctx context.Context,
+	req resource.ModifyPlanRequest,
+	resp *resource.ModifyPlanResponse,
+) {
 	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
 		"action": "start",
 	})
@@ -64,7 +68,16 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 
 		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+			ctx,
+			plan.Definition,
+			state.Definition,
+			plan.Format,
+			plan.DefinitionUpdateEnabled,
+			r.DefinitionEmpty,
+			r.DefinitionFormats,
+			&reqUpdateDefinition,
+		)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -82,11 +95,15 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 	})
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = getResourceFabricItemDefinitionPropertiesSchema(ctx, *r)
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(
+	_ context.Context,
+	req resource.ConfigureRequest,
+	resp *resource.ConfigureResponse,
+) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -109,7 +126,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(_
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
@@ -161,7 +178,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -204,7 +221,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx co
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -245,7 +262,16 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 
 	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+		ctx,
+		plan.Definition,
+		state.Definition,
+		plan.Format,
+		plan.DefinitionUpdateEnabled,
+		r.DefinitionEmpty,
+		r.DefinitionFormats,
+		&reqUpdateDefinition,
+	)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -274,7 +300,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
@@ -303,7 +329,11 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Delete(ctx 
 	})
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -374,7 +404,10 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 	}
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(ctx context.Context, model *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(
+	ctx context.Context,
+	model *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop],
+) diag.Diagnostics {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]

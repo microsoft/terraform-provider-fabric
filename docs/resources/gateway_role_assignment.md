@@ -3,16 +3,16 @@
 page_title: "fabric_gateway_role_assignment Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Gateway Role Assignment.
-  -> This item supports Service Principal authentication.
+  The Gateway Role Assignment resource allows you to manage a Fabric Gateway Role Assignment https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateway_role_assignment (Resource)
 
-Manage a Gateway Role Assignment.
+The Gateway Role Assignment resource allows you to manage a Fabric [Gateway Role Assignment](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -34,9 +34,9 @@ resource "fabric_gateway_role_assignment" "example" {
 
 ### Required
 
-- `gateway_id` (String) The Gateway ID.
+- `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Gateway ID.
 - `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
-- `role` (String) The Gateway Role of the principal. Accepted values: `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
+- `role` (String) The gateway role of the principal. Value must be one of : `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
 
 ### Optional
 
@@ -52,8 +52,8 @@ resource "fabric_gateway_role_assignment" "example" {
 
 Required:
 
-- `id` (String) The principal ID.
-- `type` (String) The type of the principal. Accepted values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal ID.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

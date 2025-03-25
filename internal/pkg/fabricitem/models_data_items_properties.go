@@ -19,7 +19,11 @@ type DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop any] struct {
 	Timeouts    timeouts.Value                                                                    `tfsdk:"timeouts"`
 }
 
-func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(ctx context.Context, from []FabricItemProperties[Titemprop], propertiesSetter func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics) diag.Diagnostics {
+func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(
+	ctx context.Context,
+	from []FabricItemProperties[Titemprop],
+	propertiesSetter func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics,
+) diag.Diagnostics {
 	slice := make([]*FabricItemPropertiesModel[Ttfprop, Titemprop], 0, len(from))
 
 	for _, entity := range from {

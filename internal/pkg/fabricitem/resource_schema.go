@@ -76,7 +76,10 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	}
 }
 
-func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
+func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](
+	ctx context.Context,
+	r ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
+) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
@@ -87,7 +90,10 @@ func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, 
 	}
 }
 
-func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
+func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](
+	ctx context.Context,
+	r ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
+) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attrConfiguration := getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
 	attrConfiguration.Validators = []validator.Object{
@@ -110,7 +116,12 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	}
 }
 
-func getResourceFabricItemConfigNestedAttr[Ttfconfig any](ctx context.Context, name string, isRequired bool, attributes map[string]schema.Attribute) schema.SingleNestedAttribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemConfigNestedAttr[Ttfconfig any](
+	ctx context.Context,
+	name string,
+	isRequired bool,
+	attributes map[string]schema.Attribute,
+) schema.SingleNestedAttribute { //revive:disable-line:flag-parameter
 	result := schema.SingleNestedAttribute{
 		MarkdownDescription: "The " + name + " creation configuration.\n\n" +
 			"Any changes to this configuration will result in recreation of the " + name + ".",
@@ -140,7 +151,12 @@ func getResourceFabricItemPropertiesNestedAttr[Ttfprop any](ctx context.Context,
 }
 
 // Helper function to get base Fabric Item resource attributes.
-func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemBaseAttributes(
+	ctx context.Context,
+	name string,
+	displayNameMaxLength, descriptionMaxLength int,
+	nameRenameAllowed bool,
+) map[string]schema.Attribute { //revive:disable-line:flag-parameter
 	displayNamePlanModifiers := []planmodifier.String{}
 
 	if !nameRenameAllowed {
@@ -190,7 +206,13 @@ func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displ
 }
 
 // Helper function to get Fabric Item definition attributes.
-func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, definitionPathDocsURL string, definitionFormats []DefinitionFormat, definitionPathKeysValidator []validator.Map, definitionRequired, alongConfiguration bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
+func getResourceFabricItemDefinitionAttributes(
+	ctx context.Context,
+	name, definitionPathDocsURL string,
+	definitionFormats []DefinitionFormat,
+	definitionPathKeysValidator []validator.Map,
+	definitionRequired, alongConfiguration bool,
+) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
 	attributes := make(map[string]schema.Attribute)
 
 	attrDefinitionUpdateEnabled := schema.BoolAttribute{}

@@ -19,6 +19,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -28,10 +29,15 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceSparkEnvironmentSettings)
 type dataSourceSparkEnvironmentSettings struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabenvironment.SparkComputeClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewDataSourceSparkEnvironmentSettings() datasource.DataSource {
-	return &dataSourceSparkEnvironmentSettings{}
+	return &dataSourceSparkEnvironmentSettings{
+		Name:      SparkEnvironmentSettingsName,
+		IsPreview: SparkEnvironmentSettingsPreview,
+	}
 }
 
 func (d *dataSourceSparkEnvironmentSettings) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -121,9 +127,13 @@ func (d *dataSourceSparkEnvironmentSettings) Schema(ctx context.Context, _ datas
 				},
 			},
 			"runtime_version": schema.StringAttribute{
-				MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-				Description:         "Runtime version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-				Computed:            true,
+				MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(
+					SparkRuntimeVersionValues,
+					true,
+					false,
+				) + ".",
+				Description: "Runtime version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
+				Computed:    true,
 			},
 			"spark_properties": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of Spark properties.",
@@ -152,6 +162,10 @@ func (d *dataSourceSparkEnvironmentSettings) Configure(_ context.Context, req da
 
 	d.pConfigData = pConfigData
 	d.client = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewSparkComputeClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (d *dataSourceSparkEnvironmentSettings) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

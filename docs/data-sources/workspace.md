@@ -3,18 +3,15 @@
 page_title: "fabric_workspace Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Workspace.
-  Use this data source to fetch a Workspace https://learn.microsoft.com/fabric/get-started/workspaces.
-  -> This item supports Service Principal authentication.
+  The Workspace data-source allows you to retrieve details about a Fabric Workspace https://learn.microsoft.com/fabric/get-started/workspaces.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_workspace (Data Source)
 
-Get a Fabric Workspace.
+The Workspace data-source allows you to retrieve details about a Fabric [Workspace](https://learn.microsoft.com/fabric/get-started/workspaces).
 
-Use this data source to fetch a [Workspace](https://learn.microsoft.com/fabric/get-started/workspaces).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -46,11 +43,11 @@ data "fabric_workspace" "example_by_name" {
 
 ### Read-Only
 
-- `capacity_assignment_progress` (String) A Workspace assignment to capacity progress status. Possible values: `Completed`, `Failed`, `InProgress`
-- `capacity_id` (String) The ID of the Capacity the Workspace is assigned to.
-- `capacity_region` (String) The region of the capacity associated with this workspace. Possible values: `Australia East`, `Australia Southeast`, `Brazil South`, `Brazil Southeast`, `Canada Central`, `Canada East`, `Central India`, `Central US`, `Central US EUAP`, `China East`, `China East 2`, `China East 3`, `China North`, `China North 2`, `China North 3`, `East Asia`, `East US`, `East US 2`, `France Central`, `France South`, `Germany Central`, `Germany North`, `Germany Northeast`, `Germany West Central`, `Israel Central`, `Italy North`, `Japan East`, `Japan West`, `Korea Central`, `Korea South`, `Mexico Central`, `North Central US`, `North Europe`, `Norway East`, `Norway West`, `Poland Central`, `Qatar Central`, `South Africa North`, `South Africa West`, `South Central US`, `South India`, `Southeast Asia`, `Spain Central`, `Sweden Central`, `Switzerland North`, `Switzerland West`, `UAE Central`, `UAE North`, `UK South`, `UK West`, `West Central US`, `West Europe`, `West India`, `West US`, `West US 2`, `West US 3`
+- `capacity_assignment_progress` (String) A Workspace assignment to capacity progress status. Value must be one of : `Completed`, `Failed`, `InProgress`.
+- `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
+- `capacity_region` (String) The region of the capacity associated with this workspace. Value must be one of : .
 - `description` (String) The Workspace description.
-- `identity` (Attributes) A workspace identity object. (see [below for nested schema](#nestedatt--identity))
+- `identity` (Attributes) A workspace identity (see [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information). (see [below for nested schema](#nestedatt--identity))
 - `onelake_endpoints` (Attributes) The OneLake API endpoints associated with this workspace. (see [below for nested schema](#nestedatt--onelake_endpoints))
 - `type` (String) The Workspace type.
 
@@ -70,7 +67,7 @@ Read-Only:
 
 - `application_id` (String) The application ID.
 - `service_principal_id` (String) The service principal ID.
-- `type` (String) The workspace identity type. Possible values: `SystemAssigned`.
+- `type` (String) The identity type. Value must be one of : `SystemAssigned`.
 
 <a id="nestedatt--onelake_endpoints"></a>
 

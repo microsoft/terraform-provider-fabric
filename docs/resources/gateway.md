@@ -3,19 +3,16 @@
 page_title: "fabric_gateway Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  This resource manages a Fabric Gateway.
-  See Gateway https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways for more information.
-  -> This item supports Service Principal authentication.
+  The Gateway resource allows you to manage a Fabric Gateway https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateway (Resource)
 
-This resource manages a Fabric Gateway.
+The Gateway resource allows you to manage a Fabric [Gateway](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
-See [Gateway](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways) for more information.
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -43,20 +40,25 @@ resource "fabric_gateway" "example" {
 
 ### Required
 
-- `type` (String) The Gateway type. Accepted values: `VirtualNetwork`
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Gateway type. Value must be one of : `VirtualNetwork`.
 
 ### Optional
 
-- `capacity_id` (String) The Gateway capacity ID.
-- `display_name` (String) The Gateway display name.
-- `inactivity_minutes_before_sleep` (Number) The Gateway inactivity minutes before sleep.
-- `number_of_member_gateways` (Number) The Gateway number of member gateways.
+- `capacity_id` (String) The capacity ID. If the value of [`type`](#type) attribute is `VirtualNetwork` this attribute is **REQUIRED**. If the value of [`type`](#type) attribute is one of `OnPremises` or `OnPremisesPersonal` this attribute is **NULL**.
+- `display_name` (String) The Gateway display name. String length must be at most 200. If the value of [`type`](#type) attribute is one of `OnPremises` or `VirtualNetwork` this attribute is **REQUIRED**. If the value of [`type`](#type) attribute is `OnPremisesPersonal` this attribute is **NULL**.
+- `inactivity_minutes_before_sleep` (Number) The inactivity minutes before sleep. Value must be one of : `30`, `60`, `90`, `120`, `150`, `240`, `360`, `480`, `720`, `1440`. If the value of [`type`](#type) attribute is `VirtualNetwork` this attribute is **REQUIRED**. If the value of [`type`](#type) attribute is one of `OnPremises` or `OnPremisesPersonal` this attribute is **NULL**.
+- `number_of_member_gateways` (Number) The number of member gateways. Value must be between 1 and 7. If the value of [`type`](#type) attribute is `VirtualNetwork` this attribute is **REQUIRED**. If the value of [`type`](#type) attribute is one of `OnPremises` or `OnPremisesPersonal` this attribute is **NULL**.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-- `virtual_network_azure_resource` (Attributes) The Gateway virtual network Azure resource. (see [below for nested schema](#nestedatt--virtual_network_azure_resource))
+- `virtual_network_azure_resource` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> The Azure virtual network resource. If the value of [`type`](#type) attribute is `VirtualNetwork` this attribute is **REQUIRED**. If the value of [`type`](#type) attribute is one of `OnPremises` or `OnPremisesPersonal` this attribute is **NULL**. (see [below for nested schema](#nestedatt--virtual_network_azure_resource))
 
 ### Read-Only
 
+- `allow_cloud_connection_refresh` (Boolean) Allow cloud connection refresh.
+- `allow_custom_connectors` (Boolean) Allow custom connectors.
 - `id` (String) The Gateway ID.
+- `load_balancing_setting` (String) The load balancing setting. Value must be one of : `DistributeEvenly`, `Failover`.
+- `public_key` (Attributes) The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections. (see [below for nested schema](#nestedatt--public_key))
+- `version` (String) The Gateway version.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -79,6 +81,15 @@ Required:
 - `subnet_name` (String) The subnet name.
 - `subscription_id` (String) The subscription ID.
 - `virtual_network_name` (String) The virtual network name.
+
+<a id="nestedatt--public_key"></a>
+
+### Nested Schema for `public_key`
+
+Read-Only:
+
+- `exponent` (String) The exponent.
+- `modulus` (String) The modulus.
 
 ## Import
 

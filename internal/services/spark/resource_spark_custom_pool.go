@@ -28,6 +28,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -41,10 +42,15 @@ var (
 type resourceSparkCustomPool struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabspark.CustomPoolsClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewResourceSparkCustomPool() resource.Resource {
-	return &resourceSparkCustomPool{}
+	return &resourceSparkCustomPool{
+		Name:      SparkCustomPoolName,
+		IsPreview: SparkCustomPoolPreview,
+	}
 }
 
 func (r *resourceSparkCustomPool) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -83,8 +89,12 @@ func (r *resourceSparkCustomPool) Schema(ctx context.Context, _ resource.SchemaR
 				},
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: "The " + SparkCustomPoolName + " type. Accepted values: " + utils.ConvertStringSlicesToString(utils.RemoveSliceByValue(fabspark.PossibleCustomPoolTypeValues(), fabspark.CustomPoolTypeCapacity), true, true) + ".",
-				Required:            true,
+				MarkdownDescription: "The " + SparkCustomPoolName + " type. Accepted values: " + utils.ConvertStringSlicesToString(
+					utils.RemoveSliceByValue(fabspark.PossibleCustomPoolTypeValues(), fabspark.CustomPoolTypeCapacity),
+					true,
+					true,
+				) + ".",
+				Required: true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabspark.PossibleCustomPoolTypeValues(), fabspark.CustomPoolTypeCapacity), false)...),
 				},
@@ -185,6 +195,10 @@ func (r *resourceSparkCustomPool) Configure(_ context.Context, req resource.Conf
 
 	r.pConfigData = pConfigData
 	r.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCustomPoolsClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceSparkCustomPool) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

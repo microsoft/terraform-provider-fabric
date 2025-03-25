@@ -3,18 +3,15 @@
 page_title: "fabric_workspace_role_assignments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List Fabric Workspace Role Assignments.
-  Use this data source to list Workspace Role Assignments https://learn.microsoft.com/fabric/fundamentals/roles-workspaces.
-  -> This item supports Service Principal authentication.
+  The Workspace Role Assignments data-source allows you to retrieve a list of Fabric Workspace Role Assignments https://learn.microsoft.com/fabric/fundamentals/roles-workspaces.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_workspace_role_assignments (Data Source)
 
-List Fabric Workspace Role Assignments.
+The Workspace Role Assignments data-source allows you to retrieve a list of Fabric [Workspace Role Assignments](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces).
 
-Use this data source to list [Workspace Role Assignments](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_workspace_role_assignments" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Workspace Role Assignments. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Workspace Role Assignments. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -54,19 +51,15 @@ Optional:
 Read-Only:
 
 - `id` (String) The Workspace Role Assignment ID.
-- `principal_details` (Attributes) The principal details. (see [below for nested schema](#nestedatt--values--principal_details))
-- `principal_display_name` (String) The principal's display name.
-- `principal_id` (String) The Principal ID.
-- `principal_type` (String) The type of the principal. Possible values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
-- `role` (String) The workspace role of the principal. Possible values: `Admin`, `Contributor`, `Member`, `Viewer`.
+- `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--values--principal))
+- `role` (String) The workspace role of the principal. Value must be one of : `Admin`, `Contributor`, `Member`, `Viewer`.
+- `workspace_id` (String) The Workspace ID.
 
-<a id="nestedatt--values--principal_details"></a>
+<a id="nestedatt--values--principal"></a>
 
-### Nested Schema for `values.principal_details`
+### Nested Schema for `values.principal`
 
 Read-Only:
 
-- `app_id` (String) The service principal's Microsoft Entra App ID.
-- `group_type` (String) The type of the group. Possible values: `DistributionList`, `SecurityGroup`, `Unknown`.
-- `parent_principal_id` (String) The parent principal ID of Service Principal Profile.
-- `user_principal_name` (String) The user principal name.
+- `id` (String) The principal ID.
+- `type` (String) The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.

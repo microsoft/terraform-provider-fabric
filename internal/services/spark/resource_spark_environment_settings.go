@@ -32,6 +32,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -46,10 +47,15 @@ type resourceSparkEnvironmentSettings struct {
 	pConfigData     *pconfig.ProviderData
 	client          *fabenvironment.SparkComputeClient
 	clientLibraries *fabenvironment.SparkLibrariesClient
+	Name            string
+	IsPreview       bool
 }
 
 func NewResourceSparkEnvironmentSettings() resource.Resource {
-	return &resourceSparkEnvironmentSettings{}
+	return &resourceSparkEnvironmentSettings{
+		Name:      SparkEnvironmentSettingsName,
+		IsPreview: SparkEnvironmentSettingsPreview,
+	}
 }
 
 func (r *resourceSparkEnvironmentSettings) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -208,9 +214,13 @@ func (r *resourceSparkEnvironmentSettings) Schema(ctx context.Context, _ resourc
 						},
 					},
 					"type": schema.StringAttribute{
-						MarkdownDescription: "The Pool type. Accepted values: " + utils.ConvertStringSlicesToString(utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolTypeValues(), false), true, true) + ".",
-						Optional:            true,
-						Computed:            true,
+						MarkdownDescription: "The Pool type. Accepted values: " + utils.ConvertStringSlicesToString(
+							utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolTypeValues(), false),
+							true,
+							true,
+						) + ".",
+						Optional: true,
+						Computed: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -222,10 +232,14 @@ func (r *resourceSparkEnvironmentSettings) Schema(ctx context.Context, _ resourc
 				},
 			},
 			"runtime_version": schema.StringAttribute{
-				MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, true) + ".",
-				Description:         "Runtime version. Accepted values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, true) + ".",
-				Optional:            true,
-				Computed:            true,
+				MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(
+					SparkRuntimeVersionValues,
+					true,
+					true,
+				) + ".",
+				Description: "Runtime version. Accepted values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, true) + ".",
+				Optional:    true,
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -272,6 +286,10 @@ func (r *resourceSparkEnvironmentSettings) Configure(_ context.Context, req reso
 	r.pConfigData = pConfigData
 	r.client = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewSparkComputeClient()
 	r.clientLibraries = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewSparkLibrariesClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceSparkEnvironmentSettings) ConfigValidators(_ context.Context) []resource.ConfigValidator {
@@ -443,7 +461,10 @@ func (r *resourceSparkEnvironmentSettings) Delete(ctx context.Context, _ resourc
 
 	resp.Diagnostics.AddWarning(
 		"delete operation not supported",
-		fmt.Sprintf("Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.", SparkEnvironmentSettingsName),
+		fmt.Sprintf(
+			"Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.",
+			SparkEnvironmentSettingsName,
+		),
 	)
 
 	resp.State.RemoveResource(ctx)

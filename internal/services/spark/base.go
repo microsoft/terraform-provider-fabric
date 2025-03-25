@@ -12,22 +12,26 @@ const (
 	SparkCustomPoolTFName         = "spark_custom_pool"
 	SparkCustomPoolDocsSPNSupport = common.DocsSPNSupported
 	SparkCustomPoolDocsURL        = "https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools"
+	SparkCustomPoolPreview        = true
 
 	SparkWorkspaceSettingsName           = "Spark Workspace Settings"
 	SparkWorkspaceSettingsTFName         = "spark_workspace_settings"
 	SparkWorkspaceSettingsDocsSPNSupport = common.DocsSPNSupported
 	SparkWorkspaceSettingsDocsURL        = "https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings"
+	SparkWorkspaceSettingsPreview        = true
 
 	SparkEnvironmentPublicationStatusPublished = "Published"
 	SparkEnvironmentSettingsName               = "Spark Environment Settings"
 	SparkEnvironmentSettingsTFName             = "spark_environment_settings"
 	SparkEnvironmentSettingsDocsSPNSupport     = common.DocsSPNSupported
 	SparkEnvironmentSettingsDocsURL            = "https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute"
+	SparkEnvironmentSettingsPreview            = true
 
 	SparkEnvironmentLibrariesName           = "Spark Environment Libraries"
 	SparkEnvironmentLibrariesTFName         = "spark_environment_libraries"
 	SparkEnvironmentLibrariesDocsSPNSupport = common.DocsSPNSupported
 	SparkEnvironmentLibrariesDocsURL        = "https://learn.microsoft.com/fabric/data-engineering/environment-manage-library"
+	SparkEnvironmentLibrariesPreview        = true
 )
 
 var (

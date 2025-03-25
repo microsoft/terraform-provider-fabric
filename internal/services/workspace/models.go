@@ -7,6 +7,8 @@ import (
 	"context"
 	"fmt"
 
+	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -15,6 +17,26 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
+
+/*
+BASE MODEL
+*/
+
+type baseWorkspaceModel struct {
+	ID          customtypes.UUID `tfsdk:"id"`
+	DisplayName types.String     `tfsdk:"display_name"`
+	Description types.String     `tfsdk:"description"`
+	Type        types.String     `tfsdk:"type"`
+	CapacityID  customtypes.UUID `tfsdk:"capacity_id"`
+}
+
+func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+	to.Description = types.StringPointerValue(from.Description)
+	to.Type = types.StringPointerValue((*string)(from.Type))
+	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
+}
 
 type baseWorkspaceInfoModel struct {
 	baseWorkspaceModel
@@ -62,21 +84,75 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	return nil
 }
 
-type baseWorkspaceModel struct {
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Description types.String     `tfsdk:"description"`
-	Type        types.String     `tfsdk:"type"`
-	CapacityID  customtypes.UUID `tfsdk:"capacity_id"`
+/*
+DATA-SOURCE
+*/
+
+type dataSourceWorkspaceModel struct {
+	baseWorkspaceInfoModel
+	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
-func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-	to.Type = types.StringPointerValue((*string)(from.Type))
-	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
+/*
+DATA-SOURCE (list)
+*/
+
+type dataSourceWorkspacesModel struct {
+	Values   supertypes.ListNestedObjectValueOf[baseWorkspaceModel] `tfsdk:"values"`
+	Timeouts timeoutsD.Value                                        `tfsdk:"timeouts"`
 }
+
+func (to *dataSourceWorkspacesModel) setValues(ctx context.Context, from []fabcore.Workspace) diag.Diagnostics {
+	slice := make([]*baseWorkspaceModel, 0, len(from))
+
+	for _, entity := range from {
+		var entityModel baseWorkspaceModel
+		entityModel.set(entity)
+		slice = append(slice, &entityModel)
+	}
+
+	return to.Values.Set(ctx, slice)
+}
+
+/*
+RESOURCE
+*/
+
+type resourceWorkspaceModel struct {
+	baseWorkspaceInfoModel
+	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+type requestCreateWorkspace struct {
+	fabcore.CreateWorkspaceRequest
+}
+
+func (to *requestCreateWorkspace) set(from resourceWorkspaceModel) {
+	to.DisplayName = from.DisplayName.ValueStringPointer()
+	to.Description = from.Description.ValueStringPointer()
+	to.CapacityID = from.CapacityID.ValueStringPointer()
+}
+
+type requestUpdateWorkspace struct {
+	fabcore.UpdateWorkspaceRequest
+}
+
+func (to *requestUpdateWorkspace) set(from resourceWorkspaceModel) {
+	to.DisplayName = from.DisplayName.ValueStringPointer()
+	to.Description = from.Description.ValueStringPointer()
+}
+
+type assignWorkspaceToCapacityRequest struct {
+	fabcore.AssignWorkspaceToCapacityRequest
+}
+
+func (to *assignWorkspaceToCapacityRequest) set(from resourceWorkspaceModel) {
+	to.CapacityID = from.CapacityID.ValueStringPointer()
+}
+
+/*
+HELPER MODELS
+*/
 
 type workspaceIdentityModel struct {
 	Type               types.String     `tfsdk:"type"`

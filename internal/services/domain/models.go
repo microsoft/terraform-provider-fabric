@@ -4,11 +4,21 @@
 package domain
 
 import (
+	"context"
+
+	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
+
+/*
+BASE MODEL
+*/
 
 type baseDomainModel struct {
 	ID                customtypes.UUID `tfsdk:"id"`
@@ -26,12 +36,61 @@ func (to *baseDomainModel) set(from fabadmin.Domain) {
 	to.ContributorsScope = types.StringPointerValue((*string)(from.ContributorsScope))
 }
 
-type workspaceModel struct {
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
+/*
+DATA-SOURCE
+*/
+
+type dataSourceDomainModel struct {
+	baseDomainModel
+	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
-func (to *workspaceModel) set(from fabadmin.DomainWorkspace) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
+/*
+DATA-SOURCE (list)
+*/
+
+type dataSourceDomainsModel struct {
+	Values   supertypes.ListNestedObjectValueOf[baseDomainModel] `tfsdk:"values"`
+	Timeouts timeoutsD.Value                                     `tfsdk:"timeouts"`
+}
+
+func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.Domain) diag.Diagnostics {
+	slice := make([]*baseDomainModel, 0, len(from))
+
+	for _, entity := range from {
+		var entityModel baseDomainModel
+		entityModel.set(entity)
+		slice = append(slice, &entityModel)
+	}
+
+	return to.Values.Set(ctx, slice)
+}
+
+/*
+RESOURCE
+*/
+
+type resourceDomainModel struct {
+	baseDomainModel
+	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+type requestCreateDomain struct {
+	fabadmin.CreateDomainRequest
+}
+
+func (to *requestCreateDomain) set(from resourceDomainModel) {
+	to.DisplayName = from.DisplayName.ValueStringPointer()
+	to.Description = from.Description.ValueStringPointer()
+	to.ParentDomainID = from.ParentDomainID.ValueStringPointer()
+}
+
+type requestUpdateDomain struct {
+	fabadmin.UpdateDomainRequest
+}
+
+func (to *requestUpdateDomain) set(from resourceDomainModel) {
+	to.DisplayName = from.DisplayName.ValueStringPointer()
+	to.Description = from.Description.ValueStringPointer()
+	to.ContributorsScope = (*fabadmin.ContributorsScopeType)(from.ContributorsScope.ValueStringPointer())
 }

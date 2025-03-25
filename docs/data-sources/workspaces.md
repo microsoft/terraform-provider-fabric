@@ -3,18 +3,15 @@
 page_title: "fabric_workspaces Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Workspaces.
-  Use this data source to list Workspaces https://learn.microsoft.com/fabric/get-started/workspaces for more information.
-  -> This item supports Service Principal authentication.
+  The Workspaces data-source allows you to retrieve a list of Fabric Workspaces https://learn.microsoft.com/fabric/get-started/workspaces.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_workspaces (Data Source)
 
-List a Fabric Workspaces.
+The Workspaces data-source allows you to retrieve a list of Fabric [Workspaces](https://learn.microsoft.com/fabric/get-started/workspaces).
 
-Use this data source to list [Workspaces](https://learn.microsoft.com/fabric/get-started/workspaces) for more information.
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -31,7 +28,7 @@ data "fabric_workspaces" "example" {}
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Workspaces. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Workspaces. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -47,7 +44,7 @@ Optional:
 
 Read-Only:
 
-- `capacity_id` (String) The Workspace capacity ID.
+- `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `description` (String) The Workspace description.
 - `display_name` (String) The Workspace display name.
 - `id` (String) The Workspace ID.

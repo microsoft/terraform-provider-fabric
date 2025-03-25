@@ -145,8 +145,10 @@ func getResourceKQLDatabaseConfigurationAttributes() map[string]schema.Attribute
 			},
 		},
 		"source_database_name": schema.StringAttribute{
-			MarkdownDescription: "The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `" + string(fabkqldatabase.TypeShortcut) + "`.",
-			Optional:            true,
+			MarkdownDescription: "The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `" + string(
+				fabkqldatabase.TypeShortcut,
+			) + "`.",
+			Optional: true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
 			},

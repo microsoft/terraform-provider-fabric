@@ -98,7 +98,7 @@ func TestUnit_JSONNormalize(t *testing.T) {
 	t.Run("nil_content", func(t *testing.T) {
 		var nilString string
 		result, err := transforms.JSONNormalize(nilString)
-		assert.Equal(t, "", result)
+		assert.Empty(t, result)
 		require.ErrorIs(t, err, transforms.ErrEmptyJSON)
 	})
 }
@@ -150,7 +150,7 @@ func TestUnit_JSONNormalizePretty(t *testing.T) {
 	t.Run("nil_content", func(t *testing.T) {
 		var nilString string
 		result, err := transforms.JSONNormalizePretty(nilString)
-		assert.Equal(t, "", result)
+		assert.Empty(t, result)
 		require.ErrorIs(t, err, transforms.ErrEmptyJSON)
 	})
 }

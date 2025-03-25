@@ -3,18 +3,18 @@
 page_title: "fabric_dashboards Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Dashboards.
-  Use this data source to list Dashboards https://learn.microsoft.com/power-bi/consumer/end-user-dashboards.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The Dashboards data-source allows you to retrieve a list of Fabric Dashboards https://learn.microsoft.com/power-bi/consumer/end-user-dashboards.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_dashboards (Data Source)
 
-List a Fabric Dashboards.
+The Dashboards data-source allows you to retrieve a list of Fabric [Dashboards](https://learn.microsoft.com/power-bi/consumer/end-user-dashboards).
 
-Use this data source to list [Dashboards](https://learn.microsoft.com/power-bi/consumer/end-user-dashboards).
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
--> This item does not support Service Principal. Please use a User context authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

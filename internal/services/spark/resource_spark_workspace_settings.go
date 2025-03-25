@@ -28,6 +28,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -41,10 +42,15 @@ var (
 type resourceSparkWorkspaceSettings struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabspark.WorkspaceSettingsClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewResourceSparkWorkspaceSettings() resource.Resource {
-	return &resourceSparkWorkspaceSettings{}
+	return &resourceSparkWorkspaceSettings{
+		Name:      SparkWorkspaceSettingsName,
+		IsPreview: SparkWorkspaceSettingsPreview,
+	}
 }
 
 func (r *resourceSparkWorkspaceSettings) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -109,10 +115,14 @@ func (r *resourceSparkWorkspaceSettings) Schema(ctx context.Context, _ resource.
 						},
 					},
 					"runtime_version": schema.StringAttribute{
-						MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Accepted values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-						Description:         "Runtime version. Accepted values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-						Optional:            true,
-						Computed:            true,
+						MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Accepted values: " + utils.ConvertStringSlicesToString(
+							SparkRuntimeVersionValues,
+							true,
+							false,
+						) + ".",
+						Description: "Runtime version. Accepted values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
+						Optional:    true,
+						Computed:    true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -299,6 +309,10 @@ func (r *resourceSparkWorkspaceSettings) Configure(_ context.Context, req resour
 
 	r.pConfigData = pConfigData
 	r.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspaceSettingsClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceSparkWorkspaceSettings) ConfigValidators(_ context.Context) []resource.ConfigValidator {
@@ -459,7 +473,10 @@ func (r *resourceSparkWorkspaceSettings) Delete(ctx context.Context, _ resource.
 
 	resp.Diagnostics.AddWarning(
 		"delete operation not supported",
-		fmt.Sprintf("Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.", SparkWorkspaceSettingsName),
+		fmt.Sprintf(
+			"Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.",
+			SparkWorkspaceSettingsName,
+		),
 	)
 
 	resp.State.RemoveResource(ctx)

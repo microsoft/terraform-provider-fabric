@@ -28,8 +28,15 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		Paths: []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
 	},
 	{
-		Type:  "PBIR",
-		API:   "PBIR",
-		Paths: []string{"definition/report.json", "definition/version.json", "definition.pbir", "definition/pages/*.json", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
+		Type: "PBIR",
+		API:  "PBIR",
+		Paths: []string{
+			"definition/report.json",
+			"definition/version.json",
+			"definition.pbir",
+			"definition/pages/*.json",
+			"StaticResources/RegisteredResources/*",
+			"StaticResources/SharedResources/*",
+		},
 	},
 }

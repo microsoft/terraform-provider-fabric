@@ -3,19 +3,16 @@
 page_title: "fabric_gateway_role_assignment Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Gateway Role Assignment.
-  Use this data source to get [Gateway Role Assignment].
-  -> This item supports Service Principal authentication.
+  The Gateway Role Assignment data-source allows you to retrieve details about a Fabric Gateway Role Assignment https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateway_role_assignment (Data Source)
 
-Get a Fabric Gateway Role Assignment.
+The Gateway Role Assignment data-source allows you to retrieve details about a Fabric [Gateway Role Assignment](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
-Use this data source to get [Gateway Role Assignment].
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -43,7 +40,7 @@ data "fabric_gateway_role_assignment" "example" {
 ### Read-Only
 
 - `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
-- `role` (String) The gateway role of the principal. Possible values: `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
+- `role` (String) The gateway role of the principal. Value must be one of : `Admin`, `ConnectionCreator`, `ConnectionCreatorWithResharing`.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -60,4 +57,4 @@ Optional:
 Read-Only:
 
 - `id` (String) The principal ID.
-- `type` (String) The principal type. Possible values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `type` (String) The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.

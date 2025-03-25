@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,10 +27,15 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceSparkWorkspaceSettings)(n
 type dataSourceSparkWorkspaceSettings struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabspark.WorkspaceSettingsClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewDataSourceSparkWorkspaceSettings() datasource.DataSource {
-	return &dataSourceSparkWorkspaceSettings{}
+	return &dataSourceSparkWorkspaceSettings{
+		Name:      SparkWorkspaceSettingsName,
+		IsPreview: SparkWorkspaceSettingsPreview,
+	}
 }
 
 func (d *dataSourceSparkWorkspaceSettings) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -72,9 +78,13 @@ func (d *dataSourceSparkWorkspaceSettings) Schema(ctx context.Context, _ datasou
 						Computed:            true,
 					},
 					"runtime_version": schema.StringAttribute{
-						MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-						Description:         "Runtime version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
-						Computed:            true,
+						MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: " + utils.ConvertStringSlicesToString(
+							SparkRuntimeVersionValues,
+							true,
+							false,
+						) + ".",
+						Description: "Runtime version. Possible values: " + utils.ConvertStringSlicesToString(SparkRuntimeVersionValues, true, false) + ".",
+						Computed:    true,
 					},
 				},
 			},
@@ -175,6 +185,10 @@ func (d *dataSourceSparkWorkspaceSettings) Configure(_ context.Context, req data
 
 	d.pConfigData = pConfigData
 	d.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspaceSettingsClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (d *dataSourceSparkWorkspaceSettings) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

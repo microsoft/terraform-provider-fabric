@@ -7,9 +7,4 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 )
 
-const (
-	itemTFName                   = gateway.ItemTFName
-	itemsTFName                  = gateway.ItemsTFName
-	gatewayRoleAssignmentTFName  = gateway.GatewayRoleAssignmentTFName
-	gatewayRoleAssignmentsTFName = gateway.GatewayRoleAssignmentsTFName
-)
+var itemTypeInfo = gateway.ItemTypeInfo
