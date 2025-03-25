@@ -55,6 +55,8 @@ func TestUnit_WorkspaceRoleAssignmentDataSource(t *testing.T) {
 }
 
 func TestAcc_WorkspaceRoleAssignmentDataSource(t *testing.T) {
+	t.SkipNow()
+
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 

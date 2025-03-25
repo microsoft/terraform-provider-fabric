@@ -98,8 +98,8 @@ DATA-SOURCE (list)
 */
 
 type dataSourceWorkspacesModel struct {
-	Values   supertypes.ListNestedObjectValueOf[baseWorkspaceModel] `tfsdk:"values"`
-	Timeouts timeoutsD.Value                                        `tfsdk:"timeouts"`
+	Values   supertypes.SetNestedObjectValueOf[baseWorkspaceModel] `tfsdk:"values"`
+	Timeouts timeoutsD.Value                                       `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceWorkspacesModel) setValues(ctx context.Context, from []fabcore.Workspace) diag.Diagnostics {

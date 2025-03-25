@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,6 +33,7 @@ type resourceWorkspaceRoleAssignment struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.WorkspacesClient
 	TypeInfo    tftypeinfo.TFTypeInfo
+	mu          sync.Mutex
 }
 
 func NewResourceWorkspaceRoleAssignment() resource.Resource {
@@ -93,6 +95,8 @@ func (r *resourceWorkspaceRoleAssignment) Create(ctx context.Context, req resour
 		return
 	}
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	respCreate, err := r.client.AddWorkspaceRoleAssignment(ctx, plan.WorkspaceID.ValueString(), reqCreate.AddWorkspaceRoleAssignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -176,6 +180,8 @@ func (r *resourceWorkspaceRoleAssignment) Update(ctx context.Context, req resour
 
 	reqUpdate.set(plan)
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	respUpdate, err := r.client.UpdateWorkspaceRoleAssignment(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateWorkspaceRoleAssignmentRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -215,6 +221,8 @@ func (r *resourceWorkspaceRoleAssignment) Delete(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	_, err := r.client.DeleteWorkspaceRoleAssignment(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
