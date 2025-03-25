@@ -855,8 +855,8 @@ $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
 $definition = @{
   parts = @(
     @{
-      path        = "MountedDataFactoryProperties.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounteddatafactory/MountedDataFactoryProperties.json'
+      path        = "mountedDataFactory-content.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json'
       payloadType = 'InlineBase64'
     }
   )

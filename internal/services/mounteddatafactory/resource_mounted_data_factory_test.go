@@ -225,8 +225,8 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 	factoryName := testhelp.WellKnown()["MountedDataFactory"].(map[string]any)["displayName"].(string)
 
 	testHelperDefinitionUpdate := map[string]any{
-		`"MountedDataFactoryProperties.json"`: map[string]any{
-			"source": "${local.path}/MountedDataFactoryProperties.json",
+		`"mountedDataFactory-content.json"`: map[string]any{
+			"source": "${local.path}/mountedDataFactory-content.json",
 			"tokens": map[string]any{
 				"subscriptionId":    vNET01SubscriptionID,
 				"resourceGroupName": vNET01ResourceGroupName,

@@ -12,14 +12,14 @@ import (
 
 const (
 	ItemName                  = "Mounted Data Factory"
-	ItemTFName                = "mounteddatafactory"
+	ItemTFName                = "mounted_data_factory"
 	ItemsName                 = "Mounted Data Factories"
-	ItemsTFName               = "mounteddatafactories"
+	ItemsTFName               = "mounted_data_factories"
 	ItemType                  = fabcore.ItemTypeMountedDataFactory
 	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview"
+	ItemDocsURL               = "https://learn.microsoft.com/fabric/data-factory/data-factory-overview"
 	ItemDefinitionEmpty       = `{}`
-	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
 	ItemPreview               = false
 )
 
@@ -27,6 +27,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"MountedDataFactoryProperties.json"},
+		Paths: []string{"mountedDataFactory-content.json"},
 	},
 }
