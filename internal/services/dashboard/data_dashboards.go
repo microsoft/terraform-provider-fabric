@@ -11,13 +11,11 @@ import (
 
 func NewDataSourceDashboards() datasource.DataSource {
 	config := fabricitem.DataSourceFabricItems{
-		Type:   ItemType,
-		Name:   ItemName,
-		Names:  ItemsName,
-		TFName: ItemsTFName,
-		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		Type:                FabricItemType,
+		Name:                ItemTypeInfo.Name,
+		Names:               ItemTypeInfo.Names,
+		TFName:              ItemTypeInfo.Types,
+		MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, true),
 	}
 
 	return fabricitem.NewDataSourceFabricItems(config)

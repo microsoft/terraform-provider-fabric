@@ -3,19 +3,16 @@
 page_title: "fabric_domain_workspace_assignments Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Domain Workspace Assignments.
-  Use this resource to manage Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  The Domain Workspace Assignments resource allows you to manage a Fabric Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_workspace_assignments (Resource)
 
-Manage a Fabric Domain Workspace Assignments.
+The Domain Workspace Assignments resource allows you to manage a Fabric [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
-Use this resource to manage [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -45,16 +42,12 @@ resource "fabric_domain_workspace_assignments" "example" {
 
 ### Required
 
-- `domain_id` (String) The Domain ID. Changing this forces a new resource to be created.
-- `workspace_ids` (Set of String) The set of Workspace IDs.
+- `domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain ID.
+- `workspace_ids` (Set of String) The set of Workspace IDs. Set must contain at least 1 elements.
 
 ### Optional
 
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-
-### Read-Only
-
-- `id` (String) The Domain Workspace Assignments ID.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -4,20 +4,15 @@
 package domain
 
 import (
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName                         = "Domain"
-	ItemTFName                       = "domain"
-	ItemsName                        = "Domains"
-	ItemsTFName                      = "domains"
-	ItemDocsSPNSupport               = common.DocsSPNSupported
-	ItemDocsURL                      = "https://learn.microsoft.com/fabric/governance/domains"
-	DomainWorkspaceAssignmentsName   = "Domain Workspace Assignments"
-	DomainWorkspaceAssignmentsTFName = "domain_workspace_assignments"
-	DomainRoleAssignmentsName        = "Domain Role Assignments"
-	DomainRoleAssignmentsTFName      = "domain_role_assignments"
-	ItemPreview                      = true
-	ItemSPNSupport                   = true
-)
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Domain",
+	Type:           "domain",
+	Names:          "Domains",
+	Types:          "domains",
+	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
+	IsPreview:      true,
+	IsSPNSupported: true,
+}

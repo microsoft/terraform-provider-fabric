@@ -142,7 +142,12 @@ func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defau
 }
 
 // processFabricError handles Fabric-specific response errors.
-func (h *ErrorHandler) processFabricError(ctx context.Context, errResp *fabcore.ResponseError, errIs error, defaultSummary, defaultDetail string) (string, string) { //revive:disable-line:confusing-results
+func (h *ErrorHandler) processFabricError(
+	ctx context.Context,
+	errResp *fabcore.ResponseError,
+	errIs error,
+	defaultSummary, defaultDetail string,
+) (string, string) { //revive:disable-line:confusing-results
 	tflog.Debug(ctx, "FABRIC ERROR", map[string]any{
 		"StatusCode": errResp.StatusCode,
 		"ErrorCode":  errResp.ErrorResponse.ErrorCode,

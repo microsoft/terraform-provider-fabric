@@ -74,7 +74,16 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 
 		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+			ctx,
+			plan.Definition,
+			state.Definition,
+			plan.Format,
+			plan.DefinitionUpdateEnabled,
+			r.DefinitionEmpty,
+			r.DefinitionFormats,
+			&reqUpdateDefinition,
+		)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -248,7 +257,16 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 
 	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+		ctx,
+		plan.Definition,
+		state.Definition,
+		plan.Format,
+		plan.DefinitionUpdateEnabled,
+		r.DefinitionEmpty,
+		r.DefinitionFormats,
+		&reqUpdateDefinition,
+	)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}

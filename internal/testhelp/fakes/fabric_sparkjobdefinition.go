@@ -43,7 +43,10 @@ func (o *operationsSparkJobDefinition) TransformDefinition(entity *fabsparkjobde
 }
 
 // UpdateDefinition implements concreteDefinitionOperations.
-func (o *operationsSparkJobDefinition) UpdateDefinition(_ *fabsparkjobdefinition.PublicDefinition, data fabsparkjobdefinition.UpdateSparkJobDefinitionDefinitionRequest) *fabsparkjobdefinition.PublicDefinition {
+func (o *operationsSparkJobDefinition) UpdateDefinition(
+	_ *fabsparkjobdefinition.PublicDefinition,
+	data fabsparkjobdefinition.UpdateSparkJobDefinitionDefinitionRequest,
+) *fabsparkjobdefinition.PublicDefinition {
 	return data.Definition
 }
 
@@ -194,7 +197,9 @@ func NewRandomSparkJobDefinitionDefinition() fabsparkjobdefinition.PublicDefinit
 	defPart := fabsparkjobdefinition.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabsparkjobdefinition.PayloadTypeInlineBase64),
 		Path:        to.Ptr("SparkJobDefinitionV1.json"),
-		Payload:     to.Ptr("ew0KICAiZXhlY3V0YWJsZUZpbGUiOiBudWxsLA0KICAiZGVmYXVsdExha2Vob3VzZUFydGlmYWN0SWQiOiBudWxsLA0KICAibWFpbkNsYXNzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMYWtlaG91c2VJZHMiOiBbXSwNCiAgInJldHJ5UG9saWN5IjogbnVsbCwNCiAgImNvbW1hbmRMaW5lQXJndW1lbnRzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMaWJyYXJ5VXJpcyI6IG51bGwsDQogICJsYW5ndWFnZSI6IG51bGwsDQogICJlbnZpcm9ubWVudEFydGlmYWN0SWQiOiBudWxsDQp9"),
+		Payload: to.Ptr(
+			"ew0KICAiZXhlY3V0YWJsZUZpbGUiOiBudWxsLA0KICAiZGVmYXVsdExha2Vob3VzZUFydGlmYWN0SWQiOiBudWxsLA0KICAibWFpbkNsYXNzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMYWtlaG91c2VJZHMiOiBbXSwNCiAgInJldHJ5UG9saWN5IjogbnVsbCwNCiAgImNvbW1hbmRMaW5lQXJndW1lbnRzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMaWJyYXJ5VXJpcyI6IG51bGwsDQogICJsYW5ndWFnZSI6IG51bGwsDQogICJlbnZpcm9ubWVudEFydGlmYWN0SWQiOiBudWxsDQp9",
+		),
 	}
 
 	var defParts []fabsparkjobdefinition.PublicDefinitionPart

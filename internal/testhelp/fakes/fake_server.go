@@ -9,7 +9,7 @@ import (
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 )
 
-var FakeServer = newFakeServer()
+var FakeServer = NewFakeServer()
 
 // Server is a fake server that can be used to test the provider.
 type fakeServer struct {
@@ -20,7 +20,7 @@ type fakeServer struct {
 }
 
 // NewFakeServer creates a new fake server.
-func newFakeServer() *fakeServer {
+func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	server := &fakeServer{
 		ServerFactory: &fabfake.ServerFactory{},
 		elements:      make([]any, 0),

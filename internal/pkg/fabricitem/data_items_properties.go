@@ -37,11 +37,11 @@ func NewDataSourceFabricItemsProperties[Ttfprop, Titemprop any](config DataSourc
 	return &config
 }
 
-func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
 }
 
-func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	attributes := map[string]schema.Attribute{
 		"workspace_id": schema.StringAttribute{
 			MarkdownDescription: "The Workspace ID.",
@@ -86,7 +86,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 	}
 }
 
-func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Configure(_ contex
 	}
 }
 
-func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})

@@ -45,10 +45,10 @@ func NewMapValueOfUnknown[T attr.Value](ctx context.Context) MapValueOf[T] {
 	return MapValueOf[T]{MapValue: basetypes.NewMapUnknown(newAttrTypeOf[T](ctx))}
 }
 
-func NewMapValueOf[T attr.Value](ctx context.Context, elements map[string]attr.Value) (MapValueOf[T], diag.Diagnostics) {
+func NewMapValueOf[T attr.Value](ctx context.Context, elements map[string]T) (MapValueOf[T], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	v, d := basetypes.NewMapValue(newAttrTypeOf[T](ctx), elements)
+	v, d := basetypes.NewMapValueFrom(ctx, newAttrTypeOf[T](ctx), elements)
 	diags.Append(d...)
 
 	if diags.HasError() {
@@ -58,14 +58,14 @@ func NewMapValueOf[T attr.Value](ctx context.Context, elements map[string]attr.V
 	return MapValueOf[T]{MapValue: v}, diags
 }
 
-func NewMapValueOfMust[T attr.Value](ctx context.Context, elements map[string]attr.Value) MapValueOf[T] {
-	return supertypes.MustDiag(NewMapValueOf[T](ctx, elements))
+func NewMapValueOfMust[T attr.Value](ctx context.Context, elements map[string]T) MapValueOf[T] {
+	return supertypes.MustDiag(NewMapValueOf(ctx, elements))
 }
 
 func (v MapValueOf[T]) Get(ctx context.Context) (values map[string]T, diags diag.Diagnostics) { //nolint:nonamedreturns
-	values = make(map[string]T, len(v.MapValue.Elements()))
+	values = make(map[string]T, len(v.Elements()))
 
-	diags.Append(v.MapValue.ElementsAs(ctx, &values, false)...)
+	diags.Append(v.ElementsAs(ctx, &values, false)...)
 
 	return
 }
@@ -79,7 +79,7 @@ func (v *MapValueOf[T]) Set(ctx context.Context, elements map[string]T) diag.Dia
 }
 
 func (v MapValueOf[T]) IsKnown() bool {
-	return !v.MapValue.IsNull() && !v.MapValue.IsUnknown()
+	return !v.IsNull() && !v.IsUnknown()
 }
 
 func (v *MapValueOf[T]) SetNull(ctx context.Context) {

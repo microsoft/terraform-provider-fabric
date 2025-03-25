@@ -58,8 +58,12 @@ func (d *dataSourceCapacities) Schema(ctx context.Context, _ datasource.SchemaRe
 							Computed:            true,
 						},
 						"region": schema.StringAttribute{
-							MarkdownDescription: "The Azure region where the " + ItemName + " has been provisioned. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityRegionValues(), true, true),
-							Computed:            true,
+							MarkdownDescription: "The Azure region where the " + ItemName + " has been provisioned. Possible values: " + utils.ConvertStringSlicesToString(
+								fabcore.PossibleCapacityRegionValues(),
+								true,
+								true,
+							),
+							Computed: true,
 						},
 						"sku": schema.StringAttribute{
 							MarkdownDescription: fmt.Sprintf("The %s SKU.", ItemName),

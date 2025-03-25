@@ -17,10 +17,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var (
-	testDataSourceItemFQN    = testhelp.DataSourceFQN("fabric", itemTFName, "test")
-	testDataSourceItemHeader = at.DataSourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
-)
+var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_WorkspaceDataSource(t *testing.T) {
 	entity := fakes.NewRandomWorkspaceInfo()

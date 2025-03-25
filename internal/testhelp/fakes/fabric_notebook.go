@@ -179,7 +179,9 @@ func NewRandomNotebookDefinition() fabnotebook.Definition {
 	defPart := fabnotebook.DefinitionPart{
 		PayloadType: to.Ptr(fabnotebook.PayloadTypeInlineBase64),
 		Path:        to.Ptr("notebook-content.ipynb"),
-		Payload:     to.Ptr("eyJjZWxscyI6W3siY2VsbF90eXBlIjoiY29kZSIsIm1ldGFkYXRhIjoge30sInNvdXJjZSI6WyIjIFdlbGNvbWUgdG8geW91ciBub3RlYm9vayJdfV0sIm1ldGFkYXRhIjp7Imxhbmd1YWdlX2luZm8iOnsibmFtZSI6InB5dGhvbiJ9fSwibmJmb3JtYXQiOjQsIm5iZm9ybWF0X21pbm9yIjo1fQ=="),
+		Payload: to.Ptr(
+			"eyJjZWxscyI6W3siY2VsbF90eXBlIjoiY29kZSIsIm1ldGFkYXRhIjoge30sInNvdXJjZSI6WyIjIFdlbGNvbWUgdG8geW91ciBub3RlYm9vayJdfV0sIm1ldGFkYXRhIjp7Imxhbmd1YWdlX2luZm8iOnsibmFtZSI6InB5dGhvbiJ9fSwibmJmb3JtYXQiOjQsIm5iZm9ybWF0X21pbm9yIjo1fQ==",
+		),
 	}
 
 	var defParts []fabnotebook.DefinitionPart

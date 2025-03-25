@@ -7,7 +7,4 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 )
 
-const (
-	itemTFName  = domain.ItemTFName
-	itemsTFName = domain.ItemsTFName
-)
+var itemTypeInfo = domain.ItemTypeInfo

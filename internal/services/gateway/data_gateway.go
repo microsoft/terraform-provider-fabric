@@ -7,10 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -19,6 +17,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -31,31 +30,21 @@ var (
 type dataSourceGateway struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
-	Name        string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceGateway() datasource.DataSource {
 	return &dataSourceGateway{
-		Name:      ItemName,
-		IsPreview: ItemPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceGateway) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (d *dataSourceGateway) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *dataSourceGateway) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	attributes := getDataSourceGatewayAttributes(ctx)
-	attributes["timeouts"] = timeouts.Attributes(ctx)
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("Get a Fabric "+ItemName+".\n\n"+
-			"Use this data source to get ["+ItemName+"]("+ItemDocsURL+").\n\n"+
-			ItemDocsSPNSupport, d.IsPreview),
-		Attributes: attributes,
-	}
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceGateway) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
@@ -88,7 +77,7 @@ func (d *dataSourceGateway) Configure(_ context.Context, req datasource.Configur
 
 	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -136,10 +125,6 @@ func (d *dataSourceGateway) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 func (d *dataSourceGateway) getByID(ctx context.Context, model *dataSourceGatewayModel) diag.Diagnostics {
-	tflog.Trace(ctx, "GET "+ItemName+" BY ID", map[string]any{
-		"id": model.ID.ValueString(),
-	})
-
 	respGet, err := d.client.GetGateway(ctx, model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
@@ -153,10 +138,6 @@ func (d *dataSourceGateway) getByID(ctx context.Context, model *dataSourceGatewa
 }
 
 func (d *dataSourceGateway) getByDisplayName(ctx context.Context, model *dataSourceGatewayModel) diag.Diagnostics {
-	tflog.Trace(ctx, "GET "+ItemName+" BY DISPLAY NAME", map[string]any{
-		"display_name": model.DisplayName.ValueString(),
-	})
-
 	var diags diag.Diagnostics
 
 	pager := d.client.NewListGatewaysPager(nil)

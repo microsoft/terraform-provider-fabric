@@ -16,7 +16,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,51 +26,31 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceWorkspaces)(nil)
 type dataSourceWorkspaces struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.WorkspacesClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceWorkspaces() datasource.DataSource {
-	return &dataSourceWorkspaces{}
+	return &dataSourceWorkspaces{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceWorkspaces) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
+func (d *dataSourceWorkspaces) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *dataSourceWorkspaces) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	s := itemSchema(true).GetDataSource(ctx)
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
-				MarkdownDescription: fmt.Sprintf("The list of %s.", ItemsName),
+			"values": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseWorkspaceModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseWorkspaceModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s ID.", ItemName),
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"display_name": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s display name.", ItemName),
-							Computed:            true,
-						},
-						"description": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s description.", ItemName),
-							Computed:            true,
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s type.", ItemName),
-							Computed:            true,
-						},
-						"capacity_id": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s capacity ID.", ItemName),
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-					},
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),

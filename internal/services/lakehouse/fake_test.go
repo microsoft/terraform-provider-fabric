@@ -13,7 +13,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-func fakeLakehouseTablesFunc(lakehouseTables fablakehouse.Tables) func(workspaceID, lakehouseID string, options *fablakehouse.TablesClientListTablesOptions) (resp azfake.PagerResponder[fablakehouse.TablesClientListTablesResponse]) {
+func fakeLakehouseTablesFunc(
+	lakehouseTables fablakehouse.Tables,
+) func(workspaceID, lakehouseID string, options *fablakehouse.TablesClientListTablesOptions) (resp azfake.PagerResponder[fablakehouse.TablesClientListTablesResponse]) {
 	return func(_, _ string, _ *fablakehouse.TablesClientListTablesOptions) (resp azfake.PagerResponder[fablakehouse.TablesClientListTablesResponse]) {
 		resp = azfake.PagerResponder[fablakehouse.TablesClientListTablesResponse]{}
 		resp.AddPage(http.StatusOK, fablakehouse.TablesClientListTablesResponse{Tables: lakehouseTables}, nil)

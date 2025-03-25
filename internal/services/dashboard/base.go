@@ -6,16 +6,17 @@ package dashboard
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Dashboard"
-	ItemTFName         = "dashboard"
-	ItemsName          = "Dashboards"
-	ItemsTFName        = "dashboards"
-	ItemType           = fabcore.ItemTypeDashboard
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
-	ItemDocsURL        = "https://learn.microsoft.com/power-bi/consumer/end-user-dashboards"
-	ItemPreview        = true
-)
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Dashboard",
+	Type:           "dashboard",
+	Names:          "Dashboards",
+	Types:          "dashboards",
+	DocsURL:        "https://learn.microsoft.com/power-bi/consumer/end-user-dashboards",
+	IsPreview:      true,
+	IsSPNSupported: false,
+}
+
+const FabricItemType = fabcore.ItemTypeDashboard

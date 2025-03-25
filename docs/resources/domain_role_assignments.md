@@ -3,19 +3,16 @@
 page_title: "fabric_domain_role_assignments Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Domain Role Assignments.
-  Use this resource to manage Domain Role Assignments https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  The Domain Role Assignments resource allows you to manage a Fabric Domain Role Assignments https://learn.microsoft.com/fabric/governance/domains.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_role_assignments (Resource)
 
-Manage a Fabric Domain Role Assignments.
+The Domain Role Assignments resource allows you to manage a Fabric [Domain Role Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
-Use this resource to manage [Domain Role Assignments](https://learn.microsoft.com/fabric/governance/domains).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -43,17 +40,13 @@ resource "fabric_domain_role_assignments" "example" {
 
 ### Required
 
-- `domain_id` (String) The Domain ID. Changing this forces a new resource to be created.
-- `principals` (Attributes Set) The list of Principals. (see [below for nested schema](#nestedatt--principals))
-- `role` (String) The Role of the principals. Accepted values: `Admins`, `Contributors`. Changing this forces a new resource to be created.
+- `domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain ID.
+- `principals` (Attributes Set) <i style="color:red;font-weight: bold">(ForceNew)</i> The list of Principals. (see [below for nested schema](#nestedatt--principals))
+- `role` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Role of the principals. Value must be one of : `Admins`, `Contributors`.
 
 ### Optional
 
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-
-### Read-Only
-
-- `id` (String) The Domain Role Assignments ID.
 
 <a id="nestedatt--principals"></a>
 
@@ -61,8 +54,8 @@ resource "fabric_domain_role_assignments" "example" {
 
 Required:
 
-- `id` (String) The Principal ID. Changing this forces a new resource to be created.
-- `type` (String) The Principal type. Accepted values: `Group`, `User`. Changing this forces a new resource to be created.
+- `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Principal ID.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Principal type. Value must be one of : `Group`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

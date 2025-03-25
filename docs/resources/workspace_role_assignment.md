@@ -3,27 +3,26 @@
 page_title: "fabric_workspace_role_assignment Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Workspace Role Assignment.
-  See Workspace Role Assignment https://learn.microsoft.com/fabric/fundamentals/roles-workspaces for more information.
-  -> This item supports Service Principal authentication.
+  The Workspace Role Assignment resource allows you to manage a Fabric Workspace Role Assignment https://learn.microsoft.com/fabric/fundamentals/roles-workspaces.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_workspace_role_assignment (Resource)
 
-Manage a Workspace Role Assignment.
+The Workspace Role Assignment resource allows you to manage a Fabric [Workspace Role Assignment](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces).
 
-See [Workspace Role Assignment](https://learn.microsoft.com/fabric/fundamentals/roles-workspaces) for more information.
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 
 ```terraform
 resource "fabric_workspace_role_assignment" "example" {
-  workspace_id   = "00000000-0000-0000-0000-000000000000"
-  principal_id   = "11111111-1111-1111-1111-111111111111"
-  principal_type = "User"
-  role           = "Member"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  principal = {
+    id   = "11111111-1111-1111-1111-111111111111"
+    type = "User"
+  }
+  role = "Member"
 }
 ```
 
@@ -32,10 +31,9 @@ resource "fabric_workspace_role_assignment" "example" {
 
 ### Required
 
-- `principal_id` (String) The Principal ID.
-- `principal_type` (String) The type of the principal. Accepted values: `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
-- `role` (String) The Workspace Role of the principal. Accepted values: `Admin`, `Contributor`, `Member`, `Viewer`.
-- `workspace_id` (String) The Workspace ID.
+- `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
+- `role` (String) The workspace role of the principal. Value must be one of : `Admin`, `Contributor`, `Member`, `Viewer`.
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
@@ -44,6 +42,15 @@ resource "fabric_workspace_role_assignment" "example" {
 ### Read-Only
 
 - `id` (String) The Workspace Role Assignment ID.
+
+<a id="nestedatt--principal"></a>
+
+### Nested Schema for `principal`
+
+Required:
+
+- `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal ID.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

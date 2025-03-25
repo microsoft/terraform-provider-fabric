@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,37 +27,31 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceGateways)(nil)
 type dataSourceGateways struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
-	Names       string
-	Name        string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceGateways() datasource.DataSource {
 	return &dataSourceGateways{
-		Names:     ItemsName,
-		Name:      ItemName,
-		IsPreview: ItemPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceGateways) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
+func (d *dataSourceGateways) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *dataSourceGateways) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	attributes := getDataSourceGatewayAttributes(ctx)
+	s := itemSchema(true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetDataSourcePreviewNote("List a Fabric "+ItemsName+".\n\n"+
-			"Use this data source to list ["+ItemsName+"]("+ItemDocsURL+").\n\n"+
-			ItemDocsSPNSupport, d.IsPreview),
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of " + ItemsName + ".",
+			"values": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseDataSourceGatewayModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseGatewayModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: attributes,
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),
@@ -81,7 +76,7 @@ func (d *dataSourceGateways) Configure(_ context.Context, req datasource.Configu
 
 	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -123,8 +118,6 @@ func (d *dataSourceGateways) Read(ctx context.Context, req datasource.ReadReques
 }
 
 func (d *dataSourceGateways) list(ctx context.Context, model *dataSourceGatewaysModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+ItemsName)
-
 	respList, err := d.client.ListGateways(ctx, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags

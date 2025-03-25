@@ -42,10 +42,13 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
@@ -65,6 +68,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
 // Ensure FabricProvider satisfies various provider interfaces.
@@ -91,9 +96,9 @@ func New(version string) pclient.ProviderWithFabricClient {
 	cfg := pconfig.ProviderConfig{}
 	cfg.Auth = &auth.Config{}
 	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.ProviderData.Endpoint = pconfig.DefaultFabricEndpointURL
-	cfg.ProviderData.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
-	cfg.ProviderData.Version = version
+	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
+	cfg.Version = version
 
 	return &FabricProvider{
 		config:               &cfg,
@@ -398,13 +403,13 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
-		domain.NewResourceDomainRoleAssignments,
-		domain.NewResourceDomainWorkspaceAssignments,
+		domainra.NewResourceDomainRoleAssignments,
+		domainwa.NewResourceDomainWorkspaceAssignments,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
 		gateway.NewResourceGateway,
-		gateway.NewResourceGatewayRoleAssignment,
+		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
@@ -424,8 +429,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sqldatabase.NewResourceSQLDatabase,
 		warehouse.NewResourceWarehouse,
 		workspace.NewResourceWorkspace,
-		workspace.NewResourceWorkspaceRoleAssignment,
-		workspace.NewResourceWorkspaceGit,
+		workspacera.NewResourceWorkspaceRoleAssignment,
+		workspacegit.NewResourceWorkspaceGit,
 	}
 }
 
@@ -439,7 +444,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
-		domain.NewDataSourceDomainWorkspaceAssignments,
+		domainwa.NewDataSourceDomainWorkspaceAssignments,
 		func() datasource.DataSource { return environment.NewDataSourceEnvironment(ctx) },
 		func() datasource.DataSource { return environment.NewDataSourceEnvironments(ctx) },
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouse(ctx) },
@@ -448,8 +453,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstreams,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
-		gateway.NewDataSourceGatewayRoleAssignment,
-		gateway.NewDataSourceGatewayRoleAssignments,
+		gatewayra.NewDataSourceGatewayRoleAssignment,
+		gatewayra.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
 		kqldashboard.NewDataSourceKQLDashboard,
@@ -490,9 +495,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehouse.NewDataSourceWarehouses,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
-		// workspace.NewDataSourceWorkspaceRoleAssignment,
-		workspace.NewDataSourceWorkspaceRoleAssignments,
-		workspace.NewDataSourceWorkspaceGit,
+		workspacera.NewDataSourceWorkspaceRoleAssignment,
+		workspacera.NewDataSourceWorkspaceRoleAssignments,
+		workspacegit.NewDataSourceWorkspaceGit,
 	}
 }
 

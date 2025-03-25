@@ -98,7 +98,7 @@ tasks:
   golangci-lint:
     desc: Run golangci-lint
     cmds:
-      - golangci-lint run --fix ./...
+      - golangci-lint run --fix
 
   tfproviderlintx:
     desc: Run tfproviderlintx

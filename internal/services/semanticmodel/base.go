@@ -28,8 +28,16 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		Paths: []string{"model.bim", "definition.pbism", "diagramLayp.json"},
 	},
 	{
-		Type:  "TMDL",
-		API:   "TMDL",
-		Paths: []string{"definition/database.tmdl", "definition/model.tmdl", "definition/expressions.tmdl", "definition/relationships.tmdl", "definition.pbism", "diagramLayp.json", "definition/tables/*.tmdl"},
+		Type: "TMDL",
+		API:  "TMDL",
+		Paths: []string{
+			"definition/database.tmdl",
+			"definition/model.tmdl",
+			"definition/expressions.tmdl",
+			"definition/relationships.tmdl",
+			"definition.pbism",
+			"diagramLayp.json",
+			"definition/tables/*.tmdl",
+		},
 	},
 }

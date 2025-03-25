@@ -3,12 +3,18 @@
 page_title: "fabric_workspace_git Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Workspace Git integration.
+  The Workspace Git data-source allows you to retrieve details about a Fabric Workspace Git https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_git (Data Source)
 
-Get a Fabric Workspace Git integration.
+The Workspace Git data-source allows you to retrieve details about a Fabric [Workspace Git](https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration).
+
+-> This data-source does not support Service Principal. Please use a User context authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -31,10 +37,11 @@ data "fabric_workspace_git" "example" {
 
 ### Read-Only
 
-- `git_connection_state` (String) The git connection state. Possible values: `Connected`, `ConnectedAndInitialized`, `NotConnected`
+- `git_connection_state` (String) The Git connection state. Value must be one of : `Connected`, `ConnectedAndInitialized`, `NotConnected`.
 - `git_credentials` (Attributes) The Git credentials details. (see [below for nested schema](#nestedatt--git_credentials))
 - `git_provider_details` (Attributes) The Git provider details. (see [below for nested schema](#nestedatt--git_provider_details))
-- `git_sync_details` (Attributes) The git sync details. (see [below for nested schema](#nestedatt--git_sync_details))
+- `git_sync_details` (Attributes) The Git sync details. (see [below for nested schema](#nestedatt--git_sync_details))
+- `id` (String) The Workspace Git ID.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -50,8 +57,8 @@ Optional:
 
 Read-Only:
 
-- `connection_id` (String) The object ID of the connection.
-- `source` (String) The Git credentials source. Possible values: `Automatic`, `ConfiguredConnection`, `None`
+- `connection_id` (String) The connection ID.
+- `source` (String) The Git credentials source. Value must be one of : `Automatic`, `ConfiguredConnection`, `None`.
 
 <a id="nestedatt--git_provider_details"></a>
 
@@ -61,7 +68,7 @@ Read-Only:
 
 - `branch_name` (String) The branch name.
 - `directory_name` (String) The directory name.
-- `git_provider_type` (String) The Git provider type. Possible values: `AzureDevOps`, `GitHub`
+- `git_provider_type` (String) The git provider type. Value must be one of : `AzureDevOps`, `GitHub`.
 - `organization_name` (String) The Azure DevOps organization name.
 - `owner_name` (String) The GitHub owner name.
 - `project_name` (String) The Azure DevOps project name.

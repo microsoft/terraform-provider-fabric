@@ -1,0 +1,5 @@
+kind: fixed
+body: "`fabric_domain_workspace_assignments` output schema aligned between data-sources and resource"
+time: 2025-03-23T21:12:35.5778324-07:00
+custom:
+  Issue: "341"

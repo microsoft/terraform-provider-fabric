@@ -22,6 +22,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -34,10 +35,15 @@ var (
 type dataSourceSparkCustomPool struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabspark.CustomPoolsClient
+	Name        string
+	IsPreview   bool
 }
 
 func NewDataSourceSparkCustomPool() datasource.DataSource {
-	return &dataSourceSparkCustomPool{}
+	return &dataSourceSparkCustomPool{
+		Name:      SparkCustomPoolName,
+		IsPreview: SparkCustomPoolPreview,
+	}
 }
 
 func (d *dataSourceSparkCustomPool) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -155,6 +161,10 @@ func (d *dataSourceSparkCustomPool) Configure(_ context.Context, req datasource.
 
 	d.pConfigData = pConfigData
 	d.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCustomPoolsClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (d *dataSourceSparkCustomPool) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

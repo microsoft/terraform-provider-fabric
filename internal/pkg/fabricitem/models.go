@@ -35,7 +35,7 @@ type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable
 	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop] `tfsdk:"properties"`
 }
 
-func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProperties[Titemprop]) { //revive:disable-line:confusing-naming
+func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProperties[Titemprop]) {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
