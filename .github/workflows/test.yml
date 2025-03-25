@@ -222,7 +222,7 @@ jobs:
           only-new-issues: true
           skip-cache: true
           skip-save-cache: true
-          args: --out-format=github-actions
+          problem-matchers: true
 
       - name: 🚧 Setup Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2

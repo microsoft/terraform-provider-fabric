@@ -68,18 +68,20 @@
     "FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS": "requestid;x-ms-operation-id;x-ms-public-api-error-code;home-cluster-uri;location;date;retry-after",
     "FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS": "format;type;continuationToken"
   },
-  "go.formatTool": "goimports",
-  "go.formatFlags": [
-    "-local",
-    "github.com/microsoft/terraform-provider-fabric"
-  ],
   "go.diagnostic.vulncheck": "Imports",
   "go.testTimeout": "5m",
-  // "go.lintTool": "golangci-lint",
-  // "go.lintFlags": [
-  //   "--fast",
-  //   "--fix"
-  // ],
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--fast-only"
+  ],
+  "go.formatTool": "custom",
+  "go.alternateTools": {
+    "customFormatter": "golangci-lint"
+  },
+  "go.formatFlags": [
+    "fmt",
+    "--stdin",
+  ],
   // lint
   "linter.linters": {
     "yamllint": {
