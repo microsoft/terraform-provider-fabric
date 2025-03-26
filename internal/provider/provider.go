@@ -54,6 +54,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
@@ -62,8 +63,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/spark"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
@@ -422,9 +425,9 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
-		spark.NewResourceSparkCustomPool,
-		spark.NewResourceSparkEnvironmentSettings,
-		spark.NewResourceSparkWorkspaceSettings,
+		sparkcustompool.NewResourceSparkCustomPool,
+		sparkenvsettings.NewResourceSparkEnvironmentSettings,
+		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
 		sqldatabase.NewResourceSQLDatabase,
 		warehouse.NewResourceWarehouse,
@@ -465,8 +468,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		kqlqueryset.NewDataSourceKQLQuerysets,
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouse(ctx) },
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
-		lakehouse.NewDataSourceLakehouseTable,
-		lakehouse.NewDataSourceLakehouseTables,
+		lakehousetable.NewDataSourceLakehouseTable,
+		lakehousetable.NewDataSourceLakehouseTables,
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
@@ -483,9 +486,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		report.NewDataSourceReports,
 		semanticmodel.NewDataSourceSemanticModel,
 		semanticmodel.NewDataSourceSemanticModels,
-		spark.NewDataSourceSparkCustomPool,
-		spark.NewDataSourceSparkEnvironmentSettings,
-		spark.NewDataSourceSparkWorkspaceSettings,
+		sparkcustompool.NewDataSourceSparkCustomPool,
+		sparkenvsettings.NewDataSourceSparkEnvironmentSettings,
+		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
 		sqldatabase.NewDataSourceSQLDatabase,

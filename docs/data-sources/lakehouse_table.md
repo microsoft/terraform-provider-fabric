@@ -3,18 +3,18 @@
 page_title: "fabric_lakehouse_table Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Lakehouse Table.
-  Use this data source to get Lakehouse Table https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables.
-  -> This item supports Service Principal authentication.
+  The Lakehouse Table data-source allows you to retrieve details about a Fabric Lakehouse Table https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_lakehouse_table (Data Source)
 
-Get a Fabric Lakehouse Table.
+The Lakehouse Table data-source allows you to retrieve details about a Fabric [Lakehouse Table](https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables).
 
-Use this data source to get [Lakehouse Table](https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables).
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -43,7 +43,7 @@ data "fabric_lakehouse_table" "example" {
 
 - `format` (String) The Format of the table.
 - `location` (String) The Location of the table.
-- `type` (String) The Type of the table. Possible values: `External`, `Managed`.
+- `type` (String) The Type of the table. Value must be one of : `External`, `Managed`.
 
 <a id="nestedatt--timeouts"></a>
 

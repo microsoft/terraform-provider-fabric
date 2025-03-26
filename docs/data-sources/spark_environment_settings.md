@@ -3,18 +3,18 @@
 page_title: "fabric_spark_environment_settings Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Spark Environment Settings.
-  See Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Environment Settings data-source allows you to retrieve details about a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Data Source)
 
-Get a Fabric Spark Environment Settings.
+The Spark Environment Settings data-source allows you to retrieve details about a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
-See [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute) for more information.
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -32,7 +32,7 @@ data "fabric_spark_environment_settings" "example" {
 ### Required
 
 - `environment_id` (String) The Environment ID.
-- `publication_status` (String) Publication Status. Accepted values: `Published`, `Staging`.
+- `publication_status` (String) Publication status. Value must be one of : `Published`, `Staging`.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
@@ -41,14 +41,14 @@ data "fabric_spark_environment_settings" "example" {
 
 ### Read-Only
 
-- `driver_cores` (Number) Spark driver core. Possible values: `4`, `8`, `16`, `32`, `64`.
-- `driver_memory` (String) Spark driver memory. Possible values: `28g`, `56g`, `112g`, `224g`, `400g`.
-- `dynamic_executor_allocation` (Attributes) Dynamic executor allocation. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
-- `executor_cores` (Number) Spark executor core. Possible values: `4`, `8`, `16`, `32`, `64`.
-- `executor_memory` (String) Spark executor memory. Possible values: `28g`, `56g`, `112g`, `224g`, `400g`.
-- `id` (String) The ID of this resource.
+- `driver_cores` (Number) Publication status. Value must be one of : `4`, `8`, `16`, `32`, `64`.
+- `driver_memory` (String) Spark driver memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
+- `executor_cores` (Number) Spark executor core. Value must be one of : `4`, `8`, `16`, `32`, `64`.
+- `executor_memory` (String) Spark executor memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `id` (String) The Spark Environment Settings ID.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: `1.1`, `1.2`, `1.3`.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
 - `spark_properties` (Map of String) A map of key/value pairs of Spark properties.
 
 <a id="nestedatt--timeouts"></a>
@@ -65,9 +65,9 @@ Optional:
 
 Read-Only:
 
-- `enabled` (Boolean) The status of the dynamic executor allocation. Possible values: `false` - Disabled, `true` - Enabled.
-- `max_executors` (Number) The maximum executor number.
-- `min_executors` (Number) The minimum executor number.
+- `enabled` (Boolean) The status of the dynamic executor allocation: `false` - Disabled, `true` - Enabled.
+- `max_executors` (Number) The maximum executors.
+- `min_executors` (Number) The minimum executors.
 
 <a id="nestedatt--pool"></a>
 
@@ -77,4 +77,4 @@ Read-Only:
 
 - `id` (String) The Pool ID.
 - `name` (String) The Pool name. `Starter Pool` means using the starting pool.
-- `type` (String) The Pool type. Possible values: `Capacity`, `Workspace`.
+- `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`.

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package workspacegit
+package sparkwssettings
 
 import (
 	"context"
@@ -10,37 +10,38 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fabspark "github.com/microsoft/fabric-sdk-go/fabric/spark"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceWorkspaceGit)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceSparkWorkspaceSettings)(nil)
 
-type dataSourceWorkspaceGit struct {
+type dataSourceSparkWorkspaceSettings struct {
 	pConfigData *pconfig.ProviderData
-	client      *fabcore.GitClient
+	client      *fabspark.WorkspaceSettingsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewDataSourceWorkspaceGit() datasource.DataSource {
-	return &dataSourceWorkspaceGit{
+func NewDataSourceSparkWorkspaceSettings() datasource.DataSource {
+	return &dataSourceSparkWorkspaceSettings{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceWorkspaceGit) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *dataSourceSparkWorkspaceSettings) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
-func (d *dataSourceWorkspaceGit) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *dataSourceSparkWorkspaceSettings) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = itemSchema().GetDataSource(ctx)
 }
 
-func (d *dataSourceWorkspaceGit) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *dataSourceSparkWorkspaceSettings) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -56,15 +57,20 @@ func (d *dataSourceWorkspaceGit) Configure(_ context.Context, req datasource.Con
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGitClient()
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	d.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspaceSettingsClient()
 }
 
-func (d *dataSourceWorkspaceGit) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *dataSourceSparkWorkspaceSettings) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var data dataSourceWorkspaceGitModel
+	var data dataSourceSparkWorkspaceSettingsModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -84,7 +90,7 @@ func (d *dataSourceWorkspaceGit) Read(ctx context.Context, req datasource.ReadRe
 
 	data.ID = data.WorkspaceID
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
@@ -95,24 +101,11 @@ func (d *dataSourceWorkspaceGit) Read(ctx context.Context, req datasource.ReadRe
 	}
 }
 
-func (d *dataSourceWorkspaceGit) get(ctx context.Context, model *dataSourceWorkspaceGitModel) diag.Diagnostics {
-	respGet, err := d.client.GetConnection(ctx, model.WorkspaceID.ValueString(), nil)
+func (d *dataSourceSparkWorkspaceSettings) get(ctx context.Context, model *dataSourceSparkWorkspaceSettingsModel) diag.Diagnostics {
+	respGet, err := d.client.GetSparkSettings(ctx, model.WorkspaceID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	if diags := model.set(ctx, respGet.GitConnection); diags.HasError() {
-		return diags
-	}
-
-	respGetCredentials, err := d.client.GetMyGitCredentials(ctx, model.WorkspaceID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
-		return diags
-	}
-
-	if diags := model.setCredentials(ctx, respGetCredentials.GitCredentialsConfigurationResponseClassification); diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return model.set(ctx, respGet.WorkspaceSparkSettings)
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package spark
+package sparkwssettings
 
 import (
 	"context"
@@ -16,15 +16,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type dataSourceSparkWorkspaceSettingsModel struct {
-	baseSparkWorkspaceSettingsModel
-	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
-}
-
-type resourceSparkWorkspaceSettingsModel struct {
-	baseSparkWorkspaceSettingsModel
-	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
-}
+/*
+BASE MODEL
+*/
 
 type baseSparkWorkspaceSettingsModel struct {
 	ID              customtypes.UUID                                                     `tfsdk:"id"`
@@ -109,102 +103,22 @@ func (to *baseSparkWorkspaceSettingsModel) set(ctx context.Context, from fabspar
 	return nil
 }
 
-type automaticLogPropertiesModel struct {
-	Enabled types.Bool `tfsdk:"enabled"`
+/*
+DATA-SOURCE
+*/
+
+type dataSourceSparkWorkspaceSettingsModel struct {
+	baseSparkWorkspaceSettingsModel
+	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
-func (to *automaticLogPropertiesModel) set(from fabspark.AutomaticLogProperties) {
-	to.Enabled = types.BoolPointerValue(from.Enabled)
-}
+/*
+RESOURCE
+*/
 
-type environmentPropertiesModel struct {
-	Name           types.String `tfsdk:"name"`
-	RuntimeVersion types.String `tfsdk:"runtime_version"`
-}
-
-func (to *environmentPropertiesModel) set(from fabspark.EnvironmentProperties) {
-	to.Name = types.StringPointerValue(from.Name)
-	to.RuntimeVersion = types.StringPointerValue(from.RuntimeVersion)
-}
-
-type highConcurrencyPropertiesModel struct {
-	NotebookInteractiveRunEnabled types.Bool `tfsdk:"notebook_interactive_run_enabled"`
-	NotebookPipelineRunEnabled    types.Bool `tfsdk:"notebook_pipeline_run_enabled"`
-}
-
-func (to *highConcurrencyPropertiesModel) set(from fabspark.HighConcurrencyProperties) {
-	to.NotebookInteractiveRunEnabled = types.BoolPointerValue(from.NotebookInteractiveRunEnabled)
-	to.NotebookPipelineRunEnabled = types.BoolPointerValue(from.NotebookPipelineRunEnabled)
-}
-
-type jobPropertiesModel struct {
-	ConservativeJobAdmissionEnabled types.Bool  `tfsdk:"conservative_job_admission_enabled"`
-	SessionTimeoutInMinutes         types.Int32 `tfsdk:"session_timeout_in_minutes"`
-}
-
-func (to *jobPropertiesModel) set(from fabspark.JobsProperties) {
-	to.ConservativeJobAdmissionEnabled = types.BoolPointerValue(from.ConservativeJobAdmissionEnabled)
-	to.SessionTimeoutInMinutes = types.Int32PointerValue(from.SessionTimeoutInMinutes)
-}
-
-type poolPropertiesModel struct {
-	CustomizeComputeEnabled types.Bool                                                       `tfsdk:"customize_compute_enabled"`
-	DefaultPool             supertypes.SingleNestedObjectValueOf[defaultPoolPropertiesModel] `tfsdk:"default_pool"`
-	StarterPool             supertypes.SingleNestedObjectValueOf[starterPoolPropertiesModel] `tfsdk:"starter_pool"`
-}
-
-func (to *poolPropertiesModel) set(ctx context.Context, from *fabspark.PoolProperties) diag.Diagnostics {
-	to.CustomizeComputeEnabled = types.BoolPointerValue(from.CustomizeComputeEnabled)
-
-	defaultPool := supertypes.NewSingleNestedObjectValueOfNull[defaultPoolPropertiesModel](ctx)
-
-	if from.DefaultPool != nil {
-		defaultPoolModel := &defaultPoolPropertiesModel{}
-		defaultPoolModel.set(*from.DefaultPool)
-
-		if diags := defaultPool.Set(ctx, defaultPoolModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.DefaultPool = defaultPool
-
-	starterPool := supertypes.NewSingleNestedObjectValueOfNull[starterPoolPropertiesModel](ctx)
-
-	if from.StarterPool != nil {
-		starterPoolModel := &starterPoolPropertiesModel{}
-		starterPoolModel.set(*from.StarterPool)
-
-		if diags := starterPool.Set(ctx, starterPoolModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.StarterPool = starterPool
-
-	return nil
-}
-
-type defaultPoolPropertiesModel struct {
-	ID   customtypes.UUID `tfsdk:"id"`
-	Name types.String     `tfsdk:"name"`
-	Type types.String     `tfsdk:"type"`
-}
-
-func (to *defaultPoolPropertiesModel) set(from fabspark.InstancePool) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Name = types.StringPointerValue(from.Name)
-	to.Type = types.StringPointerValue((*string)(from.Type))
-}
-
-type starterPoolPropertiesModel struct {
-	MaxNodeCount types.Int32 `tfsdk:"max_node_count"`
-	MaxExecutors types.Int32 `tfsdk:"max_executors"`
-}
-
-func (to *starterPoolPropertiesModel) set(from fabspark.StarterPoolProperties) {
-	to.MaxNodeCount = types.Int32PointerValue(from.MaxNodeCount)
-	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
+type resourceSparkWorkspaceSettingsModel struct {
+	baseSparkWorkspaceSettingsModel
+	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 
 type requestUpdateSparkWorkspaceSettings struct {
@@ -349,4 +263,106 @@ func (to *requestUpdateSparkWorkspaceSettings) set(ctx context.Context, from res
 	}
 
 	return nil
+}
+
+/*
+HELPER MODELS
+*/
+
+type automaticLogPropertiesModel struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+func (to *automaticLogPropertiesModel) set(from fabspark.AutomaticLogProperties) {
+	to.Enabled = types.BoolPointerValue(from.Enabled)
+}
+
+type environmentPropertiesModel struct {
+	Name           types.String `tfsdk:"name"`
+	RuntimeVersion types.String `tfsdk:"runtime_version"`
+}
+
+func (to *environmentPropertiesModel) set(from fabspark.EnvironmentProperties) {
+	to.Name = types.StringPointerValue(from.Name)
+	to.RuntimeVersion = types.StringPointerValue(from.RuntimeVersion)
+}
+
+type highConcurrencyPropertiesModel struct {
+	NotebookInteractiveRunEnabled types.Bool `tfsdk:"notebook_interactive_run_enabled"`
+	NotebookPipelineRunEnabled    types.Bool `tfsdk:"notebook_pipeline_run_enabled"`
+}
+
+func (to *highConcurrencyPropertiesModel) set(from fabspark.HighConcurrencyProperties) {
+	to.NotebookInteractiveRunEnabled = types.BoolPointerValue(from.NotebookInteractiveRunEnabled)
+	to.NotebookPipelineRunEnabled = types.BoolPointerValue(from.NotebookPipelineRunEnabled)
+}
+
+type jobPropertiesModel struct {
+	ConservativeJobAdmissionEnabled types.Bool  `tfsdk:"conservative_job_admission_enabled"`
+	SessionTimeoutInMinutes         types.Int32 `tfsdk:"session_timeout_in_minutes"`
+}
+
+func (to *jobPropertiesModel) set(from fabspark.JobsProperties) {
+	to.ConservativeJobAdmissionEnabled = types.BoolPointerValue(from.ConservativeJobAdmissionEnabled)
+	to.SessionTimeoutInMinutes = types.Int32PointerValue(from.SessionTimeoutInMinutes)
+}
+
+type poolPropertiesModel struct {
+	CustomizeComputeEnabled types.Bool                                                       `tfsdk:"customize_compute_enabled"`
+	DefaultPool             supertypes.SingleNestedObjectValueOf[defaultPoolPropertiesModel] `tfsdk:"default_pool"`
+	StarterPool             supertypes.SingleNestedObjectValueOf[starterPoolPropertiesModel] `tfsdk:"starter_pool"`
+}
+
+func (to *poolPropertiesModel) set(ctx context.Context, from *fabspark.PoolProperties) diag.Diagnostics {
+	to.CustomizeComputeEnabled = types.BoolPointerValue(from.CustomizeComputeEnabled)
+
+	defaultPool := supertypes.NewSingleNestedObjectValueOfNull[defaultPoolPropertiesModel](ctx)
+
+	if from.DefaultPool != nil {
+		defaultPoolModel := &defaultPoolPropertiesModel{}
+		defaultPoolModel.set(*from.DefaultPool)
+
+		if diags := defaultPool.Set(ctx, defaultPoolModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	to.DefaultPool = defaultPool
+
+	starterPool := supertypes.NewSingleNestedObjectValueOfNull[starterPoolPropertiesModel](ctx)
+
+	if from.StarterPool != nil {
+		starterPoolModel := &starterPoolPropertiesModel{}
+		starterPoolModel.set(*from.StarterPool)
+
+		if diags := starterPool.Set(ctx, starterPoolModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	to.StarterPool = starterPool
+
+	return nil
+}
+
+type defaultPoolPropertiesModel struct {
+	ID   customtypes.UUID `tfsdk:"id"`
+	Name types.String     `tfsdk:"name"`
+	Type types.String     `tfsdk:"type"`
+}
+
+func (to *defaultPoolPropertiesModel) set(from fabspark.InstancePool) {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Name = types.StringPointerValue(from.Name)
+	to.Type = types.StringPointerValue((*string)(from.Type))
+}
+
+type starterPoolPropertiesModel struct {
+	MaxNodeCount types.Int32 `tfsdk:"max_node_count"`
+	MaxExecutors types.Int32 `tfsdk:"max_executors"`
+}
+
+func (to *starterPoolPropertiesModel) set(from fabspark.StarterPoolProperties) {
+	to.MaxNodeCount = types.Int32PointerValue(from.MaxNodeCount)
+	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package lakehouse_test
+package lakehousetable_test
 
 import (
 	"net/http"

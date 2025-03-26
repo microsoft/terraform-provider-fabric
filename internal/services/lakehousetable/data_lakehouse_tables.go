@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package lakehouse
+package lakehousetable
 
 import (
 	"context"
@@ -17,6 +17,8 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,55 +28,41 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceLakehouseTables)(nil)
 type dataSourceLakehouseTables struct {
 	pConfigData *pconfig.ProviderData
 	client      *fablakehouse.TablesClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceLakehouseTables() datasource.DataSource {
-	return &dataSourceLakehouseTables{}
+	return &dataSourceLakehouseTables{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceLakehouseTables) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + LakehouseTablesTFName
+func (d *dataSourceLakehouseTables) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *dataSourceLakehouseTables) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	s := itemSchema(true).GetDataSource(ctx)
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + LakehouseTablesName + ".\n\n" +
-			"Use this data source to list [" + LakehouseTablesName + "](" + LakehouseTableDocsURL + ").\n\n" +
-			LakehouseTableDocsSPNSupport,
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
 			"lakehouse_id": schema.StringAttribute{
 				MarkdownDescription: "The Lakehouse ID.",
-				Required:            true,
 				CustomType:          customtypes.UUIDType{},
+				Required:            true,
 			},
 			"workspace_id": schema.StringAttribute{
 				MarkdownDescription: "The Workspace ID.",
-				Required:            true,
 				CustomType:          customtypes.UUIDType{},
+				Required:            true,
 			},
-			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of Lakehouse Tables.",
+			"values": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[lakehouseTableModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseLakehouseTableModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							MarkdownDescription: "The Name of the table.",
-							Computed:            true,
-						},
-						"location": schema.StringAttribute{
-							MarkdownDescription: "The Location of the table.",
-							Computed:            true,
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: "The Type of the table. Possible values: " + utils.ConvertStringSlicesToString(fablakehouse.PossibleTableTypeValues(), true, true) + ".",
-							Computed:            true,
-						},
-						"format": schema.StringAttribute{
-							MarkdownDescription: "The Format of the table.",
-							Computed:            true,
-						},
-					},
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),
@@ -98,6 +86,11 @@ func (d *dataSourceLakehouseTables) Configure(_ context.Context, req datasource.
 	}
 
 	d.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	d.client = fablakehouse.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTablesClient()
 }
 
@@ -136,12 +129,10 @@ func (d *dataSourceLakehouseTables) Read(ctx context.Context, req datasource.Rea
 }
 
 func (d *dataSourceLakehouseTables) list(ctx context.Context, model *dataSourceLakehouseTablesModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting Lakehouse Tables")
-
 	respList, err := d.client.ListTables(ctx, model.WorkspaceID.ValueString(), model.LakehouseID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}
 
-	return model.setValues(ctx, respList)
+	return model.setValues(ctx, model.WorkspaceID.ValueString(), model.LakehouseID.ValueString(), respList)
 }
