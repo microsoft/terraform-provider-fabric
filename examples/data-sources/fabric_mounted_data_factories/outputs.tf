@@ -1,3 +1,3 @@
 output "example" {
-  value = data.fabric_fabric_mounted_data_factory.example
+  value = data.fabric_mounted_data_factories.example
 }

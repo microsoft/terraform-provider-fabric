@@ -22,6 +22,10 @@ import (
 var (
 	testResourceItemFQN    = testhelp.ResourceFQN("fabric", itemTFName, "test")
 	testResourceItemHeader = at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
+	azureFactoryResource   = testhelp.WellKnown()["DataFactory"].(map[string]any)
+	subscriptionID         = azureFactoryResource["subscriptionId"].(string)
+	resourceGroupName      = azureFactoryResource["resourceGroupName"].(string)
+	dataFactoryName        = azureFactoryResource["name"].(string)
 )
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
@@ -32,9 +36,9 @@ var testHelperDefinitionJSON = map[string]any{
 	`"mountedDataFactory-content.json"`: map[string]any{
 		"source": "${local.path}/mountedDataFactory-content.json.tmpl",
 		"tokens": map[string]any{
-			"SUBSCRIPTION_ID":     "00000000-0000-0000-0000-000000000000",
-			"RESOURCE_GROUP_NAME": "",
-			"FACTORY_NAME":        "",
+			"SUBSCRIPTION_ID":     subscriptionID,
+			"RESOURCE_GROUP_NAME": resourceGroupName,
+			"FACTORY_NAME":        dataFactoryName,
 		},
 	},
 }
@@ -115,6 +119,20 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"display_name": "test",
+					},
+				)),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
 }
@@ -269,21 +287,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	azureFactoryResource := testhelp.WellKnown()["DataFactory"].(map[string]any)
-	subscriptionID := azureFactoryResource["subscriptionId"].(string)
-	resourceGroupName := azureFactoryResource["resourceGroupName"].(string)
-	dataFactoryName := azureFactoryResource["name"].(string)
 
-	testHelperDefinitionCRUD := map[string]any{
-		`"mountedDataFactory-content.json"`: map[string]any{
-			"source": "${local.path}/mountedDataFactory-content.json.tmpl",
-			"tokens": map[string]any{
-				"SUBSCRIPTION_ID":     subscriptionID,
-				"RESOURCE_GROUP_NAME": resourceGroupName,
-				"FACTORY_NAME":        dataFactoryName,
-			},
-		},
-	}
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -296,13 +300,28 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinitionCRUD,
+						"definition":   testHelperDefinitionJSON,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 			),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+					},
+				)),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 		// Update and Read
 		{
@@ -316,7 +335,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"format":       "Default",
 						"description":  entityUpdateDescription,
-						"definition":   testHelperDefinitionCRUD,
+						"definition":   testHelperDefinitionJSON,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(

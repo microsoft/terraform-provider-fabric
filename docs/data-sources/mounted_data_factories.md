@@ -4,7 +4,7 @@ page_title: "fabric_mounted_data_factories Data Source - terraform-provider-fabr
 subcategory: ""
 description: |-
   List a Fabric Mounted Data Factories.
-  Use this data source to list Mounted Data Factories https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview.
+  Use this data source to list Mounted Data Factories https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
   -> This item supports Service Principal authentication.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 List a Fabric Mounted Data Factories.
 
-Use this data source to list [Mounted Data Factories](https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview).
+Use this data source to list [Mounted Data Factories](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
 -> This item supports Service Principal authentication.
 

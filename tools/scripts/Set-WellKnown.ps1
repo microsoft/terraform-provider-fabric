@@ -682,7 +682,7 @@ function Set-FabricMountedDataFactory {
     [string]$WorkspaceId,
 
     [Parameter(Mandatory = $true)]
-    [string]$DataFactoryResourceId
+    [string]$MountedDataFactoryDefinition
   )
 
   # Define the creation payload for the Mounted Data Factory
@@ -690,7 +690,7 @@ function Set-FabricMountedDataFactory {
     parts = @(
       @{
         path        = "mountedDataFactory-content.json"
-        payload     = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("{`"dataFactoryResourceId`": `"$DataFactoryResourceId`"}"))
+        payload     = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("{`"dataFactoryResourceId`": `"$MountedDataFactoryDefinition`"}"))
         payloadType = 'InlineBase64'
       }
     )
@@ -948,10 +948,10 @@ $wellKnown['DataFactory'] = @{
 }
 
 # Create the Mounted Data Factory if not exists
-$dataFactoryResourceId = "/subscriptions/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID/resourceGroups/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME/providers/Microsoft.DataFactory/factories/$displayNameTemp"
-Write-Log -Message " '$dataFactoryResourceId' " -Level 'WARN'
+$mountedDataFactoryDefinition = "/subscriptions/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID/resourceGroups/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME/providers/Microsoft.DataFactory/factories/$displayNameTemp"
+
 $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
-$mountedDataFactory = Set-FabricMountedDataFactory -DisplayName $displayNameTemp -WorkspaceId $workspace.id -DataFactoryResourceId $dataFactoryResourceId
+$mountedDataFactory = Set-FabricMountedDataFactory -DisplayName $displayNameTemp -WorkspaceId $workspace.id -MountedDataFactoryDefinition $mountedDataFactoryDefinition
 
 $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id

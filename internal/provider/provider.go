@@ -92,9 +92,9 @@ func New(version string) pclient.ProviderWithFabricClient {
 	cfg := pconfig.ProviderConfig{}
 	cfg.Auth = &auth.Config{}
 	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.ProviderData.Endpoint = pconfig.DefaultFabricEndpointURL
-	cfg.ProviderData.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
-	cfg.ProviderData.Version = version
+	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
+	cfg.Version = version
 
 	return &FabricProvider{
 		config:               &cfg,
@@ -412,7 +412,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
-		func() resource.Resource { return mounteddatafactory.NewResourceMountedDataFactory() },
+		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
 		notebook.NewResourceNotebook,
@@ -471,8 +471,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mlexperiment.NewDataSourceMLExperiments,
 		mlmodel.NewDataSourceMLModel,
 		mlmodel.NewDataSourceMLModels,
-		func() datasource.DataSource { return mounteddatafactory.NewDataSourceMountedDataFactory() },
-		func() datasource.DataSource { return mounteddatafactory.NewDataSourceMountedDataFactories() },
+		mounteddatafactory.NewDataSourceMountedDataFactory,
+		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
 		paginatedreport.NewDataSourcePaginatedReports,

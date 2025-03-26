@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package mounteddatafactory
 
 import (
@@ -14,9 +17,9 @@ const (
 	ItemsTFName               = "mounted_data_factories"
 	ItemType                  = fabcore.ItemTypeMountedDataFactory
 	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview"
+	ItemDocsURL               = "https://learn.microsoft.com/fabric/data-factory/data-factory-overview"
 	ItemDefinitionEmpty       = `{}`
-	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
 )
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
