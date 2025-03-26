@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package spark
+package sparkenvsettings
 
 import (
 	"context"
@@ -17,15 +17,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type dataSourceSparkEnvironmentSettingsModel struct {
-	baseSparkEnvironmentSettingsModel
-	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
-}
-
-type resourceSparkEnvironmentSettingsModel struct {
-	baseSparkEnvironmentSettingsModel
-	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
-}
+/*
+BASE MODEL
+*/
 
 type baseSparkEnvironmentSettingsModel struct {
 	ID                        customtypes.UUID                                                               `tfsdk:"id"`
@@ -39,7 +33,7 @@ type baseSparkEnvironmentSettingsModel struct {
 	ExecutorMemory            types.String                                                                   `tfsdk:"executor_memory"`
 	Pool                      supertypes.SingleNestedObjectValueOf[instancePoolPropertiesModel]              `tfsdk:"pool"`
 	RuntimeVersion            types.String                                                                   `tfsdk:"runtime_version"`
-	SparkProperties           supertypes.MapValueOf[string]                                                  `tfsdk:"spark_properties"`
+	SparkProperties           customtypes.MapOfString                                                        `tfsdk:"spark_properties"`
 }
 
 func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
@@ -73,10 +67,16 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 		return diags
 	}
 
-	sparkPropertiesMap := supertypes.NewMapValueOfNull[string](ctx)
+	sparkPropertiesMap := customtypes.NewMapValueOfNull[types.String](ctx)
 
 	if len(sparkProperties) > 0 {
-		sparkPropertiesMap, diags = supertypes.NewMapValueOfMap(ctx, sparkProperties)
+		sparkPropertiesTF := make(map[string]types.String)
+
+		for k, v := range sparkProperties {
+			sparkPropertiesTF[k] = types.StringValue(v)
+		}
+
+		sparkPropertiesMap, diags = customtypes.NewMapValueOf(ctx, sparkPropertiesTF)
 		if diags.HasError() {
 			return diags
 		}
@@ -113,28 +113,22 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 	return nil
 }
 
-type dynamicExecutorAllocationPropertiesModel struct {
-	Enabled      types.Bool  `tfsdk:"enabled"`
-	MinExecutors types.Int32 `tfsdk:"min_executors"`
-	MaxExecutors types.Int32 `tfsdk:"max_executors"`
+/*
+DATA-SOURCE
+*/
+
+type dataSourceSparkEnvironmentSettingsModel struct {
+	baseSparkEnvironmentSettingsModel
+	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
-func (to *dynamicExecutorAllocationPropertiesModel) set(from fabenvironment.DynamicExecutorAllocationProperties) {
-	to.Enabled = types.BoolPointerValue(from.Enabled)
-	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
-	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
-}
+/*
+RESOURCE
+*/
 
-type instancePoolPropertiesModel struct {
-	ID   customtypes.UUID `tfsdk:"id"`
-	Name types.String     `tfsdk:"name"`
-	Type types.String     `tfsdk:"type"`
-}
-
-func (to *instancePoolPropertiesModel) set(from fabenvironment.InstancePool) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Name = types.StringPointerValue(from.Name)
-	to.Type = types.StringPointerValue((*string)(from.Type))
+type resourceSparkEnvironmentSettingsModel struct {
+	baseSparkEnvironmentSettingsModel
+	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 
 type requestUpdateSparkEnvironmentSettings struct {
@@ -218,8 +212,44 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 			return diags
 		}
 
-		to.SparkProperties = sparkProperties
+		sparkPropertiesMap := make(map[string]string)
+
+		for k, v := range sparkProperties {
+			if !v.IsNull() && !v.IsUnknown() {
+				sparkPropertiesMap[k] = v.ValueString()
+			}
+		}
+
+		to.SparkProperties = sparkPropertiesMap
 	}
 
 	return nil
+}
+
+/*
+HELPER MODELS
+*/
+
+type dynamicExecutorAllocationPropertiesModel struct {
+	Enabled      types.Bool  `tfsdk:"enabled"`
+	MinExecutors types.Int32 `tfsdk:"min_executors"`
+	MaxExecutors types.Int32 `tfsdk:"max_executors"`
+}
+
+func (to *dynamicExecutorAllocationPropertiesModel) set(from fabenvironment.DynamicExecutorAllocationProperties) {
+	to.Enabled = types.BoolPointerValue(from.Enabled)
+	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
+	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
+}
+
+type instancePoolPropertiesModel struct {
+	ID   customtypes.UUID `tfsdk:"id"`
+	Name types.String     `tfsdk:"name"`
+	Type types.String     `tfsdk:"type"`
+}
+
+func (to *instancePoolPropertiesModel) set(from fabenvironment.InstancePool) {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Name = types.StringPointerValue(from.Name)
+	to.Type = types.StringPointerValue((*string)(from.Type))
 }

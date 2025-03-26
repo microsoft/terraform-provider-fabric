@@ -3,18 +3,18 @@
 page_title: "fabric_spark_custom_pool Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Spark Custom Pool.
-  See Spark Custom Pool https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Custom Pool data-source allows you to retrieve details about a Fabric Spark Custom Pool https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_custom_pool (Data Source)
 
-Get a Fabric Spark Custom Pool.
+The Spark Custom Pool data-source allows you to retrieve details about a Fabric [Spark Custom Pool](https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools).
 
-See [Spark Custom Pool](https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools) for more information.
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -48,16 +48,16 @@ data "fabric_spark_custom_pool" "example_by_name" {
 ### Optional
 
 - `id` (String) The Spark Custom Pool ID.
-- `name` (String) The Spark Custom Pool name.
+- `name` (String) The Spark Custom Pool ID. String length must be at most 64. The name must contain only letters, numbers, dashes, underscores and spaces.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `auto_scale` (Attributes) Auto-scale properties. (see [below for nested schema](#nestedatt--auto_scale))
 - `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
-- `node_family` (String) The Node family. Possible values: `MemoryOptimized`.
-- `node_size` (String) The Node size. Possible values: `Large`, `Medium`, `Small`, `XLarge`, `XXLarge`.
-- `type` (String) The Spark Custom Pool type. Possible values: `Capacity`, `Workspace`.
+- `node_family` (String) The Node family. Value must be one of : `MemoryOptimized`.
+- `node_size` (String) The Node size. Value must be one of : `Large`, `Medium`, `Small`, `XLarge`, `XXLarge`.
+- `type` (String) The Spark Custom Pool type. Value must be one of : `Capacity`, `Workspace`.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -73,7 +73,7 @@ Optional:
 
 Read-Only:
 
-- `enabled` (Boolean) The status of the auto scale. Possible values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the auto scale: `false` - Disabled, `true` - Enabled.
 - `max_node_count` (Number) The maximum node count.
 - `min_node_count` (Number) The minimum node count.
 
@@ -83,6 +83,6 @@ Read-Only:
 
 Read-Only:
 
-- `enabled` (Boolean) The status of the dynamic executor allocation. Possible values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the dynamic executor allocation: `false` - Disabled, `true` - Enabled.
 - `max_executors` (Number) The maximum executors.
 - `min_executors` (Number) The minimum executors.

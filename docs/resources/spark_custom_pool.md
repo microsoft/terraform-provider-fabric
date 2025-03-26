@@ -3,18 +3,18 @@
 page_title: "fabric_spark_custom_pool Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Spark Custom Pool.
-  See Spark Custom Pool https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Custom Pool resource allows you to manage a Fabric Spark Custom Pool https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools.
+  -> This resource supports Service Principal authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_custom_pool (Resource)
 
-Manage a Fabric Spark Custom Pool.
+The Spark Custom Pool resource allows you to manage a Fabric [Spark Custom Pool](https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools).
 
-See [Spark Custom Pool](https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools) for more information.
+-> This resource supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -47,11 +47,11 @@ resource "fabric_spark_custom_pool" "example" {
 
 - `auto_scale` (Attributes) Auto-scale properties. (see [below for nested schema](#nestedatt--auto_scale))
 - `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
-- `name` (String) The Spark Custom Pool name.
-- `node_family` (String) The Node family. Accepted values: `MemoryOptimized`.
-- `node_size` (String) The Node size. Accepted values: `Large`, `Medium`, `Small`, `XLarge`, `XXLarge`.
-- `type` (String) The Spark Custom Pool type. Accepted values: `Workspace`.
-- `workspace_id` (String) The Workspace ID.
+- `name` (String) The Spark Custom Pool ID. String length must be at most 64. The name must contain only letters, numbers, dashes, underscores and spaces.Value must not be one of : .
+- `node_family` (String) The Node family. Value must be one of : `MemoryOptimized`.
+- `node_size` (String) The Node size. Value must be one of : `Large`, `Medium`, `Small`, `XLarge`, `XXLarge`.
+- `type` (String) The Spark Custom Pool type. Value must be one of : `Workspace`.
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
@@ -67,7 +67,7 @@ resource "fabric_spark_custom_pool" "example" {
 
 Required:
 
-- `enabled` (Boolean) The status of the auto scale. Accepted values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the auto scale: `false` - Disabled, `true` - Enabled.
 - `max_node_count` (Number) The maximum node count.
 - `min_node_count` (Number) The minimum node count.
 
@@ -77,12 +77,12 @@ Required:
 
 Required:
 
-- `enabled` (Boolean) The status of the dynamic executor allocation. Accepted values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the dynamic executor allocation: `false` - Disabled, `true` - Enabled.
 
 Optional:
 
-- `max_executors` (Number) The maximum executors.
-- `min_executors` (Number) The minimum executors.
+- `max_executors` (Number) The maximum executors. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `false` this attribute is **NULL**. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `true` this attribute is **REQUIRED**.
+- `min_executors` (Number) The minimum executors. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `false` this attribute is **NULL**. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `true` this attribute is **REQUIRED**.
 
 <a id="nestedatt--timeouts"></a>
 

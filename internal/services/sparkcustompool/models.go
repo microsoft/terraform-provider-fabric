@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package spark
+package sparkcustompool
 
 import (
 	"context"
@@ -16,15 +16,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type dataSourceSparkCustomPoolModel struct {
-	baseSparkCustomPoolModel
-	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
-}
-
-type resourceSparkCustomPoolModel struct {
-	baseSparkCustomPoolModel
-	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
-}
+/*
+BASE MODEL
+*/
 
 type baseSparkCustomPoolModel struct {
 	ID                        customtypes.UUID                                                                    `tfsdk:"id"`
@@ -73,28 +67,22 @@ func (to *baseSparkCustomPoolModel) set(ctx context.Context, from fabspark.Custo
 	return nil
 }
 
-type sparkCustomPoolAutoScaleModel struct {
-	Enabled      types.Bool  `tfsdk:"enabled"`
-	MinNodeCount types.Int32 `tfsdk:"min_node_count"`
-	MaxNodeCount types.Int32 `tfsdk:"max_node_count"`
+/*
+DATA-SOURCE
+*/
+
+type dataSourceSparkCustomPoolModel struct {
+	baseSparkCustomPoolModel
+	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
-func (to *sparkCustomPoolAutoScaleModel) set(from fabspark.AutoScaleProperties) {
-	to.Enabled = types.BoolPointerValue(from.Enabled)
-	to.MinNodeCount = types.Int32PointerValue(from.MinNodeCount)
-	to.MaxNodeCount = types.Int32PointerValue(from.MaxNodeCount)
-}
+/*
+RESOURCE
+*/
 
-type sparkCustomPoolDynamicExecutorAllocationModel struct {
-	Enabled      types.Bool  `tfsdk:"enabled"`
-	MinExecutors types.Int32 `tfsdk:"min_executors"`
-	MaxExecutors types.Int32 `tfsdk:"max_executors"`
-}
-
-func (to *sparkCustomPoolDynamicExecutorAllocationModel) set(from fabspark.DynamicExecutorAllocationProperties) {
-	to.Enabled = types.BoolPointerValue(from.Enabled)
-	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
-	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
+type resourceSparkCustomPoolModel struct {
+	baseSparkCustomPoolModel
+	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateSparkCustomPool struct {
@@ -163,4 +151,32 @@ func (to *requestUpdateSparkCustomPool) set(ctx context.Context, from resourceSp
 	}
 
 	return nil
+}
+
+/*
+HELPER MODELS
+*/
+
+type sparkCustomPoolAutoScaleModel struct {
+	Enabled      types.Bool  `tfsdk:"enabled"`
+	MinNodeCount types.Int32 `tfsdk:"min_node_count"`
+	MaxNodeCount types.Int32 `tfsdk:"max_node_count"`
+}
+
+func (to *sparkCustomPoolAutoScaleModel) set(from fabspark.AutoScaleProperties) {
+	to.Enabled = types.BoolPointerValue(from.Enabled)
+	to.MinNodeCount = types.Int32PointerValue(from.MinNodeCount)
+	to.MaxNodeCount = types.Int32PointerValue(from.MaxNodeCount)
+}
+
+type sparkCustomPoolDynamicExecutorAllocationModel struct {
+	Enabled      types.Bool  `tfsdk:"enabled"`
+	MinExecutors types.Int32 `tfsdk:"min_executors"`
+	MaxExecutors types.Int32 `tfsdk:"max_executors"`
+}
+
+func (to *sparkCustomPoolDynamicExecutorAllocationModel) set(from fabspark.DynamicExecutorAllocationProperties) {
+	to.Enabled = types.BoolPointerValue(from.Enabled)
+	to.MinExecutors = types.Int32PointerValue(from.MinExecutors)
+	to.MaxExecutors = types.Int32PointerValue(from.MaxExecutors)
 }

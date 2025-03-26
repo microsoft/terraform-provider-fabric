@@ -1,34 +1,25 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package spark
+package sparkcustompool
 
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabspark "github.com/microsoft/fabric-sdk-go/fabric/spark"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
-	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -42,140 +33,21 @@ var (
 type resourceSparkCustomPool struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabspark.CustomPoolsClient
-	Name        string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewResourceSparkCustomPool() resource.Resource {
 	return &resourceSparkCustomPool{
-		Name:      SparkCustomPoolName,
-		IsPreview: SparkCustomPoolPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceSparkCustomPool) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + SparkCustomPoolTFName
+func (r *resourceSparkCustomPool) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *resourceSparkCustomPool) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + SparkCustomPoolName + ".\n\n" +
-			"See [" + SparkCustomPoolName + "](" + SparkCustomPoolDocsURL + ") for more information.\n\n" +
-			SparkCustomPoolDocsSPNSupport,
-		Attributes: map[string]schema.Attribute{
-			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "The Workspace ID.",
-				Required:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + SparkCustomPoolName + " ID.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The " + SparkCustomPoolName + " name.",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(64),
-					stringvalidator.NoneOfCaseInsensitive("Starter Pool"),
-					stringvalidator.RegexMatches(regexp.MustCompile(`^[a-zA-Z0-9-_ ]+$`), "The name must contain only letters, numbers, dashes, underscores and spaces."),
-				},
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "The " + SparkCustomPoolName + " type. Accepted values: " + utils.ConvertStringSlicesToString(
-					utils.RemoveSliceByValue(fabspark.PossibleCustomPoolTypeValues(), fabspark.CustomPoolTypeCapacity),
-					true,
-					true,
-				) + ".",
-				Required: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabspark.PossibleCustomPoolTypeValues(), fabspark.CustomPoolTypeCapacity), false)...),
-				},
-			},
-			"node_family": schema.StringAttribute{
-				MarkdownDescription: "The Node family. Accepted values: " + utils.ConvertStringSlicesToString(fabspark.PossibleNodeFamilyValues(), true, true) + ".",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabspark.PossibleNodeFamilyValues(), false)...),
-				},
-			},
-			"node_size": schema.StringAttribute{
-				MarkdownDescription: "The Node size. Accepted values: " + utils.ConvertStringSlicesToString(fabspark.PossibleNodeSizeValues(), true, true) + ".",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabspark.PossibleNodeSizeValues(), false)...),
-				},
-			},
-			"auto_scale": schema.SingleNestedAttribute{
-				MarkdownDescription: "Auto-scale properties.",
-				Required:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkCustomPoolAutoScaleModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"enabled": schema.BoolAttribute{
-						MarkdownDescription: "The status of the auto scale. Accepted values: `false` - Disabled, `true` - Enabled.",
-						Required:            true,
-					},
-					"min_node_count": schema.Int32Attribute{
-						MarkdownDescription: "The minimum node count.",
-						Required:            true,
-					},
-					"max_node_count": schema.Int32Attribute{
-						MarkdownDescription: "The maximum node count.",
-						Required:            true,
-					},
-				},
-			},
-			"dynamic_executor_allocation": schema.SingleNestedAttribute{
-				MarkdownDescription: "Dynamic Executor Allocation properties.",
-				Required:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[sparkCustomPoolDynamicExecutorAllocationModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"enabled": schema.BoolAttribute{
-						MarkdownDescription: "The status of the dynamic executor allocation. Accepted values: `false` - Disabled, `true` - Enabled.",
-						Required:            true,
-					},
-					"min_executors": schema.Int32Attribute{
-						MarkdownDescription: "The minimum executors.",
-						Computed:            true,
-						Optional:            true,
-						Validators: []validator.Int32{
-							superint32validator.NullIfAttributeIsOneOf(
-								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
-								[]attr.Value{types.BoolValue(false)},
-							),
-							superint32validator.RequireIfAttributeIsOneOf(
-								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
-								[]attr.Value{types.BoolValue(true)},
-							),
-						},
-					},
-					"max_executors": schema.Int32Attribute{
-						MarkdownDescription: "The maximum executors.",
-						Computed:            true,
-						Optional:            true,
-						Validators: []validator.Int32{
-							superint32validator.NullIfAttributeIsOneOf(
-								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
-								[]attr.Value{types.BoolValue(false)},
-							),
-							superint32validator.RequireIfAttributeIsOneOf(
-								path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
-								[]attr.Value{types.BoolValue(true)},
-							),
-						},
-					},
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
-	}
+	resp.Schema = itemSchema().GetResource(ctx)
 }
 
 func (r *resourceSparkCustomPool) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -196,7 +68,7 @@ func (r *resourceSparkCustomPool) Configure(_ context.Context, req resource.Conf
 	r.pConfigData = pConfigData
 	r.client = fabspark.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCustomPoolsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -417,8 +289,6 @@ func (r *resourceSparkCustomPool) ImportState(ctx context.Context, req resource.
 }
 
 func (r *resourceSparkCustomPool) get(ctx context.Context, model *resourceSparkCustomPoolModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+SparkCustomPoolName)
-
 	respGet, err := r.client.GetWorkspaceCustomPool(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrSpark.SparkSettingsManagementUserError); diags.HasError() {
 		return diags
