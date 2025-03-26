@@ -642,7 +642,7 @@ function Set-AzureVirtualNetwork {
 }
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -656,7 +656,7 @@ if (Test-Path -Path './wellknown.env') {
 }
 
 if (!$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION) {
-  Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME and FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX and FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME and FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION are required environment variables.' -Level 'ERROR'
+  Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME, FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX, FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME and FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION are required environment variables.' -Level 'ERROR'
 }
 
 # Check if already logged in to Azure, if not then login
@@ -696,41 +696,46 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
-  'Dashboard'             = 'dash'
-  'Datamart'              = 'dm'
-  'DataPipeline'          = 'dp'
-  'Environment'           = 'env'
-  'Eventhouse'            = 'eh'
-  'Eventstream'           = 'es'
-  'GraphQLApi'            = 'gql'
-  'KQLDashboard'          = 'kqldash'
-  'KQLDatabase'           = 'kqldb'
-  'KQLQueryset'           = 'kqlqs'
-  'Lakehouse'             = 'lh'
-  'MirroredDatabase'      = 'mdb'
-  'MirroredWarehouse'     = 'mwh'
-  'MLExperiment'          = 'mle'
-  'MLModel'               = 'mlm'
-  'Notebook'              = 'nb'
-  'PaginatedReport'       = 'prpt'
-  'Reflex'                = 'rx'
-  'Report'                = 'rpt'
-  'SemanticModel'         = 'sm'
-  'SparkJobDefinition'    = 'sjd'
-  'SQLDatabase'           = 'sqldb'
-  'SQLEndpoint'           = 'sqle'
-  'Warehouse'             = 'wh'
-  'WorkspaceDS'           = 'wsds'
-  'WorkspaceRS'           = 'wsrs'
-  'DomainParent'          = 'parent'
-  'DomainChild'           = 'child'
-  'EntraServicePrincipal' = 'sp'
-  'EntraGroup'            = 'grp'
-  'AzDOProject'           = 'proj'
-  'VirtualNetwork01'      = 'vnet01'
-  'VirtualNetwork02'      = 'vnet02'
-  'VirtualNetworkSubnet'  = 'subnet'
-  'GatewayVirtualNetwork' = 'gvnet'
+  'Dashboard'              = 'dash'
+  'Datamart'               = 'dm'
+  'DataPipeline'           = 'dp'
+  'Environment'            = 'env'
+  'Eventhouse'             = 'eh'
+  'Eventstream'            = 'es'
+  'GraphQLApi'             = 'gql'
+  'KQLDashboard'           = 'kqldash'
+  'KQLDatabase'            = 'kqldb'
+  'KQLQueryset'            = 'kqlqs'
+  'Lakehouse'              = 'lh'
+  'MirroredDatabase'       = 'mdb'
+  'MirroredWarehouse'      = 'mwh'
+  'MLExperiment'           = 'mle'
+  'MLModel'                = 'mlm'
+  'Notebook'               = 'nb'
+  'PaginatedReport'        = 'prpt'
+  'Reflex'                 = 'rx'
+  'Report'                 = 'rpt'
+  'SemanticModel'          = 'sm'
+  'SparkJobDefinition'     = 'sjd'
+  'SQLDatabase'            = 'sqldb'
+  'SQLEndpoint'            = 'sqle'
+  'Warehouse'              = 'wh'
+  'WorkspaceDS'            = 'wsds'
+  'WorkspaceRS'            = 'wsrs'
+  'WorkspaceMPE'           = 'wsmpe'
+  'DomainParent'           = 'parent'
+  'DomainChild'            = 'child'
+  'EntraServicePrincipal'  = 'sp'
+  'EntraGroup'             = 'grp'
+  'AzDOProject'            = 'proj'
+  'VirtualNetwork01'       = 'vnet01'
+  'VirtualNetwork02'       = 'vnet02'
+  'VirtualNetworkSubnet'   = 'subnet'
+  'GatewayVirtualNetwork'  = 'gvnet'
+  'ManagedPrivateEndpoint' = 'mpe'
+  'StorageAccount'         = 'st'
+  'ResourceGroup'          = 'rg'
+  'FabricCapacity'         = 'fc'
 }
 
 $baseName = Get-BaseName
@@ -766,7 +771,7 @@ $displayName = Get-DisplayName -Base $baseName
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
 $workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
 
-# Assign WorkspaceDS to Capacity if not already assigned or assigned to a different capacity
+# Assign WorkspaceRS to Capacity if not already assigned or assigned to a different capacity
 $workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
 
 Write-Log -Message "WorkspaceRS - Name: $($workspace.displayName) / ID: $($workspace.id)"
@@ -952,6 +957,72 @@ $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
   displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
+}
+
+# Create WorkspaceMPE if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceMPE'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceMPE to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceMPE - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceMPE'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+# Assign SPN to WorkspaceRS if not already assigned
+if ($SPN) {
+  Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SPN $SPN
+}
+
+# Create Resource Group if not exists
+$displayNameTemp = "$($itemNaming['ResourceGroup'])-${displayName}"
+$resourceGroup = Get-AzResourceGroup -Name $displayNameTemp
+if (!$resourceGroup) {
+  Write-Log -Message "Creating Resource Group: $displayNameTemp" -Level 'WARN'
+  $resourceGroup = New-AzResourceGroup -Name $displayNameTemp -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+Write-Log -Message "Resource Group - Name: $($resourceGroup.ResourceGroupName) / ID: $($resourceGroup.ResourceId)"
+$wellKnown['ResourceGroup'] = @{
+  id       = $resourceGroup.ResourceId
+  name     = $resourceGroup.ResourceGroupName
+  location = $resourceGroup.Location
+}
+
+# Create Storage Account if not exists
+$displayNameTemp = "$($itemNaming['StorageAccount'])${displayName}".ToLower() -replace '[^a-z0-9]', ''
+$storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp
+if (!$storageAccount) {
+  Write-Log -Message "Creating Storage Account: $displayNameTemp" -Level 'WARN'
+  $storageAccount = New-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp -SkuName Standard_LRS -Kind StorageV2 -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+Write-Log -Message "Storage Account - Name: $($storageAccount.StorageAccountName) / ID: $($storageAccount.Id)"
+$wellKnown['StorageAccount'] = @{
+  id   = $storageAccount.Id
+  name = $storageAccount.StorageAccountName
+}
+
+# Create Managed Private Endpoint if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ManagedPrivateEndpoint'])"
+$managedPrivateEndpoints = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceMPE']['id'])/managedPrivateEndpoints"
+$managedPrivateEndpoint = $managedPrivateEndpoints.Response.value | Where-Object { $_.name -eq $displayNameTemp }
+if (!$managedPrivateEndpoint) {
+  Write-Log -Message "Creating Managed Private Endpoint: $displayNameTemp" -Level 'WARN'
+  $payload = @{
+    name                        = $displayNameTemp
+    targetPrivateLinkResourceId = $wellKnown['StorageAccount']['id']
+    targetSubresourceType       = 'blob'
+    requestMessage              = $displayNameTemp
+  }
+  # $managedPrivateEndpoint = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/managedPrivateEndpoints" -Payload $payload).Response
+}
+Write-Log -Message "Managed Private Endpoint - Name: $($managedPrivateEndpoint.name) / ID: $($managedPrivateEndpoint.id)"
+$wellKnown['ManagedPrivateEndpoint'] = @{
+  id   = $managedPrivateEndpoint.id
+  name = $managedPrivateEndpoint.name
 }
 
 # Create SP if not exists
