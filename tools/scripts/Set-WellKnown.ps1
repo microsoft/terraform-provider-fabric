@@ -698,7 +698,7 @@ function Set-AzureVirtualNetwork {
 }
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
