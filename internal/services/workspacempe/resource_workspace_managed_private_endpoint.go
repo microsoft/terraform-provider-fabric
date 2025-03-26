@@ -103,6 +103,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Create(ctx context.Context, re
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	respCreate, err := r.client.CreateWorkspaceManagedPrivateEndpoint(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateManagedPrivateEndpointRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -112,7 +113,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Create(ctx context.Context, re
 		return
 	}
 
-	state.ID = customtypes.NewUUIDPointerValue(respCreate.ManagedPrivateEndpoint.ID)
+	state.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
 	state.WorkspaceID = plan.WorkspaceID
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
@@ -214,6 +215,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Delete(ctx context.Context, re
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	_, err := r.client.DeleteWorkspaceManagedPrivateEndpoint(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
