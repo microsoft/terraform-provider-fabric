@@ -20,7 +20,6 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-
 func TestAcc_WorkspaceManagedPrivateEndpointResource_CRUD(t *testing.T) {
 	azure := testhelp.WellKnown()["Azure"].(map[string]any)
 	azureSubscriptionID := azure["subscriptionId"].(string)
