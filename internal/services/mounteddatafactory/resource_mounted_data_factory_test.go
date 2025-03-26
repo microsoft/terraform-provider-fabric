@@ -25,8 +25,27 @@ var (
 )
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
-	"path": testhelp.GetFixturesDirPath("mounteddatafactory"),
+	"path": testhelp.GetFixturesDirPath("mounted_data_factory"),
 })
+
+var (
+	virtualNetworkAzureResource01 = testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
+	vNET01SubscriptionID          = virtualNetworkAzureResource01["subscriptionId"].(string)
+	vNET01ResourceGroupName       = virtualNetworkAzureResource01["resourceGroupName"].(string)
+
+	factoryName = testhelp.WellKnown()["MountedDataFactory"].(map[string]any)["displayName"].(string)
+
+	testHelperDefinition = map[string]any{
+		`"mountedDataFactory-content.json"`: map[string]any{
+			"source": "${local.path}/mountedDataFactory-content.json",
+			"tokens": map[string]any{
+				"subscriptionId":    vNET01SubscriptionID,
+				"resourceGroupName": vNET01ResourceGroupName,
+				"factoryName":       factoryName,
+			},
+		},
+	}
+)
 
 func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -42,37 +61,84 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 		// error - workspace_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "invalid uuid",
-					"display_name": "test",
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "invalid uuid",
+						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":    "00000000-0000-0000-0000-000000000000",
-					"unexpected_attr": "test",
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"unexpected_attr": "test",
+						"format":          "Default",
+						"definition":      testHelperDefinition,
+					},
+				),
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": "test",
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"display_name": "test",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`The argument "format" is required, but no definition was found.`),
 		},
 		// error - no required attributes
 		{
@@ -81,9 +147,11 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+					"format":       "Default",
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
 }
@@ -96,13 +164,17 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
 
-	testCase := at.CompileConfig(
-		testResourceItemHeader,
-		map[string]any{
-			"workspace_id": *entity.WorkspaceID,
-			"display_name": *entity.DisplayName,
-		},
-	)
+	testCase := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": *entity.WorkspaceID,
+				"display_name": *entity.DisplayName,
+				"format":       "Default",
+				"definition":   testHelperDefinition,
+			},
+		))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -170,44 +242,77 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityExist.WorkspaceID,
-					"display_name": *entityExist.DisplayName,
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
 			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
-		// Create and Read
+		// Create and Read - no definition
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityBefore.DisplayName,
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
+					},
+				),
 			),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
+		},
+		// Create and Read with definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"description":  *entityBefore.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityAfter.DisplayName,
-					"description":  *entityAfter.Description,
-				},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -218,22 +323,6 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	virtualNetworkAzureResource01 := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
-	vNET01SubscriptionID := virtualNetworkAzureResource01["subscriptionId"].(string)
-	vNET01ResourceGroupName := virtualNetworkAzureResource01["resourceGroupName"].(string)
-
-	factoryName := testhelp.WellKnown()["MountedDataFactory"].(map[string]any)["displayName"].(string)
-
-	testHelperDefinitionUpdate := map[string]any{
-		`"mountedDataFactory-content.json"`: map[string]any{
-			"source": "${local.path}/mountedDataFactory-content.json",
-			"tokens": map[string]any{
-				"subscriptionId":    vNET01SubscriptionID,
-				"resourceGroupName": vNET01ResourceGroupName,
-				"factoryName":       factoryName,
-			},
-		},
-	}
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
@@ -250,7 +339,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinitionUpdate,
+						"definition":   testHelperDefinition,
 					},
 				),
 			),
@@ -271,7 +360,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
 						"format":       "Default",
-						"definition":   testHelperDefinitionUpdate,
+						"definition":   testHelperDefinition,
 					},
 				),
 			),
