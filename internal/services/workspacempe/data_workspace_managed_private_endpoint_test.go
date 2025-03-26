@@ -18,7 +18,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource("fabric", ItemTFName, "test")
+var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
 
 func TestUnit_WorkspaceManagedPrivateEndpointDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()

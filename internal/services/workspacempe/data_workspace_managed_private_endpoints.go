@@ -18,6 +18,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -30,18 +31,21 @@ var (
 type dataSourceWorkspaceManagedPrivateEndpoints struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ManagedPrivateEndpointsClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceWorkspaceManagedPrivateEndpoints() datasource.DataSource {
-	return &dataSourceWorkspaceManagedPrivateEndpoints{}
+	return &dataSourceWorkspaceManagedPrivateEndpoints{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceWorkspaceManagedPrivateEndpoints) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
+func (d *dataSourceWorkspaceManagedPrivateEndpoints) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoints) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	s := workspaceManagedPrivateEndpointSchema(ctx, true).GetDataSource(ctx)
+	s := itemSchema(true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: s.GetMarkdownDescription(),
@@ -52,7 +56,7 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoints) Schema(ctx context.Context,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"values": schema.SetNestedAttribute{
-				MarkdownDescription: "The collection of " + ItemNames + ".",
+				MarkdownDescription: "The collection of " + d.TypeInfo.Names + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseWorkspaceManagedPrivateEndpointModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
@@ -80,11 +84,12 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoints) Configure(_ context.Context
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(ItemName, ItemPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoints) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
