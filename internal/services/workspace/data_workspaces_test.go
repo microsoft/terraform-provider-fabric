@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -44,9 +47,19 @@ func TestUnit_WorkspacesDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.id"),
-			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id":           knownvalue.StringExact(*entity.ID),
+							"display_name": knownvalue.StringExact(*entity.DisplayName),
+							"description":  knownvalue.StringExact(*entity.Description),
+						}),
+					}),
+				),
+			},
 		},
 	}))
 }

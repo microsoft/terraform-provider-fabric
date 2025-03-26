@@ -50,8 +50,8 @@ DATA-SOURCE (list)
 */
 
 type dataSourceDomainsModel struct {
-	Values   supertypes.ListNestedObjectValueOf[baseDomainModel] `tfsdk:"values"`
-	Timeouts timeoutsD.Value                                     `tfsdk:"timeouts"`
+	Values   supertypes.SetNestedObjectValueOf[baseDomainModel] `tfsdk:"values"`
+	Timeouts timeoutsD.Value                                    `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.Domain) diag.Diagnostics {
