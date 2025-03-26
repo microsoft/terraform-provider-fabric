@@ -12,11 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource("fabric", ItemsTFName, "test")
+var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_WorkspaceManagedPrivateEndpointsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()

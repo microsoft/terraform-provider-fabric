@@ -16,6 +16,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -29,18 +30,21 @@ var (
 type dataSourceWorkspaceManagedPrivateEndpoint struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ManagedPrivateEndpointsClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceWorkspaceManagedPrivateEndpoint() datasource.DataSource {
-	return &dataSourceWorkspaceManagedPrivateEndpoint{}
+	return &dataSourceWorkspaceManagedPrivateEndpoint{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceWorkspaceManagedPrivateEndpoint) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (d *dataSourceWorkspaceManagedPrivateEndpoint) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoint) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = workspaceManagedPrivateEndpointSchema(ctx, false).GetDataSource(ctx)
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoint) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
@@ -72,11 +76,12 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoint) Configure(_ context.Context,
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(ItemName, ItemPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
 }
 
 func (d *dataSourceWorkspaceManagedPrivateEndpoint) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -159,7 +164,7 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoint) getByName(ctx context.Contex
 
 	diags.AddError(
 		common.ErrorReadHeader,
-		fmt.Sprintf("Unable to find %s with 'display_name': %s", ItemName, model.Name.ValueString()),
+		fmt.Sprintf("Unable to find %s with 'display_name': %s", d.TypeInfo.Name, model.Name.ValueString()),
 	)
 
 	return diags

@@ -4,7 +4,6 @@
 package workspacempe
 
 import (
-	"context"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -21,38 +20,26 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func workspaceManagedPrivateEndpointSchema(_ context.Context, dsList bool) superschema.Schema { //revive:disable-line:flag-parameter
-	markdownDescriptionR := "The " + ItemName + " resource allows you to manage a Fabric [" + ItemName + "](" + ItemDocsURL + ")."
-	markdownDescriptionR = fabricitem.GetResourceSPNSupportNote(markdownDescriptionR, ItemSPNSupport)
-	markdownDescriptionR = fabricitem.GetResourcePreviewNote(markdownDescriptionR, ItemPreview)
-
+func itemSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
-	var markdownDescriptionD string
 
-	if dsList {
-		markdownDescriptionD = "The " + ItemNames + " data-source allows you to read a collection of a Fabric [" + ItemName + "](" + ItemDocsURL + ") details."
-	} else {
+	if !dsList {
 		dsTimeout = &superschema.DatasourceTimeoutAttribute{
 			Read: true,
 		}
-
-		markdownDescriptionD = "The " + ItemName + " data-source allows you to read a Fabric [" + ItemName + "](" + ItemDocsURL + ") details."
 	}
-
-	markdownDescriptionD = fabricitem.GetDataSourceSPNSupportNote(markdownDescriptionD, ItemSPNSupport)
-	markdownDescriptionD = fabricitem.GetDataSourcePreviewNote(markdownDescriptionD, ItemPreview)
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionR,
+			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		DataSource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionD,
+			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		Attributes: map[string]superschema.Attribute{
 			"id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemName + " ID.",
+					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
 					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -84,7 +71,7 @@ func workspaceManagedPrivateEndpointSchema(_ context.Context, dsList bool) super
 			},
 			"name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemName + " name.",
+					MarkdownDescription: "The " + ItemTypeInfo.Name + " name.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,

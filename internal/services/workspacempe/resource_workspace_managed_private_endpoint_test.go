@@ -14,10 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource("fabric", ItemTFName, "test")
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
 
 func TestAcc_WorkspaceManagedPrivateEndpointResource_CRUD(t *testing.T) {
 	azure := testhelp.WellKnown()["Azure"].(map[string]any)

@@ -18,6 +18,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -31,19 +32,22 @@ var (
 type resourceWorkspaceManagedPrivateEndpoint struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ManagedPrivateEndpointsClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 	mu          *sync.Mutex
 }
 
 func NewResourceWorkspaceManagedPrivateEndpoint() resource.Resource {
-	return &resourceWorkspaceManagedPrivateEndpoint{}
+	return &resourceWorkspaceManagedPrivateEndpoint{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (r *resourceWorkspaceManagedPrivateEndpoint) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (r *resourceWorkspaceManagedPrivateEndpoint) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *resourceWorkspaceManagedPrivateEndpoint) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = workspaceManagedPrivateEndpointSchema(ctx, false).GetResource(ctx)
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceWorkspaceManagedPrivateEndpoint) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -62,12 +66,13 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Configure(_ context.Context, r
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
-	r.mu = &sync.Mutex{}
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(ItemName, ItemPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
+	r.mu = &sync.Mutex{}
 }
 
 func (r *resourceWorkspaceManagedPrivateEndpoint) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -239,7 +244,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) get(ctx context.Context, model
 
 			diags.AddError(
 				common.ErrorReadHeader,
-				ItemName+" provisioning state: "+provisioningStateStr,
+				r.TypeInfo.Name+" provisioning state: "+provisioningStateStr,
 			)
 
 			return diags
@@ -248,7 +253,7 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) get(ctx context.Context, model
 			return model.set(ctx, model.WorkspaceID.ValueString(), respGet.ManagedPrivateEndpoint)
 
 		default:
-			tflog.Info(ctx, ItemName+" provisioning in progress, waiting 30 seconds before retrying", map[string]any{
+			tflog.Info(ctx, r.TypeInfo.Name+" provisioning in progress, waiting 30 seconds before retrying", map[string]any{
 				"provisioning_state": provisioningStateStr,
 			})
 

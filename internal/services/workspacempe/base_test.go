@@ -5,7 +5,4 @@ package workspacempe_test
 
 import "github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 
-const (
-	ItemTFName  = workspacempe.ItemTFName
-	ItemsTFName = workspacempe.ItemsTFName
-)
+var itemTypeInfo = workspacempe.ItemTypeInfo

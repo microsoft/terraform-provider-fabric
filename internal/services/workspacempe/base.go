@@ -3,12 +3,14 @@
 
 package workspacempe
 
-const (
-	ItemName       = "Workspace Managed Private Endpoint"
-	ItemTFName     = "workspace_managed_private_endpoint"
-	ItemNames      = "Workspace Managed Private Endpoints"
-	ItemsTFName    = "workspace_managed_private_endpoints"
-	ItemDocsURL    = "https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview"
-	ItemSPNSupport = true
-	ItemPreview    = true
-)
+import "github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Workspace Managed Private Endpoint",
+	Type:           "workspace_managed_private_endpoint",
+	Names:          "Workspace Managed Private Endpoints",
+	Types:          "workspace_managed_private_endpoints",
+	DocsURL:        "https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview",
+	IsPreview:      true,
+	IsSPNSupported: true,
+}
