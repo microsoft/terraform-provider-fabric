@@ -16,7 +16,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -225,12 +225,12 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				Optional:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"auxiliary_tenant_ids": schema.ListAttribute{
+			"auxiliary_tenant_ids": schema.SetAttribute{
 				MarkdownDescription: "The Auxiliary Tenant IDs which should be used.",
 				ElementType:         customtypes.UUIDType{},
 				Optional:            true,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(3),
+				Validators: []validator.Set{
+					setvalidator.SizeAtMost(3),
 				},
 			},
 

@@ -42,10 +42,10 @@ func (d *dataSourceCapacities) Schema(ctx context.Context, _ datasource.SchemaRe
 			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ") for more information.\n\n" +
 			ItemDocsSPNSupport,
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: fmt.Sprintf("The list of %s.", ItemsName),
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseCapacityModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseCapacityModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{

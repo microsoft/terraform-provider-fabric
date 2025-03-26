@@ -40,7 +40,7 @@ data "fabric_ml_experiments" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of ML Experiments. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of ML Experiments. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
