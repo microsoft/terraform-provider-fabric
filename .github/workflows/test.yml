@@ -398,6 +398,10 @@ jobs:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
+          # ARM_SUBSCRIPTION_ID: ${{ secrets.TESTACC_SUBSCRIPTION_ID }}
 
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
@@ -407,6 +411,10 @@ jobs:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
+          # ARM_SUBSCRIPTION_ID: ${{ secrets.TESTACC_SUBSCRIPTION_ID }}
 
       - name: 📤 Upload test results
         if: always()
