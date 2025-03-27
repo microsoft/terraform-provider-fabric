@@ -1,0 +1,5 @@
+kind: fixed
+body: State not properly refreshed when entity removed outside of the terraform
+time: 2025-03-27T11:57:30.8504883-07:00
+custom:
+    Issue: "352"

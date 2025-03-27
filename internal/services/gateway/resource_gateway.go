@@ -146,6 +146,10 @@ func (r *resourceGateway) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{
@@ -257,7 +261,7 @@ func (r *resourceGateway) ImportState(ctx context.Context, req resource.ImportSt
 
 func (r *resourceGateway) get(ctx context.Context, model *resourceGatewayModel) diag.Diagnostics {
 	respGet, err := r.client.GetGateway(ctx, model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 

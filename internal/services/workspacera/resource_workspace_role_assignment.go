@@ -132,13 +132,16 @@ func (r *resourceWorkspaceRoleAssignment) Read(ctx context.Context, req resource
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if diags := r.get(ctx, &state); resp.Diagnostics.HasError() {
-		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
-			resp.State.RemoveResource(ctx)
-		}
+	diags = r.get(ctx, &state)
+	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+		resp.State.RemoveResource(ctx)
 
 		resp.Diagnostics.Append(diags...)
 
+		return
+	}
+
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -283,7 +286,7 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 
 func (r *resourceWorkspaceRoleAssignment) get(ctx context.Context, model *resourceWorkspaceRoleAssignmentModel) diag.Diagnostics {
 	respGetInfo, err := r.client.GetWorkspaceRoleAssignment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
