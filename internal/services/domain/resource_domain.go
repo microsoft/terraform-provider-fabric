@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -148,14 +149,16 @@ func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, res
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := r.get(ctx, &state)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
-			resp.State.RemoveResource(ctx)
-		}
+	diags = r.get(ctx, &state)
+	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+		resp.State.RemoveResource(ctx)
 
 		resp.Diagnostics.Append(diags...)
 
+		return
+	}
+
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -264,10 +267,10 @@ func (r *resourceDomain) ImportState(ctx context.Context, req resource.ImportSta
 	}
 }
 
-func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) error {
+func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) diag.Diagnostics {
 	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), nil)
-	if err != nil {
-		return err
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
+		return diags
 	}
 
 	model.set(respGet.Domain)

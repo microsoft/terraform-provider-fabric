@@ -245,7 +245,7 @@ func (r *resourceSparkWorkspaceSettings) Delete(ctx context.Context, _ resource.
 
 func (r *resourceSparkWorkspaceSettings) get(ctx context.Context, model *resourceSparkWorkspaceSettingsModel) diag.Diagnostics {
 	respGet, err := r.client.GetSparkSettings(ctx, model.WorkspaceID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 

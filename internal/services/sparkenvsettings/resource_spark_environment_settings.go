@@ -265,14 +265,14 @@ func (r *resourceSparkEnvironmentSettings) get(ctx context.Context, model *resou
 
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
 		respGet, err := r.client.GetPublishedSettings(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), nil)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
 
 		respEntity = respGet.SparkCompute
 	} else {
 		respGet, err := r.client.GetStagingSettings(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), nil)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
 

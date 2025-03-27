@@ -310,7 +310,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := r.ItemGetter(ctx, *r.pConfigData.FabricClient, *model, &fabricItem)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
