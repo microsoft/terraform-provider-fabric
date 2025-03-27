@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -33,7 +32,6 @@ type resourceWorkspaceManagedPrivateEndpoint struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ManagedPrivateEndpointsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
-	mu          *sync.Mutex
 }
 
 func NewResourceWorkspaceManagedPrivateEndpoint() resource.Resource {
@@ -72,16 +70,12 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Configure(_ context.Context, r
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewManagedPrivateEndpointsClient()
-	r.mu = &sync.Mutex{}
 }
 
 func (r *resourceWorkspaceManagedPrivateEndpoint) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	var plan, state resourceWorkspaceManagedPrivateEndpointModel
 
@@ -100,9 +94,6 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Create(ctx context.Context, re
 	var reqCreate requestCreateWorkspaceManagedPrivateEndpoint
 
 	reqCreate.set(plan)
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	respCreate, err := r.client.CreateWorkspaceManagedPrivateEndpoint(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateManagedPrivateEndpointRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -212,9 +203,6 @@ func (r *resourceWorkspaceManagedPrivateEndpoint) Delete(ctx context.Context, re
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	_, err := r.client.DeleteWorkspaceManagedPrivateEndpoint(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
