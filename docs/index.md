@@ -1,7 +1,7 @@
 ---
 page_title: "Microsoft Fabric Provider"
 description: |-
-
+  
 ---
 
 # Microsoft Fabric Provider
