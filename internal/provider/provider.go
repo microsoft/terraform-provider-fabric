@@ -300,19 +300,6 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				Optional:            true,
 			},
 
-			// Token specific fields
-			"token": schema.StringAttribute{
-				MarkdownDescription: "The token to use for authentication.",
-				DeprecationMessage:  "Token authentication is deprecated and will be removed in a future release.",
-				Optional:            true,
-				Sensitive:           true,
-			},
-			"token_file_path": schema.StringAttribute{
-				MarkdownDescription: "The path to a file containing an token.",
-				DeprecationMessage:  "Token authentication is deprecated and will be removed in a future release.",
-				Optional:            true,
-			},
-
 			// Use Azure CLI for auth
 			"use_cli": schema.BoolAttribute{
 				MarkdownDescription: "Allow Azure CLI to be used for authentication.",
@@ -627,13 +614,6 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.AzureDevOpsServiceConnectionID = putils.GetStringValue(config.AzureDevOpsServiceConnectionID, pconfig.GetEnvVarsAzureDevOpsServiceConnectionID(), "")
 	ctx = tflog.SetField(ctx, "azure_devops_service_connection_id", config.AzureDevOpsServiceConnectionID.ValueString())
 
-	config.Token = putils.GetStringValue(config.Token, pconfig.GetEnvVarsToken(), "")
-	ctx = tflog.SetField(ctx, "token", config.Token.ValueString())
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "token")
-
-	config.TokenFilePath = putils.GetStringValue(config.TokenFilePath, pconfig.GetEnvVarsTokenFilePath(), "")
-	ctx = tflog.SetField(ctx, "token_file_path", config.TokenFilePath.ValueString())
-
 	config.UseOIDC = putils.GetBoolValue(config.UseOIDC, pconfig.GetEnvVarsUseOIDC(), false)
 	ctx = tflog.SetField(ctx, "use_oidc", config.UseOIDC.ValueBool())
 
@@ -679,14 +659,6 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 
 	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
 	ctx = tflog.SetField(ctx, "preview", config.Preview.ValueBool())
-
-	if config.Preview.ValueBool() {
-		resp.Diagnostics.AddWarning(
-			"Preview mode enabled",
-			"Features available in preview mode are not yet generally available and may change without notice include breaking changes. "+
-				"Production use is not recommended. Use at your own risk!",
-		)
-	}
 
 	return ctx
 }
@@ -762,13 +734,6 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.config.Auth.OIDC.RequestURL = config.OIDCRequestURL.ValueString()
 
 	p.config.Auth.OIDC.Token, err = putils.GetValueOrFileValue("oidc_token", "oidc_token_file_path", config.OIDCToken, config.OIDCTokenFilePath)
-	if err != nil {
-		resp.Diagnostics.AddError(common.ErrorInvalidValue, err.Error())
-
-		return
-	}
-
-	p.config.Auth.Token, err = putils.GetValueOrFileValue("token", "token_file_path", config.Token, config.TokenFilePath)
 	if err != nil {
 		resp.Diagnostics.AddError(common.ErrorInvalidValue, err.Error())
 

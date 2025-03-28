@@ -46,8 +46,6 @@ type ProviderConfigModel struct {
 	OIDCToken                      types.String         `tfsdk:"oidc_token"`
 	OIDCTokenFilePath              types.String         `tfsdk:"oidc_token_file_path"`
 	AzureDevOpsServiceConnectionID types.String         `tfsdk:"azure_devops_service_connection_id"`
-	Token                          types.String         `tfsdk:"token"`
-	TokenFilePath                  types.String         `tfsdk:"token_file_path"`
 	UseOIDC                        types.Bool           `tfsdk:"use_oidc"`
 	UseCLI                         types.Bool           `tfsdk:"use_cli"`
 	UseDevCLI                      types.Bool           `tfsdk:"use_dev_cli"`
