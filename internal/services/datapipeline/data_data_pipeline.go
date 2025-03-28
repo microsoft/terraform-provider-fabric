@@ -10,16 +10,12 @@ import (
 )
 
 func NewDataSourceDataPipeline() datasource.DataSource {
-	config := fabricitem.DataSourceFabricItem{
-		Type:   ItemType,
-		Name:   ItemName,
-		TFName: ItemTFName,
-		MarkdownDescription: "Get a Fabric " + ItemName + ".\n\n" +
-			"Use this data source to fetch a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+	config := fabricitem.DataSourceFabricItemDefinition{
+		TypeInfo:            ItemTypeInfo,
+		FabricItemType:      FabricItemType,
 		IsDisplayNameUnique: true,
-		IsPreview:           ItemPreview,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
-	return fabricitem.NewDataSourceFabricItem(config)
+	return fabricitem.NewDataSourceFabricItemDefinition(config)
 }

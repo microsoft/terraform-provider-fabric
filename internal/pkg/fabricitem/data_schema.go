@@ -22,47 +22,47 @@ import (
 )
 
 func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) schema.Schema {
-	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
 
 	return schema.Schema{
-		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
+		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
-	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.DefinitionFormats) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
+		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getDataSourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
-	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
-	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
+		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getDataSourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) schema.Schema {
-	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.Name, d.IsDisplayNameUnique)
-	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
+	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.Name, d.DefinitionFormats) {
+	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: GetDataSourcePreviewNote(d.MarkdownDescription, d.IsPreview),
+		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }

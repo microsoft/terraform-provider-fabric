@@ -7,17 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -30,52 +28,21 @@ var (
 type dataSourceCapacity struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.CapacitiesClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceCapacity() datasource.DataSource {
-	return &dataSourceCapacity{}
+	return &dataSourceCapacity{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceCapacity) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (d *dataSourceCapacity) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *dataSourceCapacity) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Get a Fabric " + ItemName + ".\n\n" +
-			"Use this data source to fetch [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s ID.", ItemName),
-				Optional:            true,
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s display name.", ItemName),
-				Optional:            true,
-				Computed:            true,
-			},
-			"region": schema.StringAttribute{
-				MarkdownDescription: "The Azure region where the " + ItemName + " has been provisioned. Possible values: " + utils.ConvertStringSlicesToString(
-					fabcore.PossibleCapacityRegionValues(),
-					true,
-					true,
-				),
-				Computed: true,
-			},
-			"sku": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("The %s SKU.", ItemName),
-				Computed:            true,
-			},
-			"state": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " state. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityStateValues(), true, true),
-				Computed:            true,
-			},
-			"timeouts": timeouts.Attributes(ctx),
-		},
-	}
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceCapacity) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
@@ -153,20 +120,14 @@ func (d *dataSourceCapacity) Read(ctx context.Context, req datasource.ReadReques
 }
 
 func (d *dataSourceCapacity) getByID(ctx context.Context, model *dataSourceCapacityModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by 'id'", ItemName))
-
 	return d.get(ctx, true, model)
 }
 
 func (d *dataSourceCapacity) getByDisplayName(ctx context.Context, model *dataSourceCapacityModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by 'display_name'", ItemName))
-
 	return d.get(ctx, false, model)
 }
 
 func (d *dataSourceCapacity) get(ctx context.Context, byID bool, model *dataSourceCapacityModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+ItemName)
-
 	var diags diag.Diagnostics
 	var notFound string
 

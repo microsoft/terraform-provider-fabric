@@ -3,12 +3,6 @@
 
 package warehouse_test
 
-import (
-	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
-)
+import "github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 
-const (
-	itemTFName  = warehouse.ItemTFName
-	itemsTFName = warehouse.ItemsTFName
-	itemType    = warehouse.ItemType
-)
+var itemTypeInfo = warehouse.ItemTypeInfo

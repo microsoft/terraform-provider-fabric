@@ -9,4 +9,4 @@ import (
 
 var itemTypeInfo = dashboard.ItemTypeInfo
 
-const fabircItemType = dashboard.FabricItemType
+const fabricItemType = dashboard.FabricItemType

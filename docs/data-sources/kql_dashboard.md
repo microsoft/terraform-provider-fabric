@@ -3,18 +3,15 @@
 page_title: "fabric_kql_dashboard Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric KQL Dashboard.
-  Use this data source to fetch a KQL Dashboard https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create.
-  -> This item supports Service Principal authentication.
+  The KQL Dashboard data-source allows you to retrieve details about a Fabric KQL Dashboard https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_kql_dashboard (Data Source)
 
-Get a Fabric KQL Dashboard.
+The KQL Dashboard data-source allows you to retrieve details about a Fabric [KQL Dashboard](https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create).
 
-Use this data source to fetch a [KQL Dashboard](https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

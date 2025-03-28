@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
 )
 
-const (
-	itemTFName  = activator.ItemTFName
-	itemsTFName = activator.ItemsTFName
-	itemType    = activator.ItemType
-)
+var itemTypeInfo = activator.ItemTypeInfo
+
+const fabricItemType = activator.FabricItemType

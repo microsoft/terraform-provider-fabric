@@ -3,21 +3,15 @@
 page_title: "fabric_data_pipeline Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Data Pipeline.
-  Use this data source to fetch a Data Pipeline https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
-  -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Data Pipeline data-source allows you to retrieve details about a Fabric Data Pipeline https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_data_pipeline (Data Source)
 
-Get a Fabric Data Pipeline.
+The Data Pipeline data-source allows you to retrieve details about a Fabric [Data Pipeline](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition).
 
-Use this data source to fetch a [Data Pipeline](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
-
--> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -51,11 +45,17 @@ data "fabric_data_pipeline" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The Data Pipeline display name.
+- `format` (String) The Data Pipeline format. Possible values: `Default`
 - `id` (String) The Data Pipeline ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `pipeline-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Data Pipeline description.
 
 <a id="nestedatt--timeouts"></a>
@@ -65,3 +65,12 @@ data "fabric_data_pipeline" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.

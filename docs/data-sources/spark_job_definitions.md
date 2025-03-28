@@ -3,18 +3,15 @@
 page_title: "fabric_spark_job_definitions Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Spark Job Definitions.
-  Use this data source to list Spark Job Definitions https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
-  -> This item supports Service Principal authentication.
+  The Spark Job Definition data-source allows you to retrieve details about a Fabric Spark Job Definition https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_spark_job_definitions (Data Source)
 
-List a Fabric Spark Job Definitions.
+The Spark Job Definition data-source allows you to retrieve details about a Fabric [Spark Job Definition](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
 
-Use this data source to list [Spark Job Definitions](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

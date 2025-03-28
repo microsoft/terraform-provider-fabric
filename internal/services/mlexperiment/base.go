@@ -6,16 +6,17 @@ package mlexperiment
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "ML Experiment"
-	ItemTFName         = "ml_experiment"
-	ItemsName          = "ML Experiments"
-	ItemsTFName        = "ml_experiments"
-	ItemType           = fabcore.ItemTypeMLExperiment
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-science/machine-learning-experiment"
-	ItemPreview        = true
-)
+const FabricItemType = fabcore.ItemTypeMLExperiment
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "ML Experiment",
+	Type:           "ml_experiment",
+	Names:          "ML Experiments",
+	Types:          "ml_experiments",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-science/machine-learning-experiment",
+	IsPreview:      true,
+	IsSPNSupported: false,
+}

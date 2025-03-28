@@ -11,11 +11,8 @@ import (
 
 func NewDataSourceDashboards() datasource.DataSource {
 	config := fabricitem.DataSourceFabricItems{
-		Type:                FabricItemType,
-		Name:                ItemTypeInfo.Name,
-		Names:               ItemTypeInfo.Names,
-		TFName:              ItemTypeInfo.Types,
-		MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, true),
+		TypeInfo:       ItemTypeInfo,
+		FabricItemType: FabricItemType,
 	}
 
 	return fabricitem.NewDataSourceFabricItems(config)

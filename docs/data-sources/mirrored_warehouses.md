@@ -3,19 +3,16 @@
 page_title: "fabric_mirrored_warehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Mirrored Warehouses.
-  Use this data source to list Mirrored Warehouses https://learn.microsoft.com/fabric/database/mirrored-database/overview.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The Mirrored Warehouses data-source allows you to retrieve a list of Fabric Mirrored Warehouses https://learn.microsoft.com/fabric/database/mirrored-database/overview.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_mirrored_warehouses (Data Source)
 
-List a Fabric Mirrored Warehouses.
+The Mirrored Warehouses data-source allows you to retrieve a list of Fabric [Mirrored Warehouses](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
 
-Use this data source to list [Mirrored Warehouses](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

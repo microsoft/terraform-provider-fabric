@@ -6,16 +6,17 @@ package paginatedreport
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Paginated Report"
-	ItemTFName         = "paginated_report"
-	ItemsName          = "Paginated Reports"
-	ItemsTFName        = "paginated_reports"
-	ItemType           = fabcore.ItemTypePaginatedReport
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
-	ItemDocsURL        = "https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table"
-	ItemPreview        = true
-)
+const FabricItemType = fabcore.ItemTypePaginatedReport
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Paginated Report",
+	Type:           "paginated_report",
+	Names:          "Paginated Reports",
+	Types:          "paginated_reports",
+	DocsURL:        "https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table",
+	IsPreview:      true,
+	IsSPNSupported: false,
+}

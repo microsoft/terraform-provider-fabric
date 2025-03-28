@@ -3,21 +3,15 @@
 page_title: "fabric_data_pipeline Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Data Pipeline.
-  Use this resource to manage Data Pipeline https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
-  -> This item supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Data Pipeline resource allows you to manage a Fabric Data Pipeline https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_data_pipeline (Resource)
 
-Manage a Fabric Data Pipeline.
+The Data Pipeline resource allows you to manage a Fabric [Data Pipeline](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition).
 
-Use this resource to manage [Data Pipeline](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
-
--> This item supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

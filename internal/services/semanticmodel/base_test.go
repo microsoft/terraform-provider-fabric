@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 )
 
-const (
-	itemTFName  = semanticmodel.ItemTFName
-	itemsTFName = semanticmodel.ItemsTFName
-	itemType    = semanticmodel.ItemType
-)
+var itemTypeInfo = semanticmodel.ItemTypeInfo
+
+const fabricItemType = semanticmodel.FabricItemType

@@ -3,19 +3,16 @@
 page_title: "fabric_ml_experiment Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric ML Experiment.
-  Use this data source to fetch a ML Experiment https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The ML Experiment data-source allows you to retrieve details about a Fabric ML Experiment https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_ml_experiment (Data Source)
 
-Get a Fabric ML Experiment.
+The ML Experiment data-source allows you to retrieve details about a Fabric [ML Experiment](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
-Use this data source to fetch a [ML Experiment](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

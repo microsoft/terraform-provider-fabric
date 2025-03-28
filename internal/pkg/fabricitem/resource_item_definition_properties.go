@@ -43,8 +43,8 @@ func NewResourceFabricItemDefinitionProperties[Ttfprop, Titemprop any](config Re
 	return &config
 }
 
-func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
@@ -85,7 +85,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ModifyPlan(
 		if doUpdateDefinition {
 			resp.Diagnostics.AddWarning(
 				common.WarningItemDefinitionUpdateHeader,
-				fmt.Sprintf(common.WarningItemDefinitionUpdateDetails, r.Name),
+				fmt.Sprintf(common.WarningItemDefinitionUpdateDetails, r.TypeInfo.Name),
 			)
 		}
 	}
@@ -119,11 +119,12 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -149,7 +150,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
-	reqCreate.setType(r.Type)
+	reqCreate.setType(r.FabricItemType)
 
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
@@ -246,7 +247,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 	var reqUpdatePlan requestUpdateFabricItem
 
 	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
-		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
+		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
 		_, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -277,7 +278,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 	}
 
 	if doUpdateDefinition {
-		tflog.Trace(ctx, fmt.Sprintf("updating %s definition", r.Name))
+		tflog.Trace(ctx, fmt.Sprintf("updating %s definition", r.TypeInfo.Name))
 
 		_, err := r.client.UpdateItemDefinition(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdateDefinition.UpdateItemDefinitionRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -347,7 +348,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(
 				common.ErrorImportIdentifierDetails,
-				fmt.Sprintf("WorkspaceID/%sID", string(r.Type)),
+				fmt.Sprintf("WorkspaceID/%sID", string(r.FabricItemType)),
 			),
 		)
 
@@ -408,7 +409,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(
 	ctx context.Context,
 	model *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop],
 ) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 

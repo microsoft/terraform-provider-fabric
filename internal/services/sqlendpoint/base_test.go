@@ -7,7 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 )
 
-const (
-	itemsTFName = sqlendpoint.ItemsTFName
-	itemType    = sqlendpoint.ItemType
-)
+var itemTypeInfo = sqlendpoint.ItemTypeInfo
+
+const fabricItemType = sqlendpoint.FabricItemType

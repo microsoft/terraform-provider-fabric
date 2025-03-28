@@ -3,18 +3,15 @@
 page_title: "fabric_eventhouse Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Eventhouse.
-  Use this data source to fetch an Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
-  -> This item supports Service Principal authentication.
+  The Eventhouse data-source allows you to retrieve details about a Fabric Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_eventhouse (Data Source)
 
-Get a Fabric Eventhouse.
+The Eventhouse data-source allows you to retrieve details about a Fabric [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
-Use this data source to fetch an [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

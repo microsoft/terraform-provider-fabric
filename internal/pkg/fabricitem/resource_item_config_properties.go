@@ -46,10 +46,10 @@ func NewResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemc
 
 func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Metadata(
 	_ context.Context,
-	req resource.MetadataRequest,
+	_ resource.MetadataRequest,
 	resp *resource.MetadataResponse,
 ) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Schema(
@@ -80,11 +80,12 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Create(
@@ -118,7 +119,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
-	reqCreate.setType(r.Type)
+	reqCreate.setType(r.FabricItemType)
 
 	creationPayload, diags := getCreationPayload(ctx, config.Configuration, r.CreationPayloadSetter)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
@@ -299,7 +300,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(
 				common.ErrorImportIdentifierDetails,
-				fmt.Sprintf("WorkspaceID/%sID", string(r.Type)),
+				fmt.Sprintf("WorkspaceID/%sID", string(r.FabricItemType)),
 			),
 		)
 
@@ -354,7 +355,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	ctx context.Context,
 	model *ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
 ) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 

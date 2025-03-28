@@ -43,10 +43,10 @@ func NewDataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop any](config 
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Metadata(
 	_ context.Context,
-	req datasource.MetadataRequest,
+	_ datasource.MetadataRequest,
 	resp *datasource.MetadataResponse,
 ) {
-	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -90,11 +90,12 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -155,7 +156,7 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByID(
 	ctx context.Context,
 	model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop],
 ) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.Name, model.ID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 
@@ -173,10 +174,10 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByDisp
 	ctx context.Context,
 	model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop],
 ) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.Name, model.DisplayName.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.TypeInfo.Name, model.DisplayName.ValueString()))
 
 	errNotFoundCode := fabcore.ErrCommon.EntityNotFound.Error()
-	errNotFoundMsg := fmt.Sprintf("Unable to find %s with 'display_name': %s in the Workspace ID: %s", d.Name, model.DisplayName.ValueString(), model.WorkspaceID.ValueString())
+	errNotFoundMsg := fmt.Sprintf("Unable to find %s with 'display_name': %s in the Workspace ID: %s", d.TypeInfo.Name, model.DisplayName.ValueString(), model.WorkspaceID.ValueString())
 
 	errNotFound := fabcore.ResponseError{
 		ErrorCode:  errNotFoundCode,
@@ -200,7 +201,7 @@ func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getByDisp
 }
 
 func (d *DataSourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) getDefinition(ctx context.Context, model *DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s definition (WorkspaceID: %s ItemID: %s)", d.Name, model.WorkspaceID.ValueString(), model.ID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s definition (WorkspaceID: %s ItemID: %s)", d.TypeInfo.Name, model.WorkspaceID.ValueString(), model.ID.ValueString()))
 
 	respGetOpts := &fabcore.ItemsClientBeginGetItemDefinitionOptions{}
 

@@ -3,19 +3,16 @@
 page_title: "fabric_ml_models Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric ML Models.
-  Use this data source to list ML Models https://learn.microsoft.com/fabric/data-science/machine-learning-model.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The ML Models data-source allows you to retrieve a list of Fabric ML Models https://learn.microsoft.com/fabric/data-science/machine-learning-model.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_ml_models (Data Source)
 
-List a Fabric ML Models.
+The ML Models data-source allows you to retrieve a list of Fabric [ML Models](https://learn.microsoft.com/fabric/data-science/machine-learning-model).
 
-Use this data source to list [ML Models](https://learn.microsoft.com/fabric/data-science/machine-learning-model).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

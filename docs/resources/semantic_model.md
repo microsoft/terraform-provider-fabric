@@ -3,18 +3,15 @@
 page_title: "fabric_semantic_model Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Semantic Model.
-  Use this resource to manage Semantic Model https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
-  -> This item supports Service Principal authentication.
+  The Semantic Model resource allows you to manage a Fabric Semantic Model https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_semantic_model (Resource)
 
-Manage a Fabric Semantic Model.
+The Semantic Model resource allows you to manage a Fabric [Semantic Model](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
 
-Use this resource to manage [Semantic Model](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

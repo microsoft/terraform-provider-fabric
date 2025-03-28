@@ -3,21 +3,15 @@
 page_title: "fabric_kql_querysets Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric KQL Querysets.
-  Use this data source to list KQL Querysets https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set.
-  -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The KQL Querysets data-source allows you to retrieve a list of Fabric KQL Querysets https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_kql_querysets (Data Source)
 
-List a Fabric KQL Querysets.
+The KQL Querysets data-source allows you to retrieve a list of Fabric [KQL Querysets](https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set).
 
-Use this data source to list [KQL Querysets](https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set).
-
--> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 )
 
-const (
-	itemTFName  = mirroreddatabase.ItemTFName
-	itemsTFName = mirroreddatabase.ItemsTFName
-	itemType    = mirroreddatabase.ItemType
-)
+var itemTypeInfo = mirroreddatabase.ItemTypeInfo
+
+const fabricItemType = mirroreddatabase.FabricItemType

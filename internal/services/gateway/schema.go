@@ -28,9 +28,6 @@ import (
 
 //nolint:maintidx
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
-	markdownDescriptionR := fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false)
-	markdownDescriptionD := fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList)
-
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 
 	if !isList {
@@ -43,10 +40,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionR,
+			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		DataSource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionD,
+			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList),
 		},
 		Attributes: map[string]superschema.Attribute{
 			"id": superschema.SuperStringAttribute{

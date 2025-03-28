@@ -3,19 +3,16 @@
 page_title: "fabric_paginated_reports Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Paginated Reports.
-  Use this data source to list Paginated Reports https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The Paginated Reports data-source allows you to retrieve a list of Fabric Paginated Reports https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_paginated_reports (Data Source)
 
-List a Fabric Paginated Reports.
+The Paginated Reports data-source allows you to retrieve a list of Fabric [Paginated Reports](https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table).
 
-Use this data source to list [Paginated Reports](https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

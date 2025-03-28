@@ -3,18 +3,15 @@
 page_title: "fabric_environment Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Environment.
-  Use this resource to manage an Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
-  -> This item supports Service Principal authentication.
+  The Environment resource allows you to manage a Fabric Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_environment (Resource)
 
-Manage a Fabric Environment.
+The Environment resource allows you to manage a Fabric [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
-Use this resource to manage an [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

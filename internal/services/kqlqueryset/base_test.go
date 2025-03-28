@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 )
 
-const (
-	itemTFName  = kqlqueryset.ItemTFName
-	itemsTFName = kqlqueryset.ItemsTFName
-	itemType    = kqlqueryset.ItemType
-)
+var itemTypeInfo = kqlqueryset.ItemTypeInfo
+
+const fabricItemType = kqlqueryset.FabricItemType

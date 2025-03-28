@@ -13,23 +13,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var (
-	testDataSourceItemsFQN    = testhelp.DataSourceFQN("fabric", itemsTFName, "test")
-	testDataSourceItemsHeader = at.DataSourceHeader(testhelp.TypeName("fabric", itemsTFName), "test")
-)
+var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_MLModelsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

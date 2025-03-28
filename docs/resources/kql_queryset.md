@@ -3,21 +3,15 @@
 page_title: "fabric_kql_queryset Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric KQL Queryset.
-  Use this resource to manage KQL Queryset https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set.
-  -> This item supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The KQL Queryset resource allows you to manage a Fabric KQL Queryset https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_kql_queryset (Resource)
 
-Manage a Fabric KQL Queryset.
+The KQL Queryset resource allows you to manage a Fabric [KQL Queryset](https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set).
 
-Use this resource to manage [KQL Queryset](https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set).
-
--> This item supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

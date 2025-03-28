@@ -7,9 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
 )
 
-const (
-	itemName    = sparkjobdefinition.ItemName
-	itemTFName  = sparkjobdefinition.ItemTFName
-	itemsTFName = sparkjobdefinition.ItemsTFName
-	itemType    = sparkjobdefinition.ItemType
-)
+var itemTypeInfo = sparkjobdefinition.ItemTypeInfo
+
+const fabricItemType = sparkjobdefinition.FabricItemType

@@ -3,19 +3,16 @@
 page_title: "fabric_sql_endpoints Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric SQL Endpoints.
-  Use this data source to list SQL Endpoints https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The SQL Endpoints data-source allows you to retrieve a list of Fabric SQL Endpoints https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_endpoints (Data Source)
 
-List a Fabric SQL Endpoints.
+The SQL Endpoints data-source allows you to retrieve a list of Fabric [SQL Endpoints](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse).
 
-Use this data source to list [SQL Endpoints](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing#sql-analytics-endpoint-of-the-lakehouse).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
