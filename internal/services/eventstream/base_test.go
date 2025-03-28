@@ -12,11 +12,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-const (
-	itemTFName  = eventstream.ItemTFName
-	itemsTFName = eventstream.ItemsTFName
-	itemType    = eventstream.ItemType
-)
+var itemTypeInfo = eventstream.ItemTypeInfo
+
+const fabricItemType = eventstream.FabricItemType
 
 func lakehouseResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

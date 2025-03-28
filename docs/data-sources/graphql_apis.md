@@ -3,19 +3,16 @@
 page_title: "fabric_graphql_apis Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric GraphQL APIs.
-  Use this data source to list GraphQL APIs https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
-  -> This item supports Service Principal authentication.
+  The GraphQL APIs data-source allows you to retrieve a list of Fabric GraphQL APIs https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_graphql_apis (Data Source)
 
-List a Fabric GraphQL APIs.
+The GraphQL APIs data-source allows you to retrieve a list of Fabric [GraphQL APIs](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
 
-Use this data source to list [GraphQL APIs](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

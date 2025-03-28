@@ -37,8 +37,8 @@ func NewDataSourceFabricItemsProperties[Ttfprop, Titemprop any](config DataSourc
 	return &config
 }
 
-func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
+func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -49,24 +49,24 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			CustomType:          customtypes.UUIDType{},
 		},
 		"id": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s ID.", d.Name),
+			MarkdownDescription: fmt.Sprintf("The %s ID.", d.TypeInfo.Name),
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 		"display_name": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s display name.", d.Name),
+			MarkdownDescription: fmt.Sprintf("The %s display name.", d.TypeInfo.Name),
 			Computed:            true,
 		},
 		"description": schema.StringAttribute{
-			MarkdownDescription: fmt.Sprintf("The %s description.", d.Name),
+			MarkdownDescription: fmt.Sprintf("The %s description.", d.TypeInfo.Name),
 			Computed:            true,
 		},
 	}
 
-	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.Name, d.PropertiesAttributes)
+	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: d.MarkdownDescription,
+		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes: map[string]schema.Attribute{
 			"workspace_id": schema.StringAttribute{
 				MarkdownDescription: "The Workspace ID.",
@@ -75,7 +75,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			},
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
-				MarkdownDescription: fmt.Sprintf("The list of %s.", d.Names),
+				MarkdownDescription: fmt.Sprintf("The list of %s.", d.TypeInfo.Names),
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
@@ -103,7 +103,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Configure(_ contex
 
 	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -143,7 +143,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Read(ctx context.C
 }
 
 func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) list(ctx context.Context, model *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %ss", d.Name))
+	tflog.Trace(ctx, fmt.Sprintf("getting %ss", d.TypeInfo.Name))
 
 	var fabricItems []FabricItemProperties[Titemprop]
 

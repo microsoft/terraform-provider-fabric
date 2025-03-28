@@ -3,19 +3,16 @@
 page_title: "fabric_activator Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Activator (also known as Reflex).
-  Use this resource to manage Activator https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The Activator resource allows you to manage a Fabric Activator https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator.
+  -> This resource does not support Service Principal. Please use a User context authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_activator (Resource)
 
-Manage a Fabric Activator (also known as Reflex).
+The Activator resource allows you to manage a Fabric [Activator](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator).
 
-Use this resource to manage [Activator](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator).
-
--> This item does not support Service Principal. Please use a User context authentication.
+-> This resource does not support Service Principal. Please use a User context authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

@@ -3,18 +3,15 @@
 page_title: "fabric_semantic_model Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Semantic Model.
-  Use this data source to fetch a Semantic Model https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
-  -> This item supports Service Principal authentication.
+  The Semantic Model data-source allows you to retrieve details about a Fabric Semantic Model https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_semantic_model (Data Source)
 
-Get a Fabric Semantic Model.
+The Semantic Model data-source allows you to retrieve details about a Fabric [Semantic Model](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
 
-Use this data source to fetch a [Semantic Model](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

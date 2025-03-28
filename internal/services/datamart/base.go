@@ -6,16 +6,17 @@ package datamart
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Datamart"
-	ItemTFName         = "datamart"
-	ItemsName          = "Datamarts"
-	ItemsTFName        = "datamarts"
-	ItemType           = fabcore.ItemTypeDatamart
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
-	ItemDocsURL        = "https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview"
-	ItemPreview        = true
-)
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Datamart",
+	Type:           "datamart",
+	Names:          "Datamarts",
+	Types:          "datamarts",
+	DocsURL:        "https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview",
+	IsPreview:      true,
+	IsSPNSupported: false,
+}
+
+const FabricItemType = fabcore.ItemTypeDatamart

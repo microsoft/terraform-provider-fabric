@@ -12,11 +12,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-const (
-	itemTFName  = kqldatabase.ItemTFName
-	itemsTFName = kqldatabase.ItemsTFName
-	itemType    = kqldatabase.ItemType
-)
+var itemTypeInfo = kqldatabase.ItemTypeInfo
+
+const fabricItemType = kqldatabase.FabricItemType
 
 func eventhouseResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

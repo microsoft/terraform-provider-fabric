@@ -3,19 +3,16 @@
 page_title: "fabric_graphql_api Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric GraphQL API.
-  Use this resource to manage GraphQL API https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
-  -> This item supports Service Principal authentication.
+  The GraphQL API resource allows you to manage a Fabric GraphQL API https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_graphql_api (Resource)
 
-Manage a Fabric GraphQL API.
+The GraphQL API resource allows you to manage a Fabric [GraphQL API](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
 
-Use this resource to manage [GraphQL API](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

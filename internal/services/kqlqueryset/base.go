@@ -6,22 +6,25 @@ package kqlqueryset
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName                  = "KQL Queryset"
-	ItemTFName                = "kql_queryset"
-	ItemsName                 = "KQL Querysets"
-	ItemsTFName               = "kql_querysets"
-	ItemType                  = fabcore.ItemTypeKQLQueryset
-	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set"
+	FabricItemType            = fabcore.ItemTypeKQLQueryset
 	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-queryset-definition"
-	ItemPreview               = true
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "KQL Queryset",
+	Type:           "kql_queryset",
+	Names:          "KQL Querysets",
+	Types:          "kql_querysets",
+	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/kusto-query-set",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{

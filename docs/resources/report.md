@@ -3,18 +3,15 @@
 page_title: "fabric_report Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Report.
-  Use this resource to manage Report https://learn.microsoft.com/power-bi/developer/projects/projects-report.
-  -> This item supports Service Principal authentication.
+  The Report resource allows you to manage a Fabric Report https://learn.microsoft.com/power-bi/developer/projects/projects-report.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_report (Resource)
 
-Manage a Fabric Report.
+The Report resource allows you to manage a Fabric [Report](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
 
-Use this resource to manage [Report](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

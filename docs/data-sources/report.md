@@ -3,18 +3,15 @@
 page_title: "fabric_report Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Report.
-  Use this data source to fetch a Report https://learn.microsoft.com/power-bi/developer/projects/projects-report.
-  -> This item supports Service Principal authentication.
+  The Report data-source allows you to retrieve details about a Fabric Report https://learn.microsoft.com/power-bi/developer/projects/projects-report.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_report (Data Source)
 
-Get a Fabric Report.
+The Report data-source allows you to retrieve details about a Fabric [Report](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
 
-Use this data source to fetch a [Report](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

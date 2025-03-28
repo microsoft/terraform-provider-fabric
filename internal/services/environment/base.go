@@ -6,15 +6,17 @@ package environment
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Environment"
-	ItemTFName         = "environment"
-	ItemsName          = "Environments"
-	ItemsTFName        = "environments"
-	ItemType           = fabcore.ItemTypeEnvironment
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment"
-)
+const FabricItemType = fabcore.ItemTypeEnvironment
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Environment",
+	Type:           "environment",
+	Names:          "Environments",
+	Types:          "environments",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}

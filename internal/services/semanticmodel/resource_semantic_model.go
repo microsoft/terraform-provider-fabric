@@ -18,13 +18,9 @@ import (
 
 func NewResourceSemanticModel() resource.Resource {
 	config := fabricitem.ResourceFabricItemDefinition{
-		Type:              ItemType,
-		Name:              ItemName,
-		NameRenameAllowed: true,
-		TFName:            ItemTFName,
-		MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
-			"Use this resource to manage [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,

@@ -6,16 +6,20 @@ package sqldatabase
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName           = "SQL Database"
-	ItemTFName         = "sql_database"
-	ItemsName          = "SQL Databases"
-	ItemsTFName        = "sql_databases"
-	ItemType           = fabcore.ItemTypeSQLDatabase
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/database/sql/overview"
-	ItemPreview        = true
+	FabricItemType = fabcore.ItemTypeSQLDatabase
+	ItemDocsURL    = "https://learn.microsoft.com/fabric/database/sql/overview"
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "SQL Database",
+	Type:           "sql_database",
+	Names:          "SQL Databases",
+	Types:          "sql_databases",
+	DocsURL:        "https://learn.microsoft.com/fabric/database/sql/overview",
+	IsPreview:      true,
+	IsSPNSupported: true,
+}

@@ -40,8 +40,8 @@ func NewResourceFabricItemProperties[Ttfprop, Titemprop any](config ResourceFabr
 	return &config
 }
 
-func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -64,11 +64,12 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.C
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -94,7 +95,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
-	reqCreate.setType(r.Type)
+	reqCreate.setType(r.FabricItemType)
 
 	respCreate, err := r.client.CreateItem(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -256,7 +257,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(
 				common.ErrorImportIdentifierDetails,
-				fmt.Sprintf("WorkspaceID/%sID", string(r.Type)),
+				fmt.Sprintf("WorkspaceID/%sID", string(r.FabricItemType)),
 			),
 		)
 
@@ -305,8 +306,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(
 	ctx context.Context,
 	model *ResourceFabricItemPropertiesModel[Ttfprop, Titemprop],
 ) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
-
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := r.ItemGetter(ctx, *r.pConfigData.FabricClient, *model, &fabricItem)

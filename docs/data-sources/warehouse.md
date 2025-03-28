@@ -3,19 +3,16 @@
 page_title: "fabric_warehouse Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Warehouse.
-  Use this data source to fetch a Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
-  -> This item supports Service Principal authentication.
+  The Warehouse data-source allows you to retrieve details about a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Data Source)
 
-Get a Fabric Warehouse.
+The Warehouse data-source allows you to retrieve details about a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
-Use this data source to fetch a [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

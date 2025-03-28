@@ -3,18 +3,15 @@
 page_title: "fabric_notebooks Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Notebooks.
-  Use this data source to list Notebooks https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook.
-  -> This item supports Service Principal authentication.
+  The Notebooks data-source allows you to retrieve a list of Fabric Notebooks https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_notebooks (Data Source)
 
-List a Fabric Notebooks.
+The Notebooks data-source allows you to retrieve a list of Fabric [Notebooks](https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook).
 
-Use this data source to list [Notebooks](https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

@@ -93,11 +93,9 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 
 	config := fabricitem.ResourceFabricItemConfigProperties[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]{
 		ResourceFabricItem: fabricitem.ResourceFabricItem{
-			Type:                 FabricItemType,
-			Name:                 ItemTypeInfo.Name,
+			TypeInfo:             ItemTypeInfo,
+			FabricItemType:       FabricItemType,
 			NameRenameAllowed:    true,
-			TFName:               ItemTypeInfo.Type,
-			MarkdownDescription:  fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
 		},

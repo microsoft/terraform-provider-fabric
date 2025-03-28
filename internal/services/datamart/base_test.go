@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 )
 
-const (
-	itemTFName  = datamart.ItemTFName
-	itemsTFName = datamart.ItemsTFName
-	itemType    = datamart.ItemType
-)
+var itemTypeInfo = datamart.ItemTypeInfo
+
+const fabricItemType = datamart.FabricItemType

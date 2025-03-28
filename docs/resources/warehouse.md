@@ -3,19 +3,16 @@
 page_title: "fabric_warehouse Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Warehouse.
-  Use this resource to manage a Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
-  -> This item supports Service Principal authentication.
+  The Warehouse resource allows you to manage a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Resource)
 
-Manage a Fabric Warehouse.
+The Warehouse resource allows you to manage a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
-Use this resource to manage a [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

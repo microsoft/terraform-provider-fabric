@@ -6,20 +6,24 @@ package report
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName                  = "Report"
-	ItemTFName                = "report"
-	ItemsName                 = "Reports"
-	ItemsTFName               = "reports"
-	ItemType                  = fabcore.ItemTypeReport
-	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/power-bi/developer/projects/projects-report"
+	FabricItemType            = fabcore.ItemTypeReport
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition"
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Report",
+	Type:           "report",
+	Names:          "Reports",
+	Types:          "reports",
+	DocsURL:        "https://learn.microsoft.com/power-bi/developer/projects/projects-report",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{

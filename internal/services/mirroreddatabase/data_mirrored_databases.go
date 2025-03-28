@@ -56,13 +56,8 @@ func NewDataSourceMirroredDatabases(ctx context.Context) datasource.DataSource {
 
 	config := fabricitem.DataSourceFabricItemsProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
 		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			Type:   ItemType,
-			Name:   ItemName,
-			Names:  ItemsName,
-			TFName: ItemsTFName,
-			MarkdownDescription: "List Fabric " + ItemsName + ".\n\n" +
-				"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
-				ItemDocsSPNSupport,
+			TypeInfo:       ItemTypeInfo,
+			FabricItemType: FabricItemType,
 		},
 		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,

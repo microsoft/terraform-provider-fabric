@@ -3,19 +3,16 @@
 page_title: "fabric_sql_database Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric SQL Database.
-  Use this data source to fetch a SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
-  -> This item supports Service Principal authentication.
+  The SQL Database data-source allows you to retrieve details about a Fabric SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_database (Data Source)
 
-Get a Fabric SQL Database.
+The SQL Database data-source allows you to retrieve details about a Fabric [SQL Database](https://learn.microsoft.com/fabric/database/sql/overview).
 
-Use this data source to fetch a [SQL Database](https://learn.microsoft.com/fabric/database/sql/overview).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

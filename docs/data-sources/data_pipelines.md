@@ -3,21 +3,15 @@
 page_title: "fabric_data_pipelines Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Data Pipelines.
-  Use this data source to list Data Pipelines https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines.
-  -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Data Pipelines data-source allows you to retrieve a list of Fabric Data Pipelines https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_data_pipelines (Data Source)
 
-List a Fabric Data Pipelines.
+The Data Pipelines data-source allows you to retrieve a list of Fabric [Data Pipelines](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/datapipeline-definition).
 
-Use this data source to list [Data Pipelines](https://learn.microsoft.com/fabric/data-factory/data-factory-overview#data-pipelines).
-
--> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

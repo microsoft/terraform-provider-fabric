@@ -71,12 +71,8 @@ func NewDataSourceEventhouse(ctx context.Context) datasource.DataSource {
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[eventhousePropertiesModel, fabeventhouse.Properties]{
 		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			Type:   ItemType,
-			Name:   ItemName,
-			TFName: ItemTFName,
-			MarkdownDescription: "Get a Fabric " + ItemName + ".\n\n" +
-				"Use this data source to fetch an [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-				ItemDocsSPNSupport,
+			TypeInfo:            ItemTypeInfo,
+			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},

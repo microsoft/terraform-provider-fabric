@@ -6,22 +6,25 @@ package kqldashboard
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName                  = "KQL Dashboard"
-	ItemTFName                = "kql_dashboard"
-	ItemsName                 = "KQL Dashboards"
-	ItemsTFName               = "kql_dashboards"
-	ItemType                  = fabcore.ItemTypeKQLDashboard
-	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create"
+	FabricItemType            = fabcore.ItemTypeKQLDashboard
 	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-dashboard-definition"
-	ItemPreview               = false
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "KQL Dashboard",
+	Type:           "kql_dashboard",
+	Names:          "KQL Dashboards",
+	Types:          "kql_dashboards",
+	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{

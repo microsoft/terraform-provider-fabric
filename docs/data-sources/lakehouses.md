@@ -3,13 +3,13 @@
 page_title: "fabric_lakehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Lakehouses data-source allows you to retrieve a list of Fabric Lakehouses https://learn.microsoft.com/training/modules/get-started-lakehouses.
+  The Lakehouse data-source allows you to retrieve details about a Fabric Lakehouse https://learn.microsoft.com/training/modules/get-started-lakehouses.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_lakehouses (Data Source)
 
-The Lakehouses data-source allows you to retrieve a list of Fabric [Lakehouses](https://learn.microsoft.com/training/modules/get-started-lakehouses).
+The Lakehouse data-source allows you to retrieve details about a Fabric [Lakehouse](https://learn.microsoft.com/training/modules/get-started-lakehouses).
 
 -> This data-source supports Service Principal authentication.
 

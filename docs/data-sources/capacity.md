@@ -3,18 +3,15 @@
 page_title: "fabric_capacity Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Capacity.
-  Use this data source to fetch Capacity https://learn.microsoft.com/fabric/enterprise/licenses#capacity.
-  -> This item supports Service Principal authentication.
+  The Capacity data-source allows you to retrieve details about a Fabric Capacity https://learn.microsoft.com/fabric/enterprise/licenses#capacity.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_capacity (Data Source)
 
-Get a Fabric Capacity.
+The Capacity data-source allows you to retrieve details about a Fabric [Capacity](https://learn.microsoft.com/fabric/enterprise/licenses#capacity).
 
-Use this data source to fetch [Capacity](https://learn.microsoft.com/fabric/enterprise/licenses#capacity).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -46,9 +43,9 @@ data "fabric_capacity" "example_by_name" {
 
 ### Read-Only
 
-- `region` (String) The Azure region where the Capacity has been provisioned. Possible values: `Australia East`, `Australia Southeast`, `Brazil South`, `Brazil Southeast`, `Canada Central`, `Canada East`, `Central India`, `Central US`, `Central US EUAP`, `China East`, `China East 2`, `China East 3`, `China North`, `China North 2`, `China North 3`, `East Asia`, `East US`, `East US 2`, `France Central`, `France South`, `Germany Central`, `Germany North`, `Germany Northeast`, `Germany West Central`, `Israel Central`, `Italy North`, `Japan East`, `Japan West`, `Korea Central`, `Korea South`, `Mexico Central`, `North Central US`, `North Europe`, `Norway East`, `Norway West`, `Poland Central`, `Qatar Central`, `South Africa North`, `South Africa West`, `South Central US`, `South India`, `Southeast Asia`, `Spain Central`, `Sweden Central`, `Switzerland North`, `Switzerland West`, `UAE Central`, `UAE North`, `UK South`, `UK West`, `West Central US`, `West Europe`, `West India`, `West US`, `West US 2`, `West US 3`
+- `region` (String) The Azure region where the Capacity has been provisioned. Value must be one of : .
 - `sku` (String) The Capacity SKU.
-- `state` (String) The Capacity state. Possible values: `Active`, `Inactive`
+- `state` (String) The Capacity state. Value must be one of : `Active`, `Inactive`.
 
 <a id="nestedatt--timeouts"></a>
 
