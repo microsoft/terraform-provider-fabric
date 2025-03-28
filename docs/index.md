@@ -1,18 +1,16 @@
 ---
 page_title: "Microsoft Fabric Provider"
 description: |-
-  
+
 ---
 
 # Microsoft Fabric Provider
 
 The Microsoft Fabric Provider allows managing environments and other resources within [Microsoft Fabric](https://fabric.microsoft.com/).
 
-!> This code is experimental and provided solely for evaluation purposes. It is **NOT** intended for production use and may contain bugs, incomplete features, or other issues. Use at your own risk, as it may undergo significant changes without notice, and no guarantees or support are provided. By using this code, you acknowledge and agree to these conditions. Consult the documentation or contact the maintainer if you have questions or concerns.
-
 ## Requirements
 
-This provider requires **Terraform >= 1.8.x**.  For more information on provider installation and constraining provider versions, see the [Provider Requirements documentation](https://developer.hashicorp.com/terraform/language/providers/requirements).
+This provider requires **Terraform >= 1.8.x** (>= 1.11.x preferred).  For more information on provider installation and constraining provider versions, see the [Provider Requirements documentation](https://developer.hashicorp.com/terraform/language/providers/requirements).
 
 ## Installation
 
@@ -97,8 +95,6 @@ You can find more information on how to do this in the following guides:
 - `timeout` (String) Default timeout for all requests. It can be overridden at any Resource/Data-Source
    A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as `30s` or `2h45m`. Valid time units are "s" (seconds), "m" (minutes), "h" (hours)
    If not set, the default timeout is `10m`.
-- `token` (String, Sensitive, Deprecated) The token to use for authentication.
-- `token_file_path` (String, Deprecated) The path to a file containing an token.
 - `use_cli` (Boolean) Allow Azure CLI to be used for authentication.
 - `use_dev_cli` (Boolean) Allow Azure Developer CLI to be used for authentication.
 - `use_msi` (Boolean) Allow Managed Service Identity (MSI) to be used for authentication.

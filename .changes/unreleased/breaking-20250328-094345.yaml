@@ -1,0 +1,24 @@
+kind: breaking
+body: |
+  `fabric_workspace_role_assignment`, `fabric_workspace_role_assignments` resources/data-sources alligned principal attribute with Fabric API and others role assignment resources for unified naming experience.
+
+  BEFORE:
+  ```terraform
+  resource "fabric_workspace_role_assignment" "example" {
+    principal_id = ...
+    principal_type = ...
+  }
+  ```
+
+  AFTER:
+  ```terraform
+  resource "fabric_workspace_role_assignment" "example" {
+    principal = {
+      id = ...
+      type = ...
+    }
+  }
+  ```
+time: 2025-03-28T09:43:45.4587825-07:00
+custom:
+  Issue: "341"
