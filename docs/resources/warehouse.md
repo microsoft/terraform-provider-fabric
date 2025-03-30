@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Warehouse resource allows you to manage a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Warehouse resource allows you to manage a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

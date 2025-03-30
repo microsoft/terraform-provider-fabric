@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Warehouses",
 	Types:          "warehouses",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

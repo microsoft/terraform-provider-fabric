@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Environments",
 	Types:          "environments",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: true,
 }

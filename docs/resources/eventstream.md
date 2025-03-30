@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Eventstream resource allows you to manage a Fabric Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_eventstream (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Eventstream resource allows you to manage a Fabric [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
