@@ -103,7 +103,8 @@ DevContainer is the **preferred** way for contribution to the project. It contai
 
 Local development is still possible on Windows, Linux and macOS, but requires additional step to setup development environment.
 
-> [!NOTE] Treat all instructions, commands or scripts in `Local development` section as examples. Depending on your local environment and configuration, the final commands or script may vary.
+> [!NOTE]
+> Treat all instructions, commands or scripts in `Local development` section as examples. Depending on your local environment and configuration, the final commands or script may vary.
 
 #### Requirements
 

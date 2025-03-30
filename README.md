@@ -7,9 +7,6 @@
 
 The Microsoft Fabric Terraform Provider allows managing environments and other resources within [Microsoft Fabric](https://fabric.microsoft.com/).
 
-> [!WARNING]
-> This code is experimental and provided solely for evaluation purposes. It is **NOT** intended for production use and may contain bugs, incomplete features, or other issues. Use at your own risk, as it may undergo significant changes without notice, and no guarantees or support are provided. By using this code, you acknowledge and agree to these conditions. Consult the documentation or contact the maintainer if you have questions or concerns.
-
 ## Using the Provider
 
 The [user documentation](https://aka.ms/FabricTF/docs) contains information about how to install, configure, and use the provider to manage Fabric resources and data sources. More advances examples together with bootstrap script can be found in the [Quick Starts Repository](https://aka.ms/FabricTF/quickstart).

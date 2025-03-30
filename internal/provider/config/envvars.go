@@ -71,14 +71,6 @@ func GetEnvVarsAzureDevOpsServiceConnectionID() []string {
 	return []string{"FABRIC_AZURE_DEVOPS_SERVICE_CONNECTION_ID"}
 }
 
-func GetEnvVarsToken() []string {
-	return []string{"FABRIC_TOKEN"}
-}
-
-func GetEnvVarsTokenFilePath() []string {
-	return []string{"FABRIC_TOKEN_FILE_PATH"}
-}
-
 func GetEnvVarsUseOIDC() []string {
 	return []string{"FABRIC_USE_OIDC", "ARM_USE_OIDC"}
 }
