@@ -22,7 +22,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Eventstreams",
 	Types:          "eventstreams",
 	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
 

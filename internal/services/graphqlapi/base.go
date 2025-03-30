@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "GraphQL APIs",
 	Types:          "graphql_apis",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

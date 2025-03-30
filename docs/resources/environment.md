@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The Environment resource allows you to manage a Fabric Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
   -> This resource supports Service Principal authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_environment (Resource)
@@ -12,6 +13,8 @@ description: |-
 The Environment resource allows you to manage a Fabric [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
 -> This resource supports Service Principal authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

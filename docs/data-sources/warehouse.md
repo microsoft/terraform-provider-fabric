@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Warehouse data-source allows you to retrieve details about a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_warehouse (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Warehouse data-source allows you to retrieve details about a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The GraphQL API resource allows you to manage a Fabric GraphQL API https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_graphql_api (Resource)
@@ -13,8 +12,6 @@ description: |-
 The GraphQL API resource allows you to manage a Fabric [GraphQL API](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
