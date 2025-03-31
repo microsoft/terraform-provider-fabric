@@ -1,7 +1,0 @@
-kind: changed
-body: |
-  Mark `fabric_spark_environment_settings` and `fabric_environment` as `preview` due to upcoming API breaking changes:
-  https://learn.microsoft.com/en-us/fabric/data-engineering/environment-public-api
-time: 2025-03-30T07:30:34.869776-07:00
-custom:
-  Issue: "359"
