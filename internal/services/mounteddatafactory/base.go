@@ -13,6 +13,7 @@ import (
 const (
 	FabricItemType      = fabcore.ItemTypeMountedDataFactory
 	ItemDefinitionEmpty = `{}`
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
 )
 
 var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals

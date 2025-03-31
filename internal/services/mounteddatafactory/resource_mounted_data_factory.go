@@ -18,14 +18,14 @@ func NewResourceMountedDataFactory() resource.Resource {
 		NameRenameAllowed:     true,
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
-		DefinitionPathDocsURL: "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition",
+		DefinitionRequired:    true,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtMost(1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
-		DefinitionRequired: true,
-		DefinitionEmpty:    ItemDefinitionEmpty,
-		DefinitionFormats:  itemDefinitionFormats,
+		DefinitionEmpty:   ItemDefinitionEmpty,
+		DefinitionFormats: itemDefinitionFormats,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)
