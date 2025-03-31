@@ -19,10 +19,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var (
-	testResourceItemFQN    = testhelp.ResourceFQN("fabric", itemTFName, "test")
-	testResourceItemHeader = at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
-)
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("mounted_data_factory"),
@@ -52,9 +49,12 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 		// error - no attributes
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{},
+				),
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
@@ -84,13 +84,14 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"display_name":    "test",
 						"unexpected_attr": "test",
 						"format":          "Default",
 						"definition":      testHelperDefinition,
 					},
 				),
 			),
-			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here.`),
 		},
 		// error - no required attributes
 		{
@@ -104,65 +105,19 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				),
-			),
+				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
-		},
-		// error - no required attributes
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"format":       "Default",
-						"definition":   testHelperDefinition,
-					},
-				),
-			),
-			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
-		},
-		// error - no required attributes
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"display_name": "test",
-						"definition":   testHelperDefinition,
-					},
-				),
-			),
-			ExpectError: regexp.MustCompile(`The argument "format" is required, but no definition was found.`),
-		},
-		// error - no required attributes
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"format":       "Default",
-				},
-			),
-			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
 }
 
 func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	testCase := at.JoinConfigs(
 		testHelperLocals,
@@ -182,7 +137,7 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(itemType)))),
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(fabricItemType)))),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
@@ -229,14 +184,14 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 
 func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity

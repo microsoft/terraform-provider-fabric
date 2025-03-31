@@ -3,18 +3,15 @@
 page_title: "fabric_mounted_data_factories Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Mounted Data Factories.
-  Use this data source to list Mounted Data Factories https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
-  -> This item supports Service Principal authentication.
+  The Mounted Data Factories data-source allows you to retrieve a list of Fabric Mounted Data Factories https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_mounted_data_factories (Data Source)
 
-List a Fabric Mounted Data Factories.
+The Mounted Data Factories data-source allows you to retrieve a list of Fabric [Mounted Data Factories](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
-Use this data source to list [Mounted Data Factories](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_mounted_data_factories" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Mounted Data Factories. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Mounted Data Factories. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

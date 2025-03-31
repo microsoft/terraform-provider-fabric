@@ -13,16 +13,12 @@ import (
 
 func NewResourceMountedDataFactory() resource.Resource {
 	config := fabricitem.ResourceFabricItemDefinition{
-		Type:              ItemType,
-		Name:              ItemName,
-		NameRenameAllowed: true,
-		TFName:            ItemTFName,
-		MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
-			"Use this resource to manage a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
 		DisplayNameMaxLength:  123,
 		DescriptionMaxLength:  256,
-		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathDocsURL: "https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition",
 		DefinitionPathKeysValidator: []validator.Map{
 			mapvalidator.SizeAtMost(1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),

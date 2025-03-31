@@ -3,18 +3,15 @@
 page_title: "fabric_mounted_data_factory Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Mounted Data Factory.
-  Use this resource to manage a Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
-  -> This item supports Service Principal authentication.
+  The Mounted Data Factory resource allows you to manage a Fabric Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_mounted_data_factory (Resource)
 
-Manage a Fabric Mounted Data Factory.
+The Mounted Data Factory resource allows you to manage a Fabric [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
-Use this resource to manage a [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 
@@ -63,7 +60,7 @@ resource "fabric_mounted_data_factory" "example_definition_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Mounted Data Factory display name.
 - `format` (String) The Mounted Data Factory format. Possible values: `Default`
 - `workspace_id` (String) The Workspace ID.
