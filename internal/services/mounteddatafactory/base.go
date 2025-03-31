@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	FabricItemType      = fabcore.ItemTypeMountedDataFactory
-	ItemDefinitionEmpty = `{}`
+	FabricItemType            = fabcore.ItemTypeMountedDataFactory
+	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition"
 )
 

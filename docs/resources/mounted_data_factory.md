@@ -60,7 +60,7 @@ resource "fabric_mounted_data_factory" "example_definition_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Mounted Data Factory definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mounted-data-factory-definition). Accepted path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Mounted Data Factory display name.
 - `format` (String) The Mounted Data Factory format. Possible values: `Default`
 - `workspace_id` (String) The Workspace ID.
