@@ -6,21 +6,25 @@ package mirroreddatabase
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName                  = "Mirrored Database"
-	ItemTFName                = "mirrored_database"
-	ItemsName                 = "Mirrored Databases"
-	ItemsTFName               = "mirrored_databases"
-	ItemType                  = fabcore.ItemTypeMirroredDatabase
-	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/fabric/database/mirrored-database/overview"
+	FabricItemType            = fabcore.ItemTypeMirroredDatabase
 	ItemDefinitionEmpty       = `{"properties":{"source":{"type":"GenericMirror"},"target":{"type":"MountedRelationalDatabase","typeProperties":{"defaultSchema":"dbo","format":"Delta"}}}}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mirrored-database-definition"
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Mirrored Database",
+	Type:           "mirrored_database",
+	Names:          "Mirrored Databases",
+	Types:          "mirrored_databases",
+	DocsURL:        "https://learn.microsoft.com/fabric/database/mirrored-database/overview",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{

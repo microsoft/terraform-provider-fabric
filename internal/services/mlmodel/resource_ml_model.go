@@ -11,16 +11,11 @@ import (
 
 func NewResourceMLModel() resource.Resource {
 	config := fabricitem.ResourceFabricItem{
-		Type:              ItemType,
-		Name:              ItemName,
-		NameRenameAllowed: false,
-		TFName:            ItemTFName,
-		MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
-			"Use this resource to manage [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		NameRenameAllowed:    false,
 		DisplayNameMaxLength: 123,
 		DescriptionMaxLength: 256,
-		IsPreview:            ItemPreview,
 	}
 
 	return fabricitem.NewResourceFabricItem(config)

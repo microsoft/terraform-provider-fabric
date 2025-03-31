@@ -3,14 +3,14 @@
 page_title: "fabric_domain Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Domain data-source allows you to read Domain https://learn.microsoft.com/fabric/governance/domains details.
+  The Domain data-source allows you to retrieve details about a Fabric Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain (Data Source)
 
-The Domain data-source allows you to read [Domain](https://learn.microsoft.com/fabric/governance/domains) details.
+The Domain data-source allows you to retrieve details about a Fabric [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This data-source supports Service Principal authentication.
 

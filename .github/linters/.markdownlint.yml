@@ -32,3 +32,5 @@ MD041: false
 # MD041:
 #   level: 1
 #   front_matter_title: ^\s*(title|page_title)\s*[:=]
+
+MD051: false

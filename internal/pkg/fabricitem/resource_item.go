@@ -17,6 +17,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -30,22 +31,19 @@ var (
 type ResourceFabricItem struct {
 	pConfigData          *pconfig.ProviderData
 	client               *fabcore.ItemsClient
-	Type                 fabcore.ItemType
-	Name                 string
+	FabricItemType       fabcore.ItemType
+	TypeInfo             tftypeinfo.TFTypeInfo
 	NameRenameAllowed    bool
-	TFName               string
-	MarkdownDescription  string
 	DisplayNameMaxLength int
 	DescriptionMaxLength int
-	IsPreview            bool
 }
 
 func NewResourceFabricItem(config ResourceFabricItem) resource.Resource {
 	return &config
 }
 
-func (r *ResourceFabricItem) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+func (r *ResourceFabricItem) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *ResourceFabricItem) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -68,11 +66,12 @@ func (r *ResourceFabricItem) Configure(_ context.Context, req resource.Configure
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -98,7 +97,7 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
-	reqCreate.setType(r.Type)
+	reqCreate.setType(r.FabricItemType)
 
 	respCreate, err := r.client.CreateItem(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -246,7 +245,7 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(
 				common.ErrorImportIdentifierDetails,
-				fmt.Sprintf("WorkspaceID/%sID", string(r.Type)),
+				fmt.Sprintf("WorkspaceID/%sID", string(r.FabricItemType)),
 			),
 		)
 
@@ -289,8 +288,6 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 }
 
 func (r *ResourceFabricItem) get(ctx context.Context, model *resourceFabricItemModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
-
 	respGet, err := r.client.GetItem(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags

@@ -3,18 +3,15 @@
 page_title: "fabric_reports Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Reports.
-  Use this data source to list Reports https://learn.microsoft.com/power-bi/developer/projects/projects-report.
-  -> This item supports Service Principal authentication.
+  The Reports data-source allows you to retrieve a list of Fabric Reports https://learn.microsoft.com/power-bi/developer/projects/projects-report.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_reports (Data Source)
 
-List a Fabric Reports.
+The Reports data-source allows you to retrieve a list of Fabric [Reports](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
 
-Use this data source to list [Reports](https://learn.microsoft.com/power-bi/developer/projects/projects-report).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_reports" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Reports. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Reports. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

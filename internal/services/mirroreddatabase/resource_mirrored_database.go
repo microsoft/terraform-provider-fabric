@@ -84,13 +84,9 @@ func NewResourceMirroredDatabase(ctx context.Context) resource.Resource {
 
 	config := fabricitem.ResourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
 		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			Type:              ItemType,
-			Name:              ItemName,
-			NameRenameAllowed: true,
-			TFName:            ItemTFName,
-			MarkdownDescription: "Manages a Fabric " + ItemName + ".\n\n" +
-				"Use this resource to create and manage a [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-				ItemDocsSPNSupport,
+			TypeInfo:              ItemTypeInfo,
+			FabricItemType:        FabricItemType,
+			NameRenameAllowed:     true,
 			DisplayNameMaxLength:  123,
 			DescriptionMaxLength:  256,
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,

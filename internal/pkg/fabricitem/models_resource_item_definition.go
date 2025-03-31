@@ -14,6 +14,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 )
 
@@ -26,9 +27,9 @@ type resourceFabricItemDefinitionModel struct {
 }
 
 type resourceFabricItemDefinitionPartModel struct {
-	Source              types.String                  `tfsdk:"source"`
-	Tokens              supertypes.MapValueOf[string] `tfsdk:"tokens"`
-	SourceContentSha256 types.String                  `tfsdk:"source_content_sha256"`
+	Source              types.String            `tfsdk:"source"`
+	Tokens              customtypes.MapOfString `tfsdk:"tokens"`
+	SourceContentSha256 types.String            `tfsdk:"source_content_sha256"`
 }
 
 type fabricItemDefinition struct {
@@ -45,7 +46,14 @@ func (to *fabricItemDefinition) setFormat(v types.String, definitionFormats []De
 	}
 }
 
-func (to *fabricItemDefinition) setParts(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], definitionEmpty string, definitionPaths []string, definitionUpdateEnabled types.Bool, update bool) diag.Diagnostics { //revive:disable-line:flag-parameter
+func (to *fabricItemDefinition) setParts(
+	ctx context.Context,
+	definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	definitionEmpty string,
+	definitionPaths []string,
+	definitionUpdateEnabled types.Bool,
+	update bool,
+) diag.Diagnostics { //revive:disable-line:flag-parameter
 	to.Parts = []fabcore.ItemDefinitionPart{}
 
 	defParts, diags := definition.Get(ctx)
@@ -80,7 +88,15 @@ func (to *fabricItemDefinition) setParts(ctx context.Context, definition superty
 				return diags
 			}
 
-			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), tokens)
+			tokensValue := make(map[string]string)
+
+			for k, v := range tokens {
+				if !v.IsNull() && !v.IsUnknown() {
+					tokensValue[k] = v.ValueString()
+				}
+			}
+
+			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), tokensValue)
 			if diags.HasError() {
 				return diags
 			}
@@ -100,7 +116,14 @@ type requestUpdateFabricItemDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionFormats []DefinitionFormat) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinition) setDefinition(
+	ctx context.Context,
+	definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	format types.String,
+	definitionUpdateEnabled types.Bool,
+	definitionEmpty string,
+	definitionFormats []DefinitionFormat,
+) diag.Diagnostics {
 	var def fabricItemDefinition
 
 	def.setFormat(format, definitionFormats)

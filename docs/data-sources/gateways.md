@@ -3,19 +3,16 @@
 page_title: "fabric_gateways Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Gateways.
-  Use this data source to list Gateways https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
-  -> This item supports Service Principal authentication.
+  The Gateways data-source allows you to retrieve a list of Fabric Gateways https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateways (Data Source)
 
-List a Fabric Gateways.
+The Gateways data-source allows you to retrieve a list of Fabric [Gateways](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
-Use this data source to list [Gateways](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -34,7 +31,7 @@ data "fabric_gateways" "example" {}
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Gateways. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Gateways. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -48,21 +45,18 @@ Optional:
 
 ### Nested Schema for `values`
 
-Optional:
-
-- `display_name` (String) The Gateway display name.
-- `id` (String) The Gateway ID.
-
 Read-Only:
 
 - `allow_cloud_connection_refresh` (Boolean) Allow cloud connection refresh.
 - `allow_custom_connectors` (Boolean) Allow custom connectors.
-- `capacity_id` (String) The Gateway capacity ID.
-- `inactivity_minutes_before_sleep` (Number) The Gateway inactivity minutes before sleep. Possible values: `120`, `1440`, `150`, `240`, `30`, `360`, `480`, `60`, `720`, `90`
-- `load_balancing_setting` (String) The load balancing setting. Possible values: `DistributeEvenly`, `Failover`
-- `number_of_member_gateways` (Number) The number of member gateways. Possible values: 1 to 7.
+- `capacity_id` (String) The capacity ID.
+- `display_name` (String) The Gateway display name.
+- `id` (String) The Gateway ID.
+- `inactivity_minutes_before_sleep` (Number) The inactivity minutes before sleep. Value must be one of : `30`, `60`, `90`, `120`, `150`, `240`, `360`, `480`, `720`, `1440`.
+- `load_balancing_setting` (String) The load balancing setting. Value must be one of : `DistributeEvenly`, `Failover`.
+- `number_of_member_gateways` (Number) The number of member gateways. Value must be between 1 and 7.
 - `public_key` (Attributes) The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections. (see [below for nested schema](#nestedatt--values--public_key))
-- `type` (String) The Gateway type. Possible values: `OnPremises`, `OnPremisesPersonal`, `VirtualNetwork`
+- `type` (String) The Gateway type. Value must be one of : `OnPremises`, `OnPremisesPersonal`, `VirtualNetwork`.
 - `version` (String) The Gateway version.
 - `virtual_network_azure_resource` (Attributes) The Azure virtual network resource. (see [below for nested schema](#nestedatt--values--virtual_network_azure_resource))
 

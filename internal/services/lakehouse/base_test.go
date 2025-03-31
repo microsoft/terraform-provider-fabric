@@ -7,10 +7,4 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 )
 
-const (
-	itemTFName            = lakehouse.ItemTFName
-	itemsTFName           = lakehouse.ItemsTFName
-	itemType              = lakehouse.ItemType
-	lakehouseTableTFName  = lakehouse.LakehouseTableTFName
-	lakehouseTablesTFName = lakehouse.LakehouseTablesTFName
-)
+var itemTypeInfo = lakehouse.ItemTypeInfo

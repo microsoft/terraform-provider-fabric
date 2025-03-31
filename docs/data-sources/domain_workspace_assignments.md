@@ -3,19 +3,16 @@
 page_title: "fabric_domain_workspace_assignments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Domain Workspace Assignments.
-  Use this data source to list Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
-  -> This item supports Service Principal authentication.
+  The Domain Workspace Assignments data-source allows you to retrieve a list of Fabric Domain Workspace Assignments https://learn.microsoft.com/fabric/governance/domains.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_workspace_assignments (Data Source)
 
-List a Fabric Domain Workspace Assignments.
+The Domain Workspace Assignments data-source allows you to retrieve a list of Fabric [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
-Use this data source to list [Domain Workspace Assignments](https://learn.microsoft.com/fabric/governance/domains).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -40,7 +37,7 @@ data "fabric_domain_workspace_assignments" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Domain Workspace Assignments. (see [below for nested schema](#nestedatt--values))
+- `workspace_ids` (Set of String) The set of Workspace IDs.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -49,12 +46,3 @@ data "fabric_domain_workspace_assignments" "example" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-<a id="nestedatt--values"></a>
-
-### Nested Schema for `values`
-
-Read-Only:
-
-- `display_name` (String) The Workspace display name.
-- `id` (String) The Workspace ID.

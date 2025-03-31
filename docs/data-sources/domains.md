@@ -3,14 +3,14 @@
 page_title: "fabric_domains Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Domain data-source allows you to read a list of Domain https://learn.microsoft.com/fabric/governance/domains details.
+  The Domains data-source allows you to retrieve a list of Fabric Domains https://learn.microsoft.com/fabric/governance/domains.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domains (Data Source)
 
-The Domain data-source allows you to read a list of [Domain](https://learn.microsoft.com/fabric/governance/domains) details.
+The Domains data-source allows you to retrieve a list of Fabric [Domains](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This data-source supports Service Principal authentication.
 
@@ -31,7 +31,7 @@ data "fabric_domains" "example" {}
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Domains. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Domains. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

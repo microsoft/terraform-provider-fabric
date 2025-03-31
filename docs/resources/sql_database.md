@@ -3,19 +3,16 @@
 page_title: "fabric_sql_database Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric SQL Database.
-  Use this resource to manage SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
-  -> This item supports Service Principal authentication.
+  The SQL Database resource allows you to manage a Fabric SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_database (Resource)
 
-Manage a Fabric SQL Database.
+The SQL Database resource allows you to manage a Fabric [SQL Database](https://learn.microsoft.com/fabric/database/sql/overview).
 
-Use this resource to manage [SQL Database](https://learn.microsoft.com/fabric/database/sql/overview).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 

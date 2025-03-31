@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 )
 
-const (
-	itemTFName  = report.ItemTFName
-	itemsTFName = report.ItemsTFName
-	itemType    = report.ItemType
-)
+var itemTypeInfo = report.ItemTypeInfo
+
+const fabricItemType = report.FabricItemType

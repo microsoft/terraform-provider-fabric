@@ -216,13 +216,13 @@ jobs:
           task govulncheck || (echo "::warning::govulncheck found issues" && exit 0)
 
       - name: ✔️ Run Go linters
-        uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
+        uses: golangci/golangci-lint-action@1481404843c368bc19ca9406f87d6e0fc97bdcfd # v7.0.0
         with:
           version: latest
           only-new-issues: true
           skip-cache: true
           skip-save-cache: true
-          args: --out-format=github-actions
+          problem-matchers: true
 
       - name: 🚧 Setup Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
@@ -246,13 +246,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
@@ -463,8 +463,8 @@ jobs:
           if-no-files-found: warn
           overwrite: true
 
-  coverage-summary:
-    name: 📔 Coverage Summary
+  test-summary:
+    name: 📔 Test Summary
     needs:
       - test
       - changes
@@ -476,7 +476,13 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - name: 📥 Download
+      - name: 📥 Download test results
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: terraform-1_11-test-results
+          merge-multiple: true
+
+      - name: 📥 Download coverage results
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: terraform-1_11-test-coverage*
@@ -485,10 +491,18 @@ jobs:
       - name: 📝 Publish
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
-      - name: 📤 Upload results to Codecov
+      - name: 📤 Upload test results to Codecov
+        uses: codecov/test-results-action@f2dba722c67b86c6caa034178c6e4d35335f6706 # v1.1.0
+        with:
+          # use_oidc: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./testresults.xml
+
+      - name: 📤 Upload coverage to Codecov
         uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
         with:
-          use_oidc: true
+          # use_oidc: true
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out
 
       - name: 🔎 Find comment

@@ -60,13 +60,8 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[eventhousePropertiesModel, fabeventhouse.Properties, eventhouseConfigurationModel, fabeventhouse.CreationPayload]{
 		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			Type:              ItemType,
-			Name:              ItemName,
-			NameRenameAllowed: true,
-			TFName:            ItemTFName,
-			MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
-				"Use this resource to manage an [" + ItemName + "](" + ItemDocsURL + ").\n\n" +
-				ItemDocsSPNSupport,
+			TypeInfo:       ItemTypeInfo,
+			FabricItemType: FabricItemType, NameRenameAllowed: true,
 			DisplayNameMaxLength:  123,
 			DescriptionMaxLength:  256,
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,

@@ -40,15 +40,15 @@ func NewDataSourceFabricItemProperties[Ttfprop, Titemprop any](config DataSource
 	return &config
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) { //revive:disable-line:confusing-naming
-	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = getDataSourceFabricItemPropertiesSchema(ctx, *d)
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
 	if d.IsDisplayNameUnique {
 		return []datasource.ConfigValidator{
 			datasourcevalidator.Conflicting(
@@ -65,7 +65,7 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) ConfigValidators(_ 
 	return []datasource.ConfigValidator{}
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -83,12 +83,12 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) { //revive:disable-line:confusing-naming
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -128,8 +128,11 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Co
 	}
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.Name, model.ID.ValueString()))
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(
+	ctx context.Context,
+	model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop],
+) diag.Diagnostics {
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 
@@ -143,11 +146,14 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(ctx context
 	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
 
-func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(ctx context.Context, model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics { //revive:disable-line:confusing-naming
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.Name, model.DisplayName.ValueString()))
+func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(
+	ctx context.Context,
+	model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop],
+) diag.Diagnostics {
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.TypeInfo.Name, model.DisplayName.ValueString()))
 
 	errNotFoundCode := fabcore.ErrCommon.EntityNotFound.Error()
-	errNotFoundMsg := fmt.Sprintf("Unable to find %s with 'display_name': %s in the Workspace ID: %s", d.Name, model.DisplayName.ValueString(), model.WorkspaceID.ValueString())
+	errNotFoundMsg := fmt.Sprintf("Unable to find %s with 'display_name': %s in the Workspace ID: %s", d.TypeInfo.Name, model.DisplayName.ValueString(), model.WorkspaceID.ValueString())
 
 	errNotFound := fabcore.ResponseError{
 		ErrorCode:  errNotFoundCode,

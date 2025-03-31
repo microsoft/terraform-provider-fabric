@@ -3,18 +3,15 @@
 page_title: "fabric_semantic_models Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Semantic Models.
-  Use this data source to list Semantic Models https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
-  -> This item supports Service Principal authentication.
+  The Semantic Models data-source allows you to retrieve a list of Fabric Semantic Models https://learn.microsoft.com/power-bi/developer/projects/projects-dataset.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_semantic_models (Data Source)
 
-List a Fabric Semantic Models.
+The Semantic Models data-source allows you to retrieve a list of Fabric [Semantic Models](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
 
-Use this data source to list [Semantic Models](https://learn.microsoft.com/power-bi/developer/projects/projects-dataset).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_semantic_models" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Semantic Models. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Semantic Models. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

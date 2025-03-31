@@ -27,10 +27,10 @@ func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]s
 			MarkdownDescription: "Query service URI.",
 			Computed:            true,
 		},
-		"database_ids": schema.ListAttribute{
+		"database_ids": schema.SetAttribute{
 			MarkdownDescription: "List of all KQL Database children IDs.",
 			Computed:            true,
-			CustomType:          supertypes.NewListTypeOf[string](ctx),
+			CustomType:          supertypes.NewSetTypeOf[string](ctx),
 		},
 	}
 
@@ -44,8 +44,18 @@ func getResourceEventhouseConfigurationAttributes() map[string]schema.Attribute 
 
 	return map[string]schema.Attribute{
 		"minimum_consumption_units": schema.Float64Attribute{
-			MarkdownDescription: "When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: " + utils.ConvertStringSlicesToString(possibleMinimumConsumptionUnitsValues, true, true) + " or any number between `" + fmt.Sprintf("%v", customMin) + "` and `" + fmt.Sprintf("%v", customMax) + "`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)",
-			Required:            true,
+			MarkdownDescription: "When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: " + utils.ConvertStringSlicesToString(
+				possibleMinimumConsumptionUnitsValues,
+				true,
+				true,
+			) + " or any number between `" + fmt.Sprintf(
+				"%v",
+				customMin,
+			) + "` and `" + fmt.Sprintf(
+				"%v",
+				customMax,
+			) + "`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)",
+			Required: true,
 			Validators: []validator.Float64{
 				float64validator.Any(
 					float64validator.OneOf(possibleMinimumConsumptionUnitsValues...),

@@ -3,18 +3,15 @@
 page_title: "fabric_mirrored_database Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manages a Fabric Mirrored Database.
-  Use this resource to create and manage a Mirrored Database https://learn.microsoft.com/fabric/database/mirrored-database/overview.
-  -> This item supports Service Principal authentication.
+  The Mirrored Database resource allows you to manage a Fabric Mirrored Database https://learn.microsoft.com/fabric/database/mirrored-database/overview.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_mirrored_database (Resource)
 
-Manages a Fabric Mirrored Database.
+The Mirrored Database resource allows you to manage a Fabric [Mirrored Database](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
 
-Use this resource to create and manage a [Mirrored Database](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

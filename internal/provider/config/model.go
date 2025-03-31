@@ -32,7 +32,7 @@ type ProviderConfigModel struct {
 	Timeout                        timetypes.GoDuration `tfsdk:"timeout"`
 	Endpoint                       customtypes.URL      `tfsdk:"endpoint"`
 	Environment                    types.String         `tfsdk:"environment"`
-	AuxiliaryTenantIDs             types.List           `tfsdk:"auxiliary_tenant_ids"`
+	AuxiliaryTenantIDs             types.Set            `tfsdk:"auxiliary_tenant_ids"`
 	TenantID                       customtypes.UUID     `tfsdk:"tenant_id"`
 	ClientID                       customtypes.UUID     `tfsdk:"client_id"`
 	ClientIDFilePath               types.String         `tfsdk:"client_id_file_path"`
@@ -46,8 +46,6 @@ type ProviderConfigModel struct {
 	OIDCToken                      types.String         `tfsdk:"oidc_token"`
 	OIDCTokenFilePath              types.String         `tfsdk:"oidc_token_file_path"`
 	AzureDevOpsServiceConnectionID types.String         `tfsdk:"azure_devops_service_connection_id"`
-	Token                          types.String         `tfsdk:"token"`
-	TokenFilePath                  types.String         `tfsdk:"token_file_path"`
 	UseOIDC                        types.Bool           `tfsdk:"use_oidc"`
 	UseCLI                         types.Bool           `tfsdk:"use_cli"`
 	UseDevCLI                      types.Bool           `tfsdk:"use_dev_cli"`

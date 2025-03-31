@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 )
 
-const (
-	itemTFName  = kqldashboard.ItemTFName
-	itemsTFName = kqldashboard.ItemsTFName
-	itemType    = kqldashboard.ItemType
-)
+var itemTypeInfo = kqldashboard.ItemTypeInfo
+
+const fabricItemType = kqldashboard.FabricItemType

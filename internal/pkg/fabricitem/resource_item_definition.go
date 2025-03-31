@@ -20,6 +20,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -34,11 +35,9 @@ var (
 type ResourceFabricItemDefinition struct {
 	pConfigData                 *pconfig.ProviderData
 	client                      *fabcore.ItemsClient
-	Type                        fabcore.ItemType
-	Name                        string
+	FabricItemType              fabcore.ItemType
+	TypeInfo                    tftypeinfo.TFTypeInfo
 	NameRenameAllowed           bool
-	TFName                      string
-	MarkdownDescription         string
 	DisplayNameMaxLength        int
 	DescriptionMaxLength        int
 	DefinitionPathDocsURL       string
@@ -46,15 +45,14 @@ type ResourceFabricItemDefinition struct {
 	DefinitionRequired          bool
 	DefinitionEmpty             string
 	DefinitionFormats           []DefinitionFormat
-	IsPreview                   bool
 }
 
 func NewResourceFabricItemDefinition(config ResourceFabricItemDefinition) resource.Resource {
 	return &config
 }
 
-func (r *ResourceFabricItemDefinition) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+func (r *ResourceFabricItemDefinition) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
@@ -74,7 +72,16 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 
 		var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+		doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+			ctx,
+			plan.Definition,
+			state.Definition,
+			plan.Format,
+			plan.DefinitionUpdateEnabled,
+			r.DefinitionEmpty,
+			r.DefinitionFormats,
+			&reqUpdateDefinition,
+		)
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -82,7 +89,7 @@ func (r *ResourceFabricItemDefinition) ModifyPlan(ctx context.Context, req resou
 		if doUpdateDefinition {
 			resp.Diagnostics.AddWarning(
 				common.WarningItemDefinitionUpdateHeader,
-				fmt.Sprintf(common.WarningItemDefinitionUpdateDetails, r.Name),
+				fmt.Sprintf(common.WarningItemDefinitionUpdateDetails, r.TypeInfo.Name),
 			)
 		}
 	}
@@ -112,11 +119,12 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 
-	if resp.Diagnostics.Append(IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -142,7 +150,7 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
-	reqCreate.setType(r.Type)
+	reqCreate.setType(r.FabricItemType)
 
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
@@ -234,7 +242,7 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	var reqUpdatePlan requestUpdateFabricItem
 
 	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
-		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
+		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
 		respUpdate, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -248,13 +256,22 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 
 	var reqUpdateDefinition requestUpdateFabricItemDefinition
 
-	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(ctx, plan.Definition, state.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionEmpty, r.DefinitionFormats, &reqUpdateDefinition)
+	doUpdateDefinition, diags := fabricItemCheckUpdateDefinition(
+		ctx,
+		plan.Definition,
+		state.Definition,
+		plan.Format,
+		plan.DefinitionUpdateEnabled,
+		r.DefinitionEmpty,
+		r.DefinitionFormats,
+		&reqUpdateDefinition,
+	)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if doUpdateDefinition {
-		tflog.Trace(ctx, fmt.Sprintf("updating %s definition", r.Name))
+		tflog.Trace(ctx, fmt.Sprintf("updating %s definition", r.TypeInfo.Name))
 
 		_, err := r.client.UpdateItemDefinition(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdateDefinition.UpdateItemDefinitionRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -316,7 +333,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(
 				common.ErrorImportIdentifierDetails,
-				fmt.Sprintf("WorkspaceID/%sID", string(r.Type)),
+				fmt.Sprintf("WorkspaceID/%sID", string(r.FabricItemType)),
 			),
 		)
 
@@ -374,7 +391,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 }
 
 func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceFabricItemDefinitionModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.Name, model.ID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.TypeInfo.Name, model.ID.ValueString()))
 
 	respGet, err := r.client.GetItem(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {

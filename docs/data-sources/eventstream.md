@@ -3,21 +3,15 @@
 page_title: "fabric_eventstream Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Eventstream.
-  Use this data source to fetch a Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Eventstream data-source allows you to retrieve details about a Fabric Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_eventstream (Data Source)
 
-Get a Fabric Eventstream.
+The Eventstream data-source allows you to retrieve details about a Fabric [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
-Use this data source to fetch a [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
-
--> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

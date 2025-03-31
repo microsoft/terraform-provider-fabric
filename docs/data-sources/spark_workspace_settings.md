@@ -3,18 +3,18 @@
 page_title: "fabric_spark_workspace_settings Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Spark Workspace Settings.
-  See Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Workspace Settings data-source allows you to retrieve details about a Fabric Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_workspace_settings (Data Source)
 
-Get a Fabric Spark Workspace Settings.
+The Spark Workspace Settings data-source allows you to retrieve details about a Fabric [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings).
 
-See [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings) for more information.
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -40,8 +40,8 @@ data "fabric_spark_workspace_settings" "example" {
 - `automatic_log` (Attributes) Automatic Log properties. (see [below for nested schema](#nestedatt--automatic_log))
 - `environment` (Attributes) Environment properties. (see [below for nested schema](#nestedatt--environment))
 - `high_concurrency` (Attributes) High Concurrency properties. (see [below for nested schema](#nestedatt--high_concurrency))
-- `id` (String) The ID of this resource.
-- `job` (Attributes) (see [below for nested schema](#nestedatt--job))
+- `id` (String) The Spark Workspace Settings ID.
+- `job` (Attributes) Job properties. (see [below for nested schema](#nestedatt--job))
 - `pool` (Attributes) Pool properties. (see [below for nested schema](#nestedatt--pool))
 
 <a id="nestedatt--timeouts"></a>
@@ -58,7 +58,7 @@ Optional:
 
 Read-Only:
 
-- `enabled` (Boolean) The status of the automatic log. Possible values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the automatic log: `false` - Disabled, `true` - Enabled.
 
 <a id="nestedatt--environment"></a>
 
@@ -66,8 +66,8 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String) The name of the default environment. Empty indicated there is no workspace default environment.
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: `1.1`, `1.2`, `1.3`.
+- `name` (String) The name of the environment.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
 
 <a id="nestedatt--high_concurrency"></a>
 
@@ -75,8 +75,8 @@ Read-Only:
 
 Read-Only:
 
-- `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run. `false` - Disabled, `true` - Enabled.
-- `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run. `false` - Disabled, `true` - Enabled.
+- `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run: `false` - Disabled, `true` - Enabled.
+- `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run: `false` - Disabled, `true` - Enabled.
 
 <a id="nestedatt--job"></a>
 
@@ -95,7 +95,7 @@ Read-Only:
 
 - `customize_compute_enabled` (Boolean) Customize compute configurations for items. `false` - Disabled, `true` - Enabled.
 - `default_pool` (Attributes) Default pool for workspace. (see [below for nested schema](#nestedatt--pool--default_pool))
-- `starter_pool` (Attributes) Starter pool for workspace. (see [below for nested schema](#nestedatt--pool--starter_pool))
+- `starter_pool` (Attributes) Starter pool for workspace. For more information about configuring starter pool, see [configuring starter pool](https://review.learn.microsoft.com/fabric/data-engineering/configure-starter-pools). (see [below for nested schema](#nestedatt--pool--starter_pool))
 
 <a id="nestedatt--pool--default_pool"></a>
 
@@ -103,9 +103,9 @@ Read-Only:
 
 Read-Only:
 
-- `id` (String) The Pool ID.
-- `name` (String) The Pool name. `Starter Pool` means using the starting pool.
-- `type` (String) The Pool type. Possible values: `Capacity`, `Workspace`.
+- `id` (String) The Pool ID. `00000000-0000-0000-0000-000000000000` means use the starter pool.
+- `name` (String) The Pool name. `Starter Pool` means use the starting pool.
+- `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`.
 
 <a id="nestedatt--pool--starter_pool"></a>
 

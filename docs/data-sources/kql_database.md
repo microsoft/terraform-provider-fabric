@@ -3,18 +3,15 @@
 page_title: "fabric_kql_database Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric KQL Database.
-  Use this data source to fetch a KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
-  -> This item supports Service Principal authentication.
+  The KQL Database data-source allows you to retrieve details about a Fabric KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_kql_database (Data Source)
 
-Get a Fabric KQL Database.
+The KQL Database data-source allows you to retrieve details about a Fabric [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
 
-Use this data source to fetch a [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 

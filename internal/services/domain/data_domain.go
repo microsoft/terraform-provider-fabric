@@ -14,6 +14,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -23,25 +24,21 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceDomain)(nil)
 type dataSourceDomain struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabadmin.DomainsClient
-	Name        string
-	TFName      string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceDomain() datasource.DataSource {
 	return &dataSourceDomain{
-		Name:      ItemName,
-		TFName:    ItemTFName,
-		IsPreview: ItemPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceDomain) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + d.TFName
+func (d *dataSourceDomain) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *dataSourceDomain) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = domainSchema(false).GetDataSource(ctx)
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceDomain) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -62,7 +59,7 @@ func (d *dataSourceDomain) Configure(_ context.Context, req datasource.Configure
 	d.pConfigData = pConfigData
 	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -102,8 +99,6 @@ func (d *dataSourceDomain) Read(ctx context.Context, req datasource.ReadRequest,
 }
 
 func (d *dataSourceDomain) get(ctx context.Context, model *dataSourceDomainModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+ItemName)
-
 	respGet, err := d.client.GetDomain(ctx, model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags

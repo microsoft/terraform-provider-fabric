@@ -22,10 +22,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var (
-	testResourceItemFQN    = testhelp.ResourceFQN("fabric", itemTFName, "test")
-	testResourceItemHeader = at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
-)
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_GatewayResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -195,7 +192,9 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 					"capacity_id": "00000000-0000-0000-0000-000000000000",
 				},
 			),
-			ExpectError: regexp.MustCompile(fmt.Sprintf(`Attribute number_of_member_gateways value must be between %d and %d`, gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Attribute number_of_member_gateways value must be between %d and %d`, gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues),
+			),
 		},
 		// error - invalid uuid - capacity_id
 		{

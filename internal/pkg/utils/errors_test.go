@@ -185,7 +185,11 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 
 		assert.Len(t, diags, 1)
 		assert.Equal(t, common.ErrorReadHeader, diags[0].Summary())
-		assert.Equal(t, fmt.Sprintf("%s: %s\n\nError Code: %s\nRequest ID: %s", common.ErrorReadDetails, "Message / MessageMoreDetails", "ErrorCode / ErrorCodeMoreDetails", requestID), diags[0].Detail())
+		assert.Equal(
+			t,
+			fmt.Sprintf("%s: %s\n\nError Code: %s\nRequest ID: %s", common.ErrorReadDetails, "Message / MessageMoreDetails", "ErrorCode / ErrorCodeMoreDetails", requestID),
+			diags[0].Detail(),
+		)
 	})
 
 	t.Run("azidentity.AuthenticationFailedError", func(t *testing.T) {
@@ -226,7 +230,7 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 
 		assert.Len(t, diags, 1)
 		assert.Equal(t, "authentication required", diags[0].Summary())
-		assert.Equal(t, "", diags[0].Detail())
+		assert.Empty(t, diags[0].Detail())
 	})
 
 	t.Run("unexpected error", func(t *testing.T) {

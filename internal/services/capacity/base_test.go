@@ -7,7 +7,4 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 )
 
-const (
-	itemTFName  = capacity.ItemTFName
-	itemsTFName = capacity.ItemsTFName
-)
+var itemTypeInfo = capacity.ItemTypeInfo

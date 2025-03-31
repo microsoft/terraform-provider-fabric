@@ -3,18 +3,15 @@
 page_title: "fabric_eventhouse Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Eventhouse.
-  Use this resource to manage an Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
-  -> This item supports Service Principal authentication.
+  The Eventhouse resource allows you to manage a Fabric Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_eventhouse (Resource)
 
-Manage a Fabric Eventhouse.
+The Eventhouse resource allows you to manage a Fabric [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
-Use this resource to manage an [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 
@@ -134,7 +131,7 @@ Optional:
 
 Read-Only:
 
-- `database_ids` (List of String) List of all KQL Database children IDs.
+- `database_ids` (Set of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.
 

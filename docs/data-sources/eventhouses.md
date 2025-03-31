@@ -3,18 +3,15 @@
 page_title: "fabric_eventhouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Eventhouses.
-  Use this data source to list Eventhouses https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
-  -> This item supports Service Principal authentication.
+  The Eventhouse data-source allows you to retrieve details about a Fabric Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_eventhouses (Data Source)
 
-List a Fabric Eventhouses.
+The Eventhouse data-source allows you to retrieve details about a Fabric [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
-Use this data source to list [Eventhouses](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_eventhouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Eventhouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Eventhouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -65,6 +62,6 @@ Read-Only:
 
 Read-Only:
 
-- `database_ids` (List of String) List of all KQL Database children IDs.
+- `database_ids` (Set of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.

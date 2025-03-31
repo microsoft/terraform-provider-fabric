@@ -9,22 +9,69 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-func GetDataSourceSPNSupportNote(md string, spn bool) string { //revive:disable-line:flag-parameter
-	if spn {
-		return md + SPNSupportedDataSource
+func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool) string { //revive:disable-line:flag-parameter
+	md := fmt.Sprintf("The %s resource allows you to manage a Fabric", typeInfo.Name)
+
+	if plural {
+		md = fmt.Sprintf("The %s resource allows you to manage a Fabric", typeInfo.Names)
 	}
 
-	return md + SPNNotSupportedDataSource
+	if typeInfo.DocsURL != "" {
+		name := typeInfo.Name
+		if plural {
+			name = typeInfo.Names
+		}
+
+		md += fmt.Sprintf(" [%s](%s).", name, typeInfo.DocsURL)
+	} else {
+		md += fmt.Sprintf(" %s.", typeInfo.Name)
+	}
+
+	if typeInfo.IsSPNSupported {
+		md += SPNSupportedResource
+	} else {
+		md += SPNNotSupportedResource
+	}
+
+	if typeInfo.IsPreview {
+		md += PreviewResource
+	}
+
+	return md
 }
 
-func GetResourceSPNSupportNote(md string, spn bool) string { //revive:disable-line:flag-parameter
-	if spn {
-		return md + SPNSupportedResource
+func NewDataSourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool) string { //revive:disable-line:flag-parameter
+	md := fmt.Sprintf("The %s data-source allows you to retrieve details about a Fabric", typeInfo.Name)
+
+	if plural {
+		md = fmt.Sprintf("The %s data-source allows you to retrieve a list of Fabric", typeInfo.Names)
 	}
 
-	return md + SPNNotSupportedResource
+	if typeInfo.DocsURL != "" {
+		name := typeInfo.Name
+		if plural {
+			name = typeInfo.Names
+		}
+
+		md += fmt.Sprintf(" [%s](%s).", name, typeInfo.DocsURL)
+	} else {
+		md += fmt.Sprintf(" %s.", typeInfo.Name)
+	}
+
+	if typeInfo.IsSPNSupported {
+		md += SPNSupportedDataSource
+	} else {
+		md += SPNNotSupportedDataSource
+	}
+
+	if typeInfo.IsPreview {
+		md += PreviewDataSource
+	}
+
+	return md
 }
 
 func GetDataSourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter

@@ -11,14 +11,8 @@ import (
 
 func NewDataSourceActivators() datasource.DataSource {
 	config := fabricitem.DataSourceFabricItems{
-		Type:   ItemType,
-		Name:   ItemName,
-		Names:  ItemsName,
-		TFName: ItemsTFName,
-		MarkdownDescription: "List a Fabric " + ItemsName + " (also known as Reflex).\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
-			ItemDocsSPNSupport,
-		IsPreview: ItemPreview,
+		TypeInfo:       ItemTypeInfo,
+		FabricItemType: FabricItemType,
 	}
 
 	return fabricitem.NewDataSourceFabricItems(config)

@@ -3,18 +3,15 @@
 page_title: "fabric_kql_database Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric KQL Database.
-  Use this resource to manage a KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
-  -> This item supports Service Principal authentication.
+  The KQL Database resource allows you to manage a Fabric KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_kql_database (Resource)
 
-Manage a Fabric KQL Database.
+The KQL Database resource allows you to manage a Fabric [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
 
-Use this resource to manage a [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

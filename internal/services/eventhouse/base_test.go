@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 )
 
-const (
-	itemTFName  = eventhouse.ItemTFName
-	itemsTFName = eventhouse.ItemsTFName
-	itemType    = eventhouse.ItemType
-)
+var itemTypeInfo = eventhouse.ItemTypeInfo
+
+const fabricItemType = eventhouse.FabricItemType

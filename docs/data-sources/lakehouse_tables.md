@@ -3,18 +3,18 @@
 page_title: "fabric_lakehouse_tables Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Lakehouse Tables.
-  Use this data source to list Lakehouse Tables https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables.
-  -> This item supports Service Principal authentication.
+  The Lakehouse Tables data-source allows you to retrieve a list of Fabric Lakehouse Tables https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables.
+  -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_lakehouse_tables (Data Source)
 
-List a Fabric Lakehouse Tables.
+The Lakehouse Tables data-source allows you to retrieve a list of Fabric [Lakehouse Tables](https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables).
 
-Use this data source to list [Lakehouse Tables](https://learn.microsoft.com/fabric/data-engineering/lakehouse-and-delta-tables).
+-> This data-source supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -39,7 +39,7 @@ data "fabric_lakehouse_tables" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Lakehouse Tables. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Lakehouse Tables. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -56,6 +56,8 @@ Optional:
 Read-Only:
 
 - `format` (String) The Format of the table.
+- `lakehouse_id` (String) The Lakehouse ID.
 - `location` (String) The Location of the table.
 - `name` (String) The Name of the table.
-- `type` (String) The Type of the table. Possible values: `External`, `Managed`.
+- `type` (String) The Type of the table. Value must be one of : `External`, `Managed`.
+- `workspace_id` (String) The Workspace ID.

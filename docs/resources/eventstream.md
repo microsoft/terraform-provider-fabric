@@ -3,21 +3,15 @@
 page_title: "fabric_eventstream Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Eventstream.
-  Use this resource to manage Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> This item supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Eventstream resource allows you to manage a Fabric Eventstream https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_eventstream (Resource)
 
-Manage a Fabric Eventstream.
+The Eventstream resource allows you to manage a Fabric [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
-Use this resource to manage [Eventstream](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
-
--> This item supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

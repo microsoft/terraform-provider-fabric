@@ -3,14 +3,14 @@
 page_title: "fabric_domain Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Domain resource allows you to manage Domain https://learn.microsoft.com/fabric/governance/domains.
+  The Domain resource allows you to manage a Fabric Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain (Resource)
 
-The Domain resource allows you to manage [Domain](https://learn.microsoft.com/fabric/governance/domains).
+The Domain resource allows you to manage a Fabric [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This resource supports Service Principal authentication.
 

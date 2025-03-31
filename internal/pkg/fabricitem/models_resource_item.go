@@ -40,7 +40,13 @@ func (to *requestCreateFabricItem) setType(v fabcore.ItemType) {
 	to.Type = &v
 }
 
-func (to *requestCreateFabricItem) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionFormats []DefinitionFormat) diag.Diagnostics {
+func (to *requestCreateFabricItem) setDefinition(
+	ctx context.Context,
+	definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	format types.String,
+	definitionUpdateEnabled types.Bool,
+	definitionFormats []DefinitionFormat,
+) diag.Diagnostics {
 	if !definition.IsNull() && !definition.IsUnknown() {
 		var def fabricItemDefinition
 
@@ -62,7 +68,11 @@ func (to *requestCreateFabricItem) setCreationPayload(v any) {
 	}
 }
 
-func getCreationPayload[Ttfconfig, Titemconfig any](ctx context.Context, configuration supertypes.SingleNestedObjectValueOf[Ttfconfig], creationPayloadSetter func(ctx context.Context, from Ttfconfig) (*Titemconfig, diag.Diagnostics)) (*Titemconfig, diag.Diagnostics) {
+func getCreationPayload[Ttfconfig, Titemconfig any](
+	ctx context.Context,
+	configuration supertypes.SingleNestedObjectValueOf[Ttfconfig],
+	creationPayloadSetter func(ctx context.Context, from Ttfconfig) (*Titemconfig, diag.Diagnostics),
+) (*Titemconfig, diag.Diagnostics) {
 	if !configuration.IsNull() && !configuration.IsUnknown() {
 		config, diags := configuration.Get(ctx)
 		if diags.HasError() {
@@ -104,7 +114,15 @@ func fabricItemCheckUpdate(planDisplayName, planDescription, stateDisplayName, s
 	return !reflect.DeepEqual(reqUpdatePlan.UpdateItemRequest, reqUpdateState.UpdateItemRequest)
 }
 
-func fabricItemCheckUpdateDefinition(ctx context.Context, planDefinition, stateDefinition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], planFormat types.String, planDefinitionUpdateEnabled types.Bool, definitionEmpty string, definitionFormats []DefinitionFormat, reqUpdate *requestUpdateFabricItemDefinition) (bool, diag.Diagnostics) {
+func fabricItemCheckUpdateDefinition(
+	ctx context.Context,
+	planDefinition, stateDefinition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	planFormat types.String,
+	planDefinitionUpdateEnabled types.Bool,
+	definitionEmpty string,
+	definitionFormats []DefinitionFormat,
+	reqUpdate *requestUpdateFabricItemDefinition,
+) (bool, diag.Diagnostics) {
 	if !planDefinition.Equal(stateDefinition) && planDefinitionUpdateEnabled.ValueBool() {
 		if diags := reqUpdate.setDefinition(ctx, planDefinition, planFormat, planDefinitionUpdateEnabled, definitionEmpty, definitionFormats); diags.HasError() {
 			return false, diags

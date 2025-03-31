@@ -6,21 +6,25 @@ package kqldatabase
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
 const (
-	ItemName                  = "KQL Database"
-	ItemTFName                = "kql_database"
-	ItemsName                 = "KQL Databases"
-	ItemsTFName               = "kql_databases"
-	ItemType                  = fabcore.ItemTypeKQLDatabase
-	ItemDocsSPNSupport        = common.DocsSPNSupported
-	ItemDocsURL               = "https://learn.microsoft.com/fabric/real-time-intelligence/create-database"
+	FabricItemType            = fabcore.ItemTypeKQLDatabase
 	ItemFormatTypeDefault     = fabricitem.DefinitionFormatDefault
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition"
 )
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "KQL Database",
+	Type:           "kql_database",
+	Names:          "KQL Databases",
+	Types:          "kql_databases",
+	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/create-database",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{

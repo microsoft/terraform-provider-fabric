@@ -3,18 +3,18 @@
 page_title: "fabric_spark_environment_settings Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Spark Environment Settings.
-  See Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Environment Settings resource allows you to manage a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
+  -> This resource supports Service Principal authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Resource)
 
-Manage a Fabric Spark Environment Settings.
+The Spark Environment Settings resource allows you to manage a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
-See [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute) for more information.
+-> This resource supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -57,25 +57,28 @@ resource "fabric_spark_environment_settings" "example" {
 
 ### Required
 
-- `environment_id` (String) The Environment ID.
-- `publication_status` (String) Publication Status. Accepted values: `Published`, `Staging`.
-- `workspace_id` (String) The Workspace ID.
+- `environment_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Environment ID.
+- `publication_status` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Publication status. Value must be one of : `Published`, `Staging`.
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
-- `driver_cores` (Number) Spark driver core. Accepted values: `4`, `8`, `16`, `32`, `64`.
-- `driver_memory` (String) Spark driver memory. Accepted values: `28g`, `56g`, `112g`, `224g`, `400g`.
-- `dynamic_executor_allocation` (Attributes) Dynamic executor allocation. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
-- `executor_cores` (Number) Spark executor core. Accepted values: `4`, `8`, `16`, `32`, `64`.
-- `executor_memory` (String) Spark executor memory. Accepted values: `28g`, `56g`, `112g`, `224g`, `400g`.
+- `driver_cores` (Number) Publication status. Value must be one of : `4`, `8`, `16`, `32`, `64`.
+- `driver_memory` (String) Spark driver memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
+- `executor_cores` (Number) Spark executor core. Value must be one of : `4`, `8`, `16`, `32`, `64`.
+- `executor_memory` (String) Spark executor memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Possible values: `1.1`, `1.2`, `1.3`.
-- `spark_properties` (Map of String) A map of key/value pairs of Spark properties.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
+- `spark_properties` (Map of String) A map of key/value pairs of Spark properties. Key must satisfy all validations: Spark properties:
+- must starts with 'spark.'
+- cannot contains any white spaces
+- dot '.' is allowed but not at the start or end of the property key.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The Spark Environment Settings ID.
 
 <a id="nestedatt--dynamic_executor_allocation"></a>
 
@@ -83,9 +86,9 @@ resource "fabric_spark_environment_settings" "example" {
 
 Optional:
 
-- `enabled` (Boolean) The status of the dynamic executor allocation. Accepted values: `false` - Disabled, `true` - Enabled.
-- `max_executors` (Number) The maximum executor number.
-- `min_executors` (Number) The minimum executor number.
+- `enabled` (Boolean) The status of the dynamic executor allocation: `false` - Disabled, `true` - Enabled.
+- `max_executors` (Number) The maximum executors. Value must be at least 1. Ensure that if an attribute is set, also these are set: "[<.min_executors]".
+- `min_executors` (Number) The minimum executors. Value must be at least 1. Ensure that if an attribute is set, also these are set: "[<.max_executors]".
 
 <a id="nestedatt--pool"></a>
 
@@ -93,8 +96,8 @@ Optional:
 
 Optional:
 
-- `name` (String) The Pool name. `Starter Pool` means use the starting pool.
-- `type` (String) The Pool type. Accepted values: `Capacity`, `Workspace`.
+- `name` (String) The Pool name. `Starter Pool` means using the starting pool. Ensure that if an attribute is set, also these are set: "[<.type]".
+- `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`. Ensure that if an attribute is set, also these are set: "[<.name]".
 
 Read-Only:
 
