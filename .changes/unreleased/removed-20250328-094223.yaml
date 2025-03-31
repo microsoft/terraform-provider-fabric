@@ -1,6 +1,0 @@
-kind: removed
-body: |
-  `token`, `token_file_path` attributes removed from provider-level configuration block.
-time: 2025-03-28T09:42:23.8019967-07:00
-custom:
-  Issue: "357"
