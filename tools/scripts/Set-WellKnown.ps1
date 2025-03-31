@@ -477,11 +477,20 @@ function Set-FabricMountedDataFactory {
     [string]$Definition
   )
 
+  $MountedDataFactoryDefinition = @{
+    parts = @(
+      @{
+        path        = "mountedDataFactory-content.json"
+        payload     = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("{`"dataFactoryResourceId`": `"$Definition`"}"))
+        payloadType = 'InlineBase64'
+      }
+    )
+  }
 
   # Create the Mounted Data Factory item in Fabric
   try {
     Write-Log -Message "Creating Mounted Data Factory: $DisplayName" -Level 'WARN'
-    $mountedDataFactory = Set-FabricItem -DisplayName $DisplayName -WorkspaceId $WorkspaceId -Type 'MountedDataFactory' -Definition $Definition
+    $mountedDataFactory = Set-FabricItem -DisplayName $DisplayName -WorkspaceId $WorkspaceId -Type 'MountedDataFactory' -Definition $MountedDataFactoryDefinition
     return $mountedDataFactory
   }
   catch {
@@ -892,7 +901,7 @@ $definition = @{
   parts = @(
     @{
       path        = "mirroring.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mirrored_database/mirroring.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mirrored_database/mirroring.json.tmpl'
       payloadType = 'InlineBase64'
     }
   )
