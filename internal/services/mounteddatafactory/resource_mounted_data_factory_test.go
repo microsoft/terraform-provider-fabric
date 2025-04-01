@@ -19,12 +19,13 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
 var (
-	testResourceItemFQN, testResourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
-	azureFactoryResource                        = testhelp.WellKnown()["DataFactory"].(map[string]any)
-	subscriptionID                              = azureFactoryResource["subscriptionId"].(string)
-	resourceGroupName                           = azureFactoryResource["resourceGroupName"].(string)
-	dataFactoryName                             = azureFactoryResource["name"].(string)
+	azureFactoryResource = testhelp.WellKnown()["DataFactory"].(map[string]any)
+	subscriptionID       = azureFactoryResource["subscriptionId"].(string)
+	resourceGroupName    = azureFactoryResource["resourceGroupName"].(string)
+	dataFactoryName      = azureFactoryResource["name"].(string)
 )
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
@@ -150,10 +151,11 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 		at.CompileConfig(
 			testResourceItemHeader,
 			map[string]any{
-				"workspace_id": *entity.WorkspaceID,
-				"display_name": *entity.DisplayName,
-				"format":       "Default",
-				"definition":   testHelperDefinitionJSON,
+				"workspace_id":              *entity.WorkspaceID,
+				"display_name":              *entity.DisplayName,
+				"format":                    "Default",
+				"definition":                testHelperDefinitionJSON,
+				"definition_update_enabled": true,
 			},
 		))
 
@@ -244,10 +246,11 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id": *entityBefore.WorkspaceID,
-						"display_name": *entityBefore.DisplayName,
-						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"workspace_id":              *entityBefore.WorkspaceID,
+						"display_name":              *entityBefore.DisplayName,
+						"format":                    "Default",
+						"definition":                testHelperDefinitionJSON,
+						"definition_update_enabled": true,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -266,6 +269,7 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
+						"format":       "Default",
 						"definition":   testHelperDefinitionJSON,
 					},
 				)),
