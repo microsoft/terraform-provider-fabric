@@ -3,18 +3,15 @@
 page_title: "fabric_notebook Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Notebook.
-  Use this resource to manage a Notebook https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook.
-  -> This item supports Service Principal authentication.
+  The Notebook resource allows you to manage a Fabric Notebook https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_notebook (Resource)
 
-Manage a Fabric Notebook.
+The Notebook resource allows you to manage a Fabric [Notebook](https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook).
 
-Use this resource to manage a [Notebook](https://learn.microsoft.com/fabric/data-engineering/how-to-use-notebook).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

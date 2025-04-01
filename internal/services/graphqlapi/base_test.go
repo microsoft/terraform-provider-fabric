@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
 )
 
-const (
-	itemTFName  = graphqlapi.ItemTFName
-	itemsTFName = graphqlapi.ItemsTFName
-	itemType    = graphqlapi.ItemType
-)
+var itemTypeInfo = graphqlapi.ItemTypeInfo
+
+const fabricItemType = graphqlapi.FabricItemType

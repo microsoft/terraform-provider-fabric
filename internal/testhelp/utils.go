@@ -14,6 +14,7 @@ import (
 	"math/rand/v2"
 	"strings"
 
+	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"software.sslmate.com/src/go-pkcs12"
@@ -27,7 +28,7 @@ func RandomName(length ...int) string {
 		size = length[0]
 	}
 
-	return acctest.RandStringFromCharSet(size, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	return acctest.RandStringFromCharSet(size, acctest.CharSetAlpha+strings.ToUpper(acctest.CharSetAlpha))
 }
 
 // RandomIntRange returns a random integer between minInt (inclusive) and maxInt (exclusive).
@@ -116,6 +117,20 @@ func createP12Bundle(certPEMStr, privateKeyPEMStr, password string) ([]byte, err
 	}
 
 	return p12Bytes, nil
+}
+
+func TFDataSource(providerName, typeName, dataSourceName string) (fqn, header string) { //nolint:nonamedreturns
+	fqn = DataSourceFQN(providerName, typeName, dataSourceName)
+	header = at.DataSourceHeader(TypeName(providerName, typeName), dataSourceName)
+
+	return fqn, header
+}
+
+func TFResource(providerName, typeName, resourceName string) (fqn, header string) { //nolint:nonamedreturns
+	fqn = ResourceFQN(providerName, typeName, resourceName)
+	header = at.ResourceHeader(TypeName(providerName, typeName), resourceName)
+
+	return fqn, header
 }
 
 // Helper function to create a base type name.

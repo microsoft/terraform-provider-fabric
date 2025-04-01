@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 )
 
-const (
-	itemTFName  = mlmodel.ItemTFName
-	itemsTFName = mlmodel.ItemsTFName
-	itemType    = mlmodel.ItemType
-)
+var itemTypeInfo = mlmodel.ItemTypeInfo
+
+const fabricItemType = mlmodel.FabricItemType

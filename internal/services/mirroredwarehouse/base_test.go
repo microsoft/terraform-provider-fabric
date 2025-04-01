@@ -3,11 +3,8 @@
 
 package mirroredwarehouse_test
 
-import (
-	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
-)
+import "github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 
-const (
-	itemsTFName = mirroredwarehouse.ItemsTFName
-	itemType    = mirroredwarehouse.ItemType
-)
+var itemTypeInfo = mirroreddatabase.ItemTypeInfo
+
+const fabricItemType = mirroreddatabase.FabricItemType

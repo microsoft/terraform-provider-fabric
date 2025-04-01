@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -16,6 +17,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -29,25 +31,21 @@ var (
 type resourceDomain struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabadmin.DomainsClient
-	Name        string
-	TFName      string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewResourceDomain() resource.Resource {
 	return &resourceDomain{
-		Name:      ItemName,
-		TFName:    ItemTFName,
-		IsPreview: ItemPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceDomain) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + r.TFName
+func (r *resourceDomain) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *resourceDomain) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = domainSchema(false).GetResource(ctx)
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceDomain) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -68,7 +66,7 @@ func (r *resourceDomain) Configure(_ context.Context, req resource.ConfigureRequ
 	r.pConfigData = pConfigData
 	r.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -105,8 +103,9 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	state.set(respCreate.Domain)
 
-	if !(plan.ContributorsScope.IsNull() || plan.ContributorsScope.IsUnknown()) && plan.ContributorsScope.ValueString() != string(fabadmin.ContributorsScopeTypeAllTenant) && plan.ParentDomainID.IsNull() {
-		tflog.Trace(ctx, "setting "+ItemName+" contributors scope")
+	if (!plan.ContributorsScope.IsNull() && !plan.ContributorsScope.IsUnknown()) && plan.ContributorsScope.ValueString() != string(fabadmin.ContributorsScopeTypeAllTenant) &&
+		plan.ParentDomainID.IsNull() {
+		tflog.Trace(ctx, "setting "+r.TypeInfo.Name+" contributors scope")
 
 		var reqUpdate requestUpdateDomain
 
@@ -150,14 +149,16 @@ func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, res
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := r.get(ctx, &state)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
-			resp.State.RemoveResource(ctx)
-		}
+	diags = r.get(ctx, &state)
+	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+		resp.State.RemoveResource(ctx)
 
 		resp.Diagnostics.Append(diags...)
 
+		return
+	}
+
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -266,12 +267,10 @@ func (r *resourceDomain) ImportState(ctx context.Context, req resource.ImportSta
 	}
 }
 
-func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) error {
-	tflog.Trace(ctx, "getting "+ItemName)
-
+func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) diag.Diagnostics {
 	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), nil)
-	if err != nil {
-		return err
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
+		return diags
 	}
 
 	model.set(respGet.Domain)

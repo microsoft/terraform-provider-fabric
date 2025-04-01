@@ -9,22 +9,15 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -39,115 +32,21 @@ var (
 type resourceWorkspace struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.WorkspacesClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewResourceWorkspace() resource.Resource {
-	return &resourceWorkspace{}
+	return &resourceWorkspace{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (r *resourceWorkspace) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (r *resourceWorkspace) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *resourceWorkspace) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a Fabric " + ItemName + ".\n\n" +
-			"See [" + ItemName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " ID.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " display name.",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(256),
-					stringvalidator.NoneOfCaseInsensitive("Admin monitoring", "My workspace"),
-				},
-			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " description.",
-				Computed:            true,
-				Optional:            true,
-				Default:             stringdefault.StaticString(""),
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(4000),
-				},
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " type.",
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"capacity_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the Fabric Capacity to assign to the Workspace.",
-				Optional:            true,
-				CustomType:          customtypes.UUIDType{},
-			},
-			"capacity_region": schema.StringAttribute{
-				MarkdownDescription: "The region of the capacity associated with this workspace. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityRegionValues(), true, true),
-				Computed:            true,
-			},
-			"capacity_assignment_progress": schema.StringAttribute{
-				MarkdownDescription: "A Workspace assignment to capacity progress status. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityAssignmentProgressValues(), true, true),
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"onelake_endpoints": schema.SingleNestedAttribute{
-				MarkdownDescription: "The OneLake API endpoints associated with this workspace.",
-				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[oneLakeEndpointsModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"blob_endpoint": schema.StringAttribute{
-						MarkdownDescription: "The OneLake API endpoint available for Blob API operations.",
-						Computed:            true,
-						CustomType:          customtypes.URLType{},
-					},
-					"dfs_endpoint": schema.StringAttribute{
-						MarkdownDescription: "The OneLake API endpoint available for Distributed File System (DFS) or ADLSgen2 filesystem API operations.",
-						Computed:            true,
-						CustomType:          customtypes.URLType{},
-					},
-				},
-			},
-			"identity": schema.SingleNestedAttribute{
-				MarkdownDescription: "A workspace identity.\n\n" +
-					"See [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information.",
-				Optional:   true,
-				CustomType: supertypes.NewSingleNestedObjectTypeOf[workspaceIdentityModel](ctx),
-				Attributes: map[string]schema.Attribute{
-					"type": schema.StringAttribute{
-						MarkdownDescription: "Provision a workspace identity. Accepted values: " + utils.ConvertStringSlicesToString(workspaceIdentityTypes, true, true) + ".",
-						Required:            true,
-						Validators: []validator.String{
-							stringvalidator.OneOf(workspaceIdentityTypes...),
-						},
-					},
-					"application_id": schema.StringAttribute{
-						MarkdownDescription: "The application ID.",
-						Computed:            true,
-						CustomType:          customtypes.UUIDType{},
-					},
-					"service_principal_id": schema.StringAttribute{
-						MarkdownDescription: "The service principal ID.",
-						Computed:            true,
-						CustomType:          customtypes.UUIDType{},
-					},
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
-	}
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceWorkspace) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

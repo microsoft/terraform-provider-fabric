@@ -46,7 +46,14 @@ func (to *fabricItemDefinition) setFormat(v types.String, definitionFormats []De
 	}
 }
 
-func (to *fabricItemDefinition) setParts(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], definitionEmpty string, definitionPaths []string, definitionUpdateEnabled types.Bool, update bool) diag.Diagnostics { //revive:disable-line:flag-parameter
+func (to *fabricItemDefinition) setParts(
+	ctx context.Context,
+	definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	definitionEmpty string,
+	definitionPaths []string,
+	definitionUpdateEnabled types.Bool,
+	update bool,
+) diag.Diagnostics { //revive:disable-line:flag-parameter
 	to.Parts = []fabcore.ItemDefinitionPart{}
 
 	defParts, diags := definition.Get(ctx)
@@ -109,7 +116,14 @@ type requestUpdateFabricItemDefinition struct {
 	fabcore.UpdateItemDefinitionRequest
 }
 
-func (to *requestUpdateFabricItemDefinition) setDefinition(ctx context.Context, definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel], format types.String, definitionUpdateEnabled types.Bool, definitionEmpty string, definitionFormats []DefinitionFormat) diag.Diagnostics {
+func (to *requestUpdateFabricItemDefinition) setDefinition(
+	ctx context.Context,
+	definition supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel],
+	format types.String,
+	definitionUpdateEnabled types.Bool,
+	definitionEmpty string,
+	definitionFormats []DefinitionFormat,
+) diag.Diagnostics {
 	var def fabricItemDefinition
 
 	def.setFormat(format, definitionFormats)

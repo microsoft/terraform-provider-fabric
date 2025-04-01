@@ -53,6 +53,8 @@ linters:
           disabled: true
         - name: max-public-structs
           disabled: true
+        - name: confusing-naming
+          disabled: true
     varnamelen:
       min-name-length: 1
     wsl:

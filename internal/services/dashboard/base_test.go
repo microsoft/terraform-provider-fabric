@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 )
 
-const (
-	itemTFName  = dashboard.ItemTFName
-	itemsTFName = dashboard.ItemsTFName
-	itemType    = dashboard.ItemType
-)
+var itemTypeInfo = dashboard.ItemTypeInfo
+
+const fabricItemType = dashboard.FabricItemType

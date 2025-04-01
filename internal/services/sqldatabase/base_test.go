@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 )
 
-const (
-	itemTFName  = sqldatabase.ItemTFName
-	itemsTFName = sqldatabase.ItemsTFName
-	itemType    = sqldatabase.ItemType
-)
+var itemTypeInfo = sqldatabase.ItemTypeInfo
+
+const fabricItemType = sqldatabase.FabricItemType

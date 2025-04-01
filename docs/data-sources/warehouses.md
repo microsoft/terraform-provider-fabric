@@ -3,18 +3,15 @@
 page_title: "fabric_warehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Warehouses.
-  Use this data source to list Warehouses https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
-  -> This item supports Service Principal authentication.
+  The Warehouse data-source allows you to retrieve details about a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_warehouses (Data Source)
 
-List a Fabric Warehouses.
+The Warehouse data-source allows you to retrieve details about a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
-Use this data source to list [Warehouses](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_warehouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Warehouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Warehouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

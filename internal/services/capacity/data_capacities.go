@@ -16,7 +16,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
@@ -26,50 +26,31 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceCapacities)(nil)
 type dataSourceCapacities struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.CapacitiesClient
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceCapacities() datasource.DataSource {
-	return &dataSourceCapacities{}
+	return &dataSourceCapacities{
+		TypeInfo: ItemTypeInfo,
+	}
 }
 
-func (d *dataSourceCapacities) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemsTFName
+func (d *dataSourceCapacities) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
 func (d *dataSourceCapacities) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	s := itemSchema(true).GetDataSource(ctx)
+
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-			"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ") for more information.\n\n" +
-			ItemDocsSPNSupport,
+		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
-			"values": schema.ListNestedAttribute{
-				MarkdownDescription: fmt.Sprintf("The list of %s.", ItemsName),
+			"values": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewListNestedObjectTypeOf[baseCapacityModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseCapacityModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s ID.", ItemName),
-							Computed:            true,
-							CustomType:          customtypes.UUIDType{},
-						},
-						"display_name": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s display name.", ItemName),
-							Computed:            true,
-						},
-						"region": schema.StringAttribute{
-							MarkdownDescription: "The Azure region where the " + ItemName + " has been provisioned. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityRegionValues(), true, true),
-							Computed:            true,
-						},
-						"sku": schema.StringAttribute{
-							MarkdownDescription: fmt.Sprintf("The %s SKU.", ItemName),
-							Computed:            true,
-						},
-						"state": schema.StringAttribute{
-							MarkdownDescription: "The " + ItemName + " state. Possible values: " + utils.ConvertStringSlicesToString(fabcore.PossibleCapacityStateValues(), true, true),
-							Computed:            true,
-						},
-					},
+					Attributes: s.Attributes,
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx),
@@ -131,8 +112,6 @@ func (d *dataSourceCapacities) Read(ctx context.Context, req datasource.ReadRequ
 }
 
 func (d *dataSourceCapacities) list(ctx context.Context, model *dataSourceCapacitiesModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+ItemsName)
-
 	respList, err := d.client.ListCapacities(ctx, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags

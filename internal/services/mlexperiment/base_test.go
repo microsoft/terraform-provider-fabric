@@ -3,12 +3,8 @@
 
 package mlexperiment_test
 
-import (
-	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
-)
+import "github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
 
-const (
-	itemTFName  = mlexperiment.ItemTFName
-	itemsTFName = mlexperiment.ItemsTFName
-	itemType    = mlexperiment.ItemType
-)
+var itemTypeInfo = mlexperiment.ItemTypeInfo
+
+const fabricItemType = mlexperiment.FabricItemType

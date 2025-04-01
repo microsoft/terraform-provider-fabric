@@ -3,19 +3,16 @@
 page_title: "fabric_sql_databases Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric SQL Databases.
-  Use this data source to list SQL Databases https://learn.microsoft.com/fabric/database/sql/overview.
-  -> This item supports Service Principal authentication.
+  The SQL Databases data-source allows you to retrieve a list of Fabric SQL Databases https://learn.microsoft.com/fabric/database/sql/overview.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_databases (Data Source)
 
-List a Fabric SQL Databases.
+The SQL Databases data-source allows you to retrieve a list of Fabric [SQL Databases](https://learn.microsoft.com/fabric/database/sql/overview).
 
-Use this data source to list [SQL Databases](https://learn.microsoft.com/fabric/database/sql/overview).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -40,7 +37,7 @@ data "fabric_sql_databases" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of SQL Databases. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of SQL Databases. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

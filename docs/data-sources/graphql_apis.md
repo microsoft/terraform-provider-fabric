@@ -3,21 +3,15 @@
 page_title: "fabric_graphql_apis Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric GraphQL APIs.
-  Use this data source to list GraphQL APIs https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
-  -> This item supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The GraphQL APIs data-source allows you to retrieve a list of Fabric GraphQL APIs https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_graphql_apis (Data Source)
 
-List a Fabric GraphQL APIs.
+The GraphQL APIs data-source allows you to retrieve a list of Fabric [GraphQL APIs](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
 
-Use this data source to list [GraphQL APIs](https://learn.microsoft.com/fabric/data-engineering/api-graphql-overview).
-
--> This item supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -40,7 +34,7 @@ data "fabric_graphql_apis" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of GraphQL APIs. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of GraphQL APIs. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

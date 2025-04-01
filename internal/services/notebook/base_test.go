@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
 )
 
-const (
-	itemTFName  = notebook.ItemTFName
-	itemsTFName = notebook.ItemsTFName
-	itemType    = notebook.ItemType
-)
+var itemTypeInfo = notebook.ItemTypeInfo
+
+const fabricItemType = notebook.FabricItemType

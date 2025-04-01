@@ -3,18 +3,15 @@
 page_title: "fabric_kql_dashboard Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric KQL Dashboard.
-  Use this resource to manage KQL Dashboard https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create.
-  -> This item supports Service Principal authentication.
+  The KQL Dashboard resource allows you to manage a Fabric KQL Dashboard https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_kql_dashboard (Resource)
 
-Manage a Fabric KQL Dashboard.
+The KQL Dashboard resource allows you to manage a Fabric [KQL Dashboard](https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create).
 
-Use this resource to manage [KQL Dashboard](https://learn.microsoft.com/fabric/real-time-intelligence/dashboard-real-time-create).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

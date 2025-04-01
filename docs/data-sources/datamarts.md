@@ -3,18 +3,18 @@
 page_title: "fabric_datamarts Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric Datamarts.
-  Use this data source to list Datamarts https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview.
-  -> This item does not support Service Principal. Please use a User context authentication.
+  The Datamarts data-source allows you to retrieve a list of Fabric Datamarts https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_datamarts (Data Source)
 
-List a Fabric Datamarts.
+The Datamarts data-source allows you to retrieve a list of Fabric [Datamarts](https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview).
 
-Use this data source to list [Datamarts](https://learn.microsoft.com/power-bi/transform-model/datamarts/datamarts-overview).
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
--> This item does not support Service Principal. Please use a User context authentication.
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -37,7 +37,7 @@ data "fabric_datamarts" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of Datamarts. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of Datamarts. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

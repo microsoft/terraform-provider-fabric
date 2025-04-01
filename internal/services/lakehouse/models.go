@@ -14,6 +14,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
+type lakehouseConfigurationModel struct {
+	EnableSchemas types.Bool `tfsdk:"enable_schemas"`
+}
+
 type lakehousePropertiesModel struct {
 	OneLakeFilesPath      types.String                                                              `tfsdk:"onelake_files_path"`
 	OneLakeTablesPath     types.String                                                              `tfsdk:"onelake_tables_path"`

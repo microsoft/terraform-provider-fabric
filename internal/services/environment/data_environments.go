@@ -61,13 +61,8 @@ func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
 
 	config := fabricitem.DataSourceFabricItemsProperties[environmentPropertiesModel, fabenvironment.PublishInfo]{
 		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			Type:   ItemType,
-			Name:   ItemName,
-			Names:  ItemsName,
-			TFName: ItemsTFName,
-			MarkdownDescription: "List a Fabric " + ItemsName + ".\n\n" +
-				"Use this data source to list [" + ItemsName + "](" + ItemDocsURL + ").\n\n" +
-				ItemDocsSPNSupport,
+			TypeInfo:       ItemTypeInfo,
+			FabricItemType: FabricItemType,
 		},
 		PropertiesAttributes: getDataSourceEnvironmentPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,

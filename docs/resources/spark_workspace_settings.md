@@ -3,18 +3,18 @@
 page_title: "fabric_spark_workspace_settings Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Spark Workspace Settings.
-  See Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings for more information.
-  -> This item supports Service Principal authentication.
+  The Spark Workspace Settings resource allows you to manage a Fabric Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings.
+  -> This resource supports Service Principal authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_workspace_settings (Resource)
 
-Manage a Fabric Spark Workspace Settings.
+The Spark Workspace Settings resource allows you to manage a Fabric [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings).
 
-See [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings) for more information.
+-> This resource supports Service Principal authentication.
 
--> This item supports Service Principal authentication.
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -90,20 +90,20 @@ resource "fabric_spark_workspace_settings" "example2" {
 
 ### Required
 
-- `workspace_id` (String) The Workspace ID.
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
 - `automatic_log` (Attributes) Automatic Log properties. (see [below for nested schema](#nestedatt--automatic_log))
 - `environment` (Attributes) Environment properties. (see [below for nested schema](#nestedatt--environment))
 - `high_concurrency` (Attributes) High Concurrency properties. (see [below for nested schema](#nestedatt--high_concurrency))
-- `job` (Attributes) Jobs properties. (see [below for nested schema](#nestedatt--job))
+- `job` (Attributes) Job properties. (see [below for nested schema](#nestedatt--job))
 - `pool` (Attributes) Pool properties. (see [below for nested schema](#nestedatt--pool))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The Spark Workspace Settings ID.
 
 <a id="nestedatt--automatic_log"></a>
 
@@ -111,7 +111,7 @@ resource "fabric_spark_workspace_settings" "example2" {
 
 Optional:
 
-- `enabled` (Boolean) The status of the automatic log. Possible values: `false` - Disabled, `true` - Enabled.
+- `enabled` (Boolean) The status of the automatic log: `false` - Disabled, `true` - Enabled.
 
 <a id="nestedatt--environment"></a>
 
@@ -119,8 +119,8 @@ Optional:
 
 Optional:
 
-- `name` (String) The name of the default environment. Empty indicated there is no workspace default environment.
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Accepted values: `1.1`, `1.2`, `1.3`.
+- `name` (String) The name of the environment.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
 
 <a id="nestedatt--high_concurrency"></a>
 
@@ -128,8 +128,8 @@ Optional:
 
 Optional:
 
-- `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run. `false` - Disabled, `true` - Enabled.
-- `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run. `false` - Disabled, `true` - Enabled.
+- `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run: `false` - Disabled, `true` - Enabled.
+- `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run: `false` - Disabled, `true` - Enabled.
 
 <a id="nestedatt--job"></a>
 
@@ -138,7 +138,7 @@ Optional:
 Optional:
 
 - `conservative_job_admission_enabled` (Boolean) Reserve maximum cores for active Spark jobs. When this setting is enabled, your Fabric capacity reserves the maximum number of cores needed for active Spark jobs, ensuring job reliability by making sure that cores are available if a job scales up. When this setting is disabled, jobs are started based on the minimum number of cores needed, letting more jobs run at the same time. `false` - Disabled, `true` - Enabled.
-- `session_timeout_in_minutes` (Number) Time to terminate inactive Spark sessions. The maximum is 14 days (20160 minutes).
+- `session_timeout_in_minutes` (Number) Time to terminate inactive Spark sessions. The maximum is 14 days (20160 minutes). Value must be at most 20160.
 
 <a id="nestedatt--pool"></a>
 
@@ -156,9 +156,9 @@ Optional:
 
 Optional:
 
-- `id` (String) The Pool ID. `00000000-0000-0000-0000-000000000000` means use the starter pool.
-- `name` (String) The Pool name. It should be a valid custom pool name. `Starter Pool` means use the starter pool.
-- `type` (String) The Pool type. Accepted values: `Capacity`, `Workspace`.
+- `id` (String) The Pool ID. `00000000-0000-0000-0000-000000000000` means use the starter pool. Ensure that if an attribute is set, these are not set: "[<.name,<.type]".
+- `name` (String) The Pool name. `Starter Pool` means use the starting pool. Ensure that if an attribute is set, also these are set: "[<.type]". Ensure that if an attribute is set, these are not set: "[<.id]".
+- `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`. Ensure that if an attribute is set, also these are set: "[<.name]". Ensure that if an attribute is set, these are not set: "[<.id]".
 
 <a id="nestedatt--pool--starter_pool"></a>
 

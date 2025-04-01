@@ -3,18 +3,15 @@
 page_title: "fabric_spark_job_definition Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Spark Job Definition.
-  Use this resource to manage a Spark Job Definition https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
-  -> This item supports Service Principal authentication.
+  The Spark Job Definition resource allows you to manage a Fabric Spark Job Definition https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_spark_job_definition (Resource)
 
-Manage a Fabric Spark Job Definition.
+The Spark Job Definition resource allows you to manage a Fabric [Spark Job Definition](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
 
-Use this resource to manage a [Spark Job Definition](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

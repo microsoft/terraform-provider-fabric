@@ -11,7 +11,10 @@ import (
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 )
 
-func handleDeleteWithSimpleID[TEntity, TOptions, TDeleteResponse any](handler *typedHandler[TEntity], f *func(ctx context.Context, id string, options *TOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder)) {
+func handleDeleteWithSimpleID[TEntity, TOptions, TDeleteResponse any](
+	handler *typedHandler[TEntity],
+	f *func(ctx context.Context, id string, options *TOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -21,7 +24,10 @@ func handleDeleteWithSimpleID[TEntity, TOptions, TDeleteResponse any](handler *t
 	}
 }
 
-func handleDeleteWithParentID[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity], f *func(ctx context.Context, parentID, childID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleDeleteWithParentID[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	f *func(ctx context.Context, parentID, childID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -33,7 +39,11 @@ func handleDeleteWithParentID[TEntity, TOptions, TResponse any](handler *typedHa
 	}
 }
 
-func handleGetWithSimpleID[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity], getTransformer getTransformer[TEntity, TResponse], f *func(ctx context.Context, id string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleGetWithSimpleID[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	getTransformer getTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, id string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -43,7 +53,11 @@ func handleGetWithSimpleID[TEntity, TOptions, TResponse any](handler *typedHandl
 	}
 }
 
-func handleGetWithParentID[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity], getTransformer getTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID, childID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleGetWithParentID[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	getTransformer getTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID, childID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -55,7 +69,11 @@ func handleGetWithParentID[TEntity, TOptions, TResponse any](handler *typedHandl
 	}
 }
 
-func handleGetDefinition[TEntity, TDefinition, TOptions, TResponse any](handler *typedHandler[TEntity], definitionTransformer definitionTransformer[TDefinition, TResponse], function *func(ctx context.Context, parentID, childID string, options *TOptions) (azfake.PollerResponder[TResponse], azfake.ErrorResponder)) {
+func handleGetDefinition[TEntity, TDefinition, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	definitionTransformer definitionTransformer[TDefinition, TResponse],
+	function *func(ctx context.Context, parentID, childID string, options *TOptions) (azfake.PollerResponder[TResponse], azfake.ErrorResponder),
+) {
 	if function == nil {
 		return
 	}
@@ -85,7 +103,12 @@ func handleGetDefinition[TEntity, TDefinition, TOptions, TResponse any](handler 
 	}
 }
 
-func handleUpdateWithSimpleID[TEntity, TOptions, TUpdateRequest, TResponse any](handler *typedHandler[TEntity], updater updater[TUpdateRequest, TEntity], updateTransformer updateTransformer[TEntity, TResponse], f *func(ctx context.Context, id string, updateRequest TUpdateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleUpdateWithSimpleID[TEntity, TOptions, TUpdateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	updater updater[TUpdateRequest, TEntity],
+	updateTransformer updateTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, id string, updateRequest TUpdateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -95,7 +118,12 @@ func handleUpdateWithSimpleID[TEntity, TOptions, TUpdateRequest, TResponse any](
 	}
 }
 
-func handleUpdateWithParentID[TEntity, TOptions, TUpdateRequest, TResponse any](handler *typedHandler[TEntity], updater updater[TUpdateRequest, TEntity], updateTransformer updateTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID, childID string, updateRequest TUpdateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleUpdateWithParentID[TEntity, TOptions, TUpdateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	updater updater[TUpdateRequest, TEntity],
+	updateTransformer updateTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID, childID string, updateRequest TUpdateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -129,7 +157,11 @@ func upsertDefinition[TDefinition, TEntity any](handler *typedHandler[TEntity], 
 	}
 }
 
-func handleUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse any](handler *typedHandler[TEntity], definitionUpdater definitionUpdater[TRequest, TDefinition], function *func(ctx context.Context, parentID, childID string, request TRequest, options *TOptions) (azfake.PollerResponder[TResponse], azfake.ErrorResponder)) {
+func handleUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	definitionUpdater definitionUpdater[TRequest, TDefinition],
+	function *func(ctx context.Context, parentID, childID string, request TRequest, options *TOptions) (azfake.PollerResponder[TResponse], azfake.ErrorResponder),
+) {
 	if function == nil {
 		return
 	}
@@ -154,7 +186,13 @@ func handleUpdateDefinition[TEntity, TDefinition, TRequest, TOptions, TResponse 
 	}
 }
 
-func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse any](handler *typedHandler[TEntity], creator creator[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	creator creator[TCreateRequest, TEntity],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, createRequest TCreateRequest, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -271,7 +309,13 @@ func handleNonLROCreate[TEntity, TOptions, TCreateRequest, TResponse any](
 // 	}
 // }
 
-func handleCreateLRO[TEntity, TOptions, TCreateRequest, TResponse any](h *typedHandler[TEntity], creator creatorWithParentID[TCreateRequest, TEntity], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder)) {
+func handleCreateLRO[TEntity, TOptions, TCreateRequest, TResponse any](
+	h *typedHandler[TEntity],
+	creator creatorWithParentID[TCreateRequest, TEntity],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -279,7 +323,14 @@ func handleCreateLRO[TEntity, TOptions, TCreateRequest, TResponse any](h *typedH
 	*f = createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, any](h, creator, nil, validator, createTransformer)
 }
 
-func handleCreateLROWithDefinitions[TEntity, TOptions, TCreateRequest, TDefinition, TResponse any](h *typedHandler[TEntity], creator creatorWithParentID[TCreateRequest, TEntity], definitionCreator definitionCreator[TCreateRequest, TDefinition], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse], f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder)) {
+func handleCreateLROWithDefinitions[TEntity, TOptions, TCreateRequest, TDefinition, TResponse any](
+	h *typedHandler[TEntity],
+	creator creatorWithParentID[TCreateRequest, TEntity],
+	definitionCreator definitionCreator[TCreateRequest, TDefinition],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -287,7 +338,12 @@ func handleCreateLROWithDefinitions[TEntity, TOptions, TCreateRequest, TDefiniti
 	*f = createLROWithOptionalDefinition[TEntity, TOptions](h, creator, definitionCreator, validator, createTransformer)
 }
 
-func handleListPagerWithParentID[TEntity, TOptions, TResponse any](h *typedHandler[TEntity], filter parentFilter[TEntity], listTransformer listTransformer[TEntity, TResponse], f *func(parentID string, options *TOptions) (resp azfake.PagerResponder[TResponse])) {
+func handleListPagerWithParentID[TEntity, TOptions, TResponse any](
+	h *typedHandler[TEntity],
+	filter parentFilter[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+	f *func(parentID string, options *TOptions) (resp azfake.PagerResponder[TResponse]),
+) {
 	if f == nil {
 		return
 	}
@@ -295,7 +351,11 @@ func handleListPagerWithParentID[TEntity, TOptions, TResponse any](h *typedHandl
 	*f = listPagerWithFilter[TEntity, TOptions](h, filter, listTransformer)
 }
 
-func handleListPager[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity], listTransformer listTransformer[TEntity, TResponse], f *func(options *TOptions) (resp azfake.PagerResponder[TResponse])) {
+func handleListPager[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+	f *func(options *TOptions) (resp azfake.PagerResponder[TResponse]),
+) {
 	if f == nil {
 		return
 	}
@@ -305,7 +365,11 @@ func handleListPager[TEntity, TOptions, TResponse any](handler *typedHandler[TEn
 	}
 }
 
-func handleList[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity], listTransformer listTransformer[TEntity, TResponse], f *func(ctx context.Context, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder)) {
+func handleList[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
 	if f == nil {
 		return
 	}
@@ -315,7 +379,13 @@ func handleList[TEntity, TOptions, TResponse any](handler *typedHandler[TEntity]
 	}
 }
 
-func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinition, TResponse any](handler *typedHandler[TEntity], creator creatorWithParentID[TCreateRequest, TEntity], definitionCreator definitionCreator[TCreateRequest, TDefinition], validator validator[TEntity], createTransformer createTransformer[TEntity, TResponse]) func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder) {
+func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinition, TResponse any](
+	handler *typedHandler[TEntity],
+	creator creatorWithParentID[TCreateRequest, TEntity],
+	definitionCreator definitionCreator[TCreateRequest, TDefinition],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+) func(ctx context.Context, parentID string, createRequest TCreateRequest, options *TOptions) (resp azfake.PollerResponder[TResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, parentID string, createRequest TCreateRequest, _ *TOptions) (azfake.PollerResponder[TResponse], azfake.ErrorResponder) {
 		var resp azfake.PollerResponder[TResponse]
 
@@ -349,7 +419,11 @@ func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinit
 	}
 }
 
-func listPagerWithFilter[TEntity, TOptions, TResponse any](h *typedHandler[TEntity], filter parentFilter[TEntity], listTransformer listTransformer[TEntity, TResponse]) func(parentID string, options *TOptions) (resp azfake.PagerResponder[TResponse]) {
+func listPagerWithFilter[TEntity, TOptions, TResponse any](
+	h *typedHandler[TEntity],
+	filter parentFilter[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+) func(parentID string, options *TOptions) (resp azfake.PagerResponder[TResponse]) {
 	return func(parentID string, _ *TOptions) azfake.PagerResponder[TResponse] {
 		var resp azfake.PagerResponder[TResponse]
 
@@ -367,7 +441,11 @@ func listPagerWithFilter[TEntity, TOptions, TResponse any](h *typedHandler[TEnti
 	}
 }
 
-func listWithFilter[TEntity, TOptions, TResponse any](h *typedHandler[TEntity], filter parentFilter[TEntity], listTransformer listTransformer[TEntity, TResponse]) func(parentID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder) {
+func listWithFilter[TEntity, TOptions, TResponse any](
+	h *typedHandler[TEntity],
+	filter parentFilter[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+) func(parentID string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder) {
 	return func(parentID string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 		var resp azfake.Responder[TResponse]
 		var errResp azfake.ErrorResponder
@@ -386,7 +464,13 @@ func listWithFilter[TEntity, TOptions, TResponse any](h *typedHandler[TEntity], 
 	}
 }
 
-func updateByID[TEntity, TUpdateRequest, TResponse any](handler *typedHandler[TEntity], id string, updateRequest TUpdateRequest, updater updater[TUpdateRequest, TEntity], updateTransformer updateTransformer[TEntity, TResponse]) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+func updateByID[TEntity, TUpdateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	id string,
+	updateRequest TUpdateRequest,
+	updater updater[TUpdateRequest, TEntity],
+	updateTransformer updateTransformer[TEntity, TResponse],
+) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 	var resp azfake.Responder[TResponse]
 
 	var errResp azfake.ErrorResponder

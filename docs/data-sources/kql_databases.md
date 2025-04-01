@@ -3,18 +3,15 @@
 page_title: "fabric_kql_databases Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  List a Fabric KQL Databases.
-  Use this data source to list KQL Databases https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
-  -> This item supports Service Principal authentication.
+  The KQL Database data-source allows you to retrieve details about a Fabric KQL Database https://learn.microsoft.com/fabric/real-time-intelligence/create-database.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_kql_databases (Data Source)
 
-List a Fabric KQL Databases.
+The KQL Database data-source allows you to retrieve details about a Fabric [KQL Database](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
 
-Use this data source to list [KQL Databases](https://learn.microsoft.com/fabric/real-time-intelligence/create-database).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_kql_databases" "example" {
 
 ### Read-Only
 
-- `values` (Attributes List) The list of KQL Databases. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The list of KQL Databases. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

@@ -31,65 +31,71 @@ import (
 )
 
 func getResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getResourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, r ResourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
 func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, r ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
-func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
-	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
+func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](
+	ctx context.Context,
+	r ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
+) schema.Schema {
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.TypeInfo.Name, r.ConfigRequired, r.ConfigAttributes)
+	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
-func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](ctx context.Context, r ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) schema.Schema {
-	attributes := getResourceFabricItemBaseAttributes(ctx, r.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
-	attrConfiguration := getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.Name, r.ConfigRequired, r.ConfigAttributes)
+func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, Titemconfig any](
+	ctx context.Context,
+	r ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
+) schema.Schema {
+	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
+	attrConfiguration := getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.TypeInfo.Name, r.ConfigRequired, r.ConfigAttributes)
 	attrConfiguration.Validators = []validator.Object{
 		objectvalidator.ConflictsWith(
 			path.MatchRoot("definition"),
@@ -98,19 +104,24 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 		),
 	}
 	attributes["configuration"] = attrConfiguration
-	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.Name, r.PropertiesAttributes)
+	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
+	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
 		attributes[key] = value
 	}
 
 	return schema.Schema{
-		MarkdownDescription: GetResourcePreviewNote(r.MarkdownDescription, r.IsPreview),
+		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
 	}
 }
 
-func getResourceFabricItemConfigNestedAttr[Ttfconfig any](ctx context.Context, name string, isRequired bool, attributes map[string]schema.Attribute) schema.SingleNestedAttribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemConfigNestedAttr[Ttfconfig any](
+	ctx context.Context,
+	name string,
+	isRequired bool,
+	attributes map[string]schema.Attribute,
+) schema.SingleNestedAttribute { //revive:disable-line:flag-parameter
 	result := schema.SingleNestedAttribute{
 		MarkdownDescription: "The " + name + " creation configuration.\n\n" +
 			"Any changes to this configuration will result in recreation of the " + name + ".",
@@ -140,7 +151,12 @@ func getResourceFabricItemPropertiesNestedAttr[Ttfprop any](ctx context.Context,
 }
 
 // Helper function to get base Fabric Item resource attributes.
-func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displayNameMaxLength, descriptionMaxLength int, nameRenameAllowed bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter
+func getResourceFabricItemBaseAttributes(
+	ctx context.Context,
+	name string,
+	displayNameMaxLength, descriptionMaxLength int,
+	nameRenameAllowed bool,
+) map[string]schema.Attribute { //revive:disable-line:flag-parameter
 	displayNamePlanModifiers := []planmodifier.String{}
 
 	if !nameRenameAllowed {
@@ -190,7 +206,13 @@ func getResourceFabricItemBaseAttributes(ctx context.Context, name string, displ
 }
 
 // Helper function to get Fabric Item definition attributes.
-func getResourceFabricItemDefinitionAttributes(ctx context.Context, name, definitionPathDocsURL string, definitionFormats []DefinitionFormat, definitionPathKeysValidator []validator.Map, definitionRequired, alongConfiguration bool) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
+func getResourceFabricItemDefinitionAttributes(
+	ctx context.Context,
+	name, definitionPathDocsURL string,
+	definitionFormats []DefinitionFormat,
+	definitionPathKeysValidator []validator.Map,
+	definitionRequired, alongConfiguration bool,
+) map[string]schema.Attribute { //revive:disable-line:flag-parameter,argument-limit
 	attributes := make(map[string]schema.Attribute)
 
 	attrDefinitionUpdateEnabled := schema.BoolAttribute{}

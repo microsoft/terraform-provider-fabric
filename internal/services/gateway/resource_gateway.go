@@ -7,197 +7,44 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
-	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
-	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
-	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure = (*resourceGateway)(nil)
-	// _ resource.ResourceWithImportState = (*resourceGateway)(nil).
+	_ resource.ResourceWithConfigure   = (*resourceGateway)(nil)
+	_ resource.ResourceWithImportState = (*resourceGateway)(nil)
 )
 
 type resourceGateway struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GatewaysClient
-	Name        string
-	IsPreview   bool
+	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
 func NewResourceGateway() resource.Resource {
 	return &resourceGateway{
-		Name:      ItemName,
-		IsPreview: ItemPreview,
+		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceGateway) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ItemTFName
+func (r *resourceGateway) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
 func (r *resourceGateway) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	possibleGatewayTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleGatewayTypeValues(), []fabcore.GatewayType{fabcore.GatewayTypeOnPremises, fabcore.GatewayTypeOnPremisesPersonal})
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.GetResourcePreviewNote("This resource manages a Fabric "+ItemName+".\n\n"+
-			"See ["+ItemName+"]("+ItemDocsURL+") for more information.\n\n"+
-			ItemDocsSPNSupport, r.IsPreview),
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " ID.",
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " display name.",
-				Optional:            true,
-				Computed:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(200),
-					superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-						}),
-					superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
-							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
-						}),
-				},
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " type. Accepted values: " + utils.ConvertStringSlicesToString(possibleGatewayTypeValues, true, true),
-				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possibleGatewayTypeValues, false)...),
-				},
-			},
-			"capacity_id": schema.StringAttribute{
-				MarkdownDescription: "The " + ItemName + " capacity ID.",
-				Optional:            true,
-				Computed:            true,
-				CustomType:          customtypes.UUIDType{},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Validators: []validator.String{
-					superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-						}),
-					superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
-							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
-						}),
-				},
-			},
-			"inactivity_minutes_before_sleep": schema.Int32Attribute{
-				MarkdownDescription: "The " + ItemName + " inactivity minutes before sleep.",
-				Optional:            true,
-				Computed:            true,
-				Validators: []validator.Int32{
-					int32validator.OneOf(PossibleInactivityMinutesBeforeSleepValues...),
-					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-						}),
-					superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
-							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
-						}),
-				},
-			},
-			"number_of_member_gateways": schema.Int32Attribute{
-				MarkdownDescription: "The " + ItemName + " number of member gateways.",
-				Optional:            true,
-				Computed:            true,
-				Validators: []validator.Int32{
-					int32validator.Between(MinNumberOfMemberGatewaysValues, MaxNumberOfMemberGatewaysValues),
-					superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-						}),
-					superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
-							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
-						}),
-				},
-			},
-			"virtual_network_azure_resource": schema.SingleNestedAttribute{
-				MarkdownDescription: "The " + ItemName + " virtual network Azure resource.",
-				Optional:            true,
-				Computed:            true,
-				CustomType:          supertypes.NewSingleNestedObjectTypeOf[virtualNetworkAzureResourceModel](ctx),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.Object{
-					superobjectvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-						}),
-					superobjectvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
-						[]attr.Value{
-							types.StringValue(string(fabcore.GatewayTypeOnPremises)),
-							types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
-						}),
-				},
-				Attributes: map[string]schema.Attribute{
-					"virtual_network_name": schema.StringAttribute{
-						MarkdownDescription: "The virtual network name.",
-						Required:            true,
-					},
-					"subnet_name": schema.StringAttribute{
-						MarkdownDescription: "The subnet name.",
-						Required:            true,
-					},
-					"resource_group_name": schema.StringAttribute{
-						MarkdownDescription: "The resource group name.",
-						Required:            true,
-						CustomType:          customtypes.CaseInsensitiveStringType{},
-					},
-					"subscription_id": schema.StringAttribute{
-						MarkdownDescription: "The subscription ID.",
-						Required:            true,
-						CustomType:          customtypes.UUIDType{},
-					},
-				},
-			},
-			"timeouts": timeouts.AttributesAll(ctx),
-		},
-	}
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceGateway) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -217,7 +64,7 @@ func (r *resourceGateway) Configure(_ context.Context, req resource.ConfigureReq
 
 	r.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -296,6 +143,10 @@ func (r *resourceGateway) Read(ctx context.Context, req resource.ReadRequest, re
 
 		resp.Diagnostics.Append(diags...)
 
+		return
+	}
+
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -409,10 +260,8 @@ func (r *resourceGateway) ImportState(ctx context.Context, req resource.ImportSt
 }
 
 func (r *resourceGateway) get(ctx context.Context, model *resourceGatewayModel) diag.Diagnostics {
-	tflog.Trace(ctx, "getting "+ItemName)
-
 	respGet, err := r.client.GetGateway(ctx, model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 

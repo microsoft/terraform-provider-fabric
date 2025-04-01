@@ -6,16 +6,17 @@ package mirroredwarehouse
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Mirrored Warehouse"
-	ItemTFName         = "mirrored_warehouse"
-	ItemsName          = "Mirrored Warehouses"
-	ItemsTFName        = "mirrored_warehouses"
-	ItemType           = fabcore.ItemTypeMirroredWarehouse
-	ItemDocsSPNSupport = common.DocsSPNNotSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/database/mirrored-database/overview"
-	ItemPreview        = true
-)
+const FabricItemType = fabcore.ItemTypeMirroredWarehouse
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Mirrored Warehouse",
+	Type:           "mirrored_warehouse",
+	Names:          "Mirrored Warehouses",
+	Types:          "mirrored_warehouses",
+	DocsURL:        "https://learn.microsoft.com/fabric/database/mirrored-database/overview",
+	IsPreview:      true,
+	IsSPNSupported: false,
+}

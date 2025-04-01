@@ -98,7 +98,7 @@ tasks:
   golangci-lint:
     desc: Run golangci-lint
     cmds:
-      - golangci-lint run --fix ./...
+      - golangci-lint run --fix
 
   tfproviderlintx:
     desc: Run tfproviderlintx
@@ -339,7 +339,7 @@ tasks:
   test:tools:
     desc: Install test tools
     cmds:
-      - for: [gotestsum, gocov, gocov-xml]
+      - for: [gotestsum, gocov, gocov-xml, go-junit-report]
         task: install:{{.ITEM}}
 
   test:getcover:
@@ -446,6 +446,11 @@ tasks:
     desc: Install gocov-xml
     cmds:
       - go install github.com/AlekSi/gocov-xml@latest
+
+  install:go-junit-report:
+    desc: Install go-junit-report
+    cmds:
+      - go install github.com/jstemmer/go-junit-report/v2@latest
 
   install:tfplugindocs:
     desc: Install tfplugindocs

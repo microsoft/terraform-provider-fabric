@@ -6,16 +6,17 @@ package warehouse
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
-const (
-	ItemName           = "Warehouse"
-	ItemTFName         = "warehouse"
-	ItemsName          = "Warehouses"
-	ItemsTFName        = "warehouses"
-	ItemType           = fabcore.ItemTypeWarehouse
-	ItemDocsSPNSupport = common.DocsSPNSupported
-	ItemDocsURL        = "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing"
-	ItemPreview        = true
-)
+const FabricItemType = fabcore.ItemTypeWarehouse
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name:           "Warehouse",
+	Type:           "warehouse",
+	Names:          "Warehouses",
+	Types:          "warehouses",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing",
+	IsPreview:      false,
+	IsSPNSupported: true,
+}

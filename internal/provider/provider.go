@@ -16,7 +16,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -42,15 +42,19 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
@@ -60,12 +64,16 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/spark"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
 // Ensure FabricProvider satisfies various provider interfaces.
@@ -218,12 +226,12 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				Optional:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"auxiliary_tenant_ids": schema.ListAttribute{
+			"auxiliary_tenant_ids": schema.SetAttribute{
 				MarkdownDescription: "The Auxiliary Tenant IDs which should be used.",
 				ElementType:         customtypes.UUIDType{},
 				Optional:            true,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(3),
+				Validators: []validator.Set{
+					setvalidator.SizeAtMost(3),
 				},
 			},
 
@@ -290,19 +298,6 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 			},
 			"azure_devops_service_connection_id": schema.StringAttribute{
 				MarkdownDescription: "The Azure DevOps Service Connection ID that uses Workload Identity Federation.",
-				Optional:            true,
-			},
-
-			// Token specific fields
-			"token": schema.StringAttribute{
-				MarkdownDescription: "The token to use for authentication.",
-				DeprecationMessage:  "Token authentication is deprecated and will be removed in a future release.",
-				Optional:            true,
-				Sensitive:           true,
-			},
-			"token_file_path": schema.StringAttribute{
-				MarkdownDescription: "The path to a file containing an token.",
-				DeprecationMessage:  "Token authentication is deprecated and will be removed in a future release.",
 				Optional:            true,
 			},
 
@@ -399,13 +394,13 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
-		domain.NewResourceDomainRoleAssignments,
-		domain.NewResourceDomainWorkspaceAssignments,
+		domainra.NewResourceDomainRoleAssignments,
+		domainwa.NewResourceDomainWorkspaceAssignments,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
 		gateway.NewResourceGateway,
-		gateway.NewResourceGatewayRoleAssignment,
+		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
@@ -419,15 +414,15 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
-		spark.NewResourceSparkCustomPool,
-		spark.NewResourceSparkEnvironmentSettings,
-		spark.NewResourceSparkWorkspaceSettings,
+		sparkcustompool.NewResourceSparkCustomPool,
+		sparkenvsettings.NewResourceSparkEnvironmentSettings,
+		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
 		sqldatabase.NewResourceSQLDatabase,
 		warehouse.NewResourceWarehouse,
 		workspace.NewResourceWorkspace,
-		workspace.NewResourceWorkspaceRoleAssignment,
-		workspace.NewResourceWorkspaceGit,
+		workspacera.NewResourceWorkspaceRoleAssignment,
+		workspacegit.NewResourceWorkspaceGit,
 	}
 }
 
@@ -441,7 +436,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
-		domain.NewDataSourceDomainWorkspaceAssignments,
+		domainwa.NewDataSourceDomainWorkspaceAssignments,
 		func() datasource.DataSource { return environment.NewDataSourceEnvironment(ctx) },
 		func() datasource.DataSource { return environment.NewDataSourceEnvironments(ctx) },
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouse(ctx) },
@@ -450,8 +445,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstreams,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
-		gateway.NewDataSourceGatewayRoleAssignment,
-		gateway.NewDataSourceGatewayRoleAssignments,
+		gatewayra.NewDataSourceGatewayRoleAssignment,
+		gatewayra.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
 		kqldashboard.NewDataSourceKQLDashboard,
@@ -462,8 +457,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		kqlqueryset.NewDataSourceKQLQuerysets,
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouse(ctx) },
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
-		lakehouse.NewDataSourceLakehouseTable,
-		lakehouse.NewDataSourceLakehouseTables,
+		lakehousetable.NewDataSourceLakehouseTable,
+		lakehousetable.NewDataSourceLakehouseTables,
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
@@ -482,9 +477,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		report.NewDataSourceReports,
 		semanticmodel.NewDataSourceSemanticModel,
 		semanticmodel.NewDataSourceSemanticModels,
-		spark.NewDataSourceSparkCustomPool,
-		spark.NewDataSourceSparkEnvironmentSettings,
-		spark.NewDataSourceSparkWorkspaceSettings,
+		sparkcustompool.NewDataSourceSparkCustomPool,
+		sparkenvsettings.NewDataSourceSparkEnvironmentSettings,
+		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
 		sqldatabase.NewDataSourceSQLDatabase,
@@ -494,9 +489,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehouse.NewDataSourceWarehouses,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
-		// workspace.NewDataSourceWorkspaceRoleAssignment,
-		workspace.NewDataSourceWorkspaceRoleAssignments,
-		workspace.NewDataSourceWorkspaceGit,
+		workspacera.NewDataSourceWorkspaceRoleAssignment,
+		workspacera.NewDataSourceWorkspaceRoleAssignments,
+		workspacegit.NewDataSourceWorkspaceGit,
 	}
 }
 
@@ -623,13 +618,6 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.AzureDevOpsServiceConnectionID = putils.GetStringValue(config.AzureDevOpsServiceConnectionID, pconfig.GetEnvVarsAzureDevOpsServiceConnectionID(), "")
 	ctx = tflog.SetField(ctx, "azure_devops_service_connection_id", config.AzureDevOpsServiceConnectionID.ValueString())
 
-	config.Token = putils.GetStringValue(config.Token, pconfig.GetEnvVarsToken(), "")
-	ctx = tflog.SetField(ctx, "token", config.Token.ValueString())
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "token")
-
-	config.TokenFilePath = putils.GetStringValue(config.TokenFilePath, pconfig.GetEnvVarsTokenFilePath(), "")
-	ctx = tflog.SetField(ctx, "token_file_path", config.TokenFilePath.ValueString())
-
 	config.UseOIDC = putils.GetBoolValue(config.UseOIDC, pconfig.GetEnvVarsUseOIDC(), false)
 	ctx = tflog.SetField(ctx, "use_oidc", config.UseOIDC.ValueBool())
 
@@ -675,14 +663,6 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 
 	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
 	ctx = tflog.SetField(ctx, "preview", config.Preview.ValueBool())
-
-	if config.Preview.ValueBool() {
-		resp.Diagnostics.AddWarning(
-			"Preview mode enabled",
-			"Features available in preview mode are not yet generally available and may change without notice include breaking changes. "+
-				"Production use is not recommended. Use at your own risk!",
-		)
-	}
 
 	return ctx
 }
@@ -758,13 +738,6 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.config.Auth.OIDC.RequestURL = config.OIDCRequestURL.ValueString()
 
 	p.config.Auth.OIDC.Token, err = putils.GetValueOrFileValue("oidc_token", "oidc_token_file_path", config.OIDCToken, config.OIDCTokenFilePath)
-	if err != nil {
-		resp.Diagnostics.AddError(common.ErrorInvalidValue, err.Error())
-
-		return
-	}
-
-	p.config.Auth.Token, err = putils.GetValueOrFileValue("token", "token_file_path", config.Token, config.TokenFilePath)
 	if err != nil {
 		resp.Diagnostics.AddError(common.ErrorInvalidValue, err.Error())
 
