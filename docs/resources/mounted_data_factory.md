@@ -3,18 +3,15 @@
 page_title: "fabric_mounted_data_factory Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Manage a Fabric Mounted Data Factory.
-  Use this resource to manage a Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
-  -> This item supports Service Principal authentication.
+  The Mounted Data Factory resource allows you to manage a Fabric Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_mounted_data_factory (Resource)
 
-Manage a Fabric Mounted Data Factory.
+The Mounted Data Factory resource allows you to manage a Fabric [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
-Use this resource to manage a [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
-
--> This item supports Service Principal authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

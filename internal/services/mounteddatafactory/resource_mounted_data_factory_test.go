@@ -20,12 +20,11 @@ import (
 )
 
 var (
-	testResourceItemFQN    = testhelp.ResourceFQN("fabric", itemTFName, "test")
-	testResourceItemHeader = at.ResourceHeader(testhelp.TypeName("fabric", itemTFName), "test")
-	azureFactoryResource   = testhelp.WellKnown()["DataFactory"].(map[string]any)
-	subscriptionID         = azureFactoryResource["subscriptionId"].(string)
-	resourceGroupName      = azureFactoryResource["resourceGroupName"].(string)
-	dataFactoryName        = azureFactoryResource["name"].(string)
+	testResourceItemFQN, testResourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+	azureFactoryResource                        = testhelp.WellKnown()["DataFactory"].(map[string]any)
+	subscriptionID                              = azureFactoryResource["subscriptionId"].(string)
+	resourceGroupName                           = azureFactoryResource["resourceGroupName"].(string)
+	dataFactoryName                             = azureFactoryResource["name"].(string)
 )
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
@@ -35,6 +34,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 var testHelperDefinitionJSON = map[string]any{
 	`"mountedDataFactory-content.json"`: map[string]any{
 		"source": "${local.path}/mountedDataFactory-content.json.tmpl",
+		"format": "Default",
 		"tokens": map[string]any{
 			"SUBSCRIPTION_ID":     subscriptionID,
 			"RESOURCE_GROUP_NAME": resourceGroupName,
@@ -139,11 +139,11 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 
 func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	testCase := at.JoinConfigs(
 		testHelperLocals,
@@ -163,7 +163,7 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(itemType)))),
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(fabricItemType)))),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
@@ -210,14 +210,14 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 
 func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(itemType, workspaceID)
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(itemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -266,7 +266,6 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
-						"format":       "Default",
 						"definition":   testHelperDefinitionJSON,
 					},
 				)),

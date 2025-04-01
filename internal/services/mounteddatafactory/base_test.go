@@ -7,8 +7,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 )
 
-const (
-	itemTFName  = mounteddatafactory.ItemTFName
-	itemsTFName = mounteddatafactory.ItemsTFName
-	itemType    = mounteddatafactory.ItemType
-)
+var itemTypeInfo = mounteddatafactory.ItemTypeInfo
+
+const fabricItemType = mounteddatafactory.FabricItemType

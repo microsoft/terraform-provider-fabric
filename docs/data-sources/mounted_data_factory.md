@@ -3,18 +3,15 @@
 page_title: "fabric_mounted_data_factory Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  Get a Fabric Mounted Data Factory.
-  Use this data source to fetch a Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
-  -> This item supports Service Principal authentication.
+  The Mounted Data Factory data-source allows you to retrieve details about a Fabric Mounted Data Factory https://learn.microsoft.com/fabric/data-factory/data-factory-overview.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_mounted_data_factory (Data Source)
 
-Get a Fabric Mounted Data Factory.
+The Mounted Data Factory data-source allows you to retrieve details about a Fabric [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
 
-Use this data source to fetch a [Mounted Data Factory](https://learn.microsoft.com/fabric/data-factory/data-factory-overview).
-
--> This item supports Service Principal authentication.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
