@@ -276,7 +276,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -670,42 +670,22 @@ function Set-AzureDataFactory {
     Write-Log -Message "Created Data Factory: $DataFactoryName" -Level 'INFO'
   }
 
+  Write-Log -Message "Az Data Factory - Name: $($dataFactory.DataFactoryName)"
+
+  $userPrincipalName = $azContext.Account.Id
+  $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
+
+  $existingAssignment = Get-AzRoleAssignment -Scope $dataFactory.DataFactoryId -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Data Factory Contributor"
+  }
+  Write-Log -Message "Assigning Data Factory Contributor role to the principal on the Data Factory $($DataFactoryName)" -Level 'INFO'
+
+  if (!$existingAssignment) {
+    New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Data Factory Contributor" -Scope $dataFactory.DataFactoryId
+    Write-Log -Message "Assigned Data Factory Contributor role to the principal on the Data Factory $($DataFactoryName)" -Level 'INFO'
+  }
+
   return $dataFactory
-}
-
-function Set-FabricMountedDataFactory {
-  param (
-    [Parameter(Mandatory = $true)]
-    [string]$DisplayName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$WorkspaceId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$MountedDataFactoryDefinition
-  )
-
-  # Define the creation payload for the Mounted Data Factory
-  $definition = @{
-    parts = @(
-      @{
-        path        = "mountedDataFactory-content.json"
-        payload     = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("{`"dataFactoryResourceId`": `"$MountedDataFactoryDefinition`"}"))
-        payloadType = 'InlineBase64'
-      }
-    )
-  }
-
-  # Create the Mounted Data Factory item in Fabric
-  try {
-    Write-Log -Message "Creating Mounted Data Factory: $DisplayName" -Level 'WARN'
-    $mountedDataFactory = Set-FabricItem -DisplayName $DisplayName -WorkspaceId $WorkspaceId -Type 'MountedDataFactory' -Definition $definition
-    return $mountedDataFactory
-  }
-  catch {
-    Write-Log -Message "Failed to create Mounted Data Factory: $DisplayName. Error: $_" -Level 'ERROR'
-    throw $_
-  }
 }
 
 # Define an array of modules to install
@@ -763,6 +743,7 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'AzureDataFactory'      = 'adf'
   'Dashboard'             = 'dash'
   'Datamart'              = 'dm'
   'DataPipeline'          = 'dp'
@@ -778,6 +759,7 @@ $itemNaming = @{
   'MirroredWarehouse'     = 'mwh'
   'MLExperiment'          = 'mle'
   'MLModel'               = 'mlm'
+  'MountedDataFactory'    = 'mdf'
   'Notebook'              = 'nb'
   'PaginatedReport'       = 'prpt'
   'Reflex'                = 'rx'
@@ -798,8 +780,6 @@ $itemNaming = @{
   'VirtualNetwork02'      = 'vnet02'
   'VirtualNetworkSubnet'  = 'subnet'
   'GatewayVirtualNetwork' = 'gvnet'
-  'MountedDataFactory'    = 'mdf'
-  'AzureDataFactory'      = 'adf'
 }
 
 $baseName = Get-BaseName
@@ -930,33 +910,6 @@ $definition = @{
       payloadType = 'InlineBase64'
     }
   )
-}
-
-# Create the Azure Data Factory if not exists
-$displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
-$dataFactory = Set-AzureDataFactory `
-  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
-  -DataFactoryName $displayNameTemp `
-  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
-
-# Save Data Factory details to well-known file
-$wellKnown['DataFactory'] = @{
-  name              = $displayNameTemp
-  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
-  location          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
-  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
-}
-
-# Create the Mounted Data Factory if not exists
-$mountedDataFactoryDefinition = "/subscriptions/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID/resourceGroups/$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME/providers/Microsoft.DataFactory/factories/$displayNameTemp"
-
-$displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
-$mountedDataFactory = Set-FabricMountedDataFactory -DisplayName $displayNameTemp -WorkspaceId $workspace.id -MountedDataFactoryDefinition $mountedDataFactoryDefinition
-
-$wellKnown['MountedDataFactory'] = @{
-  id          = $mountedDataFactory.id
-  displayName = $mountedDataFactory.displayName
-  description = $mountedDataFactory.description
 }
 
 $semanticModel = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'SemanticModel' -Definition $definition
@@ -1182,6 +1135,45 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   id          = $gateway.id
   displayName = $gateway.displayName
   type        = $gateway.type
+}
+
+# Create the Azure Data Factory if not exists
+$displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
+
+$dataFactory = Set-AzureDataFactory `
+  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -DataFactoryName $displayNameTemp `
+  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+
+$wellKnown['DataFactory'] = @{
+  name              = $displayNameTemp
+  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
+  location          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+}
+
+# Create the Mounted Data Factory if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "mountedDataFactory-content.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl'  -Values @(
+        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID },
+        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME },
+        @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
+      )
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+
+$mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MountedDataFactory' -Definition $definition
+
+$wellKnown['MountedDataFactory'] = @{
+  id          = $mountedDataFactory.id
+  displayName = $mountedDataFactory.displayName
+  description = $mountedDataFactory.description
 }
 
 # Save wellknown.json file

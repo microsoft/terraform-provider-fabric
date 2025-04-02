@@ -32,7 +32,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("mounted_data_factory"),
 })
 
-var testHelperDefinitionJSON = map[string]any{
+var testHelperDefinition = map[string]any{
 	`"mountedDataFactory-content.json"`: map[string]any{
 		"source": "${local.path}/mountedDataFactory-content.json.tmpl",
 		"format": "Default",
@@ -69,7 +69,7 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -86,7 +86,7 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"display_name":    "test",
 						"unexpected_attr": "test",
 						"format":          "Default",
-						"definition":      testHelperDefinitionJSON,
+						"definition":      testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
@@ -101,7 +101,7 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 					map[string]any{
 						"display_name": "test",
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
@@ -116,7 +116,7 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
@@ -154,7 +154,7 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 				"workspace_id":              *entity.WorkspaceID,
 				"display_name":              *entity.DisplayName,
 				"format":                    "Default",
-				"definition":                testHelperDefinitionJSON,
+				"definition":                testHelperDefinition,
 				"definition_update_enabled": true,
 			},
 		))
@@ -233,7 +233,7 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
@@ -249,7 +249,7 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id":              *entityBefore.WorkspaceID,
 						"display_name":              *entityBefore.DisplayName,
 						"format":                    "Default",
-						"definition":                testHelperDefinitionJSON,
+						"definition":                testHelperDefinition,
 						"definition_update_enabled": true,
 					},
 				)),
@@ -270,7 +270,7 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -303,7 +303,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -338,7 +338,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"format":       "Default",
 						"description":  entityUpdateDescription,
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
