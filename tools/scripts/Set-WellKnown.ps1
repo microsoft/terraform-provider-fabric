@@ -462,17 +462,17 @@ function Set-FabricWorkspaceRoleAssignment {
     [string]$WorkspaceId,
 
     [Parameter(Mandatory = $true)]
-    [object]$SPN
+    [object]$SG
   )
 
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/roleAssignments"
-  $result = $results.Response.value | Where-Object { $_.id -eq $SPN.Id }
+  $result = $results.Response.value | Where-Object { $_.id -eq $SG.Id }
   if (!$result) {
-    Write-Log -Message "Assigning SPN to Workspace: $($SPN.DisplayName)" -Level 'WARN'
+    Write-Log -Message "Assigning SG to Workspace: $($SG.DisplayName)" -Level 'WARN'
     $payload = @{
       principal = @{
-        id   = $SPN.Id
-        type = 'ServicePrincipal'
+        id   = $SG.Id
+        type = 'Group'
       }
       role      = 'Admin'
     }
@@ -543,6 +543,31 @@ function Set-FabricGatewayVirtualNetwork {
   return $result
 }
 
+function Set-FabricGatewayRoleAssignment {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$GatewayId,
+
+    [Parameter(Mandatory = $true)]
+    [object]$SG
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "gateways/$GatewayId/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $SG.Id }
+  if (!$result) {
+    Write-Log -Message "Assigning SG to Gateway: $($SG.DisplayName)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $SG.Id
+        type = 'Group'
+      }
+      role      = 'Admin'
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "gateways/$GatewayId/roleAssignments" -Payload $payload).Response
+  }
+}
+
+
 
 function Set-AzureVirtualNetwork {
   param(
@@ -562,7 +587,10 @@ function Set-AzureVirtualNetwork {
     [string]$SubnetName,
 
     [Parameter(Mandatory = $true)]
-    [string[]]$SubnetAddressPrefixes
+    [string[]]$SubnetAddressPrefixes,
+
+    [Parameter(Mandatory = $true)]
+    [object]$SG
   )
 
   # Attempt to get the existing Virtual Network
@@ -571,7 +599,7 @@ function Set-AzureVirtualNetwork {
   }
   catch {
     # VNet does not exist, so create it
-    Write-Log -Message "Creating VNet: $VNetName in Resource Group: $ResourceGroupName" -Level 'WARN'
+    Write-Log -Message "Creating Azure VNet: $VNetName in Resource Group: $ResourceGroupName" -Level 'WARN'
     $subnetConfig = New-AzVirtualNetworkSubnetConfig `
       -Name $SubnetName `
       -AddressPrefix $SubnetAddressPrefixes `
@@ -590,7 +618,7 @@ function Set-AzureVirtualNetwork {
 
     # Commit creation
     $vnet = $vnet | Set-AzVirtualNetwork
-    Write-Log -Message "Created VNet: $VNetName" -Level 'INFO'
+    Write-Log -Message "Created Azure VNet: $VNetName" -Level 'INFO'
   }
 
   # If the VNet already exists, check for the subnet
@@ -629,13 +657,22 @@ function Set-AzureVirtualNetwork {
   $userPrincipalName = $azContext.Account.Id
   $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
 
+  # Check if the principal already has the Network Contributor role on the VNet, if not then assign it.
   $existingAssignment = Get-AzRoleAssignment -Scope $vnet.Id -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
     $_.RoleDefinitionName -eq "Network Contributor"
   }
-
   Write-Log "Assigning Network Contributor role to the principal on the virtual network $($VNetName)"
   if (!$existingAssignment) {
     New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Network Contributor" -Scope $vnet.Id
+  }
+
+  # Check if the spns SG already has the Network Contributor role on the VNet, if not then assign it.
+  $existingAssignment = Get-AzRoleAssignment -Scope $vnet.Id -ObjectId $SG.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Network Contributor"
+  }
+  Write-Log "Assigning Network Contributor role to the spns security group $($SG.DisplayName) on the virtual network $($VNetName)"
+  if (!$existingAssignment) {
+    New-AzRoleAssignment -ObjectId $SG.Id -RoleDefinitionName "Network Contributor" -Scope $vnet.Id
   }
 
   return $vnet
@@ -655,8 +692,29 @@ if (Test-Path -Path './wellknown.env') {
   Import-Dotenv -Path ./wellknown.env -AllowClobber
 }
 
-if (!$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -or !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION) {
-  Write-Log -Message 'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID, FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID, FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME, FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME and FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX and FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME and FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION are required environment variables.' -Level 'ERROR'
+if (
+  !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+) {
+  Write-Log -Message @'
+  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
+  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID,
+  FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME,
+  FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME,
+  FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION,
+  and FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+  are required environment variables.
+'@ `
+    -Level 'ERROR'
 }
 
 # Check if already logged in to Azure, if not then login
@@ -675,10 +733,7 @@ $secureAccessToken = (Get-AzAccessToken -WarningAction SilentlyContinue -AsSecur
 $unsecureAccessToken = $secureAccessToken | ConvertFrom-SecureString -AsPlainText
 $azdoContext = Connect-ADOPS -TenantId $azContext.Tenant.Id -Organization $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -OAuthToken $unsecureAccessToken
 
-$SPN = $null
-if ($Env:FABRIC_TESTACC_WELLKNOWN_SPN_NAME) {
-  $SPN = Get-AzADServicePrincipal -DisplayName $Env:FABRIC_TESTACC_WELLKNOWN_SPN_NAME
-}
+$SPNS_SG = Get-AzADGroup -DisplayName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
 
 $wellKnown = @{}
 
@@ -742,6 +797,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID',
   'FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME'
   'FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION',
+  'FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID',
   'FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME',
   'FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME',
   'FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX',
@@ -777,9 +833,7 @@ $wellKnown['WorkspaceRS'] = @{
 }
 
 # Assign SPN to WorkspaceRS if not already assigned
-if ($SPN) {
-  Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SPN $SPN
-}
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Create WorkspaceDS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceDS'])"
@@ -796,9 +850,7 @@ $wellKnown['WorkspaceDS'] = @{
 }
 
 # Assign SPN to WorkspaceRS if not already assigned
-if ($SPN) {
-  Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SPN $SPN
-}
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
 $itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
@@ -1010,14 +1062,12 @@ $wellKnown['AzDO'] = @{
   repositoryName   = $azdoRepo.name
 }
 
-if ($SPN) {
-  $body = @{
-    originId = $SPN.Id
-  }
-  $bodyJson = $body | ConvertTo-Json
-  $azdoSPN = Invoke-ADOPSRestMethod -Uri "https://vssps.dev.azure.com/$($azdoContext.Organization)/_apis/graph/serviceprincipals?api-version=7.2-preview.1" -Method Post -Body $bodyJson
-  $result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSPN.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
+$body = @{
+  originId = $SPNS_SG.Id
 }
+$bodyJson = $body | ConvertTo-Json
+$azdoSG = Invoke-ADOPSRestMethod -Uri "https://vssps.dev.azure.com/$($azdoContext.Organization)/_apis/graph/groups?api-version=7.2-preview.1" -Method Post -Body $bodyJson
+$result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSG.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
 
 # Register the Microsoft.PowerPlatform resource provider
 Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
@@ -1035,7 +1085,8 @@ $vnet = Set-AzureVirtualNetwork `
   -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
   -AddressPrefixes $addrRange `
   -SubnetName $subName `
-  -SubnetAddressPrefixes $subRange
+  -SubnetAddressPrefixes $subRange `
+  -SG $SPNS_SG
 
 $wellKnown['VirtualNetwork01'] = @{
   name              = $vnet.Name
@@ -1057,7 +1108,8 @@ $vnet = Set-AzureVirtualNetwork `
   -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
   -AddressPrefixes $addrRange `
   -SubnetName $subName `
-  -SubnetAddressPrefixes $subRange
+  -SubnetAddressPrefixes $subRange `
+  -SG $SPNS_SG
 
 $wellKnown['VirtualNetwork02'] = @{
   name              = $vnet.Name
@@ -1086,6 +1138,8 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   displayName = $gateway.displayName
   type        = $gateway.type
 }
+
+Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json

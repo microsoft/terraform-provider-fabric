@@ -64,7 +64,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"display_name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
+					MarkdownDescription: "The " + ItemTypeInfo.Name + " display name  .",
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
