@@ -462,40 +462,17 @@ function Set-DataFactory {
     Write-Log -Message "Created Data Factory: $FactoryName" -Level 'INFO'
   }
 
-  return $dataFactory
-}
+  $userPrincipalName = $azContext.Account.Id
+  $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
 
-function Set-FabricMountedDataFactory {
-  param (
-    [Parameter(Mandatory = $true)]
-    [string]$DisplayName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$WorkspaceId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Definition
-  )
-
-  $MountedDataFactoryDefinition = @{
-    parts = @(
-      @{
-        path        = "mountedDataFactory-content.json"
-        payload     = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("{`"dataFactoryResourceId`": `"$Definition`"}"))
-        payloadType = 'InlineBase64'
-      }
-    )
+  $existingAssignment = Get-AzRoleAssignment -Scope $dataFactory.DataFactoryId -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Data Factory Contributor"
   }
 
-  # Create the Mounted Data Factory item in Fabric
-  try {
-    Write-Log -Message "Creating Mounted Data Factory: $DisplayName" -Level 'WARN'
-    $mountedDataFactory = Set-FabricItem -DisplayName $DisplayName -WorkspaceId $WorkspaceId -Type 'MountedDataFactory' -Definition $MountedDataFactoryDefinition
-    return $mountedDataFactory
-  }
-  catch {
-    Write-Log -Message "Failed to create Mounted Data Factory: $DisplayName. Error: $_" -Level 'ERROR'
-    throw $_
+  if (!$existingAssignment) {
+    New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Data Factory Contributor" -Scope $dataFactory.DataFactoryId
+    Write-Log -Message "Assigned Data Factory Contributor role to the principal on the Data Factory $($DataFactoryName)" -Level 'INFO'
+    return $dataFactory
   }
 }
 
@@ -913,7 +890,7 @@ $wellKnown['MirroredDatabase'] = @{
   description = $mirroredDatabase.description
 }
 
-# Create Mounted Data Factory if not exists
+# Create Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['DataFactory'])"
 $dataFactory = Set-DataFactory `
   -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
@@ -928,18 +905,23 @@ $wellKnown['DataFactory'] = @{
   subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
 }
 
-$mountedDataFactoryDefinition = @{
+# Create Mounted Data Factory if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
+$definition = @{
   parts = @(
     @{
       path        = "mountedDataFactory-content.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json'  -Values @(
+        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID },
+        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME },
+        @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
+      )
       payloadType = 'InlineBase64'
     }
   )
 }
 
-$displayNameTemp = "${displayName}-$($itemNaming['MountedDataFactory'])"
-$mountedDataFactory = Set-FabricMountedDataFactory -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Definition $mountedDataFactoryDefinition
+$mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MountedDataFactory' -Definition $definition
 
 $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id

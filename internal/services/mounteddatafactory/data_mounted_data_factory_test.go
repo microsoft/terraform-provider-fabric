@@ -200,6 +200,7 @@ func TestAcc_MountedDataFactoryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
 		// read by name - not found
