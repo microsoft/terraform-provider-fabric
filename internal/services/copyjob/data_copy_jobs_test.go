@@ -83,3 +83,29 @@ func TestUnit_CopyJobsDataSource(t *testing.T) {
 		},
 	}))
 }
+
+func TestAcc_CopyJobsDataSource(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+			),
+		},
+	},
+	))
+}
