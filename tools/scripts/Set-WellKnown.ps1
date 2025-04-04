@@ -688,7 +688,10 @@ function Set-AzureDataFactory {
     [string]$DataFactoryName,
 
     [Parameter(Mandatory = $true)]
-    [string]$Location
+    [string]$Location,
+
+    [Parameter(Mandatory = $true)]
+    [object]$SG
   )
 
   # Register the Microsoft.DataFactory resource provider
@@ -711,21 +714,29 @@ function Set-AzureDataFactory {
   $userPrincipalName = $azContext.Account.Id
   $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
 
+  # Check if the principal already has the Data Factory Contributor role on the Data Factory, if not then assign it.
   $existingAssignment = Get-AzRoleAssignment -Scope $dataFactory.DataFactoryId -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
     $_.RoleDefinitionName -eq "Data Factory Contributor"
   }
-  Write-Log -Message "Assigning Data Factory Contributor role to the principal on the Data Factory $($DataFactoryName)" -Level 'INFO'
-
+  Write-Log "Assigning Data Factory Contributor role to the principal on the Data Factory $($dataFactory.DataFactoryName)"
   if (!$existingAssignment) {
     New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Data Factory Contributor" -Scope $dataFactory.DataFactoryId
-    Write-Log -Message "Assigned Data Factory Contributor role to the principal on the Data Factory $($DataFactoryName)" -Level 'INFO'
+  }
+
+  # Check if the spns SG already has the Data Factory Contributor role on the Data Factory, if not then assign it.
+  $existingAssignment = Get-AzRoleAssignment -Scope $dataFactory.DataFactoryId -ObjectId $SG.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Data Factory Contributor"
+  }
+  Write-Log "Assigning Data Factory Contributor role to the spns security group $($SG.DisplayName) on the Data Factory $($dataFactory.DataFactoryName)"
+  if (!$existingAssignment) {
+    New-AzRoleAssignment -ObjectId $SG.Id -RoleDefinitionName "Data Factory Contributor" -Scope $dataFactory.DataFactoryId
   }
 
   return $dataFactory
 }
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -1196,7 +1207,8 @@ $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTAC
 $dataFactory = Set-AzureDataFactory `
   -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
   -DataFactoryName $displayNameTemp `
-  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -SG $SPNS_SG
 
 $wellKnown['DataFactory'] = @{
   name              = $displayNameTemp
