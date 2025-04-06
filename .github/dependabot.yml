@@ -59,6 +59,8 @@ updates:
     labels:
       - "deps/terraform"
       - dependencies
+    ignore:
+      - dependency-name: "microsoft/fabric"
     groups:
       all:
         patterns: ["*"]
