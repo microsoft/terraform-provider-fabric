@@ -1,6 +1,7 @@
 module github.com/microsoft/terraform-provider-fabric
 
 go 1.24.1
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
