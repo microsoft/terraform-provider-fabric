@@ -1,0 +1,24 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
+)
+
+
+const FabricItemType = fabcore.ItemType{{.TypeInfo}}
+
+var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
+	Name: "{{.Name}}",
+	Type:  "{{.Type}}",
+	Names: "{{.Names}}",
+	Types: "{{.Names}}",
+	DocsURL: "<TBD>",
+	IsPreview: {{.IsPreview}},
+	IsSPNSupported: {{.IsSPNSupported}},
+}
+

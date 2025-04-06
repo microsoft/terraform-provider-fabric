@@ -1,0 +1,89 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/microsoft/fabric-sdk-go/fabric"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+)
+
+func NewDataSource{{.TypeInfo}}() datasource.DataSource {
+	propertiesSetter := func(ctx context.Context, from *fab{{.Package}}.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]) diag.Diagnostics {
+		properties := supertypes.NewSingleNestedObjectValueOfNull[{{.Package}}PropertiesModel](ctx)
+
+		if from != nil {
+			propertiesModel := &{{.Package}}PropertiesModel{}
+
+			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+				return diags
+			}
+
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Properties = properties
+
+		return nil
+	}
+
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties], fabricItem *fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		respGet, err := client.Get{{.TypeInfo}}(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+		if err != nil {
+			return err
+		}
+
+		fabricItem.Set(respGet.{{.TypeInfo}})
+
+		return nil
+	}
+
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		pager := client.NewList{{.TypesInfo}}Pager(model.WorkspaceID.ValueString(), nil)
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+
+			for _, entity := range page.Value {
+				if *entity.DisplayName == model.DisplayName.ValueString() {
+					fabricItem.Set(entity)
+
+					return nil
+				}
+			}
+		}
+
+		return &errNotFound
+	}
+
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]{
+		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
+			TypeInfo:            ItemTypeInfo,
+			FabricItemType:      FabricItemType,
+			IsDisplayNameUnique: true,
+			DefinitionFormats:   itemDefinitionFormats,
+		},
+		PropertiesAttributes: getDataSource{{.TypeInfo}}PropertiesAttributes(),
+		PropertiesSetter:     propertiesSetter,
+		ItemGetter:           itemGetter,
+		ItemListGetter:       itemListGetter,
+	}
+
+	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)
+}

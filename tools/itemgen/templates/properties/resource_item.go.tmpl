@@ -1,0 +1,66 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/microsoft/fabric-sdk-go/fabric"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+)
+
+func NewResource{{.TypeInfo}}() resource.Resource {
+	propertiesSetter := func(ctx context.Context, from *fab{{.Package}}.Properties, to *fabricitem.ResourceFabricItemPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]) diag.Diagnostics {
+		properties := supertypes.NewSingleNestedObjectValueOfNull[{{.Package}}PropertiesModel](ctx)
+
+		if from != nil {
+			propertiesModel := &{{.Package}}PropertiesModel{}
+
+			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+				return diags
+			}
+
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Properties = properties
+
+		return nil
+	}
+
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties], fabricItem *fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		respGet, err := client.Get{{.TypeInfo}}(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+		if err != nil {
+			return err
+		}
+
+		fabricItem.Set(respGet.{{.TypeInfo}})
+
+		return nil
+	}
+
+	config := fabricitem.ResourceFabricItemProperties[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]{
+		ResourceFabricItem: fabricitem.ResourceFabricItem{
+			TypeInfo:             ItemTypeInfo,
+			FabricItemType:       FabricItemType,
+			NameRenameAllowed:    {{.RenameAllowed}},
+			DisplayNameMaxLength: {{.DisplayNameMax}},
+			DescriptionMaxLength: {{.DescriptionMax}},
+		},
+		PropertiesAttributes:  getResource{{.TypeInfo}}PropertiesAttributes(),
+		PropertiesSetter:      propertiesSetter,
+		ItemGetter:            itemGetter,
+	}
+
+	return fabricitem.NewResourceFabricItemProperties(config)
+}

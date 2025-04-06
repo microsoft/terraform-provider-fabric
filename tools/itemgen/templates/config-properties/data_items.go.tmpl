@@ -1,0 +1,73 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/microsoft/fabric-sdk-go/fabric"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+)
+
+func NewDataSource{{.TypesInfo}}() datasource.DataSource {
+	propertiesSetter := func(ctx context.Context, from *fab{{.Package}}.Properties, to *fabricitem.FabricItemPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]) diag.Diagnostics {
+		properties := supertypes.NewSingleNestedObjectValueOfNull[{{.Package}}PropertiesModel](ctx)
+
+		if from != nil {
+			propertiesModel := &{{.Package}}PropertiesModel{}
+
+			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+				return diags
+			}
+
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Properties = properties
+
+		return nil
+	}
+
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemsPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties], fabricItems *[]fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		fabItems := make([]fabricitem.FabricItemProperties[fab{{.Package}}.Properties], 0)
+
+		respList, err := client.List{{.TypesInfo}}(ctx, model.WorkspaceID.ValueString(), nil)
+		if err != nil {
+			return err
+		}
+
+		for _, entity := range respList {
+			var fabricItem fabricitem.FabricItemProperties[fab{{.Package}}.Properties]
+
+			fabricItem.Set(entity)
+
+			fabItems = append(fabItems, fabricItem)
+		}
+
+		*fabricItems = fabItems
+
+		return nil
+	}
+
+	config := fabricitem.DataSourceFabricItemsProperties[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]{
+		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
+			TypeInfo:       ItemTypeInfo,
+			FabricItemType: FabricItemType,
+		},
+		PropertiesAttributes: getDataSource{{.TypeInfo}}PropertiesAttributes(),
+		PropertiesSetter:     propertiesSetter,
+		ItemListGetter:       itemListGetter,
+	}
+
+	return fabricitem.NewDataSourceFabricItemsProperties(config)
+}

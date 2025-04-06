@@ -1,0 +1,107 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/microsoft/fabric-sdk-go/fabric"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+)
+
+func NewResource{{.TypeInfo}}() resource.Resource {
+	propertiesSetter := func(ctx context.Context, from *fab{{.Package}}.Properties, to *fabricitem.ResourceFabricItemDefinitionPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]) diag.Diagnostics {
+		properties := supertypes.NewSingleNestedObjectValueOfNull[{{.Package}}PropertiesModel](ctx)
+
+		if from != nil {
+			propertiesModel := &{{.Package}}PropertiesModel{}
+
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
+				return diags
+			}
+
+			diags := properties.Set(ctx, propertiesModel)
+			if diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Properties = properties
+
+		return nil
+	}
+
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemDefinitionPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties], fabricItem *fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		for {
+			respGet, err := client.Get{{.TypeInfo}}(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+			if err != nil {
+				return err
+			}
+
+			if respGet.Properties == nil || respGet.Properties.SQLEndpointProperties == nil {
+				tflog.Info(ctx, "Mirrored Database provisioning not done, waiting 30 seconds before retrying")
+				time.Sleep(30 * time.Second) // lintignore:R018
+
+				continue
+			}
+
+			switch *respGet.Properties.SQLEndpointProperties.ProvisioningStatus {
+			case fab{{.Package}}.SQLEndpointProvisioningStatusFailed:
+				return &fabcore.ResponseError{
+					ErrorCode:  (string)(fab{{.Package}}.SQLEndpointProvisioningStatusFailed),
+					StatusCode: http.StatusBadRequest,
+					ErrorResponse: &fabcore.ErrorResponse{
+						ErrorCode: azto.Ptr((string)(fab{{.Package}}.SQLEndpointProvisioningStatusFailed)),
+						Message:   azto.Ptr("Mirrored Database SQL endpoint provisioning failed"),
+					},
+				}
+
+			case fab{{.Package}}.SQLEndpointProvisioningStatusSuccess:
+				fabricItem.Set(respGet.{{.TypeInfo}})
+
+				return nil
+			default:
+				tflog.Info(ctx, "Mirrored Database provisioning in progress, waiting 30 seconds before retrying")
+				time.Sleep(30 * time.Second) // lintignore:R018
+			}
+		}
+	}
+
+	config := fabricitem.ResourceFabricItemDefinitionProperties[{{.Package}}PropertiesModel, fab{{.Package}}.Properties]{
+		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
+			TypeInfo:              ItemTypeInfo,
+			FabricItemType:        FabricItemType,
+			NameRenameAllowed: {{.RenameAllowed}},
+			DisplayNameMaxLength:  {{.DisplayNameMax}},
+			DescriptionMaxLength:  {{.DescriptionMax}},
+			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+			DefinitionPathKeysValidator: []validator.Map{
+				mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
+				mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
+			},
+			DefinitionRequired:    "<TBD>",
+			DefinitionEmpty:    ItemDefinitionEmpty,
+			DefinitionFormats:  itemDefinitionFormats,
+		},
+		PropertiesAttributes: getResource{{.TypeInfo}}PropertiesAttributes(),
+		PropertiesSetter:     propertiesSetter,
+		ItemGetter:           itemGetter,
+	}
+
+	return fabricitem.NewResourceFabricItemDefinitionProperties(config)
+}

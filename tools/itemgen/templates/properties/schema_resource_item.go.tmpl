@@ -1,0 +1,24 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+)
+
+func getResource{{.TypeInfo}}PropertiesAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"TBD": schema.StringAttribute{
+			MarkdownDescription: "TBD",
+			Computed:            true,
+		},
+	}
+}

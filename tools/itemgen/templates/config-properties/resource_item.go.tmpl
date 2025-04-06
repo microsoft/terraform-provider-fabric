@@ -1,0 +1,80 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package {{.Package}}
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/microsoft/fabric-sdk-go/fabric"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+)
+
+func NewResource{{.TypeInfo}}() resource.Resource {
+	creationPayloadSetter := func(_ context.Context, from {{.Package}}ConfigurationModel) (*fab{{.Package}}.CreationPayload, diag.Diagnostics) {
+		creationPayload := fab{{.Package}}.CreationPayload{}
+		// TBD
+		return &creationPayload, nil
+	}
+
+	propertiesSetter := func(ctx context.Context, from *fab{{.Package}}.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties, {{.Package}}ConfigurationModel, fab{{.Package}}.CreationPayload]) diag.Diagnostics {
+		properties := supertypes.NewSingleNestedObjectValueOfNull[{{.Package}}PropertiesModel](ctx)
+
+		if from != nil {
+			propertiesModel := &{{.Package}}PropertiesModel{}
+
+			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+				return diags
+			}
+
+			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Properties = properties
+
+		return nil
+	}
+
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigPropertiesModel[{{.Package}}PropertiesModel, fab{{.Package}}.Properties, {{.Package}}ConfigurationModel, fab{{.Package}}.CreationPayload], fabricItem *fabricitem.FabricItemProperties[fab{{.Package}}.Properties]) error {
+		client := fab{{.Package}}.NewClientFactoryWithClient(fabricClient).NewItemsClient()
+
+		respGet, err := client.Get{{.TypeInfo}}(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
+		if err != nil {
+			return err
+		}
+
+		fabricItem.Set(respGet.{{.TypeInfo}})
+
+		return nil
+	}
+
+	config := fabricitem.ResourceFabricItemConfigProperties[{{.Package}}PropertiesModel, fab{{.Package}}.Properties, {{.Package}}ConfigurationModel, fab{{.Package}}.CreationPayload]{
+		ResourceFabricItem: fabricitem.ResourceFabricItem{
+			TypeInfo:             ItemTypeInfo,
+			FabricItemType:       FabricItemType,
+			NameRenameAllowed:    {{.RenameAllowed}},
+			DisplayNameMaxLength: {{.DisplayNameMax}},
+			DescriptionMaxLength: {{.DescriptionMax}},
+		},
+		ConfigRequired:        false,
+		ConfigAttributes:      getResource{{.TypeInfo}}ConfigurationAttributes(),
+		CreationPayloadSetter: creationPayloadSetter,
+		PropertiesAttributes:  getResource{{.TypeInfo}}PropertiesAttributes(),
+		PropertiesSetter:      propertiesSetter,
+		ItemGetter:            itemGetter,
+	}
+
+	return fabricitem.NewResourceFabricItemConfigProperties(config)
+}
