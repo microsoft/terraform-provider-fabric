@@ -1210,7 +1210,7 @@ $dataFactory = Set-AzureDataFactory `
   -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
   -SG $SPNS_SG
 
-$wellKnown['DataFactory'] = @{
+$wellKnown['AzureDataFactory'] = @{
   name              = $displayNameTemp
   resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
   location          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION

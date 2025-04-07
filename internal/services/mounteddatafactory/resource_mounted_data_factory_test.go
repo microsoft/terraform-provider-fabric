@@ -22,7 +22,7 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var (
-	azureFactoryResource = testhelp.WellKnown()["DataFactory"].(map[string]any)
+	azureFactoryResource = testhelp.WellKnown()["AzureDataFactory"].(map[string]any)
 	subscriptionID       = azureFactoryResource["subscriptionId"].(string)
 	resourceGroupName    = azureFactoryResource["resourceGroupName"].(string)
 	dataFactoryName      = azureFactoryResource["name"].(string)
