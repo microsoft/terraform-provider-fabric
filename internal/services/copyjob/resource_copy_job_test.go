@@ -30,12 +30,12 @@ var (
 	testHelperDefinition = map[string]any{
 		`"copyjob-content.json"`: map[string]any{
 			"source": "${local.path}/copyjob-content.json.tmpl",
-			// "tokens": map[string]any{
-			// 	"SourceWorkspaceID":      workspaceID,
-			// 	"SourceArtifactID":       lakehouseID,
-			// 	"DestinationWorkspaceID": workspaceID,
-			// 	"DestinationArtifactID":  lakehouseID,
-			// },
+			"tokens": map[string]any{
+				"SOURCE_WORKSPACE_ID":      workspaceID,
+				"SOURCE_ARTIFACT_ID":       lakehouseID,
+				"DESTINATION_WORKSPACE_ID": workspaceID,
+				"DESTINATION_ARTIFACT_ID":  lakehouseID,
+			},
 		},
 	}
 )
@@ -185,7 +185,7 @@ func TestUnit_CopyJobResource_ImportState(t *testing.T) {
 	}))
 }
 
-func TestUnit_NotebookResource_CRUD(t *testing.T) {
+func TestUnit_CopyJobResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
@@ -257,7 +257,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_NotebookResource_CRUD(t *testing.T) {
+func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -310,8 +310,8 @@ func TestAcc_CopyJobDefinitionResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
-	// entityUpdateDisplayName := testhelp.RandomName()
-	// entityUpdateDescription := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
 	t.Logf("testHelperDefinition JSON: %+v", testHelperDefinition)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -336,26 +336,26 @@ func TestAcc_CopyJobDefinitionResource_CRUD(t *testing.T) {
 			),
 		},
 		// Update and Read
-		// {
-		// 	ResourceName: testResourceItemFQN,
-		// 	Config: at.JoinConfigs(
-		// 		testHelperLocals,
-		// 		at.CompileConfig(
-		// 			testResourceItemHeader,
-		// 			map[string]any{
-		// 				"workspace_id": workspaceID,
-		// 				"display_name": entityUpdateDisplayName,
-		// 				"description":  entityUpdateDescription,
-		// 				"format":       "Default",
-		// 				"definition":   testHelperDefinition,
-		// 			},
-		// 		)),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-		// 	),
-		// },
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
 	},
 	))
 }
