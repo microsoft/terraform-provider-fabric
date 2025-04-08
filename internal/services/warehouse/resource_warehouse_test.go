@@ -78,6 +78,19 @@ func TestUnit_WarehouseResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
+		// error - no required attributes (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":  "00000000-0000-0000-0000-000000000000",
+					"display_name":  "test",
+					"configuration": map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "configuration".`),
+		},
 	}))
 }
 
@@ -185,6 +198,7 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
@@ -204,6 +218,7 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
@@ -235,6 +250,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
@@ -254,6 +270,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),

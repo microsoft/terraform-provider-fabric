@@ -6,6 +6,8 @@ package warehouse
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
 func getResourceWarehousePropertiesAttributes() map[string]schema.Attribute {
@@ -27,4 +29,16 @@ func getResourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 	}
 
 	return result
+}
+
+func getResourceWarehouseConfigurationAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"collation_type": schema.BoolAttribute{
+			MarkdownDescription: "The collation type of the warehouse.",
+			Required:            true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.RequiresReplace(),
+			},
+		},
+	}
 }
