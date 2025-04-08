@@ -243,6 +243,9 @@ function Set-FabricItem {
     'MLModel' {
       $itemEndpoint = 'mlModels'
     }
+    'MountedDataFactory' {
+      $itemEndpoint = 'mountedDataFactories'
+    }
     'Notebook' {
       $itemEndpoint = 'notebooks'
     }
@@ -263,9 +266,6 @@ function Set-FabricItem {
     }
     'Warehouse' {
       $itemEndpoint = 'warehouses'
-    }
-    'MountedDataFactory' {
-      $itemEndpoint = 'mountedDataFactories'
     }
     default {
       $itemEndpoint = 'items'
