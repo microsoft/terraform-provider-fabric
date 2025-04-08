@@ -6,8 +6,8 @@
       "connectionSettings": {
         "type": "Lakehouse",
         "typeProperties": {
-          "workspaceId": "00000000-0000-0000-0000-000000000000",
-          "artifactId": "aaaaaaaa-6666-7777-8888-bbbbbbbbbbbb",
+          "workspaceId": "{{.SOURCE_WORKSPACE_ID}}",
+          "artifactId": "{{.SOURCE_ARTIFACT_ID}}",
           "rootFolder": "Tables"
         }
       }
@@ -17,8 +17,8 @@
       "connectionSettings": {
         "type": "Lakehouse",
         "typeProperties": {
-          "workspaceId": "00000000-0000-0000-0000-000000000000",
-          "artifactId": "aaaaaaaa-0000-1111-2222-bbbbbbbbbbbb",
+          "workspaceId": "{{.DESTINATION_WORKSPACE_ID}}",
+          "artifactId": "{{.DESTINATION_ARTIFACT_ID}}",
           "rootFolder": "Tables"
         }
       }

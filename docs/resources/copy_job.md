@@ -18,15 +18,15 @@ The Copy Job resource allows you to manage a Fabric [Copy Job](https://learn.mic
 
 ### Required
 
+- `definition` (Attributes Map) Definition parts. Read more about [Copy Job definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/copyjob-definition). Accepted path keys: **Default** format: `copyjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Copy Job display name.
+- `format` (String) The Copy Job format. Possible values: `Default`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Copy Job definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/copyjob-definition). Accepted path keys: **Default** format: `copyjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Copy Job description.
-- `format` (String) The Copy Job format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
