@@ -252,7 +252,7 @@ func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
+		// Create and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(testHelperLocals,
@@ -271,7 +271,7 @@ func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
-		// Update and Read
+		// Update and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(testHelperLocals,
@@ -283,6 +283,40 @@ func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"definition":   testHelperDefinition,
 						"format":       "Default",
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Create and Read - without definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read - without definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(

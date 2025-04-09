@@ -1,18 +1,18 @@
 # Get item details by name
-data "fabric_copyjob" "example_by_name" {
+data "fabric_copy_job" "example_by_name" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
 # Get item details by id
-data "fabric_copyjob" "example_by_id" {
+data "fabric_copy_job" "example_by_id" {
   id           = "11111111-1111-1111-1111-111111111111"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
 # Get item details with definition
 # Examples uses `id` but `display_name` can be used as well
-data "fabric_copyjob" "example_definition" {
+data "fabric_copy_job" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
   format            = "Default"
@@ -21,17 +21,17 @@ data "fabric_copyjob" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_copyjob.example_definition.definition["copyjob-content.json"].content, ".payload.tabs[0]")
+  value = provider::fabric::content_decode(data.fabric_copy_job.example_definition.definition["copyjob-content.json"].content, ".payload.tabs[0]")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_copyjob.example_definition.definition["copyjob-content.json"].content).payload.tabs[0]
+  value = provider::fabric::content_decode(data.fabric_copy_job.example_definition.definition["copyjob-content.json"].content).payload.tabs[0]
 }
 
 # This is an invalid data source
 # Do not specify `id` and `display_name` in the same data source block
-# data "fabric_copyjob" "example" {
+# data "fabric_copy_job" "example" {
 #   display_name = "example"
 #   id           = "11111111-1111-1111-1111-111111111111"
 #   workspace_id = "00000000-0000-0000-0000-000000000000"

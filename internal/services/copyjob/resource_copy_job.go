@@ -23,7 +23,7 @@ func NewResourceCopyJob() resource.Resource {
 			mapvalidator.SizeAtMost(1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
-		DefinitionRequired: true,
+		DefinitionRequired: false,
 		DefinitionEmpty:    ItemDefinitionEmpty,
 		DefinitionFormats:  itemDefinitionFormats,
 	}

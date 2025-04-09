@@ -1,5 +1,12 @@
 # Example 1 - Item with definition bootstrapping only
-resource "fabric_copyjob" "example_definition_bootstrap" {
+resource "fabric_copy_job" "example_no_definition" {
+  display_name = "example"
+  description  = "example with no definition"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Example 2 - Item with definition bootstrapping only
+resource "fabric_copy_job" "example_definition_bootstrap" {
   display_name              = "example"
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
@@ -12,8 +19,8 @@ resource "fabric_copyjob" "example_definition_bootstrap" {
   }
 }
 
-# Example 2 - Item with definition update when source or tokens changed
-resource "fabric_copyjob" "example_definition_update" {
+# Example 3 - Item with definition update when source or tokens changed
+resource "fabric_copy_job" "example_definition_update" {
   display_name = "example"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
