@@ -309,14 +309,13 @@ func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_CopyJobDefinitionResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	t.Logf("testHelperDefinition JSON: %+v", testHelperDefinition)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -329,7 +328,7 @@ func TestAcc_CopyJobDefinitionResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
-						"description":  "A Copy job description",
+						"description":  "",
 						"definition":   testHelperDefinition,
 					},
 				)),
