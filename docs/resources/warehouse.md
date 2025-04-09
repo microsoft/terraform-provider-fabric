@@ -61,7 +61,11 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 
 Required:
 
-- `collation_type` (Boolean) The collation type of the warehouse.
+- `collation_type` (String) The collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
+
+`Latin1_General_100_BIN2_UTF8` The default - case-sensitive (CS) collation
+
+`Latin1_General_100_CI_AS_KS_WS_SC_UTF8` case-insensitive (CI) collation
 
 <a id="nestedatt--timeouts"></a>
 
@@ -80,6 +84,7 @@ Optional:
 
 Read-Only:
 
+- `collation_type` (String) The collation type of the warehouse. Possible values:`Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.

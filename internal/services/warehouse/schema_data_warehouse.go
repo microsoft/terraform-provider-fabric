@@ -6,10 +6,17 @@ package warehouse
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	fabwarehouse "github.com/microsoft/fabric-sdk-go/fabric/warehouse"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func getDataSourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 	result := map[string]schema.Attribute{
+		"collation_type": schema.StringAttribute{
+			MarkdownDescription: "The collation type of the warehouse. Possible values:" + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, true) + ".",
+			Computed:            true,
+		},
 		"connection_string": schema.StringAttribute{
 			MarkdownDescription: "The SQL connection string connected to the workspace containing this warehouse.",
 			Computed:            true,

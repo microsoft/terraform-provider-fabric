@@ -17,14 +17,14 @@ import (
 
 func NewResourceWarehouse() resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from warehouseConfigurationModel) (*fabwarehouse.CreationPayload, diag.Diagnostics) {
-		creationPayload := fabwarehouse.CreationPayload{}
-
-		if !from.CollationType.IsNull() && !from.CollationType.IsUnknown() {
-			creationPayload.CollationType = (*fabwarehouse.CollationType)(from.CollationType.ValueStringPointer())
+		collationType := (fabwarehouse.CollationType)(from.CollationType.ValueString())
+		cp := fabwarehouse.CreationPayload{
+			CollationType: &collationType,
 		}
 
-		return &creationPayload, nil
+		return &cp, nil
 	}
+
 	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[warehousePropertiesModel](ctx)
 
