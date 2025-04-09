@@ -17,13 +17,11 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-var (
-	possibleMinimumConsumptionUnitsValues = []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
-	customMin                             = float64(51)
-	customMax                             = float64(322)
-)
-
 func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
+	possibleMinimumConsumptionUnitsValues := []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
+	customMin := float64(51)
+	customMax := float64(322)
+
 	result := map[string]schema.Attribute{
 		"ingestion_service_uri": schema.StringAttribute{
 			MarkdownDescription: "Ingestion service URI.",
@@ -60,6 +58,10 @@ func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]s
 }
 
 func getResourceEventhouseConfigurationAttributes() map[string]schema.Attribute {
+	possibleMinimumConsumptionUnitsValues := []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
+	customMin := float64(51)
+	customMax := float64(322)
+
 	return map[string]schema.Attribute{
 		"minimum_consumption_units": schema.Float64Attribute{
 			MarkdownDescription: "When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: " + utils.ConvertStringSlicesToString(
