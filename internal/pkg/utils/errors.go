@@ -156,7 +156,7 @@ func (h *ErrorHandler) processFabricError(
 	})
 
 	// Handle special case for error identity check or not found errors
-	if (errIs != nil && errors.Is(errResp, errIs)) || (errIs != nil && errResp.RawResponse.StatusCode == http.StatusNotFound) {
+	if errIs != nil && (errors.Is(errResp, errIs) || (errResp.RawResponse != nil && errResp.RawResponse.StatusCode == http.StatusNotFound)) {
 		return errIs.Error(), errIs.Error()
 	}
 
