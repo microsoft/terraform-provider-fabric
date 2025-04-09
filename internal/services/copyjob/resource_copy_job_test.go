@@ -234,6 +234,7 @@ func TestUnit_CopyJobResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 	}))

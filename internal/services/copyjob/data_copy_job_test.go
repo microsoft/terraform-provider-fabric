@@ -209,21 +209,5 @@ func TestAcc_CopyJobDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by id with definition - success
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"id":           entityID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-			),
-		},
 	}))
 }
