@@ -739,7 +739,7 @@ function Set-AzureDataFactory {
 }
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -763,7 +763,6 @@ if (
   !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
 ) {
   Write-Log -Message @'
-  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
   FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
   FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID,
   FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME,
@@ -811,44 +810,49 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
-  'CopyJob'               = 'cj'
-  'AzureDataFactory'      = 'adf'
-  'Dashboard'             = 'dash'
-  'Datamart'              = 'dm'
-  'DataPipeline'          = 'dp'
-  'Environment'           = 'env'
-  'Eventhouse'            = 'eh'
-  'Eventstream'           = 'es'
-  'GraphQLApi'            = 'gql'
-  'KQLDashboard'          = 'kqldash'
-  'KQLDatabase'           = 'kqldb'
-  'KQLQueryset'           = 'kqlqs'
-  'Lakehouse'             = 'lh'
-  'MirroredDatabase'      = 'mdb'
-  'MirroredWarehouse'     = 'mwh'
-  'MLExperiment'          = 'mle'
-  'MLModel'               = 'mlm'
-  'MountedDataFactory'    = 'mdf'
-  'Notebook'              = 'nb'
-  'PaginatedReport'       = 'prpt'
-  'Reflex'                = 'rx'
-  'Report'                = 'rpt'
-  'SemanticModel'         = 'sm'
-  'SparkJobDefinition'    = 'sjd'
-  'SQLDatabase'           = 'sqldb'
-  'SQLEndpoint'           = 'sqle'
-  'Warehouse'             = 'wh'
-  'WorkspaceDS'           = 'wsds'
-  'WorkspaceRS'           = 'wsrs'
-  'DomainParent'          = 'parent'
-  'DomainChild'           = 'child'
-  'EntraServicePrincipal' = 'sp'
-  'EntraGroup'            = 'grp'
-  'AzDOProject'           = 'proj'
-  'VirtualNetwork01'      = 'vnet01'
-  'VirtualNetwork02'      = 'vnet02'
-  'VirtualNetworkSubnet'  = 'subnet'
-  'GatewayVirtualNetwork' = 'gvnet'
+  'CopyJob'                = 'cj'
+  'AzureDataFactory'       = 'adf'
+  'Dashboard'              = 'dash'
+  'Datamart'               = 'dm'
+  'DataPipeline'           = 'dp'
+  'Environment'            = 'env'
+  'Eventhouse'             = 'eh'
+  'Eventstream'            = 'es'
+  'GraphQLApi'             = 'gql'
+  'KQLDashboard'           = 'kqldash'
+  'KQLDatabase'            = 'kqldb'
+  'KQLQueryset'            = 'kqlqs'
+  'Lakehouse'              = 'lh'
+  'MirroredDatabase'       = 'mdb'
+  'MirroredWarehouse'      = 'mwh'
+  'MLExperiment'           = 'mle'
+  'MLModel'                = 'mlm'
+  'MountedDataFactory'     = 'mdf'
+  'Notebook'               = 'nb'
+  'PaginatedReport'        = 'prpt'
+  'Reflex'                 = 'rx'
+  'Report'                 = 'rpt'
+  'SemanticModel'          = 'sm'
+  'SparkJobDefinition'     = 'sjd'
+  'SQLDatabase'            = 'sqldb'
+  'SQLEndpoint'            = 'sqle'
+  'Warehouse'              = 'wh'
+  'WorkspaceDS'            = 'wsds'
+  'WorkspaceRS'            = 'wsrs'
+  'WorkspaceMPE'           = 'wsmpe'
+  'DomainParent'           = 'parent'
+  'DomainChild'            = 'child'
+  'EntraServicePrincipal'  = 'sp'
+  'EntraGroup'             = 'grp'
+  'AzDOProject'            = 'proj'
+  'VirtualNetwork01'       = 'vnet01'
+  'VirtualNetwork02'       = 'vnet02'
+  'VirtualNetworkSubnet'   = 'subnet'
+  'GatewayVirtualNetwork'  = 'gvnet'
+  'ManagedPrivateEndpoint' = 'mpe'
+  'StorageAccount'         = 'st'
+  'ResourceGroup'          = 'rg'
+  'FabricCapacity'         = 'fc'
 }
 
 $baseName = Get-BaseName
@@ -860,7 +864,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID',
   'FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME'
   'FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION',
-  'FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID',
+  'FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME',
   'FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME',
   'FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME',
   'FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX',
@@ -881,11 +885,27 @@ $envVars -join "`n" | Set-Content -Path './wellknown.env' -Force -NoNewline -Enc
 
 $displayName = Get-DisplayName -Base $baseName
 
+# Create WorkspaceMPE if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceMPE'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceMPE to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceMPE - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceMPE'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceMPE if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
 # Create WorkspaceRS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
 $workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
 
-# Assign WorkspaceDS to Capacity if not already assigned or assigned to a different capacity
+# Assign WorkspaceRS to Capacity if not already assigned or assigned to a different capacity
 $workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
 
 Write-Log -Message "WorkspaceRS - Name: $($workspace.displayName) / ID: $($workspace.id)"
@@ -912,7 +932,7 @@ $wellKnown['WorkspaceDS'] = @{
   description = $workspace.description
 }
 
-# Assign SPN to WorkspaceRS if not already assigned
+# Assign SPN to WorkspaceDS if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
@@ -922,7 +942,7 @@ $itemTypes = @('CopyJob', 'DataPipeline', 'Environment', 'Eventhouse', 'Eventstr
 foreach ($itemType in $itemTypes) {
 
   $displayNameTemp = "${displayName}_$($itemNaming[$itemType])"
-  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type $itemType
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType
   $wellKnown[$itemType] = @{
     id          = $item.id
     displayName = $item.displayName
@@ -936,7 +956,7 @@ $creationPayload = @{
   databaseType           = 'ReadWrite'
   parentEventhouseItemId = $wellKnown['Eventhouse'].id
 }
-$kqlDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'KQLDatabase' -CreationPayload $creationPayload
+$kqlDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'KQLDatabase' -CreationPayload $creationPayload
 $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
@@ -954,7 +974,7 @@ $definition = @{
     }
   )
 }
-$mirroredDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MirroredDatabase' -Definition $definition
+$mirroredDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'MirroredDatabase' -Definition $definition
 $wellKnown['MirroredDatabase'] = @{
   id          = $mirroredDatabase.id
   displayName = $mirroredDatabase.displayName
@@ -978,7 +998,7 @@ $definition = @{
   )
 }
 
-$semanticModel = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'SemanticModel' -Definition $definition
+$semanticModel = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SemanticModel' -Definition $definition
 $wellKnown['SemanticModel'] = @{
   id          = $semanticModel.id
   displayName = $semanticModel.displayName
@@ -1011,7 +1031,7 @@ $definition = @{
     }
   )
 }
-$report = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'Report' -Definition $definition
+$report = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'Report' -Definition $definition
 $wellKnown['Report'] = @{
   id          = $report.id
   displayName = $report.displayName
@@ -1036,20 +1056,20 @@ $wellKnown['DomainChild'] = @{
   description = $childDomain.description
 }
 
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($workspace.id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
   Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' to populate the data !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($workspace.id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+  Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
 
 $displayNameTemp = "${displayName}_$($itemNaming['Dashboard'])"
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($workspace.id)/dashboards"
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dashboards"
 $result = $results.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
 if (!$result) {
   Write-Log -Message "!!! Please create a Dashboard manually (with Display Name: ${displayNameTemp}), and update details in the well-known file !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Workspace: https://app.fabric.microsoft.com/groups/$($workspace.id)" -Level 'WARN'
+  Write-Log -Message "Workspace: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)" -Level 'WARN'
 }
 $wellKnown['Dashboard'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
@@ -1058,16 +1078,63 @@ $wellKnown['Dashboard'] = @{
 }
 
 $displayNameTemp = "${displayName}_$($itemNaming['Datamart'])"
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($workspace.id)/datamarts"
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/datamarts"
 $result = $results.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
 if (!$result) {
   Write-Log -Message "!!! Please create a Datamart manually (with Display Name: ${displayNameTemp}), and update details in the well-known file !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Workspace: https://app.fabric.microsoft.com/groups/$($workspace.id)" -Level 'WARN'
+  Write-Log -Message "Workspace: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)" -Level 'WARN'
 }
 $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
   displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
+}
+
+# Create Resource Group if not exists
+$displayNameTemp = "$($itemNaming['ResourceGroup'])-${displayName}"
+$resourceGroup = Get-AzResourceGroup -Name $displayNameTemp
+if (!$resourceGroup) {
+  Write-Log -Message "Creating Resource Group: $displayNameTemp" -Level 'WARN'
+  $resourceGroup = New-AzResourceGroup -Name $displayNameTemp -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+Write-Log -Message "Resource Group - Name: $($resourceGroup.ResourceGroupName) / ID: $($resourceGroup.ResourceId)"
+$wellKnown['ResourceGroup'] = @{
+  id       = $resourceGroup.ResourceId
+  name     = $resourceGroup.ResourceGroupName
+  location = $resourceGroup.Location
+}
+
+# Create Storage Account if not exists
+$displayNameTemp = "$($itemNaming['StorageAccount'])${displayName}".ToLower() -replace '[^a-z0-9]', ''
+$storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp
+if (!$storageAccount) {
+  Write-Log -Message "Creating Storage Account: $displayNameTemp" -Level 'WARN'
+  $storageAccount = New-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp -SkuName Standard_LRS -Kind StorageV2 -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+Write-Log -Message "Storage Account - Name: $($storageAccount.StorageAccountName) / ID: $($storageAccount.Id)"
+$wellKnown['StorageAccount'] = @{
+  id   = $storageAccount.Id
+  name = $storageAccount.StorageAccountName
+}
+
+# Create Managed Private Endpoint if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ManagedPrivateEndpoint'])"
+$managedPrivateEndpoints = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceMPE'].id)/managedPrivateEndpoints"
+$managedPrivateEndpoint = $managedPrivateEndpoints.Response.value | Where-Object { $_.name -eq $displayNameTemp }
+if (!$managedPrivateEndpoint) {
+  Write-Log -Message "Creating Managed Private Endpoint: $displayNameTemp" -Level 'WARN'
+  $payload = @{
+    name                        = $displayNameTemp
+    targetPrivateLinkResourceId = $wellKnown['StorageAccount']['id']
+    targetSubresourceType       = 'blob'
+    requestMessage              = $displayNameTemp
+  }
+  $managedPrivateEndpoint = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceMPE'].id)/managedPrivateEndpoints" -Payload $payload).Response
+}
+Write-Log -Message "Managed Private Endpoint - Name: $($managedPrivateEndpoint.name) / ID: $($managedPrivateEndpoint.id)"
+$wellKnown['ManagedPrivateEndpoint'] = @{
+  id   = $managedPrivateEndpoint.id
+  name = $managedPrivateEndpoint.name
 }
 
 # Create SP if not exists
@@ -1139,9 +1206,9 @@ Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
 
 # Create Azure Virtual Network 1 if not exists
 $vnetName = "${displayName}_$($itemNaming['VirtualNetwork01'])"
-$addrRange = "10.10.0.0/16"
+$addrRange = '10.10.0.0/16'
 $subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
-$subRange = "10.10.1.0/24"
+$subRange = '10.10.1.0/24'
 
 $vnet = Set-AzureVirtualNetwork `
   -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
@@ -1159,12 +1226,11 @@ $wellKnown['VirtualNetwork01'] = @{
   subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
 }
 
-
 # Create Azure Virtual Network 2 if not exists
 $vnetName = "${displayName}_$($itemNaming['VirtualNetwork02'])"
-$addrRange = "10.10.0.0/16"
+$addrRange = '10.10.0.0/16'
 $subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
-$subRange = "10.10.1.0/24"
+$subRange = '10.10.1.0/24'
 
 $vnet = Set-AzureVirtualNetwork `
   -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
@@ -1226,8 +1292,8 @@ $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
 $definition = @{
   parts = @(
     @{
-      path        = "mountedDataFactory-content.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl'  -Values @(
+      path        = 'mountedDataFactory-content.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl' -Values @(
         @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID },
         @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME },
         @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
@@ -1237,12 +1303,17 @@ $definition = @{
   )
 }
 
-$mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $workspace.id -Type 'MountedDataFactory' -Definition $definition
+$mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'MountedDataFactory' -Definition $definition
 
 $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
+}
+
+$wellKnown['Azure'] = @{
+  subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  location       = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
 }
 
 # Save wellknown.json file
