@@ -21,7 +21,7 @@ resource "fabric_warehouse" "example" {
   workspace_id = "11111111-1111-1111-1111-111111111111"
 }
 
-# Lakehouse resource with enabled schemas
+# Warehouse resource with enabled schemas
 resource "fabric_warehouse" "example2" {
   display_name = "warehouse_example2"
   description  = "warehouse_example2 with collation_type"
@@ -62,10 +62,6 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 Required:
 
 - `collation_type` (String) The collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
-
-`Latin1_General_100_BIN2_UTF8` The default - case-sensitive (CS) collation
-
-`Latin1_General_100_CI_AS_KS_WS_SC_UTF8` case-insensitive (CI) collation
 
 <a id="nestedatt--timeouts"></a>
 
