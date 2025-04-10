@@ -148,6 +148,11 @@ func TestUnit_{{.TypeInfo}}DataSource(t *testing.T) {
 }
 
 func TestAcc_{{.TypeInfo}}DataSource(t *testing.T) {
+	{{if .IsSPNSupported}}
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+	{{end}}
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

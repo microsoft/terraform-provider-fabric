@@ -214,6 +214,11 @@ func TestUnit_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
 }
 
 func TestAcc_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
+	{{if .IsSPNSupported}}
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+	{{end}}
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
