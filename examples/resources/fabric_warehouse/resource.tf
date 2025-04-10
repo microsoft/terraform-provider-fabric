@@ -3,7 +3,7 @@ resource "fabric_warehouse" "example" {
   workspace_id = "11111111-1111-1111-1111-111111111111"
 }
 
-# Lakehouse resource with enabled schemas
+# Warehouse resource with enabled schemas
 resource "fabric_warehouse" "example2" {
   display_name = "warehouse_example2"
   description  = "warehouse_example2 with collation_type"

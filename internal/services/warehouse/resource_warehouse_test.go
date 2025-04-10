@@ -12,6 +12,7 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabwarehouse "github.com/microsoft/fabric-sdk-go/fabric/warehouse"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -282,4 +283,117 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 		},
 	},
 	))
+}
+
+func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName1 := testhelp.RandomName()
+	entityUpdateDisplayName1 := testhelp.RandomName()
+	entityUpdateDescription1 := testhelp.RandomName()
+
+	entityCreateDisplayName2 := testhelp.RandomName()
+	entityUpdateDisplayName2 := testhelp.RandomName()
+	entityUpdateDescription2 := testhelp.RandomName()
+
+	collationType1 := string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8)
+	collationType2 := string(fabwarehouse.CollationTypeLatin1General100BIN2UTF8)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName1,
+					"configuration": map[string]any{
+						"collation_type": collationType1,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType1),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+			),
+		},
+		// Update and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName1,
+					"description":  entityUpdateDescription1,
+					"configuration": map[string]any{
+						"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType1),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+			),
+		},
+		// Create and Read (configuration) - Collation Type: Latin1_General_100_BIN2_UTF8
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName2,
+					"configuration": map[string]any{
+						"collation_type": collationType2,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType2),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+			),
+		},
+		// Update and Read (configuration) - Collation Type: Latin1_General_100_BIN2_UTF8
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName2,
+					"description":  entityUpdateDescription2,
+					"configuration": map[string]any{
+						"collation_type": collationType2,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType2),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType2),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+			),
+		},
+	}))
 }

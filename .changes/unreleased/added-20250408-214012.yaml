@@ -1,0 +1,5 @@
+kind: added
+body: Added `configuration` attribute and new `collation_type` property in `fabric_warehouse` for terraform users.
+time: 2025-04-08T21:40:12.555123283Z
+custom:
+  Issue: "270"

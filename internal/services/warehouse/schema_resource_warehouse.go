@@ -43,10 +43,8 @@ func getResourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 func getResourceWarehouseConfigurationAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"collation_type": schema.StringAttribute{
-			MarkdownDescription: "The collation type of the warehouse. Accepted values: " + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, true) + ".\n\n" +
-				"`" + string(fabwarehouse.CollationTypeLatin1General100BIN2UTF8) + "` The default - case-sensitive (CS) collation\n\n" +
-				"`" + string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8) + "` case-insensitive (CI) collation",
-			Required: true,
+			MarkdownDescription: "The collation type of the warehouse. Accepted values: " + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, true) + ".",
+			Required:            true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
 			},

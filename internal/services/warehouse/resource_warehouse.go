@@ -17,9 +17,8 @@ import (
 
 func NewResourceWarehouse() resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from warehouseConfigurationModel) (*fabwarehouse.CreationPayload, diag.Diagnostics) {
-		collationType := (fabwarehouse.CollationType)(from.CollationType.ValueString())
 		cp := fabwarehouse.CreationPayload{
-			CollationType: &collationType,
+			CollationType: (*fabwarehouse.CollationType)(from.CollationType.ValueStringPointer()),
 		}
 
 		return &cp, nil
