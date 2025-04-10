@@ -12,7 +12,7 @@ import (
 
 const (
 	ItemDefinitionEmpty       = `{}`
-	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/activator-definition"
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/reflex-definition"
 )
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
@@ -30,7 +30,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Types:          "activators",
 	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator",
 	IsPreview:      true,
-	IsSPNSupported: false,
+	IsSPNSupported: true,
 }
 
 const FabricItemType = fabcore.ItemTypeReflex
