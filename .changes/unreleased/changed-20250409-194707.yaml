@@ -1,5 +1,0 @@
-kind: changed
-body: SPN is now supported in the `fabric_activator` (aka Reflex) resource/data-source
-time: 2025-04-09T19:47:07.3951042-07:00
-custom:
-  Issue: "111"
