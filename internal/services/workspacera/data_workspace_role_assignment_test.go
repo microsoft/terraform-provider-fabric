@@ -85,6 +85,7 @@ func TestAcc_WorkspaceRoleAssignmentDataSource(t *testing.T) {
 					map[string]any{
 						"id":           principalID,
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"depends_on" : []string{testResourceItemFQN},
 					},
 				),
 			),
