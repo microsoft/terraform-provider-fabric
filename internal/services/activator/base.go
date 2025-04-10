@@ -12,7 +12,7 @@ import (
 
 const (
 	ItemDefinitionEmpty       = `{}`
-	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/activator-definition"
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/reflex-definition"
 )
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals

@@ -21,12 +21,12 @@ data "fabric_mounted_data_factory" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_mounted_data_factory.example_definition.definition["mountedDataFactory-content.json"].content, ".")
+  value = provider::fabric::content_decode(data.fabric_mounted_data_factory.example_definition.definition["mountedDataFactory-content.json"].content, ".dataFactoryResourceId")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_mounted_data_factory.example_definition.definition["mountedDataFactory-content.json"].content)
+  value = provider::fabric::content_decode(data.fabric_mounted_data_factory.example_definition.definition["mountedDataFactory-content.json"].content).dataFactoryResourceId
 }
 # This is an invalid data source
 # Do not specify `id` and `display_name` in the same data source block
