@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package activator_test
+package mounteddatafactory_test
 
 import (
 	"regexp"
@@ -21,7 +21,7 @@ import (
 
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
-func TestUnit_ActivatorsDataSource(t *testing.T) {
+func TestUnit_MountedDataFactoriesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
@@ -87,7 +87,7 @@ func TestUnit_ActivatorsDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_ActivatorsDataSource(t *testing.T) {
+func TestAcc_MountedDataFactoriesDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
