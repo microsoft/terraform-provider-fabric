@@ -67,7 +67,7 @@ resource "fabric_activator" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Activator definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/activator-definition). Accepted path keys: **Default** format: `ReflexEntities.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Activator definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/reflex-definition). Accepted path keys: **Default** format: `ReflexEntities.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Activator description.
 - `format` (String) The Activator format. Possible values: `Default`
