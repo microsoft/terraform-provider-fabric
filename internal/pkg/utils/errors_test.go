@@ -427,16 +427,49 @@ func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
 	handler := utils.NewErrorHandler()
 	ctx := t.Context()
 
-	fabricErr := createFabricError(t, 400, "InvalidParameter", "The parameter is invalid", "req-123")
+	tests := []struct {
+		name         string
+		fabricErr    *fabcore.ResponseError
+		wantContains []string
+	}{
+		{
+			name:      "normal error response",
+			fabricErr: createFabricError(t, 400, "InvalidParameter", "The parameter is invalid", "req-123"),
+			wantContains: []string{
+				"InvalidParameter",
+				"The parameter is invalid",
+				"req-123",
+			},
+		},
+		{
+			name: "nil RawResponse & nil ErrorResponse.RequestID",
+			fabricErr: &fabcore.ResponseError{
+				StatusCode: 400,
+				ErrorResponse: &fabcore.ErrorResponse{
+					ErrorCode: azto.Ptr("InvalidParameter"),
+					Message:   azto.Ptr("The parameter is invalid"),
+				},
+			},
+			wantContains: []string{
+				"InvalidParameter",
+				"The parameter is invalid",
+			},
+		},
+	}
 
-	diags := handler.GetDiagsFromError(ctx, fabricErr, utils.OperationCreate, nil)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := handler.GetDiagsFromError(ctx, tt.fabricErr, utils.OperationCreate, nil)
 
-	assert.True(t, diags.HasError())
-	diagErrs := diags.Errors()
-	assert.Len(t, diagErrs, 1)
-	assert.Contains(t, diagErrs[0].Detail(), "InvalidParameter")
-	assert.Contains(t, diagErrs[0].Detail(), "The parameter is invalid")
-	assert.Contains(t, diagErrs[0].Detail(), "req-123")
+			assert.True(t, diags.HasError())
+			diagErrs := diags.Errors()
+			assert.Len(t, diagErrs, 1)
+
+			for _, want := range tt.wantContains {
+				assert.Contains(t, diagErrs[0].Detail(), want)
+			}
+		})
+	}
 }
 
 func TestUnit_GetDiagsFromError_AuthFailedError(t *testing.T) {
