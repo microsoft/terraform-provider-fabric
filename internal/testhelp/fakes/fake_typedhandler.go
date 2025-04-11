@@ -220,7 +220,11 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				return element.(TEntity)
+				if typedElement, ok := element.(TEntity); ok {
+					return typedElement
+				}
+
+				panic("Element found but type assertion failed") // lintignore:R009
 			}
 		}
 
