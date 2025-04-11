@@ -72,6 +72,7 @@ func TestUnit_EventhousesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.minimum_consumption_units"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(
@@ -109,6 +110,7 @@ func TestAcc_EventhousesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.minimum_consumption_units"),
 			),
 		},
 	},

@@ -102,4 +102,5 @@ Read-Only:
 
 - `database_ids` (Set of String) List of all KQL Database children IDs.
 - `ingestion_service_uri` (String) Ingestion service URI.
+- `minimum_consumption_units` (Number) Use Minimum consumption for highly time-sensitive systems to keep the service always available at a selected minimum level. You pay for the minimum consumption level or actual consumption if above the minimum. Supported values include`0`, `13`, `18`, `2.25`, `26`, `34`, `4.25`, `50`, `8.5` or any number between `51` and `322`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)
 - `query_service_uri` (String) Query service URI.

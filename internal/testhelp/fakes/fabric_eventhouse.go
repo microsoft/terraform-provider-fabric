@@ -180,9 +180,10 @@ func NewRandomEventhouse() fabeventhouse.Eventhouse {
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties: &fabeventhouse.Properties{
-			IngestionServiceURI: to.Ptr(testhelp.RandomURI()),
-			QueryServiceURI:     to.Ptr(testhelp.RandomURI()),
-			DatabasesItemIDs:    []string{testhelp.RandomUUID()},
+			IngestionServiceURI:     to.Ptr(testhelp.RandomURI()),
+			QueryServiceURI:         to.Ptr(testhelp.RandomURI()),
+			DatabasesItemIDs:        []string{testhelp.RandomUUID()},
+			MinimumConsumptionUnits: to.Ptr(0.0),
 		},
 	}
 }

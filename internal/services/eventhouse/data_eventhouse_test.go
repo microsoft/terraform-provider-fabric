@@ -105,6 +105,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// read by id - not found
@@ -135,6 +136,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// read by name - not found
@@ -179,6 +181,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// read by id - not found
@@ -211,6 +214,7 @@ func TestAcc_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// read by name - not found

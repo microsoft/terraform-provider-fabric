@@ -248,6 +248,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// Update and Read
@@ -272,6 +273,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -303,6 +305,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// Update and Read
@@ -322,6 +325,7 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 	},
@@ -358,6 +362,7 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 		// Update and Read
@@ -382,6 +387,7 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 			),
 		},
 	},
@@ -419,6 +425,7 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.minimum_consumption_units", "2.25"),
 			),
 		},
@@ -445,6 +452,7 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.minimum_consumption_units", "2.25"),
 			),
 		},

@@ -1,0 +1,5 @@
+kind: changed
+body: enhanced eventhouse data-source by adding minimum consumption units to properties
+time: 2025-04-09T07:30:56.214777973Z
+custom:
+    Issue: "385"
