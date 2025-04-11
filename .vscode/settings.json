@@ -120,7 +120,8 @@
     "customtypes"
   ],
   "sarif-viewer.connectToGithubCodeScanning": "on",
-  //copilot
+  // copilot
+  "chat.mcp.discovery.enabled": true,
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
       "text": "Use the Conventional Commits specification to create commit message with scope to keep consistent commit history. Do not use file extension. Must be less than 100 characters."
