@@ -39,11 +39,7 @@ func TestAcc_WorkspaceManagedPrivateEndpointResource_CRUD(t *testing.T) {
 	// export ARM_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000"
 	// export ARM_TENANT_ID="00000000-0000-0000-0000-000000000000"
 
-	// provider "azurerm" {
-	// 	features {}
-	// 	subscription_id = "%s"
-	// }
-
+	// lintignore:AT004
 	azurermHCL := fmt.Sprintf(`
 		provider "azurerm" {
 			features {}
