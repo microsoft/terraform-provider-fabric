@@ -1,0 +1,5 @@
+kind: added
+body: New resource/data-source `fabric_workspace_managed_private_endpoint`
+time: 2025-03-20T23:59:05.5720271-07:00
+custom:
+  Issue: "261"
