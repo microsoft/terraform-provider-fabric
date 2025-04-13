@@ -14,11 +14,7 @@ import (
 )
 
 func getDataSourceEventhousePropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
-	possibleMinimumConsumptionUnitsValues := []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
-	customMin := float64(51)
-	customMax := float64(322)
-
-	result := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"ingestion_service_uri": schema.StringAttribute{
 			MarkdownDescription: "Ingestion service URI.",
 			Computed:            true,
@@ -41,14 +37,12 @@ func getDataSourceEventhousePropertiesAttributes(ctx context.Context) map[string
 					true,
 				) + " or any number between `" + fmt.Sprintf(
 				"%v",
-				customMin,
+				minimumConsumptionUnitsMin,
 			) + "` and `" + fmt.Sprintf(
 				"%v",
-				customMax,
+				minimumConsumptionUnitsMax,
 			) + "`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)",
 			Computed: true,
 		},
 	}
-
-	return result
 }

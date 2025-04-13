@@ -33,3 +33,9 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		Paths: []string{"EventhouseProperties.json"},
 	},
 }
+
+var (
+	possibleMinimumConsumptionUnitsValues = []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
+	minimumConsumptionUnitsMin            = float64(51)
+	minimumConsumptionUnitsMax            = float64(322)
+)
