@@ -35,7 +35,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 }
 
 var (
-	possibleMinimumConsumptionUnitsValues = []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
-	minimumConsumptionUnitsMin            = float64(51)
-	minimumConsumptionUnitsMax            = float64(322)
+	possibleMinimumConsumptionUnitsValues = []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50} //nolint:gochecknoglobals
+	minimumConsumptionUnitsMin            = float64(51)                                       //nolint:gochecknoglobals
+	minimumConsumptionUnitsMax            = float64(322)                                      //nolint:gochecknoglobals
 )
