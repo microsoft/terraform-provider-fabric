@@ -23,7 +23,7 @@ import (
 
 func ResourceConnectionSchema(ctx context.Context) schema.Schema {
 	tflog.Info(ctx, "Building schema for connection resource")
-	
+
 	// Define attribute types for connection_details and credential_details
 	connectionDetailsAttributeTypes := map[string]attr.Type{
 		"type":            types.StringType,
@@ -81,12 +81,13 @@ func ResourceConnectionSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Connection details. Can be specified as a nested block or as an object.",
 				Required:            true,
 				AttributeTypes:      connectionDetailsAttributeTypes,
-				Sensitive:           true,
+				// Connection details themselves are not sensitive, individual sensitive values should be marked separately
+				Sensitive: false,
 			},
 			"credential_details": schema.SingleNestedAttribute{
 				MarkdownDescription: "Credential details. Can be specified as a nested block or as an object.",
 				Required:            true,
-				Sensitive:           true,
+				Sensitive:           false,
 				Attributes: map[string]schema.Attribute{
 					"single_sign_on_type": schema.StringAttribute{
 						MarkdownDescription: "Single sign-on type.",
@@ -103,7 +104,7 @@ func ResourceConnectionSchema(ctx context.Context) schema.Schema {
 					"credentials": schema.SingleNestedAttribute{
 						MarkdownDescription: "Credentials configuration.",
 						Required:            true,
-						Sensitive:           true,
+						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"credential_type": schema.StringAttribute{
 								MarkdownDescription: "Credential type.",
