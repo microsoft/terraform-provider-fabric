@@ -7,18 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -53,129 +44,7 @@ func (r *resourceConnection) Metadata(_ context.Context, _ resource.MetadataRequ
 }
 
 func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	tflog.Info(ctx, "Building schema for connection_alt resource")
-	// Define attribute types for connection_details and credential_details
-	connectionDetailsAttributeTypes := map[string]attr.Type{
-		"type":            types.StringType,
-		"creation_method": types.StringType,
-		"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"data_type": types.StringType,
-			"value":     types.StringType,
-		}}},
-	}
-
-	connectivityTypeValues := []string{"ShareableCloud", "OnPremisesGateway", "VirtualNetworkGateway"}
-	privacyLevelValues := []string{"Organizational", "Private", "Public", "None"}
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Microsoft Fabric Connection",
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				MarkdownDescription: "The Connection ID.",
-				CustomType:          customtypes.UUIDType{},
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"display_name": schema.StringAttribute{
-				MarkdownDescription: "The Connection display name.",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(200),
-				},
-			},
-			"connectivity_type": schema.StringAttribute{
-				MarkdownDescription: "Connectivity type. Possible values: " + utils.ConvertStringSlicesToString(connectivityTypeValues, true, true) + ".",
-				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(connectivityTypeValues...),
-				},
-			},
-			"gateway_id": schema.StringAttribute{
-				MarkdownDescription: "Gateway ID. Required for OnPremisesGateway and VirtualNetworkGateway connectivity types.",
-				CustomType:          customtypes.UUIDType{},
-				Optional:            true,
-			},
-			"privacy_level": schema.StringAttribute{
-				MarkdownDescription: "Privacy level. Possible values: " + utils.ConvertStringSlicesToString(privacyLevelValues, true, true) + ".",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("Organizational"),
-				Validators: []validator.String{
-					stringvalidator.OneOf(privacyLevelValues...),
-				},
-			},
-			"connection_details": schema.ObjectAttribute{
-				MarkdownDescription: "Connection details. Can be specified as a nested block or as an object.",
-				Required:            true,
-				AttributeTypes:      connectionDetailsAttributeTypes,
-			},
-			"credential_details": schema.SingleNestedAttribute{
-				MarkdownDescription: "Credential details. Can be specified as a nested block or as an object.",
-				Required:            true,
-				Attributes: map[string]schema.Attribute{
-					"single_sign_on_type": schema.StringAttribute{
-						MarkdownDescription: "Single sign-on type.",
-						Required:            true,
-					},
-					"connection_encryption": schema.StringAttribute{
-						MarkdownDescription: "Connection encryption type.",
-						Required:            true,
-					},
-					"skip_test_connection": schema.BoolAttribute{
-						MarkdownDescription: "Whether to skip test connection.",
-						Required:            true,
-					},
-					"credentials": schema.SingleNestedAttribute{
-						MarkdownDescription: "Credentials configuration.",
-						Required:            true,
-						Attributes: map[string]schema.Attribute{
-							"credential_type": schema.StringAttribute{
-								MarkdownDescription: "Credential type.",
-								Required:            true,
-							},
-							// Make all other credential fields optional
-							"username": schema.StringAttribute{
-								MarkdownDescription: "Username for Basic or Windows authentication.",
-								Optional:            true,
-							},
-							"password": schema.StringAttribute{
-								MarkdownDescription: "Password for Basic or Windows authentication.",
-								Optional:            true,
-							},
-							"key": schema.StringAttribute{
-								MarkdownDescription: "Key for Key authentication.",
-								Optional:            true,
-							},
-							"application_id": schema.StringAttribute{
-								MarkdownDescription: "Application ID for Service Principal authentication.",
-								Optional:            true,
-							},
-							"application_secret": schema.StringAttribute{
-								MarkdownDescription: "Application Secret for Service Principal authentication.",
-								Optional:            true,
-							},
-							"tenant_id": schema.StringAttribute{
-								MarkdownDescription: "Tenant ID for Service Principal authentication.",
-								Optional:            true,
-							},
-							"sas_token": schema.StringAttribute{
-								MarkdownDescription: "SAS Token for Shared Access Signature authentication.",
-								Optional:            true,
-							},
-							"domain": schema.StringAttribute{
-								MarkdownDescription: "Domain for Windows authentication.",
-								Optional:            true,
-							},
-						},
-					},
-				},
-			},
-			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{}),
-		},
-	}
+	resp.Schema = ResourceConnectionSchema(ctx)
 }
 
 func (r *resourceConnection) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -243,12 +112,12 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	var state resourceConnectionModel
-	state.Timeouts = plan.Timeouts
-
-	if resp.Diagnostics.Append(state.set(ctx, respCreate.Connection)...); resp.Diagnostics.HasError() {
-		return
-	}
+	// Important: preserve the original plan values and only set the ID from the response
+	// This ensures that connection_details and credential_details remain consistent
+	state := plan
+	
+	// Only set the ID from the response, keeping everything else from the plan
+	state.ID = customtypes.NewUUIDPointerValue(respCreate.Connection.ID)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -329,14 +198,13 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	respUpdate, err := r.client.UpdateConnection(ctx, plan.ID.ValueString(), reqUpdate.UpdateConnectionRequestClassification, nil)
+	_, err := r.client.UpdateConnection(ctx, plan.ID.ValueString(), reqUpdate.UpdateConnectionRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.Connection)...); resp.Diagnostics.HasError() {
-		return
-	}
+	
+	// During update, preserve the plan values entirely
+	// No need to update anything from the API response as it won't contain connection_details and credential_details properly
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 

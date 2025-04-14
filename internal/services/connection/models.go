@@ -316,29 +316,9 @@ func (to *baseConnectionModel) set(ctx context.Context, from core.Connection) di
 			to.ConnectionDetails = connDetailsObj
 		}
 	} else {
-		// We need to update the type value from the API but preserve other values
-		var currentConnDetails connectionDetailsModel
-		diags := to.ConnectionDetails.As(ctx, &currentConnDetails, basetypes.ObjectAsOptions{})
-		if !diags.HasError() && from.ConnectionDetails != nil {
-			// Only update the type from the API, preserve everything else
-			currentConnDetails.Type = types.StringValue(string(*from.ConnectionDetails.Type))
-
-			// Convert the updated model back to types.Object
-			updatedConnDetailsObj, diags := types.ObjectValueFrom(ctx,
-				map[string]attr.Type{
-					"type":            types.StringType,
-					"creation_method": types.StringType,
-					"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-						"name":      types.StringType,
-						"data_type": types.StringType,
-						"value":     types.StringType,
-					}}},
-				},
-				currentConnDetails)
-			if !diags.HasError() {
-				to.ConnectionDetails = updatedConnDetailsObj
-			}
-		}
+		// Do not update ConnectionDetails at all - preserve all values from the current state, including the 
+		// type, creation_method, and parameters that the user has defined
+		// This prevents inconsistencies after apply where values might vanish
 	}
 
 	// We only set credential details if they're empty (like during import)
@@ -381,41 +361,8 @@ func (to *baseConnectionModel) set(ctx context.Context, from core.Connection) di
 			to.CredentialDetails = credDetailsObj
 		}
 	} else {
-		// We need to update some values from the API but preserve sensitive values
-		var currentCredDetails connectionCredentialDetailsModel
-		diags := to.CredentialDetails.As(ctx, &currentCredDetails, basetypes.ObjectAsOptions{})
-		if !diags.HasError() && from.CredentialDetails != nil {
-			// Update non-sensitive values from the API
-			currentCredDetails.SingleSignOnType = types.StringValue(string(*from.CredentialDetails.SingleSignOnType))
-			currentCredDetails.ConnectionEncryption = types.StringValue(string(*from.CredentialDetails.ConnectionEncryption))
-			currentCredDetails.SkipTestConnection = types.BoolValue(*from.CredentialDetails.SkipTestConnection)
-
-			// Only update the credential type, not the actual credentials
-			currentCredDetails.Credentials.CredentialType = types.StringValue(string(*from.CredentialDetails.CredentialType))
-
-			// Convert the updated model back to types.Object
-			updatedCredDetailsObj, diags := types.ObjectValueFrom(ctx,
-				map[string]attr.Type{
-					"single_sign_on_type":   types.StringType,
-					"connection_encryption": types.StringType,
-					"skip_test_connection":  types.BoolType,
-					"credentials": types.ObjectType{AttrTypes: map[string]attr.Type{
-						"credential_type":    types.StringType,
-						"username":           types.StringType,
-						"password":           types.StringType,
-						"key":                types.StringType,
-						"application_id":     types.StringType,
-						"application_secret": types.StringType,
-						"tenant_id":          types.StringType,
-						"sas_token":          types.StringType,
-						"domain":             types.StringType,
-					}},
-				},
-				currentCredDetails)
-			if !diags.HasError() {
-				to.CredentialDetails = updatedCredDetailsObj
-			}
-		}
+		// Do not update CredentialDetails at all - preserve all values from the current state
+		// This prevents inconsistencies with sensitive values after apply
 	}
 
 	return nil
