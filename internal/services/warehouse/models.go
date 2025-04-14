@@ -17,7 +17,6 @@ type warehousePropertiesModel struct {
 }
 
 func (to *warehousePropertiesModel) set(from fabwarehouse.Properties) {
-	to.CollationType = types.StringPointerValue((*string)(from.CollationType))
 	to.ConnectionString = types.StringPointerValue(from.ConnectionString)
 	to.CreatedDate = timetypes.NewRFC3339TimePointerValue(from.CreatedDate)
 	to.LastUpdatedTime = timetypes.NewRFC3339TimePointerValue(from.LastUpdatedTime)
