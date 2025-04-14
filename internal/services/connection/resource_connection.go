@@ -105,8 +105,6 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	logRequestBody(ctx, reqCreate)
-
 	respCreate, err := r.client.CreateConnection(ctx, reqCreate.CreateConnectionRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -115,7 +113,7 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	// Important: preserve the original plan values and only set the ID from the response
 	// This ensures that connection_details and credential_details remain consistent
 	state := plan
-	
+
 	// Only set the ID from the response, keeping everything else from the plan
 	state.ID = customtypes.NewUUIDPointerValue(respCreate.Connection.ID)
 
@@ -202,7 +200,7 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	// During update, preserve the plan values entirely
 	// No need to update anything from the API response as it won't contain connection_details and credential_details properly
 
