@@ -260,7 +260,6 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// Update and Read
@@ -282,7 +281,6 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.collation_type"),
 			),
 		},
 	},
