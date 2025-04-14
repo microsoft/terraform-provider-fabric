@@ -181,7 +181,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							"value": superschema.StringAttribute{
 								Common: &schemaR.StringAttribute{
 									MarkdownDescription: "Parameter value.",
-									Required:            true,
+								},
+								Resource: &schemaR.StringAttribute{
+									Required: true,
 								},
 								DataSource: &schemaD.StringAttribute{
 									Computed: true,
