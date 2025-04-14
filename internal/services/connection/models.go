@@ -283,101 +283,139 @@ func (to *baseConnectionModel) set(ctx context.Context, from core.Connection) di
 	to.GatewayID = customtypes.NewUUIDPointerValue(from.GatewayID)
 	to.PrivacyLevel = types.StringValue(string(*from.PrivacyLevel))
 
-	// Set connection details
-	if from.ConnectionDetails != nil {
-		connDetailsModel := connectionDetailsModel{
-			Type: types.StringValue(string(*from.ConnectionDetails.Type)),
-			// CreationMethod is not available in ListConnectionDetails
-			CreationMethod: types.StringValue(""),
-			// Parameters are not available in ListConnectionDetails
-			Parameters: []connectionParameterModel{},
-		}
+	// Important: Do NOT overwrite the connection_details and credential_details objects
+	// from the API as they don't contain sensitive values
+	// Instead, keep the values from the config/plan to maintain any sensitive values
 
-		// Convert the model to a types.Object
-		connDetailsObj, diags := types.ObjectValueFrom(ctx,
-			map[string]attr.Type{
-				"type":            types.StringType,
-				"creation_method": types.StringType,
-				"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-					"name":      types.StringType,
-					"data_type": types.StringType,
-					"value":     types.StringType,
-				}}},
-			},
-			connDetailsModel)
-		if diags.HasError() {
-			return diags
-		}
+	// We only set these if they're empty (like during import)
+	if to.ConnectionDetails.IsNull() || to.ConnectionDetails.IsUnknown() {
+		// Create a minimal connection details object
+		if from.ConnectionDetails != nil {
+			connDetailsModel := connectionDetailsModel{
+				Type:           types.StringValue(string(*from.ConnectionDetails.Type)),
+				CreationMethod: types.StringValue(""),        // Not available in API response
+				Parameters:     []connectionParameterModel{}, // Not available in API response
+			}
 
-		to.ConnectionDetails = connDetailsObj
+			// Convert the model to a types.Object
+			connDetailsObj, diags := types.ObjectValueFrom(ctx,
+				map[string]attr.Type{
+					"type":            types.StringType,
+					"creation_method": types.StringType,
+					"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
+						"name":      types.StringType,
+						"data_type": types.StringType,
+						"value":     types.StringType,
+					}}},
+				},
+				connDetailsModel)
+			if diags.HasError() {
+				return diags
+			}
+
+			to.ConnectionDetails = connDetailsObj
+		}
 	} else {
-		// Set null object if no connection details
-		to.ConnectionDetails = types.ObjectNull(
-			map[string]attr.Type{
-				"type":            types.StringType,
-				"creation_method": types.StringType,
-				"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-					"name":      types.StringType,
-					"data_type": types.StringType,
-					"value":     types.StringType,
-				}}},
-			})
+		// We need to update the type value from the API but preserve other values
+		var currentConnDetails connectionDetailsModel
+		diags := to.ConnectionDetails.As(ctx, &currentConnDetails, basetypes.ObjectAsOptions{})
+		if !diags.HasError() && from.ConnectionDetails != nil {
+			// Only update the type from the API, preserve everything else
+			currentConnDetails.Type = types.StringValue(string(*from.ConnectionDetails.Type))
+
+			// Convert the updated model back to types.Object
+			updatedConnDetailsObj, diags := types.ObjectValueFrom(ctx,
+				map[string]attr.Type{
+					"type":            types.StringType,
+					"creation_method": types.StringType,
+					"parameters": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
+						"name":      types.StringType,
+						"data_type": types.StringType,
+						"value":     types.StringType,
+					}}},
+				},
+				currentConnDetails)
+			if !diags.HasError() {
+				to.ConnectionDetails = updatedConnDetailsObj
+			}
+		}
 	}
 
-	// Set credential details
-	if from.CredentialDetails != nil {
-		credDetailsModel := connectionCredentialDetailsModel{
-			SingleSignOnType:     types.StringValue(string(*from.CredentialDetails.SingleSignOnType)),
-			ConnectionEncryption: types.StringValue(string(*from.CredentialDetails.ConnectionEncryption)),
-			SkipTestConnection:   types.BoolValue(*from.CredentialDetails.SkipTestConnection),
-			Credentials: connectionCredentialsModel{
-				CredentialType: types.StringValue(string(*from.CredentialDetails.CredentialType)),
-			},
-		}
+	// We only set credential details if they're empty (like during import)
+	if to.CredentialDetails.IsNull() || to.CredentialDetails.IsUnknown() {
+		// Create a minimal credential details object
+		if from.CredentialDetails != nil {
+			credDetailsModel := connectionCredentialDetailsModel{
+				SingleSignOnType:     types.StringValue(string(*from.CredentialDetails.SingleSignOnType)),
+				ConnectionEncryption: types.StringValue(string(*from.CredentialDetails.ConnectionEncryption)),
+				SkipTestConnection:   types.BoolValue(*from.CredentialDetails.SkipTestConnection),
+				Credentials: connectionCredentialsModel{
+					CredentialType: types.StringValue(string(*from.CredentialDetails.CredentialType)),
+					// Note: We don't get sensitive credential values from the API
+				},
+			}
 
-		// Convert the model to a types.Object
-		credDetailsObj, diags := types.ObjectValueFrom(ctx,
-			map[string]attr.Type{
-				"single_sign_on_type":   types.StringType,
-				"connection_encryption": types.StringType,
-				"skip_test_connection":  types.BoolType,
-				"credentials": types.ObjectType{AttrTypes: map[string]attr.Type{
-					"credential_type":    types.StringType,
-					"username":           types.StringType,
-					"password":           types.StringType,
-					"key":                types.StringType,
-					"application_id":     types.StringType,
-					"application_secret": types.StringType,
-					"tenant_id":          types.StringType,
-					"sas_token":          types.StringType,
-					"domain":             types.StringType,
-				}},
-			},
-			credDetailsModel)
-		if diags.HasError() {
-			return diags
-		}
+			// Convert the model to a types.Object
+			credDetailsObj, diags := types.ObjectValueFrom(ctx,
+				map[string]attr.Type{
+					"single_sign_on_type":   types.StringType,
+					"connection_encryption": types.StringType,
+					"skip_test_connection":  types.BoolType,
+					"credentials": types.ObjectType{AttrTypes: map[string]attr.Type{
+						"credential_type":    types.StringType,
+						"username":           types.StringType,
+						"password":           types.StringType,
+						"key":                types.StringType,
+						"application_id":     types.StringType,
+						"application_secret": types.StringType,
+						"tenant_id":          types.StringType,
+						"sas_token":          types.StringType,
+						"domain":             types.StringType,
+					}},
+				},
+				credDetailsModel)
+			if diags.HasError() {
+				return diags
+			}
 
-		to.CredentialDetails = credDetailsObj
+			to.CredentialDetails = credDetailsObj
+		}
 	} else {
-		// Set null object if no credential details
-		to.CredentialDetails = types.ObjectNull(
-			map[string]attr.Type{
-				"single_sign_on_type":   types.StringType,
-				"connection_encryption": types.StringType,
-				"skip_test_connection":  types.BoolType,
-				"credentials": types.ObjectType{AttrTypes: map[string]attr.Type{
-					"credential_type":    types.StringType,
-					"username":           types.StringType,
-					"password":           types.StringType,
-					"key":                types.StringType,
-					"application_id":     types.StringType,
-					"application_secret": types.StringType,
-					"tenant_id":          types.StringType,
-					"sas_token":          types.StringType,
-					"domain":             types.StringType,
-				}},
-			})
+		// We need to update some values from the API but preserve sensitive values
+		var currentCredDetails connectionCredentialDetailsModel
+		diags := to.CredentialDetails.As(ctx, &currentCredDetails, basetypes.ObjectAsOptions{})
+		if !diags.HasError() && from.CredentialDetails != nil {
+			// Update non-sensitive values from the API
+			currentCredDetails.SingleSignOnType = types.StringValue(string(*from.CredentialDetails.SingleSignOnType))
+			currentCredDetails.ConnectionEncryption = types.StringValue(string(*from.CredentialDetails.ConnectionEncryption))
+			currentCredDetails.SkipTestConnection = types.BoolValue(*from.CredentialDetails.SkipTestConnection)
+
+			// Only update the credential type, not the actual credentials
+			currentCredDetails.Credentials.CredentialType = types.StringValue(string(*from.CredentialDetails.CredentialType))
+
+			// Convert the updated model back to types.Object
+			updatedCredDetailsObj, diags := types.ObjectValueFrom(ctx,
+				map[string]attr.Type{
+					"single_sign_on_type":   types.StringType,
+					"connection_encryption": types.StringType,
+					"skip_test_connection":  types.BoolType,
+					"credentials": types.ObjectType{AttrTypes: map[string]attr.Type{
+						"credential_type":    types.StringType,
+						"username":           types.StringType,
+						"password":           types.StringType,
+						"key":                types.StringType,
+						"application_id":     types.StringType,
+						"application_secret": types.StringType,
+						"tenant_id":          types.StringType,
+						"sas_token":          types.StringType,
+						"domain":             types.StringType,
+					}},
+				},
+				currentCredDetails)
+			if !diags.HasError() {
+				to.CredentialDetails = updatedCredDetailsObj
+			}
+		}
 	}
 
 	return nil
