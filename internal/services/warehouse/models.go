@@ -10,15 +10,10 @@ import (
 )
 
 type warehousePropertiesModel struct {
-	CollationType    types.String      `tfsdk:"collation_type"`
 	ConnectionString types.String      `tfsdk:"connection_string"`
 	CreatedDate      timetypes.RFC3339 `tfsdk:"created_date"`
 	LastUpdatedTime  timetypes.RFC3339 `tfsdk:"last_updated_time"`
 	CollationType    types.String      `tfsdk:"collation_type"`
-}
-
-type warehouseConfigurationModel struct {
-	CollationType types.String `tfsdk:"collation_type"`
 }
 
 func (to *warehousePropertiesModel) set(from fabwarehouse.Properties) {

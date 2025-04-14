@@ -12,7 +12,7 @@ import (
 )
 
 func getDataSourceWarehousePropertiesAttributes() map[string]schema.Attribute {
-	result := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"collation_type": schema.StringAttribute{
 			MarkdownDescription: "The collation type of the warehouse. Possible values:" + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, true) + ".",
 			Computed:            true,
@@ -31,11 +31,5 @@ func getDataSourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 			Computed:            true,
 			CustomType:          timetypes.RFC3339Type{},
 		},
-		"collation_type": schema.StringAttribute{
-			MarkdownDescription: "The collation type of the warehouse. Possible values: " + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, false) + ".",
-			Computed:            true,
-		},
 	}
-
-	return result
 }
