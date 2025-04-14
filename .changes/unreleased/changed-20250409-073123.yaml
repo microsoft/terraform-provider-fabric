@@ -1,0 +1,5 @@
+kind: changed
+body: Enhanced `fabric_eventhouse` resource by adding `minimum_consumption_units` to properties
+time: 2025-04-09T07:31:23.45607498Z
+custom:
+  Issue: "386"

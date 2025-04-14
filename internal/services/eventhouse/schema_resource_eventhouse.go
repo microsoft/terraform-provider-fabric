@@ -18,7 +18,7 @@ import (
 )
 
 func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
-	result := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"ingestion_service_uri": schema.StringAttribute{
 			MarkdownDescription: "Ingestion service URI.",
 			Computed:            true,
@@ -32,16 +32,26 @@ func getResourceEventhousePropertiesAttributes(ctx context.Context) map[string]s
 			Computed:            true,
 			CustomType:          supertypes.NewSetTypeOf[string](ctx),
 		},
+		"minimum_consumption_units": schema.Float64Attribute{
+			MarkdownDescription: "Use Minimum consumption for highly time-sensitive systems to keep the service always available at a selected minimum level. " +
+				"You pay for the minimum consumption level or actual consumption if above the minimum. Supported values include" +
+				utils.ConvertStringSlicesToString(
+					possibleMinimumConsumptionUnitsValues,
+					true,
+					true,
+				) + " or any number between `" + fmt.Sprintf(
+				"%v",
+				minimumConsumptionUnitsMin,
+			) + "` and `" + fmt.Sprintf(
+				"%v",
+				minimumConsumptionUnitsMax,
+			) + "`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)",
+			Computed: true,
+		},
 	}
-
-	return result
 }
 
 func getResourceEventhouseConfigurationAttributes() map[string]schema.Attribute {
-	possibleMinimumConsumptionUnitsValues := []float64{0, 2.25, 4.25, 8.5, 13, 18, 26, 34, 50}
-	customMin := float64(51)
-	customMax := float64(322)
-
 	return map[string]schema.Attribute{
 		"minimum_consumption_units": schema.Float64Attribute{
 			MarkdownDescription: "When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: " + utils.ConvertStringSlicesToString(
@@ -50,16 +60,16 @@ func getResourceEventhouseConfigurationAttributes() map[string]schema.Attribute 
 				true,
 			) + " or any number between `" + fmt.Sprintf(
 				"%v",
-				customMin,
+				minimumConsumptionUnitsMin,
 			) + "` and `" + fmt.Sprintf(
 				"%v",
-				customMax,
+				minimumConsumptionUnitsMax,
 			) + "`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)",
 			Required: true,
 			Validators: []validator.Float64{
 				float64validator.Any(
 					float64validator.OneOf(possibleMinimumConsumptionUnitsValues...),
-					float64validator.Between(customMin, customMax),
+					float64validator.Between(minimumConsumptionUnitsMin, minimumConsumptionUnitsMax),
 				),
 			},
 			PlanModifiers: []planmodifier.Float64{
