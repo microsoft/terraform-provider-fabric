@@ -8,11 +8,9 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
@@ -39,21 +37,7 @@ func (d *dataSourceConnections) Metadata(_ context.Context, _ datasource.Metadat
 }
 
 func (d *dataSourceConnections) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	s := itemSchema(true).GetDataSource(ctx)
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: s.GetMarkdownDescription(),
-		Attributes: map[string]schema.Attribute{
-			"values": schema.SetNestedAttribute{
-				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
-				Computed:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseConnectionModel](ctx),
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: s.Attributes,
-				},
-			},
-		},
-	}
+	resp.Schema = DataSourceConnectionsSchema(ctx, d.TypeInfo)
 }
 
 func (d *dataSourceConnections) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

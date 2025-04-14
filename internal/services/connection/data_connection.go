@@ -39,7 +39,7 @@ func (d *dataSourceConnection) Metadata(_ context.Context, _ datasource.Metadata
 }
 
 func (d *dataSourceConnection) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = itemSchema(false).GetDataSource(ctx)
+	resp.Schema = DataSourceConnectionSchema(ctx)
 }
 
 func (d *dataSourceConnection) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -132,11 +132,8 @@ func (d *dataSourceConnection) getByDisplayName(ctx context.Context, model *data
 		}
 
 		for _, entity := range page.Value {
-			var entityDisplayName string
-
-			if entityDisplayName == model.DisplayName.ValueString() {
+			if entity.DisplayName != nil && *entity.DisplayName == model.DisplayName.ValueString() {
 				model.ID = customtypes.NewUUIDPointerValue(entity.ID)
-
 				return d.getByID(ctx, model)
 			}
 		}
