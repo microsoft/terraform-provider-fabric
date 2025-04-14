@@ -90,7 +90,7 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Use the helper function from models_alt.go to build the request
+	// Use the helper function from models_consolidated.go to build the request
 	reqCreate, diags := buildConnectionRequest(
 		ctx,
 		plan.ConnectionDetails,

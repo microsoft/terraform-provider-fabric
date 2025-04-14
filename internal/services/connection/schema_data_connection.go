@@ -15,7 +15,7 @@ import (
 
 func DataSourceConnectionSchema(ctx context.Context) schema.Schema {
 	tflog.Info(ctx, "Building schema for connection data source")
-	
+
 	return schema.Schema{
 		MarkdownDescription: "Use this data source to retrieve details of a Microsoft Fabric Connection by ID or display name.",
 		Attributes: map[string]schema.Attribute{
