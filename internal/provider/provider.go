@@ -74,6 +74,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
@@ -426,6 +427,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		workspace.NewResourceWorkspace,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
+		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
 	}
 }
 
@@ -497,6 +499,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,
+		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoint,
+		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoints,
 	}
 }
 
