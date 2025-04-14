@@ -204,6 +204,7 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// Update and Read
@@ -225,6 +226,7 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

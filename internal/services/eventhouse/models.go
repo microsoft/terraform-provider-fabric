@@ -18,7 +18,7 @@ type eventhousePropertiesModel struct {
 	MinimumConsumptionUnits types.Float64                 `tfsdk:"minimum_consumption_units"`
 }
 
-func (to *eventhousePropertiesModel) set(ctx context.Context, from *fabeventhouse.Properties) {
+func (to *eventhousePropertiesModel) set(ctx context.Context, from fabeventhouse.Properties) {
 	to.IngestionServiceURI = types.StringPointerValue(from.IngestionServiceURI)
 	to.QueryServiceURI = types.StringPointerValue(from.QueryServiceURI)
 	to.DatabaseIDs = supertypes.NewSetValueOfSlice(ctx, from.DatabasesItemIDs)

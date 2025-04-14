@@ -22,7 +22,7 @@ func NewResourceEnvironment(ctx context.Context) resource.Resource {
 		if from != nil {
 			propertiesModel := &environmentPropertiesModel{}
 
-			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
 				return diags
 			}
 
