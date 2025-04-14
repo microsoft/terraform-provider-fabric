@@ -23,7 +23,7 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 		if from != nil {
 			propertiesModel := &environmentPropertiesModel{}
 
-			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
 				return diags
 			}
 
