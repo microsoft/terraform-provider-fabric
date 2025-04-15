@@ -1,5 +1,0 @@
-kind: fixed
-body: Nil pointer dereference on Fabric Error Responses when RawResponse is nil.
-time: 2025-04-09T10:52:32.927656615Z
-custom:
-    Issue: "362"

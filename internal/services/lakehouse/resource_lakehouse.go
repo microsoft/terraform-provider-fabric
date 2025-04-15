@@ -39,7 +39,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 		if from != nil {
 			propertiesModel := &lakehousePropertiesModel{}
 
-			if diags := propertiesModel.set(ctx, from); diags.HasError() {
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
 				return diags
 			}
 

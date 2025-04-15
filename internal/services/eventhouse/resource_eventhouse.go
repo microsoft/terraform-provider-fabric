@@ -33,7 +33,7 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 
 		if from != nil {
 			propertiesModel := &eventhousePropertiesModel{}
-			propertiesModel.set(ctx, from)
+			propertiesModel.set(ctx, *from)
 
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
