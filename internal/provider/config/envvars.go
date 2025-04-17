@@ -90,3 +90,7 @@ func GetEnvVarsUseCLI() []string {
 func GetEnvVarsPreview() []string {
 	return []string{"FABRIC_PREVIEW"}
 }
+
+func GetEnvVarsPartnerID() []string {
+	return []string{"FABRIC_PARTNER_ID", "ARM_PARTNER_ID"}
+}
