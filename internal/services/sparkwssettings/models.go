@@ -89,7 +89,7 @@ func (to *baseSparkWorkspaceSettingsModel) set(ctx context.Context, from fabspar
 	if from.Pool != nil {
 		poolModel := &poolPropertiesModel{}
 
-		if diags := poolModel.set(ctx, from.Pool); diags.HasError() {
+		if diags := poolModel.set(ctx, *from.Pool); diags.HasError() {
 			return diags
 		}
 
@@ -313,7 +313,7 @@ type poolPropertiesModel struct {
 	StarterPool             supertypes.SingleNestedObjectValueOf[starterPoolPropertiesModel] `tfsdk:"starter_pool"`
 }
 
-func (to *poolPropertiesModel) set(ctx context.Context, from *fabspark.PoolProperties) diag.Diagnostics {
+func (to *poolPropertiesModel) set(ctx context.Context, from fabspark.PoolProperties) diag.Diagnostics {
 	to.CustomizeComputeEnabled = types.BoolPointerValue(from.CustomizeComputeEnabled)
 
 	defaultPool := supertypes.NewSingleNestedObjectValueOfNull[defaultPoolPropertiesModel](ctx)

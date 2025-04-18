@@ -73,6 +73,7 @@ func TestUnit_WarehousesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.last_updated_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.collation_type"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(

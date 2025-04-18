@@ -16,7 +16,7 @@ import (
 )
 
 func getResourceWarehousePropertiesAttributes() map[string]schema.Attribute {
-	result := map[string]schema.Attribute{
+	return map[string]schema.Attribute{
 		"collation_type": schema.StringAttribute{
 			MarkdownDescription: "The collation type of the warehouse. Possible values:" + utils.ConvertStringSlicesToString(fabwarehouse.PossibleCollationTypeValues(), true, true) + ".",
 			Computed:            true,
@@ -36,8 +36,6 @@ func getResourceWarehousePropertiesAttributes() map[string]schema.Attribute {
 			CustomType:          timetypes.RFC3339Type{},
 		},
 	}
-
-	return result
 }
 
 func getResourceWarehouseConfigurationAttributes() map[string]schema.Attribute {
