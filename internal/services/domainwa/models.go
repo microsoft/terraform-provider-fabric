@@ -10,6 +10,7 @@ import (
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
@@ -20,12 +21,12 @@ BASE MODEL
 
 type baseDomainWorkspaceAssignmentsModel struct {
 	// ID           customtypes.UUID                         `tfsdk:"id"`
-	DomainID     customtypes.UUID                         `tfsdk:"domain_id"`
-	WorkspaceIDs customtypes.SetValueOf[customtypes.UUID] `tfsdk:"workspace_ids"`
+	DomainID     customtypes.UUID                        `tfsdk:"domain_id"`
+	WorkspaceIDs supertypes.SetValueOf[customtypes.UUID] `tfsdk:"workspace_ids"`
 }
 
 func (to *baseDomainWorkspaceAssignmentsModel) setWorkspaceIDs(ctx context.Context, from []fabadmin.DomainWorkspace) diag.Diagnostics {
-	v := customtypes.NewSetValueOfNull[customtypes.UUID](ctx)
+	v := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
 
 	elements := make([]customtypes.UUID, 0, len(from))
 	for _, element := range from {

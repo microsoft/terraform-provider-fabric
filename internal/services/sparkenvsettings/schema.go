@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabenvironment "github.com/microsoft/fabric-sdk-go/fabric/environment"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -191,7 +192,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 			"spark_properties": superschema.SuperMapAttribute{
 				Common: &schemaR.MapAttribute{
 					MarkdownDescription: "A map of key/value pairs of Spark properties.",
-					CustomType:          customtypes.MapOfStringType,
+					CustomType:          supertypes.MapTypeOf[types.String]{MapType: types.MapType{ElemType: types.StringType}},
 					ElementType:         types.StringType,
 				},
 				Resource: &schemaR.MapAttribute{
