@@ -74,22 +74,6 @@ func NewDataSourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural boo
 	return md
 }
 
-func GetDataSourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter
-	if preview {
-		return md + PreviewDataSource
-	}
-
-	return md
-}
-
-func GetResourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter
-	if preview {
-		return md + PreviewResource
-	}
-
-	return md
-}
-
 func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	var diags diag.Diagnostics
 
