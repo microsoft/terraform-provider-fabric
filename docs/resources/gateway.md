@@ -3,14 +3,14 @@
 page_title: "fabric_gateway Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Gateway resource allows you to manage a Fabric Gateway https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  The Gateway resource allows you to manage a Fabric Gateway https://learn.microsoft.com/data-integration/vnet/overview.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateway (Resource)
 
-The Gateway resource allows you to manage a Fabric [Gateway](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
+The Gateway resource allows you to manage a Fabric [Gateway](https://learn.microsoft.com/data-integration/vnet/overview).
 
 -> This resource supports Service Principal authentication.
 
@@ -58,7 +58,7 @@ resource "fabric_gateway" "example" {
 - `id` (String) The Gateway ID.
 - `load_balancing_setting` (String) The load balancing setting. Value must be one of : `DistributeEvenly`, `Failover`.
 - `public_key` (Attributes) The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections. (see [below for nested schema](#nestedatt--public_key))
-- `version` (String) The Gateway version.
+- `version` (String) The version of the installed gateway member.
 
 <a id="nestedatt--timeouts"></a>
 

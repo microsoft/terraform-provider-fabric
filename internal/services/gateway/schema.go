@@ -333,7 +333,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"version": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemTypeInfo.Name + " version.",
+					MarkdownDescription: "The version of the installed gateway member.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,

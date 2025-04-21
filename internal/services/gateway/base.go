@@ -17,7 +17,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "gateway",
 	Names:          "Gateways",
 	Types:          "gateways",
-	DocsURL:        "https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways",
+	DocsURL:        "https://learn.microsoft.com/data-integration/vnet/overview",
 	IsPreview:      true,
 	IsSPNSupported: true,
 }

@@ -3,14 +3,14 @@
 page_title: "fabric_gateways Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Gateways data-source allows you to retrieve a list of Fabric Gateways https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
+  The Gateways data-source allows you to retrieve a list of Fabric Gateways https://learn.microsoft.com/data-integration/vnet/overview.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateways (Data Source)
 
-The Gateways data-source allows you to retrieve a list of Fabric [Gateways](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
+The Gateways data-source allows you to retrieve a list of Fabric [Gateways](https://learn.microsoft.com/data-integration/vnet/overview).
 
 -> This data-source supports Service Principal authentication.
 
@@ -57,7 +57,7 @@ Read-Only:
 - `number_of_member_gateways` (Number) The number of member gateways. Value must be between 1 and 7.
 - `public_key` (Attributes) The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections. (see [below for nested schema](#nestedatt--values--public_key))
 - `type` (String) The Gateway type. Value must be one of : `OnPremises`, `OnPremisesPersonal`, `VirtualNetwork`.
-- `version` (String) The Gateway version.
+- `version` (String) The version of the installed gateway member.
 - `virtual_network_azure_resource` (Attributes) The Azure virtual network resource. (see [below for nested schema](#nestedatt--values--virtual_network_azure_resource))
 
 <a id="nestedatt--values--public_key"></a>
