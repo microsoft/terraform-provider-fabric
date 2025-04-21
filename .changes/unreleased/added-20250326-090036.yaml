@@ -1,6 +1,0 @@
-kind: added
-body: |
-  `fabric_mounted_data_factory` resource
-time: 2025-03-26T09:00:36.156230599Z
-custom:
-  Issue: "342"

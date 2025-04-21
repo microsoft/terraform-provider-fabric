@@ -19,13 +19,13 @@ type environmentPropertiesModel struct {
 	PublishDetails supertypes.SingleNestedObjectValueOf[environmentPublishDetailsModel] `tfsdk:"publish_details"`
 }
 
-func (to *environmentPropertiesModel) set(ctx context.Context, from *fabenvironment.PublishInfo) diag.Diagnostics {
+func (to *environmentPropertiesModel) set(ctx context.Context, from fabenvironment.PublishInfo) diag.Diagnostics {
 	publishDetails := supertypes.NewSingleNestedObjectValueOfNull[environmentPublishDetailsModel](ctx)
 
 	if from.PublishDetails != nil {
 		publishDetailsModel := &environmentPublishDetailsModel{}
 
-		if diags := publishDetailsModel.set(ctx, from.PublishDetails); diags.HasError() {
+		if diags := publishDetailsModel.set(ctx, *from.PublishDetails); diags.HasError() {
 			return diags
 		}
 
@@ -47,7 +47,7 @@ type environmentPublishDetailsModel struct {
 	ComponentPublishInfo supertypes.SingleNestedObjectValueOf[environmentComponentPublishInfoModel] `tfsdk:"component_publish_info"`
 }
 
-func (to *environmentPublishDetailsModel) set(ctx context.Context, from *fabenvironment.PublishDetails) diag.Diagnostics {
+func (to *environmentPublishDetailsModel) set(ctx context.Context, from fabenvironment.PublishDetails) diag.Diagnostics {
 	to.State = types.StringPointerValue((*string)(from.State))
 	to.TargetVersion = customtypes.NewUUIDPointerValue(from.TargetVersion)
 	to.StartTime = timetypes.NewRFC3339TimePointerValue(from.StartTime)
@@ -58,7 +58,7 @@ func (to *environmentPublishDetailsModel) set(ctx context.Context, from *fabenvi
 	if from.ComponentPublishInfo != nil {
 		publishDetailsModel := &environmentComponentPublishInfoModel{}
 
-		if diags := publishDetailsModel.set(ctx, from.ComponentPublishInfo); diags.HasError() {
+		if diags := publishDetailsModel.set(ctx, *from.ComponentPublishInfo); diags.HasError() {
 			return diags
 		}
 
@@ -77,7 +77,7 @@ type environmentComponentPublishInfoModel struct {
 	SparkSettings  supertypes.SingleNestedObjectValueOf[environmentSparkSettingsModel]  `tfsdk:"spark_settings"`
 }
 
-func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from *fabenvironment.ComponentPublishInfo) diag.Diagnostics {
+func (to *environmentComponentPublishInfoModel) set(ctx context.Context, from fabenvironment.ComponentPublishInfo) diag.Diagnostics {
 	sparkLibraries := supertypes.NewSingleNestedObjectValueOfNull[environmentSparkLibrariesModel](ctx)
 
 	if from.SparkLibraries != nil {

@@ -1,5 +1,0 @@
-kind: added
-body: New `configuration` object attribute with `collation_type` property in the `fabric_warehouse` resource/data-source
-time: 2025-04-08T21:40:12.555123283Z
-custom:
-  Issue: "270"

@@ -60,22 +60,6 @@ func handleEntity[TEntity any](server *fakeServer, configureFunction func(server
 	server.types = append(server.types, reflect.TypeOf(sample))
 }
 
-// SupportsType returns true if the server supports the given type.
-func (s *fakeServer) isSupportedType(t reflect.Type) bool {
-	for _, supportedType := range s.types {
-		// if supportedType is an interface, check if t implements it
-		if supportedType.Kind() == reflect.Interface {
-			if t.Implements(supportedType) {
-				return true
-			}
-		} else if supportedType == t {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Upsert inserts or updates an element in the server.
 // It panics if the element type is not supported.
 func (s *fakeServer) Upsert(element any) {
@@ -97,4 +81,20 @@ func (s *fakeServer) Upsert(element any) {
 	}
 
 	s.elements = append(s.elements, element)
+}
+
+// SupportsType returns true if the server supports the given type.
+func (s *fakeServer) isSupportedType(t reflect.Type) bool {
+	for _, supportedType := range s.types {
+		// if supportedType is an interface, check if t implements it
+		if supportedType.Kind() == reflect.Interface {
+			if t.Implements(supportedType) {
+				return true
+			}
+		} else if supportedType == t {
+			return true
+		}
+	}
+
+	return false
 }
