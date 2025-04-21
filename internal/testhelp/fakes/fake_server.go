@@ -32,6 +32,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureItem)
 	handleEntity(server, configureCapacity)
 	handleEntity(server, configureDataPipeline)
+	handleEntity(server, configureDeploymentPipeline)
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
 	handleEntity(server, configureEnvironment)
@@ -89,9 +90,8 @@ func (s *fakeServer) Upsert(element any) {
 	}
 
 	for i, e := range s.elements {
-		if e == element {
+		if reflect.DeepEqual(e, element) {
 			s.elements[i] = element
-
 			return
 		}
 	}
