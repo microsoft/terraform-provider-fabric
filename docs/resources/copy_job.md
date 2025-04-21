@@ -16,10 +16,10 @@ The Copy Job resource allows you to manage a Fabric [Copy Job](https://learn.mic
 ## Example Usage
 
 ```terraform
-# Example 1 - Item with definition bootstrapping only
-resource "fabric_copy_job" "example_no_definition" {
+# Example 1 - Item without definition
+resource "fabric_copy_job" "example_definition" {
   display_name = "example"
-  description  = "example with no definition"
+  description  = "example without definition"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
@@ -32,7 +32,7 @@ resource "fabric_copy_job" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "copyjob-content.json" = {
-      source = "${local.path}/copyjob-content.json"
+      source = "${local.path}/copyjob-content.json.tmpl"
     }
   }
 }
@@ -109,6 +109,6 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-# terraform import fabric_copy_job.example "<WorkspaceID>/<ActivatorID>"
+# terraform import fabric_copy_job.example "<WorkspaceID>/<CopyJobID>"
 terraform import fabric_copy_job.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
 ```

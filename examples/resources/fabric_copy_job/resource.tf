@@ -1,7 +1,7 @@
-# Example 1 - Item with definition bootstrapping only
-resource "fabric_copy_job" "example_no_definition" {
+# Example 1 - Item without definition
+resource "fabric_copy_job" "example_definition" {
   display_name = "example"
-  description  = "example with no definition"
+  description  = "example without definition"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
@@ -14,7 +14,7 @@ resource "fabric_copy_job" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "copyjob-content.json" = {
-      source = "${local.path}/copyjob-content.json"
+      source = "${local.path}/copyjob-content.json.tmpl"
     }
   }
 }

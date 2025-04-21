@@ -1,5 +1,5 @@
-output "example_no_definition" {
-  value = fabric_copy_job.example_no_definition
+output "example_definition" {
+  value = fabric_copy_job.example_definition
 }
 
 output "example_definition_bootstrap" {

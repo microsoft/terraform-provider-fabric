@@ -811,7 +811,6 @@ $wellKnown['Capacity'] = @{
 
 $itemNaming = @{
   'CopyJob'                = 'cj'
-  'AzureDataFactory'       = 'adf'
   'Dashboard'              = 'dash'
   'Datamart'               = 'dm'
   'DataPipeline'           = 'dp'
