@@ -171,6 +171,10 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 		})
 	}
 
+	perCallPolicies := make([]policy.Policy, 0)
+	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
+	fabricClientOpt.PerCallPolicies = perCallPolicies
+
 	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
 	if err != nil {
 		tflog.Error(ctx, "Failed to initialize Microsoft Fabric client", map[string]any{"error": err.Error()})
@@ -325,6 +329,17 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				MarkdownDescription: "Enable preview mode to use preview features.",
 				Optional:            true,
 			},
+
+			// Telemetry
+			"partner_id": schema.StringAttribute{
+				MarkdownDescription: "A GUID/UUID that is [registered](https://learn.microsoft.com/partner-center/marketplace-offers/azure-partner-customer-usage-attribution#register-guids-and-offers) with Microsoft to facilitate partner resource usage attribution.",
+				Optional:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+			"disable_terraform_partner_id": schema.BoolAttribute{
+				MarkdownDescription: "Disable sending the Terraform Partner ID if a custom `partner_id` isn't specified, which allows Microsoft to better understand the usage of Terraform. The Partner ID does not give HashiCorp any direct access to usage information. This can also be sourced from the `FABRIC_DISABLE_TERRAFORM_PARTNER_ID` environment variable. Defaults to `false`.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -360,6 +375,8 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	p.mapConfig(ctx, &config, resp)
 	tflog.Debug(ctx, "Mapping configuration")
+
+	p.config.TerraformVersion = req.TerraformVersion
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -668,6 +685,17 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
 	ctx = tflog.SetField(ctx, "preview", config.Preview.ValueBool())
 
+	partnerID, diags := config.PartnerID.ToStringValue(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return ctx
+	}
+
+	config.PartnerID = customtypes.NewUUIDValue(putils.GetStringValue(partnerID, pconfig.GetEnvVarsPartnerID(), "").ValueString())
+	ctx = tflog.SetField(ctx, "partner_id", config.PartnerID.ValueString())
+
+	config.DisableTerraformPartnerID = putils.GetBoolValue(config.DisableTerraformPartnerID, pconfig.GetEnvVarsDisableTerraformPartnerID(), false)
+	ctx = tflog.SetField(ctx, "disable_terraform_partner_id", config.DisableTerraformPartnerID.ValueBool())
+
 	return ctx
 }
 
@@ -760,6 +788,8 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.validateConfigAuthSecret(resp)
 
 	p.config.Preview = config.Preview.ValueBool()
+	p.config.PartnerID = config.PartnerID.ValueString()
+	p.config.DisableTerraformPartnerID = config.DisableTerraformPartnerID.ValueBool()
 }
 
 func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse) {
