@@ -45,10 +45,12 @@ resource "fabric_copy_job" "example_definition_update" {
   format       = "Default"
   definition = {
     "copyjob-content.json" = {
-      source = "${local.path}/copyjob-content.json"
+      source = "${local.path}/copyjob-content.json.tmpl"
       tokens = {
-        "MyValue1" = "my value 1"
-        "MyValue2" = "my value 2"
+        "SOURCE_WORKSPACE_ID"      = "Source Workspace ID"
+        "SOURCE_ARTIFACT_ID"       = "Source Artifact ID"
+        "DESTINATION_WORKSPACE_ID" = "Destination Workspace ID"
+        "DESTINATION_ARTIFACT_ID"  = "Destination Artifact ID"
       }
     }
   }

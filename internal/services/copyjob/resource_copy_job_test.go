@@ -33,7 +33,7 @@ var (
 
 	testHelperDefinition = map[string]any{
 		`"copyjob-content.json"`: map[string]any{
-			"source": "${local.path}/copyjob-content.json",
+			"source": "${local.path}/copyjob-content.json.tmpl",
 			"tokens": map[string]any{
 				"SOURCE_WORKSPACE_ID":      workspaceID,
 				"SOURCE_ARTIFACT_ID":       lakehouseID,
@@ -240,7 +240,7 @@ func TestUnit_CopyJobResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_CopyJobResource_CRUD(t *testing.T) {
+func TestAcc_CopyJobResource_CRUDWithDefinition(t *testing.T) {
 	if testhelp.ShouldSkipTest(t) {
 		t.Skip("No SPN support")
 	}
@@ -292,6 +292,23 @@ func TestAcc_CopyJobResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
+	},
+	))
+}
+
+func TestAcc_CopyJobResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - without definition
 		{
 			ResourceName: testResourceItemFQN,
