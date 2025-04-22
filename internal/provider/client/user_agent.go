@@ -29,7 +29,7 @@ func WithUserAgent(userAgent string) policy.Policy {
 	return UserAgentPolicy{UserAgent: userAgent}
 }
 
-func BuildUserAgent(terraformVersion, sdkVersion, providerVersion, partnerID string, disableTerraformPartnerID bool) string {
+func BuildUserAgent(terraformVersion, sdkVersion, providerVersion, partnerID string, disableTerraformPartnerID bool) string { //revive:disable-line:flag-parameter
 	if terraformVersion == "" {
 		terraformVersion = "0.11+compatible"
 	}
