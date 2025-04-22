@@ -19,13 +19,6 @@ type TokenCredential struct {
 	token string
 }
 
-// GetToken returns the bearer token.
-func (c *TokenCredential) GetToken(_ context.Context, _ policy.TokenRequestOptions) (azcore.AccessToken, error) {
-	return azcore.AccessToken{
-		Token: c.token,
-	}, nil
-}
-
 // NewTokenCredential creates a new instance of TokenCredential.
 func NewTokenCredential(token string) (*TokenCredential, error) {
 	if token == "" {
@@ -33,4 +26,11 @@ func NewTokenCredential(token string) (*TokenCredential, error) {
 	}
 
 	return &TokenCredential{token: token}, nil
+}
+
+// GetToken returns the bearer token.
+func (c *TokenCredential) GetToken(_ context.Context, _ policy.TokenRequestOptions) (azcore.AccessToken, error) {
+	return azcore.AccessToken{
+		Token: c.token,
+	}, nil
 }
