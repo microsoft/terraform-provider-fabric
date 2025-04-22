@@ -258,6 +258,9 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
+    'Shortcut' {
+      $itemEndpoint = 'shortcuts'
+    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -1265,6 +1268,81 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
+function Set-OneLakeShortcut {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ShortcutName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ShortcutPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$TargetWorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$TargetItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$TargetPath
+  )
+
+  # Construct the payload for the shortcut creation
+  $payload = @{
+    path   = $ShortcutPath
+    name   = $ShortcutName
+    target = @{
+      oneLake = @{
+        workspaceId = $TargetWorkspaceId
+        itemId      = $TargetItemId
+        path        = $TargetPath
+      }
+    }
+  }
+
+  # API endpoint for creating the shortcut
+  $endpoint = "workspaces/$WorkspaceId/items/$ItemId/shortcuts?shortcutConflictPolicy=CreateOrOverwrite"
+
+  Write-Log -Message "Creating OneLake Shortcut: $ShortcutName in Workspace: $WorkspaceId" -Level 'WARN'
+
+  # Make the API call
+  $result = Invoke-FabricRest -Method 'POST' -Endpoint $endpoint -Payload $payload
+
+  Write-Log -Message "OneLake Shortcut - Name: $($result.Response.name) / Path: $($result.Response.path)" -Level 'INFO'
+
+  return $result.Response
+}
+
+# Define the parameters for the OneLake shortcut
+$workspaceId = $wellKnown['WorkspaceDS'].id
+$itemId = $wellKnown['Lakehouse'].id
+$shortcutName = "MyOneLakeShortcut"
+$shortcutPath = "Tables"
+$targetWorkspaceId = $wellKnown['WorkspaceDS'].id
+$targetItemId = $wellKnown['Lakehouse'].id
+$targetPath = "Tables/publicholidays"
+
+# Create the OneLake shortcut
+$oneLakeShortcut = Set-OneLakeShortcut `
+  -WorkspaceId $workspaceId `
+  -ItemId $itemId `
+  -ShortcutName $shortcutName `
+  -ShortcutPath $shortcutPath `
+  -TargetWorkspaceId $targetWorkspaceId `
+  -TargetItemId $targetItemId `
+  -TargetPath $targetPath
+
+# Add the shortcut details to the well-known object
+$wellKnown['OneLakeShortcut'] = @{
+  id   = $oneLakeShortcut.id
+  name = $oneLakeShortcut.name
+  path = $oneLakeShortcut.path
+}
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
 
 # Create the Azure Data Factory if not exists

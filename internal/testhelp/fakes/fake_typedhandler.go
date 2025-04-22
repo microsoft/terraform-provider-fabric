@@ -117,6 +117,22 @@ func configureEntityWithParentIDNoLRO[TEntity, TGetOutput, TUpdateOutput, TCreat
 	handleDeleteWithParentID(handler, deleteFunction)
 }
 
+// func configureEntityWithDynamicParams[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
+// 	handler *typedHandler[TEntity],
+// 	operations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
+// 	getFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
+// 	updateFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TUpdateOutput], errResp azfake.ErrorResponder),
+// 	createFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
+// 	listFunction *func(params ...any) (resp azfake.PagerResponder[TListOutput]),
+// 	deleteFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
+// ) {
+// 	handleGetWithDynamicParams(handler, operations, getFunction)
+// 	handleUpdateWithDynamicParams(handler, operations, updateFunction)
+// 	handleCreateWithDynamicParams(handler, operations, createFunction)
+// 	handleListWithDynamicParams(handler, operations, listFunction)
+// 	handleDeleteWithDynamicParams(handler, deleteFunction)
+// }
+
 func configureEntityWithParentIDNoLRONoUpdate[TEntity, TGetOutput, TCreateOutput, TDeleteResponse, TListOutput, TCreationData, TGetOptions, TCreateOptions, TListOptions, TDeleteOptions any](
 	handler *typedHandler[TEntity],
 	operations parentIDOperations[TEntity, TGetOutput, TEntity, TCreateOutput, TListOutput, TCreationData, TEntity],
