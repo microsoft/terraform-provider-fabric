@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 )
 
@@ -48,7 +48,7 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 	}
 
 	var sourceFile types.String
-	var defPartTokens customtypes.MapOfString
+	var defPartTokens supertypes.MapValueOf[types.String]
 
 	if resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, sourceFilePlanPaths[0], &sourceFile)...); resp.Diagnostics.HasError() {
 		return

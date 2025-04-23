@@ -698,8 +698,14 @@ function Set-AzureDataFactory {
   )
 
   # Register the Microsoft.DataFactory resource provider
-  Write-Log -Message "Registering Microsoft.DataFactory resource provider" -Level 'WARN'
-  Register-AzResourceProvider -ProviderNamespace "Microsoft.DataFactory"
+  $df = Get-AzResourceProvider -ProviderNamespace "Microsoft.DataFactory"
+  if ($df.RegistrationState -ne 'Registered') {
+    Write-Log -Message "Registering Microsoft.DataFactory resource provider" -Level 'WARN'
+    Register-AzResourceProvider -ProviderNamespace "Microsoft.DataFactory"
+  }
+  else {
+    Write-Log -Message "Microsoft.DataFactory resource provider already registered" -Level 'INFO'
+  }
 
   # Attempt to get the existing Data Factory
   try {
@@ -708,7 +714,7 @@ function Set-AzureDataFactory {
   catch {
     # Data Factory does not exist, so create it
     Write-Log -Message "Creating Data Factory: $DataFactoryName in Resource Group: $ResourceGroupName" -Level 'WARN'
-    $dataFactory = New-AzDataFactoryV2 -ResourceGroupName $ResourceGroupName -Name $DataFactoryName -Location $Location
+    $dataFactory = Set-AzDataFactoryV2 -ResourceGroupName $ResourceGroupName -Name $DataFactoryName -Location $Location
     Write-Log -Message "Created Data Factory: $DataFactoryName" -Level 'INFO'
   }
 
@@ -1201,8 +1207,14 @@ $azdoSG = Invoke-ADOPSRestMethod -Uri "https://vssps.dev.azure.com/$($azdoContex
 $result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSG.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
 
 # Register the Microsoft.PowerPlatform resource provider
-Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
-Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+$pp = Get-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+if ($pp.RegistrationState -ne 'Registered') {
+  Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
+  Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+}
+else {
+  Write-Log -Message "Microsoft.PowerPlatform resource provider already registered" -Level 'INFO'
+}
 
 # Create Azure Virtual Network 1 if not exists
 $vnetName = "${displayName}_$($itemNaming['VirtualNetwork01'])"
