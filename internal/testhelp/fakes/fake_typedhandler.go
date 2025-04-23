@@ -317,7 +317,10 @@ func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.I
 
 	tags := make([]fabcore.ItemTag, propertyValue.Len())
 	for i := range propertyValue.Len() {
-		tag := propertyValue.Index(i).Interface().(fabcore.ItemTag)
+		tag, ok := propertyValue.Index(i).Interface().(fabcore.ItemTag)
+		if !ok {
+			continue
+		}
 		tags[i] = tag
 	}
 
