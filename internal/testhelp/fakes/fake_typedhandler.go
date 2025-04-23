@@ -19,11 +19,13 @@ type defaultConverter[TEntity any] struct{}
 func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEntity {
 	var entity TEntity
 
+	setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
 	setReflectedStringPropertyValue(&entity, "ID", *item.ID)
 	setReflectedStringPropertyValue(&entity, "WorkspaceID", *item.WorkspaceID)
 	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
 	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
-	setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
+	setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
+	setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
 
 	return entity
 }
@@ -297,9 +299,47 @@ func asFabricItem(element any) fabcore.Item {
 		DisplayName: getReflectedStringPropertyValue(element, "DisplayName"),
 		ID:          getReflectedStringPropertyValue(element, "ID"),
 		WorkspaceID: getReflectedStringPropertyValue(element, "WorkspaceID"),
+		FolderID:    getReflectedStringPropertyValue(element, "FolderID"),
+		Tags:        getReflectedTagsPropertyValue(element, "Tags"),
 	}
 
 	return item
+}
+
+func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {
+	reflectedValue := reflect.ValueOf(element)
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// check if the property is a slice
+	if propertyValue.Kind() != reflect.Slice {
+		return nil
+	}
+
+	tags := make([]fabcore.ItemTag, propertyValue.Len())
+	for i := range propertyValue.Len() {
+		tag := propertyValue.Index(i).Interface().(fabcore.ItemTag)
+		tags[i] = tag
+	}
+
+	return tags
+}
+
+func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabcore.ItemTag) {
+	reflectedValue := reflect.ValueOf(element).Elem()
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// create a new slice of the same type as the property
+	slice := reflect.MakeSlice(propertyValue.Type(), len(tags), len(tags))
+
+	for i, tag := range tags {
+		// set the value as a pointer
+		ptr := reflect.New(reflect.TypeOf(tag))
+		ptr.Elem().Set(reflect.ValueOf(tag))
+		slice.Index(i).Set(ptr)
+	}
+
+	// set the value as a pointer
+	propertyValue.Set(slice)
 }
 
 // getReflectedStringPropertyValue gets a string property value from a reflected object.

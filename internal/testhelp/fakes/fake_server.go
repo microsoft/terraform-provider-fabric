@@ -73,7 +73,7 @@ func (s *fakeServer) Upsert(element any) {
 	}
 
 	for i, e := range s.elements {
-		if e == element {
+		if reflect.DeepEqual(e, element) {
 			s.elements[i] = element
 
 			return
