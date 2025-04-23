@@ -131,11 +131,6 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 	fabricClientOpt := &policy.ClientOptions{}
 
-	// ApplicationID is an application-specific identification string to add to the User-Agent.
-	// It has a maximum length of 24 characters and must not contain any spaces.
-	fabricClientOpt.Telemetry.ApplicationID = "tffab/" + cfg.Version
-	fabricClientOpt.Telemetry.Disabled = false
-
 	// MaxRetries specifies the maximum number of attempts a failed operation will be retried before producing an error.
 	// Not really an unlimited cap, but sufficiently large enough to be considered as such.
 	fabricClientOpt.Retry.MaxRetries = math.MaxInt32
