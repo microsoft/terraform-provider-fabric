@@ -52,10 +52,9 @@ func (d *dataSourceShortcut) Schema(ctx context.Context, _ datasource.SchemaRequ
 
 func (d *dataSourceShortcut) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
 	return []datasource.ConfigValidator{
-		datasourcevalidator.ExactlyOneOf(
+		datasourcevalidator.RequiredTogether(
 			path.MatchRoot("path"),
 			path.MatchRoot("name"),
-			path.MatchRoot("target"),
 		),
 	}
 }
@@ -98,7 +97,7 @@ func (d *dataSourceShortcut) Read(ctx context.Context, req datasource.ReadReques
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = d.getByDisplayName(ctx, &data)
+	diags = d.getShortcut(ctx, &data)
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -115,10 +114,13 @@ func (d *dataSourceShortcut) Read(ctx context.Context, req datasource.ReadReques
 	}
 }
 
-func (d *dataSourceShortcut) getByID(ctx context.Context, model *dataSourceOnelakeShortcutModel) diag.Diagnostics {
-	tflog.Trace(ctx, "GET BY ID", map[string]any{
+func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceOnelakeShortcutModel) diag.Diagnostics {
+	tflog.Trace(ctx, "GET SHORTCUT", map[string]any{
 		// TODO: concatenate name and path
-		"id": model.ItemID.ValueString(),
+		"id_model":     model.ItemID.ValueString(),
+		"workspace_id": model.WorkspaceID.ValueString(),
+		"path":         model.Path.ValueString(),
+		"name":         model.Name.ValueString(),
 	})
 
 	respGet, err := d.client.GetShortcut(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Path.ValueString(), model.Name.ValueString(), nil)
@@ -127,34 +129,4 @@ func (d *dataSourceShortcut) getByID(ctx context.Context, model *dataSourceOnela
 	}
 
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
-}
-
-// TODO rename get functions
-func (d *dataSourceShortcut) getByDisplayName(ctx context.Context, model *dataSourceOnelakeShortcutModel) diag.Diagnostics {
-	tflog.Trace(ctx, "GET BY DISPLAY NAME", map[string]any{
-		"name": model.Name.ValueString(),
-	})
-
-	var diags diag.Diagnostics
-
-	pager := d.client.NewListShortcutsPager(model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
-	for pager.More() {
-		page, err := pager.NextPage(ctx)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-			return diags
-		}
-
-		for _, entity := range page.Value {
-			if *entity.Name == model.Name.ValueString() {
-				return d.getByID(ctx, model)
-			}
-		}
-	}
-
-	diags.AddError(
-		common.ErrorReadHeader,
-		"Unable to find OnelakeShortcut with 'display_name': "+model.Name.ValueString(),
-	)
-
-	return diags
 }

@@ -21,17 +21,24 @@ BASE MODEL
 */
 
 type baseShortcutModel struct {
-	ID          customtypes.UUID                                  `tfsdk:"id"`
-	Name        types.String                                      `tfsdk:"name"`
-	Path        types.String                                      `tfsdk:"path"`
-	Target      supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
-	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
-	ItemID      customtypes.UUID                                  `tfsdk:"item_id"`
+	ID                     types.String                                      `tfsdk:"id"`
+	Name                   types.String                                      `tfsdk:"name"`
+	Path                   types.String                                      `tfsdk:"path"`
+	Target                 supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
+	WorkspaceID            customtypes.UUID                                  `tfsdk:"workspace_id"`
+	ItemID                 customtypes.UUID                                  `tfsdk:"item_id"`
+	ShortcutConflictPolicy types.String                                      `tfsdk:"shortcut_conflict_policy"`
 }
 
 type targetModel struct {
-	Onelake supertypes.SingleNestedObjectValueOf[oneLakeModel] `tfsdk:"onelake"`
-	Type    types.String                                       `tfsdk:"type"`
+	Onelake            supertypes.SingleNestedObjectValueOf[oneLakeModel]       `tfsdk:"onelake"`
+	Type               types.String                                             `tfsdk:"type"`
+	AdlsGen2           supertypes.SingleNestedObjectValueOf[adlsGen2]           `tfsdk:"adls_gen2"`
+	AmazonS3           supertypes.SingleNestedObjectValueOf[amazonS3]           `tfsdk:"amazon_s3"`
+	Dataverse          supertypes.SingleNestedObjectValueOf[dataverse]          `tfsdk:"dataverse"`
+	GoogleCloudStorage supertypes.SingleNestedObjectValueOf[googleCloudStorage] `tfsdk:"google_cloud_storage"`
+	S3Compatible       supertypes.SingleNestedObjectValueOf[s3Compatible]       `tfsdk:"s3_compatible"`
+	ExternalDataShare  supertypes.SingleNestedObjectValueOf[externalDataShare]  `tfsdk:"external_data_share"`
 }
 
 type oneLakeModel struct {
@@ -39,10 +46,44 @@ type oneLakeModel struct {
 	Path        types.String     `tfsdk:"path"`
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 }
+type adlsGen2 struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	Location     types.String     `tfsdk:"location"`
+	Subpath      types.String     `tfsdk:"subpath"`
+}
+type amazonS3 struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	Location     types.String     `tfsdk:"location"`
+	Subpath      types.String     `tfsdk:"subpath"`
+}
+type dataverse struct {
+	ConnectionID      customtypes.UUID `tfsdk:"connection_id"`
+	DeltaLakeFolder   types.String     `tfsdk:"deltalake_folder"`
+	EnvironmentDomain types.String     `tfsdk:"environment_domain"`
+	TableName         types.String     `tfsdk:"table_name"`
+}
+
+type googleCloudStorage struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	Location     types.String     `tfsdk:"location"`
+	Subpath      types.String     `tfsdk:"subpath"`
+}
+
+type s3Compatible struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	Location     types.String     `tfsdk:"location"`
+	Subpath      types.String     `tfsdk:"subpath"`
+	Bucket       types.String     `tfsdk:"bucket"`
+}
+type externalDataShare struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+}
 
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
 	to.Path = types.StringPointerValue(from.Path)
+	concatenatedString := to.Name.ValueString() + to.Path.ValueString()
+	to.ID = types.StringPointerValue(&concatenatedString)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 
@@ -62,27 +103,79 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 }
 
 func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagnostics {
+	var diagnostics diag.Diagnostics
+
+	// Set the type
 	to.Type = types.StringPointerValue((*string)(from.Type))
-	onelake := supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
+
+	// Initialize all nested objects to null
+	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
+	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[adlsGen2](ctx)
+	to.AmazonS3 = supertypes.NewSingleNestedObjectValueOfNull[amazonS3](ctx)
+	to.Dataverse = supertypes.NewSingleNestedObjectValueOfNull[dataverse](ctx)
+	to.GoogleCloudStorage = supertypes.NewSingleNestedObjectValueOfNull[googleCloudStorage](ctx)
+	to.S3Compatible = supertypes.NewSingleNestedObjectValueOfNull[s3Compatible](ctx)
+	to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOfNull[externalDataShare](ctx)
+
+	// Set the appropriate nested object based on the input
 	if from.OneLake != nil {
-		onelakeModel := &oneLakeModel{}
-
-		onelakeModel.set(from.OneLake)
-
-		if diags := onelake.Set(ctx, onelakeModel); diags.HasError() {
-			return diags
+		onelakeModel := &oneLakeModel{
+			ItemId:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),
+			Path:        types.StringPointerValue(from.OneLake.Path),
+			WorkspaceID: customtypes.NewUUIDPointerValue(from.OneLake.WorkspaceID),
 		}
+		to.Onelake = supertypes.NewSingleNestedObjectValueOf(ctx, onelakeModel)
+	}
+	if from.AdlsGen2 != nil {
+		adlsGen2Model := &adlsGen2{
+			ConnectionID: customtypes.NewUUIDPointerValue(from.AdlsGen2.ConnectionID),
+			Location:     types.StringPointerValue(from.AdlsGen2.Location),
+			Subpath:      types.StringPointerValue(from.AdlsGen2.Subpath),
+		}
+		to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOf(ctx, adlsGen2Model)
+	}
+	if from.AmazonS3 != nil {
+		amazonS3Model := &amazonS3{
+			ConnectionID: customtypes.NewUUIDPointerValue(from.AmazonS3.ConnectionID),
+			Location:     types.StringPointerValue(from.AmazonS3.Location),
+			Subpath:      types.StringPointerValue(from.AmazonS3.Subpath),
+		}
+		to.AmazonS3 = supertypes.NewSingleNestedObjectValueOf(ctx, amazonS3Model)
+	}
+	if from.Dataverse != nil {
+		dataverseModel := &dataverse{
+			ConnectionID:      customtypes.NewUUIDPointerValue(from.Dataverse.ConnectionID),
+			DeltaLakeFolder:   types.StringPointerValue(from.Dataverse.DeltaLakeFolder),
+			EnvironmentDomain: types.StringPointerValue(from.Dataverse.EnvironmentDomain),
+			TableName:         types.StringPointerValue(from.Dataverse.TableName),
+		}
+		to.Dataverse = supertypes.NewSingleNestedObjectValueOf(ctx, dataverseModel)
+	}
+	if from.GoogleCloudStorage != nil {
+		googleStorageCloudModel := &googleCloudStorage{
+			ConnectionID: customtypes.NewUUIDPointerValue(from.GoogleCloudStorage.ConnectionID),
+			Location:     types.StringPointerValue(from.GoogleCloudStorage.Location),
+			Subpath:      types.StringPointerValue(from.GoogleCloudStorage.Subpath),
+		}
+		to.GoogleCloudStorage = supertypes.NewSingleNestedObjectValueOf(ctx, googleStorageCloudModel)
+	}
+	if from.S3Compatible != nil {
+		s3CompatibleModel := &s3Compatible{
+			ConnectionID: customtypes.NewUUIDPointerValue(from.S3Compatible.ConnectionID),
+			Location:     types.StringPointerValue(from.S3Compatible.Location),
+			Subpath:      types.StringPointerValue(from.S3Compatible.Subpath),
+			Bucket:       types.StringPointerValue(from.S3Compatible.Bucket),
+		}
+		to.S3Compatible = supertypes.NewSingleNestedObjectValueOf(ctx, s3CompatibleModel)
+	}
+	if from.ExternalDataShare != nil {
+		externalDataShareModel := &externalDataShare{
+			ConnectionID: customtypes.NewUUIDPointerValue(from.ExternalDataShare.ConnectionID),
+		}
+		to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOf(ctx, externalDataShareModel)
 	}
 
-	to.Onelake = onelake
-
-	return nil
-}
-
-func (to *oneLakeModel) set(from *fabcore.OneLake) {
-	to.ItemId = customtypes.NewUUIDPointerValue(from.ItemID)
-	to.Path = types.StringPointerValue(from.Path)
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
+	return diagnostics
 }
 
 /*
@@ -99,8 +192,10 @@ DATA-SOURCE (list)
 */
 
 type dataSourceOnelakeShortcutsModel struct {
-	Values   supertypes.SetNestedObjectValueOf[baseShortcutModel] `tfsdk:"values"`
-	Timeouts timeoutsD.Value                                      `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                     `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID                                     `tfsdk:"item_id"`
+	Values      supertypes.SetNestedObjectValueOf[baseShortcutModel] `tfsdk:"values"`
+	Timeouts    timeoutsD.Value                                      `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceOnelakeShortcutsModel) setValues(ctx context.Context, workspaceID, itemID string, from []fabcore.Shortcut) diag.Diagnostics {

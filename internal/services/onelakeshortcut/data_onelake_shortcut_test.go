@@ -4,7 +4,6 @@
 package onelakeshortcut_test
 
 import (
-	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -32,7 +31,6 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"name":         *entity.Name,
 					"item_id":      itemId,
 					"workspace_id": workspaceID,
 				},
@@ -45,10 +43,10 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 }
 
 func TestAcc_WorkspaceDataSource(t *testing.T) {
-	entity := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityDisplayName := entity["displayName"].(string)
-	entityDescription := entity["description"].(string)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	itemID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
+	// onelake := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by id
@@ -56,48 +54,49 @@ func TestAcc_WorkspaceDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"id": entityID,
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"name":         "publicholidays_1",
+					"path":         "/Tables",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
 			),
 		},
-		// read by id - not found
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"id": testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		// read by name
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"display_name": entityDisplayName,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-			),
-		},
-		// read by name - not found
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"display_name": testhelp.RandomName(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
+		// // read by id - not found
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"id": testhelp.RandomUUID(),
+		// 		},
+		// 	),
+		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		// },
+		// // read by name
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"display_name": entityDisplayName,
+		// 		},
+		// 	),
+		// 	Check: resource.ComposeAggregateTestCheckFunc(
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+		// 	),
+		// },
+		// // read by name - not found
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"display_name": testhelp.RandomName(),
+		// 		},
+		// 	),
+		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		// },
 	}))
 }
