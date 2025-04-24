@@ -14,7 +14,6 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 )
 
@@ -27,9 +26,9 @@ type resourceFabricItemDefinitionModel struct {
 }
 
 type resourceFabricItemDefinitionPartModel struct {
-	Source              types.String            `tfsdk:"source"`
-	Tokens              customtypes.MapOfString `tfsdk:"tokens"`
-	SourceContentSha256 types.String            `tfsdk:"source_content_sha256"`
+	Source              types.String                        `tfsdk:"source"`
+	Tokens              supertypes.MapValueOf[types.String] `tfsdk:"tokens"`
+	SourceContentSha256 types.String                        `tfsdk:"source_content_sha256"`
 }
 
 type fabricItemDefinition struct {
