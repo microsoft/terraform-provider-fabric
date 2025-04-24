@@ -15,11 +15,14 @@ import (
 )
 
 type ProviderData struct {
-	FabricClient *fabric.Client
-	Timeout      time.Duration
-	Endpoint     string
-	Version      string
-	Preview      bool
+	FabricClient              *fabric.Client
+	Timeout                   time.Duration
+	Endpoint                  string
+	Version                   string
+	Preview                   bool
+	TerraformVersion          string
+	PartnerID                 string
+	DisableTerraformPartnerID bool
 }
 
 type ProviderConfig struct {
@@ -51,4 +54,6 @@ type ProviderConfigModel struct {
 	UseDevCLI                      types.Bool           `tfsdk:"use_dev_cli"`
 	UseMSI                         types.Bool           `tfsdk:"use_msi"`
 	Preview                        types.Bool           `tfsdk:"preview"`
+	PartnerID                      customtypes.UUID     `tfsdk:"partner_id"`
+	DisableTerraformPartnerID      types.Bool           `tfsdk:"disable_terraform_partner_id"`
 }

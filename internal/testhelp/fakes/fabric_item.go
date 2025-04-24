@@ -159,11 +159,13 @@ func configureItem(server *fakeServer) fabcore.Item {
 
 func NewRandomItem(itemType fabcore.ItemType) fabcore.Item {
 	return fabcore.Item{
+		Type:        &itemType,
 		ID:          to.Ptr(testhelp.RandomUUID()),
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		Type:        &itemType,
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		Tags:        []fabcore.ItemTag{},
 	}
 }
 
