@@ -38,6 +38,7 @@ import (
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
@@ -407,6 +408,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
+		connection.NewResourceConnection,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
@@ -444,6 +446,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 	return []func() datasource.DataSource{
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
+		connection.NewDataSourceConnection,
+		connection.NewDataSourceConnections,
 		dashboard.NewDataSourceDashboards,
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
