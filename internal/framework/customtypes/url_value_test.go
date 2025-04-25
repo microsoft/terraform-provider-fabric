@@ -8,11 +8,11 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-framework/attr/xattr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
@@ -99,9 +99,7 @@ func TestUnit_URLValidateAttribute(t *testing.T) {
 				&resp,
 			)
 
-			if diff := cmp.Diff(resp.Diagnostics, testCase.expectedDiags); diff != "" {
-				t.Errorf("Unexpected diagnostics (-got, +expected): %s", diff)
-			}
+			assert.Equal(t, testCase.expectedDiags, resp.Diagnostics, "Unexpected diagnostics")
 		})
 	}
 }
@@ -178,9 +176,7 @@ func TestUnit_URLValidateParameter(t *testing.T) {
 				&resp,
 			)
 
-			if diff := cmp.Diff(resp.Error, testCase.expectedFuncErr); diff != "" {
-				t.Errorf("Unexpected diagnostics (-got, +expected): %s", diff)
-			}
+			assert.Equal(t, testCase.expectedFuncErr, resp.Error, "Unexpected diagnostics")
 		})
 	}
 }
@@ -231,9 +227,7 @@ func TestUnit_URLValueURL(t *testing.T) {
 				}
 			}
 
-			if diff := cmp.Diff(diags, testCase.expectedDiags); diff != "" {
-				t.Errorf("Unexpected diagnostics (-got, +expected): %s", diff)
-			}
+			assert.Equal(t, testCase.expectedDiags, diags, "Unexpected diagnostics")
 		})
 	}
 }
