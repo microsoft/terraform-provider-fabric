@@ -207,6 +207,9 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'CopyJob' {
+      $itemEndpoint = 'copyJobs'
+    }
     'DataPipeline' {
       $itemEndpoint = 'dataPipelines'
     }
@@ -851,6 +854,7 @@ $wellKnown['Capacity'] = @{
 
 $itemNaming = @{
   'AzureDataFactory'       = 'adf'
+  'CopyJob'                = 'cj'
   'Dashboard'              = 'dash'
   'Datamart'               = 'dm'
   'DataPipeline'           = 'dp'
@@ -976,7 +980,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('CopyJob', 'DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
