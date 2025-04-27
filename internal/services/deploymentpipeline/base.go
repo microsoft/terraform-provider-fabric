@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Deployment Pipelines",
 	Types:          "deployment_pipelines",
 	DocsURL:        "https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: true,
 }

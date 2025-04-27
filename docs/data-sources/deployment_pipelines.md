@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The Deployment Pipelines data-source allows you to retrieve a list of Fabric Deployment Pipelines https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines.
   -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_deployment_pipelines (Data Source)
@@ -12,6 +13,8 @@ description: |-
 The Deployment Pipelines data-source allows you to retrieve a list of Fabric [Deployment Pipelines](https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines).
 
 -> This data-source supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

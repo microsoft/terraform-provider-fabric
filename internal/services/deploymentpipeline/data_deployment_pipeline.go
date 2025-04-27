@@ -57,11 +57,12 @@ func (d *dataSourceDeploymentPipeline) Configure(_ context.Context, req datasour
 	}
 
 	d.pConfigData = pConfigData
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDeploymentPipelinesClient()
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDeploymentPipelinesClient()
 }
 
 func (d *dataSourceDeploymentPipeline) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -104,7 +105,9 @@ func (d *dataSourceDeploymentPipeline) getByID(ctx context.Context, model *dataS
 		return diags
 	}
 
-	model.set(ctx, respGet.DeploymentPipelineExtendedInfo)
+	if diags := model.set(ctx, respGet.DeploymentPipelineExtendedInfo); diags.HasError() {
+		return diags
+	}
 
 	return nil
 }

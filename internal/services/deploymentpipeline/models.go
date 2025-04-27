@@ -48,7 +48,7 @@ func (to *baseDeploymentPipelineModel) setExtendedInfo(from fabcore.DeploymentPi
 	to.Description = types.StringPointerValue(from.Description)
 }
 
-func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from fabcore.DeploymentPipelineExtendedInfo) {
+func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from fabcore.DeploymentPipelineExtendedInfo) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
@@ -63,7 +63,11 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 		slice = append(slice, &entityModel)
 	}
 
-	to.Stages.Set(ctx, slice)
+	if diags := to.Stages.Set(ctx, slice); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }
 
 /*

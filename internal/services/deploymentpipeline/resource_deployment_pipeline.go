@@ -63,11 +63,12 @@ func (r *resourceDeploymentPipeline) Configure(_ context.Context, req resource.C
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDeploymentPipelinesClient()
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDeploymentPipelinesClient()
 }
 
 func (r *resourceDeploymentPipeline) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -93,14 +94,20 @@ func (r *resourceDeploymentPipeline) Create(ctx context.Context, req resource.Cr
 
 	var reqCreate requestCreateDeploymentPipeline
 
-	reqCreate.set(ctx, plan)
+	diags = reqCreate.set(ctx, plan)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	respCreate, err := r.client.CreateDeploymentPipeline(ctx, reqCreate.CreateDeploymentPipelineRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	state.set(ctx, respCreate.DeploymentPipelineExtendedInfo)
+	diags = state.set(ctx, respCreate.DeploymentPipelineExtendedInfo)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	if len(plan.Stages.Elements()) > 0 {
 		var reqUpdate requestUpdateDeploymentPipeline
@@ -111,7 +118,10 @@ func (r *resourceDeploymentPipeline) Create(ctx context.Context, req resource.Cr
 			return
 		}
 
-		state.set(ctx, respUpdate.DeploymentPipelineExtendedInfo)
+		diags = state.set(ctx, respUpdate.DeploymentPipelineExtendedInfo)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
@@ -268,7 +278,9 @@ func (r *resourceDeploymentPipeline) get(ctx context.Context, model *resourceDep
 		return diags
 	}
 
-	model.set(ctx, respGet.DeploymentPipelineExtendedInfo)
+	if diags := model.set(ctx, respGet.DeploymentPipelineExtendedInfo); diags.HasError() {
+		return diags
+	}
 
 	return nil
 }
