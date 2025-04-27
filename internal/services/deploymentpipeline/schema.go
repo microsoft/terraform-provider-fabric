@@ -4,11 +4,12 @@
 package deploymentpipeline
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -30,19 +31,22 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		}
 	}
 
-	var stagesAttribute superschema.SuperSetNestedAttributeOf[baseDeploymentPipelineStageModel]
+	var stagesAttribute superschema.SuperListNestedAttributeOf[baseDeploymentPipelineStageModel]
 	if !isList {
-		stagesAttribute = superschema.SuperSetNestedAttributeOf[baseDeploymentPipelineStageModel]{
-			Common: &schemaR.SetNestedAttribute{
+		stagesAttribute = superschema.SuperListNestedAttributeOf[baseDeploymentPipelineStageModel]{
+			Common: &schemaR.ListNestedAttribute{
 				MarkdownDescription: "The collection of " + ItemTypeInfo.Name + " stages.",
 			},
-			Resource: &schemaR.SetNestedAttribute{
+			Resource: &schemaR.ListNestedAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.RequiresReplace(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.List{
+					listvalidator.SizeBetween(2, 10),
 				},
 			},
-			DataSource: &schemaD.SetNestedAttribute{
+			DataSource: &schemaD.ListNestedAttribute{
 				Computed: true,
 			},
 			Attributes: superschema.Attributes{
@@ -82,11 +86,11 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 		}
 	} else {
-		stagesAttribute = superschema.SuperSetNestedAttributeOf[baseDeploymentPipelineStageModel]{
-			Resource: &schemaR.SetNestedAttribute{
+		stagesAttribute = superschema.SuperListNestedAttributeOf[baseDeploymentPipelineStageModel]{
+			Resource: &schemaR.ListNestedAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.RequiresReplace(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
 				},
 			},
 		}

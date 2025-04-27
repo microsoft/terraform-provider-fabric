@@ -6,6 +6,7 @@ package deploymentpipeline_test
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -81,6 +82,9 @@ func TestUnit_DeploymentPipelineDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "stages.0.display_name", entity.Stages[0].DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "stages.0.description", entity.Stages[0].Description),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.is_public", strconv.FormatBool(*entity.Stages[0].IsPublic)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "stages.1.display_name", entity.Stages[1].DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "stages.1.description", entity.Stages[1].Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.is_public", strconv.FormatBool(*entity.Stages[1].IsPublic)),
 			),
 		},
 	}))
@@ -91,6 +95,22 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
+	rawStagesAny := entity["stages"].([]any)
+	// stage 1
+	stage1Map := parseStageEntry(rawStagesAny[0].(string))
+	entityStage1DisplayName := stage1Map["displayName"]
+	entityStage1Description := stage1Map["description"]
+	entityStage1IsPublic := strings.EqualFold(stage1Map["isPublic"], "True")
+	// stage 2
+	stage2Map := parseStageEntry(rawStagesAny[1].(string))
+	entityStage2DisplayName := stage2Map["displayName"]
+	entityStage2Description := stage2Map["description"]
+	entityStage2IsPublic := strings.EqualFold(stage2Map["isPublic"], "True")
+	// stage 3
+	stage3Map := parseStageEntry(rawStagesAny[2].(string))
+	entityStage3DisplayName := stage3Map["displayName"]
+	entityStage3Description := stage3Map["description"]
+	entityStage3IsPublic := strings.EqualFold(stage3Map["isPublic"], "True")
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -105,6 +125,15 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.display_name", entityStage1DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.description", entityStage1Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublic)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.display_name", entityStage2DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.description", entityStage2Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublic)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.display_name", entityStage3DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.description", entityStage3Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.is_public", strconv.FormatBool(entityStage3IsPublic)),
 			),
 		},
 		// read by id - not found

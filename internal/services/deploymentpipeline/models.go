@@ -34,7 +34,7 @@ type baseDeploymentPipelineStageModel struct {
 
 type baseDeploymentPipelineExtendedInfoModel struct {
 	baseDeploymentPipelineModel
-	Stages supertypes.SetNestedObjectValueOf[baseDeploymentPipelineStageModel] `tfsdk:"stages"`
+	Stages supertypes.ListNestedObjectValueOf[baseDeploymentPipelineStageModel] `tfsdk:"stages"`
 }
 
 func (to *baseDeploymentPipelineModel) set(from fabcore.DeploymentPipeline) {
@@ -62,6 +62,7 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 		entityModel.IsPublic = types.BoolPointerValue(entity.IsPublic)
 		slice = append(slice, &entityModel)
 	}
+
 	to.Stages.Set(ctx, slice)
 }
 
@@ -105,11 +106,6 @@ type resourceDeploymentPipelineModel struct {
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
-type resourceUpdateDeploymentPipelineModel struct {
-	baseDeploymentPipelineModel
-	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
-}
-
 type requestCreateDeploymentPipeline struct {
 	fabcore.CreateDeploymentPipelineRequest
 }
@@ -137,12 +133,7 @@ type requestUpdateDeploymentPipeline struct {
 	fabcore.UpdateDeploymentPipelineRequest
 }
 
-func (to *requestUpdateDeploymentPipeline) set(from resourceUpdateDeploymentPipelineModel) {
-	to.DisplayName = from.DisplayName.ValueStringPointer()
-	to.Description = from.Description.ValueStringPointer()
-}
-
-func (to *requestUpdateDeploymentPipeline) setUpdate(from resourceDeploymentPipelineModel) {
+func (to *requestUpdateDeploymentPipeline) set(from resourceDeploymentPipelineModel) {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
 }

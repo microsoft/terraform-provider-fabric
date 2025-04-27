@@ -12,7 +12,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "deployment_pipeline",
 	Names:          "Deployment Pipelines",
 	Types:          "deployment_pipelines",
-	DocsURL:        "https://learn.microsoft.com/fabric/data-factory/what-is-copy-job",
+	DocsURL:        "https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines",
 	IsPreview:      false,
 	IsSPNSupported: true,
 }

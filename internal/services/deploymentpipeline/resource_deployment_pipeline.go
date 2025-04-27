@@ -103,10 +103,8 @@ func (r *resourceDeploymentPipeline) Create(ctx context.Context, req resource.Cr
 	state.set(ctx, respCreate.DeploymentPipelineExtendedInfo)
 
 	if len(plan.Stages.Elements()) > 0 {
-
 		var reqUpdate requestUpdateDeploymentPipeline
-
-		reqUpdate.setUpdate(plan)
+		reqUpdate.set(plan)
 
 		respUpdate, err := r.client.UpdateDeploymentPipeline(ctx, state.ID.ValueString(), reqUpdate.UpdateDeploymentPipelineRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -175,7 +173,7 @@ func (r *resourceDeploymentPipeline) Update(ctx context.Context, req resource.Up
 		"action": "start",
 	})
 
-	var plan resourceUpdateDeploymentPipelineModel
+	var plan resourceDeploymentPipelineModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return

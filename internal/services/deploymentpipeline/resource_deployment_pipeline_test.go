@@ -7,6 +7,7 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -80,6 +81,11 @@ func TestUnit_DeploymentPipelineResource_Attributes(t *testing.T) {
 							"description":  *entity.Stages[0].Description,
 							"is_public":    *entity.Stages[0].IsPublic,
 						},
+						{
+							"display_name": *entity.Stages[1].DisplayName,
+							"description":  *entity.Stages[1].Description,
+							"is_public":    *entity.Stages[1].IsPublic,
+						},
 					},
 				},
 			),
@@ -88,6 +94,9 @@ func TestUnit_DeploymentPipelineResource_Attributes(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "stages.0.display_name", entity.Stages[0].DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "stages.0.description", entity.Stages[0].Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(*entity.Stages[0].IsPublic)),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "stages.1.display_name", entity.Stages[1].DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "stages.1.description", entity.Stages[1].Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(*entity.Stages[1].IsPublic)),
 			),
 		},
 	}))
@@ -110,6 +119,11 @@ func TestUnit_DeploymentPipelineResource_ImportState(t *testing.T) {
 					"display_name": *entity.Stages[0].DisplayName,
 					"description":  *entity.Stages[0].Description,
 					"is_public":    *entity.Stages[0].IsPublic,
+				},
+				{
+					"display_name": *entity.Stages[1].DisplayName,
+					"description":  *entity.Stages[1].Description,
+					"is_public":    *entity.Stages[1].IsPublic,
 				},
 			},
 		},
@@ -163,7 +177,7 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(fakes.NewRandomDeploymentPipelineWithStages())
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - create - existing entity
+		// error - stages should be between 2 and 10
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -175,6 +189,29 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 							"display_name": *entityExist.Stages[0].DisplayName,
 							"description":  *entityExist.Stages[0].Description,
 							"is_public":    *entityExist.Stages[0].IsPublic,
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`stages list must contain at least 2 elements and at most 10`),
+		},
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityExist.DisplayName,
+					"stages": []map[string]any{
+						{
+							"display_name": *entityBefore.Stages[0].DisplayName,
+							"description":  *entityBefore.Stages[0].Description,
+							"is_public":    *entityBefore.Stages[0].IsPublic,
+						},
+						{
+							"display_name": *entityBefore.Stages[1].DisplayName,
+							"description":  *entityBefore.Stages[1].Description,
+							"is_public":    *entityBefore.Stages[1].IsPublic,
 						},
 					},
 				},
@@ -194,6 +231,11 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 							"description":  *entityBefore.Stages[0].Description,
 							"is_public":    *entityBefore.Stages[0].IsPublic,
 						},
+						{
+							"display_name": *entityBefore.Stages[1].DisplayName,
+							"description":  *entityBefore.Stages[1].Description,
+							"is_public":    *entityBefore.Stages[1].IsPublic,
+						},
 					},
 				},
 			),
@@ -203,6 +245,9 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", *entityBefore.Stages[0].DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", *entityBefore.Stages[0].Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(*entityBefore.Stages[0].IsPublic)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", *entityBefore.Stages[1].DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", *entityBefore.Stages[1].Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(*entityBefore.Stages[1].IsPublic)),
 			),
 		},
 		// Update and Read
@@ -213,6 +258,18 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 				map[string]any{
 					"display_name": *entityBefore.DisplayName,
 					"description":  *entityAfter.Description,
+					"stages": []map[string]any{
+						{
+							"display_name": *entityBefore.Stages[0].DisplayName,
+							"description":  *entityBefore.Stages[0].Description,
+							"is_public":    *entityBefore.Stages[0].IsPublic,
+						},
+						{
+							"display_name": *entityBefore.Stages[1].DisplayName,
+							"description":  *entityBefore.Stages[1].Description,
+							"is_public":    *entityBefore.Stages[1].IsPublic,
+						},
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -224,14 +281,33 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
-	entityCreateDisplayName := testhelp.RandomName()
+	entity := testhelp.WellKnown()["DeploymentPipeline"].(map[string]any)
+
+	rawStagesAny := entity["stages"].([]any)
+	// stage 1
+	stage1Map := parseStageEntry(rawStagesAny[0].(string))
+	entityStage1DisplayName := stage1Map["displayName"]
+	entityStage1Description := stage1Map["description"]
+	entityStage1IsPublic := strings.EqualFold(stage1Map["isPublic"], "True")
+	// stage 2
+	stage2Map := parseStageEntry(rawStagesAny[1].(string))
+	entityStage2DisplayName := stage2Map["displayName"]
+	entityStage2Description := stage2Map["description"]
+	entityStage2IsPublic := strings.EqualFold(stage2Map["isPublic"], "True")
+	// stage 3
+	stage3Map := parseStageEntry(rawStagesAny[2].(string))
+	entityStage3DisplayName := stage3Map["displayName"]
+	entityStage3Description := stage3Map["description"]
+	entityStage3IsPublic := strings.EqualFold(stage3Map["isPublic"], "True")
+
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+	entityCreateDisplayName := testhelp.RandomName()
 
 	entityStage1Name := testhelp.RandomName()
-	entityStage1IsPublic := testhelp.RandomBool()
+	entityStage1IsPublicRandom := testhelp.RandomBool()
 	entityStage2Name := testhelp.RandomName()
-	entityStage2IsPublic := testhelp.RandomBool()
+	entityStage2IsPublicRandom := testhelp.RandomBool()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -245,12 +321,12 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 						{
 							"display_name": entityStage1Name,
 							"description":  entityStage1Name,
-							"is_public":    entityStage1IsPublic,
+							"is_public":    entityStage1IsPublicRandom,
 						},
 						{
 							"display_name": entityStage2Name,
 							"description":  entityStage2Name,
-							"is_public":    entityStage2IsPublic,
+							"is_public":    entityStage2IsPublicRandom,
 						},
 					},
 				},
@@ -260,10 +336,10 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", entityStage1Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", entityStage1Name),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublic)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublicRandom)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Name),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublic)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
 			),
 		},
 		// Update and Read
@@ -274,6 +350,23 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 				map[string]any{
 					"display_name": entityUpdateDisplayName,
 					"description":  entityUpdateDescription,
+					"stages": []map[string]any{
+						{
+							"display_name": entityStage1DisplayName,
+							"description":  entityStage1Description,
+							"is_public":    entityStage1IsPublic,
+						},
+						{
+							"display_name": entityStage2DisplayName,
+							"description":  entityStage2Description,
+							"is_public":    entityStage2IsPublic,
+						},
+						{
+							"display_name": entityStage3DisplayName,
+							"description":  entityStage3Description,
+							"is_public":    entityStage3IsPublic,
+						},
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -283,4 +376,20 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 		},
 	},
 	))
+}
+
+func parseStageEntry(raw string) map[string]string {
+	m := map[string]string{}
+	// strip the "@{" prefix and "}" suffix
+	s := strings.TrimPrefix(raw, "@{")
+	s = strings.TrimSuffix(s, "}")
+
+	for _, pair := range strings.Split(s, "; ") {
+		kv := strings.SplitN(pair, "=", 2)
+		if len(kv) == 2 {
+			m[kv[0]] = kv[1]
+		}
+	}
+
+	return m
 }
