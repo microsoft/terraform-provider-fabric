@@ -13,4 +13,3 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	IsPreview:      false,
 	IsSPNSupported: true,
 }
-

@@ -79,6 +79,19 @@ type externalDataShare struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
 }
 
+func (to *baseShortcutModel) setModelWithShortcutConflictPolicy(ctx context.Context, workspaceID, itemID, shortcutConflictPolicy string, from fabcore.Shortcut) diag.Diagnostics {
+	if shortcutConflictPolicy != "" {
+		to.ShortcutConflictPolicy = types.StringValue(shortcutConflictPolicy)
+	}
+
+	diags := to.set(ctx, workspaceID, itemID, from)
+	if diags.HasError() {
+		return diags
+	}
+
+	return nil
+}
+
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
 	to.Path = types.StringPointerValue(from.Path)
@@ -86,6 +99,7 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 	to.ID = types.StringPointerValue(&concatenatedString)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
+	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 
 	target := supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 	if from.Target != nil {

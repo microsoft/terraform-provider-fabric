@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -97,8 +98,9 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
+	state.ID = types.StringValue(*respCreate.Shortcut.Name + *respCreate.Shortcut.Path)
 
-	if resp.Diagnostics.Append(plan.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(state.setModelWithShortcutConflictPolicy(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -162,7 +164,7 @@ func (r *resourceOnelakeShortcut) get(ctx context.Context, model *resourceOneLak
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.String(), respGet.Shortcut)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
 
 	return nil
 }
@@ -191,15 +193,55 @@ func (r *resourceOnelakeShortcut) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
+	resp.State.RemoveResource(ctx)
+
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",
 	})
 }
 
 func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	tflog.Debug(ctx, "UPDATE", map[string]any{
-		"action": "operation not supported",
-	})
+	tflog.Debug(ctx, "UPDATE", map[string]any{"action": "start"})
 
-	return
+	var plan, state resourceOneLakeShortcutModel
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	timeout, diags := plan.Timeouts.Update(ctx, r.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	state.Timeouts = plan.Timeouts
+
+	var reqCreate requestCreateOnelakeShortcut
+
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
+		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
+	}
+	// Call the API to update the resource
+	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+	state.ID = types.StringValue(*respCreate.Shortcut.Name + *respCreate.Shortcut.Path)
+
+	if resp.Diagnostics.Append(state.setModelWithShortcutConflictPolicy(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+
+	tflog.Debug(ctx, "UPDATE", map[string]any{"action": "end"})
 }

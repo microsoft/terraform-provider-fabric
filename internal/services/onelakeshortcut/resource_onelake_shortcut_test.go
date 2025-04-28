@@ -12,13 +12,13 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestAcc_DomainResource_CRUD(t *testing.T) {
-	// entityCreateDisplayName := testhelp.RandomName()
-	// entityUpdateDisplayName := testhelp.RandomName()
-	// entityUpdateDescription := testhelp.RandomName()
-	// defaultContributorsScope := string(admin.ContributorsScopeTypeAllTenant)
-	// updatedContributorsScope := string(admin.ContributorsScopeTypeAdminsOnly)
-
+func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
+	entityCreateDisplayName := testhelp.RandomName()
+	entityTargetPath := "Files/images"
+	entityType := "OneLake"
+	entityUpdatedTargetPath := "Files/sample_datasets"
+	workspaceId := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
+	lakehouseId := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -26,47 +26,57 @@ func TestAcc_DomainResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":                  testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string),
-					"workspace_id":             testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string),
-					"shortcut_conflict_policy": "CreateOrOverwrite",
-					"name":                     "acc_test",
-					"path":                     "/Tables",
+					"item_id":      lakehouseId,
+					"workspace_id": workspaceId,
+					"name":         entityCreateDisplayName,
+					"path":         "Files",
 					"target": map[string]any{
-						"type": "OneLake",
+						"type": entityType,
 						"onelake": map[string]any{
-							"workspace_id": testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string),
-							"item_id":      testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string),
-							"path":         "/Tables/publicholidays_1",
+							"workspace_id": workspaceId,
+							"item_id":      lakehouseId,
+							"path":         entityTargetPath,
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "name", "acc_test"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "path", "/Tables"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.0.type", "onelake"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.0.onelake.workspace_id", testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.0.onelake.item_id", testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.0.onelake.path", "/Tables/publicholidays"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", entityType),
 			),
 		},
-		// // Update and Read
-		// {
-		// 	ResourceName: testResourceItemFQN,
-		// 	Config: at.CompileConfig(
-		// 		testResourceItemHeader,
-		// 		map[string]any{
-		// 			"display_name":       entityUpdateDisplayName,
-		// 			"description":        entityUpdateDescription,
-		// 			"contributors_scope": updatedContributorsScope,
-		// 		},
-		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "contributors_scope", updatedContributorsScope),
-		// 	),
-		// },
+		// Update - Create with OverwriteOnly and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"item_id":                  lakehouseId,
+					"workspace_id":             workspaceId,
+					"shortcut_conflict_policy": "OverwriteOnly",
+					"name":                     entityCreateDisplayName,
+					"path":                     "Files",
+					"target": map[string]any{
+						"type": entityType,
+						"onelake": map[string]any{
+							"workspace_id": workspaceId,
+							"item_id":      lakehouseId,
+							"path":         entityUpdatedTargetPath,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", entityType),
+			),
+		},
 	},
 	))
 }

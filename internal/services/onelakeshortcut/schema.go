@@ -26,23 +26,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		}
 	}
 
-	// possibleTargetTypeValues := utils.RemoveSlicesByValues(fabcore.PossibleTypeValues(), []fabcore.Type{
-	// 	fabcore.TypeOneLake,
-	// 	fabcore.TypeAdlsGen2,
-	// 	fabcore.TypeAmazonS3,
-	// 	fabcore.TypeDataverse,
-	// 	fabcore.TypeExternalDataShare,
-	// 	fabcore.TypeGoogleCloudStorage,
-	// 	fabcore.TypeS3Compatible,
-	// })
-
-	// possibleShortcutConflictPolicyValues := utils.RemoveSlicesByValues(fabcore.PossibleShortcutConflictPolicyValues(), []fabcore.ShortcutConflictPolicy{
-	// 	fabcore.ShortcutConflictPolicyAbort,
-	// 	fabcore.ShortcutConflictPolicyCreateOrOverwrite,
-	// 	fabcore.ShortcutConflictPolicyOverwriteOnly,
-	// 	fabcore.ShortcutConflictPolicyGenerateUniqueName,
-	// })
-
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
 			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
@@ -57,9 +40,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -75,6 +55,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						stringvalidator.LengthAtMost(200),
 						stringvalidator.LengthAtLeast(1),
 					},
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Optional: !isList,
@@ -89,9 +72,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &schemaR.StringAttribute{
 					Required: !isList,
 					Computed: isList,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
@@ -106,9 +86,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &schemaR.StringAttribute{
 					Required: true,
 					Computed: isList,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
@@ -124,6 +101,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Validators: []validator.String{
 						stringvalidator.LengthAtMost(200),
 						stringvalidator.LengthAtLeast(1),
+					},
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
@@ -142,6 +122,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleShortcutConflictPolicyValues(), true)...),
 					},
 				},
+
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
 					Optional: true,
@@ -194,6 +175,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							"item_id": superschema.SuperStringAttribute{
 								Common: &schemaR.StringAttribute{
 									MarkdownDescription: "Target item ID",
+									CustomType:          customtypes.UUIDType{},
 								},
 								Resource: &schemaR.StringAttribute{
 									Required: true,
@@ -698,8 +680,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &superschema.ResourceTimeoutAttribute{
 					Create: true,
 					Read:   true,
-					Update: true,
 					Delete: true,
+					Update: true,
 				},
 				DataSource: dsTimeout,
 			},
