@@ -406,6 +406,24 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 			),
 		},
+
+		// Update requiresReplace atrribute
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityAfter.DisplayName,
+					"description":  *entityAfter.Description,
+					"configuration": map[string]any{
+						"database_type": "Shortcut",
+						"eventhouse_id": *eventhouse.ID,
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Could not create resource: ItemDisplayNameAlreadyInUse"),
+		},
 		// Delete testing automatically occurs in TestCase
 	}))
 }

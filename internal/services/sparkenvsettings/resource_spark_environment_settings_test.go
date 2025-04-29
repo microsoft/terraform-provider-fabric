@@ -87,6 +87,31 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.spark.acls.enable"),
 			),
 		},
+
+		// Update requires replace attribute - force delete and recreate
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				environmentResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":       testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"environment_id":     testhelp.RefByFQN(environmentResourceFQN, "id"),
+						"publication_status": "Staging",
+						"driver_cores":       8,
+						"spark_properties": map[string]any{
+							`"spark.acls.enable"`: "true",
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.spark.acls.enable"),
+			),
+		},
 	},
 	))
 }

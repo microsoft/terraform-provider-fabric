@@ -369,6 +369,25 @@ func TestAcc_LakehouseResource_CRUD_Configuration(t *testing.T) {
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
 			),
 		},
+
+		// Update requiresReplaces attribute -> forece delete and recreate
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName2,
+					"description":  entityUpdateDescription2,
+					"configuration": map[string]any{
+						"enable_schemas": true,
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Could not create resource: Requested '%s' is already in use`, entityUpdateDisplayName2),
+			),
+		},
 	},
 	))
 }

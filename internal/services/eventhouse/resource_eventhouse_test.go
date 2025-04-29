@@ -19,7 +19,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+var (
+	testResourceItemFQN, testResourceItemHeader     = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+	testResourceItemFQN_2, testResourceItemHeader_2 = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test_2")
+)
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("eventhouse"),
@@ -454,6 +457,220 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.minimum_consumption_units", "2.25"),
+			),
+		},
+
+		// Update required replace -> new resource to be created
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"configuration": map[string]any{
+							"minimum_consumption_units": "0",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Could not create resource: Requested '%s' is already in use`, entityCreateDisplayName),
+			),
+		},
+	},
+	))
+}
+
+// TERRAFORM PLAN VALIDATION AND MULTIPLE RESOURCES TESTS
+func TestAcc_EventhouseConfigurationResource_NoPlanChange(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+
+	fieldConfig := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": workspaceID,
+				"display_name": entityCreateDisplayName,
+				"configuration": map[string]any{
+					"minimum_consumption_units": "2.25",
+				},
+			},
+		))
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config:       fieldConfig,
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.minimum_consumption_units", "2.25"),
+			),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config:       fieldConfig,
+
+			ExpectNonEmptyPlan: false, // <-- very important addition
+		},
+	},
+	))
+}
+
+func TestAcc_OneLakeShortcut_DuplicateResourceFailsFormatted(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+
+	// Build one normal resource block using your helpers
+	resourceBlock1 := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"display_name": entityCreateDisplayName,
+			"configuration": map[string]any{
+				"minimum_consumption_units": "2.25",
+			},
+		},
+	)
+	resourceBlock2 := at.CompileConfig(
+		testResourceItemHeader_2,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"display_name": entityCreateDisplayName,
+			"configuration": map[string]any{
+				"minimum_consumption_units": "2.25",
+			},
+		},
+	)
+
+	// Join the same resource block twice (=> causes duplicate resource address)
+	fieldConfig := at.JoinConfigs(
+		testHelperLocals,
+		resourceBlock1,
+		resourceBlock2, // 👈 added twice intentionally to trigger the duplicate resource error
+	)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		{
+			Config: fieldConfig,
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Could not create resource: Requested '%s' is already in use`, entityCreateDisplayName),
+			),
+		},
+	}))
+}
+
+func TestAcc_OneLakeShortcut_CRUDOnDifferentResources(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdatedDescription := testhelp.RandomName()
+
+	// Build one normal resource block using your helpers
+	resourceBlock1 := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"display_name": entityCreateDisplayName,
+			"configuration": map[string]any{
+				"minimum_consumption_units": "2.25",
+			},
+		},
+	)
+
+	// will try to create another resource
+	resourceBlock2 := at.CompileConfig(
+		testResourceItemHeader_2,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"display_name": entityCreateDisplayName,
+			"description":  entityUpdatedDescription,
+			"configuration": map[string]any{
+				"minimum_consumption_units": "2.25",
+			},
+		},
+	)
+
+	// Join the same resource block twice (=> causes duplicate resource address)
+	fieldConfig := at.JoinConfigs(
+		testHelperLocals,
+		resourceBlock1,
+		resourceBlock2,
+	)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		{
+			Config: fieldConfig,
+
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Could not create resource: Requested '%s' is already in use`, entityCreateDisplayName),
+			),
+		},
+	}))
+}
+
+func TestAcc_OneLakeShortcut_CRUDCreateSameResourceAfterDestroy(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
+			),
+		},
+
+		// triggers delete
+		{
+			Config: `
+			# empty config but valid HCL
+			`,
+		},
+
+		// recreate the previous configuration
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+				},
+			),
+			ExpectError: regexp.MustCompile(
+				fmt.Sprintf(`Could not create resource: Requested '%s' is already in use`, entityCreateDisplayName),
 			),
 		},
 	},
