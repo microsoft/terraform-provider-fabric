@@ -20,8 +20,7 @@ The Deployment Pipeline data-source allows you to retrieve details about a Fabri
 
 ```terraform
 data "fabric_deployment_pipeline" "example_by_id" {
-  id           = "11111111-1111-1111-1111-111111111111"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
+  id = "11111111-1111-1111-1111-111111111111"
 }
 ```
 
@@ -53,6 +52,13 @@ Optional:
 <a id="nestedatt--stages"></a>
 
 ### Nested Schema for `stages`
+
+Optional:
+
+- `id` (String) The Deployment Pipeline ID.
+- `order` (Number) The order of the stage.
+- `workspace_id` (String) The assigned workspace ID.
+- `workspace_name` (String) The assigned workspace name.
 
 Read-Only:
 

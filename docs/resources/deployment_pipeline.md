@@ -61,9 +61,16 @@ resource "fabric_deployment_pipeline" "example" {
 
 Required:
 
-- `description` (String) The description of the stage.
-- `display_name` (String) The display name of the stage.
+- `description` (String) The description of the stage. String length must be at most 1024.
+- `display_name` (String) The display name of the stage. String length must be at most 256.
 - `is_public` (Boolean) Whether the stage is public.
+
+Read-Only:
+
+- `id` (String) The Deployment Pipeline ID.
+- `order` (Number) The order of the stage.
+- `workspace_id` (String) The assigned workspace ID.
+- `workspace_name` (String) The assigned workspace name.
 
 <a id="nestedatt--timeouts"></a>
 

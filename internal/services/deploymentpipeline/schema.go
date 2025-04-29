@@ -50,6 +50,22 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Computed: true,
 			},
 			Attributes: superschema.Attributes{
+				"id": superschema.SuperStringAttribute{
+					Common: &schemaR.StringAttribute{
+						MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
+						CustomType:          customtypes.UUIDType{},
+					},
+					Resource: &schemaR.StringAttribute{
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					DataSource: &schemaD.StringAttribute{
+						Optional: true,
+						Computed: true,
+					},
+				},
 				"display_name": superschema.SuperStringAttribute{
 					Common: &schemaR.StringAttribute{
 						MarkdownDescription: "The display name of the stage.",
@@ -59,6 +75,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 					Resource: &schemaR.StringAttribute{
 						Required: true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(256),
+						},
 					},
 				},
 				"description": superschema.SuperStringAttribute{
@@ -70,6 +89,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 					Resource: &schemaR.StringAttribute{
 						Required: true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(1024),
+						},
 					},
 				},
 				"is_public": superschema.SuperBoolAttribute{
@@ -81,6 +103,46 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 					Resource: &schemaR.BoolAttribute{
 						Required: true,
+					},
+				},
+				"order": superschema.SuperInt32Attribute{
+					Common: &schemaR.Int32Attribute{
+						MarkdownDescription: "The order of the stage.",
+					},
+					Resource: &schemaR.Int32Attribute{
+						Computed: true,
+					},
+					DataSource: &schemaD.Int32Attribute{
+						Optional: true,
+						Computed: true,
+					},
+				},
+				"workspace_id": superschema.SuperStringAttribute{
+					Common: &schemaR.StringAttribute{
+						MarkdownDescription: "The assigned workspace ID.",
+						CustomType:          customtypes.UUIDType{},
+					},
+					Resource: &schemaR.StringAttribute{
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					DataSource: &schemaD.StringAttribute{
+						Optional: true,
+						Computed: true,
+					},
+				},
+				"workspace_name": superschema.SuperStringAttribute{
+					Common: &schemaR.StringAttribute{
+						MarkdownDescription: "The assigned workspace name.",
+					},
+					Resource: &schemaR.StringAttribute{
+						Computed: true,
+					},
+					DataSource: &schemaD.StringAttribute{
+						Optional: true,
+						Computed: true,
 					},
 				},
 			},

@@ -27,9 +27,13 @@ type baseDeploymentPipelineModel struct {
 }
 
 type baseDeploymentPipelineStageModel struct {
-	DisplayName types.String `tfsdk:"display_name"`
-	Description types.String `tfsdk:"description"`
-	IsPublic    types.Bool   `tfsdk:"is_public"`
+	ID            customtypes.UUID `tfsdk:"id"`
+	Order         types.Int32      `tfsdk:"order"`
+	DisplayName   types.String     `tfsdk:"display_name"`
+	Description   types.String     `tfsdk:"description"`
+	WorkspaceID   types.String     `tfsdk:"workspace_id"`
+	WorkspaceName types.String     `tfsdk:"workspace_name"`
+	IsPublic      types.Bool       `tfsdk:"is_public"`
 }
 
 type baseDeploymentPipelineExtendedInfoModel struct {
@@ -57,9 +61,14 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 	for _, entity := range from.Stages {
 		var entityModel baseDeploymentPipelineStageModel
 
+		entityModel.ID = customtypes.NewUUIDPointerValue(entity.ID)
+		entityModel.Order = types.Int32PointerValue(entity.Order)
+		entityModel.WorkspaceID = types.StringPointerValue(entity.WorkspaceID)
+		entityModel.WorkspaceName = types.StringPointerValue(entity.WorkspaceName)
 		entityModel.DisplayName = types.StringPointerValue(entity.DisplayName)
 		entityModel.Description = types.StringPointerValue(entity.Description)
 		entityModel.IsPublic = types.BoolPointerValue(entity.IsPublic)
+
 		slice = append(slice, &entityModel)
 	}
 
