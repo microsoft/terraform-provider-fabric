@@ -178,8 +178,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Required: !isList,
-					Computed: isList,
+					Optional: !isList,
+					Computed: true,
 				},
 			},
 			"display_name": superschema.StringAttribute{
@@ -193,6 +193,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
+					Optional: !isList,
 					Computed: true,
 				},
 			},
