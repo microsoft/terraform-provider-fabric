@@ -25,7 +25,7 @@ type lakehousePropertiesModel struct {
 	DefaultSchema         types.String                                                              `tfsdk:"default_schema"`
 }
 
-func (to *lakehousePropertiesModel) set(ctx context.Context, from *fablakehouse.Properties) diag.Diagnostics {
+func (to *lakehousePropertiesModel) set(ctx context.Context, from fablakehouse.Properties) diag.Diagnostics {
 	sqlEndpointProperties := supertypes.NewSingleNestedObjectValueOfNull[lakehouseSQLEndpointPropertiesModel](ctx)
 
 	if from.SQLEndpointProperties != nil {

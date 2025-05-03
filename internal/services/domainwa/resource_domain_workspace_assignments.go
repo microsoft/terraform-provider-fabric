@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -268,17 +269,17 @@ func (r *resourceDomainWorkspaceAssignments) Delete(ctx context.Context, req res
 	})
 }
 
-func (r *resourceDomainWorkspaceAssignments) diffWorkspaces(ctx context.Context, slice1, slice2 customtypes.SetValueOf[customtypes.UUID]) (customtypes.SetValueOf[customtypes.UUID], diag.Diagnostics) {
+func (r *resourceDomainWorkspaceAssignments) diffWorkspaces(ctx context.Context, slice1, slice2 supertypes.SetValueOf[customtypes.UUID]) (supertypes.SetValueOf[customtypes.UUID], diag.Diagnostics) {
 	s1 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
 	if diags := slice1.ElementsAs(ctx, &s1, false); diags.HasError() {
-		return customtypes.NewSetValueOfNull[customtypes.UUID](ctx), diags
+		return supertypes.NewSetValueOfNull[customtypes.UUID](ctx), diags
 	}
 
 	s2 := make([]customtypes.UUID, 0, len(slice1.Elements()))
 
 	if diags := slice2.ElementsAs(ctx, &s2, false); diags.HasError() {
-		return customtypes.NewSetValueOfNull[customtypes.UUID](ctx), diags
+		return supertypes.NewSetValueOfNull[customtypes.UUID](ctx), diags
 	}
 
 	m := make(map[string]bool)
@@ -294,10 +295,7 @@ func (r *resourceDomainWorkspaceAssignments) diffWorkspaces(ctx context.Context,
 		}
 	}
 
-	diff, diags := customtypes.NewSetValueOfSlice(ctx, elements)
-	if diags.HasError() {
-		return customtypes.NewSetValueOfNull[customtypes.UUID](ctx), diags
-	}
+	diff := supertypes.NewSetValueOfSlice(ctx, elements)
 
 	return diff, nil
 }

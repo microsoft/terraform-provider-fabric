@@ -17,11 +17,11 @@ import (
 
 func NewResourceWarehouse() resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from warehouseConfigurationModel) (*fabwarehouse.CreationPayload, diag.Diagnostics) {
-		cp := fabwarehouse.CreationPayload{
+		cp := &fabwarehouse.CreationPayload{
 			CollationType: (*fabwarehouse.CollationType)(from.CollationType.ValueStringPointer()),
 		}
 
-		return &cp, nil
+		return cp, nil
 	}
 
 	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload]) diag.Diagnostics {

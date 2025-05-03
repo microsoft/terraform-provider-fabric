@@ -23,7 +23,7 @@ terraform {
   required_providers {
     fabric = {
       source  = "microsoft/fabric"
-      version = "1.0.0"
+      version = "1.1.0"
     }
   }
 }
@@ -84,12 +84,14 @@ You can find more information on how to do this in the following guides:
 - `client_id_file_path` (String) The path to a file containing the Client ID which should be used.
 - `client_secret` (String, Sensitive) The Client Secret of the app registration. For use when authenticating as a Service Principal using a Client Secret.
 - `client_secret_file_path` (String) The path to a file containing the Client Secret which should be used. For use when authenticating as a Service Principal using a Client Secret.
+- `disable_terraform_partner_id` (Boolean) Disable sending the Terraform Partner ID if a custom `partner_id` isn't specified, which allows Microsoft to better understand the usage of Terraform. The Partner ID does not give HashiCorp any direct access to usage information. This can also be sourced from the `FABRIC_DISABLE_TERRAFORM_PARTNER_ID` environment variable. Defaults to `false`.
 - `endpoint` (String) The Endpoint of the Microsoft Fabric API.
 - `environment` (String) The cloud environment which should be used. Possible values are 'public', 'usgovernment' and 'china'. Defaults to 'public'
 - `oidc_request_token` (String, Sensitive) The bearer token for the request to the OIDC provider. For use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_request_url` (String) The URL for the OIDC provider from which to request an ID token. For use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_token` (String, Sensitive) The OIDC token for use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_token_file_path` (String) The path to a file containing an OIDC token for use when authenticating as a Service Principal using OpenID Connect.
+- `partner_id` (String) A GUID/UUID that is [registered](https://learn.microsoft.com/partner-center/marketplace-offers/azure-partner-customer-usage-attribution#register-guids-and-offers) with Microsoft to facilitate partner resource usage attribution.
 - `preview` (Boolean) Enable preview mode to use preview features.
 - `tenant_id` (String) The ID of the Microsoft Entra ID tenant that Fabric API uses to authenticate with.
 - `timeout` (String) Default timeout for all requests. It can be overridden at any Resource/Data-Source

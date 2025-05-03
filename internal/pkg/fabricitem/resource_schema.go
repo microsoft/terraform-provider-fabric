@@ -287,7 +287,7 @@ func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedA
 			"tokens": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of tokens substitutes in the source.",
 				Optional:            true,
-				CustomType:          customtypes.MapOfStringType,
+				CustomType:          supertypes.MapTypeOf[types.String]{MapType: types.MapType{ElemType: types.StringType}},
 				ElementType:         types.StringType,
 				Validators: []validator.Map{
 					mapvalidator.KeysAre(stringvalidator.RegexMatches(
