@@ -90,17 +90,17 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
-		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
-	}
+	// options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
+	// 	ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
+	// }
 
-	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
+	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 	state.ID = types.StringValue(*respCreate.Shortcut.Name + *respCreate.Shortcut.Path)
 
-	if resp.Diagnostics.Append(state.setModelWithShortcutConflictPolicy(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -224,20 +224,17 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyOverwriteOnly
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
-		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
+		ShortcutConflictPolicy: &overwriteOnlyPolicy,
 	}
 	// Call the API to update the resource
 	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-		return
-	}
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
-	state.ID = types.StringValue(*respCreate.Shortcut.Name + *respCreate.Shortcut.Path)
 
-	if resp.Diagnostics.Append(state.setModelWithShortcutConflictPolicy(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 

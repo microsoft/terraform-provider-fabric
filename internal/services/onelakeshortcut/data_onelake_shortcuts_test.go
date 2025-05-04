@@ -33,7 +33,6 @@ func TestAcc_WorkspaceManagedPrivateEndpointsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.path"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.item_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.path"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.workspace_id"),

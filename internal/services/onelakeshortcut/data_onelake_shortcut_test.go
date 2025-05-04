@@ -33,6 +33,8 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 				map[string]any{
 					"item_id":      itemId,
 					"workspace_id": workspaceID,
+					"name":         entity.Name,
+					"path":         entity.Path,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

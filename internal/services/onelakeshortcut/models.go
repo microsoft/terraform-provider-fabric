@@ -21,18 +21,16 @@ BASE MODEL
 */
 
 type baseShortcutModel struct {
-	ID                     types.String                                      `tfsdk:"id"`
-	Name                   types.String                                      `tfsdk:"name"`
-	Path                   types.String                                      `tfsdk:"path"`
-	Target                 supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
-	WorkspaceID            customtypes.UUID                                  `tfsdk:"workspace_id"`
-	ItemID                 customtypes.UUID                                  `tfsdk:"item_id"`
-	ShortcutConflictPolicy types.String                                      `tfsdk:"shortcut_conflict_policy"`
+	ID          types.String                                      `tfsdk:"id"`
+	Name        types.String                                      `tfsdk:"name"`
+	Path        types.String                                      `tfsdk:"path"`
+	Target      supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
+	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID                                  `tfsdk:"item_id"`
 }
 
 type targetModel struct {
 	Onelake            supertypes.SingleNestedObjectValueOf[oneLakeModel]       `tfsdk:"onelake"`
-	Type               types.String                                             `tfsdk:"type"`
 	AdlsGen2           supertypes.SingleNestedObjectValueOf[adlsGen2]           `tfsdk:"adls_gen2"`
 	AmazonS3           supertypes.SingleNestedObjectValueOf[amazonS3]           `tfsdk:"amazon_s3"`
 	Dataverse          supertypes.SingleNestedObjectValueOf[dataverse]          `tfsdk:"dataverse"`
@@ -79,23 +77,10 @@ type externalDataShare struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
 }
 
-func (to *baseShortcutModel) setModelWithShortcutConflictPolicy(ctx context.Context, workspaceID, itemID, shortcutConflictPolicy string, from fabcore.Shortcut) diag.Diagnostics {
-	if shortcutConflictPolicy != "" {
-		to.ShortcutConflictPolicy = types.StringValue(shortcutConflictPolicy)
-	}
-
-	diags := to.set(ctx, workspaceID, itemID, from)
-	if diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
 	to.Path = types.StringPointerValue(from.Path)
-	concatenatedString := to.Name.ValueString() + to.Path.ValueString()
+	concatenatedString := to.Name.ValueString() + to.Path.ValueString() + workspaceID + itemID
 	to.ID = types.StringPointerValue(&concatenatedString)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
@@ -118,10 +103,6 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 
 func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
-
-	// Set the type
-	to.Type = types.StringPointerValue((*string)(from.Type))
-
 	// Initialize all nested objects to null
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
 	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[adlsGen2](ctx)

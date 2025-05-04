@@ -14,9 +14,9 @@ var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.Pro
 
 func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
+
 	entityTargetPath := "Files/images"
-	entityType := "OneLake"
-	entityUpdatedTargetPath := "Files/sample_datasets"
+	entityUpdatedTargetPath := "Files/sample_dataset"
 	workspaceId := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
 	lakehouseId := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
@@ -31,7 +31,6 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 					"name":         entityCreateDisplayName,
 					"path":         "Files",
 					"target": map[string]any{
-						"type": entityType,
 						"onelake": map[string]any{
 							"workspace_id": workspaceId,
 							"item_id":      lakehouseId,
@@ -45,7 +44,6 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", entityType),
 			),
 		},
 		// Update - Create with OverwriteOnly and Read
@@ -54,13 +52,11 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":                  lakehouseId,
-					"workspace_id":             workspaceId,
-					"shortcut_conflict_policy": "OverwriteOnly",
-					"name":                     entityCreateDisplayName,
-					"path":                     "Files",
+					"item_id":      lakehouseId,
+					"workspace_id": workspaceId,
+					"name":         entityCreateDisplayName,
+					"path":         "Files",
 					"target": map[string]any{
-						"type": entityType,
 						"onelake": map[string]any{
 							"workspace_id": workspaceId,
 							"item_id":      lakehouseId,
@@ -74,7 +70,6 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", entityType),
 			),
 		},
 	},
