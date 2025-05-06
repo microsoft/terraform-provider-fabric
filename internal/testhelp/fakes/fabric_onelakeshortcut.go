@@ -130,7 +130,7 @@ func configureOneLakeShortcut(server *fakeServer) fabcore.Shortcut {
 func NewRandomOnelakeShortcut() fabcore.Shortcut {
 	return fabcore.Shortcut{
 		Name:   to.Ptr(testhelp.RandomName()),
-		Path:   to.Ptr(testhelp.RandomURI()),
+		Path:   to.Ptr(testhelp.RandomName()),
 		Target: NewRandomOnelakeShortcutTarget(),
 	}
 }
@@ -144,7 +144,7 @@ func NewRandomOnelakeShortcutTarget() *fabcore.Target {
 func NewRandomOneLakeShortcutTargetOneLake() *fabcore.OneLake {
 	return &fabcore.OneLake{
 		ItemID:      to.Ptr(testhelp.RandomUUID()),
-		Path:        to.Ptr(testhelp.RandomURI()),
+		Path:        to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 	}
 }

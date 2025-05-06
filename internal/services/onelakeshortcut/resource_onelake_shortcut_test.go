@@ -90,13 +90,13 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// {
-		// 	ResourceName:  testResourceItemFQN,
-		// 	Config:        testCase,
-		// 	ImportStateId: "not-valid",
-		// 	ImportState:   true,
-		// 	ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "<WorkspaceID>/<ItemID>/<Path>/<Name>")),
-		// },
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "not-valid",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name")),
+		},
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,

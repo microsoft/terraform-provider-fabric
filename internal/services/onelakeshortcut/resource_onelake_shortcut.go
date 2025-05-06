@@ -6,7 +6,9 @@ package onelakeshortcut
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -38,16 +40,48 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
-	tflog.Trace(ctx, "IMPORT", map[string]any{
-		"id": req.ID,
-	})
 
-	_, diags := customtypes.NewUUIDValueMust(req.ID)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+	parts := strings.Split(req.ID, "/")
+	if len(parts) != 4 {
+		resp.Diagnostics.AddError(
+			common.ErrorImportIdentifierHeader,
+			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name"),
+		)
 		return
 	}
 
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	workspaceID, itemID, shortcutPath, name := parts[0], parts[1], parts[2], parts[3]
+
+	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
+	resp.Diagnostics.Append(diags...)
+
+	uuitemID, diags := customtypes.NewUUIDValueMust(itemID)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var timeout timeouts.Value
+	if resp.Diagnostics.Append(resp.State.GetAttribute(ctx, path.Root("timeouts"), &timeout)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	state := resourceOneLakeShortcutModel{
+		baseShortcutModel: baseShortcutModel{
+			ItemID:      uuitemID,
+			WorkspaceID: uuidWorkspaceID,
+			Name:        types.StringValue(name),
+			Path:        types.StringValue(shortcutPath),
+		},
+		Timeouts: timeout,
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "end",
