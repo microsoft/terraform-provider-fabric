@@ -4,18 +4,80 @@
 package onelakeshortcut_test
 
 import (
+	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
-func TestAcc_WorkspaceManagedPrivateEndpointsDataSource(t *testing.T) {
+func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemId := testhelp.RandomUUID()
+	entity := fakes.NewRandomOnelakeShortcut()
+
+	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - no attributes
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{},
+			),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
+		},
+		// error - workspace_id - invalid UUID
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id": "invalid uuid",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - unexpected_attr
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id":    workspaceID,
+					"unexpected_attr": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemId,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.target.onelake.workspace_id"),
+			),
+		},
+	}))
+}
+
+func TestAcc_OnelakeShortcutsDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	itemID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)

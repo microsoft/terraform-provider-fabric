@@ -8,12 +8,14 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
@@ -21,13 +23,105 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithConfigure      = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithImportState    = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithValidateConfig = (*resourceOnelakeShortcut)(nil)
 )
 
 type resourceOnelakeShortcut struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.OneLakeShortcutsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
+}
+
+func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "IMPORT", map[string]any{
+		"id": req.ID,
+	})
+
+	_, diags := customtypes.NewUUIDValueMust(req.ID)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (r *resourceOnelakeShortcut) ValidateConfig(
+	ctx context.Context,
+	req resource.ValidateConfigRequest,
+	resp *resource.ValidateConfigResponse,
+) {
+	var config resourceOneLakeShortcutModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var (
+		targetConfig *targetModel
+		diags        diag.Diagnostics
+	)
+	if !config.Target.IsNull() && !config.Target.IsUnknown() {
+		targetConfig, diags = config.Target.Get(ctx)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("target"),
+			"Missing target block",
+			"You must specify exactly one of onelake, adls_gen2, amazon_s3, google_cloud_storage, s3_compatible, external_data_share or dataverse.",
+		)
+		return
+	}
+
+	count := 0
+
+	if !targetConfig.Onelake.IsNull() && !targetConfig.Onelake.IsUnknown() {
+		count++
+	}
+	if !targetConfig.AdlsGen2.IsNull() && !targetConfig.AdlsGen2.IsUnknown() {
+		count++
+	}
+	if !targetConfig.AmazonS3.IsNull() && !targetConfig.AmazonS3.IsUnknown() {
+		count++
+	}
+	if !targetConfig.GoogleCloudStorage.IsNull() && !targetConfig.GoogleCloudStorage.IsUnknown() {
+		count++
+	}
+	if !targetConfig.S3Compatible.IsNull() && !targetConfig.S3Compatible.IsUnknown() {
+		count++
+	}
+	if !targetConfig.ExternalDataShare.IsNull() && !targetConfig.ExternalDataShare.IsUnknown() {
+		count++
+	}
+	if !targetConfig.Dataverse.IsNull() && !targetConfig.Dataverse.IsUnknown() {
+		count++
+	}
+
+	if count != 1 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("target"),
+			"Exactly one target type must be specified",
+			fmt.Sprintf(
+				"You have configured %d targets; please set exactly one of onelake, adls_gen2, amazon_s3, google_cloud_storage, s3_compatible, external_data_share or dataverse.",
+				count,
+			),
+		)
+	}
 }
 
 func NewResourceOneLakeShortcut() resource.Resource {

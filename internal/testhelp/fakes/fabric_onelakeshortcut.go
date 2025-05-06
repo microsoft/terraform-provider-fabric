@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package fakes
 
 import (
@@ -12,25 +15,17 @@ import (
 
 type operationsOneLakeShortcut struct{}
 
-func (o *operationsOneLakeShortcut) GetID(entity fabcore.Shortcut) string {
-	return *entity.Target.OneLake.ItemID
-}
-
-func (o *operationsOneLakeShortcut) GetIDWithParentID(_ string, entity fabcore.Shortcut) string {
-	return *entity.Target.OneLake.ItemID
-}
-
 func (o *operationsOneLakeShortcut) Create(data fabcore.CreateShortcutRequest) fabcore.Shortcut {
 	entity := NewRandomOnelakeShortcut()
 	entity.Name = data.Name
-
-	return entity
-}
-
-// CreateWithParentID implements concreteOperations.
-func (o *operationsOneLakeShortcut) CreateWithParentID(_ string, data fabcore.Shortcut) fabcore.Shortcut {
-	entity := NewRandomOnelakeShortcut()
-	entity.Name = data.Name
+	entity.Path = data.Path
+	entity.Target = &fabcore.Target{
+		OneLake: &fabcore.OneLake{
+			ItemID:      data.Target.OneLake.ItemID,
+			WorkspaceID: data.Target.OneLake.WorkspaceID,
+			Path:        data.Target.OneLake.Path,
+		},
+	}
 
 	return entity
 }
@@ -142,7 +137,6 @@ func NewRandomOnelakeShortcut() fabcore.Shortcut {
 
 func NewRandomOnelakeShortcutTarget() *fabcore.Target {
 	return &fabcore.Target{
-		Type:    to.Ptr(fabcore.TypeOneLake),
 		OneLake: NewRandomOneLakeShortcutTargetOneLake(),
 	}
 }

@@ -4,6 +4,7 @@
 package onelakeshortcut_test
 
 import (
+	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -26,79 +27,138 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// read by name
+		// error - no attributes
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{},
+			),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
+		},
+		// error - unexpected attribute
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"item_id":      itemId,
-					"workspace_id": workspaceID,
-					"name":         entity.Name,
-					"path":         entity.Path,
+					"workspace_id":    workspaceID,
+					"unexpected_attr": "test",
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.Name),
-			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
+		// missing item_id attribute
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found`),
+		},
+		// missing path attribute
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemId,
+				},
+			),
+			ExpectError: regexp.MustCompile(`parameter shortcutPath cannot be empty`),
+		},
+		// missing name attribute
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemId,
+					"path":         "Files",
+				},
+			),
+			ExpectError: regexp.MustCompile(`These attributes must be configured together: \[path,name\]`),
+		},
+		// read
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"workspace_id": workspaceID,
+		// 			"item_id":      itemId,
+		// 			"name":         *entity.Name,
+		// 			"path":         *entity.Path,
+		// 		},
+		// 	),
+		// Check: resource.ComposeAggregateTestCheckFunc(
+		// 	resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", entity.Name),
+		// 	resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", entity.Path),
+		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
+		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
+		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.item_id"),
+		// ),
+		// },
+		// read - not found
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"workspace_id": workspaceID,
+		// 			"item_id":      testhelp.RandomUUID(),
+		// 			"name":         *entity.Name,
+		// 			"path":         *entity.Path,
+		// 		},
+		// 	),
+		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		// },
 	}))
 }
 
 func TestAcc_WorkspaceDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
+	workspaceID := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
 	itemID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
-	// onelake := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)
+	tableName := testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read by id
+		// error - no attributes
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{},
+			),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
+		},
+		// read
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         "publicholidays_1",
-					"path":         "/Tables",
+					"name":         tableName,
+					"path":         "Tables",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", tableName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", "Tables"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.item_id"),
 			),
 		},
-		// // read by id - not found
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"id": testhelp.RandomUUID(),
-		// 		},
-		// 	),
-		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		// },
-		// // read by name
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"display_name": entityDisplayName,
-		// 		},
-		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-		// 	),
-		// },
-		// // read by name - not found
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"display_name": testhelp.RandomName(),
-		// 		},
-		// 	),
-		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		// },
+		// read - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"name":         testhelp.RandomName(),
+					"path":         "Tables",
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
 	}))
 }

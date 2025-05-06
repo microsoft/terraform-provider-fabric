@@ -1072,6 +1072,8 @@ if (!$result) {
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
+#when populating the lakehouse with publicholidays sample data, it will create the images folder under Files
+$wellKnown['Lakehouse']['filesFolder'] = 'images'
 
 $displayNameTemp = "${displayName}_$($itemNaming['Dashboard'])"
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dashboards"
