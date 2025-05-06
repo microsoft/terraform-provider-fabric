@@ -4,7 +4,7 @@
 package onelakeshortcut_test
 
 import (
-	//"errors"
+	//"errors".
 	"errors"
 	"fmt"
 	"regexp"

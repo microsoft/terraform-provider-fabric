@@ -65,6 +65,7 @@ func (r *resourceOnelakeShortcut) ValidateConfig(
 ) {
 	var config resourceOneLakeShortcutModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -73,9 +74,11 @@ func (r *resourceOnelakeShortcut) ValidateConfig(
 		targetConfig *targetModel
 		diags        diag.Diagnostics
 	)
+
 	if !config.Target.IsNull() && !config.Target.IsUnknown() {
 		targetConfig, diags = config.Target.Get(ctx)
 		resp.Diagnostics.Append(diags...)
+
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -85,6 +88,7 @@ func (r *resourceOnelakeShortcut) ValidateConfig(
 			"Missing target block",
 			"You must specify exactly one of onelake, adls_gen2, amazon_s3, google_cloud_storage, s3_compatible, external_data_share or dataverse.",
 		)
+
 		return
 	}
 
@@ -93,21 +97,27 @@ func (r *resourceOnelakeShortcut) ValidateConfig(
 	if !targetConfig.Onelake.IsNull() && !targetConfig.Onelake.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.AdlsGen2.IsNull() && !targetConfig.AdlsGen2.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.AmazonS3.IsNull() && !targetConfig.AmazonS3.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.GoogleCloudStorage.IsNull() && !targetConfig.GoogleCloudStorage.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.S3Compatible.IsNull() && !targetConfig.S3Compatible.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.ExternalDataShare.IsNull() && !targetConfig.ExternalDataShare.IsUnknown() {
 		count++
 	}
+
 	if !targetConfig.Dataverse.IsNull() && !targetConfig.Dataverse.IsUnknown() {
 		count++
 	}
@@ -192,7 +202,8 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
-	state.ID = types.StringValue(*respCreate.Shortcut.Name + *respCreate.Shortcut.Path)
+
+	state.ID = types.StringValue(*respCreate.Name + *respCreate.Path)
 
 	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return

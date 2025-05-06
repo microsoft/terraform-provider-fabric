@@ -87,15 +87,18 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 
 	target := supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
+
 	if from.Target != nil {
 		targetModel := &targetModel{}
 		if diags := targetModel.set(ctx, from.Target); diags.HasError() {
 			return diags
 		}
+
 		if diags := target.Set(ctx, targetModel); diags.HasError() {
 			return diags
 		}
 	}
+
 	to.Target = target
 
 	return nil
@@ -121,6 +124,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.Onelake = supertypes.NewSingleNestedObjectValueOf(ctx, onelakeModel)
 	}
+
 	if from.AdlsGen2 != nil {
 		adlsGen2Model := &adlsGen2{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.AdlsGen2.ConnectionID),
@@ -129,6 +133,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOf(ctx, adlsGen2Model)
 	}
+
 	if from.AmazonS3 != nil {
 		amazonS3Model := &amazonS3{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.AmazonS3.ConnectionID),
@@ -137,6 +142,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.AmazonS3 = supertypes.NewSingleNestedObjectValueOf(ctx, amazonS3Model)
 	}
+
 	if from.Dataverse != nil {
 		dataverseModel := &dataverse{
 			ConnectionID:      customtypes.NewUUIDPointerValue(from.Dataverse.ConnectionID),
@@ -146,6 +152,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.Dataverse = supertypes.NewSingleNestedObjectValueOf(ctx, dataverseModel)
 	}
+
 	if from.GoogleCloudStorage != nil {
 		googleStorageCloudModel := &googleCloudStorage{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.GoogleCloudStorage.ConnectionID),
@@ -154,6 +161,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.GoogleCloudStorage = supertypes.NewSingleNestedObjectValueOf(ctx, googleStorageCloudModel)
 	}
+
 	if from.S3Compatible != nil {
 		s3CompatibleModel := &s3Compatible{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.S3Compatible.ConnectionID),
@@ -163,6 +171,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.S3Compatible = supertypes.NewSingleNestedObjectValueOf(ctx, s3CompatibleModel)
 	}
+
 	if from.ExternalDataShare != nil {
 		externalDataShareModel := &externalDataShare{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.ExternalDataShare.ConnectionID),
@@ -226,12 +235,14 @@ func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOn
 	if diags.HasError() {
 		return diags
 	}
+
 	to.Target = &fabcore.CreatableShortcutTarget{
 		OneLake: func() *fabcore.OneLake {
 			onelake, diags := target.Onelake.Get(ctx)
 			if diags.HasError() || onelake == nil {
 				return nil
 			}
+
 			return &fabcore.OneLake{
 				ItemID:      onelake.ItemId.ValueStringPointer(),
 				Path:        onelake.Path.ValueStringPointer(),
