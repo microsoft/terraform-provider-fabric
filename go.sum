@@ -179,8 +179,8 @@ github.com/orange-cloudavenue/terraform-plugin-framework-superschema v1.11.0 h1:
 github.com/orange-cloudavenue/terraform-plugin-framework-superschema v1.11.0/go.mod h1:2R4+FiimXRb6we3IP4Jy4XwkmPG17isxcjUfYEWLJ44=
 github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v1.2.0 h1:tvDLBfqkKQdlcPyb3dZsZMM52mpzVpys2a9ar/38ulE=
 github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v1.2.0/go.mod h1:5SJrMDAHcQopy+p9Oq3anoaqclPZgTs27b0WQ3J97E0=
-github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.15.0 h1:HV90eiPGBVZ/eS4W0PI7uzxLXIKGqfl3UCLx5Euqb/Y=
-github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.15.0/go.mod h1:XRoHgbq0xhmUvb3Ti5EiwBaL4r/FHM+eawMH/m7gIqw=
+github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.16.0 h1:e3mTXKilFC1kYZWIMrMfgRHlKxYEplmC0DTwKx9C/C4=
+github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.16.0/go.mod h1:XRoHgbq0xhmUvb3Ti5EiwBaL4r/FHM+eawMH/m7gIqw=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
 github.com/pjbgf/sha1cd v0.3.0/go.mod h1:nZ1rrWOcGJ5uZgEEVL1VUM9iRQiZvWdbZjkKyFzPPsI=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
