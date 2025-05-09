@@ -48,6 +48,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureWarehouse)
 	handleEntity(server, configureWorkspace)
 	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
+	handleEntity(server, configureOneLakeShortcut)
 
 	return server
 }
