@@ -282,6 +282,8 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 
 func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 	entity := testhelp.WellKnown()["DeploymentPipeline"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	rawStagesAny := entity["stages"].([]any)
 	// stage 1
@@ -322,6 +324,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 							"display_name": entityStage1Name,
 							"description":  entityStage1Name,
 							"is_public":    entityStage1IsPublicRandom,
+							"workspace_id": workspaceID,
 						},
 						{
 							"display_name": entityStage2Name,
@@ -337,9 +340,42 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", entityStage1Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", entityStage1Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublicRandom)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entityCreateDisplayName,
+					"stages": []map[string]any{
+						{
+							"display_name": entityStage1DisplayName,
+							"description":  entityStage1Description,
+							"is_public":    entityStage1IsPublic,
+						},
+						{
+							"display_name": entityStage2DisplayName,
+							"description":  entityStage2Description,
+							"is_public":    entityStage2IsPublic,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", entityStage1DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", entityStage1Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublic)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", entityStage2DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublic)),
 			),
 		},
 		// Update and Read

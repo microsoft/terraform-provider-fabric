@@ -52,6 +52,30 @@ func (to *baseDeploymentPipelineModel) setExtendedInfo(from fabcore.DeploymentPi
 	to.Description = types.StringPointerValue(from.Description)
 }
 
+func (to *baseDeploymentPipelineExtendedInfoModel) setStages(ctx context.Context, from []*baseDeploymentPipelineStageModel) diag.Diagnostics {
+	slice := make([]*baseDeploymentPipelineStageModel, 0, len(from))
+
+	for _, entity := range from {
+		var entityModel baseDeploymentPipelineStageModel
+
+		entityModel.ID = entity.ID
+		entityModel.Order = entity.Order
+		entityModel.WorkspaceID = entity.WorkspaceID
+		entityModel.WorkspaceName = entity.WorkspaceName
+		entityModel.DisplayName = entity.DisplayName
+		entityModel.Description = entity.Description
+		entityModel.IsPublic = entity.IsPublic
+
+		slice = append(slice, &entityModel)
+	}
+
+	if diags := to.Stages.Set(ctx, slice); diags.HasError() {
+		return diags
+	}
+
+	return nil
+}
+
 func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from fabcore.DeploymentPipelineExtendedInfo) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
@@ -123,6 +147,15 @@ type requestCreateDeploymentPipeline struct {
 	fabcore.CreateDeploymentPipelineRequest
 }
 
+type requestAssignStageToWorkspace struct {
+	fabcore.DeploymentPipelineAssignWorkspaceRequest
+}
+
+func (to *requestAssignStageToWorkspace) set(from baseDeploymentPipelineStageModel) {
+	to.WorkspaceID = from.WorkspaceID.ValueStringPointer()
+	to.DeploymentPipelineAssignWorkspaceRequest.WorkspaceID = from.WorkspaceID.ValueStringPointer()
+}
+
 func (to *requestCreateDeploymentPipeline) set(ctx context.Context, from resourceDeploymentPipelineModel) diag.Diagnostics {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
@@ -149,4 +182,22 @@ type requestUpdateDeploymentPipeline struct {
 func (to *requestUpdateDeploymentPipeline) set(from resourceDeploymentPipelineModel) {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
+}
+
+type requestUpdateDeploymentPipelineStage struct {
+	fabcore.DeploymentPipelineStageRequest
+}
+
+func (to *requestUpdateDeploymentPipelineStage) set(from baseDeploymentPipelineStageModel) {
+	to.DisplayName = from.DisplayName.ValueStringPointer()
+	to.Description = from.Description.ValueStringPointer()
+	to.IsPublic = from.IsPublic.ValueBoolPointer()
+}
+
+func (to *baseDeploymentPipelineStageModel) set(from fabcore.DeploymentPipelineStage) {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Order = types.Int32PointerValue(from.Order)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+	to.Description = types.StringPointerValue(from.Description)
+	to.IsPublic = types.BoolPointerValue(from.IsPublic)
 }

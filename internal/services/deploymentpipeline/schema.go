@@ -123,6 +123,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						CustomType:          customtypes.UUIDType{},
 					},
 					Resource: &schemaR.StringAttribute{
+						Optional: true,
 						Computed: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
