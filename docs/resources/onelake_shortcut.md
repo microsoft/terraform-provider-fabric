@@ -151,6 +151,10 @@ Optional:
 - `onelake` (Attributes) An object containing the properties of the target OneLake data source. (see [below for nested schema](#nestedatt--target--onelake))
 - `s3_compatible` (Attributes) An object containing the properties of the target S3 compatible data source. (see [below for nested schema](#nestedatt--target--s3_compatible))
 
+Read-Only:
+
+- `type` (String) The OneLake Shortcut target type. Value must be one of : `AdlsGen2`, `AmazonS3`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`.
+
 <a id="nestedatt--target--adls_gen2"></a>
 
 ### Nested Schema for `target.adls_gen2`

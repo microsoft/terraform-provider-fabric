@@ -165,6 +165,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
 		},
 		// Update - Create with OverwriteOnly and Read
@@ -191,6 +192,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
 		},
 	},

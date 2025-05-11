@@ -30,6 +30,7 @@ type baseShortcutModel struct {
 }
 
 type targetModel struct {
+	Type               types.String                                             `tfsdk:"type"`
 	Onelake            supertypes.SingleNestedObjectValueOf[oneLakeModel]       `tfsdk:"onelake"`
 	AdlsGen2           supertypes.SingleNestedObjectValueOf[adlsGen2]           `tfsdk:"adls_gen2"`
 	AmazonS3           supertypes.SingleNestedObjectValueOf[amazonS3]           `tfsdk:"amazon_s3"`
@@ -106,6 +107,8 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 
 func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
+
+	to.Type = types.StringPointerValue((*string)(from.Type))
 	// Initialize all nested objects to null
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
 	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[adlsGen2](ctx)

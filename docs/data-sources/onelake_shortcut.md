@@ -16,11 +16,11 @@ The OneLake Shortcut data-source allows you to retrieve details about a Fabric [
 ## Example Usage
 
 ```terraform
-data "fabric_onelake_shortcut" "example_by_name_path_wsid_itemid" {
-  name   = "MyShortcutName"
-  path   = "/MyShortcutPath"
-  wsid   = "00000000-0000-0000-0000-000000000000"
-  itemid = "00000000-0000-0000-0000-000000000000"
+data "fabric_onelake_shortcut" "example_by_name_path_workspaceid_itemid" {
+  name         = "MyShortcutName"
+  path         = "/MyShortcutPath"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  item_id      = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -55,7 +55,7 @@ Optional:
 
 ### Nested Schema for `target`
 
-Optional:
+Read-Only:
 
 - `adls_gen2` (Attributes) An object containing the properties of the target ADLS Gen2 data source. (see [below for nested schema](#nestedatt--target--adls_gen2))
 - `amazon_s3` (Attributes) An object containing the properties of the target Amazon S3 data source. (see [below for nested schema](#nestedatt--target--amazon_s3))
@@ -64,6 +64,7 @@ Optional:
 - `google_cloud_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--google_cloud_storage))
 - `onelake` (Attributes) An object containing the properties of the target OneLake data source. (see [below for nested schema](#nestedatt--target--onelake))
 - `s3_compatible` (Attributes) An object containing the properties of the target S3 compatible data source. (see [below for nested schema](#nestedatt--target--s3_compatible))
+- `type` (String) The OneLake Shortcut target type. Value must be one of : `AdlsGen2`, `AmazonS3`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`.
 
 <a id="nestedatt--target--adls_gen2"></a>
 

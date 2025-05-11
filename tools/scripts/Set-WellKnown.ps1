@@ -838,6 +838,7 @@ $itemNaming = @{
   'MLModel'                = 'mlm'
   'MountedDataFactory'     = 'mdf'
   'Notebook'               = 'nb'
+  'OneLakeShortcut'        = 'ols'
   'PaginatedReport'        = 'prpt'
   'Reflex'                 = 'rx'
   'Report'                 = 'rpt'
@@ -1073,7 +1074,7 @@ if (!$result) {
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
 #when populating the lakehouse with publicholidays sample data, it will create the images folder under Files
-$wellKnown['Lakehouse']['filesFolder'] = 'images'
+$wellKnown['Lakehouse']['filesFolder'] = 'Files/images'
 
 $displayNameTemp = "${displayName}_$($itemNaming['Dashboard'])"
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dashboards"
@@ -1298,69 +1299,26 @@ function Set-OneLakeShortcut {
     [string]$ShortcutName,
 
     [Parameter(Mandatory = $true)]
-    [string]$ShortcutPath,
+    [string]$Path,
 
     [Parameter(Mandatory = $true)]
-    [string]$TargetWorkspaceId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$TargetItemId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$TargetPath
+    [string]$Payload
   )
 
-  # Construct the payload for the shortcut creation
-  $payload = @{
-    path   = $ShortcutPath
-    name   = $ShortcutName
-    target = @{
-      oneLake = @{
-        workspaceId = $TargetWorkspaceId
-        itemId      = $TargetItemId
-        path        = $TargetPath
-      }
-    }
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
+  $result = $results.Response.value | Where-Object { $_.name -eq $ShortcutName -and $_.path -eq $Path }
+
+  if (!$result) {
+    Write-Log -Message "Creating OneLake Shortcut: $ShortcutName" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts?shortcutConflictPolicy=CreateOrOverwrite" -Payload $Payload).Response
   }
 
-  # API endpoint for creating the shortcut
-  $endpoint = "workspaces/$WorkspaceId/items/$ItemId/shortcuts?shortcutConflictPolicy=CreateOrOverwrite"
+  Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
 
-  Write-Log -Message "Creating OneLake Shortcut: $ShortcutName in Workspace: $WorkspaceId" -Level 'WARN'
-
-  # Make the API call
-  $result = Invoke-FabricRest -Method 'POST' -Endpoint $endpoint -Payload $payload
-
-  Write-Log -Message "OneLake Shortcut - Name: $($result.Response.name) / Path: $($result.Response.path)" -Level 'INFO'
-
-  return $result.Response
+  return $result
 }
 
-# Define the parameters for the OneLake shortcut
-$workspaceId = $wellKnown['WorkspaceDS'].id
-$itemId = $wellKnown['Lakehouse'].id
-$shortcutName = "MyOneLakeShortcut"
-$shortcutPath = "Tables"
-$targetWorkspaceId = $wellKnown['WorkspaceDS'].id
-$targetItemId = $wellKnown['Lakehouse'].id
-$targetPath = "Tables/publicholidays"
-
-# Create the OneLake shortcut
-$oneLakeShortcut = Set-OneLakeShortcut `
-  -WorkspaceId $workspaceId `
-  -ItemId $itemId `
-  -ShortcutName $shortcutName `
-  -ShortcutPath $shortcutPath `
-  -TargetWorkspaceId $targetWorkspaceId `
-  -TargetItemId $targetItemId `
-  -TargetPath $targetPath
-
-# Add the shortcut details to the well-known object
-$wellKnown['OneLakeShortcut'] = @{
-  id   = $oneLakeShortcut.id
-  name = $oneLakeShortcut.name
-  path = $oneLakeShortcut.path
-}
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
 
 # Create the Azure Data Factory if not exists
@@ -1406,6 +1364,37 @@ $wellKnown['MountedDataFactory'] = @{
 $wellKnown['Azure'] = @{
   subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
   location       = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
+
+Write-Log -Message "name temp: $displayNameTemp" -Level 'WARN'
+$onelakeShortcutPayload = @{
+  path   = "Files"
+  name   = $displayNameTemp
+  target = @{
+    onelake = @{
+      workspaceId = $wellKnown['WorkspaceDS'].id
+      itemId      = $wellKnown['Lakehouse'].id
+      path        = "Files/images"
+    }
+  }
+}
+
+$oneLakeShortcut = Set-OneLakeShortcut `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id`
+  -ItemId $wellKnown['Lakehouse'].id `
+  -ShortcutName $displayNameTemp `
+  -Path "Files" `
+  -Payload $onelakeShortcutPayload
+
+Write-Log -Message "Creating OneLake Shortcut: $oneLakeShortcut" -Level 'WARN'
+
+$wellKnown['OneLakeShortcut'] = @{
+  $ShortcutName = $oneLakeShortcut.Name
+  $ShortcutPath = $oneLakeShortcut.Path
+  WorkspaceId   = $wellKnown['WorkspaceDS'].id
+  LakehouseId   = $wellKnown['Lakehouse'].id
 }
 
 # Save wellknown.json file
