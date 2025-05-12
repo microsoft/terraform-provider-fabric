@@ -1296,22 +1296,20 @@ function Set-OneLakeShortcut {
     [string]$ItemId,
 
     [Parameter(Mandatory = $true)]
-    [string]$ShortcutName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Path,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Payload
+    [object]$Payload
   )
 
+  $shortcutName = $Payload.name
+  $path = $Payload.path
+
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
-  $result = $results.Response.value | Where-Object { $_.name -eq $ShortcutName -and $_.path -eq $Path }
+  $result = $results.Response.value | Where-Object { $_.name -eq $shortcutName -and ($_.path.TrimStart('/') -eq $path.TrimStart('/')) }
 
   if (!$result) {
-    Write-Log -Message "Creating OneLake Shortcut: $ShortcutName" -Level 'WARN'
+    Write-Log -Message "Creating OneLake Shortcut: $shortcutName" -Level 'WARN'
 
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts?shortcutConflictPolicy=CreateOrOverwrite" -Payload $Payload).Response
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+
   }
 
   Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
@@ -1367,16 +1365,15 @@ $wellKnown['Azure'] = @{
 }
 
 $displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
-
-Write-Log -Message "name temp: $displayNameTemp" -Level 'WARN'
+$shortcutPath = "Tables"
 $onelakeShortcutPayload = @{
-  path   = "Files"
+  path   = $shortcutPath
   name   = $displayNameTemp
   target = @{
-    onelake = @{
+    OneLake = @{
       workspaceId = $wellKnown['WorkspaceDS'].id
       itemId      = $wellKnown['Lakehouse'].id
-      path        = "Files/images"
+      path        = $shortcutPath + "/" + $wellKnown['Lakehouse'].tableName
     }
   }
 }
@@ -1384,17 +1381,13 @@ $onelakeShortcutPayload = @{
 $oneLakeShortcut = Set-OneLakeShortcut `
   -WorkspaceId $wellKnown['WorkspaceDS'].id`
   -ItemId $wellKnown['Lakehouse'].id `
-  -ShortcutName $displayNameTemp `
-  -Path "Files" `
   -Payload $onelakeShortcutPayload
 
-Write-Log -Message "Creating OneLake Shortcut: $oneLakeShortcut" -Level 'WARN'
-
 $wellKnown['OneLakeShortcut'] = @{
-  $ShortcutName = $oneLakeShortcut.Name
-  $ShortcutPath = $oneLakeShortcut.Path
-  WorkspaceId   = $wellKnown['WorkspaceDS'].id
-  LakehouseId   = $wellKnown['Lakehouse'].id
+  ShortcutName = $oneLakeShortcut.name
+  ShortcutPath = $oneLakeShortcut.Path
+  WorkspaceId  = $wellKnown['WorkspaceDS'].id
+  LakehouseId  = $wellKnown['Lakehouse'].id
 }
 
 # Save wellknown.json file
