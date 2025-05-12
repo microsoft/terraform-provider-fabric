@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+---
+name: 🔽 Provider Ephemeral Resource Request
+description: Request a new ephemeral resource to be added to the Terraform Provider
+title: "[DS] "
+labels: ["tf/ephemeral"]
+type: Feature
+projects: ["microsoft/1018"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Description
+      description: |
+        Short description here describing the new ephemeral resource that you're requesting.
+        Include a use case for why users need this ephemeral resource.
+        Try to follow the Job Story format: "When [situation] I want to [motivation] so I can [expected outcome]". Learn more about Job Stories: https://www.mountaingoatsoftware.com/blog/job-stories-offer-a-viable-alternative-to-user-stories
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: 🔬 Details / References
+      description: Example Details
+      placeholder: |
+        - Ephemeral Resource Name: `fabric_[your ephemeral resource name]`
+        - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
+        - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
+        - Related resources/data-sources: <!-- are there any existing or potential data sources that are related to this one -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
+      value: |
+        - Ephemeral Resource Name: `fabric_[your ephemeral resource name]`
+        - API documentation: <!-- links to API documentation (if public). What APIs are needed for read/list data? -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
+        - Estimated complexity/effort: <!-- (e.g., easy, moderate, hard) -->
+        - Related resources/data-sources: <!-- are there any existing or potential data sources that are related to this one -->
+          - <!-- link 1 -->
+          - <!-- link 2 -->
+    validations:
+      required: false
+
+  - type: textarea
+    id: tf-configuration
+    attributes:
+      label: 🚧 Potential Terraform Configuration / Desired Solution
+      description: Sample Terraform config (and related) that describes how the new ephemeral resource might look.
+      placeholder: |
+        ```terraform
+        ephemeral "fabric_[your ephemeral resource name]" "example" {
+          name = "example"
+          parameter1 = "value1"
+          parameter2 = "value2"
+        }
+        ```
+      value: |
+        ```terraform
+        ephemeral "fabric_[your ephemeral resource name]" "example" {
+          name = "example"
+          parameter1 = "value1"
+          parameter2 = "value2"
+        }
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context or screenshots about the feature request here.
+      placeholder: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ☑️ Acceptance Criteria
+      description: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+      placeholder: The functional criteria for the acceptance of this feature include a description of the expected behavior of the feature.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: done-definition
+    attributes:
+      label: ✅ Definition of Done
+      description: Necessary criteria for a task or feature to be considered complete.
+      options:
+        - label: Data Transfer Objects (DTOs)
+          required: false
+        - label: Ephemeral Resource Implementation
+          required: false
+        - label: Ephemeral Resource Added to Provider
+          required: false
+        - label: Unit Tests for Happy path
+          required: false
+        - label: Unit Tests for Error path
+          required: false
+        - label: Acceptance Tests
+          required: false
+        - label: Example in the ./examples folder
+          required: false
+        - label: Schema documentation in code
+          required: false
+        - label: Updated auto-generated provider docs with `task docs`
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 🔰 Code of Conduct
+      description: By submitting this issue, you agree to follow our [`Code of Conduct`](../blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true
