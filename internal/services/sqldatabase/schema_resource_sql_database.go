@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-func getResourceSqlDatabasePropertiesAttributes() map[string]schema.Attribute {
+func getResourceSQLDatabasePropertiesAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"connection_string": schema.StringAttribute{
 			MarkdownDescription: "The connection string of the database.",

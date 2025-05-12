@@ -15,7 +15,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
-func NewDataSourceSQLDatabases(ctx context.Context) datasource.DataSource {
+func NewDataSourceSQLDatabases() datasource.DataSource {
 	propertiesSetter := func(ctx context.Context, from *fabsqldatabase.Properties, to *fabricitem.FabricItemPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[sqlDatabasePropertiesModel](ctx)
 
@@ -61,7 +61,7 @@ func NewDataSourceSQLDatabases(ctx context.Context) datasource.DataSource {
 			TypeInfo:       ItemTypeInfo,
 			FabricItemType: FabricItemType,
 		},
-		PropertiesAttributes: getDataSourceSqlDatabasePropertiesAttributes(),
+		PropertiesAttributes: getDataSourceSQLDatabasePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,
 	}
