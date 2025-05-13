@@ -8,7 +8,7 @@ import (
 
 // Credentials is the base structure for all credential types
 type Credentials struct {
-	credentialType fabcore.CredentialType
+	Type           fabcore.CredentialType
 	CredentialData []CredentialEntry `json:"credentialData"`
 }
 
@@ -20,7 +20,7 @@ type CredentialEntry struct {
 // NewAnonymousCredentials creates a new instance of AnonymousCredentials
 func NewAnonymousCredentials() (*Credentials, error) {
 	creds := Credentials{
-		credentialType: fabcore.CredentialTypeAnonymous,
+		Type:           fabcore.CredentialTypeAnonymous,
 		CredentialData: make([]CredentialEntry, 0),
 	}
 
@@ -34,7 +34,7 @@ func NewOAuth2Credentials(accessToken string) (*Credentials, error) {
 	}
 
 	creds := Credentials{
-		credentialType: fabcore.CredentialTypeOAuth2,
+		Type:           fabcore.CredentialTypeOAuth2,
 		CredentialData: make([]CredentialEntry, 0),
 	}
 
@@ -56,7 +56,7 @@ func NewWindowsCredentials(username, password string) (*Credentials, error) {
 	}
 
 	creds := Credentials{
-		credentialType: fabcore.CredentialTypeWindows,
+		Type:           fabcore.CredentialTypeWindows,
 		CredentialData: make([]CredentialEntry, 0),
 	}
 
@@ -80,7 +80,7 @@ func NewKeyCredentials(key string) (*Credentials, error) {
 	}
 
 	creds := Credentials{
-		credentialType: fabcore.CredentialTypeKey,
+		Type:           fabcore.CredentialTypeKey,
 		CredentialData: make([]CredentialEntry, 0),
 	}
 
@@ -102,7 +102,7 @@ func NewBasicCredentials(username, password string) (*Credentials, error) {
 	}
 
 	creds := Credentials{
-		credentialType: fabcore.CredentialTypeBasic,
+		Type:           fabcore.CredentialTypeBasic,
 		CredentialData: make([]CredentialEntry, 0),
 	}
 
@@ -117,4 +117,36 @@ func NewBasicCredentials(username, password string) (*Credentials, error) {
 	})
 
 	return &creds, nil
+}
+
+func NewCredentials(creds fabcore.CredentialsClassification) (*Credentials, error) {
+	if creds == nil {
+		return nil, errors.New("creds is required")
+	}
+
+	credentialType := creds.GetCredentials()
+
+	switch *credentialType.CredentialType {
+	case fabcore.CredentialTypeAnonymous:
+		return NewAnonymousCredentials()
+	case fabcore.CredentialTypeOAuth2:
+		return NewOAuth2Credentials("TODO")
+	case fabcore.CredentialTypeWindows:
+		c := creds.(*fabcore.WindowsCredentials)
+
+		return NewWindowsCredentials(*c.Username, *c.Password)
+
+	case fabcore.CredentialTypeKey:
+		c := creds.(*fabcore.KeyCredentials)
+
+		return NewKeyCredentials(*c.Key)
+
+	case fabcore.CredentialTypeBasic:
+		c := creds.(*fabcore.BasicCredentials)
+
+		return NewBasicCredentials(*c.Username, *c.Password)
+
+	default:
+		return nil, errors.New("unsupported credential type")
+	}
 }
