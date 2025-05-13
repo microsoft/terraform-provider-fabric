@@ -14,6 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/credentials"
 )
 
 type resourceConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnectionDetailsModel, CredentialDetails dsCredentialDetailsModel | rsCredentialDetailsModel] struct {
@@ -88,7 +90,7 @@ type rsCredentialDetailsModel struct {
 	// EncryptedCredentials             supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel]             `tfsdk:"encrypted_credentials"`
 	// WindowsWithoutImpersonationCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsWithoutImpersonationModel] `tfsdk:"windows_without_impersonation_credentials"`
 	// WorkspaceIdentityCredentials           supertypes.SingleNestedObjectValueOf[credentialsWorkspaceIdentityModel]           `tfsdk:"workspace_identity_credentials"`
-	OnPremisesGatewayCredentials supertypes.ListNestedObjectValueOf[credentialsOnPremisesGatewayModel] `tfsdk:"on_premises_gateway_credentials"`
+	// OnPremisesGatewayCredentials supertypes.ListNestedObjectValueOf[credentialsOnPremisesGatewayModel] `tfsdk:"on_premises_gateway_credentials"`
 }
 
 // func (to *rsCredentialDetailsModel) set(from fabcore.ListCredentialDetails) {
@@ -109,7 +111,11 @@ type requestCreateConnection struct {
 	fabcore.CreateConnectionRequestClassification
 }
 
-func (to *requestCreateConnection) set(ctx context.Context, plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]) diag.Diagnostics {
+func (to *requestCreateConnection) set(
+	ctx context.Context,
+	plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+	gwMembers []fabcore.OnPremisesGatewayMember,
+) diag.Diagnostics {
 	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
 
 	var requestCreateConnectionDetails requestCreateConnectionDetails
@@ -119,7 +125,7 @@ func (to *requestCreateConnection) set(ctx context.Context, plan, config resourc
 
 	var requestCreateCredentialDetails requestCreateCredentialDetails
 	if connectivityType == fabcore.ConnectivityTypeShareableCloud ||
-		connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway { // || connectivityType == fabcore.ConnectivityTypePersonalCloud {
+		connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway || connectivityType == fabcore.ConnectivityTypeOnPremisesGateway {
 		if diags := requestCreateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
 			return diags
 		}
@@ -153,7 +159,7 @@ func (to *requestCreateConnection) set(ctx context.Context, plan, config resourc
 	case fabcore.ConnectivityTypeOnPremisesGateway: // fabcore.ConnectivityTypeOnPremisesGatewayPersonal:
 		var credentialDetails requestCreateOnPremisesCredentialDetails
 
-		if diags := credentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
+		if diags := credentialDetails.set(ctx, config.CredentialDetails, requestCreateCredentialDetails.Credentials, gwMembers); diags.HasError() {
 			return diags
 		}
 
@@ -430,7 +436,14 @@ type requestCreateOnPremisesCredentialDetails struct {
 	fabcore.CreateOnPremisesCredentialDetails
 }
 
-func (to *requestCreateOnPremisesCredentialDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
+func (to *requestCreateOnPremisesCredentialDetails) set(
+	ctx context.Context,
+	from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel],
+	creds fabcore.CredentialsClassification,
+	gwMembers []fabcore.OnPremisesGatewayMember,
+) diag.Diagnostics {
+	var err error
+
 	credentialDetails, diags := from.Get(ctx)
 	if diags.HasError() {
 		return diags
@@ -440,58 +453,30 @@ func (to *requestCreateOnPremisesCredentialDetails) set(ctx context.Context, fro
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	credentials, diags := credentialDetails.OnPremisesGatewayCredentials.Get(ctx)
-	if diags.HasError() {
+	c, err := credentials.NewCredentials(creds)
+	if err != nil {
+		diags.AddError("summary string", err.Error())
+
 		return diags
 	}
 
 	var values []fabcore.OnPremisesCredentialEntry
 
-	for _, credential := range credentials {
-		if credential.EncryptedCredentials.IsKnown() {
-			encryptedCredentials, diags := credential.EncryptedCredentials.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
-
-			values = append(values, fabcore.OnPremisesCredentialEntry{
-				GatewayID:            credential.GatewayID.ValueStringPointer(),
-				EncryptedCredentials: encryptedCredentials.ValueWO.ValueStringPointer(),
-			})
-		} else {
-			gwCredential, diags := newOnPremisesCredentialEntry(ctx, *credential)
-			if diags.HasError() {
-				return diags
-			}
-			_ = gwCredential
-
-			pubKeyModel, diags := credential.PublicKey.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
-
-			pubKey := publicKey{
-				Exponent: pubKeyModel.Exponent.ValueString(),
-				Modulus:  pubKeyModel.Modulus.ValueString(),
-			}
-			_ = pubKey
-
-			// TODO: EncryptCredentials is not implemented yet
-			// encryptedCredentials, diags := EncryptCredentials(ctx, pubKey, gwCredential)
-			// if diags.HasError() {
-			// 	return diags
-			// }
-
-			// values = append(values, fabcore.OnPremisesCredentialEntry{
-			// 	GatewayID:            credential.GatewayID.ValueStringPointer(),
-			// 	EncryptedCredentials: encryptedCredentials,
-			// })
-
+	for _, gwMember := range gwMembers {
+		encryptedCredentials, err := credentials.EncryptCredentials(*c, *gwMember.PublicKey)
+		if err != nil {
+			diags.AddError("summary string", err.Error())
+			return diags
 		}
+
+		values = append(values, fabcore.OnPremisesCredentialEntry{
+			GatewayID:            gwMember.ID,
+			EncryptedCredentials: &encryptedCredentials,
+		})
 	}
 
 	to.Credentials = &fabcore.OnPremisesGatewayCredentials{
-		CredentialType: azto.Ptr(fabcore.CredentialTypeWindows),
+		CredentialType: &c.Type,
 		Values:         values,
 	}
 
@@ -508,84 +493,84 @@ type (
 	}
 )
 
-func newOnPremisesCredentialEntry(ctx context.Context, entity credentialsOnPremisesGatewayModel) (*gatewayCredential, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var gwCredential *gatewayCredential
+// func newOnPremisesCredentialEntry(ctx context.Context, entity credentialsOnPremisesGatewayModel) (*gatewayCredential, diag.Diagnostics) {
+// 	var diags diag.Diagnostics
+// 	var gwCredential *gatewayCredential
 
-	switch fabcore.CredentialType(entity.CredentialType.ValueString()) {
-	case fabcore.CredentialTypeWindows:
-		credentials, diags := entity.WindowsCredentials.Get(ctx)
-		if diags.HasError() {
-			return nil, diags
-		}
+// 	switch fabcore.CredentialType(entity.CredentialType.ValueString()) {
+// 	case fabcore.CredentialTypeWindows:
+// 		credentials, diags := entity.WindowsCredentials.Get(ctx)
+// 		if diags.HasError() {
+// 			return nil, diags
+// 		}
 
-		username := gatewayCredentialEntity{
-			Name:  "username",
-			Value: credentials.Username.ValueString(),
-		}
+// 		username := gatewayCredentialEntity{
+// 			Name:  "username",
+// 			Value: credentials.Username.ValueString(),
+// 		}
 
-		password := gatewayCredentialEntity{
-			Name:  "password",
-			Value: credentials.PasswordWO.ValueString(),
-		}
+// 		password := gatewayCredentialEntity{
+// 			Name:  "password",
+// 			Value: credentials.PasswordWO.ValueString(),
+// 		}
 
-		gwCredential = &gatewayCredential{
-			CredentialData: []gatewayCredentialEntity{username, password},
-		}
+// 		gwCredential = &gatewayCredential{
+// 			CredentialData: []gatewayCredentialEntity{username, password},
+// 		}
 
-	case fabcore.CredentialTypeBasic:
-		credentials, diags := entity.BasicCredentials.Get(ctx)
-		if diags.HasError() {
-			return nil, diags
-		}
+// 	case fabcore.CredentialTypeBasic:
+// 		credentials, diags := entity.BasicCredentials.Get(ctx)
+// 		if diags.HasError() {
+// 			return nil, diags
+// 		}
 
-		username := gatewayCredentialEntity{
-			Name:  "username",
-			Value: credentials.Username.ValueString(),
-		}
+// 		username := gatewayCredentialEntity{
+// 			Name:  "username",
+// 			Value: credentials.Username.ValueString(),
+// 		}
 
-		password := gatewayCredentialEntity{
-			Name:  "password",
-			Value: credentials.PasswordWO.ValueString(),
-		}
+// 		password := gatewayCredentialEntity{
+// 			Name:  "password",
+// 			Value: credentials.PasswordWO.ValueString(),
+// 		}
 
-		gwCredential = &gatewayCredential{
-			CredentialData: []gatewayCredentialEntity{username, password},
-		}
+// 		gwCredential = &gatewayCredential{
+// 			CredentialData: []gatewayCredentialEntity{username, password},
+// 		}
 
-	case fabcore.CredentialTypeKey:
-		credentials, diags := entity.KeyCredentials.Get(ctx)
-		if diags.HasError() {
-			return nil, diags
-		}
+// 	case fabcore.CredentialTypeKey:
+// 		credentials, diags := entity.KeyCredentials.Get(ctx)
+// 		if diags.HasError() {
+// 			return nil, diags
+// 		}
 
-		key := gatewayCredentialEntity{
-			Name:  "key",
-			Value: credentials.KeyWO.ValueString(),
-		}
+// 		key := gatewayCredentialEntity{
+// 			Name:  "key",
+// 			Value: credentials.KeyWO.ValueString(),
+// 		}
 
-		gwCredential = &gatewayCredential{
-			CredentialData: []gatewayCredentialEntity{key},
-		}
+// 		gwCredential = &gatewayCredential{
+// 			CredentialData: []gatewayCredentialEntity{key},
+// 		}
 
-	case fabcore.CredentialTypeOAuth2:
-		credentials, diags := entity.OAuth2Credentials.Get(ctx)
-		if diags.HasError() {
-			return nil, diags
-		}
+// 	case fabcore.CredentialTypeOAuth2:
+// 		credentials, diags := entity.OAuth2Credentials.Get(ctx)
+// 		if diags.HasError() {
+// 			return nil, diags
+// 		}
 
-		accessToken := gatewayCredentialEntity{
-			Name:  "accessToken",
-			Value: credentials.AccessTokenWO.ValueString(),
-		}
+// 		accessToken := gatewayCredentialEntity{
+// 			Name:  "accessToken",
+// 			Value: credentials.AccessTokenWO.ValueString(),
+// 		}
 
-		gwCredential = &gatewayCredential{
-			CredentialData: []gatewayCredentialEntity{accessToken},
-		}
-	}
+// 		gwCredential = &gatewayCredential{
+// 			CredentialData: []gatewayCredentialEntity{accessToken},
+// 		}
+// 	}
 
-	return gwCredential, diags
-}
+// 	return gwCredential, diags
+// }
 
 type requestUpdateCredentialDetails struct {
 	fabcore.UpdateCredentialDetails
