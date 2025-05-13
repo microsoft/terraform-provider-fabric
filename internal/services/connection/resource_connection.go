@@ -38,6 +38,7 @@ type resourceConnection struct {
 	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
+	clientGw    *fabcore.GatewaysClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
@@ -72,6 +73,7 @@ func (r *resourceConnection) Configure(_ context.Context, req resource.Configure
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
+	r.clientGw = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
@@ -165,9 +167,19 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	var gwMembers []fabcore.OnPremisesGatewayMember
+
+	if !plan.GatewayID.IsNull() && !plan.GatewayID.IsUnknown() {
+		gwMembers, diags = r.getGatewayMembers(ctx, plan)
+
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	var reqCreate requestCreateConnection
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, config, gwMembers)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -675,4 +687,16 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 	}
 
 	return nil
+}
+
+func (r *resourceConnection) getGatewayMembers(
+	ctx context.Context,
+	model resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+) ([]fabcore.OnPremisesGatewayMember, diag.Diagnostics) {
+	respList, err := r.clientGw.ListGatewayMembers(ctx, model.GatewayID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+		return nil, diags
+	}
+
+	return respList.Value, nil
 }
