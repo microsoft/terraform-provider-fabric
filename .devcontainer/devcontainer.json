@@ -15,7 +15,7 @@
     },
     // "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
     "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.24.2"
+      "version": "1.24.3"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.12"
@@ -42,7 +42,7 @@
       "installTerraformDocs": true
     },
     "ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-      "version": "1.9.0"
+      "version": "1.9.1"
     },
     "ghcr.io/devcontainers-contrib/features/pipx-package:1": {},
     // "ghcr.io/devcontainers-contrib/features/mkdocs:2": {},

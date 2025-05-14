@@ -1,6 +1,6 @@
 module github.com/microsoft/terraform-provider-fabric
 
-go 1.24.2
+go 1.24.3
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
