@@ -134,11 +134,9 @@ func (to *requestCreateConnection) set(
 	displayName := plan.DisplayName.ValueStringPointer()
 	privacyLevel := (*fabcore.PrivacyLevel)(plan.PrivacyLevel.ValueStringPointer())
 
-	var requestCreateConnection fabcore.CreateConnectionRequestClassification
-
 	switch connectivityType {
 	case fabcore.ConnectivityTypeShareableCloud: // fabcore.ConnectivityTypePersonalCloud:
-		requestCreateConnection = &fabcore.CreateCloudConnectionRequest{
+		to.CreateConnectionRequestClassification = &fabcore.CreateCloudConnectionRequest{
 			DisplayName:       displayName,
 			PrivacyLevel:      privacyLevel,
 			ConnectivityType:  &connectivityType,
@@ -147,7 +145,7 @@ func (to *requestCreateConnection) set(
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
-		requestCreateConnection = &fabcore.CreateVirtualNetworkGatewayConnectionRequest{
+		to.CreateConnectionRequestClassification = &fabcore.CreateVirtualNetworkGatewayConnectionRequest{
 			DisplayName:       displayName,
 			PrivacyLevel:      privacyLevel,
 			ConnectivityType:  &connectivityType,
@@ -163,7 +161,7 @@ func (to *requestCreateConnection) set(
 			return diags
 		}
 
-		requestCreateConnection = &fabcore.CreateOnPremisesConnectionRequest{
+		to.CreateConnectionRequestClassification = &fabcore.CreateOnPremisesConnectionRequest{
 			DisplayName:       displayName,
 			PrivacyLevel:      privacyLevel,
 			ConnectivityType:  &connectivityType,
@@ -173,15 +171,13 @@ func (to *requestCreateConnection) set(
 		}
 
 	case fabcore.ConnectivityTypeAutomatic: // fabcore.ConnectivityTypeNone:
-		requestCreateConnection = &fabcore.CreateConnectionRequest{
+		to.CreateConnectionRequestClassification = &fabcore.CreateConnectionRequest{
 			DisplayName:       displayName,
 			PrivacyLevel:      privacyLevel,
 			ConnectivityType:  &connectivityType,
 			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
 		}
 	}
-
-	to.CreateConnectionRequestClassification = requestCreateConnection
 
 	return nil
 }
@@ -746,11 +742,11 @@ func (to *requestUpdateConnection) set(
 	displayName := plan.DisplayName.ValueStringPointer()
 	privacyLevel := (*fabcore.PrivacyLevel)(plan.PrivacyLevel.ValueStringPointer())
 
-	var requestUpdateConnection fabcore.UpdateConnectionRequestClassification
+	// var requestUpdateConnection fabcore.UpdateConnectionRequestClassification
 
 	switch connectivityType {
 	case fabcore.ConnectivityTypeShareableCloud:
-		requestUpdateConnection = &fabcore.UpdateShareableCloudConnectionRequest{
+		to.UpdateConnectionRequestClassification = &fabcore.UpdateShareableCloudConnectionRequest{
 			DisplayName:       displayName,
 			ConnectivityType:  &connectivityType,
 			PrivacyLevel:      privacyLevel,
@@ -764,7 +760,7 @@ func (to *requestUpdateConnection) set(
 	// 		PrivacyLevel:     privacyLevel,
 	// 	}
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
-		requestUpdateConnection = &fabcore.UpdateVirtualNetworkGatewayConnectionRequest{
+		to.UpdateConnectionRequestClassification = &fabcore.UpdateVirtualNetworkGatewayConnectionRequest{
 			DisplayName:       displayName,
 			ConnectivityType:  &connectivityType,
 			PrivacyLevel:      privacyLevel,
@@ -778,7 +774,7 @@ func (to *requestUpdateConnection) set(
 			return diags
 		}
 
-		requestUpdateConnection = &fabcore.UpdateOnPremisesGatewayConnectionRequest{
+		to.UpdateConnectionRequestClassification = &fabcore.UpdateOnPremisesGatewayConnectionRequest{
 			DisplayName:       displayName,
 			ConnectivityType:  &connectivityType,
 			PrivacyLevel:      privacyLevel,
@@ -792,13 +788,13 @@ func (to *requestUpdateConnection) set(
 	// 		PrivacyLevel:     privacyLevel,
 	// 	}
 	case fabcore.ConnectivityTypeAutomatic: // fabcore.ConnectivityTypeNone:
-		requestUpdateConnection = &fabcore.UpdateConnectionRequest{
+		to.UpdateConnectionRequestClassification = &fabcore.UpdateConnectionRequest{
 			ConnectivityType: &connectivityType,
 			PrivacyLevel:     privacyLevel,
 		}
 	}
 
-	to.UpdateConnectionRequestClassification = requestUpdateConnection
+	// to.UpdateConnectionRequestClassification = requestUpdateConnection
 
 	return nil
 }
