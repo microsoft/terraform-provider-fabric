@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -87,6 +86,7 @@ type rsCredentialDetailsModel struct {
 	ServicePrincipalCredentials      supertypes.SingleNestedObjectValueOf[credentialsServicePrincipalModel]      `tfsdk:"service_principal_credentials"`
 	SharedAccessSignatureCredentials supertypes.SingleNestedObjectValueOf[credentialsSharedAccessSignatureModel] `tfsdk:"shared_access_signature_credentials"`
 	WindowsCredentials               supertypes.SingleNestedObjectValueOf[credentialsWindowsModel]               `tfsdk:"windows_credentials"`
+	OAuth2Credentials                supertypes.SingleNestedObjectValueOf[credentialsOAuth2Model]                `tfsdk:"oauth2_credentials"`
 	// EncryptedCredentials             supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel]             `tfsdk:"encrypted_credentials"`
 	// WindowsWithoutImpersonationCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsWithoutImpersonationModel] `tfsdk:"windows_without_impersonation_credentials"`
 	// WorkspaceIdentityCredentials           supertypes.SingleNestedObjectValueOf[credentialsWorkspaceIdentityModel]           `tfsdk:"workspace_identity_credentials"`
@@ -680,7 +680,12 @@ type requestUpdateOnPremisesCredentialDetails struct {
 	fabcore.UpdateOnPremisesGatewayCredentialDetails
 }
 
-func (to *requestUpdateOnPremisesCredentialDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
+func (to *requestUpdateOnPremisesCredentialDetails) set(
+	ctx context.Context,
+	from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel],
+	creds fabcore.CredentialsClassification,
+	gwMembers []fabcore.OnPremisesGatewayMember,
+) diag.Diagnostics {
 	credentialDetails, diags := from.Get(ctx)
 	if diags.HasError() {
 		return diags
@@ -690,29 +695,29 @@ func (to *requestUpdateOnPremisesCredentialDetails) set(ctx context.Context, fro
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	credentials, diags := credentialDetails.OnPremisesGatewayCredentials.Get(ctx)
-	if diags.HasError() {
+	c, err := credentials.NewCredentials(creds)
+	if err != nil {
+		diags.AddError("summary string", err.Error())
+
 		return diags
 	}
 
 	var values []fabcore.OnPremisesCredentialEntry
-
-	for _, credential := range credentials {
-		if credential.EncryptedCredentials.IsKnown() {
-			encryptedCredentials, diags := credential.EncryptedCredentials.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
-
-			values = append(values, fabcore.OnPremisesCredentialEntry{
-				GatewayID:            credential.GatewayID.ValueStringPointer(),
-				EncryptedCredentials: encryptedCredentials.ValueWO.ValueStringPointer(),
-			})
+	for _, gwMember := range gwMembers {
+		encryptedCredentials, err := credentials.EncryptCredentials(*c, *gwMember.PublicKey)
+		if err != nil {
+			diags.AddError("summary string", err.Error())
+			return diags
 		}
+
+		values = append(values, fabcore.OnPremisesCredentialEntry{
+			GatewayID:            gwMember.ID,
+			EncryptedCredentials: &encryptedCredentials,
+		})
 	}
 
 	to.Credentials = &fabcore.OnPremisesGatewayCredentials{
-		CredentialType: azto.Ptr(fabcore.CredentialTypeWindows),
+		CredentialType: &c.Type,
 		Values:         values,
 	}
 
@@ -723,12 +728,16 @@ type requestUpdateConnection struct {
 	fabcore.UpdateConnectionRequestClassification
 }
 
-func (to *requestUpdateConnection) set(ctx context.Context, plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]) diag.Diagnostics {
+func (to *requestUpdateConnection) set(
+	ctx context.Context,
+	plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+	gwMembers []fabcore.OnPremisesGatewayMember,
+) diag.Diagnostics {
 	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
 
 	var requestUpdateCredentialDetails requestUpdateCredentialDetails
 	if connectivityType == fabcore.ConnectivityTypeShareableCloud ||
-		connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway { //  || connectivityType == fabcore.ConnectivityTypePersonalCloud
+		connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway || connectivityType == fabcore.ConnectivityTypeOnPremisesGateway {
 		if diags := requestUpdateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
 			return diags
 		}
@@ -765,7 +774,7 @@ func (to *requestUpdateConnection) set(ctx context.Context, plan, config resourc
 	case fabcore.ConnectivityTypeOnPremisesGateway:
 		var credentialDetails requestUpdateOnPremisesCredentialDetails
 
-		if diags := credentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
+		if diags := credentialDetails.set(ctx, config.CredentialDetails, requestUpdateCredentialDetails.Credentials, gwMembers); diags.HasError() {
 			return diags
 		}
 
