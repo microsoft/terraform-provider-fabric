@@ -144,36 +144,36 @@ type credentialsOAuth2Model struct {
 	AccessTokenWOVersion types.Int32  `tfsdk:"access_token_wo_version"`
 }
 
-type credentialsEncryptedModel struct {
-	ValueWO        types.String `tfsdk:"value_wo"`
-	ValueWOVersion types.Int32  `tfsdk:"value_wo_version"`
-}
+// type credentialsEncryptedModel struct {
+// 	ValueWO        types.String `tfsdk:"value_wo"`
+// 	ValueWOVersion types.Int32  `tfsdk:"value_wo_version"`
+// }
 
-type credentialsOnPremisesGatewayModel struct {
-	GatewayID customtypes.UUID `tfsdk:"gateway_id"`
-	// EncryptedCredentialsWO        types.String     `tfsdk:"encrypted_credentials_wo"`
-	// EncryptedCredentialsWOVersion types.Int32      `tfsdk:"encrypted_credentials_wo_version"`
-	EncryptedCredentials supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel] `tfsdk:"encrypted_credentials"`
+// type credentialsOnPremisesGatewayModel struct {
+// 	GatewayID customtypes.UUID `tfsdk:"gateway_id"`
+// 	// EncryptedCredentialsWO        types.String     `tfsdk:"encrypted_credentials_wo"`
+// 	// EncryptedCredentialsWOVersion types.Int32      `tfsdk:"encrypted_credentials_wo_version"`
+// 	EncryptedCredentials supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel] `tfsdk:"encrypted_credentials"`
 
-	CredentialType     types.String                                                  `tfsdk:"credential_type"`
-	BasicCredentials   supertypes.SingleNestedObjectValueOf[credentialsBasicModel]   `tfsdk:"basic_credentials"`
-	WindowsCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsModel] `tfsdk:"windows_credentials"`
-	KeyCredentials     supertypes.SingleNestedObjectValueOf[credentialsKeyModel]     `tfsdk:"key_credentials"`
-	OAuth2Credentials  supertypes.SingleNestedObjectValueOf[credentialsOAuth2Model]  `tfsdk:"oauth2_credentials"`
-	PublicKey          supertypes.SingleNestedObjectValueOf[publicKeyModel]          `tfsdk:"public_key"`
-}
+// 	CredentialType     types.String                                                  `tfsdk:"credential_type"`
+// 	BasicCredentials   supertypes.SingleNestedObjectValueOf[credentialsBasicModel]   `tfsdk:"basic_credentials"`
+// 	WindowsCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsModel] `tfsdk:"windows_credentials"`
+// 	KeyCredentials     supertypes.SingleNestedObjectValueOf[credentialsKeyModel]     `tfsdk:"key_credentials"`
+// 	OAuth2Credentials  supertypes.SingleNestedObjectValueOf[credentialsOAuth2Model]  `tfsdk:"oauth2_credentials"`
+// 	PublicKey          supertypes.SingleNestedObjectValueOf[publicKeyModel]          `tfsdk:"public_key"`
+// }
 
-type publicKeyModel struct {
-	Exponent types.String `tfsdk:"exponent"`
-	Modulus  types.String `tfsdk:"modulus"`
-}
+// type publicKeyModel struct {
+// 	Exponent types.String `tfsdk:"exponent"`
+// 	Modulus  types.String `tfsdk:"modulus"`
+// }
 
-func (to *publicKeyModel) set(from fabcore.PublicKey) {
-	to.Exponent = types.StringPointerValue(from.Exponent)
-	to.Modulus = types.StringPointerValue(from.Modulus)
-}
+// func (to *publicKeyModel) set(from fabcore.PublicKey) {
+// 	to.Exponent = types.StringPointerValue(from.Exponent)
+// 	to.Modulus = types.StringPointerValue(from.Modulus)
+// }
 
-type publicKey struct {
-	Exponent string
-	Modulus  string
-}
+// type publicKey struct {
+// 	Exponent string
+// 	Modulus  string
+// }
