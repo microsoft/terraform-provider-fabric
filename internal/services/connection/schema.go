@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -135,6 +134,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					Optional: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
+						stringplanmodifier.UseStateForUnknown(),
 					},
 					Validators: []validator.String{
 						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
@@ -308,30 +308,87 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					"credential_type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The credential type.",
-							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), true)...),
-							},
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.RequiresReplace(),
 							},
-							// Validators: []validator.String{
-							// 	superstringvalidator.RequireIfAttributeIsOneOf(
-							// 		path.MatchRoot("connectivity_type"),
-							// 		possibleConnectivityTypeValues1,
-							// 	),
-							// 	superstringvalidator.NullIfAttributeIsOneOf(
-							// 		path.MatchRoot("connectivity_type"),
-							// 		[]attr.Value{
-							// 			types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
-							// 		},
-							// 	),
-							// },
+							Validators: []validator.String{
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									path.MatchRoot("connectivity_type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
+									},
+									[]superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+										{
+											Description: string(fabcore.CredentialTypeAnonymous),
+											Value:       string(fabcore.CredentialTypeAnonymous),
+										},
+										{
+											Description: string(fabcore.CredentialTypeBasic),
+											Value:       string(fabcore.CredentialTypeBasic),
+										},
+										{
+											Description: string(fabcore.CredentialTypeKey),
+											Value:       string(fabcore.CredentialTypeKey),
+										},
+										{
+											Description: string(fabcore.CredentialTypeOAuth2),
+											Value:       string(fabcore.CredentialTypeOAuth2),
+										},
+										{
+											Description: string(fabcore.CredentialTypeWindows),
+											Value:       string(fabcore.CredentialTypeWindows),
+										},
+									}...),
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									path.MatchRoot("connectivity_type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
+										types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
+									},
+									[]superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+										{
+											Description: string(fabcore.CredentialTypeAnonymous),
+											Value:       string(fabcore.CredentialTypeAnonymous),
+										},
+										{
+											Description: string(fabcore.CredentialTypeBasic),
+											Value:       string(fabcore.CredentialTypeBasic),
+										},
+										{
+											Description: string(fabcore.CredentialTypeKey),
+											Value:       string(fabcore.CredentialTypeKey),
+										},
+										{
+											Description: string(fabcore.CredentialTypeServicePrincipal),
+											Value:       string(fabcore.CredentialTypeServicePrincipal),
+										},
+										{
+											Description: string(fabcore.CredentialTypeSharedAccessSignature),
+											Value:       string(fabcore.CredentialTypeSharedAccessSignature),
+										},
+										{
+											Description: string(fabcore.CredentialTypeWindows),
+											Value:       string(fabcore.CredentialTypeWindows),
+										},
+										{
+											Description: string(fabcore.CredentialTypeWindowsWithoutImpersonation),
+											Value:       string(fabcore.CredentialTypeWindowsWithoutImpersonation),
+										},
+										{
+											Description: string(fabcore.CredentialTypeWorkspaceIdentity),
+											Value:       string(fabcore.CredentialTypeWorkspaceIdentity),
+										},
+									}...),
+							},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
+							Validators: []validator.String{
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), true)...),
+							},
 						},
 					},
 					"basic_credentials": superschema.SuperSingleNestedAttributeOf[credentialsBasicModel]{
@@ -344,7 +401,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 									path.MatchRelative().AtParent().AtName("windows_credentials"),
-									// path.MatchRelative().AtParent().AtName("on_premises_gateway_credentials"),
+									path.MatchRelative().AtParent().AtName("oauth2_credentials"),
 								),
 								superobjectvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRelative().AtParent().AtName("credential_type"),
@@ -375,9 +432,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `password_wo`.",
 									Required:            true,
-									PlanModifiers: []planmodifier.Int32{
-										int32planmodifier.RequiresReplace(),
-									},
 								},
 							},
 						},
@@ -392,7 +446,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 									path.MatchRelative().AtParent().AtName("windows_credentials"),
-									// path.MatchRelative().AtParent().AtName("on_premises_gateway_credentials"),
+									path.MatchRelative().AtParent().AtName("oauth2_credentials"),
 								),
 								superobjectvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRelative().AtParent().AtName("credential_type"),
@@ -414,9 +468,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `key_wo`.",
 									Required:            true,
-									PlanModifiers: []planmodifier.Int32{
-										int32planmodifier.RequiresReplace(),
-									},
 								},
 							},
 						},
@@ -431,7 +482,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("key_credentials"),
 									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 									path.MatchRelative().AtParent().AtName("windows_credentials"),
-									// path.MatchRelative().AtParent().AtName("on_premises_gateway_credentials"),
+									path.MatchRelative().AtParent().AtName("oauth2_credentials"),
 								),
 								superobjectvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRelative().AtParent().AtName("credential_type"),
@@ -471,9 +522,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `client_secret_wo`.",
 									Required:            true,
-									PlanModifiers: []planmodifier.Int32{
-										int32planmodifier.RequiresReplace(),
-									},
 								},
 							},
 						},
@@ -488,7 +536,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("key_credentials"),
 									path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 									path.MatchRelative().AtParent().AtName("windows_credentials"),
-									// path.MatchRelative().AtParent().AtName("on_premises_gateway_credentials"),
+									path.MatchRelative().AtParent().AtName("oauth2_credentials"),
 								),
 								superobjectvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRelative().AtParent().AtName("credential_type"),
@@ -510,9 +558,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `sas_wo`.",
 									Required:            true,
-									PlanModifiers: []planmodifier.Int32{
-										int32planmodifier.RequiresReplace(),
-									},
 								},
 							},
 						},
@@ -527,7 +572,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("key_credentials"),
 									path.MatchRelative().AtParent().AtName("service_principal_credentials"),
 									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
-									// path.MatchRelative().AtParent().AtName("on_premises_gateway_credentials"),
+									path.MatchRelative().AtParent().AtName("oauth2_credentials"),
 								),
 								superobjectvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRelative().AtParent().AtName("credential_type"),
@@ -558,9 +603,50 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `password_wo`.",
 									Required:            true,
-									PlanModifiers: []planmodifier.Int32{
-										int32planmodifier.RequiresReplace(),
-									},
+								},
+							},
+						},
+					},
+					"oauth2_credentials": superschema.SuperSingleNestedAttributeOf[credentialsOAuth2Model]{
+						Resource: &schemaR.SingleNestedAttribute{
+							MarkdownDescription: "The OAuth2 credentials.",
+							Optional:            true,
+							Validators: []validator.Object{
+								objectvalidator.ConflictsWith(
+									path.MatchRelative().AtParent().AtName("basic_credentials"),
+									path.MatchRelative().AtParent().AtName("key_credentials"),
+									path.MatchRelative().AtParent().AtName("service_principal_credentials"),
+									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
+									path.MatchRelative().AtParent().AtName("windows_credentials"),
+								),
+								objectvalidator.All(
+									superobjectvalidator.RequireIfAttributeIsOneOf(
+										path.MatchRoot("connectivity_type"),
+										[]attr.Value{
+											types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
+										},
+									),
+									superobjectvalidator.RequireIfAttributeIsOneOf(
+										path.MatchRelative().AtParent().AtName("credential_type"),
+										[]attr.Value{
+											types.StringValue(string(fabcore.CredentialTypeOAuth2)),
+										},
+									),
+								),
+							},
+						},
+						Attributes: superschema.Attributes{
+							"access_token_wo": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The key (WO).",
+									Required:            true,
+									WriteOnly:           true,
+								},
+							},
+							"access_token_wo_version": superschema.Int32Attribute{
+								Resource: &schemaR.Int32Attribute{
+									MarkdownDescription: "The version of the `access_token_wo`.",
+									Required:            true,
 								},
 							},
 						},
