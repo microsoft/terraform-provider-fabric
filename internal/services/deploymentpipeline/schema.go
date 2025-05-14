@@ -40,7 +40,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			Resource: &schemaR.ListNestedAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
+					listplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.List{
 					listvalidator.SizeBetween(2, 10),
@@ -113,7 +113,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Computed: true,
 					},
 					DataSource: &schemaD.Int32Attribute{
-						Optional: true,
 						Computed: true,
 					},
 				},
@@ -125,12 +124,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Resource: &schemaR.StringAttribute{
 						Optional: true,
 						Computed: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 					DataSource: &schemaD.StringAttribute{
-						Optional: true,
 						Computed: true,
 					},
 				},
@@ -142,7 +137,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Computed: true,
 					},
 					DataSource: &schemaD.StringAttribute{
-						Optional: true,
 						Computed: true,
 					},
 				},
@@ -153,7 +147,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			Resource: &schemaR.ListNestedAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 		}

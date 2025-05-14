@@ -47,11 +47,6 @@ func (to *baseDeploymentPipelineModel) set(from fabcore.DeploymentPipeline) {
 	to.Description = types.StringPointerValue(from.Description)
 }
 
-func (to *baseDeploymentPipelineModel) setExtendedInfo(from fabcore.DeploymentPipelineExtendedInfo) {
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-}
-
 func (to *baseDeploymentPipelineExtendedInfoModel) setStages(ctx context.Context, from []*baseDeploymentPipelineStageModel) diag.Diagnostics {
 	slice := make([]*baseDeploymentPipelineStageModel, 0, len(from))
 
@@ -83,17 +78,16 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 	slice := make([]*baseDeploymentPipelineStageModel, 0, len(from.Stages))
 
 	for _, entity := range from.Stages {
-		var entityModel baseDeploymentPipelineStageModel
-
-		entityModel.ID = customtypes.NewUUIDPointerValue(entity.ID)
-		entityModel.Order = types.Int32PointerValue(entity.Order)
-		entityModel.WorkspaceID = types.StringPointerValue(entity.WorkspaceID)
-		entityModel.WorkspaceName = types.StringPointerValue(entity.WorkspaceName)
-		entityModel.DisplayName = types.StringPointerValue(entity.DisplayName)
-		entityModel.Description = types.StringPointerValue(entity.Description)
-		entityModel.IsPublic = types.BoolPointerValue(entity.IsPublic)
-
-		slice = append(slice, &entityModel)
+		entityModel := &baseDeploymentPipelineStageModel{
+			ID:            customtypes.NewUUIDPointerValue(entity.ID),
+			Order:         types.Int32PointerValue(entity.Order),
+			WorkspaceID:   types.StringPointerValue(entity.WorkspaceID),
+			WorkspaceName: types.StringPointerValue(entity.WorkspaceName),
+			DisplayName:   types.StringPointerValue(entity.DisplayName),
+			Description:   types.StringPointerValue(entity.Description),
+			IsPublic:      types.BoolPointerValue(entity.IsPublic),
+		}
+		slice = append(slice, entityModel)
 	}
 
 	if diags := to.Stages.Set(ctx, slice); diags.HasError() {
