@@ -10,6 +10,10 @@ type identifier[TEntity any] interface {
 	GetID(entity TEntity) string
 }
 
+type onelakeIdentifier[TEntity any] interface {
+	GetOneLakeID(workspaceID, itemID string, entity TEntity) string
+}
+
 type itemConverter[TEntity any] interface {
 	// ConvertItemToEntity converts an fabcore.Item into an specific entity.
 	ConvertItemToEntity(item fabcore.Item) TEntity
@@ -72,4 +76,7 @@ type definitionUpdater[TDefinitionUpdateData, TDefinition any] interface {
 type definitionTransformer[TDefinition, TOutput any] interface {
 	// TransformDefinition transforms a definition into a response.
 	TransformDefinition(entity *TDefinition) TOutput
+}
+type creatorWithWorkspaceIDAndItemID[TRequest, TEntity any] interface {
+	CreateWithWorkspaceIDAndItemID(workspaceID, itemID string, request TRequest) TEntity
 }

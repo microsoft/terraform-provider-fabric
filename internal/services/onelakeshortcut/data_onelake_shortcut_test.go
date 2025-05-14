@@ -80,37 +80,37 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 			ExpectError: regexp.MustCompile(`These attributes must be configured together: \[path,name\]`),
 		},
 		// read
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"workspace_id": workspaceID,
-		// 			"item_id":      itemId,
-		// 			"name":         *entity.Name,
-		// 			"path":         *entity.Path,
-		// 		},
-		// 	),
-		// Check: resource.ComposeAggregateTestCheckFunc(
-		// 	resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", entity.Name),
-		// 	resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", entity.Path),
-		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
-		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
-		// 	resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.item_id"),
-		// ),
-		// },
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemId,
+					"name":         *entity.Name,
+					"path":         *entity.Path,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", *entity.Name),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", *entity.Path),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.item_id"),
+			),
+		},
 		// read - not found
-		// {
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"workspace_id": workspaceID,
-		// 			"item_id":      testhelp.RandomUUID(),
-		// 			"name":         *entity.Name,
-		// 			"path":         *entity.Path,
-		// 		},
-		// 	),
-		// 	ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		// },
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemId,
+					"name":         testhelp.RandomName(),
+					"path":         *entity.Path,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
 	}))
 }
 

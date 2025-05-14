@@ -15,28 +15,23 @@ import (
 
 type operationsOneLakeShortcut struct{}
 
-func (o *operationsOneLakeShortcut) Create(data fabcore.CreateShortcutRequest) fabcore.Shortcut {
+func (o *operationsOneLakeShortcut) GetID(entity fabcore.Shortcut) string {
+	return *entity.Path + "/" + *entity.Name
+}
+
+func (o *operationsOneLakeShortcut) CreateWithWorkspaceIDAndItemID(workspaceID, itemID string, request fabcore.CreateShortcutRequest) fabcore.Shortcut {
 	entity := NewRandomOnelakeShortcut()
-	entity.Name = data.Name
-	entity.Path = data.Path
+	entity.Name = request.Name
+	entity.Path = request.Path
 	entity.Target = &fabcore.Target{
 		OneLake: &fabcore.OneLake{
-			ItemID:      data.Target.OneLake.ItemID,
-			WorkspaceID: data.Target.OneLake.WorkspaceID,
-			Path:        data.Target.OneLake.Path,
+			ItemID:      request.Target.OneLake.ItemID,
+			WorkspaceID: request.Target.OneLake.WorkspaceID,
+			Path:        request.Target.OneLake.Path,
 		},
 	}
 
 	return entity
-}
-
-// Filter implements concreteOperations.
-func (o *operationsOneLakeShortcut) Filter(entities []fabcore.Shortcut, _ string) []fabcore.Shortcut {
-	ret := make([]fabcore.Shortcut, 0)
-
-	ret = append(ret, entities...)
-
-	return ret
 }
 
 // TransformCreate implements concreteOperations.
@@ -77,22 +72,17 @@ func transformShortcut(entity fabcore.Shortcut) fabcore.Shortcut {
 	}
 }
 
-func (o *operationsOneLakeShortcut) TransformUpdate(entity fabcore.Shortcut) fabcore.OneLakeShortcutsClientCreateShortcutResponse {
-	return fabcore.OneLakeShortcutsClientCreateShortcutResponse{
-		Shortcut: transformShortcut(entity),
-	}
-}
-
-func (o *operationsOneLakeShortcut) Update(base fabcore.Shortcut, data fabcore.CreateShortcutRequest) fabcore.Shortcut {
-	base.Name = data.Name
-
-	return base
-}
-
 func (o *operationsOneLakeShortcut) Validate(newEntity fabcore.Shortcut, existing []fabcore.Shortcut) (int, error) {
 	for _, entity := range existing {
-		if *entity.Name == *newEntity.Name {
-			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrWorkspace.WorkspaceNameAlreadyExists.Error(), fabcore.ErrWorkspace.WorkspaceNameAlreadyExists.Error())
+		if *entity.Name == *newEntity.Name &&
+			*entity.Path == *newEntity.Path &&
+			*entity.Target.OneLake.ItemID == *newEntity.Target.OneLake.ItemID &&
+			*entity.Target.OneLake.WorkspaceID == *newEntity.Target.OneLake.WorkspaceID &&
+			*entity.Target.OneLake.Path == *newEntity.Target.OneLake.Path {
+			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error(), fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error())
+		}
+		if entity.Name == newEntity.Name && entity.Path == newEntity.Path {
+			return http.StatusUpgradeRequired, nil
 		}
 	}
 
@@ -101,28 +91,25 @@ func (o *operationsOneLakeShortcut) Validate(newEntity fabcore.Shortcut, existin
 
 func configureOneLakeShortcut(server *fakeServer) fabcore.Shortcut {
 	type concreteEntityOperations interface {
-		simpleIDOperations[
+		onelakeOperations[
 			fabcore.Shortcut,
 			fabcore.OneLakeShortcutsClientGetShortcutResponse,
 			fabcore.OneLakeShortcutsClientCreateShortcutResponse,
-			fabcore.OneLakeShortcutsClientCreateShortcutResponse,
 			fabcore.OneLakeShortcutsClientListShortcutsResponse,
-			fabcore.CreateShortcutRequest,
 			fabcore.CreateShortcutRequest]
 	}
 
-	// var entityOperations concreteEntityOperations = &operationsOneLakeShortcut{}
+	var entityOperations concreteEntityOperations = &operationsOneLakeShortcut{}
 
-	// handler := newTypedHandler(server, entityOperations)
+	handler := newTypedHandler(server, entityOperations)
 
-	// configureEntityPagerWithSimpleID(
-	// 	handler,
-	// 	entityOperations,
-	// 	&handler.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut,
-	// 	&handler.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut,
-	// 	&handler.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut,
-	// 	&handler.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager,
-	// 	&handler.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut)
+	configureOneLakeShortcutHandler(
+		handler,
+		entityOperations,
+		&handler.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut,
+		&handler.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut,
+		&handler.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager,
+		&handler.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut)
 
 	return fabcore.Shortcut{}
 }

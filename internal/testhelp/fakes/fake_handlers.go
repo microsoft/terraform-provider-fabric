@@ -69,6 +69,22 @@ func handleGetWithParentID[TEntity, TOptions, TResponse any](
 	}
 }
 
+func handleGetOnelakeShortcut[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	getTransformer getTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, workspaceID, itemID, path, name string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(_ context.Context, workspaceID, itemID, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+		id := generateID(path, name)
+
+		return getByID(handler, id, getTransformer)
+	}
+}
+
 func handleGetDefinition[TEntity, TDefinition, TOptions, TResponse any](
 	handler *typedHandler[TEntity],
 	definitionTransformer definitionTransformer[TDefinition, TResponse],
@@ -214,6 +230,73 @@ func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse a
 		} else {
 			handler.Upsert(newEntity)
 
+			respValue := createTransformer.TransformCreate(newEntity)
+			resp.SetResponse(statusCode, respValue, nil)
+		}
+
+		return resp, errResp
+	}
+}
+
+func handleListOnelakeShortcut[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	listTransformer listTransformer[TEntity, TResponse],
+	f *func(workspaceID, itemID string, options *TOptions) azfake.PagerResponder[TResponse],
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(workspaceID, itemID string, options *TOptions) azfake.PagerResponder[TResponse] {
+		var resp azfake.PagerResponder[TResponse]
+
+		elements := handler.Elements()
+
+		respValue := listTransformer.TransformList(elements)
+		resp.AddPage(http.StatusOK, respValue, nil)
+
+		return resp
+	}
+}
+
+func handleDeleteOnelakeShortcut[TEntity, TOptions, TResponse any](
+	handler *typedHandler[TEntity],
+	f *func(ctx context.Context, workspaceID, itemID, path, name string, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(_ context.Context, workspaceID, itemID, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+		id := generateID(path, name)
+		return deleteByID[TEntity, TResponse](handler, id)
+	}
+}
+
+func handleNonLROCreateOnelakeShortcut[TEntity, TOptions, TCreateRequest, TResponse any](
+	handler *typedHandler[TEntity],
+	creator creatorWithWorkspaceIDAndItemID[TCreateRequest, TEntity],
+	validator validator[TEntity],
+	createTransformer createTransformer[TEntity, TResponse],
+	f *func(ctx context.Context, workspaceID, itemID string, createRequest TCreateRequest, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder),
+) {
+	if f == nil {
+		return
+	}
+
+	*f = func(_ context.Context, workspaceID, itemID string, createRequest TCreateRequest, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+		var resp azfake.Responder[TResponse]
+		var errResp azfake.ErrorResponder
+
+		newEntity := creator.CreateWithWorkspaceIDAndItemID(workspaceID, itemID, createRequest)
+
+		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+			var empty TEntity
+			respValue := createTransformer.TransformCreate(empty)
+			resp.SetResponse(statusCode, respValue, nil)
+			errResp.SetError(err)
+		} else {
+			handler.Upsert(newEntity)
 			respValue := createTransformer.TransformCreate(newEntity)
 			resp.SetResponse(statusCode, respValue, nil)
 		}

@@ -21,6 +21,19 @@ type operationsBase[
 	validator[TEntity]
 }
 
+type operationsBaseOneLake[
+	TEntity,
+	TGetEntityResponse,
+	TCreateEntityResponse,
+	TListEntityResponse,
+	TCreateEntityRequest any] interface {
+	identifier[TEntity]
+	getTransformer[TEntity, TGetEntityResponse]
+	createTransformer[TEntity, TCreateEntityResponse]
+	listTransformer[TEntity, TListEntityResponse]
+	validator[TEntity]
+}
+
 // Operations that apply to entities with a simple ID.
 type simpleIDOperations[
 	TEntity,
@@ -68,4 +81,21 @@ type definitionOperationsNonLROCreation[
 	TUpdateDefinitionResponse any] interface {
 	definitionUpdater[TDefinitionUpdateRequest, TDefinition]
 	definitionTransformer[TDefinition, TGetDefinitionResponse]
+}
+
+type onelakeOperations[
+	TEntity,
+	TGetOutput,
+	TCreateOutput,
+	TListOutput,
+	TCreateInput any,
+] interface {
+	operationsBaseOneLake[
+		TEntity,
+		TGetOutput,
+		TCreateOutput,
+		TListOutput,
+		TCreateInput,
+	]
+	creatorWithWorkspaceIDAndItemID[TCreateInput, TEntity]
 }

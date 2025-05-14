@@ -86,6 +86,13 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 			"item_id":      itemId,
 			"path":         *entity.Path,
 			"name":         *entity.Name,
+			"target": map[string]any{
+				"onelake": map[string]any{
+					"workspace_id": *entity.Target.OneLake.WorkspaceID,
+					"item_id":      *entity.Target.OneLake.ItemID,
+					"path":         *entity.Target.OneLake.Path,
+				},
+			},
 		},
 	)
 
@@ -122,14 +129,100 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 				if len(is) != 1 {
 					return errors.New("expected one instance state")
 				}
+				expectedID := fmt.Sprintf("%s%s%s%s", *entity.Name, *entity.Path, workspaceID, itemId)
 
-				if is[0].ID != workspaceID {
-					return errors.New(testResourceItemFQN + ": unexpected ID")
+				if is[0].ID != expectedID {
+					return fmt.Errorf("%s: unexpected ID — got %q, want %q", testResourceItemFQN, is[0].ID, expectedID)
 				}
-
 				return nil
 			},
 		},
+	}))
+}
+
+func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomOnelakeShortcut()
+	entityBefore := fakes.NewRandomOnelakeShortcut()
+	entityAfter := fakes.NewRandomOnelakeShortcut()
+
+	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"name":         *entityExist.Name,
+					"path":         *entityExist.Path,
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": *entityExist.Target.OneLake.WorkspaceID,
+							"item_id":      *entityExist.Target.OneLake.ItemID,
+							"path":         *entityExist.Target.OneLake.Path,
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"name":         *entityBefore.Name,
+					"path":         *entityBefore.Path,
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
+							"item_id":      *entityBefore.Target.OneLake.ItemID,
+							"path":         *entityBefore.Target.OneLake.Path,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "name", entityBefore.Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "path", *entityBefore.Path),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"name":         *entityBefore.Name,
+					"path":         *entityBefore.Path,
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
+							"item_id":      *entityAfter.Target.OneLake.ItemID,
+							"path":         *entityBefore.Target.OneLake.Path,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "name", entityBefore.Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "path", *entityBefore.Path),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
 	}))
 }
 

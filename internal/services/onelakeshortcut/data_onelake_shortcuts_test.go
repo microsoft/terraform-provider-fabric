@@ -42,6 +42,7 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
+					"item_id":      "invalid uuid",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -52,6 +53,7 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id":    workspaceID,
+					"item_id":         itemId,
 					"unexpected_attr": "test",
 				},
 			),

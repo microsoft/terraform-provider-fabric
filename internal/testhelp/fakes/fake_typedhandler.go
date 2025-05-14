@@ -52,6 +52,20 @@ func newTypedHandlerWithConverter[TEntity any](server *fakeServer, identifier id
 	return typedHandler
 }
 
+func configureOneLakeShortcutHandler[TEntity, TGetOutput, TCreateOutput, TListOutput, TCreationData, TGetOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
+	handler *typedHandler[TEntity],
+	operations onelakeOperations[TEntity, TGetOutput, TCreateOutput, TListOutput, TCreationData],
+	getFunction *func(ctx context.Context, workspaceID, itemID, path, name string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
+	createFunction *func(ctx context.Context, workspaceID, itemID string, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
+	listFunction *func(workspaceID, itemID string, options *TListOptions) (resp azfake.PagerResponder[TListOutput]),
+	deleteFunction *func(ctx context.Context, workspaceID, itemID, path, name string, options *TDeleteOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
+) {
+	handleGetOnelakeShortcut(handler, operations, getFunction)
+	handleNonLROCreateOnelakeShortcut(handler, operations, operations, operations, createFunction)
+	handleListOnelakeShortcut(handler, operations, listFunction)
+	handleDeleteOnelakeShortcut(handler, deleteFunction)
+}
+
 // ConfigureEntityWithSimpleID configures an entity with a simple ID.
 func configureEntityPagerWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
 	handler *typedHandler[TEntity],
