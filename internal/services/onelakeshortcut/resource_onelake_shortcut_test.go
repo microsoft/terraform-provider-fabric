@@ -40,6 +40,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":    testhelp.RandomUUID(),
+					"item_id":         testhelp.RandomUUID(),
 					"unexpected_attr": "test",
 				},
 			),
@@ -56,6 +57,19 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
 		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "invalid uuid",
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
+		},
 		// // error - invalid uuid - capacity_id
 		{
 			ResourceName: testResourceItemFQN,
@@ -63,9 +77,66 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"unexpected_attr": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+						"dataverse": map[string]any{
+							"connection_id":      testhelp.RandomUUID(),
+							"table_name":         testhelp.RandomName(),
+							"deltalake_folder":   testhelp.RandomName(),
+							"path":               testhelp.RandomName(),
+							"environment_domain": testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
 		},
 	}))
 }
@@ -73,11 +144,12 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemId := testhelp.RandomUUID()
-	entity := fakes.NewRandomOnelakeShortcut()
-
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	// fakes.FakeServer.Upsert(entity)
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -143,14 +215,16 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomOnelakeShortcut()
-	entityBefore := fakes.NewRandomOnelakeShortcut()
-	entityAfter := fakes.NewRandomOnelakeShortcut()
-
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	fakes.FakeServer.Upsert(entityExist)
-	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	entityExist := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
+	entityBefore := NewRandomOnelakeShortcut()
+	entityAfter := NewRandomOnelakeShortcut()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateOneLakeShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	// fakes.FakeServer.Upsert(entityExist)
+	// fakes.FakeServer.Upsert(entityAfter)
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity

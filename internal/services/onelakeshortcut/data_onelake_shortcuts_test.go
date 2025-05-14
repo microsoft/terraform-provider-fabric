@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -21,11 +22,15 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemId := testhelp.RandomUUID()
-	entity := fakes.NewRandomOnelakeShortcut()
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
+	shortcuts := NewRandomOneLakeShortcuts(
+		[]fabcore.Shortcut{entity, NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId), NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)},
+	)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager = fakeOneLakeShortcutsFunc(shortcuts)
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	// fakes.FakeServer.Upsert(entity)
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

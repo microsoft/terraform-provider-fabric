@@ -20,11 +20,12 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemId := testhelp.RandomUUID()
-	entity := fakes.NewRandomOnelakeShortcut()
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
+	// fakes.FakeServer.Upsert(entity)
+	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

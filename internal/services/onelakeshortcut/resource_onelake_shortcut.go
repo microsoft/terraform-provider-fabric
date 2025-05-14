@@ -104,56 +104,30 @@ func (r *resourceOnelakeShortcut) ValidateConfig(
 		return
 	}
 
-	var (
-		targetConfig *targetModel
-		diags        diag.Diagnostics
-	)
-
-	if !config.Target.IsNull() && !config.Target.IsUnknown() {
-		targetConfig, diags = config.Target.Get(ctx)
-		resp.Diagnostics.Append(diags...)
-
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	} else {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("target"),
-			"Missing target block",
-			"You must specify exactly one of onelake, adls_gen2, amazon_s3, google_cloud_storage, s3_compatible, external_data_share or dataverse.",
-		)
-
+	targetConfig, diags := config.Target.Get(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	targets := []struct {
+		isSet bool
+		label string
+	}{
+		{!targetConfig.Onelake.IsNull() && !targetConfig.Onelake.IsUnknown(), "onelake"},
+		{!targetConfig.AdlsGen2.IsNull() && !targetConfig.AdlsGen2.IsUnknown(), "adls_gen2"},
+		{!targetConfig.AmazonS3.IsNull() && !targetConfig.AmazonS3.IsUnknown(), "amazon_s3"},
+		{!targetConfig.GoogleCloudStorage.IsNull() && !targetConfig.GoogleCloudStorage.IsUnknown(), "google_cloud_storage"},
+		{!targetConfig.S3Compatible.IsNull() && !targetConfig.S3Compatible.IsUnknown(), "s3_compatible"},
+		{!targetConfig.ExternalDataShare.IsNull() && !targetConfig.ExternalDataShare.IsUnknown(), "external_data_share"},
+		{!targetConfig.Dataverse.IsNull() && !targetConfig.Dataverse.IsUnknown(), "dataverse"},
+	}
+
 	count := 0
-
-	if !targetConfig.Onelake.IsNull() && !targetConfig.Onelake.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.AdlsGen2.IsNull() && !targetConfig.AdlsGen2.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.AmazonS3.IsNull() && !targetConfig.AmazonS3.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.GoogleCloudStorage.IsNull() && !targetConfig.GoogleCloudStorage.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.S3Compatible.IsNull() && !targetConfig.S3Compatible.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.ExternalDataShare.IsNull() && !targetConfig.ExternalDataShare.IsUnknown() {
-		count++
-	}
-
-	if !targetConfig.Dataverse.IsNull() && !targetConfig.Dataverse.IsUnknown() {
-		count++
+	for _, t := range targets {
+		if t.isSet {
+			count++
+		}
 	}
 
 	if count != 1 {

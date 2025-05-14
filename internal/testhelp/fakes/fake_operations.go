@@ -90,12 +90,10 @@ type onelakeOperations[
 	TListOutput,
 	TCreateInput any,
 ] interface {
-	operationsBaseOneLake[
-		TEntity,
-		TGetOutput,
-		TCreateOutput,
-		TListOutput,
-		TCreateInput,
-	]
+	identifier[TEntity]
+	getTransformer[TEntity, TGetOutput]
+	createTransformer[TEntity, TCreateOutput]
+	listTransformer[TEntity, TListOutput]
+	validator[TEntity]
 	creatorWithWorkspaceIDAndItemID[TCreateInput, TEntity]
 }
