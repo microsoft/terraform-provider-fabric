@@ -275,7 +275,7 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	respUpdate, err := r.client.UpdateConnection(ctx, plan.ID.ValueString(), reqUpdate, nil)
+	respUpdate, err := r.client.UpdateConnection(ctx, plan.ID.ValueString(), reqUpdate.UpdateConnectionRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
