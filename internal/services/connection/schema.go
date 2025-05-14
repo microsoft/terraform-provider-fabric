@@ -39,7 +39,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 		}
 	}
 
-	possibleConnectivityTypeValues := []fabcore.ConnectivityType{fabcore.ConnectivityTypeOnPremisesGateway, fabcore.ConnectivityTypeShareableCloud, fabcore.ConnectivityTypeVirtualNetworkGateway}
+	// possibleConnectivityTypeValues := []fabcore.ConnectivityType{fabcore.ConnectivityTypeOnPremisesGateway, fabcore.ConnectivityTypeShareableCloud, fabcore.ConnectivityTypeVirtualNetworkGateway}
 
 	// var possibleConnectivityTypeValues1 []attr.Value
 
@@ -99,7 +99,15 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						stringplanmodifier.RequiresReplace(),
 					},
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possibleConnectivityTypeValues, true)...),
+						stringvalidator.OneOf(
+							utils.ConvertEnumsToStringSlices(
+								[]fabcore.ConnectivityType{
+									fabcore.ConnectivityTypeOnPremisesGateway,
+									fabcore.ConnectivityTypeShareableCloud,
+									fabcore.ConnectivityTypeVirtualNetworkGateway,
+								},
+								true,
+							)...),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
@@ -619,19 +627,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									path.MatchRelative().AtParent().AtName("shared_access_signature_credentials"),
 									path.MatchRelative().AtParent().AtName("windows_credentials"),
 								),
-								objectvalidator.All(
-									superobjectvalidator.RequireIfAttributeIsOneOf(
-										path.MatchRoot("connectivity_type"),
-										[]attr.Value{
-											types.StringValue(string(fabcore.ConnectivityTypeOnPremisesGateway)),
-										},
-									),
-									superobjectvalidator.RequireIfAttributeIsOneOf(
-										path.MatchRelative().AtParent().AtName("credential_type"),
-										[]attr.Value{
-											types.StringValue(string(fabcore.CredentialTypeOAuth2)),
-										},
-									),
+								superobjectvalidator.RequireIfAttributeIsOneOf(
+									path.MatchRelative().AtParent().AtName("credential_type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.CredentialTypeOAuth2)),
+									},
 								),
 							},
 						},
