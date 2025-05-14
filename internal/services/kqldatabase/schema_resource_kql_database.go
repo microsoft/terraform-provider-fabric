@@ -77,7 +77,7 @@ func getResourceKQLDatabaseConfigurationAttributes() map[string]schema.Attribute
 			},
 			Validators: []validator.String{
 				stringvalidator.PreferWriteOnlyAttribute(
-					path.MatchRelative().AtParent().AtName("invitation_token_wo"),
+					path.MatchRoot("configuration").AtName("invitation_token_wo"),
 				),
 				stringvalidator.ConflictsWith(
 					path.MatchRelative().AtParent().AtName("invitation_token_wo"),
