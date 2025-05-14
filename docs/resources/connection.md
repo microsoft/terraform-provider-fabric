@@ -103,19 +103,24 @@ Read-Only:
 
 Required:
 
+- `credential_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The credential type.
+
+-> **If the value of the attribute [`connectivity_type`](#connectivity_type) is `OnPremisesGateway` the value is one of** - `"Anonymous"` - Anonymous<br>- `"Basic"` - Basic<br>- `"Key"` - Key<br>- `"OAuth2"` - OAuth2<br>- `"Windows"` - Windows<br>.
+
+-> **If the value of the attribute [`connectivity_type`](#connectivity_type) is one of `ShareableCloud` or `VirtualNetworkGateway`** : - `"Anonymous"` - Anonymous<br>- `"Basic"` - Basic<br>- `"Key"` - Key<br>- `"ServicePrincipal"` - ServicePrincipal<br>- `"SharedAccessSignature"` - SharedAccessSignature<br>- `"Windows"` - Windows<br>- `"WindowsWithoutImpersonation"` - WindowsWithoutImpersonation<br>- `"WorkspaceIdentity"` - WorkspaceIdentity<br>.
+
 - `skip_test_connection` (Boolean) <i style="color:red;font-weight: bold">(ForceNew)</i> Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.
 
 Optional:
 
-- `basic_credentials` (Attributes) The basic credentials. Ensure that if an attribute is set, these are not set: "[<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.on_premises_gateway_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
+- `basic_credentials` (Attributes) The basic credentials. Ensure that if an attribute is set, these are not set: "[<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
 - `connection_encryption` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The connection encryption type. Value defaults to `NotEncrypted`. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
-- `credential_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`. If the value of [`connectivity_type`](#connectivity_type) attribute is one of `ShareableCloud` or `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `OnPremisesGateway` this attribute is **NULL**.
-- `key_credentials` (Attributes) The key credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.on_premises_gateway_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
-- `on_premises_gateway_credentials` (Attributes List) The on-premises gateway credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials]". If the value of [`connectivity_type`](#connectivity_type) attribute is `OnPremisesGateway` this attribute is **REQUIRED**. List must contain at least 1 elements. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials))
-- `service_principal_credentials` (Attributes) The service principal credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.on_premises_gateway_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `ServicePrincipal` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
-- `shared_access_signature_credentials` (Attributes) The hared access signature credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.windows_credentials,<.on_premises_gateway_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `SharedAccessSignature` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
+- `key_credentials` (Attributes) The key credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
+- `oauth2_credentials` (Attributes) The OAuth2 credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials]". Value must satisfy all of the validations: If connectivity_type attribute is set and the value is "OnPremisesGateway" this attribute is REQUIRED + If <.credential_type attribute is set and the value is "OAuth2" this attribute is REQUIRED. (see [below for nested schema](#nestedatt--credential_details--oauth2_credentials))
+- `service_principal_credentials` (Attributes) The service principal credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `ServicePrincipal` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
+- `shared_access_signature_credentials` (Attributes) The hared access signature credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `SharedAccessSignature` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
 - `single_sign_on_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The single sign-on type. Value defaults to `None`. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
-- `windows_credentials` (Attributes) The Windows credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.on_premises_gateway_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Windows` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--windows_credentials))
+- `windows_credentials` (Attributes) The Windows credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Windows` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--windows_credentials))
 
 <a id="nestedatt--credential_details--basic_credentials"></a>
 
@@ -124,7 +129,7 @@ Optional:
 Required:
 
 - `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `password_wo`.
+- `password_wo_version` (Number) The version of the `password_wo`.
 - `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
 
 <a id="nestedatt--credential_details--key_credentials"></a>
@@ -134,81 +139,16 @@ Required:
 Required:
 
 - `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
-- `key_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `key_wo`.
+- `key_wo_version` (Number) The version of the `key_wo`.
 
-<a id="nestedatt--credential_details--on_premises_gateway_credentials"></a>
+<a id="nestedatt--credential_details--oauth2_credentials"></a>
 
-### Nested Schema for `credential_details.on_premises_gateway_credentials`
-
-Required:
-
-- `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Gateway ID.
-
-Optional:
-
-- `basic_credentials` (Attributes) The Basic credentials. Ensure that if an attribute is set, these are not set: "[<.windows_credentials,<.key_credentials,<.oauth2_credentials]". Ensure that if an attribute is set, also these are set: "[<.public_key]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--basic_credentials))
-- `credential_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `OAuth2`, `Windows`. Ensure that if an attribute is set, these are not set: "[<.encrypted_credentials]". If the [`<.encrypted_credentials`](#<.encrypted_credentials) attribute is set this attribute is **NULL**.
-- `encrypted_credentials` (Attributes) The encrypted credentials. Ensure that if an attribute is set, these are not set: "[<.windows_credentials,<.basic_credentials,<.key_credentials,<.oauth2_credentials,<.credential_type,<.public_key]". Value must not satisfy the validation: If <.credential_type attribute is set this attribute is REQUIRED. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--encrypted_credentials))
-- `key_credentials` (Attributes) The key credentials. Ensure that if an attribute is set, these are not set: "[<.windows_credentials,<.basic_credentials,<.oauth2_credentials]". Ensure that if an attribute is set, also these are set: "[<.public_key]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--key_credentials))
-- `oauth2_credentials` (Attributes) The OAuth2 credentials. Ensure that if an attribute is set, these are not set: "[<.windows_credentials,<.basic_credentials,<.key_credentials]". Ensure that if an attribute is set, also these are set: "[<.public_key]". If the value of [`<.credential_type`](#<.credential_type) attribute is `OAuth2` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--oauth2_credentials))
-- `public_key` (Attributes) The public key used to encrypt the credentials. Ensure that if an attribute is set, these are not set: "[<.encrypted_credentials]". (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--public_key))
-- `windows_credentials` (Attributes) The Windows credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.oauth2_credentials]". Ensure that if an attribute is set, also these are set: "[<.public_key]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Windows` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--on_premises_gateway_credentials--windows_credentials))
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--basic_credentials"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.basic_credentials`
-
-Required:
-
-- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `password_wo`.
-- `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--encrypted_credentials"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.encrypted_credentials`
-
-Required:
-
-- `value_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The value (WO).
-- `value_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `value_wo`.
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--key_credentials"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.key_credentials`
-
-Required:
-
-- `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
-- `key_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `key_wo`.
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--oauth2_credentials"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.oauth2_credentials`
+### Nested Schema for `credential_details.oauth2_credentials`
 
 Required:
 
 - `access_token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
-- `access_token_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `access_token_wo`.
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--public_key"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.public_key`
-
-Required:
-
-- `exponent` (String) The exponent.
-- `modulus` (String) The modulus.
-
-<a id="nestedatt--credential_details--on_premises_gateway_credentials--windows_credentials"></a>
-
-### Nested Schema for `credential_details.on_premises_gateway_credentials.windows_credentials`
-
-Required:
-
-- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `password_wo`.
-- `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
+- `access_token_wo_version` (Number) The version of the `access_token_wo`.
 
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
@@ -218,7 +158,7 @@ Required:
 
 - `client_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The client ID.
 - `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO).
-- `client_secret_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `client_secret_wo`.
+- `client_secret_wo_version` (Number) The version of the `client_secret_wo`.
 - `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID.
 
 <a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
@@ -228,7 +168,7 @@ Required:
 Required:
 
 - `sas_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The sas (WO).
-- `sas_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `sas_wo`.
+- `sas_wo_version` (Number) The version of the `sas_wo`.
 
 <a id="nestedatt--credential_details--windows_credentials"></a>
 
@@ -237,7 +177,7 @@ Required:
 Required:
 
 - `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) <i style="color:red;font-weight: bold">(ForceNew)</i> The version of the `password_wo`.
+- `password_wo_version` (Number) The version of the `password_wo`.
 - `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
 
 <a id="nestedatt--timeouts"></a>
