@@ -167,14 +167,9 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var gwMembers []fabcore.OnPremisesGatewayMember
-
-	if !plan.GatewayID.IsNull() && !plan.GatewayID.IsUnknown() {
-		gwMembers, diags = r.getGatewayMembers(ctx, plan)
-
-		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-			return
-		}
+	gwMembers, diags := r.getGatewayMembers(ctx, plan)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	var reqCreate requestCreateConnection
@@ -269,9 +264,14 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	gwMembers, diags := r.getGatewayMembers(ctx, plan)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	var reqUpdate requestUpdateConnection
 
-	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan, config, gwMembers)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -693,10 +693,17 @@ func (r *resourceConnection) getGatewayMembers(
 	ctx context.Context,
 	model resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
 ) ([]fabcore.OnPremisesGatewayMember, diag.Diagnostics) {
-	respList, err := r.clientGw.ListGatewayMembers(ctx, model.GatewayID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		return nil, diags
+	var gwMembers []fabcore.OnPremisesGatewayMember
+
+	if !model.GatewayID.IsNull() && !model.GatewayID.IsUnknown() {
+		respList, err := r.clientGw.ListGatewayMembers(ctx, model.GatewayID.ValueString(), nil)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+			return nil, diags
+		}
+
+		gwMembers = respList.Value
+
 	}
 
-	return respList.Value, nil
+	return gwMembers, nil
 }
