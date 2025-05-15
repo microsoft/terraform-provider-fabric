@@ -81,6 +81,7 @@ func (o *operationsOneLakeShortcut) Validate(newEntity fabcore.Shortcut, existin
 			*entity.Target.OneLake.Path == *newEntity.Target.OneLake.Path {
 			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error(), fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error())
 		}
+
 		if entity.Name == newEntity.Name && entity.Path == newEntity.Path {
 			return http.StatusUpgradeRequired, nil
 		}

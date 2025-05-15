@@ -30,11 +30,11 @@ func fakeGetOneLakeShortcutFunc() func(ctx context.Context, workspaceID, itemID,
 	return func(_ context.Context, workspaceID, itemID, path, name string, _ *fabcore.OneLakeShortcutsClientGetShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientGetShortcutResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeShortcutsClientGetShortcutResponse]{}
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
+
 		id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, path, name)
 		if shortcut, ok := fakeOneLakeShortcutStore[id]; ok {
 			resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientGetShortcutResponse{Shortcut: shortcut}, nil)
 		} else {
-
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Item not found"))
 			resp.SetResponse(http.StatusNotFound, fabcore.OneLakeShortcutsClientGetShortcutResponse{}, nil)
 		}
@@ -63,28 +63,29 @@ func fakeCreateOneLakeShortcutFunc() func(ctx context.Context, workspaceID, item
 		id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, *createShortcutRequest.Path, *createShortcutRequest.Name)
 
 		if existing, ok := fakeOneLakeShortcutStore[id]; ok {
-			// Check if the target details also match
 			if existing.Target != nil && existing.Target.OneLake != nil &&
 				createShortcutRequest.Target != nil && createShortcutRequest.Target.OneLake != nil &&
 				*existing.Target.OneLake.ItemID == *createShortcutRequest.Target.OneLake.ItemID &&
 				*existing.Target.OneLake.WorkspaceID == *createShortcutRequest.Target.OneLake.WorkspaceID &&
 				*existing.Target.OneLake.Path == *createShortcutRequest.Target.OneLake.Path {
-
-				// Only then: return conflict
 				errResp.SetError(fabfake.SetResponseError(http.StatusConflict, errItemAlreadyExists, "Item Display Name Already In Use"))
 				resp.SetResponse(http.StatusConflict, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: existing}, nil)
-				return
+
+				return resp, errResp
 			}
+
 			fakeOneLakeShortcutStore[id] = created
+
 			resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: created}, nil)
-			return
+
+			return resp, errResp
 		}
 
 		fakeOneLakeShortcutStore[id] = created
 
-		// No match, return 200 OK with first existing shortcut as placeholder response
 		resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: created}, nil)
-		return
+
+		return resp, errResp
 	}
 }
 
@@ -130,6 +131,7 @@ func NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID string
 	entity := NewRandomOnelakeShortcut()
 	id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, *entity.Path, *entity.Name)
 	fakeOneLakeShortcutStore[id] = entity
+
 	return entity
 }
 

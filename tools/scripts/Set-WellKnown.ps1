@@ -1384,10 +1384,10 @@ $oneLakeShortcut = Set-OneLakeShortcut `
   -Payload $onelakeShortcutPayload
 
 $wellKnown['OneLakeShortcut'] = @{
-  ShortcutName = $oneLakeShortcut.name
-  ShortcutPath = $oneLakeShortcut.Path
-  WorkspaceId  = $wellKnown['WorkspaceDS'].id
-  LakehouseId  = $wellKnown['Lakehouse'].id
+  shortcutName = $oneLakeShortcut.name
+  shortcutPath = $oneLakeShortcut.Path
+  workspaceId  = $wellKnown['WorkspaceDS'].id
+  lakehouseId  = $wellKnown['Lakehouse'].id
 }
 
 # Save wellknown.json file

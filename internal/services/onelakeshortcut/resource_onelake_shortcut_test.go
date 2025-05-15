@@ -4,7 +4,6 @@
 package onelakeshortcut_test
 
 import (
-	//"errors".
 	"errors"
 	"fmt"
 	"regexp"
@@ -141,10 +140,10 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 	}))
 }
 
-func TestUnit_LakehouseResource_ImportState(t *testing.T) {
+func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	itemId := testhelp.RandomUUID()
-	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
+	itemID := testhelp.RandomUUID()
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
 	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
@@ -155,7 +154,7 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 		testResourceItemHeader,
 		map[string]any{
 			"workspace_id": workspaceID,
-			"item_id":      itemId,
+			"item_id":      itemID,
 			"path":         *entity.Path,
 			"name":         *entity.Name,
 			"target": map[string]any{
@@ -186,7 +185,7 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
-			ImportStateId: fmt.Sprintf("%s/%s/%s/%s", "test", itemId, *entity.Path, *entity.Name),
+			ImportStateId: fmt.Sprintf("%s/%s/%s/%s", "test", itemID, *entity.Path, *entity.Name),
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
@@ -194,18 +193,19 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 		{
 			ResourceName:       testResourceItemFQN,
 			Config:             testCase,
-			ImportStateId:      fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemId, *entity.Path, *entity.Name),
+			ImportStateId:      fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, *entity.Path, *entity.Name),
 			ImportState:        true,
 			ImportStatePersist: true,
 			ImportStateCheck: func(is []*terraform.InstanceState) error {
 				if len(is) != 1 {
 					return errors.New("expected one instance state")
 				}
-				expectedID := fmt.Sprintf("%s%s%s%s", *entity.Name, *entity.Path, workspaceID, itemId)
+				expectedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, *entity.Path, *entity.Name)
 
 				if is[0].ID != expectedID {
 					return fmt.Errorf("%s: unexpected ID — got %q, want %q", testResourceItemFQN, is[0].ID, expectedID)
 				}
+
 				return nil
 			},
 		},
@@ -302,11 +302,10 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 
 func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
-
 	entityTargetPath := "Files/images"
 	entityUpdatedTargetPath := "Files/sample_dataset"
-	workspaceId := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
-	lakehouseId := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
+	workspaceID := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
+	lakehouseID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -314,14 +313,14 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":      lakehouseId,
-					"workspace_id": workspaceId,
+					"item_id":      lakehouseID,
+					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "Files",
+					"path":         "/Files",
 					"target": map[string]any{
 						"onelake": map[string]any{
-							"workspace_id": workspaceId,
-							"item_id":      lakehouseId,
+							"workspace_id": workspaceID,
+							"item_id":      lakehouseID,
 							"path":         entityTargetPath,
 						},
 					},
@@ -329,8 +328,8 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
@@ -341,14 +340,14 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":      lakehouseId,
-					"workspace_id": workspaceId,
+					"item_id":      lakehouseID,
+					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "Files",
+					"path":         "/Files",
 					"target": map[string]any{
 						"onelake": map[string]any{
-							"workspace_id": workspaceId,
-							"item_id":      lakehouseId,
+							"workspace_id": workspaceID,
+							"item_id":      lakehouseID,
 							"path":         entityUpdatedTargetPath,
 						},
 					},
@@ -356,8 +355,8 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseId),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceId),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),

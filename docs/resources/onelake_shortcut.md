@@ -124,8 +124,8 @@ resource "fabric_onelake_shortcut" "external_data_share_target" {
 ### Required
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The OneLake Shortcut name. String length must be at most 200. String length must be at least 1.
-- `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 200. String length must be at least 1. String length must be at least 1. Path must not start with a leading slash ('/').
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut. String length must be at most 200. String length must be at least 1.
+- `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables".
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
@@ -153,7 +153,7 @@ Optional:
 
 Read-Only:
 
-- `type` (String) The OneLake Shortcut target type. Value must be one of : `AdlsGen2`, `AmazonS3`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`.
+- `type` (String) The type object contains properties like target shortcut account type. Additional types may be added over time.
 
 <a id="nestedatt--target--adls_gen2"></a>
 
@@ -161,9 +161,9 @@ Read-Only:
 
 Required:
 
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
-- `location` (String) Target location. String length must be at least 1. String length must be at most 200.
-- `subpath` (String) Target subpath. String length must be at least 1. String length must be at most 200.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the ADLS data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.
+- `location` (String) Specifies the location of the target ADLS container. The URI must be in the format https://[account-name].dfs.core.windows.net where [account-name] is the name of the target ADLS account.
+- `subpath` (String) Specifies the container and subfolder within the ADLS account where the target folder is located. Must be of the format [container]/[subfolder] where [container] is the name of the container that holds the files and folders; [subfolder] is the name of the subfolder within the container (optional). For example: /mycontainer/mysubfolder.
 
 <a id="nestedatt--target--amazon_s3"></a>
 
@@ -171,10 +171,9 @@ Required:
 
 Required:
 
-- `bucket` (String) Target bucket. String length must be at least 1. String length must be at most 200.
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
-- `location` (String) Target location. String length must be at least 1. String length must be at most 200.
-- `subpath` (String) Target subpath. String length must be at least 1. String length must be at most 200.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Amazon S3 data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.
+- `location` (String) HTTP URL that points to the target bucket in S3. The URL should be in the format https://[bucket-name].s3.[region-code].amazonaws.com, where 'bucket-name' is the name of the S3 bucket you want to point to, and 'region-code' is the code for the region where the bucket is located. For example: <https://my-s3-bucket.s3.us-west-2.amazonaws.com>.
+- `subpath` (String) Specifies a target folder or subfolder within the S3 bucket.
 
 <a id="nestedatt--target--dataverse"></a>
 
@@ -182,10 +181,10 @@ Required:
 
 Required:
 
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
-- `deltalake_folder` (String) Target delta lake folder. String length must be at least 1. String length must be at most 200.
-- `environment_domain` (String) Target environment domain. String length must be at least 1. String length must be at most 200.
-- `table_name` (String) Target table name. String length must be at least 1. String length must be at most 200.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Dataverse data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.
+- `deltalake_folder` (String) Specifies the DeltaLake folder path where the target data is stored.
+- `environment_domain` (String) URI that indicates the Dataverse target environment's domain name. The URI should be formatted as 'https://[orgname].crm[xx].dynamics.com', where [orgname] represents the name of your Dataverse organization.
+- `table_name` (String) Specifies the name of the target table in Dataverse.
 
 <a id="nestedatt--target--external_data_share"></a>
 
@@ -193,7 +192,7 @@ Required:
 
 Required:
 
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
 
 <a id="nestedatt--target--google_cloud_storage"></a>
 
@@ -201,10 +200,9 @@ Required:
 
 Required:
 
-- `bucket` (String) Target bucket. String length must be at least 1. String length must be at most 200.
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
-- `location` (String) Target location. String length must be at least 1. String length must be at most 200.
-- `subpath` (String) Target subpath. String length must be at least 1. String length must be at most 200.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
+- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
+- `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
 
 <a id="nestedatt--target--onelake"></a>
 
@@ -212,9 +210,9 @@ Required:
 
 Required:
 
-- `item_id` (String) Target item ID.
-- `path` (String) Target path.
-- `workspace_id` (String) Target Workspace ID.
+- `item_id` (String) The ID of the target in OneLake. The target can be an item of Lakehouse, KQLDatabase, or Warehouse.
+- `path` (String) A string representing the full path to the target folder within the Item. This path should be relative to the root of the OneLake directory structure. For example: 'Tables/myTablesFolder/someTableSubFolder'.
+- `workspace_id` (String) The ID of the target workspace.
 
 <a id="nestedatt--target--s3_compatible"></a>
 
@@ -222,10 +220,10 @@ Required:
 
 Required:
 
-- `bucket` (String) Target bucket. String length must be at least 1. String length must be at most 200.
-- `connection_id` (String) Target connection ID. String length must be at least 1. String length must be at most 200.
-- `location` (String) Target location. String length must be at least 1. String length must be at most 200.
-- `subpath` (String) Target subpath. String length must be at least 1. String length must be at most 200.
+- `bucket` (String) Specifies the target bucket within the S3 compatible location.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
+- `location` (String) HTTP URL of the S3 compatible endpoint. This endpoint must be able to receive ListBuckets S3 API calls. The URL must be in the non-bucket specific format; no bucket should be specified here. For example: <https://s3endpoint.contoso.com>.
+- `subpath` (String) Specifies a target folder or subfolder within the S3 compatible bucket. For example: /folder.
 
 <a id="nestedatt--timeouts"></a>
 

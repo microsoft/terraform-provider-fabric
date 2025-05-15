@@ -269,6 +269,7 @@ func handleDeleteOnelakeShortcut[TEntity, TOptions, TResponse any](
 
 	*f = func(_ context.Context, workspaceID, itemID, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 		id := generateID(path, name)
+
 		return deleteByID[TEntity, TResponse](handler, id)
 	}
 }

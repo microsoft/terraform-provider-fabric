@@ -84,10 +84,10 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_OnelakeShortcutsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-	itemID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
+func TestAcc_OneLakeShortcutsDataSource(t *testing.T) {
+	onelakeShortcut := testhelp.WellKnown()["OneLakeShortcut"]
+	workspaceID := onelakeShortcut.(map[string]any)["workspaceId"].(string)
+	itemID := onelakeShortcut.(map[string]any)["lakehouseId"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read

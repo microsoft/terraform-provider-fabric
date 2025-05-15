@@ -19,8 +19,8 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	itemId := testhelp.RandomUUID()
-	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
+	itemID := testhelp.RandomUUID()
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
 
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
@@ -63,10 +63,10 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemId,
+					"item_id":      itemID,
 				},
 			),
-			ExpectError: regexp.MustCompile(`parameter shortcutPath cannot be empty`),
+			ExpectError: regexp.MustCompile(`The argument "path" is required, but no definition was found.`),
 		},
 		// missing name attribute
 		{
@@ -74,11 +74,11 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemId,
-					"path":         "Files",
+					"item_id":      itemID,
+					"path":         *entity.Path,
 				},
 			),
-			ExpectError: regexp.MustCompile(`These attributes must be configured together: \[path,name\]`),
+			ExpectError: regexp.MustCompile(`The argument "name" is required, but no definition was found.`),
 		},
 		// read
 		{
@@ -86,7 +86,7 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemId,
+					"item_id":      itemID,
 					"name":         *entity.Name,
 					"path":         *entity.Path,
 				},
@@ -105,7 +105,7 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemId,
+					"item_id":      itemID,
 					"name":         testhelp.RandomName(),
 					"path":         *entity.Path,
 				},
@@ -115,10 +115,12 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_WorkspaceDataSource(t *testing.T) {
-	workspaceID := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
-	itemID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
-	tableName := testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
+func TestAcc_OneLakeShortcutDataSource(t *testing.T) {
+	onelakeShortcut := testhelp.WellKnown()["OneLakeShortcut"]
+	workspaceID := onelakeShortcut.(map[string]any)["workspaceId"].(string)
+	itemID := onelakeShortcut.(map[string]any)["lakehouseId"].(string)
+	shortcutName := onelakeShortcut.(map[string]any)["shortcutName"].(string)
+	shortcutPath := onelakeShortcut.(map[string]any)["shortcutPath"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// error - no attributes
@@ -136,13 +138,13 @@ func TestAcc_WorkspaceDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         tableName,
-					"path":         "Tables",
+					"name":         shortcutName,
+					"path":         shortcutPath,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", tableName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", "Tables"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", shortcutName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", shortcutPath),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.item_id"),
@@ -156,7 +158,7 @@ func TestAcc_WorkspaceDataSource(t *testing.T) {
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
 					"name":         testhelp.RandomName(),
-					"path":         "Tables",
+					"path":         shortcutPath,
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),

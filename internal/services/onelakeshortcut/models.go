@@ -5,6 +5,7 @@ package onelakeshortcut
 
 import (
 	"context"
+	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -41,7 +42,7 @@ type targetModel struct {
 }
 
 type oneLakeModel struct {
-	ItemId      customtypes.UUID `tfsdk:"item_id"`
+	ItemID      customtypes.UUID `tfsdk:"item_id"`
 	Path        types.String     `tfsdk:"path"`
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 }
@@ -81,12 +82,14 @@ type externalDataShare struct {
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
 	to.Path = types.StringPointerValue(from.Path)
-	concatenatedString := to.Name.ValueString() + to.Path.ValueString() + workspaceID + itemID
-	to.ID = types.StringPointerValue(&concatenatedString)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
-	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 
+	onelakeShortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, to.Path.ValueString(), to.Name.ValueString())
+
+	to.ID = types.StringPointerValue(&onelakeShortcutComputedID)
+
+	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 	target := supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 
 	if from.Target != nil {
@@ -121,7 +124,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	// Set the appropriate nested object based on the input
 	if from.OneLake != nil {
 		onelakeModel := &oneLakeModel{
-			ItemId:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),
+			ItemID:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),
 			Path:        types.StringPointerValue(from.OneLake.Path),
 			WorkspaceID: customtypes.NewUUIDPointerValue(from.OneLake.WorkspaceID),
 		}
@@ -247,7 +250,7 @@ func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOn
 			}
 
 			return &fabcore.OneLake{
-				ItemID:      onelake.ItemId.ValueStringPointer(),
+				ItemID:      onelake.ItemID.ValueStringPointer(),
 				Path:        onelake.Path.ValueStringPointer(),
 				WorkspaceID: onelake.WorkspaceID.ValueStringPointer(),
 			}

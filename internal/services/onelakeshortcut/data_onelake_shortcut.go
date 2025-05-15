@@ -7,10 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -20,43 +18,26 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-// Ensure the implementation satisfies the expected interfaces.
-var (
-	_ datasource.DataSourceWithConfigure        = (*dataSourceShortcut)(nil)
-	_ datasource.DataSourceWithConfigValidators = (*dataSourceShortcut)(nil)
-)
+var _ datasource.DataSourceWithConfigure = (*dataSourceShortcut)(nil)
 
-// DataSource is the data source for the Fabric OnelakeShortcut.
 type dataSourceShortcut struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.OneLakeShortcutsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-// NewDataSource creates a new data source for the Fabric OnelakeShortcut.
 func NewDataSourceOnelakeShortcut() datasource.DataSource {
 	return &dataSourceShortcut{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-// Metadata sets metadata for the Fabric OnelakeShortcut data source.
 func (d *dataSourceShortcut) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
-// Schema sets the schema for the Fabric OnelakeShortcut data source.
 func (d *dataSourceShortcut) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetDataSource(ctx)
-}
-
-func (d *dataSourceShortcut) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
-	return []datasource.ConfigValidator{
-		datasourcevalidator.RequiredTogether(
-			path.MatchRoot("path"),
-			path.MatchRoot("name"),
-		),
-	}
 }
 
 func (d *dataSourceShortcut) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -116,8 +97,7 @@ func (d *dataSourceShortcut) Read(ctx context.Context, req datasource.ReadReques
 
 func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceOnelakeShortcutModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET SHORTCUT", map[string]any{
-		// TODO: concatenate name and path
-		"id_model":     model.ItemID.ValueString(),
+		"item_Id":      model.ItemID.ValueString(),
 		"workspace_id": model.WorkspaceID.ValueString(),
 		"path":         model.Path.ValueString(),
 		"name":         model.Name.ValueString(),
