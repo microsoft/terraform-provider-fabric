@@ -525,7 +525,7 @@ function Set-FabricGatewayVirtualNetwork {
   $result = $existingGateways.Response.value | Where-Object { $_.displayName -eq $DisplayName }
   if (!$result) {
     # Construct the payload for creating a Virtual Network gateway.
-    # Refer to the API documentation for details on the request format :contentReference[oaicite:1]{index=1} and the Virtual Network Azure Resource :contentReference[oaicite:2]{index=2}.
+    # Refer to the API documentation for details on the request format and the Virtual Network Azure Resource.
     $payload = @{
       type                         = "VirtualNetwork"
       displayName                  = $DisplayName
