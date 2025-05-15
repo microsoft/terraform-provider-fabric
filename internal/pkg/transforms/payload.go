@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 	"unicode/utf8"
 
@@ -25,10 +26,38 @@ import (
 	sprouttime "github.com/go-sprout/sprout/registry/time"
 	sproutuniqueid "github.com/go-sprout/sprout/registry/uniqueid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/ohler55/ojg/jp"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/params"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
+
+const (
+	ParameterTypeFindReplace     string = "FindReplace"
+	ParameterTypeKeyValueReplace string = "KeyValueReplace"
+)
+
+func PossibleParameterTypeValues() []string {
+	return []string{
+		ParameterTypeFindReplace,
+		ParameterTypeKeyValueReplace,
+	}
+}
+
+const (
+	ProcessingTypeGoTemplate string = "GoTemplate"
+	ProcessingTypeParameters string = "Parameters"
+	ProcessingTypeNone       string = "None"
+)
+
+func PossibleProcessingTypeValues() []string {
+	return []string{
+		ProcessingTypeGoTemplate,
+		ProcessingTypeParameters,
+		ProcessingTypeNone,
+	}
+}
 
 // getTmplFuncs initializes and returns template functions from the sprout library.
 func getTmplFuncs() (template.FuncMap, error) {
@@ -64,7 +93,12 @@ func getTmplFuncs() (template.FuncMap, error) {
 
 // SourceFileToPayload transforms a source file into a base64 encoded payload and calculates its SHA256 hash.
 // It optionally processes the file as a template with the provided tokens.
-func SourceFileToPayload(srcPath string, tokens map[string]string) (string, string, diag.Diagnostics) { //revive:disable-line:confusing-results
+func SourceFileToPayload(
+	srcPath string,
+	processingType string,
+	tokens map[string]string,
+	parameters []*params.ParametersModel,
+) (string, string, diag.Diagnostics) { //revive:disable-line:confusing-results
 	var diags diag.Diagnostics
 
 	content, err := os.ReadFile(srcPath)
@@ -74,38 +108,71 @@ func SourceFileToPayload(srcPath string, tokens map[string]string) (string, stri
 		return "", "", diags
 	}
 
-	var contentB64, contentSha256 string
+	var contentB64, contentSha256, contentStr string
 
 	if utf8.Valid(content) { //nolint:nestif
-		tmplFuncs, err := getTmplFuncs()
-		if err != nil {
-			diags.AddError("Template functions error", err.Error())
+		if strings.EqualFold(processingType, ProcessingTypeGoTemplate) {
+			tmplFuncs, err := getTmplFuncs()
+			if err != nil {
+				diags.AddError("Template functions error", err.Error())
 
-			return "", "", diags
+				return "", "", diags
+			}
+
+			tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
+			if err != nil {
+				diags.AddError(common.ErrorFileReadHeader, err.Error())
+
+				return "", "", diags
+			}
+
+			// Process template with tokens if provided
+			tokensData := map[string]string{}
+			if len(tokens) > 0 {
+				tokensData = tokens
+			}
+
+			// Execute template
+			var contentBuf bytes.Buffer
+			if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData); err != nil {
+				diags.AddError(common.ErrorTmplParseHeader, err.Error())
+
+				return "", "", diags
+			}
+
+			contentStr = contentBuf.String()
+		} else if strings.EqualFold(processingType, ProcessingTypeParameters) {
+			contentStr = string(content)
+			for _, param := range parameters {
+				if strings.EqualFold(param.Type, ParameterTypeFindReplace) {
+					contentStr = strings.ReplaceAll(contentStr, param.Find, param.Value)
+				} else if strings.EqualFold(param.Type, ParameterTypeKeyValueReplace) {
+					if IsJSON(contentStr) {
+						jpExpression, err := jp.ParseString(param.Find)
+						if err != nil {
+							diags.AddError("JSONPath expression", err.Error())
+
+							return "", "", diags
+						}
+						jpIter := jpExpression.Get(contentStr)
+
+						if len(jpIter) == 0 {
+							diags.AddError("JSONPath expression", "JSONPath expression did not match any elements")
+
+							return "", "", diags
+						}
+
+						// TODO
+						// change in-place value of the key specified by the JSONPath expression
+					}
+				} else {
+					diags.AddError("Unsupported parameter type", "Invalid parameter type: "+param.Type)
+					return "", "", diags
+				}
+			}
+		} else {
+			contentStr = string(content)
 		}
-
-		tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
-		if err != nil {
-			diags.AddError(common.ErrorFileReadHeader, err.Error())
-
-			return "", "", diags
-		}
-
-		// Process template with tokens if provided
-		tokensData := map[string]string{}
-		if len(tokens) > 0 {
-			tokensData = tokens
-		}
-
-		// Execute template
-		var contentBuf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData); err != nil {
-			diags.AddError(common.ErrorTmplParseHeader, err.Error())
-
-			return "", "", diags
-		}
-
-		contentStr := contentBuf.String()
 
 		// If content is JSON, normalize it
 		if IsJSON(contentStr) {

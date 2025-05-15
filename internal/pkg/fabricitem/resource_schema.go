@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -27,6 +28,8 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/planmodifiers"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/params"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
@@ -276,7 +279,7 @@ func getResourceFabricItemDefinitionAttributes(
 }
 
 // Helper function to get Fabric Item data-source definition part attributes.
-func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedAttributeObject {
+func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: map[string]schema.Attribute{
 			"source": schema.StringAttribute{
@@ -284,12 +287,56 @@ func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedA
 					"The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.",
 				Required: true,
 			},
+			"parameters": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of parameters to be passed and processed in the source content.",
+				Optional:            true,
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[params.ParametersModel](ctx),
+				Validators: []validator.Set{
+					setvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("tokens")),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: fmt.Sprintf(
+								"Processing type of the parameters. Possible values: %s.",
+								utils.ConvertStringSlicesToString(transforms.PossibleParameterTypeValues(), true, true),
+							),
+							Required: true,
+							Validators: []validator.String{
+								stringvalidator.OneOf(transforms.PossibleParameterTypeValues()...),
+							},
+						},
+						"find": schema.StringAttribute{
+							MarkdownDescription: "The find value of the parameter.",
+							Required:            true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the parameter.",
+							Required:            true,
+						},
+					},
+				},
+			},
+			"processing_type": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf(
+					"Processing type of the tokens/parameters. Possible values: %s. Default `%s`",
+					utils.ConvertStringSlicesToString(transforms.PossibleProcessingTypeValues(), true, true),
+					transforms.ProcessingTypeGoTemplate,
+				),
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(transforms.ProcessingTypeGoTemplate),
+				Validators: []validator.String{
+					stringvalidator.OneOf(transforms.PossibleProcessingTypeValues()...),
+				},
+			},
 			"tokens": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of tokens substitutes in the source.",
 				Optional:            true,
 				CustomType:          supertypes.MapTypeOf[types.String]{MapType: types.MapType{ElemType: types.StringType}},
 				ElementType:         types.StringType,
 				Validators: []validator.Map{
+					mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("parameters")),
 					mapvalidator.KeysAre(stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$`),
 						"Token key:\n"+
@@ -303,7 +350,12 @@ func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedA
 				MarkdownDescription: "SHA256 of source's content of definition part.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefinitionContentSha256(path.MatchRelative().AtParent().AtName("source"), path.MatchRelative().AtParent().AtName("tokens")),
+					planmodifiers.DefinitionContentSha256(
+						path.MatchRelative().AtParent().AtName("source"),
+						path.MatchRelative().AtParent().AtName("processing_type"),
+						path.MatchRelative().AtParent().AtName("tokens"),
+						path.MatchRelative().AtParent().AtName("parameters"),
+					),
 				},
 			},
 		},

@@ -73,73 +73,146 @@ func TestUnit_SourceFileToPayload(t *testing.T) {
 	nonExistentPath := filepath.Join(tempDir, testhelp.RandomUUID()+".txt")
 
 	tests := []struct {
-		name        string
-		filePath    string
-		tokens      map[string]string
-		expectError bool
-		content     string
+		name           string
+		filePath       string
+		tokens         map[string]string
+		expectError    bool
+		content        string
+		processingType string
 	}{
 		{
-			name:        "regular_file",
-			filePath:    regularFilePath,
-			tokens:      nil,
-			expectError: false,
-			content:     regularContent,
+			name:           "regular_file_none",
+			filePath:       regularFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        regularContent,
+			processingType: "None",
 		},
 		{
-			name:        "json_file",
-			filePath:    jsonFilePath,
-			tokens:      nil,
-			expectError: false,
-			content:     jsonContent,
+			name:           "json_file_none",
+			filePath:       jsonFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        jsonContent,
+			processingType: "None",
 		},
 		{
-			name:        "template_regular_file",
-			filePath:    templateRegularFilePath,
-			tokens:      map[string]string{"Name": "World"},
-			expectError: false,
-			content:     "Hello World!",
+			name:           "template_regular_file_none",
+			filePath:       templateRegularFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    false,
+			content:        templateRegularContent,
+			processingType: "None",
 		},
 		{
-			name:        "template_json_file",
-			filePath:    templateJSONFilePath,
-			tokens:      map[string]string{"Name": "World", "Value": "123"},
-			expectError: false,
-			content:     `{"name":"World","value":123}`,
+			name:           "template_json_file_none",
+			filePath:       templateJSONFilePath,
+			tokens:         map[string]string{"Name": "World", "Value": "123"},
+			expectError:    false,
+			content:        templateJSONContent,
+			processingType: "None",
 		},
 		{
-			name:        "invalid_template_regular",
-			filePath:    invalidTemplateRegularFilePath,
-			tokens:      map[string]string{"Name": "World"},
-			expectError: true,
-			content:     "",
+			name:           "invalid_template_regular_none",
+			filePath:       invalidTemplateRegularFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    false,
+			content:        invalidTemplateRegularContent,
+			processingType: "None",
 		},
 		{
-			name:        "invalid_template_json",
-			filePath:    invalidTemplateJSONContent,
-			tokens:      map[string]string{"Name": "World"},
-			expectError: true,
-			content:     "",
+			name:           "invalid_template_json_none",
+			filePath:       invalidTemplateJSONFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    false,
+			content:        invalidTemplateJSONContent,
+			processingType: "None",
 		},
 		{
-			name:        "non_existent_file",
-			filePath:    nonExistentPath,
-			tokens:      nil,
-			expectError: true,
-			content:     "",
+			name:           "non_existent_file_none",
+			filePath:       nonExistentPath,
+			tokens:         nil,
+			expectError:    true,
+			content:        "",
+			processingType: "None",
 		},
 		{
-			name:        "binary_file",
-			filePath:    binaryFilePath,
-			tokens:      nil,
-			expectError: false,
-			content:     "",
+			name:           "binary_file_none",
+			filePath:       binaryFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        "",
+			processingType: "None",
+		},
+		{
+			name:           "regular_file",
+			filePath:       regularFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        regularContent,
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "json_file",
+			filePath:       jsonFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        jsonContent,
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "template_regular_file",
+			filePath:       templateRegularFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    false,
+			content:        "Hello World!",
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "template_json_file",
+			filePath:       templateJSONFilePath,
+			tokens:         map[string]string{"Name": "World", "Value": "123"},
+			expectError:    false,
+			content:        `{"name":"World","value":123}`,
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "invalid_template_regular",
+			filePath:       invalidTemplateRegularFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    true,
+			content:        "",
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "invalid_template_json",
+			filePath:       invalidTemplateJSONFilePath,
+			tokens:         map[string]string{"Name": "World"},
+			expectError:    false,
+			content:        `{ "name": "World", "value": }`,
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "non_existent_file",
+			filePath:       nonExistentPath,
+			tokens:         nil,
+			expectError:    true,
+			content:        "",
+			processingType: "GoTemplate",
+		},
+		{
+			name:           "binary_file",
+			filePath:       binaryFilePath,
+			tokens:         nil,
+			expectError:    false,
+			content:        "",
+			processingType: "GoTemplate",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, tt.tokens)
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, tt.processingType, tt.tokens, nil)
 			errCount := diags.ErrorsCount()
 
 			if tt.expectError {
@@ -165,7 +238,7 @@ func TestUnit_SourceFileToPayload(t *testing.T) {
 	t.Run("null_tokens", func(t *testing.T) {
 		var tokens map[string]string
 
-		contentB64, contentSha256, diags := transforms.SourceFileToPayload(regularFilePath, tokens)
+		contentB64, contentSha256, diags := transforms.SourceFileToPayload(regularFilePath, "GoTemplate", tokens, nil)
 
 		assert.False(t, diags.HasError(), "Unexpected error diagnostics with null tokens: %v", diags)
 		require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
