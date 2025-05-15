@@ -21,10 +21,10 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	itemId := testhelp.RandomUUID()
-	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)
+	itemID := testhelp.RandomUUID()
+	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
 	shortcuts := NewRandomOneLakeShortcuts(
-		[]fabcore.Shortcut{entity, NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId), NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemId)},
+		[]fabcore.Shortcut{entity, NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID), NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)},
 	)
 
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager = fakeOneLakeShortcutsFunc(shortcuts)
@@ -58,7 +58,7 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id":    workspaceID,
-					"item_id":         itemId,
+					"item_id":         itemID,
 					"unexpected_attr": "test",
 				},
 			),
@@ -70,7 +70,7 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemId,
+					"item_id":      itemID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

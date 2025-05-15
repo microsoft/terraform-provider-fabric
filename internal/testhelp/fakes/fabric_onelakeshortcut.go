@@ -19,7 +19,7 @@ func (o *operationsOneLakeShortcut) GetID(entity fabcore.Shortcut) string {
 	return *entity.Path + "/" + *entity.Name
 }
 
-func (o *operationsOneLakeShortcut) CreateWithWorkspaceIDAndItemID(workspaceID, itemID string, request fabcore.CreateShortcutRequest) fabcore.Shortcut {
+func (o *operationsOneLakeShortcut) CreateWithWorkspaceIDAndItemID(_, _ string, request fabcore.CreateShortcutRequest) fabcore.Shortcut {
 	entity := NewRandomOnelakeShortcut()
 	entity.Name = request.Name
 	entity.Path = request.Path

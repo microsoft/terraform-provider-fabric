@@ -78,7 +78,7 @@ func handleGetOnelakeShortcut[TEntity, TOptions, TResponse any](
 		return
 	}
 
-	*f = func(_ context.Context, workspaceID, itemID, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+	*f = func(_ context.Context, _, _, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 		id := generateID(path, name)
 
 		return getByID(handler, id, getTransformer)
@@ -247,7 +247,7 @@ func handleListOnelakeShortcut[TEntity, TOptions, TResponse any](
 		return
 	}
 
-	*f = func(workspaceID, itemID string, options *TOptions) azfake.PagerResponder[TResponse] {
+	*f = func(_, _ string, _ *TOptions) azfake.PagerResponder[TResponse] {
 		var resp azfake.PagerResponder[TResponse]
 
 		elements := handler.Elements()
@@ -267,7 +267,7 @@ func handleDeleteOnelakeShortcut[TEntity, TOptions, TResponse any](
 		return
 	}
 
-	*f = func(_ context.Context, workspaceID, itemID, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+	*f = func(_ context.Context, _, _, path, name string, _ *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 		id := generateID(path, name)
 
 		return deleteByID[TEntity, TResponse](handler, id)
