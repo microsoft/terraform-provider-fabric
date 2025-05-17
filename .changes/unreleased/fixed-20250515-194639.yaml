@@ -1,0 +1,5 @@
+kind: fixed
+body: Handle runtime error / nil pointer in the AuthenticationFailedError error
+time: 2025-05-15T19:46:39.4887143-07:00
+custom:
+  Issue: "440"
