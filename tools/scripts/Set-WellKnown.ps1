@@ -261,6 +261,9 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
+    'Shortcut' {
+      $itemEndpoint = 'shortcuts'
+    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -835,6 +838,7 @@ $itemNaming = @{
   'MLModel'                = 'mlm'
   'MountedDataFactory'     = 'mdf'
   'Notebook'               = 'nb'
+  'OneLakeShortcut'        = 'ols'
   'PaginatedReport'        = 'prpt'
   'Reflex'                 = 'rx'
   'Report'                 = 'rpt'
@@ -1069,6 +1073,8 @@ if (!$result) {
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
+#when populating the lakehouse with publicholidays sample data, it will create the images folder under Files
+$wellKnown['Lakehouse']['filesFolder'] = 'Files/images'
 
 $displayNameTemp = "${displayName}_$($itemNaming['Dashboard'])"
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dashboards"
@@ -1281,6 +1287,36 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
+function Set-OneLakeShortcut {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [object]$Payload
+  )
+
+  $shortcutName = $Payload.name
+  $path = $Payload.path
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
+  $result = $results.Response.value | Where-Object { $_.name -eq $shortcutName -and ($_.path.TrimStart('/') -eq $path.TrimStart('/')) }
+
+  if (!$result) {
+    Write-Log -Message "Creating OneLake Shortcut: $shortcutName" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+
+  }
+
+  Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
+
+  return $result
+}
+
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
 
 # Create the Azure Data Factory if not exists
@@ -1326,6 +1362,32 @@ $wellKnown['MountedDataFactory'] = @{
 $wellKnown['Azure'] = @{
   subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
   location       = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
+$shortcutPath = "Tables"
+$onelakeShortcutPayload = @{
+  path   = $shortcutPath
+  name   = $displayNameTemp
+  target = @{
+    OneLake = @{
+      workspaceId = $wellKnown['WorkspaceDS'].id
+      itemId      = $wellKnown['Lakehouse'].id
+      path        = $shortcutPath + "/" + $wellKnown['Lakehouse'].tableName
+    }
+  }
+}
+
+$oneLakeShortcut = Set-OneLakeShortcut `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id`
+  -ItemId $wellKnown['Lakehouse'].id `
+  -Payload $onelakeShortcutPayload
+
+$wellKnown['OneLakeShortcut'] = @{
+  shortcutName = $oneLakeShortcut.name
+  shortcutPath = $oneLakeShortcut.Path
+  workspaceId  = $wellKnown['WorkspaceDS'].id
+  lakehouseId  = $wellKnown['Lakehouse'].id
 }
 
 # Save wellknown.json file

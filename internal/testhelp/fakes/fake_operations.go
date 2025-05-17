@@ -69,3 +69,18 @@ type definitionOperationsNonLROCreation[
 	definitionUpdater[TDefinitionUpdateRequest, TDefinition]
 	definitionTransformer[TDefinition, TGetDefinitionResponse]
 }
+
+type onelakeOperations[
+	TEntity,
+	TGetOutput,
+	TCreateOutput,
+	TListOutput,
+	TCreateInput any,
+] interface {
+	identifier[TEntity]
+	getTransformer[TEntity, TGetOutput]
+	createTransformer[TEntity, TCreateOutput]
+	listTransformer[TEntity, TListOutput]
+	validator[TEntity]
+	creatorWithWorkspaceIDAndItemID[TCreateInput, TEntity]
+}
