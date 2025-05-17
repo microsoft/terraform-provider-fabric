@@ -76,7 +76,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `eventstream.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `eventstream.json`, `eventstreamProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Eventstream description.
 
 <a id="nestedatt--timeouts"></a>

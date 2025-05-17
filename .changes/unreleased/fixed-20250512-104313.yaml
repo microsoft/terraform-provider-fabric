@@ -1,0 +1,5 @@
+kind: fixed
+body: Added missing `eventstreamProperties.json` definition path to the `fabric_eventstream`
+time: 2025-05-12T10:43:13.8562644-07:00
+custom:
+    Issue: "325"
