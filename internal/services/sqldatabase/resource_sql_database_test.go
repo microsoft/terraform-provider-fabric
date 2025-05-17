@@ -83,11 +83,11 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 
 func TestUnit_SQLDatabaseResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entity := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -150,14 +150,14 @@ func TestUnit_SQLDatabaseResource_ImportState(t *testing.T) {
 
 func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityExist := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -185,6 +185,9 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// Update and Read
@@ -201,6 +204,9 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -228,6 +234,9 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// Update and Read
@@ -244,6 +253,9 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 	},

@@ -54,6 +54,7 @@ data "fabric_sql_database" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The SQL Database description.
+- `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -62,3 +63,13 @@ data "fabric_sql_database" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Read-Only:
+
+- `connection_string` (String) The connection string of the database.
+- `database_name` (String) The database name.
+- `server_fqdn` (String) The server fully qualified domain name (FQDN).
