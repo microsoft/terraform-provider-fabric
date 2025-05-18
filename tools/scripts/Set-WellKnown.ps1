@@ -350,17 +350,17 @@ function Set-DeploymentPipeline {
       displayName = $DisplayName
       description = $DisplayName
       stages      = @(
-        @{
+        [PSCustomObject]@{
           displayName = "Development"
           description = "Development stage description"
           isPublic    = $false
         },
-        @{
+        [PSCustomObject]@{
           displayName = "Test"
           description = "Test stage description"
           isPublic    = $false
         },
-        @{
+        [PSCustomObject]@{
           displayName = "Production"
           description = "Production stage description"
           isPublic    = $true

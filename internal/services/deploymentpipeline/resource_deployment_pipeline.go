@@ -348,7 +348,7 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 	var req requestAssignStageToWorkspace
 	req.set(*stage)
 
-	created, diags := state.Stages.Get(ctx)
+	stateStages, diags := state.Stages.Get(ctx)
 	*respDiags = append(*respDiags, diags...)
 	if respDiags.HasError() {
 		return
@@ -371,14 +371,14 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 		return
 	}
 
-	created[order].WorkspaceID = stage.WorkspaceID
+	stateStages[order].WorkspaceID = stage.WorkspaceID
 
 	tflog.Debug(ctx, "ASSIGN WORKSPACE", map[string]any{
 		"action": "end",
 		"id":     stage.ID.ValueString(),
 	})
 
-	state.setStages(ctx, created)
+	state.setStages(ctx, stateStages)
 }
 
 func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
@@ -389,7 +389,7 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 	respDiags *diag.Diagnostics,
 	order int,
 ) {
-	created, diags := state.Stages.Get(ctx)
+	stateStages, diags := state.Stages.Get(ctx)
 	*respDiags = append(*respDiags, diags...)
 	if respDiags.HasError() {
 		return
@@ -410,14 +410,15 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 		return
 	}
 
-	created[order].WorkspaceID = supertypes.NewStringNull().StringValue
+	stateStages[order].WorkspaceID = supertypes.NewStringNull().StringValue
+	stateStages[order].WorkspaceName = supertypes.NewStringNull().StringValue
 
 	tflog.Debug(ctx, "UNASSIGN WORKSPACE", map[string]any{
 		"action": "end",
 		"id":     stage.ID.ValueString(),
 	})
 
-	state.setStages(ctx, created)
+	state.setStages(ctx, stateStages)
 }
 
 func (stage *baseDeploymentPipelineStageModel) UpdateStage(
@@ -438,7 +439,7 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 		return
 	}
 
-	old := stateStages[order]
+	initialStage := stateStages[order]
 
 	respUpdate, err := client.UpdateDeploymentPipelineStage(
 		ctx,
@@ -454,8 +455,8 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 	}
 
 	stage.set(respUpdate.DeploymentPipelineStage)
-	stage.WorkspaceID = old.WorkspaceID
-	stage.WorkspaceName = old.WorkspaceName
+	stage.WorkspaceID = initialStage.WorkspaceID
+	stage.WorkspaceName = initialStage.WorkspaceName
 	stateStages[order] = stage
 	state.setStages(ctx, stateStages)
 }
