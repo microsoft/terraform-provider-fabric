@@ -211,6 +211,11 @@ func (h *ErrorHandler) processFabricError(
 func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed *azidentity.AuthenticationFailedError) (string, string) { //revive:disable-line:confusing-results
 	var errAuthResp authErrorResponse
 
+	// Check if RawResponse is nil to avoid panic
+	if errAuthFailed.RawResponse == nil {
+		return "AuthenticationFailedError", errAuthFailed.Error()
+	}
+
 	err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
 	if err != nil {
 		return "Failed to parse authentication error response", err.Error()
@@ -272,7 +277,7 @@ type authErrorResponse struct {
 
 // getErrFromResp parses an HTTP response body into an authErrorResponse.
 func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
-	if resp.Body == nil {
+	if resp == nil || resp.Body == nil {
 		return nil
 	}
 
