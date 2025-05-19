@@ -154,29 +154,6 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 	entityStage3IsPublic := strings.EqualFold(stage3Map["isPublic"], "True")
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read by id
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"id": entityID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.display_name", entityStage1DisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.description", entityStage1Description),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublic)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.display_name", entityStage2DisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.description", entityStage2Description),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublic)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.display_name", entityStage3DisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.description", entityStage3Description),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.is_public", strconv.FormatBool(entityStage3IsPublic)),
-			),
-		},
 		// read by id - not found
 		{
 			Config: at.CompileConfig(
@@ -187,12 +164,12 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by name
+		// read by id - success
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"display_name": entityDisplayName,
+					"id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -219,6 +196,29 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by name - success
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": entityDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.display_name", entityStage1DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.description", entityStage1Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublic)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.display_name", entityStage2DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.description", entityStage2Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublic)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.display_name", entityStage3DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.description", entityStage3Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "stages.2.is_public", strconv.FormatBool(entityStage3IsPublic)),
+			),
 		},
 	}))
 }
