@@ -58,7 +58,6 @@ func TestAcc_GatewayRoleAssignmentDataSource(t *testing.T) {
 	// principal := testhelp.WellKnown()["Principal"].(map[string]any)
 	// principalID := principal["id"].(string)
 	// principalType := principal["type"].(string)
-
 	group := testhelp.WellKnown()["Group"].(map[string]any)
 	groupID := group["id"].(string)
 
