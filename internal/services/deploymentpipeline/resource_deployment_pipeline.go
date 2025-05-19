@@ -207,8 +207,11 @@ func (r *resourceDeploymentPipeline) Update(ctx context.Context, req resource.Up
 	}
 
 	planStages, diags := plan.Stages.Get(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
-	diags = r.getById(ctx, plan.ID.ValueString(), &state)
+	diags = r.getByID(ctx, plan.ID.ValueString(), &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -232,6 +235,7 @@ func (r *resourceDeploymentPipeline) Update(ctx context.Context, req resource.Up
 		} else if stage.WorkspaceID.ValueString() != "" && stateStages[i].WorkspaceID.ValueString() == "" {
 			stage.AssignWorkspace(ctx, r.client, plan.ID.ValueString(), &state, &resp.Diagnostics, i)
 		}
+
 		if stage.DisplayName.ValueString() != stateStages[i].DisplayName.ValueString() ||
 			stage.IsPublic.ValueBool() != stateStages[i].IsPublic.ValueBool() ||
 			stage.Description.ValueString() != stateStages[i].Description.ValueString() {
@@ -239,13 +243,18 @@ func (r *resourceDeploymentPipeline) Update(ctx context.Context, req resource.Up
 		}
 	}
 
-	plan.set(ctx, respUpdate.DeploymentPipelineExtendedInfo)
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.DeploymentPipelineExtendedInfo)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	stages, diags := state.Stages.Get(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
-	plan.setStages(ctx, stages)
+
+	if resp.Diagnostics.Append(plan.setStages(ctx, stages)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -324,8 +333,8 @@ func (r *resourceDeploymentPipeline) get(ctx context.Context, model *resourceDep
 	return nil
 }
 
-func (r *resourceDeploymentPipeline) getById(ctx context.Context, deploymentPipelineId string, model *resourceDeploymentPipelineModel) diag.Diagnostics {
-	respGet, err := r.client.GetDeploymentPipeline(ctx, deploymentPipelineId, nil)
+func (r *resourceDeploymentPipeline) getByID(ctx context.Context, deploymentPipelineID string, model *resourceDeploymentPipelineModel) diag.Diagnostics {
+	respGet, err := r.client.GetDeploymentPipeline(ctx, deploymentPipelineID, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
@@ -349,6 +358,7 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 	req.set(*stage)
 
 	stateStages, diags := state.Stages.Get(ctx)
+
 	*respDiags = append(*respDiags, diags...)
 	if respDiags.HasError() {
 		return
@@ -366,6 +376,7 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 		req.DeploymentPipelineAssignWorkspaceRequest,
 		nil,
 	)
+
 	*respDiags = append(*respDiags, utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...)
 	if respDiags.HasError() {
 		return
@@ -378,7 +389,10 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 		"id":     stage.ID.ValueString(),
 	})
 
-	state.setStages(ctx, stateStages)
+	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
+	if respDiags.HasError() {
+		return
+	}
 }
 
 func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
@@ -390,6 +404,7 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 	order int,
 ) {
 	stateStages, diags := state.Stages.Get(ctx)
+
 	*respDiags = append(*respDiags, diags...)
 	if respDiags.HasError() {
 		return
@@ -399,12 +414,14 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 		"action": "start",
 		"id":     stage.ID.ValueString(),
 	})
+
 	_, err := client.UnassignWorkspaceFromStage(
 		ctx,
 		pipelineID,
 		stage.ID.ValueString(),
 		nil,
 	)
+
 	*respDiags = append(*respDiags, utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...)
 	if respDiags.HasError() {
 		return
@@ -418,7 +435,10 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 		"id":     stage.ID.ValueString(),
 	})
 
-	state.setStages(ctx, stateStages)
+	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
+	if respDiags.HasError() {
+		return
+	}
 }
 
 func (stage *baseDeploymentPipelineStageModel) UpdateStage(
@@ -458,5 +478,8 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 	stage.WorkspaceID = initialStage.WorkspaceID
 	stage.WorkspaceName = initialStage.WorkspaceName
 	stateStages[order] = stage
-	state.setStages(ctx, stateStages)
+	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
+	if respDiags.HasError() {
+		return
+	}
 }

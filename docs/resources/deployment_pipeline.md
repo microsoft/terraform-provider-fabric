@@ -28,6 +28,7 @@ resource "fabric_deployment_pipeline" "example" {
       display_name = "Stage 1",
       description  = "Stage 1",
       is_public    = true,
+      workspace_id = "00000000-0000-0000-0000-000000000000"
     },
     {
       display_name = "Stage 2",
@@ -44,7 +45,7 @@ resource "fabric_deployment_pipeline" "example" {
 ### Required
 
 - `display_name` (String) The Deployment Pipeline display name. String length must be at most 40.
-- `stages` (Attributes List) <i style="color:red;font-weight: bold">(ForceNew)</i> The collection of Deployment Pipeline stages. List must contain at least 2 elements and at most 10 elements. (see [below for nested schema](#nestedatt--stages))
+- `stages` (Attributes List) The collection of Deployment Pipeline stages. List must contain at least 2 elements and at most 10 elements. (see [below for nested schema](#nestedatt--stages))
 
 ### Optional
 
@@ -65,11 +66,14 @@ Required:
 - `display_name` (String) The display name of the stage. String length must be at most 256.
 - `is_public` (Boolean) Whether the stage is public.
 
+Optional:
+
+- `workspace_id` (String) The assigned workspace ID.
+
 Read-Only:
 
 - `id` (String) The Deployment Pipeline ID.
 - `order` (Number) The order of the stage.
-- `workspace_id` (String) The assigned workspace ID.
 - `workspace_name` (String) The assigned workspace name.
 
 <a id="nestedatt--timeouts"></a>

@@ -285,7 +285,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceDS := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
-	workspaceID_DS := workspaceDS["id"].(string)
+	workspaceIDDS := workspaceDS["id"].(string)
 	entityName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
 
@@ -404,7 +404,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 							"display_name": entityStage2Name,
 							"description":  entityStage2Name,
 							"is_public":    entityStage2IsPublicRandom,
-							"workspace_id": workspaceID_DS,
+							"workspace_id": workspaceIDDS,
 						},
 					},
 				},
@@ -421,7 +421,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.order", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.workspace_id", workspaceID_DS),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.workspace_id", workspaceIDDS),
 			),
 		},
 		// Update and Read - unassign stage 1 & update stage 2
@@ -442,7 +442,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 							"display_name": entityStage2NameRandom,
 							"description":  entityStage2NameRandom,
 							"is_public":    entityStage2IsPublicRandom,
-							"workspace_id": workspaceID_DS,
+							"workspace_id": workspaceIDDS,
 						},
 					},
 				},
@@ -460,7 +460,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2NameRandom),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.order", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.workspace_id", workspaceID_DS),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.workspace_id", workspaceIDDS),
 			),
 		},
 	},

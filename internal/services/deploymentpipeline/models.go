@@ -147,7 +147,7 @@ type requestAssignStageToWorkspace struct {
 
 func (to *requestAssignStageToWorkspace) set(from baseDeploymentPipelineStageModel) {
 	to.WorkspaceID = from.WorkspaceID.ValueStringPointer()
-	to.DeploymentPipelineAssignWorkspaceRequest.WorkspaceID = from.WorkspaceID.ValueStringPointer()
+	to.WorkspaceID = from.WorkspaceID.ValueStringPointer()
 }
 
 func (to *requestCreateDeploymentPipeline) set(ctx context.Context, from resourceDeploymentPipelineModel) diag.Diagnostics {
