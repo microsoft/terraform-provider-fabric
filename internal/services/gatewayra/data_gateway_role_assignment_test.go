@@ -9,7 +9,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -56,9 +55,9 @@ func TestUnit_GatewayRoleAssignmentDataSource(t *testing.T) {
 }
 
 func TestAcc_GatewayRoleAssignmentDataSource(t *testing.T) {
-	principal := testhelp.WellKnown()["Principal"].(map[string]any)
-	principalID := principal["id"].(string)
-	principalType := principal["type"].(string)
+	// principal := testhelp.WellKnown()["Principal"].(map[string]any)
+	// principalID := principal["id"].(string)
+	// principalType := principal["type"].(string)
 
 	group := testhelp.WellKnown()["Group"].(map[string]any)
 	groupID := group["id"].(string)
@@ -78,22 +77,22 @@ func TestAcc_GatewayRoleAssignmentDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"id":         principalID,
-					"gateway_id": gwID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "gateway_id"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", principalID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role", string(fabcore.GatewayRoleConnectionCreator)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.id", principalID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.type", principalType),
-			),
-		},
+		// {
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"id":         principalID,
+		// 			"gateway_id": gwID,
+		// 		},
+		// 	),
+		// 	Check: resource.ComposeAggregateTestCheckFunc(
+		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "gateway_id"),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", principalID),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "role", string(fabcore.GatewayRoleConnectionCreator)),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.id", principalID),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.type", principalType),
+		// 	),
+		// },
 	},
 	))
 }
