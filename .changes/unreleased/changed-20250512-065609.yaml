@@ -1,0 +1,5 @@
+kind: changed
+body: Enhanced `fabric_sql_database` data-source by adding properties support
+time: 2025-05-12T06:56:09.317670755Z
+custom:
+  Issue: "428"
