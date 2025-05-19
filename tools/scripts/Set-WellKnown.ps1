@@ -1335,9 +1335,9 @@ $definition = @{
     @{
       path        = 'mountedDataFactory-content.json'
       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl' -Values @(
-        @{ key = '{ { .SUBSCRIPTION_ID } }'; value = $wellKnown['Azure'].subscriptionId },
-        @{ key = '{ { .RESOURCE_GROUP_NAME } }'; value = $wellKnown['ResourceGroup'].name },
-        @{ key = '{ { .FACTORY_NAME } }'; value = $dataFactory.DataFactoryName }
+        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $wellKnown['Azure'].subscriptionId },
+        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $wellKnown['ResourceGroup'].name },
+        @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
       )
       payloadType = 'InlineBase64'
     }
