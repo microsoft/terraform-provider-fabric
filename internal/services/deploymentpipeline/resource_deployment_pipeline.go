@@ -478,6 +478,7 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 	stage.WorkspaceID = initialStage.WorkspaceID
 	stage.WorkspaceName = initialStage.WorkspaceName
 	stateStages[order] = stage
+
 	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
 	if respDiags.HasError() {
 		return
