@@ -15,6 +15,7 @@ on:
   schedule:
     - cron: "0 2 * * *"
   workflow_dispatch:
+  merge_group:
 
 concurrency:
   group: ${{ format('{0}-{1}-{2}-{3}-{4}', github.workflow, github.event_name, github.ref, github.base_ref || null, github.head_ref || null) }}
@@ -317,21 +318,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cli: [terraform, tofu]
-        version: ["1.7", "1.8", "1.9", "1.10", "1.11"]
-        exclude:
+        include:
+          # Terraform - 2 specific versions
           - cli: terraform
-            version: "1.7"
-          - cli: terraform
-            version: "1.9"
-          - cli: terraform
-            version: "1.10"
-          - cli: tofu
             version: "1.8"
+          - cli: terraform
+            version: "1.12"
+
+          # OpenTofu - 2 specific versions
           - cli: tofu
-            version: "1.10"
+            version: "1.7"
           - cli: tofu
-            version: "1.11"
+            version: "1.9"
     steps:
       - name: ⤵️ Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -487,13 +485,13 @@ jobs:
       - name: 📥 Download test results
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: terraform-1_11-test-results
+          pattern: terraform-1_12-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: terraform-1_11-test-coverage*
+          pattern: terraform-1_12-test-coverage*
           merge-multiple: true
 
       - name: 📝 Publish
