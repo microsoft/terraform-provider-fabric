@@ -34,6 +34,7 @@ website/vendor
 _dev/
 __debug*
 testresults.xml
+testresults.json
 golangci-report.xml
 .wellknown.json
 .wellknown.*.json
