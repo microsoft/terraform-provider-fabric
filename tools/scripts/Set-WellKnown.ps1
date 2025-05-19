@@ -350,17 +350,17 @@ function Set-DeploymentPipeline {
       displayName = $DisplayName
       description = $DisplayName
       stages      = @(
-        [PSCustomObject]@{
+        @{
           displayName = "Development"
           description = "Development stage description"
           isPublic    = $false
         },
-        [PSCustomObject]@{
+        @{
           displayName = "Test"
           description = "Test stage description"
           isPublic    = $false
         },
-        [PSCustomObject]@{
+        @{
           displayName = "Production"
           description = "Production stage description"
           isPublic    = $true
@@ -368,6 +368,10 @@ function Set-DeploymentPipeline {
       )
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines" -Payload $payload).Response
+  }
+  else {
+    $result = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$($result.id)"
+    $result = $result.Response
   }
   Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
 
@@ -1401,6 +1405,6 @@ $wellKnown['MountedDataFactory'] = @{
 }
 
 # Save wellknown.json file
-$wellKnownJson = $wellKnown | ConvertTo-Json
+$wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
