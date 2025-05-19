@@ -555,19 +555,27 @@ function Set-FabricGatewayRoleAssignment {
     [string]$GatewayId,
 
     [Parameter(Mandatory = $true)]
-    [object]$SG
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Admin', 'ConnectionCreator', 'ConnectionCreatorWithResharing')]
+    [string]$Role
   )
 
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "gateways/$GatewayId/roleAssignments"
-  $result = $results.Response.value | Where-Object { $_.id -eq $SG.Id }
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
   if (!$result) {
-    Write-Log -Message "Assigning SG to Gateway: $($SG.DisplayName)" -Level 'WARN'
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to Gateway: $($GatewayId)" -Level 'WARN'
     $payload = @{
       principal = @{
-        id   = $SG.Id
-        type = 'Group'
+        id   = $PrincipalId
+        type = $PrincipalType
       }
-      role      = 'Admin'
+      role      = $Role
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "gateways/$GatewayId/roleAssignments" -Payload $payload).Response
   }
@@ -1301,7 +1309,8 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
-Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
+Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
+Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
 
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
@@ -1326,9 +1335,9 @@ $definition = @{
     @{
       path        = 'mountedDataFactory-content.json'
       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl' -Values @(
-        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $wellKnown['Azure'].subscriptionId },
-        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $wellKnown['ResourceGroup'].name },
-        @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
+        @{ key = '{ { .SUBSCRIPTION_ID } }'; value = $wellKnown['Azure'].subscriptionId },
+        @{ key = '{ { .RESOURCE_GROUP_NAME } }'; value = $wellKnown['ResourceGroup'].name },
+        @{ key = '{ { .FACTORY_NAME } }'; value = $dataFactory.DataFactoryName }
       )
       payloadType = 'InlineBase64'
     }
