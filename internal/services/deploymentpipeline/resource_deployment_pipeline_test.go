@@ -7,7 +7,6 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
-	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -291,20 +290,20 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 
 	entityStages := entity["stages"].([]any)
 	// stage 1
-	stage1Map := parseStageEntry(entityStages[0].(string))
+	stage1Map := entityStages[0].(map[string]any)
 	entityStage1DisplayName := stage1Map["displayName"]
 	entityStage1Description := stage1Map["description"]
-	entityStage1IsPublic := strings.EqualFold(stage1Map["isPublic"], "True")
+	entityStage1IsPublic := stage1Map["isPublic"]
 	// stage 2
-	stage2Map := parseStageEntry(entityStages[1].(string))
+	stage2Map := entityStages[1].(map[string]any)
 	entityStage2DisplayName := stage2Map["displayName"]
 	entityStage2Description := stage2Map["description"]
-	entityStage2IsPublic := strings.EqualFold(stage2Map["isPublic"], "True")
+	entityStage2IsPublic := stage2Map["isPublic"]
 	// stage 3
-	stage3Map := parseStageEntry(entityStages[2].(string))
+	stage3Map := entityStages[2].(map[string]any)
 	entityStage3DisplayName := stage3Map["displayName"]
 	entityStage3Description := stage3Map["description"]
-	entityStage3IsPublic := strings.EqualFold(stage3Map["isPublic"], "True")
+	entityStage3IsPublic := stage3Map["isPublic"]
 
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
@@ -465,20 +464,4 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 		},
 	},
 	))
-}
-
-func parseStageEntry(raw string) map[string]string {
-	m := map[string]string{}
-	// strip the "@{" prefix and "}" suffix
-	s := strings.TrimPrefix(raw, "@{")
-	s = strings.TrimSuffix(s, "}")
-
-	for _, pair := range strings.Split(s, "; ") {
-		kv := strings.SplitN(pair, "=", 2)
-		if len(kv) == 2 {
-			m[kv[0]] = kv[1]
-		}
-	}
-
-	return m
 }

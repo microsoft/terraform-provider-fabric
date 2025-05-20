@@ -6,7 +6,6 @@ package deploymentpipeline_test
 import (
 	"regexp"
 	"strconv"
-	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -138,20 +137,20 @@ func TestAcc_DeploymentPipelineDataSource(t *testing.T) {
 	entityDescription := entity["description"].(string)
 	rawStagesAny := entity["stages"].([]any)
 	// stage 1
-	stage1Map := parseStageEntry(rawStagesAny[0].(string))
-	entityStage1DisplayName := stage1Map["displayName"]
-	entityStage1Description := stage1Map["description"]
-	entityStage1IsPublic := strings.EqualFold(stage1Map["isPublic"], "True")
+	stage1Map := rawStagesAny[0].(map[string]any)
+	entityStage1DisplayName := stage1Map["displayName"].(string)
+	entityStage1Description := stage1Map["description"].(string)
+	entityStage1IsPublic := stage1Map["isPublic"].(bool)
 	// stage 2
-	stage2Map := parseStageEntry(rawStagesAny[1].(string))
-	entityStage2DisplayName := stage2Map["displayName"]
-	entityStage2Description := stage2Map["description"]
-	entityStage2IsPublic := strings.EqualFold(stage2Map["isPublic"], "True")
+	stage2Map := rawStagesAny[1].(map[string]any)
+	entityStage2DisplayName := stage2Map["displayName"].(string)
+	entityStage2Description := stage2Map["description"].(string)
+	entityStage2IsPublic := stage2Map["isPublic"].(bool)
 	// stage 3
-	stage3Map := parseStageEntry(rawStagesAny[2].(string))
-	entityStage3DisplayName := stage3Map["displayName"]
-	entityStage3Description := stage3Map["description"]
-	entityStage3IsPublic := strings.EqualFold(stage3Map["isPublic"], "True")
+	stage3Map := rawStagesAny[2].(map[string]any)
+	entityStage3DisplayName := stage3Map["displayName"].(string)
+	entityStage3Description := stage3Map["description"].(string)
+	entityStage3IsPublic := stage3Map["isPublic"].(bool)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by id - not found
