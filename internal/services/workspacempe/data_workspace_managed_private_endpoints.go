@@ -56,7 +56,7 @@ func (d *dataSourceWorkspaceManagedPrivateEndpoints) Schema(ctx context.Context,
 				CustomType:          customtypes.UUIDType{},
 			},
 			"values": schema.SetNestedAttribute{
-				MarkdownDescription: "The collection of " + d.TypeInfo.Names + ".",
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseWorkspaceManagedPrivateEndpointModel](ctx),
 				NestedObject: schema.NestedAttributeObject{

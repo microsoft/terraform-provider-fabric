@@ -75,7 +75,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			},
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
-				MarkdownDescription: fmt.Sprintf("The list of %s.", d.TypeInfo.Names),
+				MarkdownDescription: fmt.Sprintf("The set of %s.", d.TypeInfo.Names),
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
