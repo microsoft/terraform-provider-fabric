@@ -184,7 +184,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &schemaR.StringAttribute{
 					Required: true,
 					Validators: []validator.String{
-						stringvalidator.LengthAtMost(40),
+						stringvalidator.LengthAtMost(246),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{

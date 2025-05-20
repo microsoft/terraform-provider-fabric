@@ -56,7 +56,6 @@ func (to *baseDeploymentPipelineExtendedInfoModel) setStages(ctx context.Context
 		entityModel.ID = entity.ID
 		entityModel.Order = entity.Order
 		entityModel.WorkspaceID = entity.WorkspaceID
-		entityModel.WorkspaceName = entity.WorkspaceName
 		entityModel.DisplayName = entity.DisplayName
 		entityModel.Description = entity.Description
 		entityModel.IsPublic = entity.IsPublic
@@ -79,13 +78,12 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 
 	for _, entity := range from.Stages {
 		entityModel := &baseDeploymentPipelineStageModel{
-			ID:            customtypes.NewUUIDPointerValue(entity.ID),
-			Order:         types.Int32PointerValue(entity.Order),
-			WorkspaceID:   types.StringPointerValue(entity.WorkspaceID),
-			WorkspaceName: types.StringPointerValue(entity.WorkspaceName),
-			DisplayName:   types.StringPointerValue(entity.DisplayName),
-			Description:   types.StringPointerValue(entity.Description),
-			IsPublic:      types.BoolPointerValue(entity.IsPublic),
+			ID:          customtypes.NewUUIDPointerValue(entity.ID),
+			Order:       types.Int32PointerValue(entity.Order),
+			WorkspaceID: types.StringPointerValue(entity.WorkspaceID),
+			DisplayName: types.StringPointerValue(entity.DisplayName),
+			Description: types.StringPointerValue(entity.Description),
+			IsPublic:    types.BoolPointerValue(entity.IsPublic),
 		}
 		slice = append(slice, entityModel)
 	}

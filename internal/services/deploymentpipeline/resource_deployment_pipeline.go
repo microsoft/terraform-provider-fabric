@@ -121,7 +121,7 @@ func (r *resourceDeploymentPipeline) Create(ctx context.Context, req resource.Cr
 			continue
 		}
 
-		stage.AssignWorkspace(ctx, r.client, state.ID.ValueString(), &state, &resp.Diagnostics, i)
+		stage.AssignWorkspace(ctx, r.client, &state, &resp.Diagnostics, i)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
@@ -154,7 +154,7 @@ func (r *resourceDeploymentPipeline) Read(ctx context.Context, req resource.Read
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state)
+	diags = r.getByID(ctx, state.ID.ValueString(), &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -231,15 +231,15 @@ func (r *resourceDeploymentPipeline) Update(ctx context.Context, req resource.Up
 
 	for i, stage := range planStages {
 		if stage.WorkspaceID.ValueString() == "" && stateStages[i].WorkspaceID.ValueString() != "" {
-			stage.UnassignWorkspace(ctx, r.client, plan.ID.ValueString(), &state, &resp.Diagnostics, i)
+			stage.UnassignWorkspace(ctx, r.client, &state, &resp.Diagnostics, i)
 		} else if stage.WorkspaceID.ValueString() != "" && stateStages[i].WorkspaceID.ValueString() == "" {
-			stage.AssignWorkspace(ctx, r.client, plan.ID.ValueString(), &state, &resp.Diagnostics, i)
+			stage.AssignWorkspace(ctx, r.client, &state, &resp.Diagnostics, i)
 		}
 
 		if stage.DisplayName.ValueString() != stateStages[i].DisplayName.ValueString() ||
 			stage.IsPublic.ValueBool() != stateStages[i].IsPublic.ValueBool() ||
 			stage.Description.ValueString() != stateStages[i].Description.ValueString() {
-			stage.UpdateStage(ctx, r.client, plan.ID.ValueString(), &state, &resp.Diagnostics, i)
+			stage.UpdateStage(ctx, r.client, &state, &resp.Diagnostics, i)
 		}
 	}
 
@@ -320,19 +320,6 @@ func (r *resourceDeploymentPipeline) ImportState(ctx context.Context, req resour
 	}
 }
 
-func (r *resourceDeploymentPipeline) get(ctx context.Context, model *resourceDeploymentPipelineModel) diag.Diagnostics {
-	respGet, err := r.client.GetDeploymentPipeline(ctx, model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		return diags
-	}
-
-	if diags := model.set(ctx, respGet.DeploymentPipelineExtendedInfo); diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
 func (r *resourceDeploymentPipeline) getByID(ctx context.Context, deploymentPipelineID string, model *resourceDeploymentPipelineModel) diag.Diagnostics {
 	respGet, err := r.client.GetDeploymentPipeline(ctx, deploymentPipelineID, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
@@ -349,7 +336,6 @@ func (r *resourceDeploymentPipeline) getByID(ctx context.Context, deploymentPipe
 func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 	ctx context.Context,
 	client *fabcore.DeploymentPipelinesClient,
-	pipelineID string,
 	state *resourceDeploymentPipelineModel,
 	respDiags *diag.Diagnostics,
 	order int,
@@ -371,7 +357,7 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 
 	_, err := client.AssignWorkspaceToStage(
 		ctx,
-		pipelineID,
+		state.ID.ValueString(),
 		stage.ID.ValueString(),
 		req.DeploymentPipelineAssignWorkspaceRequest,
 		nil,
@@ -398,7 +384,6 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 	ctx context.Context,
 	client *fabcore.DeploymentPipelinesClient,
-	pipelineID string,
 	state *resourceDeploymentPipelineModel,
 	respDiags *diag.Diagnostics,
 	order int,
@@ -417,7 +402,7 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 
 	_, err := client.UnassignWorkspaceFromStage(
 		ctx,
-		pipelineID,
+		state.ID.ValueString(),
 		stage.ID.ValueString(),
 		nil,
 	)
@@ -428,7 +413,6 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 	}
 
 	stateStages[order].WorkspaceID = supertypes.NewStringNull().StringValue
-	stateStages[order].WorkspaceName = supertypes.NewStringNull().StringValue
 
 	tflog.Debug(ctx, "UNASSIGN WORKSPACE", map[string]any{
 		"action": "end",
@@ -444,7 +428,6 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 	ctx context.Context,
 	client *fabcore.DeploymentPipelinesClient,
-	pipelineID string,
 	state *resourceDeploymentPipelineModel,
 	respDiags *diag.Diagnostics,
 	order int,
@@ -463,7 +446,7 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 
 	respUpdate, err := client.UpdateDeploymentPipelineStage(
 		ctx,
-		pipelineID,
+		state.ID.ValueString(),
 		stage.ID.ValueString(),
 		req.DeploymentPipelineStageRequest,
 		nil,
@@ -476,7 +459,6 @@ func (stage *baseDeploymentPipelineStageModel) UpdateStage(
 
 	stage.set(respUpdate.DeploymentPipelineStage)
 	stage.WorkspaceID = initialStage.WorkspaceID
-	stage.WorkspaceName = initialStage.WorkspaceName
 	stateStages[order] = stage
 
 	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
