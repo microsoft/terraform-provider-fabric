@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	//"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -27,6 +28,8 @@ var (
 	_ resource.ResourceWithConfigure      = (*resourceOnelakeShortcut)(nil)
 	_ resource.ResourceWithImportState    = (*resourceOnelakeShortcut)(nil)
 	_ resource.ResourceWithValidateConfig = (*resourceOnelakeShortcut)(nil)
+
+// _ resource.ResourceWithConfigValidators = (*resourceOnelakeShortcut)(nil)
 )
 
 type resourceOnelakeShortcut struct {
@@ -91,6 +94,24 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 		return
 	}
 }
+
+// func (r *resourceOnelakeShortcut) ConfigValidators(
+// 	_ context.Context,
+// ) []resource.ConfigValidator {
+// 	result := []resource.ConfigValidator{}
+
+// 	result = append(result, resourcevalidator.ExactlyOneOf(
+// 		path.MatchRelative().AtName("onelake"),
+// 		path.MatchRelative().AtName("adls_gen2"),
+// 		path.MatchRelative().AtName("amazon_s3"),
+// 		path.MatchRelative().AtName("google_cloud_storage"),
+// 		path.MatchRelative().AtName("s3_compatible"),
+// 		path.MatchRelative().AtName("external_data_share"),
+// 		path.MatchRelative().AtName("dataverse"),
+// 	))
+
+// 	return result
+// }
 
 func (r *resourceOnelakeShortcut) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var config resourceOneLakeShortcutModel

@@ -52,20 +52,6 @@ func newTypedHandlerWithConverter[TEntity any](server *fakeServer, identifier id
 	return typedHandler
 }
 
-func configureOneLakeShortcutHandler[TEntity, TGetOutput, TCreateOutput, TListOutput, TCreationData, TGetOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
-	handler *typedHandler[TEntity],
-	operations onelakeOperations[TEntity, TGetOutput, TCreateOutput, TListOutput, TCreationData],
-	getFunction *func(ctx context.Context, workspaceID, itemID, path, name string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
-	createFunction *func(ctx context.Context, workspaceID, itemID string, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
-	listFunction *func(workspaceID, itemID string, options *TListOptions) (resp azfake.PagerResponder[TListOutput]),
-	deleteFunction *func(ctx context.Context, workspaceID, itemID, path, name string, options *TDeleteOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
-) {
-	handleGetOnelakeShortcut(handler, operations, getFunction)
-	handleNonLROCreateOnelakeShortcut(handler, operations, operations, operations, createFunction)
-	handleListOnelakeShortcut(handler, operations, listFunction)
-	handleDeleteOnelakeShortcut(handler, deleteFunction)
-}
-
 // ConfigureEntityWithSimpleID configures an entity with a simple ID.
 func configureEntityPagerWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
 	handler *typedHandler[TEntity],
@@ -132,22 +118,6 @@ func configureEntityWithParentIDNoLRO[TEntity, TGetOutput, TUpdateOutput, TCreat
 	handleListPagerWithParentID(handler, operations, operations, listFunction)
 	handleDeleteWithParentID(handler, deleteFunction)
 }
-
-// func configureEntityWithDynamicParams[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
-// 	handler *typedHandler[TEntity],
-// 	operations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
-// 	getFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
-// 	updateFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TUpdateOutput], errResp azfake.ErrorResponder),
-// 	createFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
-// 	listFunction *func(params ...any) (resp azfake.PagerResponder[TListOutput]),
-// 	deleteFunction *func(ctx context.Context, params ...any) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
-// ) {
-// 	handleGetWithDynamicParams(handler, operations, getFunction)
-// 	handleUpdateWithDynamicParams(handler, operations, updateFunction)
-// 	handleCreateWithDynamicParams(handler, operations, createFunction)
-// 	handleListWithDynamicParams(handler, operations, listFunction)
-// 	handleDeleteWithDynamicParams(handler, deleteFunction)
-// }
 
 func configureEntityWithParentIDNoLRONoUpdate[TEntity, TGetOutput, TCreateOutput, TDeleteResponse, TListOutput, TCreationData, TGetOptions, TCreateOptions, TListOptions, TDeleteOptions any](
 	handler *typedHandler[TEntity],

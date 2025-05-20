@@ -6,6 +6,7 @@ package onelakeshortcut
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -106,6 +107,16 @@ func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceO
 	respGet, err := d.client.GetShortcut(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Path.ValueString(), model.Name.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
+	}
+
+	// Normalize mismatch between expected (with /) and API (without /)
+	if respGet.Path != nil && model.Path.ValueString() != "" {
+		expected := model.Path.ValueString()
+		actual := *respGet.Path
+
+		if strings.TrimPrefix(actual, "/") == strings.TrimPrefix(expected, "/") {
+			respGet.Path = &expected
+		}
 	}
 
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)

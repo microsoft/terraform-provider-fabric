@@ -15,12 +15,10 @@ import (
 
 var fakeOneLakeShortcutStore = map[string]fabcore.Shortcut{}
 
-func fakeOneLakeShortcutsFunc(
-	onelakeshortcuts fabcore.Shortcuts,
-) func(workspaceID, itemID string, options *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
+func fakeOneLakeShortcutsFunc() func(workspaceID, itemID string, options *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 	return func(_, _ string, _ *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 		resp = azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]{}
-		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Shortcuts: onelakeshortcuts}, nil)
+		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Shortcuts: fabcore.Shortcuts{Value: GetAllStoredShortcuts()}}, nil)
 
 		return
 	}
@@ -30,8 +28,8 @@ func fakeGetOneLakeShortcutFunc() func(ctx context.Context, workspaceID, itemID,
 	return func(_ context.Context, workspaceID, itemID, path, name string, _ *fabcore.OneLakeShortcutsClientGetShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientGetShortcutResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeShortcutsClientGetShortcutResponse]{}
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
+		id := GenerateOneLakeShortcutID(workspaceID, itemID, path, name)
 
-		id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, path, name)
 		if shortcut, ok := fakeOneLakeShortcutStore[id]; ok {
 			resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientGetShortcutResponse{Shortcut: shortcut}, nil)
 		} else {
@@ -46,9 +44,10 @@ func fakeGetOneLakeShortcutFunc() func(ctx context.Context, workspaceID, itemID,
 func fakeCreateOneLakeShortcutFunc() func(ctx context.Context, workspaceID, itemID string, createShortcutRequest fabcore.CreateShortcutRequest, options *fabcore.OneLakeShortcutsClientCreateShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientCreateShortcutResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID string, createShortcutRequest fabcore.CreateShortcutRequest, _ *fabcore.OneLakeShortcutsClientCreateShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientCreateShortcutResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeShortcutsClientCreateShortcutResponse]{}
-
 		errItemAlreadyExists := fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error()
-		created := fabcore.Shortcut{
+		id := GenerateOneLakeShortcutID(workspaceID, itemID, *createShortcutRequest.Path, *createShortcutRequest.Name)
+
+		requestOneLakeShortcut := fabcore.Shortcut{
 			Name: createShortcutRequest.Name,
 			Path: createShortcutRequest.Path,
 			Target: &fabcore.Target{
@@ -60,12 +59,8 @@ func fakeCreateOneLakeShortcutFunc() func(ctx context.Context, workspaceID, item
 			},
 		}
 
-		id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, *createShortcutRequest.Path, *createShortcutRequest.Name)
-
 		if existing, ok := fakeOneLakeShortcutStore[id]; ok {
-			if existing.Target != nil && existing.Target.OneLake != nil &&
-				createShortcutRequest.Target != nil && createShortcutRequest.Target.OneLake != nil &&
-				*existing.Target.OneLake.ItemID == *createShortcutRequest.Target.OneLake.ItemID &&
+			if *existing.Target.OneLake.ItemID == *createShortcutRequest.Target.OneLake.ItemID &&
 				*existing.Target.OneLake.WorkspaceID == *createShortcutRequest.Target.OneLake.WorkspaceID &&
 				*existing.Target.OneLake.Path == *createShortcutRequest.Target.OneLake.Path {
 				errResp.SetError(fabfake.SetResponseError(http.StatusConflict, errItemAlreadyExists, "Item Display Name Already In Use"))
@@ -74,16 +69,14 @@ func fakeCreateOneLakeShortcutFunc() func(ctx context.Context, workspaceID, item
 				return resp, errResp
 			}
 
-			fakeOneLakeShortcutStore[id] = created
-
-			resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: created}, nil)
+			fakeOneLakeShortcutStore[id] = requestOneLakeShortcut
+			resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: requestOneLakeShortcut}, nil)
 
 			return resp, errResp
 		}
 
-		fakeOneLakeShortcutStore[id] = created
-
-		resp.SetResponse(http.StatusOK, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: created}, nil)
+		fakeOneLakeShortcutStore[id] = requestOneLakeShortcut
+		resp.SetResponse(http.StatusCreated, fabcore.OneLakeShortcutsClientCreateShortcutResponse{Shortcut: requestOneLakeShortcut}, nil)
 
 		return resp, errResp
 	}
@@ -91,7 +84,7 @@ func fakeCreateOneLakeShortcutFunc() func(ctx context.Context, workspaceID, item
 
 func fakeDeleteOneLakeShortcutFunc() func(ctx context.Context, workspaceID, itemID, shortcutPath, shortcutName string, options *fabcore.OneLakeShortcutsClientDeleteShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientDeleteShortcutResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID, path, name string, _ *fabcore.OneLakeShortcutsClientDeleteShortcutOptions) (resp azfake.Responder[fabcore.OneLakeShortcutsClientDeleteShortcutResponse], errResp azfake.ErrorResponder) {
-		id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, path, name)
+		id := GenerateOneLakeShortcutID(workspaceID, itemID, path, name)
 
 		if _, ok := fakeOneLakeShortcutStore[id]; ok {
 			delete(fakeOneLakeShortcutStore, id)
@@ -103,36 +96,6 @@ func fakeDeleteOneLakeShortcutFunc() func(ctx context.Context, workspaceID, item
 
 		return
 	}
-}
-
-func NewRandomOneLakeShortcuts(shortcuts []fabcore.Shortcut) fabcore.Shortcuts {
-	copied := make([]fabcore.Shortcut, len(shortcuts))
-
-	for i, shortcut := range shortcuts {
-		copied[i] = fabcore.Shortcut{
-			Name: shortcut.Name,
-			Path: shortcut.Path,
-			Target: &fabcore.Target{
-				OneLake: &fabcore.OneLake{
-					ItemID:      shortcut.Target.OneLake.ItemID,
-					WorkspaceID: shortcut.Target.OneLake.WorkspaceID,
-					Path:        shortcut.Target.OneLake.Path,
-				},
-			},
-		}
-	}
-
-	return fabcore.Shortcuts{
-		Value: copied,
-	}
-}
-
-func NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID string) fabcore.Shortcut {
-	entity := NewRandomOnelakeShortcut()
-	id := fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, *entity.Path, *entity.Name)
-	fakeOneLakeShortcutStore[id] = entity
-
-	return entity
 }
 
 func NewRandomOnelakeShortcut() fabcore.Shortcut {
@@ -155,4 +118,22 @@ func NewRandomOneLakeShortcutTargetOneLake() *fabcore.OneLake {
 		Path:        to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 	}
+}
+
+func GenerateOneLakeShortcutID(workspaceID, itemID, path, name string) string {
+	return fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, path, name)
+}
+
+func GetAllStoredShortcuts() []fabcore.Shortcut {
+	shortcuts := make([]fabcore.Shortcut, 0, len(fakeOneLakeShortcutStore))
+	for _, shortcut := range fakeOneLakeShortcutStore {
+		shortcuts = append(shortcuts, shortcut)
+	}
+
+	return shortcuts
+}
+
+func fakeTestUpsert(workspaceID, itemID string, entity fabcore.Shortcut) {
+	id := GenerateOneLakeShortcutID(workspaceID, itemID, *entity.Path, *entity.Name)
+	fakeOneLakeShortcutStore[id] = entity
 }

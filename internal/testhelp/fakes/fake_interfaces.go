@@ -73,6 +73,3 @@ type definitionTransformer[TDefinition, TOutput any] interface {
 	// TransformDefinition transforms a definition into a response.
 	TransformDefinition(entity *TDefinition) TOutput
 }
-type creatorWithWorkspaceIDAndItemID[TRequest, TEntity any] interface {
-	CreateWithWorkspaceIDAndItemID(workspaceID, itemID string, request TRequest) TEntity
-}

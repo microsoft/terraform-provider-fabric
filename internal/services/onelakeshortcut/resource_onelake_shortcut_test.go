@@ -137,18 +137,31 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
 		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+					"target":       map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
+		},
 	}))
 }
 
 func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
+	entity := NewRandomOnelakeShortcut()
+
+	fakeTestUpsert(workspaceID, itemID, entity)
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
-	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	// fakes.FakeServer.Upsert(entity)
-	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -215,16 +228,14 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entityExist := NewRandomOnelakeShortcutWithWorkspaceIDAndItemID(workspaceID, itemID)
+	entityExist := NewRandomOnelakeShortcut()
 	entityBefore := NewRandomOnelakeShortcut()
 	entityAfter := NewRandomOnelakeShortcut()
+
+	fakeTestUpsert(workspaceID, itemID, entityExist)
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
-	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
-	// fakes.FakeServer.Upsert(entityExist)
-	// fakes.FakeServer.Upsert(entityAfter)
-	// fakes.FakeServer.Upsert(fakes.NewRandomOnelakeShortcut())
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
