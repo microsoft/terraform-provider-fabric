@@ -37,7 +37,7 @@ data "fabric_workspace_managed_private_endpoints" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The collection of Workspace Managed Private Endpoints. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Workspace Managed Private Endpoints. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

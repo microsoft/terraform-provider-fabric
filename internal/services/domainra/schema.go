@@ -95,7 +95,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"principals": superschema.SuperSetNestedAttributeOf[principalModel]{
 				Common: &schemaR.SetNestedAttribute{
-					MarkdownDescription: "The list of Principals.",
+					MarkdownDescription: "The set of Principals.",
 				},
 				Resource: &schemaR.SetNestedAttribute{
 					Required: true,
