@@ -41,7 +41,7 @@ resource "fabric_domain_role_assignments" "example" {
 ### Required
 
 - `domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain ID.
-- `principals` (Attributes Set) <i style="color:red;font-weight: bold">(ForceNew)</i> The list of Principals. (see [below for nested schema](#nestedatt--principals))
+- `principals` (Attributes Set) <i style="color:red;font-weight: bold">(ForceNew)</i> The set of Principals. (see [below for nested schema](#nestedatt--principals))
 - `role` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Role of the principals. Value must be one of : `Admins`, `Contributors`.
 
 ### Optional

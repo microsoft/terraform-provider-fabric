@@ -47,7 +47,7 @@ func (d *dataSourceDomains) Schema(ctx context.Context, _ datasource.SchemaReque
 		MarkdownDescription: s.GetMarkdownDescription(),
 		Attributes: map[string]schema.Attribute{
 			"values": schema.SetNestedAttribute{
-				MarkdownDescription: "The list of " + d.TypeInfo.Names + ".",
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseDomainModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
