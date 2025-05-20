@@ -26,7 +26,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 })
 
 var (
-	workspace   = testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace   = testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID = workspace["id"].(string)
 	lakehouse   = testhelp.WellKnown()["Lakehouse"].(map[string]any)
 	lakehouseID = lakehouse["id"].(string)
