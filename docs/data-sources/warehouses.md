@@ -3,13 +3,13 @@
 page_title: "fabric_warehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Warehouse data-source allows you to retrieve details about a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
+  The Warehouses data-source allows you to retrieve a list of Fabric Warehouses https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_warehouses (Data Source)
 
-The Warehouse data-source allows you to retrieve details about a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
+The Warehouses data-source allows you to retrieve a list of Fabric [Warehouses](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This data-source supports Service Principal authentication.
 
