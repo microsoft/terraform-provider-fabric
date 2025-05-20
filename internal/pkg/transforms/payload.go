@@ -159,29 +159,29 @@ func SourceFileToPayload(
 						var contentJSON any
 
 						if err := json.Unmarshal([]byte(contentStr), &contentJSON); err != nil {
-							diags.AddError("JSON unmarshal error", err.Error())
+							diags.AddError("JSON unmarshal", err.Error())
 
 							return "", "", diags
 						}
 
 						jpIter := jpExpression.Get(contentJSON)
 
-						if len(jpIter) == 0 {
-							diags.AddError("JSONPath expression", "JSONPath expression did not match any elements")
+						if len(jpIter) == 1 {
+							jpExpression.Set(contentJSON, param.Value.ValueString())
+
+							content, err = json.Marshal(contentJSON)
+							if err != nil {
+								diags.AddError("JSON marshal", err.Error())
+
+								return "", "", diags
+							}
+
+							contentStr = string(content)
+						} else if len(jpIter) > 1 {
+							diags.AddError("JSONPath expression", "Multiple matches found for JSONPath expression: "+param.Find.ValueString())
 
 							return "", "", diags
 						}
-
-						jpExpression.Set(contentJSON, param.Value.ValueString())
-
-						content, err = json.Marshal(contentJSON)
-						if err != nil {
-							diags.AddError("JSON marshal error", err.Error())
-
-							return "", "", diags
-						}
-
-						contentStr = string(content)
 					}
 				} else {
 					diags.AddError("Unsupported parameter type", "Invalid parameter type: "+param.Type.ValueString())
