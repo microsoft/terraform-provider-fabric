@@ -3,14 +3,14 @@
 page_title: "fabric_environments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Environment data-source allows you to retrieve details about a Fabric Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
+  The Environments data-source allows you to retrieve a list of Fabric Environments https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_environments (Data Source)
 
-The Environment data-source allows you to retrieve details about a Fabric [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
+The Environments data-source allows you to retrieve a list of Fabric [Environments](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
 -> This data-source supports Service Principal authentication.
 

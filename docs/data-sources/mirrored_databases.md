@@ -3,13 +3,13 @@
 page_title: "fabric_mirrored_databases Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Mirrored Database data-source allows you to retrieve details about a Fabric Mirrored Database https://learn.microsoft.com/fabric/database/mirrored-database/overview.
+  The Mirrored Databases data-source allows you to retrieve a list of Fabric Mirrored Databases https://learn.microsoft.com/fabric/database/mirrored-database/overview.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_mirrored_databases (Data Source)
 
-The Mirrored Database data-source allows you to retrieve details about a Fabric [Mirrored Database](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
+The Mirrored Databases data-source allows you to retrieve a list of Fabric [Mirrored Databases](https://learn.microsoft.com/fabric/database/mirrored-database/overview).
 
 -> This data-source supports Service Principal authentication.
 
