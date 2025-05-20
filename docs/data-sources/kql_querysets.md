@@ -34,7 +34,7 @@ data "fabric_kql_querysets" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of KQL Querysets. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of KQL Querysets. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
