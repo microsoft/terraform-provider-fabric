@@ -368,7 +368,7 @@ func TestAcc_EventstreamDefinitionResource_CRUD_Parameters(t *testing.T) {
 				},
 				{
 					"type":  "KeyValueReplace",
-					"find":  `$.destinations[?(@.name=="Lakehouse")].properties.itemId`,
+					"find":  `$.destinations[?(@.name=='Lakehouse')].properties.itemId`,
 					"value": testhelp.RefByFQN(lakehouseResourceFQN, "id"),
 				},
 			},

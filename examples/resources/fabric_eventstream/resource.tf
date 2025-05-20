@@ -52,8 +52,8 @@ resource "fabric_eventstream" "example_definition_update_parameters" {
         },
         {
           type  = "KeyValueReplace"
-          find  = "AAA"
-          value = "BBB"
+          find  = "$.destinations[?(@.name=='Lakehouse')].properties.itemId"
+          value = "33333333-3333-3333-3333-333333333333"
         }
       ]
     }
