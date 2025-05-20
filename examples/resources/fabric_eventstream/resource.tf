@@ -43,7 +43,7 @@ resource "fabric_eventstream" "example_definition_update_parameters" {
   definition = {
     "eventstream.json" = {
       source          = "${local.path}/eventstream.json"
-      processing_mode = "Async"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "FindReplace"
