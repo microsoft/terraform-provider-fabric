@@ -297,7 +297,7 @@ func TestUnit_MirroredDatabaseResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_MirroredDatabaseResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
