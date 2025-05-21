@@ -160,6 +160,7 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 	entity := NewRandomOnelakeShortcut()
 
 	fakeTestUpsert(workspaceID, itemID, entity)
+
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
 
@@ -233,6 +234,7 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 	entityAfter := NewRandomOnelakeShortcut()
 
 	fakeTestUpsert(workspaceID, itemID, entityExist)
+
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateOneLakeShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()

@@ -24,6 +24,7 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 
 	fakeTestUpsert(workspaceID, itemID, NewRandomOnelakeShortcut())
 	fakeTestUpsert(workspaceID, itemID, NewRandomOnelakeShortcut())
+
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager = fakeOneLakeShortcutsFunc()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{

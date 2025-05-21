@@ -23,6 +23,7 @@ func TestUnit_OneLakeShortcutDataSource(t *testing.T) {
 	entity := NewRandomOnelakeShortcut()
 
 	fakeTestUpsert(workspaceID, itemID, entity)
+
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
