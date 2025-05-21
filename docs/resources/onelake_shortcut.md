@@ -124,7 +124,7 @@ resource "fabric_onelake_shortcut" "external_data_share_target" {
 ### Required
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut. String length must be at most 200. String length must be at least 1.
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut.
 - `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables".
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
