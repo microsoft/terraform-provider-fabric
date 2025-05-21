@@ -340,6 +340,47 @@ function Get-DefinitionPartBase64 {
   return [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
 }
 
+function Set-DeploymentPipeline {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName
+  )
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines"
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+  if (!$result) {
+    Write-Log -Message "Creating Deployment Pipeline: $DisplayName" -Level 'WARN'
+    $payload = @{
+      displayName = $DisplayName
+      description = $DisplayName
+      stages      = @(
+        @{
+          displayName = "Development"
+          description = "Development stage description"
+          isPublic    = $false
+        },
+        @{
+          displayName = "Test"
+          description = "Test stage description"
+          isPublic    = $false
+        },
+        @{
+          displayName = "Production"
+          description = "Production stage description"
+          isPublic    = $true
+        }
+      )
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines" -Payload $payload).Response
+  }
+  else {
+    $result = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$($result.id)"
+    $result = $result.Response
+  }
+  Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
+
+  return $result
+}
+
 function Set-FabricDomain {
   param (
     [Parameter(Mandatory = $true)]
@@ -830,6 +871,7 @@ $itemNaming = @{
   'Dashboard'              = 'dash'
   'Datamart'               = 'dm'
   'DataPipeline'           = 'dp'
+  'DeploymentPipeline'     = 'deployp'
   'Environment'            = 'env'
   'Eventhouse'             = 'eh'
   'Eventstream'            = 'es'
@@ -1052,6 +1094,16 @@ $wellKnown['Report'] = @{
   id          = $report.id
   displayName = $report.displayName
   description = $report.description
+}
+
+# Create Deployment Pipeline if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['DeploymentPipeline'])"
+$deploymentPipeline = Set-DeploymentPipeline -DisplayName $displayNameTemp
+$wellKnown['DeploymentPipeline'] = @{
+  id          = $deploymentPipeline.id
+  displayName = $deploymentPipeline.displayName
+  description = $deploymentPipeline.description
+  stages      = $deploymentPipeline.stages
 }
 
 # Create Parent Domain if not exists
@@ -1415,6 +1467,6 @@ $wellKnown['OneLakeShortcut'] = @{
 }
 
 # Save wellknown.json file
-$wellKnownJson = $wellKnown | ConvertTo-Json
+$wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
