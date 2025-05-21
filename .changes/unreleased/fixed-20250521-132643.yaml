@@ -1,0 +1,5 @@
+kind: fixed
+body: fix issue where domain role assignment support is blocked for domains with contributor scope different than `SpecificUsersAndGroups`
+time: 2025-05-21T13:26:43.584789595Z
+custom:
+  Issue: "414"
