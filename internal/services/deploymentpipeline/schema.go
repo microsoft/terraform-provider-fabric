@@ -105,17 +105,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Required: true,
 					},
 				},
-				"order": superschema.SuperInt32Attribute{
-					Common: &schemaR.Int32Attribute{
-						MarkdownDescription: "The order of the stage.",
-					},
-					Resource: &schemaR.Int32Attribute{
-						Computed: true,
-					},
-					DataSource: &schemaD.Int32Attribute{
-						Computed: true,
-					},
-				},
 				"workspace_id": superschema.SuperStringAttribute{
 					Common: &schemaR.StringAttribute{
 						MarkdownDescription: "The assigned workspace ID.",
@@ -123,18 +112,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 					Resource: &schemaR.StringAttribute{
 						Optional: true,
-						Computed: true,
-					},
-					DataSource: &schemaD.StringAttribute{
-						Computed: true,
-					},
-				},
-				"workspace_name": superschema.SuperStringAttribute{
-					Common: &schemaR.StringAttribute{
-						MarkdownDescription: "The assigned workspace name.",
-					},
-					Resource: &schemaR.StringAttribute{
-						Computed: true,
+						Computed: false,
 					},
 					DataSource: &schemaD.StringAttribute{
 						Computed: true,

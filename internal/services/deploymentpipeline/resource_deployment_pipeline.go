@@ -352,13 +352,13 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 
 	tflog.Debug(ctx, "ASSIGN WORKSPACE", map[string]any{
 		"action": "start",
-		"id":     stage.ID.ValueString(),
+		"id":     stateStages[order].ID.ValueString(),
 	})
 
 	_, err := client.AssignWorkspaceToStage(
 		ctx,
 		state.ID.ValueString(),
-		stage.ID.ValueString(),
+		stateStages[order].ID.ValueString(),
 		req.DeploymentPipelineAssignWorkspaceRequest,
 		nil,
 	)
@@ -372,7 +372,7 @@ func (stage *baseDeploymentPipelineStageModel) AssignWorkspace(
 
 	tflog.Debug(ctx, "ASSIGN WORKSPACE", map[string]any{
 		"action": "end",
-		"id":     stage.ID.ValueString(),
+		"id":     stateStages[order].ID.ValueString(),
 	})
 
 	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)
@@ -397,13 +397,13 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 
 	tflog.Debug(ctx, "UNASSIGN WORKSPACE", map[string]any{
 		"action": "start",
-		"id":     stage.ID.ValueString(),
+		"id":     stateStages[order].ID.ValueString(),
 	})
 
 	_, err := client.UnassignWorkspaceFromStage(
 		ctx,
 		state.ID.ValueString(),
-		stage.ID.ValueString(),
+		stateStages[order].ID.ValueString(),
 		nil,
 	)
 
@@ -416,7 +416,7 @@ func (stage *baseDeploymentPipelineStageModel) UnassignWorkspace(
 
 	tflog.Debug(ctx, "UNASSIGN WORKSPACE", map[string]any{
 		"action": "end",
-		"id":     stage.ID.ValueString(),
+		"id":     stateStages[order].ID.ValueString(),
 	})
 
 	*respDiags = append(*respDiags, state.setStages(ctx, stateStages)...)

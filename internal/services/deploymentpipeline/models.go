@@ -27,13 +27,11 @@ type baseDeploymentPipelineModel struct {
 }
 
 type baseDeploymentPipelineStageModel struct {
-	ID            customtypes.UUID `tfsdk:"id"`
-	Order         types.Int32      `tfsdk:"order"`
-	DisplayName   types.String     `tfsdk:"display_name"`
-	Description   types.String     `tfsdk:"description"`
-	WorkspaceID   types.String     `tfsdk:"workspace_id"`
-	WorkspaceName types.String     `tfsdk:"workspace_name"`
-	IsPublic      types.Bool       `tfsdk:"is_public"`
+	ID          customtypes.UUID `tfsdk:"id"`
+	DisplayName types.String     `tfsdk:"display_name"`
+	Description types.String     `tfsdk:"description"`
+	WorkspaceID types.String     `tfsdk:"workspace_id"`
+	IsPublic    types.Bool       `tfsdk:"is_public"`
 }
 
 type baseDeploymentPipelineExtendedInfoModel struct {
@@ -54,7 +52,6 @@ func (to *baseDeploymentPipelineExtendedInfoModel) setStages(ctx context.Context
 		var entityModel baseDeploymentPipelineStageModel
 
 		entityModel.ID = entity.ID
-		entityModel.Order = entity.Order
 		entityModel.WorkspaceID = entity.WorkspaceID
 		entityModel.DisplayName = entity.DisplayName
 		entityModel.Description = entity.Description
@@ -79,7 +76,6 @@ func (to *baseDeploymentPipelineExtendedInfoModel) set(ctx context.Context, from
 	for _, entity := range from.Stages {
 		entityModel := &baseDeploymentPipelineStageModel{
 			ID:          customtypes.NewUUIDPointerValue(entity.ID),
-			Order:       types.Int32PointerValue(entity.Order),
 			WorkspaceID: types.StringPointerValue(entity.WorkspaceID),
 			DisplayName: types.StringPointerValue(entity.DisplayName),
 			Description: types.StringPointerValue(entity.Description),
@@ -188,7 +184,6 @@ func (to *requestUpdateDeploymentPipelineStage) set(from baseDeploymentPipelineS
 
 func (to *baseDeploymentPipelineStageModel) set(from fabcore.DeploymentPipelineStage) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Order = types.Int32PointerValue(from.Order)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.IsPublic = types.BoolPointerValue(from.IsPublic)

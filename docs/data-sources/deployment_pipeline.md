@@ -63,6 +63,4 @@ Read-Only:
 - `description` (String) The description of the stage.
 - `display_name` (String) The display name of the stage.
 - `is_public` (Boolean) Whether the stage is public.
-- `order` (Number) The order of the stage.
 - `workspace_id` (String) The assigned workspace ID.
-- `workspace_name` (String) The assigned workspace name.

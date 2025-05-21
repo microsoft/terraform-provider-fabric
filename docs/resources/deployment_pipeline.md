@@ -73,8 +73,6 @@ Optional:
 Read-Only:
 
 - `id` (String) The Deployment Pipeline ID.
-- `order` (Number) The order of the stage.
-- `workspace_name` (String) The assigned workspace name.
 
 <a id="nestedatt--timeouts"></a>
 
