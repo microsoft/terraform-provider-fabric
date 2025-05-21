@@ -337,6 +337,47 @@ function Get-DefinitionPartBase64 {
   return [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($content))
 }
 
+function Set-DeploymentPipeline {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName
+  )
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines"
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+  if (!$result) {
+    Write-Log -Message "Creating Deployment Pipeline: $DisplayName" -Level 'WARN'
+    $payload = @{
+      displayName = $DisplayName
+      description = $DisplayName
+      stages      = @(
+        @{
+          displayName = "Development"
+          description = "Development stage description"
+          isPublic    = $false
+        },
+        @{
+          displayName = "Test"
+          description = "Test stage description"
+          isPublic    = $false
+        },
+        @{
+          displayName = "Production"
+          description = "Production stage description"
+          isPublic    = $true
+        }
+      )
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines" -Payload $payload).Response
+  }
+  else {
+    $result = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$($result.id)"
+    $result = $result.Response
+  }
+  Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
+
+  return $result
+}
+
 function Set-FabricDomain {
   param (
     [Parameter(Mandatory = $true)]
@@ -525,7 +566,7 @@ function Set-FabricGatewayVirtualNetwork {
   $result = $existingGateways.Response.value | Where-Object { $_.displayName -eq $DisplayName }
   if (!$result) {
     # Construct the payload for creating a Virtual Network gateway.
-    # Refer to the API documentation for details on the request format :contentReference[oaicite:1]{index=1} and the Virtual Network Azure Resource :contentReference[oaicite:2]{index=2}.
+    # Refer to the API documentation for details on the request format and the Virtual Network Azure Resource.
     $payload = @{
       type                         = "VirtualNetwork"
       displayName                  = $DisplayName
@@ -555,19 +596,27 @@ function Set-FabricGatewayRoleAssignment {
     [string]$GatewayId,
 
     [Parameter(Mandatory = $true)]
-    [object]$SG
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Admin', 'ConnectionCreator', 'ConnectionCreatorWithResharing')]
+    [string]$Role
   )
 
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "gateways/$GatewayId/roleAssignments"
-  $result = $results.Response.value | Where-Object { $_.id -eq $SG.Id }
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
   if (!$result) {
-    Write-Log -Message "Assigning SG to Gateway: $($SG.DisplayName)" -Level 'WARN'
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to Gateway: $($GatewayId)" -Level 'WARN'
     $payload = @{
       principal = @{
-        id   = $SG.Id
-        type = 'Group'
+        id   = $PrincipalId
+        type = $PrincipalType
       }
-      role      = 'Admin'
+      role      = $Role
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "gateways/$GatewayId/roleAssignments" -Payload $payload).Response
   }
@@ -764,7 +813,6 @@ if (
   !$Env:FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME -or
   !$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME -or
   !$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX -or
-  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME -or
   !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION -or
   !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
 ) {
@@ -774,7 +822,6 @@ if (
   FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME,
   FABRIC_TESTACC_WELLKNOWN_AZDO_ORGANIZATION_NAME,
   FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX,
-  FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME,
   FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION,
   and FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
   are required environment variables.
@@ -821,6 +868,7 @@ $itemNaming = @{
   'Dashboard'              = 'dash'
   'Datamart'               = 'dm'
   'DataPipeline'           = 'dp'
+  'DeploymentPipeline'     = 'deployp'
   'Environment'            = 'env'
   'Eventhouse'             = 'eh'
   'Eventstream'            = 'es'
@@ -868,7 +916,6 @@ $Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE = $baseName
 $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID',
   'FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID',
-  'FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME'
   'FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION',
   'FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME',
   'FABRIC_TESTACC_WELLKNOWN_FABRIC_CAPACITY_NAME',
@@ -876,7 +923,8 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX',
   'FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX',
   'FABRIC_TESTACC_WELLKNOWN_NAME_BASE',
-  'FABRIC_TESTACC_WELLKNOWN_SPN_NAME'
+  'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
+  'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1044,6 +1092,16 @@ $wellKnown['Report'] = @{
   description = $report.description
 }
 
+# Create Deployment Pipeline if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['DeploymentPipeline'])"
+$deploymentPipeline = Set-DeploymentPipeline -DisplayName $displayNameTemp
+$wellKnown['DeploymentPipeline'] = @{
+  id          = $deploymentPipeline.id
+  displayName = $deploymentPipeline.displayName
+  description = $deploymentPipeline.description
+  stages      = $deploymentPipeline.stages
+}
+
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
 $eventstreamSourceId = '7f77b4a1-9989-4bae-8c9c-a5dd6ef62689'
@@ -1092,7 +1150,7 @@ $wellKnown['DomainChild'] = @{
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
-  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
@@ -1137,12 +1195,18 @@ $wellKnown['ResourceGroup'] = @{
   location = $resourceGroup.Location
 }
 
+# Set Azure Context
+$wellKnown['Azure'] = @{
+  subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  location       = $wellKnown['ResourceGroup'].location
+}
+
 # Create Storage Account if not exists
 $displayNameTemp = "$($itemNaming['StorageAccount'])${displayName}".ToLower() -replace '[^a-z0-9]', ''
-$storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp
+$storageAccount = Get-AzStorageAccount -ResourceGroupName $wellKnown['ResourceGroup'].name -Name $displayNameTemp -ErrorAction SilentlyContinue
 if (!$storageAccount) {
   Write-Log -Message "Creating Storage Account: $displayNameTemp" -Level 'WARN'
-  $storageAccount = New-AzStorageAccount -ResourceGroupName $resourceGroup.ResourceGroupName -Name $displayNameTemp -SkuName Standard_LRS -Kind StorageV2 -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
+  $storageAccount = New-AzStorageAccount -ResourceGroupName $wellKnown['ResourceGroup'].name -Name $displayNameTemp -SkuName Standard_LRS -Kind StorageV2 -Location $wellKnown['ResourceGroup'].location
 }
 Write-Log -Message "Storage Account - Name: $($storageAccount.StorageAccountName) / ID: $($storageAccount.Id)"
 $wellKnown['StorageAccount'] = @{
@@ -1233,14 +1297,30 @@ $bodyJson = $body | ConvertTo-Json
 $azdoSG = Invoke-ADOPSRestMethod -Uri "https://vssps.dev.azure.com/$($azdoContext.Organization)/_apis/graph/groups?api-version=7.2-preview.1" -Method Post -Body $bodyJson
 $result = Set-ADOPSGitPermission -ProjectId $azdoProject.id -RepositoryId $azdoRepo.id -Descriptor $azdoSG.descriptor -Allow 'GenericContribute', 'PullRequestContribute', 'CreateBranch', 'CreateTag', 'GenericRead'
 
+# Set GitHub
+if (!$Env:FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID) {
+  Write-Log -Message "!!! Please go to the Connections and manually add 'GitHub - Source control' connection !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
+  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID" -Level 'ERROR' -Stop $true
+}
+
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$Env:FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID"
+Write-Log -Message "GitHub - Name: $($results.Response.displayName) / ID: $($results.Response.id) / Path: $($results.Response.connectionDetails.path)"
+$segments = $results.Response.connectionDetails.path.TrimEnd('/') -split '/'
+$wellKnown['GitHub'] = @{
+  connectionId   = $Env:FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID
+  ownerName      = $segments[3]
+  repositoryName = $segments[4]
+}
+
 # Register the Microsoft.PowerPlatform resource provider
-$pp = Get-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+$pp = Get-AzResourceProvider -ProviderNamespace 'Microsoft.PowerPlatform'
 if ($pp.RegistrationState -ne 'Registered') {
-  Write-Log -Message "Registering Microsoft.PowerPlatform resource provider" -Level 'WARN'
-  Register-AzResourceProvider -ProviderNamespace "Microsoft.PowerPlatform"
+  Write-Log -Message 'Registering Microsoft.PowerPlatform resource provider' -Level 'WARN'
+  Register-AzResourceProvider -ProviderNamespace 'Microsoft.PowerPlatform'
 }
 else {
-  Write-Log -Message "Microsoft.PowerPlatform resource provider already registered" -Level 'INFO'
+  Write-Log -Message 'Microsoft.PowerPlatform resource provider already registered' -Level 'INFO'
 }
 
 # Create Azure Virtual Network 1 if not exists
@@ -1250,9 +1330,9 @@ $subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
 $subRange = '10.10.1.0/24'
 
 $vnet = Set-AzureVirtualNetwork `
-  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
   -VNetName $vnetName `
-  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -Location $wellKnown['ResourceGroup'].location `
   -AddressPrefixes $addrRange `
   -SubnetName $subName `
   -SubnetAddressPrefixes $subRange `
@@ -1260,9 +1340,9 @@ $vnet = Set-AzureVirtualNetwork `
 
 $wellKnown['VirtualNetwork01'] = @{
   name              = $vnet.Name
-  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
+  resourceGroupName = $wellKnown['ResourceGroup'].name
   subnetName        = $subName
-  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
 # Create Azure Virtual Network 2 if not exists
@@ -1272,9 +1352,9 @@ $subName = "${displayName}_$($itemNaming['VirtualNetworkSubnet'])"
 $subRange = '10.10.1.0/24'
 
 $vnet = Set-AzureVirtualNetwork `
-  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
   -VNetName $vnetName `
-  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -Location $wellKnown['ResourceGroup'].location `
   -AddressPrefixes $addrRange `
   -SubnetName $subName `
   -SubnetAddressPrefixes $subRange `
@@ -1282,9 +1362,9 @@ $vnet = Set-AzureVirtualNetwork `
 
 $wellKnown['VirtualNetwork02'] = @{
   name              = $vnet.Name
-  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
+  resourceGroupName = $wellKnown['ResourceGroup'].name
   subnetName        = $subName
-  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
 # Create Fabric Gateway Virtual Network if not exists
@@ -1297,8 +1377,8 @@ $gateway = Set-FabricGatewayVirtualNetwork `
   -CapacityId $capacity.id `
   -InactivityMinutesBeforeSleep $inactivityMinutesBeforeSleep `
   -NumberOfMemberGateways $numberOfMemberGateways `
-  -SubscriptionId $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID `
-  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -SubscriptionId $wellKnown['Azure'].subscriptionId `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
   -VirtualNetworkName $wellKnown['VirtualNetwork01'].name `
   -SubnetName $wellKnown['VirtualNetwork01'].subnetName
 
@@ -1308,22 +1388,23 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
-Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -SG $SPNS_SG
+Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
+Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
 
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
 
 $dataFactory = Set-AzureDataFactory `
-  -ResourceGroupName $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
   -DataFactoryName $displayNameTemp `
-  -Location $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION `
+  -Location $wellKnown['ResourceGroup'].location `
   -SG $SPNS_SG
 
 $wellKnown['AzureDataFactory'] = @{
   name              = $displayNameTemp
-  resourceGroupName = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME
-  location          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
-  subscriptionId    = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  resourceGroupName = $wellKnown['ResourceGroup'].name
+  location          = $wellKnown['ResourceGroup'].location
+  subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
 # Create the Mounted Data Factory if not exists
@@ -1333,8 +1414,8 @@ $definition = @{
     @{
       path        = 'mountedDataFactory-content.json'
       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/mounted_data_factory/mountedDataFactory-content.json.tmpl' -Values @(
-        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID },
-        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_RESOURCE_GROUP_NAME },
+        @{ key = '{{ .SUBSCRIPTION_ID }}'; value = $wellKnown['Azure'].subscriptionId },
+        @{ key = '{{ .RESOURCE_GROUP_NAME }}'; value = $wellKnown['ResourceGroup'].name },
         @{ key = '{{ .FACTORY_NAME }}'; value = $dataFactory.DataFactoryName }
       )
       payloadType = 'InlineBase64'
@@ -1350,12 +1431,7 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-$wellKnown['Azure'] = @{
-  subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
-  location       = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION
-}
-
 # Save wellknown.json file
-$wellKnownJson = $wellKnown | ConvertTo-Json
+$wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8

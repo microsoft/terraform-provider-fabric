@@ -23,11 +23,11 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_SQLDatabasesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entity := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -69,6 +69,9 @@ func TestUnit_SQLDatabasesDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.server_fqdn"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(
@@ -103,6 +106,9 @@ func TestAcc_SQLDatabasesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.server_fqdn"),
 			),
 		},
 	},
