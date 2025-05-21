@@ -279,7 +279,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -942,7 +942,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('CopyJob', 'DataPipeline', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1043,6 +1043,33 @@ $wellKnown['Report'] = @{
   displayName = $report.displayName
   description = $report.description
 }
+
+# Create Eventstream if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
+$eventstreamSourceId = '7f77b4a1-9989-4bae-8c9c-a5dd6ef62689'
+Write-Log -Message "Eventstream source Id: $($eventstreamSourceId)"
+$definition = @{
+  parts = @(
+    @{
+      path        = "eventstream.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/eventstream/eventstream.json.tmpl' -Values @(
+        @{ key = '{{ .SourceID }}'; value = $eventstreamSourceId },
+        @{ key = '{{ .LakehouseID }}'; value = $wellKnown['Lakehouse'].id },
+        @{ key = '{{ .LakehouseWorkspaceID }}'; value = $wellKnown['WorkspaceDS'].id }
+      )
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$eventstream = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'Eventstream' -Definition $definition
+$wellKnown['Eventstream'] = @{
+  id          = $eventstream.id
+  displayName = $eventstream.displayName
+  description = $eventstream.description
+  sourceId    = $eventstreamSourceId
+}
+
+
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"

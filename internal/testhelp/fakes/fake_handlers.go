@@ -135,6 +135,19 @@ func handleUpdateWithParentID[TEntity, TOptions, TUpdateRequest, TResponse any](
 	}
 }
 
+// func handleOpenWithSimpleId[TEntity, TOptions, TOpenResponse any](
+// 	handler *typedHandler[TEntity],
+// 	openTransformer openTransformer[TEntity, TOpenResponse],
+// 	f *func(ctx context.Context, id string, options *TOptions) (resp azfake.Responder[TOpenResponse], errResp azfake.ErrorResponder),
+// ) {
+// 	if f == nil {
+// 		return
+// 	}
+// 	*f = func(_ context.Context, id string, _ *TOptions) (azfake.Responder[TOpenResponse], azfake.ErrorResponder) {
+// 		return openByID(handler, id, openTransformer)
+// 	}
+// }
+
 func getDefinition[TDefinition, TEntity any](handler *typedHandler[TEntity], id string) *TDefinition {
 	if definition, ok := handler.definitions[id]; ok {
 		typedDefinition, ok := definition.(TDefinition)
@@ -531,3 +544,23 @@ func getByID[TEntity, TResponse any](handler *typedHandler[TEntity], id string, 
 
 	return resp, errResp
 }
+
+// func openByID[TEntity, TResponse any](handler *typedHandler[TEntity], id string, openTransformer openTransformer[TEntity, TResponse]) (azfake.Responder[TResponse], azfake.ErrorResponder) {
+// 	var resp azfake.Responder[TResponse]
+
+// 	var errResp azfake.ErrorResponder
+
+// 	var empty TResponse
+
+// 	if handler.Contains(id) {
+// 		element := handler.Get(id)
+// 		respValue := openTransformer.TransformOpen(element)
+// 		resp.SetResponse(http.StatusOK, respValue, nil)
+// 	} else {
+// 		resp.SetResponse(http.StatusNotFound, empty, nil)
+
+// 		errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Item not found"))
+// 	}
+
+// 	return resp, errResp
+// }

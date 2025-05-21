@@ -15,8 +15,10 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/provider"
 )
@@ -30,6 +32,16 @@ var NewTestAccCase = func(t *testing.T, testResource *string, preCheck func(*tes
 
 	return newTestAccCase(t, testResource, preCheck, steps)
 }
+
+// var NewEphemeralTestAccCase = func(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
+// 	t.Helper()
+
+// 	if preCheck == nil {
+// 		return newEphemeralTestAccCase(t, testResource, TestAccPreCheck, steps)
+// 	}
+
+// 	return newEphemeralTestAccCase(t, testResource, preCheck, steps)
+// }
 
 // lintignore:AT003
 func TestAccPreCheck(t *testing.T) {
@@ -54,7 +66,7 @@ func TestAccPreCheckNoEnvs(t *testing.T) {
 func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
 	t.Helper()
 
-	return resource.TestCase{
+	testCase := resource.TestCase{
 		IsUnitTest: false,
 		PreCheck:   func() { preCheck(t) },
 		CheckDestroy: func(s *terraform.State) error {
@@ -75,7 +87,51 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 		},
 		Steps: steps,
 	}
+
+	// Only add TerraformVersionChecks if testResource starts with "ephemeral"
+	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_10_0),
+		}
+	}
+
+	return testCase
 }
+
+// func newEphemeralTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
+// 	t.Helper()
+
+// 	testCase := resource.TestCase{
+// 		IsUnitTest: false,
+// 		PreCheck:   func() { preCheck(t) },
+// 		CheckDestroy: func(s *terraform.State) error {
+// 			if testResource != nil {
+// 				_, ok := s.RootModule().Resources[*testResource]
+// 				if !ok {
+// 					return errors.New(*testResource + ` - resource still exists`)
+// 				}
+// 			}
+
+// 			return nil
+// 		},
+// 		ProtoV6ProviderFactories: getEphemeralTestAccProtoV6ProviderFactories(),
+// 		ExternalProviders: map[string]resource.ExternalProvider{
+// 			"azurerm": {
+// 				Source: "hashicorp/azurerm",
+// 			},
+// 		},
+// 		Steps: steps,
+// 	}
+
+// 	// Only add TerraformVersionChecks if testResource starts with "ephemeral"
+// 	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
+// 		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+// 			tfversion.SkipBelow(tfversion.Version1_10_0),
+// 		}
+// 	}
+
+// 	return testCase
+// }
 
 // getTestAccProtoV6ProviderFactories are used to instantiate a provider during
 // acceptance testing. The factory function will be invoked for every Terraform
@@ -84,8 +140,19 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 func getTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
+		"echo":   echoprovider.NewProviderServer(),
 	}
 }
+
+// getTestAccProtoV6ProviderFactories are used to instantiate a provider during
+// acceptance testing. The factory function will be invoked for every Terraform
+// CLI command executed to create a provider server to which the CLI can
+// reattach.
+// func getEphemeralTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
+// 	return map[string]func() (tfprotov6.ProviderServer, error){
+// 		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
+// 	}
+// }
 
 // lintignore:AT003
 func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
