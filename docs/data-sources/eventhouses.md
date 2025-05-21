@@ -3,13 +3,13 @@
 page_title: "fabric_eventhouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Eventhouse data-source allows you to retrieve details about a Fabric Eventhouse https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
+  The Eventhouses data-source allows you to retrieve a list of Fabric Eventhouses https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_eventhouses (Data Source)
 
-The Eventhouse data-source allows you to retrieve details about a Fabric [Eventhouse](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
+The Eventhouses data-source allows you to retrieve a list of Fabric [Eventhouses](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse).
 
 -> This data-source supports Service Principal authentication.
 
@@ -34,7 +34,7 @@ data "fabric_eventhouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Eventhouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Eventhouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

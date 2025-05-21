@@ -31,7 +31,7 @@ data "fabric_domains" "example" {}
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Domains. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Domains. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

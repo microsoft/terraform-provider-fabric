@@ -3,13 +3,13 @@
 page_title: "fabric_spark_job_definitions Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Spark Job Definition data-source allows you to retrieve details about a Fabric Spark Job Definition https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
+  The Spark Job Definitions data-source allows you to retrieve a list of Fabric Spark Job Definitions https://learn.microsoft.com/fabric/data-engineering/spark-job-definition.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_spark_job_definitions (Data Source)
 
-The Spark Job Definition data-source allows you to retrieve details about a Fabric [Spark Job Definition](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
+The Spark Job Definitions data-source allows you to retrieve a list of Fabric [Spark Job Definitions](https://learn.microsoft.com/fabric/data-engineering/spark-job-definition).
 
 -> This data-source supports Service Principal authentication.
 
@@ -34,7 +34,7 @@ data "fabric_spark_job_definitions" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Spark Job Definitions. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Spark Job Definitions. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

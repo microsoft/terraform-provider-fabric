@@ -3,13 +3,13 @@
 page_title: "fabric_lakehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Lakehouse data-source allows you to retrieve details about a Fabric Lakehouse https://learn.microsoft.com/training/modules/get-started-lakehouses.
+  The Lakehouses data-source allows you to retrieve a list of Fabric Lakehouses https://learn.microsoft.com/training/modules/get-started-lakehouses.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_lakehouses (Data Source)
 
-The Lakehouse data-source allows you to retrieve details about a Fabric [Lakehouse](https://learn.microsoft.com/training/modules/get-started-lakehouses).
+The Lakehouses data-source allows you to retrieve a list of Fabric [Lakehouses](https://learn.microsoft.com/training/modules/get-started-lakehouses).
 
 -> This data-source supports Service Principal authentication.
 
@@ -34,7 +34,7 @@ data "fabric_lakehouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Lakehouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Lakehouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
