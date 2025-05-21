@@ -36,6 +36,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -179,9 +182,6 @@ func onelakeSchema() superschema.SuperSingleNestedAttributeOf[oneLakeModel] {
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -410,33 +410,6 @@ func s3CompatibleSchema() superschema.SuperSingleNestedAttributeOf[s3Compatible]
 	}
 }
 
-func externalDataShareSchema() superschema.SuperSingleNestedAttributeOf[externalDataShare] {
-	return superschema.SuperSingleNestedAttributeOf[externalDataShare]{
-		Common: &schemaR.SingleNestedAttribute{
-			MarkdownDescription: "An object containing the properties of the target external data share.",
-		},
-		Resource: &schemaR.SingleNestedAttribute{
-			Optional: true,
-		},
-		DataSource: &schemaD.SingleNestedAttribute{
-			Computed: true,
-		},
-		Attributes: map[string]superschema.Attribute{
-			"connection_id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Required: true,
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
-				},
-			},
-		},
-	}
-}
-
 func dataverseSchema() superschema.SuperSingleNestedAttributeOf[dataverse] {
 	return superschema.SuperSingleNestedAttributeOf[dataverse]{
 		Common: &schemaR.SingleNestedAttribute{
@@ -488,6 +461,36 @@ func dataverseSchema() superschema.SuperSingleNestedAttributeOf[dataverse] {
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func externalDataShareSchema() superschema.SuperSingleNestedAttributeOf[externalDataShare] {
+	return superschema.SuperSingleNestedAttributeOf[externalDataShare]{
+		Common: &schemaR.SingleNestedAttribute{
+			MarkdownDescription: "An object containing the properties of the target external data share.",
+		},
+		Resource: &schemaR.SingleNestedAttribute{
+			Computed: true,
+		},
+		DataSource: &schemaD.SingleNestedAttribute{
+			Computed: true,
+		},
+		Attributes: map[string]superschema.Attribute{
+			"connection_id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

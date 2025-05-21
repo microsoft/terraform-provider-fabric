@@ -104,7 +104,6 @@ func (r *resourceOnelakeShortcut) ConfigValidators(
 		path.MatchRoot("target").AtName("amazon_s3"),
 		path.MatchRoot("target").AtName("google_cloud_storage"),
 		path.MatchRoot("target").AtName("s3_compatible"),
-		path.MatchRoot("target").AtName("external_data_share"),
 		path.MatchRoot("target").AtName("dataverse"),
 	))
 
@@ -175,6 +174,8 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
+	trimmedPath := strings.TrimPrefix(*respCreate.Path, "/")
+	respCreate.Path = &trimmedPath
 
 	state.ID = types.StringValue(*respCreate.Name + *respCreate.Path)
 
@@ -226,6 +227,9 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	trimmedPath := strings.TrimPrefix(*respCreate.Path, "/")
+	respCreate.Path = &trimmedPath
 
 	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
@@ -317,15 +321,16 @@ func (r *resourceOnelakeShortcut) get(ctx context.Context, model *resourceOneLak
 	}
 
 	// Normalize mismatch between configuration Path and API path
-	if respGet.Path != nil && model.Path.ValueString() != "" {
-		apiResponsePath := *respGet.Path
-		configPath := model.Path.ValueString()
+	// if respGet.Path != nil && model.Path.ValueString() != "" {
+	// 	apiResponsePath := *respGet.Path
+	// 	configPath := model.Path.ValueString()
 
-		if strings.TrimPrefix(configPath, "/") == strings.TrimPrefix(apiResponsePath, "/") {
-			respGet.Path = &configPath
-		}
-	}
-
+	// 	if strings.TrimPrefix(configPath, "/") == strings.TrimPrefix(apiResponsePath, "/") {
+	// 		respGet.Path = &configPath
+	// 	}
+	// }
+	trimmedPath := strings.TrimPrefix(*respGet.Path, "/")
+	respGet.Path = &trimmedPath
 	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
 
 	return nil

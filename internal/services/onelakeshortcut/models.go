@@ -6,7 +6,6 @@ package onelakeshortcut
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -234,7 +233,7 @@ type requestCreateOnelakeShortcut struct {
 
 func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOneLakeShortcutModel) diag.Diagnostics {
 	to.Name = from.Name.ValueStringPointer()
-	to.Path = strings.TrimPrefix(from.Path.ValueString(), "/").ValueStringPointer()
+	to.Path = from.Path.ValueStringPointer()
 
 	target, diags := from.Target.Get(ctx)
 	if diags.HasError() {
@@ -252,6 +251,68 @@ func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOn
 				ItemID:      onelake.ItemID.ValueStringPointer(),
 				Path:        onelake.Path.ValueStringPointer(),
 				WorkspaceID: onelake.WorkspaceID.ValueStringPointer(),
+			}
+		}(),
+		AdlsGen2: func() *fabcore.AdlsGen2 {
+			adlsGen2, diags := target.AdlsGen2.Get(ctx)
+			if diags.HasError() || adlsGen2 == nil {
+				return nil
+			}
+
+			return &fabcore.AdlsGen2{
+				ConnectionID: adlsGen2.ConnectionID.ValueStringPointer(),
+				Location:     adlsGen2.Location.ValueStringPointer(),
+				Subpath:      adlsGen2.Subpath.ValueStringPointer(),
+			}
+		}(),
+		AmazonS3: func() *fabcore.AmazonS3 {
+			amazonS3, diags := target.AmazonS3.Get(ctx)
+			if diags.HasError() || amazonS3 == nil {
+				return nil
+			}
+
+			return &fabcore.AmazonS3{
+				ConnectionID: amazonS3.ConnectionID.ValueStringPointer(),
+				Location:     amazonS3.Location.ValueStringPointer(),
+				Subpath:      amazonS3.Subpath.ValueStringPointer(),
+			}
+		}(),
+		Dataverse: func() *fabcore.Dataverse {
+			dataverse, diags := target.Dataverse.Get(ctx)
+			if diags.HasError() || dataverse == nil {
+				return nil
+			}
+
+			return &fabcore.Dataverse{
+				ConnectionID:      dataverse.ConnectionID.ValueStringPointer(),
+				DeltaLakeFolder:   dataverse.DeltaLakeFolder.ValueStringPointer(),
+				EnvironmentDomain: dataverse.EnvironmentDomain.ValueStringPointer(),
+				TableName:         dataverse.TableName.ValueStringPointer(),
+			}
+		}(),
+		GoogleCloudStorage: func() *fabcore.GoogleCloudStorage {
+			googleCloudStorage, diags := target.GoogleCloudStorage.Get(ctx)
+			if diags.HasError() || googleCloudStorage == nil {
+				return nil
+			}
+
+			return &fabcore.GoogleCloudStorage{
+				ConnectionID: googleCloudStorage.ConnectionID.ValueStringPointer(),
+				Location:     googleCloudStorage.Location.ValueStringPointer(),
+				Subpath:      googleCloudStorage.Subpath.ValueStringPointer(),
+			}
+		}(),
+		S3Compatible: func() *fabcore.S3Compatible {
+			s3Compatible, diags := target.S3Compatible.Get(ctx)
+			if diags.HasError() || s3Compatible == nil {
+				return nil
+			}
+
+			return &fabcore.S3Compatible{
+				ConnectionID: s3Compatible.ConnectionID.ValueStringPointer(),
+				Location:     s3Compatible.Location.ValueStringPointer(),
+				Subpath:      s3Compatible.Subpath.ValueStringPointer(),
+				Bucket:       s3Compatible.Bucket.ValueStringPointer(),
 			}
 		}(),
 	}

@@ -111,7 +111,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
-  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.dataverse]`),
 		},
 		// error - multiple target data sources
 		{
@@ -140,7 +140,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
-  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.dataverse]`),
 		},
 		// error - no target data source
 		{
@@ -156,7 +156,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
-  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.dataverse]`),
 		},
 	}))
 }
@@ -277,7 +277,7 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
 					"name":         *entityBefore.Name,
-					"path":         "/" + *entityBefore.Path,
+					"path":         *entityBefore.Path,
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
@@ -301,7 +301,7 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
 					"name":         *entityBefore.Name,
-					"path":         "/" + *entityBefore.Path,
+					"path":         *entityBefore.Path,
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
