@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	// "github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator".
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -25,11 +25,9 @@ import (
 )
 
 var (
-	_ resource.ResourceWithConfigure      = (*resourceOnelakeShortcut)(nil)
-	_ resource.ResourceWithImportState    = (*resourceOnelakeShortcut)(nil)
-	_ resource.ResourceWithValidateConfig = (*resourceOnelakeShortcut)(nil)
-
-// _ resource.ResourceWithConfigValidators = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithConfigure        = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithImportState      = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithConfigValidators = (*resourceOnelakeShortcut)(nil)
 )
 
 type resourceOnelakeShortcut struct {
@@ -95,70 +93,22 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 	}
 }
 
-// func (r *resourceOnelakeShortcut) ConfigValidators(
-// 	_ context.Context,
-// ) []resource.ConfigValidator {
-// 	result := []resource.ConfigValidator{}
+func (r *resourceOnelakeShortcut) ConfigValidators(
+	_ context.Context,
+) []resource.ConfigValidator {
+	result := []resource.ConfigValidator{}
 
-// 	result = append(result, resourcevalidator.ExactlyOneOf(
-// 		path.MatchRelative().AtName("onelake"),
-// 		path.MatchRelative().AtName("adls_gen2"),
-// 		path.MatchRelative().AtName("amazon_s3"),
-// 		path.MatchRelative().AtName("google_cloud_storage"),
-// 		path.MatchRelative().AtName("s3_compatible"),
-// 		path.MatchRelative().AtName("external_data_share"),
-// 		path.MatchRelative().AtName("dataverse"),
-// 	))
+	result = append(result, resourcevalidator.ExactlyOneOf(
+		path.MatchRoot("target").AtName("onelake"),
+		path.MatchRoot("target").AtName("adls_gen2"),
+		path.MatchRoot("target").AtName("amazon_s3"),
+		path.MatchRoot("target").AtName("google_cloud_storage"),
+		path.MatchRoot("target").AtName("s3_compatible"),
+		path.MatchRoot("target").AtName("external_data_share"),
+		path.MatchRoot("target").AtName("dataverse"),
+	))
 
-// 	return result
-// }
-
-func (r *resourceOnelakeShortcut) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var config resourceOneLakeShortcutModel
-	var diags diag.Diagnostics
-
-	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	targetConfig, diags := config.Target.Get(ctx)
-	resp.Diagnostics.Append(diags...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	targets := []struct {
-		isSet bool
-		label string
-	}{
-		{!targetConfig.Onelake.IsNull() && !targetConfig.Onelake.IsUnknown(), "onelake"},
-		{!targetConfig.AdlsGen2.IsNull() && !targetConfig.AdlsGen2.IsUnknown(), "adls_gen2"},
-		{!targetConfig.AmazonS3.IsNull() && !targetConfig.AmazonS3.IsUnknown(), "amazon_s3"},
-		{!targetConfig.GoogleCloudStorage.IsNull() && !targetConfig.GoogleCloudStorage.IsUnknown(), "google_cloud_storage"},
-		{!targetConfig.S3Compatible.IsNull() && !targetConfig.S3Compatible.IsUnknown(), "s3_compatible"},
-		{!targetConfig.ExternalDataShare.IsNull() && !targetConfig.ExternalDataShare.IsUnknown(), "external_data_share"},
-		{!targetConfig.Dataverse.IsNull() && !targetConfig.Dataverse.IsUnknown(), "dataverse"},
-	}
-
-	count := 0
-
-	for _, t := range targets {
-		if t.isSet {
-			count++
-		}
-	}
-
-	if count != 1 {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("target"),
-			"Exactly one target type must be specified",
-			fmt.Sprintf(
-				"You have configured %d targets; please set exactly one of onelake, adls_gen2, amazon_s3, google_cloud_storage, s3_compatible, external_data_share or dataverse.",
-				count,
-			),
-		)
-	}
+	return result
 }
 
 func NewResourceOneLakeShortcut() resource.Resource {

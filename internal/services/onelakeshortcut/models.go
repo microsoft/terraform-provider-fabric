@@ -6,6 +6,7 @@ package onelakeshortcut
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -233,7 +234,7 @@ type requestCreateOnelakeShortcut struct {
 
 func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOneLakeShortcutModel) diag.Diagnostics {
 	to.Name = from.Name.ValueStringPointer()
-	to.Path = from.Path.ValueStringPointer()
+	to.Path = strings.TrimPrefix(from.Path.ValueString(), "/").ValueStringPointer()
 
 	target, diags := from.Target.Get(ctx)
 	if diags.HasError() {

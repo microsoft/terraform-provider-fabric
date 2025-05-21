@@ -56,12 +56,13 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
 		},
+		// error - no required attribute target
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "invalid uuid",
+					"workspace_id": testhelp.RandomUUID(),
 					"item_id":      testhelp.RandomUUID(),
 					"name":         testhelp.RandomName(),
 					"path":         testhelp.RandomName(),
@@ -69,7 +70,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
 		},
-		// error - no required attribute target
+		// error - workspace_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -109,7 +110,8 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
+			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
 		},
 		// error - multiple target data sources
 		{
@@ -137,7 +139,8 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
+			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
 		},
 		// error - no target data source
 		{
@@ -152,7 +155,8 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 					"target":       map[string]any{},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
+			ExpectError: regexp.MustCompile(`Exactly one of these attributes must be configured:
+  | [target.onelake,target.adls_gen2,target.amazon_s3,target.google_cloud_storage,target.s3_compatible,target.external_data_share,target.dataverse]`),
 		},
 	}))
 }
@@ -273,7 +277,7 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
 					"name":         *entityBefore.Name,
-					"path":         *entityBefore.Path,
+					"path":         "/" + *entityBefore.Path,
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
@@ -297,7 +301,7 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
 					"name":         *entityBefore.Name,
-					"path":         *entityBefore.Path,
+					"path":         "/" + *entityBefore.Path,
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": *entityBefore.Target.OneLake.WorkspaceID,
@@ -318,10 +322,10 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 
 func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
-	entityTargetPath := "Files/images"
-	entityUpdatedTargetPath := "Files/sample_dataset"
-	workspaceID := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)["id"].(string)
-	lakehouseID := testhelp.WellKnown()["Lakehouse"].(map[string]any)["id"].(string)
+	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
+	entityUpdatedTargetPath := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["shortcutName"].(string)
+	workspaceID := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["workspaceId"].(string)
+	lakehouseID := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["lakehouseId"].(string)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -332,7 +336,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 					"item_id":      lakehouseID,
 					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "/Files",
+					"path":         "/Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,
@@ -359,7 +363,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 					"item_id":      lakehouseID,
 					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "/Files",
+					"path":         "/Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,

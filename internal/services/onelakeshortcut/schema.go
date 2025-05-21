@@ -179,6 +179,9 @@ func onelakeSchema() superschema.SuperSingleNestedAttributeOf[oneLakeModel] {
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
