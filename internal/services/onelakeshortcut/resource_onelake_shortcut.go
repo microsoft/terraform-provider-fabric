@@ -271,7 +271,7 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
 		ShortcutConflictPolicy: &overwriteOnlyPolicy,
 	}
-	// Call the API to update the resource
+
 	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -366,13 +366,13 @@ func (r *resourceOnelakeShortcut) get(ctx context.Context, model *resourceOneLak
 		return diags
 	}
 
-	// Normalize mismatch between expected (with /) and API (without /)
+	// Normalize mismatch between configuration Path and API path
 	if respGet.Path != nil && model.Path.ValueString() != "" {
-		expected := model.Path.ValueString()
-		actual := *respGet.Path
+		apiResponsePath := *respGet.Path
+		configPath := model.Path.ValueString()
 
-		if strings.TrimPrefix(actual, "/") == strings.TrimPrefix(expected, "/") {
-			respGet.Path = &expected
+		if strings.TrimPrefix(configPath, "/") == strings.TrimPrefix(apiResponsePath, "/") {
+			respGet.Path = &configPath
 		}
 	}
 

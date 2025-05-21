@@ -3,12 +3,10 @@
 package onelakeshortcut
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -94,11 +92,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
-
-					Validators: []validator.String{
-						stringvalidator.LengthAtMost(200),
-						stringvalidator.LengthAtLeast(1),
-					},
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},

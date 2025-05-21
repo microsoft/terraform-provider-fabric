@@ -109,13 +109,13 @@ func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceO
 		return diags
 	}
 
-	// Normalize mismatch between expected (with /) and API (without /)
+	// Normalize mismatch between configuration Path and API path
 	if respGet.Path != nil && model.Path.ValueString() != "" {
-		expected := model.Path.ValueString()
-		actual := *respGet.Path
+		apiResponsePath := *respGet.Path
+		configPath := model.Path.ValueString()
 
-		if strings.TrimPrefix(actual, "/") == strings.TrimPrefix(expected, "/") {
-			respGet.Path = &expected
+		if strings.TrimPrefix(configPath, "/") == strings.TrimPrefix(apiResponsePath, "/") {
+			respGet.Path = &configPath
 		}
 	}
 

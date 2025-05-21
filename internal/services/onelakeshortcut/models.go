@@ -112,7 +112,6 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	var diagnostics diag.Diagnostics
 
 	to.Type = types.StringPointerValue((*string)(from.Type))
-	// Initialize all nested objects to null
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
 	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[adlsGen2](ctx)
 	to.AmazonS3 = supertypes.NewSingleNestedObjectValueOfNull[amazonS3](ctx)
@@ -121,7 +120,6 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	to.S3Compatible = supertypes.NewSingleNestedObjectValueOfNull[s3Compatible](ctx)
 	to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOfNull[externalDataShare](ctx)
 
-	// Set the appropriate nested object based on the input
 	if from.OneLake != nil {
 		onelakeModel := &oneLakeModel{
 			ItemID:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),

@@ -45,7 +45,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
-		// // error - no required attributes
+		// error - no required attribute item_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -69,7 +69,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
 		},
-		// // error - invalid uuid - capacity_id
+		// error - no required attribute target
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -90,6 +90,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - unexpected data source attribute for target
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -110,6 +111,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
 		},
+		// error - multiple target data sources
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -137,6 +139,7 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Exactly one target type must be specified`),
 		},
+		// error - no target data source
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -347,7 +350,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
 		},
-		// Update - Create with OverwriteOnly and Read
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
