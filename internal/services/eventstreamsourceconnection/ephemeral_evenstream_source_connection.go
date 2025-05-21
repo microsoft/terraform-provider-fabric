@@ -22,10 +22,7 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-// _ ephemeral.EphemeralResourceWithConfigValidators = (*ephemeralEventstreamSourceConnection)(nil)
-var (
-	_ ephemeral.EphemeralResourceWithConfigure = (*ephemeralEventstreamSourceConnection)(nil)
-)
+var _ ephemeral.EphemeralResourceWithConfigure = (*ephemeralEventstreamSourceConnection)(nil)
 
 type ephemeralEventstreamSourceConnection struct {
 	pConfigData *pconfig.ProviderData

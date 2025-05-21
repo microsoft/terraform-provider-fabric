@@ -14,12 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
 var (
-	testEphemeralItemFQN, testEphemeralItemHeader         = testhelp.TFEphemeral(common.ProviderTypeName, eventstreamsourceconnection.ItemTypeInfo.Type, "test")
+	testEphemeralItemFQN, testEphemeralItemHeader         = testhelp.TFEphemeral(common.ProviderTypeName, itemTypeInfo.Type, "test")
 	testEphemeralItemEchoFQN, testEphemeralItemEchoConfig = testhelp.TFEphemeralEcho(testEphemeralItemFQN)
 )
 

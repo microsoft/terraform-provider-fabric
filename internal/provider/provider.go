@@ -522,7 +522,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 	}
 }
 
-func (p *FabricProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
+func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
 		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}

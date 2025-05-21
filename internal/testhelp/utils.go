@@ -141,7 +141,9 @@ func TFEphemeral(providerName, typeName, ephemeralResourceName string) (fqn, hea
 }
 
 func TFEphemeralEcho(ephemeralResourceFQN string) (config, fqn string) { //nolint:nonamedreturns
-	fqn = fmt.Sprintf("echo.test")
+	fqn = "echo.test"
+
+	// lintignore:AT004
 	config = fmt.Sprintf(`
 					provider "echo" {
 						data = %[1]s
@@ -155,6 +157,7 @@ func TFEphemeralEcho(ephemeralResourceFQN string) (config, fqn string) { //nolin
 
 func EphemeralResourceHeader(ephemeralResourceType, ephemeralResourceName string) string {
 	const f = `ephemeral %q %q`
+
 	return fmt.Sprintf(f, ephemeralResourceType, ephemeralResourceName)
 }
 
