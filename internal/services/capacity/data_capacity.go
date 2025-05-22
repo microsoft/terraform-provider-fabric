@@ -6,6 +6,7 @@ package capacity
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -90,7 +91,16 @@ func (d *dataSourceCapacity) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
+	// Set a default timeout in case pConfigData is nil
+	defaultTimeout := 5 * time.Minute
+	timeoutValue := defaultTimeout
+	
+	// Only use pConfigData.Timeout if pConfigData is not nil
+	if d.pConfigData != nil {
+		timeoutValue = d.pConfigData.Timeout
+	}
+	
+	timeout, diags := data.Timeouts.Read(ctx, timeoutValue)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
