@@ -296,12 +296,44 @@ func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, 
 	}
 
 	if *respGet.ContributorsScope != fabadmin.ContributorsScopeTypeSpecificUsersAndGroups {
-		diags.AddError(
-			"Unsupported Domain Contributors Scope",
-			"Only '"+string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups)+"' Domain Contributors Scope is supported for Role Assignment.",
-		)
+		// Automatically update the domain's contributors scope
+		tflog.Info(ctx, "Domain contributors scope is not 'SpecificUsersAndGroups'. Updating it automatically.", map[string]any{
+			"domain_id":           model.DomainID.ValueString(),
+			"current_scope":       string(*respGet.ContributorsScope),
+			"required_scope":      string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
+		})
 
-		return diags
+		_, err := r.client.UpdateDomain(ctx, model.DomainID.ValueString(), fabadmin.UpdateDomainRequest{
+			ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
+		}, nil)
+		
+		if diagErr := utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil); diagErr.HasError() {
+			diags.AddError(
+				"Failed to update Domain Contributors Scope",
+				"Attempted to automatically update the domain's contributors scope to '"+string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups)+"' but encountered an error: "+diagErr.Errors()[0].Summary(),
+			)
+			return diags
+		}
+
+		// Get the domain again to verify the update
+		respGet, err = r.client.GetDomain(ctx, model.DomainID.ValueString(), nil)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil); diags.HasError() {
+			return diags
+		}
+
+		// Verify that the contributors scope was updated successfully
+		if *respGet.ContributorsScope != fabadmin.ContributorsScopeTypeSpecificUsersAndGroups {
+			diags.AddError(
+				"Domain Contributors Scope update failed",
+				"Attempted to update the domain's contributors scope to '"+string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups)+"' but it was not updated successfully.",
+			)
+			return diags
+		}
+
+		tflog.Info(ctx, "Domain contributors scope updated successfully", map[string]any{
+			"domain_id": model.DomainID.ValueString(),
+			"scope":     string(*respGet.ContributorsScope),
+		})
 	}
 
 	return nil
