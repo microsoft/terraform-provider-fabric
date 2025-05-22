@@ -38,7 +38,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionR,
+			MarkdownDescription: markdownDescriptionR + "\n\n > **Note:** This resource requires the domain to have a Contributors Scope of 'SpecificUsersAndGroups'. If the domain doesn't have this scope, it will be automatically updated during resource creation.",
 		},
 		DataSource: superschema.SchemaDetails{
 			MarkdownDescription: markdownDescriptionD,
@@ -63,7 +63,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			// },
 			"domain_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The Domain ID.",
+					MarkdownDescription: "The Domain ID. The domain's Contributors Scope must be 'SpecificUsersAndGroups' (this will be set automatically if needed).",
 					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
