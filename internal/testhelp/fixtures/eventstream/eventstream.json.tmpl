@@ -1,11 +1,10 @@
 {
   "sources": [
     {
-      "name": "SampleData",
-      "type": "SampleData",
-      "properties": {
-        "type": "Bicycles"
-      }
+			"id": "{{ .SourceID }}",
+      "name": "CustomEndpoint",
+      "type": "CustomEndpoint",
+			"properties": {}
     }
   ],
   "destinations": [
@@ -39,7 +38,7 @@
       "properties": {},
       "inputNodes": [
         {
-          "name": "SampleData"
+          "name": "CustomEndpoint"
         }
       ]
     }
