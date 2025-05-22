@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_deployment_pipeline` data source
+time: 2025-04-27T11:49:10.881225045Z
+custom:
+  Issue: "394"
