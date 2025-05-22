@@ -261,6 +261,9 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
+    'Shortcut' {
+      $itemEndpoint = 'shortcuts'
+    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -883,6 +886,7 @@ $itemNaming = @{
   'MLModel'                = 'mlm'
   'MountedDataFactory'     = 'mdf'
   'Notebook'               = 'nb'
+  'OneLakeShortcut'        = 'ols'
   'PaginatedReport'        = 'prpt'
   'Reflex'                 = 'rx'
   'Report'                 = 'rpt'
@@ -1361,6 +1365,36 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
+function Set-OneLakeShortcut {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [object]$Payload
+  )
+
+  $shortcutName = $Payload.name
+  $path = $Payload.path
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
+  $result = $results.Response.value | Where-Object { $_.name -eq $shortcutName -and ($_.path.TrimStart('/') -eq $path.TrimStart('/')) }
+
+  if (!$result) {
+    Write-Log -Message "Creating OneLake Shortcut: $shortcutName" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+
+  }
+
+  Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
+
+  return $result
+}
+
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
 
@@ -1402,6 +1436,32 @@ $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
+$shortcutPath = "/Tables"
+$onelakeShortcutPayload = @{
+  path   = $shortcutPath
+  name   = $displayNameTemp
+  target = @{
+    OneLake = @{
+      workspaceId = $wellKnown['WorkspaceDS'].id
+      itemId      = $wellKnown['Lakehouse'].id
+      path        = $shortcutPath + "/" + $wellKnown['Lakehouse'].tableName
+    }
+  }
+}
+
+$oneLakeShortcut = Set-OneLakeShortcut `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id`
+  -ItemId $wellKnown['Lakehouse'].id `
+  -Payload $onelakeShortcutPayload
+
+$wellKnown['OneLakeShortcut'] = @{
+  shortcutName = $oneLakeShortcut.name
+  shortcutPath = $oneLakeShortcut.Path
+  workspaceId  = $wellKnown['WorkspaceDS'].id
+  lakehouseId  = $wellKnown['Lakehouse'].id
 }
 
 # Save wellknown.json file
