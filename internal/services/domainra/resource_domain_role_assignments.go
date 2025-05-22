@@ -295,15 +295,6 @@ func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, 
 		return diags
 	}
 
-	if *respGet.ContributorsScope != fabadmin.ContributorsScopeTypeSpecificUsersAndGroups {
-		diags.AddError(
-			"Unsupported Domain Contributors Scope",
-			"Only '"+string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups)+"' Domain Contributors Scope is supported for Role Assignment.",
-		)
-
-		return diags
-	}
-
 	return nil
 }
 
