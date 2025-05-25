@@ -15,9 +15,9 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0
 	github.com/hashicorp/terraform-plugin-framework-timetypes v0.5.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
-	github.com/hashicorp/terraform-plugin-go v0.27.0
+	github.com/hashicorp/terraform-plugin-go v0.28.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/hashicorp/terraform-plugin-testing v1.13.0
+	github.com/hashicorp/terraform-plugin-testing v1.13.1
 	github.com/microsoft/fabric-sdk-go v0.5.0
 	github.com/ohler55/ojg v1.26.5
 	github.com/orange-cloudavenue/terraform-plugin-framework-superschema v1.11.0
