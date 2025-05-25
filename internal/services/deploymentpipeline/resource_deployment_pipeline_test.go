@@ -414,8 +414,11 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
-	workspaceEntity := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	workspaceID := workspaceEntity["id"].(string)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+	workspaceID := testhelp.RefByFQN(workspaceResourceFQN, "id")
 	entityCreateDisplayName := testhelp.RandomName()
 	entityCreateDescription := testhelp.RandomName()
 
@@ -433,25 +436,26 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 		// Create and Read - with stage assignment
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityCreateDisplayName,
-					"description":  entityCreateDescription,
-					"stages": []map[string]any{
-						{
-							"display_name": entityStage1Name,
-							"description":  entityStage1Description,
-							"is_public":    entityStage1IsPublicRandom,
-							"workspace_id": workspaceID,
+			Config: at.JoinConfigs(workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityCreateDisplayName,
+						"description":  entityCreateDescription,
+						"stages": []map[string]any{
+							{
+								"display_name": entityStage1Name,
+								"description":  entityStage1Description,
+								"is_public":    entityStage1IsPublicRandom,
+								"workspace_id": workspaceID,
+							},
+							{
+								"display_name": entityStage2Name,
+								"description":  entityStage2Description,
+								"is_public":    entityStage2IsPublicRandom,
+							},
 						},
-						{
-							"display_name": entityStage2Name,
-							"description":  entityStage2Description,
-							"is_public":    entityStage2IsPublicRandom,
-						},
-					},
-				},
+					}),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
@@ -459,7 +463,7 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", entityStage1Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", entityStage1Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublicRandom)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.workspace_id", workspaceID),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "stages.0.workspace_id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
@@ -469,25 +473,26 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 		// Update and Read - update stage 1 and unassign to workspace
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityCreateDisplayName,
-					"description":  entityCreateDescription,
-					"stages": []map[string]any{
-						{
-							"display_name": entityStage1UpdateName,
-							"description":  entityStage1Description,
-							"is_public":    entityStage1IsPublicRandom,
-						},
-						{
-							"display_name": entityStage2Name,
-							"description":  entityStage2Description,
-							"is_public":    entityStage2IsPublicRandom,
+			Config: at.JoinConfigs(workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityCreateDisplayName,
+						"description":  entityCreateDescription,
+						"stages": []map[string]any{
+							{
+								"display_name": entityStage1UpdateName,
+								"description":  entityStage1Description,
+								"is_public":    entityStage1IsPublicRandom,
+							},
+							{
+								"display_name": entityStage2Name,
+								"description":  entityStage2Description,
+								"is_public":    entityStage2IsPublicRandom,
+							},
 						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityCreateDescription),
@@ -505,8 +510,10 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 }
 
 func TestAcc_DeploymentPipelineResource_CRUD_DPAndStages(t *testing.T) {
-	workspaceEntity := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	workspaceID := workspaceEntity["id"].(string)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 	entityCreateDisplayName := testhelp.RandomName()
 	entityCreateDescription := testhelp.RandomName()
 
@@ -561,25 +568,26 @@ func TestAcc_DeploymentPipelineResource_CRUD_DPAndStages(t *testing.T) {
 		// Update and Read - update stage 1 and unassign to workspace
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDisplayName,
-					"stages": []map[string]any{
-						{
-							"display_name": entityStage1UpdateName,
-							"description":  entityStage1Description,
-							"is_public":    entityStage1IsPublicRandom,
-							"workspace_id": workspaceID,
+			Config: at.JoinConfigs(workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDisplayName,
+						"stages": []map[string]any{
+							{
+								"display_name": entityStage1UpdateName,
+								"description":  entityStage1Description,
+								"is_public":    entityStage1IsPublicRandom,
+								"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+							},
+							{
+								"display_name": entityStage2Name,
+								"description":  entityStage2Description,
+								"is_public":    entityStage2IsPublicRandom,
+							},
 						},
-						{
-							"display_name": entityStage2Name,
-							"description":  entityStage2Description,
-							"is_public":    entityStage2IsPublicRandom,
-						},
-					},
-				},
+					}),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
@@ -587,7 +595,7 @@ func TestAcc_DeploymentPipelineResource_CRUD_DPAndStages(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.display_name", entityStage1UpdateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.description", entityStage1Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.is_public", strconv.FormatBool(entityStage1IsPublicRandom)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.0.workspace_id", workspaceID),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "stages.0.workspace_id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.display_name", entityStage2Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.description", entityStage2Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "stages.1.is_public", strconv.FormatBool(entityStage2IsPublicRandom)),
@@ -597,25 +605,26 @@ func TestAcc_DeploymentPipelineResource_CRUD_DPAndStages(t *testing.T) {
 		// Update and Read - unassign stage
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDisplayName,
-					"stages": []map[string]any{
-						{
-							"display_name": entityStage1UpdateName,
-							"description":  entityStage1Description,
-							"is_public":    entityStage1IsPublicRandom,
-						},
-						{
-							"display_name": entityStage2Name,
-							"description":  entityStage2Description,
-							"is_public":    entityStage2IsPublicRandom,
+			Config: at.JoinConfigs(workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDisplayName,
+						"stages": []map[string]any{
+							{
+								"display_name": entityStage1UpdateName,
+								"description":  entityStage1Description,
+								"is_public":    entityStage1IsPublicRandom,
+							},
+							{
+								"display_name": entityStage2Name,
+								"description":  entityStage2Description,
+								"is_public":    entityStage2IsPublicRandom,
+							},
 						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDisplayName),
