@@ -805,23 +805,22 @@ function Set-OneLakeShortcut {
     [object]$Payload
   )
 
+  # If the lakehouse is not populated, then shortcut creation will fail - 400 Bad Request
+  if ($IS_LAKEHOUSE_POPULATED -eq $false) {
+    Write-Log -Message "Lakehouse is not populated. Skipping OneLake shortcut creation." -Level 'WARN'
+    return
+  }
+
   # Attempt to get the existing OneLake shortcut
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
   $result = $results.Response.value | Where-Object { $_.name -eq $Payload.name -and ($_.path.TrimStart('/') -eq $Payload.path.TrimStart('/')) }
 
   if (!$result) {
-    try {
-      # OneLake shortcut does not exist, so create it
-      Write-Log -Message "Creating OneLake Shortcut: $($Payload.name)" -Level 'INFO'
+    # OneLake shortcut does not exist, so create it
+    Write-Log -Message "Creating OneLake Shortcut: $($Payload.name)" -Level 'INFO'
 
-      $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
-
-    }
-    catch {
-      Write-Log -Message "Error on creating OneLake Shortcut. Make sure Lakehouse is populated with publicholidays sample data" -Level 'ERROR'
-    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
   }
-
   Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
 
   return $result
@@ -1155,11 +1154,15 @@ $wellKnown['DomainChild'] = @{
   description = $childDomain.description
 }
 
+$IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
   Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+}
+else {
+  $IS_LAKEHOUSE_POPULATED = $true
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
 
