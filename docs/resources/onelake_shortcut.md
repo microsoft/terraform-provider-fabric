@@ -146,13 +146,13 @@ Optional:
 - `adls_gen2` (Attributes) An object containing the properties of the target ADLS Gen2 data source. (see [below for nested schema](#nestedatt--target--adls_gen2))
 - `amazon_s3` (Attributes) An object containing the properties of the target Amazon S3 data source. (see [below for nested schema](#nestedatt--target--amazon_s3))
 - `dataverse` (Attributes) An object containing the properties of the target Dataverse data source. (see [below for nested schema](#nestedatt--target--dataverse))
-- `external_data_share` (Attributes) An object containing the properties of the target external data share. (see [below for nested schema](#nestedatt--target--external_data_share))
 - `google_cloud_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--google_cloud_storage))
 - `onelake` (Attributes) An object containing the properties of the target OneLake data source. (see [below for nested schema](#nestedatt--target--onelake))
 - `s3_compatible` (Attributes) An object containing the properties of the target S3 compatible data source. (see [below for nested schema](#nestedatt--target--s3_compatible))
 
 Read-Only:
 
+- `external_data_share` (Attributes) An object containing the properties of the target external data share. (see [below for nested schema](#nestedatt--target--external_data_share))
 - `type` (String) The type object contains properties like target shortcut account type. Additional types may be added over time.
 
 <a id="nestedatt--target--adls_gen2"></a>
@@ -186,14 +186,6 @@ Required:
 - `environment_domain` (String) URI that indicates the Dataverse target environment's domain name. The URI should be formatted as 'https://[orgname].crm[xx].dynamics.com', where [orgname] represents the name of your Dataverse organization.
 - `table_name` (String) Specifies the name of the target table in Dataverse.
 
-<a id="nestedatt--target--external_data_share"></a>
-
-### Nested Schema for `target.external_data_share`
-
-Required:
-
-- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-
 <a id="nestedatt--target--google_cloud_storage"></a>
 
 ### Nested Schema for `target.google_cloud_storage`
@@ -224,6 +216,14 @@ Required:
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
 - `location` (String) HTTP URL of the S3 compatible endpoint. This endpoint must be able to receive ListBuckets S3 API calls. The URL must be in the non-bucket specific format; no bucket should be specified here. For example: <https://s3endpoint.contoso.com>.
 - `subpath` (String) Specifies a target folder or subfolder within the S3 compatible bucket. For example: /folder.
+
+<a id="nestedatt--target--external_data_share"></a>
+
+### Nested Schema for `target.external_data_share`
+
+Read-Only:
+
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
 
 <a id="nestedatt--timeouts"></a>
 

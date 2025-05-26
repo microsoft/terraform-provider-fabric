@@ -73,7 +73,7 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 			ItemID:      uuitemID,
 			WorkspaceID: uuidWorkspaceID,
 			Name:        types.StringValue(name),
-			Path:        types.StringValue(shortcutPath),
+			Path:        customtypes.NewPathStringValue(shortcutPath),
 		},
 		Timeouts: timeout,
 	}
@@ -174,6 +174,7 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
+
 	trimmedPath := strings.TrimPrefix(*respCreate.Path, "/")
 	respCreate.Path = &trimmedPath
 
@@ -320,17 +321,6 @@ func (r *resourceOnelakeShortcut) get(ctx context.Context, model *resourceOneLak
 		return diags
 	}
 
-	// Normalize mismatch between configuration Path and API path
-	// if respGet.Path != nil && model.Path.ValueString() != "" {
-	// 	apiResponsePath := *respGet.Path
-	// 	configPath := model.Path.ValueString()
-
-	// 	if strings.TrimPrefix(configPath, "/") == strings.TrimPrefix(apiResponsePath, "/") {
-	// 		respGet.Path = &configPath
-	// 	}
-	// }
-	trimmedPath := strings.TrimPrefix(*respGet.Path, "/")
-	respGet.Path = &trimmedPath
 	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
 
 	return nil

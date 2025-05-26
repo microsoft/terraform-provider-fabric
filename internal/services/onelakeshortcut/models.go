@@ -24,7 +24,7 @@ BASE MODEL
 type baseShortcutModel struct {
 	ID          types.String                                      `tfsdk:"id"`
 	Name        types.String                                      `tfsdk:"name"`
-	Path        types.String                                      `tfsdk:"path"`
+	Path        customtypes.PathString                            `tfsdk:"path"`
 	Target      supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
 	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
 	ItemID      customtypes.UUID                                  `tfsdk:"item_id"`
@@ -42,9 +42,9 @@ type targetModel struct {
 }
 
 type oneLakeModel struct {
-	ItemID      customtypes.UUID `tfsdk:"item_id"`
-	Path        types.String     `tfsdk:"path"`
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID       `tfsdk:"item_id"`
+	Path        customtypes.PathString `tfsdk:"path"`
+	WorkspaceID customtypes.UUID       `tfsdk:"workspace_id"`
 }
 type adlsGen2 struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
@@ -81,7 +81,7 @@ type externalDataShare struct {
 
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
-	to.Path = types.StringPointerValue(from.Path)
+	to.Path = customtypes.NewPathStringPointerValue(from.Path)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 
@@ -123,7 +123,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	if from.OneLake != nil {
 		onelakeModel := &oneLakeModel{
 			ItemID:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),
-			Path:        types.StringPointerValue(from.OneLake.Path),
+			Path:        customtypes.NewPathStringPointerValue(from.OneLake.Path),
 			WorkspaceID: customtypes.NewUUIDPointerValue(from.OneLake.WorkspaceID),
 		}
 		to.Onelake = supertypes.NewSingleNestedObjectValueOf(ctx, onelakeModel)

@@ -74,9 +74,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 				},
 			},
-			"path": superschema.StringAttribute{
+			"path": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: `A string representing the full path where the shortcut is created, including either "Files" or "Tables".`,
+					CustomType:          customtypes.PathStringType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -121,9 +122,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -179,6 +177,7 @@ func onelakeSchema() superschema.SuperSingleNestedAttributeOf[oneLakeModel] {
 			"path": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the full path to the target folder within the Item. This path should be relative to the root of the OneLake directory structure. For example: 'Tables/myTablesFolder/someTableSubFolder'.",
+					CustomType:          customtypes.PathStringType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
