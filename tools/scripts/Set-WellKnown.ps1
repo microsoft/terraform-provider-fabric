@@ -802,12 +802,15 @@ function Set-OneLakeShortcut {
     [string]$ItemId,
     # OneLake data source payload
     [Parameter(Mandatory = $true)]
-    [object]$Payload
+    [object]$Payload,
+    # Indicates whether the lakehouse is populated or not
+    [Parameter(Mandatory = $true)]
+    [bool]$IsLakehousePopulated
   )
 
   # If the lakehouse is not populated, then shortcut creation will fail - 400 Bad Request
-  if ($IS_LAKEHOUSE_POPULATED -eq $false) {
-    Write-Log -Message "Lakehouse is not populated. Skipping OneLake shortcut creation." -Level 'WARN'
+  if ($IsLakehousePopulated -eq $false) {
+    Write-Log -Message "Lakehouse is not populated. Skipping OneLake shortcut creation." -Level 'ERROR'
     return
   }
 
@@ -1459,11 +1462,12 @@ $oneLakeShortcutPayload = @{
 $oneLakeShortcut = Set-OneLakeShortcut `
   -WorkspaceId $wellKnown['WorkspaceDS'].id `
   -ItemId $wellKnown['Lakehouse'].id `
-  -Payload $oneLakeShortcutPayload
+  -Payload $oneLakeShortcutPayload `
+  -IsLakehousePopulated $IS_LAKEHOUSE_POPULATED
 
 $wellKnown['OneLakeShortcut'] = @{
   shortcutName = $oneLakeShortcut.name
-  shortcutPath = $oneLakeShortcut.Path
+  shortcutPath = $oneLakeShortcut.path
   workspaceId  = $wellKnown['WorkspaceDS'].id
   lakehouseId  = $wellKnown['Lakehouse'].id
 }
