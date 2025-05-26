@@ -797,7 +797,7 @@ function Set-OneLakeShortcut {
   param (
     [Parameter(Mandatory = $true)]
     [string]$WorkspaceId,
-    #The ID of the data item -lakehouseID
+    # The unique identifier of the data item (e.g., lakehouse ID)
     [Parameter(Mandatory = $true)]
     [string]$ItemId,
     # OneLake data source payload
@@ -810,11 +810,16 @@ function Set-OneLakeShortcut {
   $result = $results.Response.value | Where-Object { $_.name -eq $Payload.name -and ($_.path.TrimStart('/') -eq $Payload.path.TrimStart('/')) }
 
   if (!$result) {
-    # OneLake shortcut does not exist, so create it
-    Write-Log -Message "Creating OneLake Shortcut: $Payload.name" -Level 'INFO'
+    try {
+      # OneLake shortcut does not exist, so create it
+      Write-Log -Message "Creating OneLake Shortcut: $($Payload.name)" -Level 'INFO'
 
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+      $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
 
+    }
+    catch {
+      Write-Log -Message "Error on creating OneLake Shortcut. Make sure Lakehouse is populated with publicholidays sample data" -Level 'ERROR'
+    }
   }
 
   Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
@@ -1434,16 +1439,16 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
+$TABLES_PATH = "/Tables"
 $displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
-$shortcutPath = "/Tables"
 $oneLakeShortcutPayload = @{
-  path   = $shortcutPath
+  path   = $TABLES_PATH
   name   = $displayNameTemp
   target = @{
     OneLake = @{
       workspaceId = $wellKnown['WorkspaceDS'].id
       itemId      = $wellKnown['Lakehouse'].id
-      path        = $shortcutPath + "/" + $wellKnown['Lakehouse'].tableName
+      path        = $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
     }
   }
 }
