@@ -130,6 +130,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"onelake":              onelakeSchema(),
 					"adls_gen2":            adlsGen2Schema(),
 					"amazon_s3":            amazonS3Schema(),
+					"azure_blob_storage":   azureBlobStorageSchema(),
 					"google_cloud_storage": googleCloudStorageSchema(),
 					"s3_compatible":        s3CompatibleSchema(),
 					"external_data_share":  externalDataShareSchema(),
@@ -216,6 +217,7 @@ func adlsGen2Schema() superschema.SuperSingleNestedAttributeOf[adlsGen2] {
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the ADLS data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.",
+					CustomType:          customtypes.UUIDType{},
 				},
 
 				Resource: &schemaR.StringAttribute{
@@ -228,6 +230,7 @@ func adlsGen2Schema() superschema.SuperSingleNestedAttributeOf[adlsGen2] {
 			"location": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Specifies the location of the target ADLS container. The URI must be in the format https://[account-name].dfs.core.windows.net where [account-name] is the name of the target ADLS account.",
+					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -266,6 +269,7 @@ func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[amazonS3] {
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Amazon S3 data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -277,6 +281,7 @@ func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[amazonS3] {
 			"location": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "HTTP URL that points to the target bucket in S3. The URL should be in the format https://[bucket-name].s3.[region-code].amazonaws.com, where 'bucket-name' is the name of the S3 bucket you want to point to, and 'region-code' is the code for the region where the bucket is located. For example: https://my-s3-bucket.s3.us-west-2.amazonaws.com",
+					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -288,6 +293,56 @@ func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[amazonS3] {
 			"subpath": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Specifies a target folder or subfolder within the S3 bucket.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[azureBlobStorage] {
+	return superschema.SuperSingleNestedAttributeOf[azureBlobStorage]{
+		Common: &schemaR.SingleNestedAttribute{
+			MarkdownDescription: "An object containing the properties of the target Google Cloud Storage data source.",
+		},
+		Resource: &schemaR.SingleNestedAttribute{
+			Optional: true,
+		},
+		DataSource: &schemaD.SingleNestedAttribute{
+			Computed: true,
+		},
+		Attributes: map[string]superschema.Attribute{
+			"connection_id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"location": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: https://my-gcs-bucket.storage.googleapis.com",
+					CustomType:          customtypes.URLType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"subpath": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Specifies a target folder or subfolder within the GCS bucket. For example: /folder",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -315,6 +370,7 @@ func googleCloudStorageSchema() superschema.SuperSingleNestedAttributeOf[googleC
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -326,6 +382,7 @@ func googleCloudStorageSchema() superschema.SuperSingleNestedAttributeOf[googleC
 			"location": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: https://my-gcs-bucket.storage.googleapis.com",
+					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -364,6 +421,7 @@ func s3CompatibleSchema() superschema.SuperSingleNestedAttributeOf[s3Compatible]
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -375,6 +433,7 @@ func s3CompatibleSchema() superschema.SuperSingleNestedAttributeOf[s3Compatible]
 			"location": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "HTTP URL of the S3 compatible endpoint. This endpoint must be able to receive ListBuckets S3 API calls. The URL must be in the non-bucket specific format; no bucket should be specified here. For example: https://s3endpoint.contoso.com",
+					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -424,6 +483,7 @@ func dataverseSchema() superschema.SuperSingleNestedAttributeOf[dataverse] {
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Dataverse data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -435,6 +495,7 @@ func dataverseSchema() superschema.SuperSingleNestedAttributeOf[dataverse] {
 			"environment_domain": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "URI that indicates the Dataverse target environment's domain name. The URI should be formatted as 'https://[orgname].crm[xx].dynamics.com', where [orgname] represents the name of your Dataverse organization.",
+					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -484,6 +545,7 @@ func externalDataShareSchema() superschema.SuperSingleNestedAttributeOf[external
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,

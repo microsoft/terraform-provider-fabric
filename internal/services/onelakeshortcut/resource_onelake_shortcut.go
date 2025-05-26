@@ -175,11 +175,6 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	trimmedPath := strings.TrimPrefix(*respCreate.Path, "/")
-	respCreate.Path = &trimmedPath
-
-	state.ID = types.StringValue(*respCreate.Name + *respCreate.Path)
-
 	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -228,9 +223,6 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	trimmedPath := strings.TrimPrefix(*respCreate.Path, "/")
-	respCreate.Path = &trimmedPath
 
 	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return

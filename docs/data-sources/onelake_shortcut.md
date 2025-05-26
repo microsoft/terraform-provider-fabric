@@ -59,6 +59,7 @@ Read-Only:
 
 - `adls_gen2` (Attributes) An object containing the properties of the target ADLS Gen2 data source. (see [below for nested schema](#nestedatt--target--adls_gen2))
 - `amazon_s3` (Attributes) An object containing the properties of the target Amazon S3 data source. (see [below for nested schema](#nestedatt--target--amazon_s3))
+- `azure_blob_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--azure_blob_storage))
 - `dataverse` (Attributes) An object containing the properties of the target Dataverse data source. (see [below for nested schema](#nestedatt--target--dataverse))
 - `external_data_share` (Attributes) An object containing the properties of the target external data share. (see [below for nested schema](#nestedatt--target--external_data_share))
 - `google_cloud_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--google_cloud_storage))
@@ -85,6 +86,16 @@ Read-Only:
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Amazon S3 data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.
 - `location` (String) HTTP URL that points to the target bucket in S3. The URL should be in the format https://[bucket-name].s3.[region-code].amazonaws.com, where 'bucket-name' is the name of the S3 bucket you want to point to, and 'region-code' is the code for the region where the bucket is located. For example: <https://my-s3-bucket.s3.us-west-2.amazonaws.com>.
 - `subpath` (String) Specifies a target folder or subfolder within the S3 bucket.
+
+<a id="nestedatt--target--azure_blob_storage"></a>
+
+### Nested Schema for `target.azure_blob_storage`
+
+Read-Only:
+
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
+- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
+- `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
 
 <a id="nestedatt--target--dataverse"></a>
 

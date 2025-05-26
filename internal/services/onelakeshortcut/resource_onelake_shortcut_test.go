@@ -91,6 +91,27 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - location - invalid URL
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"amazon_s3": map[string]any{
+							"connection_id": testhelp.RandomUUID(),
+							"location":      "invalid url",
+							"subpath":       testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.URLTypeErrorInvalidStringHeader),
+		},
 		// error - unexpected data source attribute for target
 		{
 			ResourceName: testResourceItemFQN,
