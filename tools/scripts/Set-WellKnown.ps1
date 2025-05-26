@@ -261,9 +261,6 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
-    'Shortcut' {
-      $itemEndpoint = 'shortcuts'
-    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
