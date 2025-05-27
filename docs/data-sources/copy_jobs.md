@@ -34,7 +34,7 @@ data "fabric_copy_jobs" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Copy Jobs. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Copy Jobs. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

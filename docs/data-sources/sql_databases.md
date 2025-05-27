@@ -37,7 +37,7 @@ data "fabric_sql_databases" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of SQL Databases. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of SQL Databases. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -56,4 +56,15 @@ Read-Only:
 - `description` (String) The SQL Database description.
 - `display_name` (String) The SQL Database display name.
 - `id` (String) The SQL Database ID.
+- `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `connection_string` (String) The connection string of the database.
+- `database_name` (String) The database name.
+- `server_fqdn` (String) The server fully qualified domain name (FQDN).

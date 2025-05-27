@@ -26,7 +26,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 })
 
 var (
-	workspace   = testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace   = testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID = workspace["id"].(string)
 	lakehouse   = testhelp.WellKnown()["Lakehouse"].(map[string]any)
 	lakehouseID = lakehouse["id"].(string)
@@ -293,10 +293,6 @@ func TestAcc_CopyJobResource_CRUD_WithDefinition(t *testing.T) {
 }
 
 func TestAcc_CopyJobResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

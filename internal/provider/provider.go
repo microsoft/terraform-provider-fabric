@@ -818,6 +818,15 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 			return
 		}
 
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
+			)
+
+			return
+		}
+
 		if p.config.Auth.OIDC.AzureDevOpsServiceConnectionID != "" && p.config.Auth.OIDC.RequestToken == "" {
 			resp.Diagnostics.AddError(
 				common.ErrorInvalidConfig,
@@ -862,6 +871,15 @@ func (p *FabricProvider) validateConfigAuthMSI(resp *provider.ConfigureResponse)
 
 			return
 		}
+
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
+			)
+
+			return
+		}
 	}
 }
 
@@ -883,6 +901,15 @@ func (p *FabricProvider) validateConfigAuthCertificate(resp *provider.ConfigureR
 				common.ErrorInvalidConfig,
 				"Client ID is required"+infoAuthType+"\n"+
 					"Please provide a valid 'client_id' or 'client_id_file_path' in the provider configuration.",
+			)
+
+			return
+		}
+
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
 			)
 
 			return
