@@ -21,14 +21,14 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("apache_airflow_job"),
+})
+
 var testHelperDefinition = map[string]any{
 	`"apacheairflowjob-content.json"`: map[string]any{
 		"source": "${local.path}/apacheairflowjob-content.json.tmpl",
-		"tokens": map[string]any{
-			"AIRFLOW_CONFIGURATION_OVERRIDES": map[string]any{
-				"AIRFLOW__API__MAXIMUM_PAGE_LIMIT": "100",
-			},
-		},
+		"tokens": map[string]any{},
 	},
 }
 
@@ -37,57 +37,91 @@ func TestUnit_ApacheAirflowJobResource_Attributes(t *testing.T) {
 		// error - no attributes
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{},
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{},
+				),
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
 		// error - workspace_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "invalid uuid",
-					"display_name": "test",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "invalid uuid",
+						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":    "00000000-0000-0000-0000-000000000000",
-					"unexpected_attr": "test",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"display_name":    "test",
+						"unexpected_attr": "test",
+						"format":          "Default",
+						"definition":      testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": "test",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"display_name": "test",
+					},
+				)),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
 }
@@ -100,13 +134,18 @@ func TestUnit_ApacheAirflowJobResource_ImportState(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
-	testCase := at.CompileConfig(
-		testResourceItemHeader,
-		map[string]any{
-			"workspace_id": *entity.WorkspaceID,
-			"display_name": *entity.DisplayName,
-		},
-	)
+	testCase := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id":              *entity.WorkspaceID,
+				"display_name":              *entity.DisplayName,
+				"format":                    "Default",
+				"definition":                testHelperDefinition,
+				"definition_update_enabled": true,
+			},
+		))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -157,4 +196,143 @@ func TestUnit_ApacheAirflowJobResource_ImportState(t *testing.T) {
 			},
 		},
 	}))
+}
+
+func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":              *entityBefore.WorkspaceID,
+						"display_name":              *entityBefore.DisplayName,
+						"format":                    "Default",
+						"definition":                testHelperDefinition,
+						"definition_update_enabled": true,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	}))
+}
+
+func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+					},
+				)),
+			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"format":       "Default",
+						"description":  entityUpdateDescription,
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+			),
+		},
+	},
+	))
 }

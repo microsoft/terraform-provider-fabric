@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_apache_airflow_job` resource
+time: 2025-05-28T22:43:57.643109773Z
+custom:
+    Issue: "467"

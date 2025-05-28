@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -141,6 +144,108 @@ func TestUnit_ApacheAirflowJobDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+	}))
+}
+
+func TestAcc_ApacheAirflowJobDataSource(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["ApacheAirflowJob"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityDescription := entity["description"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           entityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
+			),
+		},
+		// read by id - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by name
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
+			),
+		},
+		// read by name - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id with definition - no format
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
+		},
+		// read by id with definition
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "Default",
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("apacheairflowjob-content.json").AtMapKey("content"), knownvalue.NotNull()),
+			},
 		},
 	}))
 }
