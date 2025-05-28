@@ -793,7 +793,7 @@ function Set-AzureDataFactory {
   return $dataFactory
 }
 
-function Set-OneLakeShortcut {
+function Set-Shortcut {
   param (
     [Parameter(Mandatory = $true)]
     [string]$WorkspaceId,
@@ -810,21 +810,22 @@ function Set-OneLakeShortcut {
 
   # If the lakehouse is not populated, then shortcut creation will fail - 400 Bad Request
   if ($IsLakehousePopulated -eq $false) {
-    Write-Log -Message "Lakehouse is not populated. Skipping OneLake shortcut creation." -Level 'ERROR'
+    Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
     return
   }
 
-  # Attempt to get the existing OneLake shortcut
+  # Attempt to get the existing shortcut
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
   $result = $results.Response.value | Where-Object { $_.name -eq $Payload.name -and ($_.path.TrimStart('/') -eq $Payload.path.TrimStart('/')) }
 
   if (!$result) {
-    # OneLake shortcut does not exist, so create it
-    Write-Log -Message "Creating OneLake Shortcut: $($Payload.name)" -Level 'INFO'
+    # Shortcut does not exist, so create it
+    Write-Log -Message "Creating Shortcut: $($Payload.name)" -Level 'INFO'
 
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+    $result.path = $result.path.TrimStart('/')
   }
-  Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
+  Write-Log -Message "Shortcut - Name: $($result.name) / Path: $($result.path)"
 
   return $result
 }
@@ -919,7 +920,7 @@ $itemNaming = @{
   'MLModel'                = 'mlm'
   'MountedDataFactory'     = 'mdf'
   'Notebook'               = 'nb'
-  'OneLakeShortcut'        = 'ols'
+  'Shortcut'               = 'srt'
   'PaginatedReport'        = 'prpt'
   'Reflex'                 = 'rx'
   'Report'                 = 'rpt'
@@ -1445,13 +1446,13 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-$TABLES_PATH = "/Tables"
-$displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
-$oneLakeShortcutPayload = @{
+$TABLES_PATH = "Tables"
+$displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
+$shortcutPayload = @{
   path   = $TABLES_PATH
   name   = $displayNameTemp
   target = @{
-    OneLake = @{
+    onelake = @{
       workspaceId = $wellKnown['WorkspaceDS'].id
       itemId      = $wellKnown['Lakehouse'].id
       path        = $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
@@ -1459,15 +1460,15 @@ $oneLakeShortcutPayload = @{
   }
 }
 
-$oneLakeShortcut = Set-OneLakeShortcut `
+$shortcut = Set-Shortcut `
   -WorkspaceId $wellKnown['WorkspaceDS'].id `
   -ItemId $wellKnown['Lakehouse'].id `
-  -Payload $oneLakeShortcutPayload `
+  -Payload $shortcutPayload `
   -IsLakehousePopulated $IS_LAKEHOUSE_POPULATED
 
-$wellKnown['OneLakeShortcut'] = @{
-  shortcutName = $oneLakeShortcut.name
-  shortcutPath = $oneLakeShortcut.path
+$wellKnown['Shortcut'] = @{
+  shortcutName = if ($shortcut) { $shortcut.name } else { $displayNameTemp }
+  shortcutPath = if ($shortcut) { $shortcut.path } else { '' }
   workspaceId  = $wellKnown['WorkspaceDS'].id
   lakehouseId  = $wellKnown['Lakehouse'].id
 }
