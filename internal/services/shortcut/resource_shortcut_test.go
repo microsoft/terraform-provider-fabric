@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut_test
+package shortcut_test
 
 import (
 	"errors"
@@ -21,7 +21,7 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
+func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
@@ -185,12 +185,12 @@ func TestUnit_OneLakeShortcutResource_Attributes(t *testing.T) {
 func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := NewRandomOnelakeShortcut()
+	entity := NewRandomShortcut()
 
 	fakeTestUpsert(workspaceID, itemID, entity)
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteShortcutFunc()
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -254,18 +254,18 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 	}))
 }
 
-func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
+func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entityExist := NewRandomOnelakeShortcut()
-	entityBefore := NewRandomOnelakeShortcut()
-	entityAfter := NewRandomOnelakeShortcut()
+	entityExist := NewRandomShortcut()
+	entityBefore := NewRandomShortcut()
+	entityAfter := NewRandomShortcut()
 
 	fakeTestUpsert(workspaceID, itemID, entityExist)
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetOneLakeShortcutFunc()
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateOneLakeShortcutFunc()
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteOneLakeShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.GetShortcut = fakeGetShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateShortcutFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteShortcutFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -341,12 +341,12 @@ func TestUnit_OneLakeShortcuResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
+func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
-	entityUpdatedTargetPath := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["shortcutName"].(string)
-	workspaceID := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["workspaceId"].(string)
-	lakehouseID := testhelp.WellKnown()["OneLakeShortcut"].(map[string]any)["lakehouseId"].(string)
+	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
+	workspaceID := testhelp.WellKnown()["Shortcut"].(map[string]any)["workspaceId"].(string)
+	lakehouseID := testhelp.WellKnown()["Shortcut"].(map[string]any)["lakehouseId"].(string)
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -357,7 +357,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 					"item_id":      lakehouseID,
 					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "/Tables",
+					"path":         "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,
@@ -384,7 +384,7 @@ func TestAcc_OneLakeShortcutResource_CRUD(t *testing.T) {
 					"item_id":      lakehouseID,
 					"workspace_id": workspaceID,
 					"name":         entityCreateDisplayName,
-					"path":         "/Tables",
+					"path":         "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,

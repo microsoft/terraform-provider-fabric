@@ -1,7 +1,7 @@
 // // Copyright (c) Microsoft Corporation
 // // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut
+package shortcut
 
 import (
 	"context"
@@ -25,18 +25,18 @@ import (
 )
 
 var (
-	_ resource.ResourceWithConfigure        = (*resourceOnelakeShortcut)(nil)
-	_ resource.ResourceWithImportState      = (*resourceOnelakeShortcut)(nil)
-	_ resource.ResourceWithConfigValidators = (*resourceOnelakeShortcut)(nil)
+	_ resource.ResourceWithConfigure        = (*resourceShortcut)(nil)
+	_ resource.ResourceWithImportState      = (*resourceShortcut)(nil)
+	_ resource.ResourceWithConfigValidators = (*resourceShortcut)(nil)
 )
 
-type resourceOnelakeShortcut struct {
+type resourceShortcut struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.OneLakeShortcutsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -68,12 +68,12 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 		return
 	}
 
-	state := resourceOneLakeShortcutModel{
+	state := resourceShortcutModel{
 		baseShortcutModel: baseShortcutModel{
 			ItemID:      uuitemID,
 			WorkspaceID: uuidWorkspaceID,
 			Name:        types.StringValue(name),
-			Path:        customtypes.NewPathStringValue(shortcutPath),
+			Path:        types.StringValue(shortcutPath),
 		},
 		Timeouts: timeout,
 	}
@@ -93,7 +93,7 @@ func (r *resourceOnelakeShortcut) ImportState(ctx context.Context, req resource.
 	}
 }
 
-func (r *resourceOnelakeShortcut) ConfigValidators(
+func (r *resourceShortcut) ConfigValidators(
 	_ context.Context,
 ) []resource.ConfigValidator {
 	result := []resource.ConfigValidator{}
@@ -110,21 +110,21 @@ func (r *resourceOnelakeShortcut) ConfigValidators(
 	return result
 }
 
-func NewResourceOneLakeShortcut() resource.Resource {
-	return &resourceOnelakeShortcut{
+func NewResourceShortcut() resource.Resource {
+	return &resourceShortcut{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceOnelakeShortcut) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *resourceShortcut) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
-func (r *resourceOnelakeShortcut) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *resourceShortcut) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
-func (r *resourceOnelakeShortcut) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *resourceShortcut) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -143,12 +143,12 @@ func (r *resourceOnelakeShortcut) Configure(_ context.Context, req resource.Conf
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewOneLakeShortcutsClient()
 }
 
-func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
 
-	var plan, state resourceOneLakeShortcutModel
+	var plan, state resourceShortcutModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -164,7 +164,7 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 
 	state.Timeouts = plan.Timeouts
 
-	var reqCreate requestCreateOnelakeShortcut
+	var reqCreate requestCreateShortcut
 
 	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
 		return
@@ -190,10 +190,10 @@ func (r *resourceOnelakeShortcut) Create(ctx context.Context, req resource.Creat
 	}
 }
 
-func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{"action": "start"})
 
-	var plan, state resourceOneLakeShortcutModel
+	var plan, state resourceShortcutModel
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -208,7 +208,7 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 
 	state.Timeouts = plan.Timeouts
 
-	var reqCreate requestCreateOnelakeShortcut
+	var reqCreate requestCreateShortcut
 
 	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
 		return
@@ -233,12 +233,12 @@ func (r *resourceOnelakeShortcut) Update(ctx context.Context, req resource.Updat
 	tflog.Debug(ctx, "UPDATE", map[string]any{"action": "end"})
 }
 
-func (r *resourceOnelakeShortcut) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *resourceShortcut) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var state resourceOneLakeShortcutModel
+	var state resourceShortcutModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -276,12 +276,12 @@ func (r *resourceOnelakeShortcut) Read(ctx context.Context, req resource.ReadReq
 	}
 }
 
-func (r *resourceOnelakeShortcut) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceShortcut) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
 
-	var state resourceOneLakeShortcutModel
+	var state resourceShortcutModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -307,7 +307,7 @@ func (r *resourceOnelakeShortcut) Delete(ctx context.Context, req resource.Delet
 	})
 }
 
-func (r *resourceOnelakeShortcut) get(ctx context.Context, model *resourceOneLakeShortcutModel) diag.Diagnostics {
+func (r *resourceShortcut) get(ctx context.Context, model *resourceShortcutModel) diag.Diagnostics {
 	respGet, err := r.client.GetShortcut(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Path.ValueString(), model.Name.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags

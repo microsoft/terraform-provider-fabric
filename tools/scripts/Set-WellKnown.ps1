@@ -886,7 +886,7 @@ $itemNaming = @{
   'MLModel'                = 'mlm'
   'MountedDataFactory'     = 'mdf'
   'Notebook'               = 'nb'
-  'OneLakeShortcut'        = 'ols'
+  'Shortcut'               = 'srt'
   'PaginatedReport'        = 'prpt'
   'Reflex'                 = 'rx'
   'Report'                 = 'rpt'
@@ -1365,7 +1365,7 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
-function Set-OneLakeShortcut {
+function Set-Shortcut {
   param (
     [Parameter(Mandatory = $true)]
     [string]$WorkspaceId,
@@ -1384,13 +1384,14 @@ function Set-OneLakeShortcut {
   $result = $results.Response.value | Where-Object { $_.name -eq $shortcutName -and ($_.path.TrimStart('/') -eq $path.TrimStart('/')) }
 
   if (!$result) {
-    Write-Log -Message "Creating OneLake Shortcut: $shortcutName" -Level 'WARN'
+    Write-Log -Message "Creating Shortcut: $shortcutName" -Level 'WARN'
 
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+    $result.path = $result.path.TrimStart('/')
 
   }
 
-  Write-Log -Message "OneLake shortcut - Name: $($result.name) / Path: $($result.path)"
+  Write-Log -Message "Shortcut - Name: $($result.name) / Path: $($result.path)"
 
   return $result
 }
@@ -1438,9 +1439,9 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-$displayNameTemp = "${displayName}_$($itemNaming['OneLakeShortcut'])"
-$shortcutPath = "/Tables"
-$onelakeShortcutPayload = @{
+$displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
+$shortcutPath = "Tables"
+$shortcutPayload = @{
   path   = $shortcutPath
   name   = $displayNameTemp
   target = @{
@@ -1452,14 +1453,14 @@ $onelakeShortcutPayload = @{
   }
 }
 
-$oneLakeShortcut = Set-OneLakeShortcut `
+$shortcut = Set-Shortcut `
   -WorkspaceId $wellKnown['WorkspaceDS'].id`
   -ItemId $wellKnown['Lakehouse'].id `
-  -Payload $onelakeShortcutPayload
+  -Payload $shortcutPayload
 
-$wellKnown['OneLakeShortcut'] = @{
-  shortcutName = $oneLakeShortcut.name
-  shortcutPath = $oneLakeShortcut.Path
+$wellKnown['Shortcut'] = @{
+  shortcutName = $shortcut.name
+  shortcutPath = $shortcut.Path
   workspaceId  = $wellKnown['WorkspaceDS'].id
   lakehouseId  = $wellKnown['Lakehouse'].id
 }

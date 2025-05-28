@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut
+package shortcut
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type dataSourceShortcut struct {
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewDataSourceOnelakeShortcut() datasource.DataSource {
+func NewDataSourceShortcut() datasource.DataSource {
 	return &dataSourceShortcut{
 		TypeInfo: ItemTypeInfo,
 	}
@@ -65,7 +65,7 @@ func (d *dataSourceShortcut) Read(ctx context.Context, req datasource.ReadReques
 		"action": "start",
 	})
 
-	var data dataSourceOnelakeShortcutModel
+	var data dataSourceShortcutModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -96,7 +96,7 @@ func (d *dataSourceShortcut) Read(ctx context.Context, req datasource.ReadReques
 	}
 }
 
-func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceOnelakeShortcutModel) diag.Diagnostics {
+func (d *dataSourceShortcut) getShortcut(ctx context.Context, model *dataSourceShortcutModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET SHORTCUT", map[string]any{
 		"item_Id":      model.ItemID.ValueString(),
 		"workspace_id": model.WorkspaceID.ValueString(),

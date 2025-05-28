@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut
+package shortcut
 
 import (
 	"context"
@@ -25,7 +25,7 @@ BASE MODEL
 type baseShortcutModel struct {
 	ID          types.String                                      `tfsdk:"id"`
 	Name        types.String                                      `tfsdk:"name"`
-	Path        customtypes.PathString                            `tfsdk:"path"`
+	Path        types.String                                      `tfsdk:"path"`
 	Target      supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
 	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
 	ItemID      customtypes.UUID                                  `tfsdk:"item_id"`
@@ -44,9 +44,9 @@ type targetModel struct {
 }
 
 type oneLakeModel struct {
-	ItemID      customtypes.UUID       `tfsdk:"item_id"`
-	Path        customtypes.PathString `tfsdk:"path"`
-	WorkspaceID customtypes.UUID       `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID `tfsdk:"item_id"`
+	Path        types.String     `tfsdk:"path"`
+	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 }
 type adlsGen2 struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
@@ -88,13 +88,13 @@ type externalDataShare struct {
 
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
 	to.Name = types.StringPointerValue(from.Name)
-	to.Path = customtypes.NewPathStringPointerValue(from.Path)
+	to.Path = types.StringPointerValue(from.Path)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 
-	onelakeShortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, strings.TrimPrefix(to.Path.ValueString(), "/"), to.Name.ValueString())
+	shortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, strings.TrimPrefix(to.Path.ValueString(), "/"), to.Name.ValueString())
 
-	to.ID = types.StringPointerValue(&onelakeShortcutComputedID)
+	to.ID = types.StringPointerValue(&shortcutComputedID)
 
 	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 	target := supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
@@ -131,7 +131,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	if from.OneLake != nil {
 		onelakeModel := &oneLakeModel{
 			ItemID:      customtypes.NewUUIDPointerValue(from.OneLake.ItemID),
-			Path:        customtypes.NewPathStringPointerValue(from.OneLake.Path),
+			Path:        types.StringPointerValue(from.OneLake.Path),
 			WorkspaceID: customtypes.NewUUIDPointerValue(from.OneLake.WorkspaceID),
 		}
 		to.Onelake = supertypes.NewSingleNestedObjectValueOf(ctx, onelakeModel)
@@ -207,7 +207,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 DATA-SOURCE
 */
 
-type dataSourceOnelakeShortcutModel struct {
+type dataSourceShortcutModel struct {
 	baseShortcutModel
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
@@ -216,14 +216,14 @@ type dataSourceOnelakeShortcutModel struct {
 DATA-SOURCE (list)
 */
 
-type dataSourceOnelakeShortcutsModel struct {
+type dataSourceShortcutsModel struct {
 	WorkspaceID customtypes.UUID                                     `tfsdk:"workspace_id"`
 	ItemID      customtypes.UUID                                     `tfsdk:"item_id"`
 	Values      supertypes.SetNestedObjectValueOf[baseShortcutModel] `tfsdk:"values"`
 	Timeouts    timeoutsD.Value                                      `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceOnelakeShortcutsModel) setValues(ctx context.Context, workspaceID, itemID string, from []fabcore.Shortcut) diag.Diagnostics {
+func (to *dataSourceShortcutsModel) setValues(ctx context.Context, workspaceID, itemID string, from []fabcore.Shortcut) diag.Diagnostics {
 	slice := make([]*baseShortcutModel, 0, len(from))
 
 	for _, entity := range from {
@@ -239,16 +239,16 @@ func (to *dataSourceOnelakeShortcutsModel) setValues(ctx context.Context, worksp
 	return to.Values.Set(ctx, slice)
 }
 
-type resourceOneLakeShortcutModel struct {
+type resourceShortcutModel struct {
 	baseShortcutModel
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
-type requestCreateOnelakeShortcut struct {
+type requestCreateShortcut struct {
 	fabcore.CreateShortcutRequest
 }
 
-func (to *requestCreateOnelakeShortcut) set(ctx context.Context, from resourceOneLakeShortcutModel) diag.Diagnostics {
+func (to *requestCreateShortcut) set(ctx context.Context, from resourceShortcutModel) diag.Diagnostics {
 	to.Name = from.Name.ValueStringPointer()
 	to.Path = from.Path.ValueStringPointer()
 

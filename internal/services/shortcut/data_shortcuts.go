@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut
+package shortcut
 
 import (
 	"context"
@@ -22,25 +22,25 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceOneLakeShortcuts)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceShortcuts)(nil)
 
-type dataSourceOneLakeShortcuts struct {
+type dataSourceShortcuts struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.OneLakeShortcutsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewDataSourceOneLakeShortcuts() datasource.DataSource {
-	return &dataSourceOneLakeShortcuts{
+func NewDataSourceShortcuts() datasource.DataSource {
+	return &dataSourceShortcuts{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceOneLakeShortcuts) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *dataSourceShortcuts) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
-func (d *dataSourceOneLakeShortcuts) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *dataSourceShortcuts) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	s := itemSchema(true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
@@ -69,7 +69,7 @@ func (d *dataSourceOneLakeShortcuts) Schema(ctx context.Context, _ datasource.Sc
 	}
 }
 
-func (d *dataSourceOneLakeShortcuts) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *dataSourceShortcuts) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -88,12 +88,12 @@ func (d *dataSourceOneLakeShortcuts) Configure(_ context.Context, req datasource
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewOneLakeShortcutsClient()
 }
 
-func (d *dataSourceOneLakeShortcuts) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *dataSourceShortcuts) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var data dataSourceOnelakeShortcutsModel
+	var data dataSourceShortcutsModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -122,7 +122,7 @@ func (d *dataSourceOneLakeShortcuts) Read(ctx context.Context, req datasource.Re
 	}
 }
 
-func (d *dataSourceOneLakeShortcuts) list(ctx context.Context, model *dataSourceOnelakeShortcutsModel) diag.Diagnostics {
+func (d *dataSourceShortcuts) list(ctx context.Context, model *dataSourceShortcutsModel) diag.Diagnostics {
 	tflog.Trace(ctx, "LIST", map[string]any{
 		"action": "start",
 		"model":  model,

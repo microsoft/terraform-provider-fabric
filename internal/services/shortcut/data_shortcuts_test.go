@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelakeshortcut_test
+package shortcut_test
 
 import (
 	"regexp"
@@ -18,14 +18,14 @@ import (
 
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
-func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
+func TestUnit_ShortcutsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 
-	fakeTestUpsert(workspaceID, itemID, NewRandomOnelakeShortcut())
-	fakeTestUpsert(workspaceID, itemID, NewRandomOnelakeShortcut())
+	fakeTestUpsert(workspaceID, itemID, NewRandomShortcut())
+	fakeTestUpsert(workspaceID, itemID, NewRandomShortcut())
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager = fakeOneLakeShortcutsFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.NewListShortcutsPager = fakeShortcutsFunc()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -79,8 +79,8 @@ func TestUnit_OneLakeShortcutsDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_OneLakeShortcutsDataSource(t *testing.T) {
-	onelakeShortcut := testhelp.WellKnown()["OneLakeShortcut"]
+func TestAcc_ShortcutsDataSource(t *testing.T) {
+	onelakeShortcut := testhelp.WellKnown()["Shortcut"]
 	workspaceID := onelakeShortcut.(map[string]any)["workspaceId"].(string)
 	itemID := onelakeShortcut.(map[string]any)["lakehouseId"].(string)
 
