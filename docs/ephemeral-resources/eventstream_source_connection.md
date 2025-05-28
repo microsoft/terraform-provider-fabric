@@ -4,7 +4,7 @@ page_title: "fabric_eventstream_source_connection Ephemeral Resource - terraform
 subcategory: ""
 description: |-
   The Eventstream Source Connection ephemeral resource allows you to manage a temporary Fabric Eventstream Source Connection https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> Ephemeral resource requires Terraform 1.11 or later.
+  -> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later.
   -> This resource supports Service Principal authentication.
   ~> This ephemeral resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
@@ -13,7 +13,7 @@ description: |-
 
 The Eventstream Source Connection ephemeral resource allows you to manage a temporary Fabric [Eventstream Source Connection](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
 
--> Ephemeral resource requires Terraform 1.11 or later.
+-> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later.
 
 -> This resource supports Service Principal authentication.
 
@@ -28,11 +28,23 @@ The Eventstream Source Connection ephemeral resource allows you to manage a temp
 - `source_id` (String) The source ID.
 - `workspace_id` (String) The workspace ID.
 
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
 ### Read-Only
 
 - `access_keys` (Attributes) The access keys for the event hub. (see [below for nested schema](#nestedatt--access_keys))
 - `event_hub_name` (String) The name of the event hub.
 - `fully_qualified_namespace` (String) The fully qualified namespace of the event hub.
+
+<a id="nestedatt--timeouts"></a>
+
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `open` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 <a id="nestedatt--access_keys"></a>
 
