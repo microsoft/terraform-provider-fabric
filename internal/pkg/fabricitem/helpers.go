@@ -92,6 +92,8 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 		md += fmt.Sprintf(" %s.", typeInfo.Name)
 	}
 
+	md += "\n\n-> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later."
+
 	if typeInfo.IsSPNSupported {
 		md += SPNSupportedResource
 	} else {
@@ -99,23 +101,7 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 	}
 
 	if typeInfo.IsPreview {
-		md += PreviewResource
-	}
-
-	return md
-}
-
-func GetDataSourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter
-	if preview {
-		return md + PreviewDataSource
-	}
-
-	return md
-}
-
-func GetResourcePreviewNote(md string, preview bool) string { //revive:disable-line:flag-parameter
-	if preview {
-		return md + PreviewResource
+		md += PreviewEphemeralResource
 	}
 
 	return md

@@ -6,7 +6,8 @@ package eventstreamsourceconnection
 import (
 	"context"
 
-	//revive:disable-line:import-alias-naming
+	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsE "github.com/hashicorp/terraform-plugin-framework-timeouts/ephemeral/timeouts"  //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabeventstream "github.com/microsoft/fabric-sdk-go/fabric/eventstream"
@@ -15,7 +16,17 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
+type dataSourceEventstreamSourceConnectionModel struct {
+	baseEventstreamSourceConnectionModel
+	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
+}
+
 type ephemeralEventstreamSourceConnectionModel struct {
+	baseEventstreamSourceConnectionModel
+	Timeouts timeoutsE.Value `tfsdk:"timeouts"`
+}
+
+type baseEventstreamSourceConnectionModel struct {
 	SourceID                customtypes.UUID                                      `tfsdk:"source_id"`
 	EventstreamID           customtypes.UUID                                      `tfsdk:"eventstream_id"`
 	WorkspaceID             customtypes.UUID                                      `tfsdk:"workspace_id"`
@@ -24,7 +35,7 @@ type ephemeralEventstreamSourceConnectionModel struct {
 	AccessKeys              supertypes.SingleNestedObjectValueOf[accessKeysModel] `tfsdk:"access_keys"`
 }
 
-func (to *ephemeralEventstreamSourceConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, sourceID string, from fabeventstream.SourceConnectionResponse) diag.Diagnostics {
+func (to *baseEventstreamSourceConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, sourceID string, from fabeventstream.SourceConnectionResponse) diag.Diagnostics {
 	to.SourceID = customtypes.NewUUIDValue(sourceID)
 	to.EventstreamID = customtypes.NewUUIDValue(eventstreamID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)

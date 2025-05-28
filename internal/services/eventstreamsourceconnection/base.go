@@ -9,6 +9,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Eventstream Source Connection",
 	Type:           "eventstream_source_connection",
 	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: true,
 }

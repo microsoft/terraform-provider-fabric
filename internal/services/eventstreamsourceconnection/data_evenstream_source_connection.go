@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/ephemeral/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
-	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabeventstream "github.com/microsoft/fabric-sdk-go/fabric/eventstream"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -23,27 +23,27 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ ephemeral.EphemeralResourceWithConfigure = (*ephemeralEventstreamSourceConnection)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceEventstreamSourceConnection)(nil)
 
-type ephemeralEventstreamSourceConnection struct {
+type dataSourceEventstreamSourceConnection struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabeventstream.TopologyClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewEphemeralResourceEventstreamSourceConnection() ephemeral.EphemeralResource {
-	return &ephemeralEventstreamSourceConnection{
+func NewDataSourceEventstreamSourceConnection() datasource.DataSource {
+	return &dataSourceEventstreamSourceConnection{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (e *ephemeralEventstreamSourceConnection) Metadata(_ context.Context, _ ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = e.TypeInfo.FullTypeName(false)
+func (d *dataSourceEventstreamSourceConnection) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
-func (e *ephemeralEventstreamSourceConnection) Schema(ctx context.Context, _ ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+func (d *dataSourceEventstreamSourceConnection) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: fabricitem.NewEphemeralResourceMarkdownDescription(e.TypeInfo, false),
+		MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes: map[string]schema.Attribute{
 			"source_id": schema.StringAttribute{
 				MarkdownDescription: "The source ID.",
@@ -76,18 +76,22 @@ func (e *ephemeralEventstreamSourceConnection) Schema(ctx context.Context, _ eph
 					"primary_key": schema.StringAttribute{
 						MarkdownDescription: "The primary key for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"secondary_key": schema.StringAttribute{
 						MarkdownDescription: "The secondary key for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"secondary_connection_string": schema.StringAttribute{
 						MarkdownDescription: "The secondary connection string for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"primary_connection_string": schema.StringAttribute{
 						MarkdownDescription: "The primary connection string for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 				},
 			},
@@ -96,20 +100,8 @@ func (e *ephemeralEventstreamSourceConnection) Schema(ctx context.Context, _ eph
 	}
 }
 
-// func (e *ephemeralEventstreamSourceConnection) ConfigValidators(_ context.Context) []ephemeral.ConfigValidator {
-// 	return []ephemeral.ConfigValidator{
-// 		ephemeralvalidator.Conflicting(
-// 			path.MatchRoot("id"),
-// 			path.MatchRoot("display_name"),
-// 		),
-// 		ephemeralvalidator.ExactlyOneOf(
-// 			path.MatchRoot("id"),
-// 			path.MatchRoot("display_name"),
-// 		),
-// 	}
-// }
-
-func (e *ephemeralEventstreamSourceConnection) Configure(_ context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
+// Configure adds the provider configured client to the data source.
+func (d *dataSourceEventstreamSourceConnection) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -117,34 +109,35 @@ func (e *ephemeralEventstreamSourceConnection) Configure(_ context.Context, req 
 	pConfigData, ok := req.ProviderData.(*pconfig.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			common.ErrorEphemeralResourceConfigType,
+			common.ErrorDataSourceConfigType,
 			fmt.Sprintf(common.ErrorFabricClientType, req.ProviderData),
 		)
 
 		return
 	}
 
-	e.pConfigData = pConfigData
+	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(e.TypeInfo.Name, e.TypeInfo.IsPreview, e.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	e.client = fabeventstream.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTopologyClient()
+	d.client = fabeventstream.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTopologyClient()
 }
 
-func (e *ephemeralEventstreamSourceConnection) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
-	tflog.Debug(ctx, "OPEN", map[string]any{
+// Read refreshes the Terraform state with the latest data.
+func (d *dataSourceEventstreamSourceConnection) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var data ephemeralEventstreamSourceConnectionModel
+	var data dataSourceEventstreamSourceConnectionModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	timeout, diags := data.Timeouts.Open(ctx, e.pConfigData.Timeout)
+	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -152,13 +145,17 @@ func (e *ephemeralEventstreamSourceConnection) Open(ctx context.Context, req eph
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(e.get(ctx, &data)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(d.get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
-	tflog.Debug(ctx, "OPEN", map[string]any{
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
+	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
 	})
 
@@ -167,8 +164,8 @@ func (e *ephemeralEventstreamSourceConnection) Open(ctx context.Context, req eph
 	}
 }
 
-func (e *ephemeralEventstreamSourceConnection) get(ctx context.Context, model *ephemeralEventstreamSourceConnectionModel) diag.Diagnostics {
-	respGet, err := e.client.GetEventstreamSourceConnection(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.SourceID.ValueString(), nil)
+func (d *dataSourceEventstreamSourceConnection) get(ctx context.Context, model *dataSourceEventstreamSourceConnectionModel) diag.Diagnostics {
+	respGet, err := d.client.GetEventstreamSourceConnection(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.SourceID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationOpen, nil); diags.HasError() {
 		return diags
 	}
