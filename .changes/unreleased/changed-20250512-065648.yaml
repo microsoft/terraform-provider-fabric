@@ -1,5 +1,0 @@
-kind: changed
-body: Enhanced `fabric_sql_database` resource by adding properties support
-time: 2025-05-12T06:56:48.79556765Z
-custom:
-    Issue: "429"
