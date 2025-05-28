@@ -1,5 +1,0 @@
-kind: added
-body: '`partner_id` and `disable_terraform_partner_id` options to provider configuration to facilitate partner resource usage'
-time: 2025-04-23T10:45:39.9591769-07:00
-custom:
-    Issue: "408"
