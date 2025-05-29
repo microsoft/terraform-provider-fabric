@@ -1,0 +1,5 @@
+kind: changed
+body: Removed preview for `fabric_gateway_role_assignment`
+time: 2025-05-29T09:21:27.955294164Z
+custom:
+    Issue: "472"
