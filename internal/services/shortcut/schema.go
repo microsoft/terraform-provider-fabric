@@ -218,8 +218,8 @@ func onelakeSchema() superschema.SuperSingleNestedAttributeOf[oneLakeModel] {
 	}
 }
 
-func adlsGen2Schema() superschema.SuperSingleNestedAttributeOf[adlsGen2] {
-	return superschema.SuperSingleNestedAttributeOf[adlsGen2]{
+func adlsGen2Schema() superschema.SuperSingleNestedAttributeOf[targetDataSourceModel] {
+	return superschema.SuperSingleNestedAttributeOf[targetDataSourceModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the target ADLS Gen2 data source.",
 		},
@@ -270,8 +270,8 @@ func adlsGen2Schema() superschema.SuperSingleNestedAttributeOf[adlsGen2] {
 	}
 }
 
-func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[amazonS3] {
-	return superschema.SuperSingleNestedAttributeOf[amazonS3]{
+func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[targetDataSourceModel] {
+	return superschema.SuperSingleNestedAttributeOf[targetDataSourceModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the target Amazon S3 data source.",
 		},
@@ -321,8 +321,8 @@ func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[amazonS3] {
 	}
 }
 
-func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[azureBlobStorage] {
-	return superschema.SuperSingleNestedAttributeOf[azureBlobStorage]{
+func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDataSourceModel] {
+	return superschema.SuperSingleNestedAttributeOf[targetDataSourceModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the target Google Cloud Storage data source.",
 		},
@@ -371,8 +371,8 @@ func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[azureBlob
 	}
 }
 
-func googleCloudStorageSchema() superschema.SuperSingleNestedAttributeOf[googleCloudStorage] {
-	return superschema.SuperSingleNestedAttributeOf[googleCloudStorage]{
+func googleCloudStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDataSourceModel] {
+	return superschema.SuperSingleNestedAttributeOf[targetDataSourceModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the target Google Cloud Storage data source.",
 		},

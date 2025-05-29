@@ -32,15 +32,21 @@ type baseShortcutModel struct {
 }
 
 type targetModel struct {
-	Type               types.String                                             `tfsdk:"type"`
-	Onelake            supertypes.SingleNestedObjectValueOf[oneLakeModel]       `tfsdk:"onelake"`
-	AdlsGen2           supertypes.SingleNestedObjectValueOf[adlsGen2]           `tfsdk:"adls_gen2"`
-	AmazonS3           supertypes.SingleNestedObjectValueOf[amazonS3]           `tfsdk:"amazon_s3"`
-	Dataverse          supertypes.SingleNestedObjectValueOf[dataverse]          `tfsdk:"dataverse"`
-	GoogleCloudStorage supertypes.SingleNestedObjectValueOf[googleCloudStorage] `tfsdk:"google_cloud_storage"`
-	S3Compatible       supertypes.SingleNestedObjectValueOf[s3Compatible]       `tfsdk:"s3_compatible"`
-	AzureBlobStorage   supertypes.SingleNestedObjectValueOf[azureBlobStorage]   `tfsdk:"azure_blob_storage"`
-	ExternalDataShare  supertypes.SingleNestedObjectValueOf[externalDataShare]  `tfsdk:"external_data_share"`
+	Type               types.String                                                `tfsdk:"type"`
+	Onelake            supertypes.SingleNestedObjectValueOf[oneLakeModel]          `tfsdk:"onelake"`
+	AdlsGen2           supertypes.SingleNestedObjectValueOf[targetDataSourceModel] `tfsdk:"adls_gen2"`
+	AmazonS3           supertypes.SingleNestedObjectValueOf[targetDataSourceModel] `tfsdk:"amazon_s3"`
+	Dataverse          supertypes.SingleNestedObjectValueOf[dataverse]             `tfsdk:"dataverse"`
+	GoogleCloudStorage supertypes.SingleNestedObjectValueOf[targetDataSourceModel] `tfsdk:"google_cloud_storage"`
+	S3Compatible       supertypes.SingleNestedObjectValueOf[s3Compatible]          `tfsdk:"s3_compatible"`
+	AzureBlobStorage   supertypes.SingleNestedObjectValueOf[targetDataSourceModel] `tfsdk:"azure_blob_storage"`
+	ExternalDataShare  supertypes.SingleNestedObjectValueOf[externalDataShare]     `tfsdk:"external_data_share"`
+}
+
+type targetDataSourceModel struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	Location     customtypes.URL  `tfsdk:"location"`
+	Subpath      types.String     `tfsdk:"subpath"`
 }
 
 type oneLakeModel struct {
@@ -48,16 +54,7 @@ type oneLakeModel struct {
 	Path        types.String     `tfsdk:"path"`
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 }
-type adlsGen2 struct {
-	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
-	Location     customtypes.URL  `tfsdk:"location"`
-	Subpath      types.String     `tfsdk:"subpath"`
-}
-type amazonS3 struct {
-	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
-	Location     customtypes.URL  `tfsdk:"location"`
-	Subpath      types.String     `tfsdk:"subpath"`
-}
+
 type dataverse struct {
 	ConnectionID      customtypes.UUID `tfsdk:"connection_id"`
 	DeltaLakeFolder   types.String     `tfsdk:"deltalake_folder"`
@@ -65,22 +62,11 @@ type dataverse struct {
 	TableName         types.String     `tfsdk:"table_name"`
 }
 
-type googleCloudStorage struct {
-	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
-	Location     customtypes.URL  `tfsdk:"location"`
-	Subpath      types.String     `tfsdk:"subpath"`
-}
-
 type s3Compatible struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
 	Location     customtypes.URL  `tfsdk:"location"`
 	Subpath      types.String     `tfsdk:"subpath"`
 	Bucket       types.String     `tfsdk:"bucket"`
-}
-type azureBlobStorage struct {
-	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
-	Location     customtypes.URL  `tfsdk:"location"`
-	Subpath      types.String     `tfsdk:"subpath"`
 }
 type externalDataShare struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
@@ -120,12 +106,12 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
-	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[adlsGen2](ctx)
-	to.AmazonS3 = supertypes.NewSingleNestedObjectValueOfNull[amazonS3](ctx)
+	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
+	to.AmazonS3 = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
 	to.Dataverse = supertypes.NewSingleNestedObjectValueOfNull[dataverse](ctx)
-	to.GoogleCloudStorage = supertypes.NewSingleNestedObjectValueOfNull[googleCloudStorage](ctx)
+	to.GoogleCloudStorage = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
 	to.S3Compatible = supertypes.NewSingleNestedObjectValueOfNull[s3Compatible](ctx)
-	to.AzureBlobStorage = supertypes.NewSingleNestedObjectValueOfNull[azureBlobStorage](ctx)
+	to.AzureBlobStorage = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
 	to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOfNull[externalDataShare](ctx)
 
 	if from.OneLake != nil {
@@ -138,7 +124,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	}
 
 	if from.AdlsGen2 != nil {
-		adlsGen2Model := &adlsGen2{
+		adlsGen2Model := &targetDataSourceModel{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.AdlsGen2.ConnectionID),
 			Location:     customtypes.NewURLPointerValue(from.AdlsGen2.Location),
 			Subpath:      types.StringPointerValue(from.AdlsGen2.Subpath),
@@ -147,7 +133,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	}
 
 	if from.AmazonS3 != nil {
-		amazonS3Model := &amazonS3{
+		amazonS3Model := &targetDataSourceModel{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.AmazonS3.ConnectionID),
 			Location:     customtypes.NewURLPointerValue(from.AmazonS3.Location),
 			Subpath:      types.StringPointerValue(from.AmazonS3.Subpath),
@@ -166,7 +152,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	}
 
 	if from.GoogleCloudStorage != nil {
-		googleStorageCloudModel := &googleCloudStorage{
+		googleStorageCloudModel := &targetDataSourceModel{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.GoogleCloudStorage.ConnectionID),
 			Location:     customtypes.NewURLPointerValue(from.GoogleCloudStorage.Location),
 			Subpath:      types.StringPointerValue(from.GoogleCloudStorage.Subpath),
@@ -185,7 +171,7 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 	}
 
 	if from.AzureBlobStorage != nil {
-		azureBlobStorageModel := &azureBlobStorage{
+		azureBlobStorageModel := &targetDataSourceModel{
 			ConnectionID: customtypes.NewUUIDPointerValue(from.AzureBlobStorage.ConnectionID),
 			Location:     customtypes.NewURLPointerValue(from.AzureBlobStorage.Location),
 			Subpath:      types.StringPointerValue(from.AzureBlobStorage.Subpath),
