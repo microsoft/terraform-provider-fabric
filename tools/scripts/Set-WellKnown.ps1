@@ -1469,6 +1469,7 @@ $wellKnown['ApacheAirflowJob'] = @{
   id          = $apacheAirflowJob.id
   displayName = $apacheAirflowJob.displayName
   description = $apacheAirflowJob.description
+}
 
 $TABLES_PATH = "Tables"
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
