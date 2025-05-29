@@ -11,6 +11,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Gateway Role Assignments",
 	Types:          "gateway_role_assignments",
 	DocsURL:        "https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
