@@ -207,6 +207,9 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'ApacheAirflowJob' {
+      $itemEndpoint = 'apacheAirflowJobs'
+    }
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
     }
@@ -279,7 +282,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory')
+  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -305,7 +308,8 @@ function Set-FabricItem {
       $payload['definition'] = $Definition
     }
 
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/$itemEndpoint" -Payload $payload).Response
+    $resultPost = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/$itemEndpoint" -Payload $payload)
+    $result = $resultPost.Response
   }
 
   Write-Log -Message "${Type} - Name: $($result.displayName) / ID: $($result.id)"
@@ -863,6 +867,7 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'ApacheAirflowJob'       = 'aaj'
   'AzureDataFactory'       = 'adf'
   'CopyJob'                = 'cj'
   'Dashboard'              = 'dash'
@@ -1402,6 +1407,26 @@ $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
+}
+
+# Create the Apache Airflow Job if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = 'apacheAirflowJob-content.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheAirflowJob-content.json.tmpl'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+
+$apacheAirflowJob = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'ApacheAirflowJob' -Definition $definition
+
+$wellKnown['ApacheAirflowJob'] = @{
+  id          = $apacheAirflowJob.id
+  displayName = $apacheAirflowJob.displayName
+  description = $apacheAirflowJob.description
 }
 
 # Save wellknown.json file
