@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Gateway Role Assignment resource allows you to manage a Fabric Gateway Role Assignment https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateway_role_assignment (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Gateway Role Assignment resource allows you to manage a Fabric [Gateway Role Assignment](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
