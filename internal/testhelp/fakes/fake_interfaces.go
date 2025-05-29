@@ -34,6 +34,12 @@ type listTransformer[TEntity, TOutput any] interface {
 	// TransformList transforms a list of entities into a response.
 	TransformList(list []TEntity) TOutput
 }
+
+// type openTransformer[TEntity, TOpenEntityResponse any] interface {
+// 	// TransformOpen transforms an entity into a response.
+// 	TransformOpen(entity TEntity) TOpenEntityResponse
+// }
+
 type validator[TEntity any] interface {
 	// Validate validates the entity against existing entities in the server.
 	Validate(newEntity TEntity, existing []TEntity) (statusCode int, err error)

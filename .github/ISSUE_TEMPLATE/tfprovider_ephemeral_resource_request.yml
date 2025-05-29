@@ -3,7 +3,7 @@
 ---
 name: 🔽 Provider Ephemeral Resource Request
 description: Request a new ephemeral resource to be added to the Terraform Provider
-title: "[DS] "
+title: "[EPH] "
 labels: ["tf/ephemeral"]
 type: Feature
 projects: ["microsoft/1018"]
