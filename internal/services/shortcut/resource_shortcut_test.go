@@ -112,6 +112,27 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.URLTypeErrorInvalidStringHeader),
 		},
+		// error - location - invalid path with `/`
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+					"path":         "/" + testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Shortcut path can't start with forward slash '/'."),
+		},
 		// error - unexpected data source attribute for target
 		{
 			ResourceName: testResourceItemFQN,
