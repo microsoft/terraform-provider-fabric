@@ -1,0 +1,5 @@
+kind: changed
+body: Removed preview for `fabric_gateway`
+time: 2025-05-29T09:14:00.027852044Z
+custom:
+    Issue: "471"

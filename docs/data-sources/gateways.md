@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Gateways data-source allows you to retrieve a list of Fabric Gateways https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_gateways (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Gateways data-source allows you to retrieve a list of Fabric [Gateways](https://learn.microsoft.com/power-bi/guidance/powerbi-implementation-planning-data-gateways).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
