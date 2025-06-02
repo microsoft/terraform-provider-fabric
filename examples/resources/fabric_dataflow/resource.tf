@@ -12,10 +12,10 @@ resource "fabric_dataflow" "example_bootstrap" {
   format                    = "Default"
   definition = {
     "queryMetadata.json" = {
-      source = "${local.path}/queryMetadata.json"
+      source = "${local.path}/queryMetadata.json.tmpl"
     }
     "mashup.pq" = {
-      source = "${local.path}/mashup.pq"
+      source = "${local.path}/mashup.pq.tmpl"
     }
   }
 }
@@ -27,14 +27,14 @@ resource "fabric_dataflow" "example_update" {
   format       = "Default"
   definition = {
     "queryMetadata.json" = {
-      source = "${local.path}/queryMetadata.json"
+      source = "${local.path}/queryMetadata.json.tmpl"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"
       }
     }
     "mashup.pq" = {
-      source = "${local.path}/mashup.pq"
+      source = "${local.path}/mashup.pq.tmpl"
     }
   }
 }

@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_dataflow` resource
+time: 2025-06-02T23:17:22.914914265Z
+custom:
+    Issue: "478"

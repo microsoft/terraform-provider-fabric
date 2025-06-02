@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	FabricItemType = fabcore.ItemTypeDataflow
-
+	FabricItemType            = fabcore.ItemTypeDataflow
 	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/data-source-management"
 )
@@ -27,7 +26,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	IsSPNSupported: true,
 }
 
-var itemDefinitionFormats = []fabricitem.DefinitionFormat{
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
