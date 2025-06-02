@@ -31,11 +31,11 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"queryMetadata.json"},
+		Paths: []string{"queryMetadata.json", "mashup.pq"},
 	},
 	{
 		Type:  "pq",
 		API:   "",
-		Paths: []string{"mashup.pq"},
+		Paths: []string{"queryMetadata.json", "mashup.pq"},
 	},
 }

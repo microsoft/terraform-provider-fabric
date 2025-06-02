@@ -88,10 +88,6 @@ func TestUnit_DataflowsDataSource(t *testing.T) {
 }
 
 func TestAcc_DataflowsDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -107,7 +103,6 @@ func TestAcc_DataflowsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.definition"),
 			),
 		},
 	}))

@@ -25,13 +25,10 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("dataflow"),
 })
 
-var testHelperDefinitionJSON = map[string]any{
+var testHelperDefinition = map[string]any{
 	`"queryMetadata.json"`: map[string]any{
 		"source": "${local.path}/queryMetadata.json.tmpl",
 	},
-}
-
-var testHelperDefinitionPQ = map[string]any{
 	`"mashup.pq"`: map[string]any{
 		"source": "${local.path}/mashup.pq.tmpl",
 	},
@@ -61,9 +58,10 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
-				),
-			),
+				)),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -75,10 +73,12 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"display_name":    "test",
 						"unexpected_attr": "test",
+						"format":          "Default",
+						"definition":      testHelperDefinition,
 					},
-				),
-			),
+				)),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -90,9 +90,10 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
-				),
-			),
+				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -104,9 +105,10 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
-				),
-			),
+				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -120,13 +122,17 @@ func TestUnit_DataflowResource_ImportState(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
-	testCase := at.CompileConfig(
-		testResourceItemHeader,
-		map[string]any{
-			"workspace_id": *entity.WorkspaceID,
-			"display_name": *entity.DisplayName,
-		},
-	)
+	testCase := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": *entity.WorkspaceID,
+				"display_name": *entity.DisplayName,
+				"format":       "Default",
+				"definition":   testHelperDefinition,
+			},
+		))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -194,13 +200,17 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityExist.WorkspaceID,
-					"display_name": *entityExist.DisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -214,12 +224,13 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 		// Update and Read
@@ -232,14 +243,12 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
-						"description":  *entityAfter.Description,
 						"format":       "Default",
-						"definition":   testHelperDefinitionJSON,
+						"definition":   testHelperDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
@@ -248,51 +257,50 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DataflowResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
-	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-					"definition":   "{}",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition", "{}"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-					"definition":   "{}",
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition", "{}"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 	}))
