@@ -133,6 +133,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					Computed: true,
 				},
 			},
+			// TODO: gateway_members SetNestedAttribute
 			"gateway_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " gateway object ID.",
