@@ -6,19 +6,16 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu24.04",
   // Features to add to the dev container. More info: https://containers.dev/features
   "features": {
-    // "ghcr.io/devcontainers/features/git:1": {
-    //   "version": "latest"
-    // },
     "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     },
-    // "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
     "ghcr.io/devcontainers/features/go:1": {
       "version": "1.24.3"
     },
     "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.12"
+      "version": "3.13",
+      "toolsToInstall": ""
     },
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers/features/azure-cli:1": {},
@@ -30,13 +27,8 @@
       "gojqVersion": "latest",
       "jaqVersion": "latest"
     },
-    // "ghcr.io/marcozac/devcontainer-features/gofumpt:1": {},
-    // "ghcr.io/guiyomh/features/golangci-lint:0": {},
-    // "ghcr.io/guiyomh/features/goreleaser:0": {},
-    // "ghcr.io/guiyomh/features/gomarkdoc:0": {},
-    // "ghcr.io/guiyomh/features/gotestsum:0": {},
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.12.0",
+      "version": "1.12.1",
       "installSentinel": true,
       "installTFsec": true,
       "installTerraformDocs": true
@@ -44,25 +36,19 @@
     "ghcr.io/robbert229/devcontainer-features/opentofu:1": {
       "version": "1.9.1"
     },
-    "ghcr.io/devcontainers-contrib/features/pipx-package:1": {},
-    // "ghcr.io/devcontainers-contrib/features/mkdocs:2": {},
-    // "ghcr.io/devcontainers-contrib/features/checkov:1": {},
-    // "ghcr.io/devcontainers-contrib/features/markdownlint-cli2:1": {},
-    // "ghcr.io/devcontainers-contrib/features/yamllint:2": {},
-    "ghcr.io/devcontainers-contrib/features/go-task:1": {},
+    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {},
     "./features/tfprovider-local-dev": {
       "providerName": "microsoft/fabric",
       "workspace": "${containerWorkspaceFolder}"
     }
   },
   "onCreateCommand": {
-    // "mkdocs": "task install:mkdocs"
-    "task-tools": "task tools"
+    "chown-local": "sudo chown -R $(id -un):$(id -gn) $HOME/.local",
+    "setup-tools": "task tools"
   },
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": {
-    "git-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-    "pwsh-chown": "sudo chown -R vscode:vscode /home/vscode/.local/share/powershell"
+    "git-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}"
   },
   // "privileged": true,
   "remoteUser": "vscode",
