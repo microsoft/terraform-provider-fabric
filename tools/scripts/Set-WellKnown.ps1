@@ -806,17 +806,8 @@ function Set-Shortcut {
     [string]$ItemId,
     # OneLake data source payload
     [Parameter(Mandatory = $true)]
-    [object]$Payload,
-    # Indicates whether the lakehouse is populated or not
-    [Parameter(Mandatory = $true)]
-    [bool]$IsLakehousePopulated
+    [object]$Payload
   )
-
-  # If the lakehouse is not populated, then shortcut creation will fail - 400 Bad Request
-  if ($IsLakehousePopulated -eq $false) {
-    Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
-    return
-  }
 
   # Attempt to get the existing shortcut
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
@@ -1471,31 +1462,35 @@ $wellKnown['ApacheAirflowJob'] = @{
   description = $apacheAirflowJob.description
 }
 
-$TABLES_PATH = "Tables"
-$displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
-$shortcutPayload = @{
-  path   = $TABLES_PATH
-  name   = $displayNameTemp
-  target = @{
-    onelake = @{
-      workspaceId = $wellKnown['WorkspaceDS'].id
-      itemId      = $wellKnown['Lakehouse'].id
-      path        = $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+if ($IS_LAKEHOUSE_POPULATED -eq $false) {
+  Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
+}
+else {
+  $TABLES_PATH = "Tables"
+  $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
+  $shortcutPayload = @{
+    path   = $TABLES_PATH
+    name   = $displayNameTemp
+    target = @{
+      onelake = @{
+        workspaceId = $wellKnown['WorkspaceDS'].id
+        itemId      = $wellKnown['Lakehouse'].id
+        path        = $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      }
     }
   }
-}
 
-$shortcut = Set-Shortcut `
-  -WorkspaceId $wellKnown['WorkspaceDS'].id `
-  -ItemId $wellKnown['Lakehouse'].id `
-  -Payload $shortcutPayload `
-  -IsLakehousePopulated $IS_LAKEHOUSE_POPULATED
+  $shortcut = Set-Shortcut `
+    -WorkspaceId $wellKnown['WorkspaceDS'].id `
+    -ItemId $wellKnown['Lakehouse'].id `
+    -Payload $shortcutPayload
 
-$wellKnown['Shortcut'] = @{
-  shortcutName = if ($shortcut) { $shortcut.name } else { $displayNameTemp }
-  shortcutPath = if ($shortcut) { $shortcut.path } else { '' }
-  workspaceId  = $wellKnown['WorkspaceDS'].id
-  lakehouseId  = $wellKnown['Lakehouse'].id
+  $wellKnown['Shortcut'] = @{
+    shortcutName = $shortcut.name
+    shortcutPath = $shortcut.path
+    workspaceId  = $wellKnown['WorkspaceDS'].id
+    lakehouseId  = $wellKnown['Lakehouse'].id
+  }
 }
 
 # Save wellknown.json file
