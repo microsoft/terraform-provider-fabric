@@ -1,0 +1,382 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package warehousesnapshot_test
+
+import (
+	"errors"
+	"fmt"
+	"regexp"
+	"testing"
+	"time"
+
+	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
+)
+
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
+func TestUnit_WarehouseSnapshotResource_Attributes(t *testing.T) {
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - no attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{},
+			),
+			ExpectError: regexp.MustCompile(`Missing required argument`),
+		},
+		// error - workspace_id - invalid UUID
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "invalid uuid",
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - unexpected attribute
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":    "00000000-0000-0000-0000-000000000000",
+					"unexpected_attr": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		// error - no required attributes (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":  "00000000-0000-0000-0000-000000000000",
+					"display_name":  "test",
+					"configuration": map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "configuration".`),
+		},
+	}))
+}
+
+func TestUnit_WarehouseSnapshotResource_ImportState(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entity := fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID))
+
+	testCase := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": *entity.WorkspaceID,
+			"display_name": *entity.DisplayName,
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "not-valid",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/WarehouseSnapshotID")),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "test/id",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", "test", *entity.ID),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", *entity.WorkspaceID, "test"),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// Import state testing
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             testCase,
+			ImportStateId:      fmt.Sprintf("%s/%s", *entity.WorkspaceID, *entity.ID),
+			ImportState:        true,
+			ImportStatePersist: true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				if is[0].ID != *entity.ID {
+					return errors.New(testResourceItemFQN + ": unexpected ID")
+				}
+
+				return nil
+			},
+		},
+	}))
+}
+
+func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseSnapshotWithWorkspace(workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityExist.WorkspaceID,
+					"display_name": *entityExist.DisplayName,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityAfter.DisplayName,
+					"description":  *entityAfter.Description,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName,
+					"description":  entityUpdateDescription,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_WarehouseSnapshotConfigurationResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	warehouse := testhelp.WellKnown()["Warehouse"].(map[string]any)
+	warehouseID := warehouse["id"].(string)
+
+	entityCreateDisplayName1 := testhelp.RandomName()
+	entityUpdateDisplayName1 := testhelp.RandomName()
+	entityUpdateDescription1 := testhelp.RandomName()
+
+	entityCreateDisplayName2 := testhelp.RandomName()
+	entityUpdateDisplayName2 := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName1,
+					"configuration": map[string]any{
+						"parent_warehouse_id": warehouseID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
+
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+			),
+		},
+		// Update and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName1,
+					"description":  entityUpdateDescription1,
+					"configuration": map[string]any{
+						"parentId": warehouseID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
+
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+			),
+		},
+		// Create and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName2,
+					"configuration": map[string]any{
+						"parentId": warehouseID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
+
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+			),
+		},
+		// Update and Read (configuration)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName2,
+					"configuration": map[string]any{
+						"parentId":           warehouseID,
+						"snapshot_date_time": time.Now().Format(time.RFC3339),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
+
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "configuration.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+			),
+		},
+	}))
+}

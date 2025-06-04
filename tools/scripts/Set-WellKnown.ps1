@@ -125,7 +125,7 @@ function Invoke-FabricRest {
             $retryDelaySeconds = $retryAfter
           }
 
-          Write-Log -Message "Throttled. Waiting for $retryDelaySeconds seconds before retrying..." -Level 'DEBUG'
+          Write-Log -Message "Throttled. Waiting for $retryDelaySeconds seconds before retrying..." -Level 'INFO'
           Start-Sleep -Seconds $retryDelaySeconds
 
           $attempt++
@@ -149,7 +149,7 @@ function Invoke-FabricRest {
 
     if ($statusCode -eq 202 -and $responseHeaders.Location -and $responseHeaders['x-ms-operation-id']) {
       $operationId = [string]$responseHeaders['x-ms-operation-id']
-      Write-Log -Message "Long Running Operation initiated. Operation ID: $operationId" -Level 'DEBUG'
+      Write-Log -Message "Long Running Operation initiated. Operation ID: $operationId" -Level 'INFO'
       $result = Get-LroResult -OperationId $operationId
 
       return [PSCustomObject]@{
@@ -272,6 +272,9 @@ function Set-FabricItem {
     }
     'Warehouse' {
       $itemEndpoint = 'warehouses'
+    }
+    'WarehouseSnapshot' {
+      $itemEndpoint = 'warehousesnapshots'
     }
     default {
       $itemEndpoint = 'items'
@@ -896,6 +899,7 @@ $itemNaming = @{
   'SQLDatabase'            = 'sqldb'
   'SQLEndpoint'            = 'sqle'
   'Warehouse'              = 'wh'
+  'WarehouseSnapshot'      = 'whs'
   'WorkspaceDS'            = 'wsds'
   'WorkspaceRS'            = 'wsrs'
   'WorkspaceMPE'           = 'wsmpe'
@@ -1428,6 +1432,21 @@ $wellKnown['ApacheAirflowJob'] = @{
   displayName = $apacheAirflowJob.displayName
   description = $apacheAirflowJob.description
 }
+
+# Create Warehouse Snapshot if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
+$creationPayload = @{
+  parentWarehouseId = $wellKnown['Warehouse'].id
+}
+
+$warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
+
+$wellKnown['WarehouseSnapshot'] = @{
+  id          = $warehouseSnapshot.id
+  displayName = $warehouseSnapshot.displayName
+  description = $warehouseSnapshot.description
+}
+
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
