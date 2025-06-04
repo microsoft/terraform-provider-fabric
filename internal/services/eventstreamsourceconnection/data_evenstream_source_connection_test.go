@@ -43,7 +43,7 @@ func TestUnit_EventstreamDataSource(t *testing.T) {
 	}
 
 	serverFactory := &fabfake.ServerFactory{}
-	serverFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = func(ctx context.Context, workspaceID, eventstreamID, sourceID string, options *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
+	serverFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
 		if sourceID != fakeSourceID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
 			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
@@ -216,7 +216,7 @@ func TestAcc_EventstreamSourceConnectionDataSource(t *testing.T) {
 	sourceConnection := evenstream["sourceConnection"].(map[string]any)
 	sourceID := sourceConnection["sourceId"].(string)
 	eventHubName := sourceConnection["eventHubName"].(string)
-	FullyQualifiedNamespace := sourceConnection["fullyQualifiedNamespace"].(string)
+	fullyQualifiedNamespace := sourceConnection["fullyQualifiedNamespace"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by source id - not found
@@ -246,7 +246,7 @@ func TestAcc_EventstreamSourceConnectionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "eventstream_id", eventstreamID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "event_hub_name", eventHubName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "fully_qualified_namespace", FullyQualifiedNamespace),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "fully_qualified_namespace", fullyQualifiedNamespace),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.primary_connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.secondary_connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.primary_key"),
