@@ -1,7 +1,6 @@
 {
   "sources": [
     {
-			"id": "{{ .SourceID }}",
       "name": "CustomEndpoint",
       "type": "CustomEndpoint",
 			"properties": {}
@@ -12,7 +11,7 @@
       "name": "Lakehouse",
       "type": "Lakehouse",
       "properties": {
-        "workspaceId": "{{ .LakehouseWorkspaceID }}",
+			"workspaceId": "{{ .LakehouseWorkspaceID }}",
         "itemId": "{{ .LakehouseID }}",
         "schema": "",
         "deltaTable": "streamTable",

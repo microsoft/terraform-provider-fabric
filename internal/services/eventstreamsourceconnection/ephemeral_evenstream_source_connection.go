@@ -96,19 +96,6 @@ func (e *ephemeralEventstreamSourceConnection) Schema(ctx context.Context, _ eph
 	}
 }
 
-// func (e *ephemeralEventstreamSourceConnection) ConfigValidators(_ context.Context) []ephemeral.ConfigValidator {
-// 	return []ephemeral.ConfigValidator{
-// 		ephemeralvalidator.Conflicting(
-// 			path.MatchRoot("id"),
-// 			path.MatchRoot("display_name"),
-// 		),
-// 		ephemeralvalidator.ExactlyOneOf(
-// 			path.MatchRoot("id"),
-// 			path.MatchRoot("display_name"),
-// 		),
-// 	}
-// }
-
 func (e *ephemeralEventstreamSourceConnection) Configure(_ context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return

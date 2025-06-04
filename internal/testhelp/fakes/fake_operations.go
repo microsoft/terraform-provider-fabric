@@ -3,14 +3,7 @@
 
 package fakes
 
-// type simpleEphemeralIDOperations[
-// 	TEntity,
-// 	TOpenEntityResponse any] interface {
-// 	identifier[TEntity]
-// 	openTransformer[TEntity, TOpenEntityResponse]
-// }
-
-// General operations that apply to every entity (non-ephemeral).
+// General operations that apply to every entity.
 type operationsBase[
 	TEntity,
 	TGetEntityResponse,

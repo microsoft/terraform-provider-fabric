@@ -158,14 +158,6 @@ func configureDefinitionsNonLROCreation[TEntity, TDefinition, TUpdateDefinitionO
 	handleUpdateDefinition(handler, definitionOperations, updateDefinitionsFunction)
 }
 
-// func configureEphemeralEntityWithAncestorID[TEntity, TOpenOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
-// 	handler *typedHandler[TEntity],
-// 	operations simpleEphemeralIDOperations[TEntity, TOpenOutput],
-// 	openFunction *func(ctx context.Context, ancestorId, parentId, childID string, options *TGetOptions) (resp azfake.Responder[TOpenOutput], errResp azfake.ErrorResponder),
-// ) {
-// 	handleOpenWithSimpleId(handler, operations, openFunction)
-// }
-
 // GenerateID generates an ID from a parent and child ID.
 func generateID(parentID, childID string) string {
 	return parentID + "/" + childID

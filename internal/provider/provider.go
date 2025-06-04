@@ -468,6 +468,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,

@@ -1104,14 +1104,12 @@ $wellKnown['DeploymentPipeline'] = @{
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
-$eventstreamSourceId = '7f77b4a1-9989-4bae-8c9c-a5dd6ef62689'
 Write-Log -Message "Eventstream source Id: $($eventstreamSourceId)"
 $definition = @{
   parts = @(
     @{
       path        = "eventstream.json"
       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/eventstream/eventstream.json.tmpl' -Values @(
-        @{ key = '{{ .SourceID }}'; value = $eventstreamSourceId },
         @{ key = '{{ .LakehouseID }}'; value = $wellKnown['Lakehouse'].id },
         @{ key = '{{ .LakehouseWorkspaceID }}'; value = $wellKnown['WorkspaceDS'].id }
       )
@@ -1124,7 +1122,18 @@ $wellKnown['Eventstream'] = @{
   id          = $eventstream.id
   displayName = $eventstream.displayName
   description = $eventstream.description
-  sourceId    = $eventstreamSourceId
+}
+
+# Set Eventstream source connection
+$eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
+$eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamSourceId = $eventstreamSource.id
+
+$eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
+$wellKnown['Eventstream']['sourceConnection'] = @{
+  sourceId                = $eventstreamSourceId
+  eventHubName            = $eventstreamConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
 }
 
 

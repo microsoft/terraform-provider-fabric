@@ -100,7 +100,6 @@ func (d *dataSourceEventstreamSourceConnection) Schema(ctx context.Context, _ da
 	}
 }
 
-// Configure adds the provider configured client to the data source.
 func (d *dataSourceEventstreamSourceConnection) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -125,7 +124,6 @@ func (d *dataSourceEventstreamSourceConnection) Configure(_ context.Context, req
 	d.client = fabeventstream.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTopologyClient()
 }
 
-// Read refreshes the Terraform state with the latest data.
 func (d *dataSourceEventstreamSourceConnection) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
@@ -166,7 +164,7 @@ func (d *dataSourceEventstreamSourceConnection) Read(ctx context.Context, req da
 
 func (d *dataSourceEventstreamSourceConnection) get(ctx context.Context, model *dataSourceEventstreamSourceConnectionModel) diag.Diagnostics {
 	respGet, err := d.client.GetEventstreamSourceConnection(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.SourceID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationOpen, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
