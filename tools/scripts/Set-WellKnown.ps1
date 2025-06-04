@@ -207,8 +207,14 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'ApacheAirflowJob' {
+      $itemEndpoint = 'apacheAirflowJobs'
+    }
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
+    }
+    'Dataflow' {
+      $itemEndpoint = 'dataflows'
     }
     'DataPipeline' {
       $itemEndpoint = 'dataPipelines'
@@ -279,7 +285,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -305,7 +311,8 @@ function Set-FabricItem {
       $payload['definition'] = $Definition
     }
 
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/$itemEndpoint" -Payload $payload).Response
+    $resultPost = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/$itemEndpoint" -Payload $payload)
+    $result = $resultPost.Response
   }
 
   Write-Log -Message "${Type} - Name: $($result.displayName) / ID: $($result.id)"
@@ -863,9 +870,11 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'ApacheAirflowJob'       = 'aaj'
   'AzureDataFactory'       = 'adf'
   'CopyJob'                = 'cj'
   'Dashboard'              = 'dash'
+  'Dataflow'               = 'df'
   'Datamart'               = 'dm'
   'DataPipeline'           = 'dp'
   'DeploymentPipeline'     = 'deployp'
@@ -990,7 +999,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'DataPipeline', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1438,6 +1447,26 @@ $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
+}
+
+# Create the Apache Airflow Job if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = 'apacheAirflowJob-content.json'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheAirflowJob-content.json.tmpl'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+
+$apacheAirflowJob = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'ApacheAirflowJob' -Definition $definition
+
+$wellKnown['ApacheAirflowJob'] = @{
+  id          = $apacheAirflowJob.id
+  displayName = $apacheAirflowJob.displayName
+  description = $apacheAirflowJob.description
 }
 
 # Save wellknown.json file
