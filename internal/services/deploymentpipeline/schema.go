@@ -52,7 +52,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			Attributes: superschema.Attributes{
 				"id": superschema.SuperStringAttribute{
 					Common: &schemaR.StringAttribute{
-						MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
+						MarkdownDescription: "The ID of the stage.",
 						CustomType:          customtypes.UUIDType{},
 					},
 					Resource: &schemaR.StringAttribute{
@@ -117,15 +117,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					DataSource: &schemaD.StringAttribute{
 						Computed: true,
 					},
-				},
-			},
-		}
-	} else {
-		stagesAttribute = superschema.SuperListNestedAttributeOf[baseDeploymentPipelineStageModel]{
-			Resource: &schemaR.ListNestedAttribute{
-				Required: true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 		}
