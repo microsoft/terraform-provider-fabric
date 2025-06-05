@@ -821,8 +821,8 @@ function Set-Shortcut {
     Write-Log -Message "Creating Shortcut: $($Payload.name)" -Level 'INFO'
 
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
-    $result.path = $result.path.TrimStart('/')
   }
+  $result.path = $result.path.TrimStart('/')
   Write-Log -Message "Shortcut - Name: $($result.name) / Path: $($result.path)"
 
   return $result
