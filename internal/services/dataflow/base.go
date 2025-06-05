@@ -20,7 +20,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Dataflow",
 	Type:           "dataflow",
 	Names:          "Dataflows",
-	Types:          "Dataflows",
+	Types:          "dataflows",
 	DocsURL:        "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/dataflow-definition",
 	IsPreview:      false,
 	IsSPNSupported: true,

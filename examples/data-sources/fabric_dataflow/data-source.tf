@@ -17,11 +17,15 @@ data "fabric_dataflow" "example_definition" {
   output_definition = true
 }
 
-# Access the content of the definition as JSON object
-output "example_definition_json_object" {
-  value = provider::fabric::content_decode(data.fabric_dataflow.example_definition.definition["queryMetadata.json"].content)
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_dataflow.example_definition.definition["queryMetadata.json"].content, ".")
 }
 
+# Access the content of the definition as JSON object
+output "example_definition_content_json_object" {
+  value = provider::fabric::content_decode(data.fabric_dataflow.example_definition.definition["queryMetadata.json"].content)
+}
 output "example_definition_pq_object" {
   value = provider::fabric::content_decode(data.fabric_dataflow.example_definition.definition["mashup.pq"].content)
 }
