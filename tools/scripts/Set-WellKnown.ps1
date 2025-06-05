@@ -267,9 +267,6 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
-    'Shortcut' {
-      $itemEndpoint = 'shortcuts'
-    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -803,6 +800,35 @@ function Set-AzureDataFactory {
   return $dataFactory
 }
 
+function Set-Shortcut {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+    # The unique identifier of the data item (e.g., lakehouse ID)
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+    # OneLake data source payload
+    [Parameter(Mandatory = $true)]
+    [object]$Payload
+  )
+
+  # Attempt to get the existing shortcut
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
+  $result = $results.Response.value | Where-Object { $_.name -eq $Payload.name -and ($_.path.TrimStart('/') -eq $Payload.path.TrimStart('/')) }
+
+  if (!$result) {
+    # Shortcut does not exist, so create it
+    Write-Log -Message "Creating Shortcut: $($Payload.name)" -Level 'INFO'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
+  }
+
+  $result.path = $result.path.TrimStart('/')
+  Write-Log -Message "Shortcut - Name: $($result.name) / Path: $($result.path)"
+
+  return $result
+}
+
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
@@ -1133,11 +1159,15 @@ $wellKnown['DomainChild'] = @{
   description = $childDomain.description
 }
 
+$IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
   Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+}
+else {
+  $IS_LAKEHOUSE_POPULATED = $true
 }
 $wellKnown['Lakehouse']['tableName'] = 'publicholidays'
 
@@ -1374,37 +1404,6 @@ $wellKnown['GatewayVirtualNetwork'] = @{
   type        = $gateway.type
 }
 
-function Set-Shortcut {
-  param (
-    [Parameter(Mandatory = $true)]
-    [string]$WorkspaceId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$ItemId,
-
-    [Parameter(Mandatory = $true)]
-    [object]$Payload
-  )
-
-  $shortcutName = $Payload.name
-  $path = $Payload.path
-
-  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts"
-  $result = $results.Response.value | Where-Object { $_.name -eq $shortcutName -and ($_.path.TrimStart('/') -eq $path.TrimStart('/')) }
-
-  if (!$result) {
-    Write-Log -Message "Creating Shortcut: $shortcutName" -Level 'WARN'
-
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/shortcuts" -Payload $Payload).Response
-    $result.path = $result.path.TrimStart('/')
-
-  }
-
-  Write-Log -Message "Shortcut - Name: $($result.name) / Path: $($result.path)"
-
-  return $result
-}
-
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
 
@@ -1448,32 +1447,6 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-$displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
-$shortcutPath = "Tables"
-$shortcutPayload = @{
-  path   = $shortcutPath
-  name   = $displayNameTemp
-  target = @{
-    OneLake = @{
-      workspaceId = $wellKnown['WorkspaceDS'].id
-      itemId      = $wellKnown['Lakehouse'].id
-      path        = $shortcutPath + "/" + $wellKnown['Lakehouse'].tableName
-    }
-  }
-}
-
-$shortcut = Set-Shortcut `
-  -WorkspaceId $wellKnown['WorkspaceDS'].id`
-  -ItemId $wellKnown['Lakehouse'].id `
-  -Payload $shortcutPayload
-
-$wellKnown['Shortcut'] = @{
-  shortcutName = $shortcut.name
-  shortcutPath = $shortcut.Path
-  workspaceId  = $wellKnown['WorkspaceDS'].id
-  lakehouseId  = $wellKnown['Lakehouse'].id
-}
-
 # Create the Apache Airflow Job if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
 $definition = @{
@@ -1492,6 +1465,37 @@ $wellKnown['ApacheAirflowJob'] = @{
   id          = $apacheAirflowJob.id
   displayName = $apacheAirflowJob.displayName
   description = $apacheAirflowJob.description
+}
+
+if ($IS_LAKEHOUSE_POPULATED -eq $false) {
+  Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
+}
+else {
+  $TABLES_PATH = "Tables"
+  $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
+  $shortcutPayload = @{
+    path   = $TABLES_PATH
+    name   = $displayNameTemp
+    target = @{
+      onelake = @{
+        workspaceId = $wellKnown['WorkspaceDS'].id
+        itemId      = $wellKnown['Lakehouse'].id
+        path        = $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      }
+    }
+  }
+
+  $shortcut = Set-Shortcut `
+    -WorkspaceId $wellKnown['WorkspaceDS'].id `
+    -ItemId $wellKnown['Lakehouse'].id `
+    -Payload $shortcutPayload
+
+  $wellKnown['Shortcut'] = @{
+    shortcutName = $shortcut.name
+    shortcutPath = $shortcut.path
+    workspaceId  = $wellKnown['WorkspaceDS'].id
+    lakehouseId  = $wellKnown['Lakehouse'].id
+  }
 }
 
 # Save wellknown.json file

@@ -125,7 +125,7 @@ resource "fabric_onelake_shortcut" "external_data_share_target" {
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
 - `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut.
-- `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Path name path must not start with forward slash '/'.
+- `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Shortcut path can't start with forward slash '/'.
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
@@ -214,7 +214,7 @@ Required:
 Required:
 
 - `item_id` (String) The ID of the target in OneLake. The target can be an item of Lakehouse, KQLDatabase, or Warehouse.
-- `path` (String) A string representing the full path to the target folder within the Item. This path should be relative to the root of the OneLake directory structure. For example: 'Tables/myTablesFolder/someTableSubFolder'. String length must be at most 256. Path name path must starts with forward slash '/'.
+- `path` (String) A string representing the full path to the target folder within the Item. This path should be relative to the root of the OneLake directory structure. For example: 'Tables/myTablesFolder/someTableSubFolder'. String length must be at most 256. OneLake path can't start with forward slash '/'.
 - `workspace_id` (String) The ID of the target workspace.
 
 <a id="nestedatt--target--s3_compatible"></a>
