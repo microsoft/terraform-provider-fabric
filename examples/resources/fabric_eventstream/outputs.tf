@@ -1,3 +1,3 @@
-output "example" {
-  value = fabric_eventstream.example
-}
+# output "example" {
+#   value = fabric_eventstream.example
+# }
