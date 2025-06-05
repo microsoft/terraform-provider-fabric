@@ -1466,12 +1466,19 @@ $wellKnown['ApacheAirflowJob'] = @{
   description = $apacheAirflowJob.description
 }
 
+$displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {
   Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
+
+  $wellKnown['Shortcut'] = @{
+    shortcutName = $displayNameTemp
+    shortcutPath = ''
+    workspaceId  = $wellKnown['WorkspaceDS'].id
+    lakehouseId  = $wellKnown['Lakehouse'].id
+  }
 }
 else {
   $TABLES_PATH = "Tables"
-  $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
   $shortcutPayload = @{
     path   = $TABLES_PATH
     name   = $displayNameTemp
