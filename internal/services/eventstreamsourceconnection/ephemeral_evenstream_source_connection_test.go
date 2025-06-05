@@ -60,7 +60,7 @@ func TestUnit_EventstreamEphemeralResource(t *testing.T) {
 		return
 	}
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, serverFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, serverFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
@@ -246,7 +246,7 @@ func TestAcc_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 	eventHubName := sourceConnection["eventHubName"].(string)
 	fullyQualifiedNamespace := sourceConnection["fullyQualifiedNamespace"].(string)
 
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testEphemeralItemFQN, nil, []resource.TestStep{
 		// Test error - source not found
 		{
 			Config: at.CompileConfig(
