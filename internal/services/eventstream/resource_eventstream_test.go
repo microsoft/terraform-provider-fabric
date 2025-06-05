@@ -345,3 +345,80 @@ func TestAcc_EventstreamDefinitionResource_CRUD(t *testing.T) {
 	},
 	))
 }
+
+func TestAcc_EventstreamDefinitionResource_CRUD_Parameters(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	lakehouseResourceHCL, lakehouseResourceFQN := lakehouseResource(t, workspaceID)
+
+	testHelperDefinition := map[string]any{
+		`"eventstream.json"`: map[string]any{
+			"source":          "${local.path}/eventstream.json",
+			"processing_mode": "Parameters",
+			"parameters": []map[string]any{
+				{
+					"type":  "FindReplace",
+					"find":  "00000000-0000-0000-0000-000000000000",
+					"value": testhelp.RefByFQN(lakehouseResourceFQN, "workspace_id"),
+				},
+				{
+					"type":  "KeyValueReplace",
+					"find":  `$.destinations[?(@.name=='Lakehouse')].properties.itemId`,
+					"value": testhelp.RefByFQN(lakehouseResourceFQN, "id"),
+				},
+			},
+		},
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	},
+	))
+}
