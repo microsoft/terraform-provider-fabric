@@ -65,6 +65,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -425,6 +426,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
@@ -488,6 +490,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		shortcut.NewDataSourceShortcut,
+		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,
