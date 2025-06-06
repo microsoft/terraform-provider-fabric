@@ -403,6 +403,12 @@ func TestUnit_GetDiagsFromError_OperationMessages(t *testing.T) {
 			expectDetailIn: testErr.Error(),
 		},
 		{
+			name:           "open operation",
+			operation:      utils.OperationOpen,
+			expectSummary:  "unknown error",
+			expectDetailIn: testErr.Error(),
+		},
+		{
 			name:           "undefined operation",
 			operation:      utils.OperationUndefined,
 			expectSummary:  "unknown error",

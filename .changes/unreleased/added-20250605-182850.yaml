@@ -1,0 +1,5 @@
+kind: added
+body: new data-source `fabric_eventstream_source_connection`
+time: 2025-06-05T18:28:50.407851908Z
+custom:
+    Issue: "491"

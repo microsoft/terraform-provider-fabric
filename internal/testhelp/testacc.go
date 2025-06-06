@@ -15,8 +15,10 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/provider"
 )
@@ -54,7 +56,7 @@ func TestAccPreCheckNoEnvs(t *testing.T) {
 func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
 	t.Helper()
 
-	return resource.TestCase{
+	testCase := resource.TestCase{
 		IsUnitTest: false,
 		PreCheck:   func() { preCheck(t) },
 		CheckDestroy: func(s *terraform.State) error {
@@ -75,6 +77,15 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 		},
 		Steps: steps,
 	}
+
+	// Only add TerraformVersionChecks if testResource starts with "ephemeral"
+	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_10_0),
+		}
+	}
+
+	return testCase
 }
 
 // getTestAccProtoV6ProviderFactories are used to instantiate a provider during
@@ -84,6 +95,7 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 func getTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
+		"echo":   echoprovider.NewProviderServer(),
 	}
 }
 
