@@ -52,7 +52,7 @@ Optional:
 
 Read-Only:
 
-- `primary_connection_string` (String) The primary connection string for the event hub.
-- `primary_key` (String) The primary key for the event hub.
-- `secondary_connection_string` (String) The secondary connection string for the event hub.
-- `secondary_key` (String) The secondary key for the event hub.
+- `primary_connection_string` (String, Sensitive) The primary connection string for the event hub.
+- `primary_key` (String, Sensitive) The primary key for the event hub.
+- `secondary_connection_string` (String, Sensitive) The secondary connection string for the event hub.
+- `secondary_key` (String, Sensitive) The secondary key for the event hub.

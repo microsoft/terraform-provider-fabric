@@ -83,7 +83,7 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_10_0),
 		}
-		testCase.CheckDestroy = func(s *terraform.State) error {
+		testCase.CheckDestroy = func(_ *terraform.State) error {
 			return nil // No need to check destroy for ephemeral resources
 		}
 	}
