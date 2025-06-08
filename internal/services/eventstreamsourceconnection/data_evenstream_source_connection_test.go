@@ -24,7 +24,11 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 	fakeSourceID := testhelp.RandomUUID()
 
 	entity := NewRandomEventstreamSourceConnection()
-	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(entity)
+	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(
+		fakeWorkspaceID,
+		fakeEventstreamID,
+		fakeSourceID,
+		entity)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -116,6 +120,42 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "source_id" is required, but no definition was found`),
+		},
+		// error - invalid workspace_id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":   testhelp.RandomUUID(),
+					"eventstream_id": fakeEventstreamID,
+					"source_id":      fakeSourceID,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// error - invalid eventstream_id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":   fakeWorkspaceID,
+					"eventstream_id": testhelp.RandomUUID(),
+					"source_id":      fakeSourceID,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// error - invalid source_id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":   fakeWorkspaceID,
+					"eventstream_id": fakeEventstreamID,
+					"source_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
 		// read
 		{

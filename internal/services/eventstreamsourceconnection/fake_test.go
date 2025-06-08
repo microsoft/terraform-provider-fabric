@@ -9,21 +9,30 @@ import (
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
+	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
 func fakeGetEventstreamSourceConnection(
+	fakeWorkspaceID, fakeEventstreamID, fakeSourceID string,
 	entity eventstream.TopologyClientGetEventstreamSourceConnectionResponse,
 ) func(
 	ctx context.Context,
 	workspaceID, eventstreamID, sourceID string,
 	options *eventstream.TopologyClientGetEventstreamSourceConnectionOptions,
 ) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _, _, _ string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse]{}
-		resp.SetResponse(http.StatusOK, entity, nil)
+
+		if sourceID != fakeSourceID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
+			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
+			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
+		} else {
+			resp.SetResponse(http.StatusOK, entity, nil)
+		}
 
 		return
 	}
