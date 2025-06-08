@@ -4,25 +4,19 @@
 package eventstreamsourceconnection_test
 
 import (
-	"context"
-	"net/http"
 	"regexp"
 	"testing"
 
-	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
-	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
 var (
@@ -35,32 +29,14 @@ func TestUnit_EventstreamEphemeralResource(t *testing.T) {
 	fakeEventstreamID := testhelp.RandomUUID()
 	fakeSourceID := testhelp.RandomUUID()
 
-	eventstreamSourceConnection := eventstream.TopologyClientGetEventstreamSourceConnectionResponse{
-		SourceConnectionResponse: eventstream.SourceConnectionResponse{
-			EventHubName:            to.Ptr(testhelp.RandomName()),
-			FullyQualifiedNamespace: to.Ptr(testhelp.RandomName()),
-			AccessKeys: &eventstream.AccessKeys{
-				PrimaryConnectionString:   to.Ptr(testhelp.RandomName()),
-				SecondaryConnectionString: to.Ptr(testhelp.RandomName()),
-				PrimaryKey:                to.Ptr(testhelp.RandomName()),
-				SecondaryKey:              to.Ptr(testhelp.RandomName()),
-			},
-		},
-	}
+	entity := NewRandomEventstreamSourceConnection()
+	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(
+		fakeWorkspaceID,
+		fakeEventstreamID,
+		fakeSourceID,
+		entity)
 
-	serverFactory := &fabfake.ServerFactory{}
-	serverFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-		if sourceID != fakeSourceID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
-			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
-			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
-		} else {
-			resp.SetResponse(200, eventstreamSourceConnection, nil)
-		}
-
-		return
-	}
-
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, serverFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
@@ -203,31 +179,31 @@ func TestUnit_EventstreamEphemeralResource(t *testing.T) {
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("workspace_id"), knownvalue.StringExact(fakeWorkspaceID)),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("eventstream_id"), knownvalue.StringExact(fakeEventstreamID)),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("source_id"), knownvalue.StringExact(fakeSourceID)),
-				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("event_hub_name"), knownvalue.StringExact(*eventstreamSourceConnection.EventHubName)),
+				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("event_hub_name"), knownvalue.StringExact(*entity.EventHubName)),
 				statecheck.ExpectKnownValue(
 					testEphemeralItemEchoFQN,
 					tfjsonpath.New("data").AtMapKey("fully_qualified_namespace"),
-					knownvalue.StringExact(*eventstreamSourceConnection.FullyQualifiedNamespace),
+					knownvalue.StringExact(*entity.FullyQualifiedNamespace),
 				),
 				statecheck.ExpectKnownValue(
 					testEphemeralItemEchoFQN,
 					tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("primary_key"),
-					knownvalue.StringExact(*eventstreamSourceConnection.AccessKeys.PrimaryKey),
+					knownvalue.StringExact(*entity.AccessKeys.PrimaryKey),
 				),
 				statecheck.ExpectKnownValue(
 					testEphemeralItemEchoFQN,
 					tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("secondary_key"),
-					knownvalue.StringExact(*eventstreamSourceConnection.AccessKeys.SecondaryKey),
+					knownvalue.StringExact(*entity.AccessKeys.SecondaryKey),
 				),
 				statecheck.ExpectKnownValue(
 					testEphemeralItemEchoFQN,
 					tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("primary_connection_string"),
-					knownvalue.StringExact(*eventstreamSourceConnection.AccessKeys.PrimaryConnectionString),
+					knownvalue.StringExact(*entity.AccessKeys.PrimaryConnectionString),
 				),
 				statecheck.ExpectKnownValue(
 					testEphemeralItemEchoFQN,
 					tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("secondary_connection_string"),
-					knownvalue.StringExact(*eventstreamSourceConnection.AccessKeys.SecondaryConnectionString),
+					knownvalue.StringExact(*entity.AccessKeys.SecondaryConnectionString),
 				),
 			},
 		},

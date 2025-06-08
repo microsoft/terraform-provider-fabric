@@ -4,22 +4,16 @@
 package eventstreamsourceconnection_test
 
 import (
-	"context"
-	"net/http"
 	"regexp"
 	"testing"
 
-	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
-	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
@@ -29,32 +23,14 @@ func TestUnit_EventstreamDataSource(t *testing.T) {
 	fakeEventstreamID := testhelp.RandomUUID()
 	fakeSourceID := testhelp.RandomUUID()
 
-	eventstreamSourceConnection := eventstream.TopologyClientGetEventstreamSourceConnectionResponse{
-		SourceConnectionResponse: eventstream.SourceConnectionResponse{
-			EventHubName:            to.Ptr(testhelp.RandomName()),
-			FullyQualifiedNamespace: to.Ptr(testhelp.RandomName()),
-			AccessKeys: &eventstream.AccessKeys{
-				PrimaryConnectionString:   to.Ptr(testhelp.RandomName()),
-				SecondaryConnectionString: to.Ptr(testhelp.RandomName()),
-				PrimaryKey:                to.Ptr(testhelp.RandomName()),
-				SecondaryKey:              to.Ptr(testhelp.RandomName()),
-			},
-		},
-	}
+	entity := NewRandomEventstreamSourceConnection()
+	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(
+		fakeWorkspaceID,
+		fakeEventstreamID,
+		fakeSourceID,
+		entity)
 
-	serverFactory := &fabfake.ServerFactory{}
-	serverFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-		if sourceID != fakeSourceID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
-			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
-			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
-		} else {
-			resp.SetResponse(200, eventstreamSourceConnection, nil)
-		}
-
-		return
-	}
-
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, serverFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
@@ -195,12 +171,12 @@ func TestUnit_EventstreamDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "workspace_id", &fakeWorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "source_id", &fakeSourceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "eventstream_id", &fakeEventstreamID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "event_hub_name", eventstreamSourceConnection.EventHubName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "fully_qualified_namespace", eventstreamSourceConnection.FullyQualifiedNamespace),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.primary_connection_string", eventstreamSourceConnection.AccessKeys.PrimaryConnectionString),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.secondary_connection_string", eventstreamSourceConnection.AccessKeys.SecondaryConnectionString),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.primary_key", eventstreamSourceConnection.AccessKeys.PrimaryKey),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.secondary_key", eventstreamSourceConnection.AccessKeys.SecondaryKey),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "event_hub_name", entity.EventHubName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "fully_qualified_namespace", entity.FullyQualifiedNamespace),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.primary_connection_string", entity.AccessKeys.PrimaryConnectionString),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.secondary_connection_string", entity.AccessKeys.SecondaryConnectionString),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.primary_key", entity.AccessKeys.PrimaryKey),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.secondary_key", entity.AccessKeys.SecondaryKey),
 			),
 		},
 	}))

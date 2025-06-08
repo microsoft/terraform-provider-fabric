@@ -76,18 +76,22 @@ func (e *ephemeralEventstreamSourceConnection) Schema(ctx context.Context, _ eph
 					"primary_key": schema.StringAttribute{
 						MarkdownDescription: "The primary key for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"secondary_key": schema.StringAttribute{
 						MarkdownDescription: "The secondary key for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"secondary_connection_string": schema.StringAttribute{
 						MarkdownDescription: "The secondary connection string for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 					"primary_connection_string": schema.StringAttribute{
 						MarkdownDescription: "The primary connection string for the event hub.",
 						Computed:            true,
+						Sensitive:           true,
 					},
 				},
 			},
