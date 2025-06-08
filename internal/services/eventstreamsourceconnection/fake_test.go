@@ -21,7 +21,7 @@ func fakeGetEventstreamSourceConnection(
 	workspaceID, eventstreamID, sourceID string,
 	options *eventstream.TopologyClientGetEventstreamSourceConnectionOptions,
 ) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _, _ string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse]{}
 		resp.SetResponse(http.StatusOK, entity, nil)
 
