@@ -26,7 +26,7 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 	entity := NewRandomEventstreamSourceConnection()
 	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(entity)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
@@ -128,9 +128,9 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "workspace_id", &fakeWorkspaceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "source_id", &fakeSourceID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "eventstream_id", &fakeEventstreamID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", fakeWorkspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "source_id", fakeSourceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "eventstream_id", fakeEventstreamID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "event_hub_name", entity.SourceConnectionResponse.EventHubName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "fully_qualified_namespace", entity.SourceConnectionResponse.FullyQualifiedNamespace),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "access_keys.primary_connection_string", entity.SourceConnectionResponse.AccessKeys.PrimaryConnectionString),

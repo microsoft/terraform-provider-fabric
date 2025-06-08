@@ -32,7 +32,7 @@ func TestUnit_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 	entity := NewRandomEventstreamSourceConnection()
 	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(entity)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
