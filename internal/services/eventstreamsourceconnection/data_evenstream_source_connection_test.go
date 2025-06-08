@@ -18,7 +18,7 @@ import (
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_EventstreamDataSource(t *testing.T) {
+func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 	fakeWorkspaceID := testhelp.RandomUUID()
 	fakeEventstreamID := testhelp.RandomUUID()
 	fakeSourceID := testhelp.RandomUUID()

@@ -24,7 +24,7 @@ var (
 	testEphemeralItemEchoFQN, testEphemeralItemEchoConfig = testhelp.TFEphemeralEcho(testEphemeralItemFQN)
 )
 
-func TestUnit_EventstreamEphemeralResource(t *testing.T) {
+func TestUnit_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 	fakeWorkspaceID := testhelp.RandomUUID()
 	fakeEventstreamID := testhelp.RandomUUID()
 	fakeSourceID := testhelp.RandomUUID()
