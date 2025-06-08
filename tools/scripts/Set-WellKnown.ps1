@@ -1142,7 +1142,6 @@ $wellKnown['DeploymentPipeline'] = @{
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
-Write-Log -Message "Eventstream source Id: $($eventstreamSourceId)"
 $definition = @{
   parts = @(
     @{
@@ -1488,7 +1487,7 @@ $definition = @{
   parts = @(
     @{
       path        = 'apacheAirflowJob-content.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheAirflowJob-content.json.tmpl'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheairflowjob-content.json.tmpl'
       payloadType = 'InlineBase64'
     }
   )
