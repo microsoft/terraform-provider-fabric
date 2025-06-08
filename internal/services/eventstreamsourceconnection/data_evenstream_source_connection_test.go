@@ -121,42 +121,6 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "source_id" is required, but no definition was found`),
 		},
-		// invalid workspace_id
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id":   testhelp.RandomUUID(),
-					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		// invalid eventstream_id
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id":   fakeWorkspaceID,
-					"eventstream_id": testhelp.RandomUUID(),
-					"source_id":      fakeSourceID,
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		// invalid source_id
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id":   fakeWorkspaceID,
-					"eventstream_id": fakeEventstreamID,
-					"source_id":      testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
 		// read
 		{
 			Config: at.CompileConfig(

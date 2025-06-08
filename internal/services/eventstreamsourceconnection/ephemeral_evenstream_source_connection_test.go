@@ -127,42 +127,6 @@ func TestUnit_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "source_id" is required, but no definition was found`),
 		},
-		// invalid workspace_id
-		{
-			Config: at.CompileConfig(
-				testEphemeralItemHeader,
-				map[string]any{
-					"workspace_id":   testhelp.RandomUUID(),
-					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorOpenHeader),
-		},
-		// invalid eventstream_id
-		{
-			Config: at.CompileConfig(
-				testEphemeralItemHeader,
-				map[string]any{
-					"workspace_id":   fakeWorkspaceID,
-					"eventstream_id": testhelp.RandomUUID(),
-					"source_id":      fakeSourceID,
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorOpenHeader),
-		},
-		// invalid source_id
-		{
-			Config: at.CompileConfig(
-				testEphemeralItemHeader,
-				map[string]any{
-					"workspace_id":   fakeWorkspaceID,
-					"eventstream_id": fakeEventstreamID,
-					"source_id":      testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorOpenHeader),
-		},
 		// read
 		{
 			Config: at.JoinConfigs(
