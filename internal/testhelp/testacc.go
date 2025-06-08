@@ -78,10 +78,13 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 		Steps: steps,
 	}
 
-	// Only add TerraformVersionChecks if testResource starts with "ephemeral"
+	// ephemeral specific configurations
 	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
 		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_10_0),
+		}
+		testCase.CheckDestroy = func(s *terraform.State) error {
+			return nil // No need to check destroy for ephemeral resources
 		}
 	}
 
