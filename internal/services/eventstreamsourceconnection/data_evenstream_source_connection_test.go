@@ -24,11 +24,7 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 	fakeSourceID := testhelp.RandomUUID()
 
 	entity := NewRandomEventstreamSourceConnection()
-	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(
-		fakeWorkspaceID,
-		fakeEventstreamID,
-		fakeSourceID,
-		entity)
+	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamSourceConnection = fakeGetEventstreamSourceConnection(entity)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
