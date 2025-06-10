@@ -1,0 +1,5 @@
+kind: added
+body: new ephemeral resource `fabric_eventstream_source_connection`
+time: 2025-06-04T09:41:02.191082278Z
+custom:
+  Issue: "453"
