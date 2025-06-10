@@ -212,7 +212,7 @@ func TestUnit_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 
 func TestAcc_EventstreamSourceConnectionEphemeralResource(t *testing.T) {
 	if testhelp.ShouldSkipTest(t) {
-		t.Skip("Thorttling issues which blocks all PR tests in the pipeline")
+		t.Skip("Throttling issues which blocks all PR tests in the pipeline")
 	}
 
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
