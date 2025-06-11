@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1
 	github.com/dcarbone/terraform-plugin-framework-utils/v3 v3.9.0
 	github.com/go-sprout/sprout v1.0.0
 	github.com/google/go-cmp v0.7.0
