@@ -220,7 +220,24 @@ func TestUnit_DigitalTwinBuilderResource_CRUD(t *testing.T) {
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
-		// Create and Read
+		// Create and Read - without definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Create and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
