@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_deployment_pipeline` resource
+time: 2025-04-27T11:49:32.096609785Z
+custom:
+  Issue: "395"
