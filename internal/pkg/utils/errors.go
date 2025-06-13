@@ -33,6 +33,7 @@ const (
 	OperationDelete    Operation = "delete"
 	OperationList      Operation = "list"
 	OperationImport    Operation = "import"
+	OperationOpen      Operation = "open"
 	OperationUndefined Operation = "undefined"
 )
 
@@ -111,6 +112,8 @@ func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, 
 		return common.ErrorListHeader, common.ErrorListDetails
 	case OperationImport:
 		return common.ErrorImportHeader, common.ErrorImportDetails
+	case OperationOpen:
+		return common.ErrorOpenHeader, common.ErrorOpenDetails
 	default:
 		return "", ""
 	}

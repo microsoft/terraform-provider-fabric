@@ -133,6 +133,34 @@ func TFResource(providerName, typeName, resourceName string) (fqn, header string
 	return fqn, header
 }
 
+func TFEphemeral(providerName, typeName, ephemeralResourceName string) (fqn, header string) { //nolint:nonamedreturns
+	fqn = EphemeralResourceFQN(providerName, typeName, ephemeralResourceName)
+	header = EphemeralResourceHeader(TypeName(providerName, typeName), ephemeralResourceName)
+
+	return fqn, header
+}
+
+func TFEphemeralEcho(ephemeralResourceFQN string) (config, fqn string) { //nolint:nonamedreturns
+	fqn = "echo.test"
+
+	// lintignore:AT004
+	config = fmt.Sprintf(`
+					provider "echo" {
+						data = %[1]s
+					}
+
+					resource "echo" "test" {}
+				`, ephemeralResourceFQN)
+
+	return fqn, config
+}
+
+func EphemeralResourceHeader(ephemeralResourceType, ephemeralResourceName string) string {
+	const f = `ephemeral %q %q`
+
+	return fmt.Sprintf(f, ephemeralResourceType, ephemeralResourceName)
+}
+
 // Helper function to create a base type name.
 func TypeName(providerName, typeName string) string {
 	return fmt.Sprintf("%s_%s", providerName, typeName)
@@ -146,6 +174,11 @@ func ResourceFQN(providerName, typeName, resourceName string) string {
 // Helper function to create a data source FQN.
 func DataSourceFQN(providerName, typeName, dataSourceName string) string {
 	return fmt.Sprintf("data.%s.%s", TypeName(providerName, typeName), dataSourceName)
+}
+
+// Helper function to create a ephemeral resource FQN.
+func EphemeralResourceFQN(providerName, typeName, ephemeralResource string) string {
+	return fmt.Sprintf("ephemeral.%s.%s", TypeName(providerName, typeName), ephemeralResource)
 }
 
 // Helper function to create a function Header.
