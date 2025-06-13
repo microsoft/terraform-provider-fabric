@@ -15,8 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -65,7 +67,7 @@ func TestUnitPreCheckNoEnvs(t *testing.T) {
 func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.ServerFactory, testState *TestState, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
 	t.Helper()
 
-	return resource.TestCase{
+	testCase := resource.TestCase{
 		IsUnitTest: true,
 		PreCheck:   func() { preCheck(t) },
 		CheckDestroy: func(s *terraform.State) error {
@@ -83,6 +85,18 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 		}, testState),
 		Steps: steps,
 	}
+
+	// ephemeral specific configurations
+	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_10_0),
+		}
+		testCase.CheckDestroy = func(_ *terraform.State) error {
+			return nil // No need to check destroy for ephemeral resources
+		}
+	}
+
+	return testCase
 }
 
 // getTestUnitProtoV6ProviderFactories are used to instantiate a provider during
@@ -109,6 +123,7 @@ func GetTestUnitProtoV6ProviderFactories(fabricClientOpts *azcore.ClientOptions,
 
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"fabric": providerserver.NewProtocol6WithError(prov),
+		"echo":   echoprovider.NewProviderServer(),
 	}
 }
 

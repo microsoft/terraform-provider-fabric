@@ -1,11 +1,9 @@
 {
   "sources": [
     {
-      "name": "SampleData",
-      "type": "SampleData",
-      "properties": {
-        "type": "Bicycles"
-      }
+      "name": "CustomEndpoint",
+      "type": "CustomEndpoint",
+      "properties": {}
     }
   ],
   "destinations": [
@@ -13,7 +11,7 @@
       "name": "Lakehouse",
       "type": "Lakehouse",
       "properties": {
-        "workspaceId": "{{ .LakehouseWorkspaceID }}",
+      "workspaceId": "{{ .LakehouseWorkspaceID }}",
         "itemId": "{{ .LakehouseID }}",
         "schema": "",
         "deltaTable": "streamTable",
@@ -39,7 +37,7 @@
       "properties": {},
       "inputNodes": [
         {
-          "name": "SampleData"
+          "name": "CustomEndpoint"
         }
       ]
     }
