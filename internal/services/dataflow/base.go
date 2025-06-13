@@ -32,9 +32,4 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		API:   "",
 		Paths: []string{"queryMetadata.json", "mashup.pq"},
 	},
-	{
-		Type:  "pq",
-		API:   "",
-		Paths: []string{"queryMetadata.json", "mashup.pq"},
-	},
 }

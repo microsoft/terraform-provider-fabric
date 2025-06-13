@@ -221,7 +221,7 @@ func TestAcc_DataflowDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
 		},
-		// read by id with definition - default format
+		// read by id with definition
 		{
 			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
@@ -239,25 +239,6 @@ func TestAcc_DataflowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.queryMetadata.json.content"),
-			),
-		},
-		// read by name with definition - pq format
-		{
-			ResourceName: testDataSourceItemFQN,
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id":      workspaceID,
-					"id":                entityID,
-					"format":            "pq",
-					"output_definition": true,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.mashup.pq.content"),
 			),
 		},
