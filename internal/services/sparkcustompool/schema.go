@@ -174,7 +174,46 @@ func itemSchema() superschema.Schema {
 					},
 				},
 			},
-			"dynamic_executor_allocation": superschema.SuperSingleNestedAttributeOf[sparkCustomPoolDynamicExecutorAllocationModel]{
+			"dynamic_executor_allocation": superschema."dynamic_executor_allocation": superschema.SuperSingleNestedAttributeOf[sparkCustomPoolDynamicExecutorAllocationModel]{
+				Common: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "Dynamic Executor Allocation properties.",
+				},
+				Resource: &schemaR.SingleNestedAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.SingleNestedAttribute{
+					Computed: true,
+				},
+				Attributes: superschema.Attributes{
+					"enabled": superschema.BoolAttribute{
+						Common: &schemaR.BoolAttribute{
+							MarkdownDescription: "The status of the dynamic executor allocation: `false` - Disabled, `true` - Enabled.",
+						},
+						Resource: &schemaR.BoolAttribute{
+							Required: true,
+						},
+						DataSource: &schemaD.BoolAttribute{
+							Computed: true,
+						},
+					},
+					"min_executors": superschema.Int32Attribute{
+						Common: &schemaR.Int32Attribute{
+							MarkdownDescription: "The minimum executors.",
+						},
+						Resource: &schemaR.Int32Attribute{
+							Computed: true,
+							Optional: true,
+							Validators: []validator.Int32{
+								superint32validator.NullIfAttributeIsOneOf(
+									path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+									[]attr.Value{types.BoolValue(false)},
+								),
+								superint32validator.RequireIfAttributeIsOneOf(
+									path.MatchRoot("dynamic_executor_allocation").AtName("enabled"),
+									[]attr.Value{types.BoolValue(true)},
+								),
+							},
+						},[sparkCustomPoolDynamicExecutorAllocationModel]{
 				Common: &schemaR.SingleNestedAttribute{
 					MarkdownDescription: "Dynamic Executor Allocation properties.",
 				},

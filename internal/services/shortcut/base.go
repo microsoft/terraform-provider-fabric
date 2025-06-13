@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Shortcuts",
 	Types:          "shortcuts",
 	DocsURL:        "https://learn.microsoft.com/fabric/onelake/onelake-shortcuts",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: true,
 }
