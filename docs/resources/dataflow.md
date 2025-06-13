@@ -68,10 +68,10 @@ resource "fabric_dataflow" "example_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Dataflow definition part paths](https://learn.microsoft.com/fabric/data-factory/data-source-management). Accepted path keys: **Default** format: `mashup.pq`, `queryMetadata.json` **pq** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Dataflow definition part paths](https://learn.microsoft.com/fabric/data-factory/data-source-management). Accepted path keys: **Default** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Dataflow description.
-- `format` (String) The Dataflow format. Possible values: `Default`, `pq`
+- `format` (String) The Dataflow format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

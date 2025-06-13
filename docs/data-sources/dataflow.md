@@ -67,7 +67,7 @@ output "example_definition_pq_object" {
 ### Optional
 
 - `display_name` (String) The Dataflow display name.
-- `format` (String) The Dataflow format. Possible values: `Default`, `pq`
+- `format` (String) The Dataflow format. Possible values: `Default`
 - `id` (String) The Dataflow ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -77,7 +77,7 @@ output "example_definition_pq_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mashup.pq`, `queryMetadata.json` **pq** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Dataflow description.
 
 <a id="nestedatt--timeouts"></a>
