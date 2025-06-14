@@ -97,7 +97,8 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	reqCreate.setDescription(plan.Description)
 	reqCreate.setType(r.FabricItemType)
 
-	respCreate, err := r.client.CreateItem(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest, nil)
+	// Use retry logic for create operations
+	respCreate, err := RetryCreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -190,7 +191,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 	reqUpdate.setDisplayName(plan.DisplayName)
 	reqUpdate.setDescription(plan.Description)
 
-	_, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest, nil)
+	_, err := RetryUpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
