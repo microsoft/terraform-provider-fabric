@@ -138,57 +138,91 @@ func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Di
 
 // RetryConfig holds configuration for retry operations
 type RetryConfig struct {
-	MaxRetries    int
 	RetryInterval time.Duration
 	Operation     string
 }
 
-// DefaultUpdateRetryConfig returns the default retry configuration for update operations
-func DefaultUpdateRetryConfig() RetryConfig {
-	return RetryConfig{
-		MaxRetries:    7,
-		RetryInterval: time.Minute,
-		Operation:     "update",
-	}
-}
-
-// RetryUpdateOperation executes an update operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
-func RetryUpdateOperation(ctx context.Context, config RetryConfig, operation func() error) error {
+// RetryOperation executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
+// This will retry indefinitely until the operation succeeds or encounters a non-retryable error
+func RetryOperation(ctx context.Context, config RetryConfig, operation func() error) error {
 	var err error
 	var errRespFabric *fabcore.ResponseError
+	retryCount := 0
 
-	for i := 0; i < config.MaxRetries; i++ {
+	for {
 		err = operation()
 
 		if err == nil {
+			if retryCount > 0 {
+				tflog.Debug(ctx, fmt.Sprintf("Operation succeeded after %d retries", retryCount))
+			}
 			return nil
 		}
 
+		// Check if context is cancelled
+		if ctx.Err() != nil {
+			tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
+			return ctx.Err()
+		}
+
 		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == "ItemDisplayNameNotAvailableYet" {
-			if i < config.MaxRetries-1 {
-				tflog.Debug(ctx, fmt.Sprintf("Retry %d/%d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", i+1, config.MaxRetries, config.RetryInterval))
-				time.Sleep(config.RetryInterval)
+			retryCount++
+			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", retryCount, config.RetryInterval))
+
+			// Use a timer to respect context cancellation during sleep
+			timer := time.NewTimer(config.RetryInterval)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
+				return ctx.Err()
+			case <-timer.C:
 				continue
-			} else {
-				tflog.Error(ctx, fmt.Sprintf("Max retries (%d) reached for %s operation. Operation failed.", config.MaxRetries, config.Operation))
 			}
 		}
 
+		// For any other error, don't retry
+		tflog.Error(ctx, fmt.Sprintf("Non-retryable error in %s operation after %d retries: %v", config.Operation, retryCount, err))
 		break
 	}
 
 	return err
 }
 
-// RetryUpdateItem executes UpdateItem with retry logic and returns the response
+func DefaultUpdateRetryConfig() RetryConfig {
+	return RetryConfig{
+		RetryInterval: 2 * time.Minute,
+		Operation:     "update",
+	}
+}
+
 func RetryUpdateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.UpdateItemRequest) (fabcore.ItemsClientUpdateItemResponse, error) {
 	var respUpdate fabcore.ItemsClientUpdateItemResponse
 	var err error
 
-	err = RetryUpdateOperation(ctx, DefaultUpdateRetryConfig(), func() error {
+	err = RetryOperation(ctx, DefaultUpdateRetryConfig(), func() error {
 		respUpdate, err = client.UpdateItem(ctx, workspaceID, itemID, request, nil)
 		return err
 	})
 
 	return respUpdate, err
+}
+
+func DefaultCreateRetryConfig() RetryConfig {
+	return RetryConfig{
+		RetryInterval: 2 * time.Minute,
+		Operation:     "create",
+	}
+}
+
+func RetryCreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID string, request fabcore.CreateItemRequest) (fabcore.ItemsClientCreateItemResponse, error) {
+	var respCreate fabcore.ItemsClientCreateItemResponse
+	var err error
+
+	err = RetryOperation(ctx, DefaultCreateRetryConfig(), func() error {
+		respCreate, err = client.CreateItem(ctx, workspaceID, request, nil)
+		return err
+	})
+
+	return respCreate, err
 }

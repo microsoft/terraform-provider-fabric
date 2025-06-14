@@ -99,7 +99,8 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 	reqCreate.setDescription(plan.Description)
 	reqCreate.setType(r.FabricItemType)
 
-	respCreate, err := r.client.CreateItem(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest, nil)
+	// Use retry logic for create operations
+	respCreate, err := RetryCreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
