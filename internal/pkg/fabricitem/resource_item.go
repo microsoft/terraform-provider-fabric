@@ -184,7 +184,7 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 	reqUpdate.setDisplayName(plan.DisplayName)
 	reqUpdate.setDescription(plan.Description)
 
-	respUpdate, err := r.client.UpdateItem(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest, nil)
+	respUpdate, err := RetryUpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}

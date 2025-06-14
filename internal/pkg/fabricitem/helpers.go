@@ -4,9 +4,14 @@
 package fabricitem
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
@@ -129,4 +134,61 @@ func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Di
 	}
 
 	return nil
+}
+
+// RetryConfig holds configuration for retry operations
+type RetryConfig struct {
+	MaxRetries    int
+	RetryInterval time.Duration
+	Operation     string
+}
+
+// DefaultUpdateRetryConfig returns the default retry configuration for update operations
+func DefaultUpdateRetryConfig() RetryConfig {
+	return RetryConfig{
+		MaxRetries:    7,
+		RetryInterval: time.Minute,
+		Operation:     "update",
+	}
+}
+
+// RetryUpdateOperation executes an update operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
+func RetryUpdateOperation(ctx context.Context, config RetryConfig, operation func() error) error {
+	var err error
+	var errRespFabric *fabcore.ResponseError
+
+	for i := 0; i < config.MaxRetries; i++ {
+		err = operation()
+
+		if err == nil {
+			return nil
+		}
+
+		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == "ItemDisplayNameNotAvailableYet" {
+			if i < config.MaxRetries-1 {
+				tflog.Debug(ctx, fmt.Sprintf("Retry %d/%d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", i+1, config.MaxRetries, config.RetryInterval))
+				time.Sleep(config.RetryInterval)
+				continue
+			} else {
+				tflog.Error(ctx, fmt.Sprintf("Max retries (%d) reached for %s operation. Operation failed.", config.MaxRetries, config.Operation))
+			}
+		}
+
+		break
+	}
+
+	return err
+}
+
+// RetryUpdateItem executes UpdateItem with retry logic and returns the response
+func RetryUpdateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.UpdateItemRequest) (fabcore.ItemsClientUpdateItemResponse, error) {
+	var respUpdate fabcore.ItemsClientUpdateItemResponse
+	var err error
+
+	err = RetryUpdateOperation(ctx, DefaultUpdateRetryConfig(), func() error {
+		respUpdate, err = client.UpdateItem(ctx, workspaceID, itemID, request, nil)
+		return err
+	})
+
+	return respUpdate, err
 }
