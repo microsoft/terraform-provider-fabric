@@ -219,6 +219,9 @@ function Set-FabricItem {
     'DataPipeline' {
       $itemEndpoint = 'dataPipelines'
     }
+    'DigitalTwinBuilder' {
+      $itemEndpoint = 'digitalTwinBuilders'
+    }
     'Environment' {
       $itemEndpoint = 'environments'
     }
@@ -285,7 +288,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory')
+  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1028,7 +1031,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'Environment', 'Eventhouse', 'Eventstream', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1139,6 +1142,41 @@ $wellKnown['DeploymentPipeline'] = @{
   description = $deploymentPipeline.description
   stages      = $deploymentPipeline.stages
 }
+
+# Create Eventstream if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "eventstream.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/eventstream/eventstream.json.tmpl' -Values @(
+        @{ key = '{{ .LakehouseID }}'; value = $wellKnown['Lakehouse'].id },
+        @{ key = '{{ .LakehouseWorkspaceID }}'; value = $wellKnown['WorkspaceDS'].id }
+      )
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$eventstream = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'Eventstream' -Definition $definition
+$wellKnown['Eventstream'] = @{
+  id          = $eventstream.id
+  displayName = $eventstream.displayName
+  description = $eventstream.description
+}
+
+# Set Eventstream source connection
+$eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
+$eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamSourceId = $eventstreamSource.id
+
+$eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
+$wellKnown['Eventstream']['sourceConnection'] = @{
+  sourceId                = $eventstreamSourceId
+  eventHubName            = $eventstreamConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
+}
+
+
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"
@@ -1452,7 +1490,7 @@ $definition = @{
   parts = @(
     @{
       path        = 'apacheAirflowJob-content.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheAirflowJob-content.json.tmpl'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheairflowjob-content.json.tmpl'
       payloadType = 'InlineBase64'
     }
   )

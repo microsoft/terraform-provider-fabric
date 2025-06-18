@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -40,6 +41,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
@@ -49,6 +51,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
@@ -81,8 +84,9 @@ import (
 
 // Ensure FabricProvider satisfies various provider interfaces.
 var (
-	_ provider.Provider              = (*FabricProvider)(nil)
-	_ provider.ProviderWithFunctions = (*FabricProvider)(nil)
+	_ provider.Provider                       = (*FabricProvider)(nil)
+	_ provider.ProviderWithFunctions          = (*FabricProvider)(nil)
+	_ provider.ProviderWithEphemeralResources = (*FabricProvider)(nil)
 	// _ provider.ProviderWithConfigValidators = (*FabricProvider)(nil)
 	// _ provider.ProviderWithValidateConfig   = (*FabricProvider)(nil)
 	// _ provider.ProviderWithMetaSchema = (*FabricProvider)(nil).
@@ -402,12 +406,17 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	resp.ResourceData = p.config.ProviderData
 
+	tflog.Debug(ctx, "Assigning Microsoft Fabric client to EphemeralResourceData")
+
+	resp.EphemeralResourceData = p.config.ProviderData
+
 	tflog.Info(ctx, "Configured Microsoft Fabric client", map[string]any{"success": true})
 }
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		copyjob.NewResourceCopyJob,
+		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
@@ -451,6 +460,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
+		dataflow.NewDataSourceDataflow,
+		dataflow.NewDataSourceDataflows,
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
@@ -465,6 +476,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,
@@ -516,6 +528,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacegit.NewDataSourceWorkspaceGit,
 		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoint,
 		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoints,
+	}
+}
+
+func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{
+		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
 
