@@ -159,17 +159,15 @@ func RetryOperation(ctx context.Context, config RetryConfig, operation func() er
 			return nil
 		}
 
-		// Check if context is cancelled
 		if ctx.Err() != nil {
 			tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
 			return ctx.Err()
 		}
 
-		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == "ItemDisplayNameNotAvailableYet" {
+		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
 			retryCount++
 			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", retryCount, config.RetryInterval))
 
-			// Use a timer to respect context cancellation during sleep
 			timer := time.NewTimer(config.RetryInterval)
 			select {
 			case <-ctx.Done():
@@ -181,7 +179,6 @@ func RetryOperation(ctx context.Context, config RetryConfig, operation func() er
 			}
 		}
 
-		// For any other error, don't retry
 		tflog.Error(ctx, fmt.Sprintf("Non-retryable error in %s operation after %d retries: %v", config.Operation, retryCount, err))
 		break
 	}
@@ -196,7 +193,7 @@ func DefaultUpdateRetryConfig() RetryConfig {
 	}
 }
 
-func RetryUpdateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.UpdateItemRequest) (fabcore.ItemsClientUpdateItemResponse, error) {
+func UpdateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.UpdateItemRequest) (fabcore.ItemsClientUpdateItemResponse, error) {
 	var respUpdate fabcore.ItemsClientUpdateItemResponse
 	var err error
 
@@ -215,7 +212,7 @@ func DefaultCreateRetryConfig() RetryConfig {
 	}
 }
 
-func RetryCreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID string, request fabcore.CreateItemRequest) (fabcore.ItemsClientCreateItemResponse, error) {
+func CreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID string, request fabcore.CreateItemRequest) (fabcore.ItemsClientCreateItemResponse, error) {
 	var respCreate fabcore.ItemsClientCreateItemResponse
 	var err error
 

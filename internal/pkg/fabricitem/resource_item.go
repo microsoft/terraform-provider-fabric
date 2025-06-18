@@ -99,8 +99,7 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 	reqCreate.setDescription(plan.Description)
 	reqCreate.setType(r.FabricItemType)
 
-	// Use retry logic for create operations
-	respCreate, err := RetryCreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
+	respCreate, err := CreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -185,7 +184,7 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 	reqUpdate.setDisplayName(plan.DisplayName)
 	reqUpdate.setDescription(plan.Description)
 
-	respUpdate, err := RetryUpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
+	respUpdate, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
