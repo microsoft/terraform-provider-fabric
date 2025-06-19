@@ -23,6 +23,7 @@ func (o *operationsDeploymentPipeline) Create(data fabcore.CreateDeploymentPipel
 	entity.Stages = make([]fabcore.DeploymentPipelineStage, len(data.Stages))
 
 	for i := range data.Stages {
+		entity.Stages[i].ID = to.Ptr(testhelp.RandomUUID())
 		entity.Stages[i].DisplayName = data.Stages[i].DisplayName
 		entity.Stages[i].Description = data.Stages[i].Description
 		entity.Stages[i].IsPublic = data.Stages[i].IsPublic
@@ -131,11 +132,13 @@ func NewRandomDeploymentPipelineWithStages() fabcore.DeploymentPipelineExtendedI
 	entity := NewRandomDeploymentPipeline()
 	entity.Stages = []fabcore.DeploymentPipelineStage{
 		{
+			ID:          to.Ptr(testhelp.RandomUUID()),
 			DisplayName: to.Ptr(testhelp.RandomName()),
 			Description: to.Ptr(testhelp.RandomName()),
 			IsPublic:    to.Ptr(testhelp.RandomBool()),
 		},
 		{
+			ID:          to.Ptr(testhelp.RandomUUID()),
 			DisplayName: to.Ptr(testhelp.RandomName()),
 			Description: to.Ptr(testhelp.RandomName()),
 			IsPublic:    to.Ptr(testhelp.RandomBool()),

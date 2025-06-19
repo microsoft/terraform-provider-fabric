@@ -40,7 +40,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			Resource: &schemaR.ListNestedAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+					listplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.List{
 					listvalidator.SizeBetween(2, 10),
