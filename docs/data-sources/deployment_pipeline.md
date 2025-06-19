@@ -56,7 +56,7 @@ Optional:
 
 Optional:
 
-- `id` (String) The Deployment Pipeline ID.
+- `id` (String) The ID of the stage.
 
 Read-Only:
 

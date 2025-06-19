@@ -45,7 +45,7 @@ resource "fabric_deployment_pipeline" "example" {
 ### Required
 
 - `display_name` (String) The Deployment Pipeline display name. String length must be at most 246.
-- `stages` (Attributes List) The collection of Deployment Pipeline stages. List must contain at least 2 elements and at most 10 elements. (see [below for nested schema](#nestedatt--stages))
+- `stages` (Attributes List) <i style="color:red;font-weight: bold">(ForceNew)</i> The collection of Deployment Pipeline stages. List must contain at least 2 elements and at most 10 elements. (see [below for nested schema](#nestedatt--stages))
 
 ### Optional
 
@@ -72,7 +72,7 @@ Optional:
 
 Read-Only:
 
-- `id` (String) The Deployment Pipeline ID.
+- `id` (String) The ID of the stage.
 
 <a id="nestedatt--timeouts"></a>
 
