@@ -44,6 +44,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -420,6 +421,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
+		deploymentpipeline.NewResourceDeploymentPipeline,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
@@ -463,6 +465,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		deploymentpipeline.NewDataSourceDeploymentPipeline,
+		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
