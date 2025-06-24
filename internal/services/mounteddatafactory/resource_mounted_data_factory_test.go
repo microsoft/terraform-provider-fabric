@@ -349,3 +349,63 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 	},
 	))
 }
+
+func TestAcc_MountedDataFactoryResource_Update_Definition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	testHelperDefinition2 := map[string]any{
+		`"mountedDataFactory-content.json"`: map[string]any{
+			"source": "${local.path}/mountedDataFactory-content.json.tmpl",
+			"format": "Default",
+			"tokens": map[string]any{
+				"SUBSCRIPTION_ID":     testhelp.RandomUUID(),
+				"RESOURCE_GROUP_NAME": testhelp.RandomName(),
+				"FACTORY_NAME":        testhelp.RandomName(),
+			},
+		},
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition2,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+	},
+	))
+}
