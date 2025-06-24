@@ -512,6 +512,8 @@ func deleteByID[TEntity, TResponse any](handler *typedHandler[TEntity], id strin
 	return resp, errResp
 }
 
+
+
 func getByID[TEntity, TResponse any](handler *typedHandler[TEntity], id string, getTransformer getTransformer[TEntity, TResponse]) (azfake.Responder[TResponse], azfake.ErrorResponder) {
 	var resp azfake.Responder[TResponse]
 
