@@ -846,18 +846,11 @@ function Set-FabricFolder {
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/folders"
 
   if (!$ParentFolderId) {
-    # Looking for a root folder - filter for folders that don't have parentFolderId property
-    $result = $results.Response.value | Where-Object {
-      $_.displayName -eq $DisplayName -and
-      (-not (Get-Member -InputObject $_ -Name "parentFolderId" -MemberType Properties))
-    }
-    Write-Log -Message "$result" -Level 'INFO'
+    # Looking for a root folder - folder that doesn't have parentFolderId property
+    $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and -not $_.parentFolderId } | Select-Object -First 1
   } else {
-    # Looking for a folder with a specific parentFolderId
-    $result = $results.Response.value | Where-Object {
-      $_.displayName -eq $DisplayName -and
-      $_.parentFolderId -eq $ParentFolderId
-    }
+    # Looking for a subfolder with a specific parentFolderId
+    $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and $_.parentFolderId -eq $ParentFolderId } | Select-Object -First 1
   }
 
   if (!$result) {
