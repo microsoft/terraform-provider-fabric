@@ -136,14 +136,14 @@ func IsPreviewMode(name string, itemIsPreview, providerPreviewMode bool) diag.Di
 	return nil
 }
 
-// RetryConfig holds configuration for retry operations
+// RetryConfig holds configuration for retry operations.
 type RetryConfig struct {
 	RetryInterval time.Duration
 	Operation     string
 }
 
 // RetryOperation executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
-// This will retry indefinitely until the operation succeeds or encounters a non-retryable error
+// This will retry indefinitely until the operation succeeds or encounters a non-retryable error.
 func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
 	var result T
 	var err error
@@ -157,11 +157,13 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 			if retryCount > 0 {
 				tflog.Debug(ctx, fmt.Sprintf("Operation succeeded after %d retries", retryCount))
 			}
+
 			return result, nil
 		}
 
 		if ctx.Err() != nil {
 			tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
+
 			return result, ctx.Err()
 		}
 
@@ -174,6 +176,7 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 			case <-ctx.Done():
 				timer.Stop()
 				tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
+
 				return result, ctx.Err()
 			case <-timer.C:
 				continue
@@ -181,6 +184,7 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 		}
 
 		tflog.Error(ctx, fmt.Sprintf("Non-retryable error in %s operation after %d retries: %v", config.Operation, retryCount, err))
+
 		break
 	}
 
