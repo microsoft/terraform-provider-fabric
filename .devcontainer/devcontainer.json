@@ -28,13 +28,13 @@
       "jaqVersion": "latest"
     },
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.12.1",
+      "version": "1.12.2",
       "installSentinel": true,
       "installTFsec": true,
       "installTerraformDocs": true
     },
     "ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-      "version": "1.9.1"
+      "version": "1.10.1"
     },
     "ghcr.io/eitsupi/devcontainer-features/go-task:1": {},
     "./features/tfprovider-local-dev": {
