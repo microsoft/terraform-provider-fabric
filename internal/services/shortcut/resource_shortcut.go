@@ -36,61 +36,18 @@ type resourceShortcut struct {
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	tflog.Debug(ctx, "IMPORT", map[string]any{
-		"action": "start",
-	})
-
-	parts := strings.Split(req.ID, "/")
-	if len(parts) != 4 {
-		resp.Diagnostics.AddError(
-			common.ErrorImportIdentifierHeader,
-			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name"),
-		)
-
-		return
+func NewResourceShortcut() resource.Resource {
+	return &resourceShortcut{
+		TypeInfo: ItemTypeInfo,
 	}
+}
 
-	workspaceID, itemID, shortcutPath, name := parts[0], parts[1], parts[2], parts[3]
+func (r *resourceShortcut) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = r.TypeInfo.FullTypeName(false)
+}
 
-	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
-	resp.Diagnostics.Append(diags...)
-
-	uuitemID, diags := customtypes.NewUUIDValueMust(itemID)
-	resp.Diagnostics.Append(diags...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var timeout timeouts.Value
-	if resp.Diagnostics.Append(resp.State.GetAttribute(ctx, path.Root("timeouts"), &timeout)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	state := resourceShortcutModel{
-		baseShortcutModel: baseShortcutModel{
-			ItemID:      uuitemID,
-			WorkspaceID: uuidWorkspaceID,
-			Name:        types.StringValue(name),
-			Path:        types.StringValue(shortcutPath),
-		},
-		Timeouts: timeout,
-	}
-
-	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-
-	tflog.Debug(ctx, "IMPORT", map[string]any{
-		"action": "end",
-	})
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
+func (r *resourceShortcut) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceShortcut) ConfigValidators(_ context.Context) []resource.ConfigValidator {
@@ -104,20 +61,6 @@ func (r *resourceShortcut) ConfigValidators(_ context.Context) []resource.Config
 			path.MatchRoot("target").AtName("dataverse"),
 		),
 	}
-}
-
-func NewResourceShortcut() resource.Resource {
-	return &resourceShortcut{
-		TypeInfo: ItemTypeInfo,
-	}
-}
-
-func (r *resourceShortcut) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = r.TypeInfo.FullTypeName(false)
-}
-
-func (r *resourceShortcut) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceShortcut) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -301,6 +244,66 @@ func (r *resourceShortcut) Delete(ctx context.Context, req resource.DeleteReques
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",
 	})
+}
+
+func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "IMPORT", map[string]any{
+		"id": req.ID,
+	})
+
+	parts := strings.Split(req.ID, "/")
+	if len(parts) != 4 {
+		resp.Diagnostics.AddError(
+			common.ErrorImportIdentifierHeader,
+			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name"),
+		)
+
+		return
+	}
+
+	workspaceID, itemID, shortcutPath, name := parts[0], parts[1], parts[2], parts[3]
+
+	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
+	resp.Diagnostics.Append(diags...)
+
+	uuitemID, diags := customtypes.NewUUIDValueMust(itemID)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var timeout timeouts.Value
+	if resp.Diagnostics.Append(resp.State.GetAttribute(ctx, path.Root("timeouts"), &timeout)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	state := resourceShortcutModel{
+		baseShortcutModel: baseShortcutModel{
+			ItemID:      uuitemID,
+			WorkspaceID: uuidWorkspaceID,
+			Name:        types.StringValue(name),
+			Path:        types.StringValue(shortcutPath),
+		},
+		Timeouts: timeout,
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceShortcut) get(ctx context.Context, model *resourceShortcutModel) diag.Diagnostics {
