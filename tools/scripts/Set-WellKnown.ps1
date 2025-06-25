@@ -831,6 +831,39 @@ function Set-Shortcut {
   return $result
 }
 
+function Set-FabricFolder {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParentFolderId
+  )
+
+  # Attempt to get the existing folder
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/folders"
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and ($_.parentFolderId -eq $ParentFolderId) }
+
+  if (!$result) {
+    # Folder does not exist, so create it
+    Write-Log -Message "Creating Folder: $DisplayName" -Level 'INFO'
+
+    $payload = @{
+      displayName    = $DisplayName
+      parentFolderId = $ParentFolderId
+    }
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/folders" -Payload $Payload).Response
+  }
+  Write-Log -Message "Folder - Name: $($result.displayName) / ParentFolderId: $($result.parentFolderId)"
+
+  return $result
+}
+
+
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
@@ -912,6 +945,7 @@ $itemNaming = @{
   'Environment'            = 'env'
   'Eventhouse'             = 'eh'
   'Eventstream'            = 'es'
+  'Folder'                 = 'fld'
   'GraphQLApi'             = 'gql'
   'KQLDashboard'           = 'kqldash'
   'KQLDatabase'            = 'kqldb'
@@ -1540,6 +1574,19 @@ else {
     workspaceId  = $wellKnown['WorkspaceDS'].id
     lakehouseId  = $wellKnown['Lakehouse'].id
   }
+}
+
+# Create the Folder if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['Folder'])"
+
+$folder = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp `
+
+$wellKnown['Folder'] = @{
+  id             = $folder.id
+  displayName    = $folder.displayName
+  parentFolderId = $folder.parentFolderId
 }
 
 # Save wellknown.json file
