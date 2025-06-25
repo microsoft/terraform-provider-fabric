@@ -93,21 +93,17 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 	}
 }
 
-func (r *resourceShortcut) ConfigValidators(
-	_ context.Context,
-) []resource.ConfigValidator {
-	result := []resource.ConfigValidator{}
-
-	result = append(result, resourcevalidator.ExactlyOneOf(
-		path.MatchRoot("target").AtName("onelake"),
-		path.MatchRoot("target").AtName("adls_gen2"),
-		path.MatchRoot("target").AtName("amazon_s3"),
-		path.MatchRoot("target").AtName("google_cloud_storage"),
-		path.MatchRoot("target").AtName("s3_compatible"),
-		path.MatchRoot("target").AtName("dataverse"),
-	))
-
-	return result
+func (r *resourceShortcut) ConfigValidators(_ context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.ExactlyOneOf(
+			path.MatchRoot("target").AtName("onelake"),
+			path.MatchRoot("target").AtName("adls_gen2"),
+			path.MatchRoot("target").AtName("amazon_s3"),
+			path.MatchRoot("target").AtName("google_cloud_storage"),
+			path.MatchRoot("target").AtName("s3_compatible"),
+			path.MatchRoot("target").AtName("dataverse"),
+		),
+	}
 }
 
 func NewResourceShortcut() resource.Resource {
