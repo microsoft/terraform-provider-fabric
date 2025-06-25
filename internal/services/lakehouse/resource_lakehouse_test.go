@@ -270,14 +270,17 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
 			),
 		},
-		// Update display name to previous value and Read - goal is to check handling for "ItemDisplayNameNotAvailableYet" error
+		// Recreate resource and read - goal is to check handling for "ItemDisplayNameNotAvailableYet" error
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
+					"display_name": entityUpdateDisplayName,
+					"configuration": map[string]any{
+						"enable_schemas": true,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

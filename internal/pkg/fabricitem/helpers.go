@@ -144,24 +144,25 @@ type RetryConfig struct {
 
 // RetryOperation executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
 // This will retry indefinitely until the operation succeeds or encounters a non-retryable error
-func RetryOperation(ctx context.Context, config RetryConfig, operation func() error) error {
+func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
+	var result T
 	var err error
 	var errRespFabric *fabcore.ResponseError
 	retryCount := 0
 
 	for {
-		err = operation()
+		result, err = operation()
 
 		if err == nil {
 			if retryCount > 0 {
 				tflog.Debug(ctx, fmt.Sprintf("Operation succeeded after %d retries", retryCount))
 			}
-			return nil
+			return result, nil
 		}
 
 		if ctx.Err() != nil {
 			tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
-			return ctx.Err()
+			return result, ctx.Err()
 		}
 
 		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
@@ -173,7 +174,7 @@ func RetryOperation(ctx context.Context, config RetryConfig, operation func() er
 			case <-ctx.Done():
 				timer.Stop()
 				tflog.Error(ctx, fmt.Sprintf("Context cancelled during %s operation after %d retries", config.Operation, retryCount))
-				return ctx.Err()
+				return result, ctx.Err()
 			case <-timer.C:
 				continue
 			}
@@ -183,7 +184,7 @@ func RetryOperation(ctx context.Context, config RetryConfig, operation func() er
 		break
 	}
 
-	return err
+	return result, err
 }
 
 func DefaultUpdateRetryConfig() RetryConfig {
@@ -194,15 +195,9 @@ func DefaultUpdateRetryConfig() RetryConfig {
 }
 
 func UpdateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.UpdateItemRequest) (fabcore.ItemsClientUpdateItemResponse, error) {
-	var respUpdate fabcore.ItemsClientUpdateItemResponse
-	var err error
-
-	err = RetryOperation(ctx, DefaultUpdateRetryConfig(), func() error {
-		respUpdate, err = client.UpdateItem(ctx, workspaceID, itemID, request, nil)
-		return err
+	return RetryOperationWithResult(ctx, DefaultUpdateRetryConfig(), func() (fabcore.ItemsClientUpdateItemResponse, error) {
+		return client.UpdateItem(ctx, workspaceID, itemID, request, nil)
 	})
-
-	return respUpdate, err
 }
 
 func DefaultCreateRetryConfig() RetryConfig {
@@ -213,13 +208,7 @@ func DefaultCreateRetryConfig() RetryConfig {
 }
 
 func CreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID string, request fabcore.CreateItemRequest) (fabcore.ItemsClientCreateItemResponse, error) {
-	var respCreate fabcore.ItemsClientCreateItemResponse
-	var err error
-
-	err = RetryOperation(ctx, DefaultCreateRetryConfig(), func() error {
-		respCreate, err = client.CreateItem(ctx, workspaceID, request, nil)
-		return err
+	return RetryOperationWithResult(ctx, DefaultCreateRetryConfig(), func() (fabcore.ItemsClientCreateItemResponse, error) {
+		return client.CreateItem(ctx, workspaceID, request, nil)
 	})
-
-	return respCreate, err
 }
