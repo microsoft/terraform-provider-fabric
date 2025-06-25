@@ -98,7 +98,7 @@ func (o *operationsFolder) Validate(newEntity fabcore.Folder, existing []fabcore
 func FakeMoveFolder(
 	handler *typedHandler[fabcore.Folder],
 ) func(ctx context.Context, workspaceID, folderID string, moveFolderRequest fabcore.MoveFolderRequest, options *fabcore.FoldersClientMoveFolderOptions) (resp azfake.Responder[fabcore.FoldersClientMoveFolderResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, folderID string, moveReq fabcore.MoveFolderRequest, _ *fabcore.FoldersClientMoveFolderOptions) (resp azfake.Responder[fabcore.FoldersClientMoveFolderResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, folderID string, moveReq fabcore.MoveFolderRequest, _ *fabcore.FoldersClientMoveFolderOptions) (azfake.Responder[fabcore.FoldersClientMoveFolderResponse], azfake.ErrorResponder) {
 		moveUpdater := &moveFolderOperations{}
 		moveTransformer := &moveFolderOperations{}
 
