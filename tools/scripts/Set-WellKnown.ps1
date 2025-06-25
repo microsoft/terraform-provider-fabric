@@ -842,10 +842,23 @@ function Set-FabricFolder {
     [Parameter(Mandatory = $false)]
     [string]$ParentFolderId
   )
-
   # Attempt to get the existing folder
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/folders"
-  $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and ($_.parentFolderId -eq $ParentFolderId) }
+
+  if (!$ParentFolderId) {
+    # Looking for a root folder - filter for folders that don't have parentFolderId property
+    $result = $results.Response.value | Where-Object {
+      $_.displayName -eq $DisplayName -and
+      (-not (Get-Member -InputObject $_ -Name "parentFolderId" -MemberType Properties))
+    }
+    Write-Log -Message "$result" -Level 'INFO'
+  } else {
+    # Looking for a folder with a specific parentFolderId
+    $result = $results.Response.value | Where-Object {
+      $_.displayName -eq $DisplayName -and
+      $_.parentFolderId -eq $ParentFolderId
+    }
+  }
 
   if (!$result) {
     # Folder does not exist, so create it
@@ -856,7 +869,7 @@ function Set-FabricFolder {
       parentFolderId = $ParentFolderId
     }
 
-    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/folders" -Payload $Payload).Response
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/folders" -Payload $payload).Response
   }
   Write-Log -Message "Folder - Name: $($result.displayName) / ParentFolderId: $($result.parentFolderId)"
 
@@ -1581,7 +1594,7 @@ $displayNameTemp = "${displayName}_$($itemNaming['Folder'])"
 
 $folder = Set-FabricFolder `
   -WorkspaceId $wellKnown['WorkspaceDS'].id `
-  -DisplayName $displayNameTemp `
+  -DisplayName $displayNameTemp
 
 $wellKnown['Folder'] = @{
   id             = $folder.id
