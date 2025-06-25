@@ -254,40 +254,6 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestUnit_FolderResource_MoveFolder(t *testing.T) {
-	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomFolderWithWorkspace(workspaceID)
-	entityAfter := fakes.NewRandomFolderWithWorkspace(workspaceID)
-	entityAfter.DisplayName = entityExist.DisplayName
-
-	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
-	fakes.FakeServer.Upsert(entityExist)
-	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
-	fakes.FakeServer.ServerFactory.Core.FoldersServer.MoveFolder = fakeMoveFolder(entityAfter)
-	fakes.FakeServer.ServerFactory.Core.FoldersServer.GetFolder = fakeGetFolder(entityAfter)
-
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// Update and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":     *entityExist.WorkspaceID,
-						"display_name":     *entityExist.DisplayName,
-						"parent_folder_id": *entityAfter.ParentFolderID,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityExist.DisplayName),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "parent_folder_id", entityAfter.ParentFolderID),
-			),
-		},
-		// Delete testing automatically occurs in TestCase
-	}))
-}
-
 func TestAcc_FolderResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)

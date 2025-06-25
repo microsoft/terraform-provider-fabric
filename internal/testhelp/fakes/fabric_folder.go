@@ -15,7 +15,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-// operationsDomain implements SimpleIDOperations.
 type operationsFolder struct{}
 
 // GetID implements concreteOperations.
@@ -86,7 +85,8 @@ func (o *operationsFolder) Update(base fabcore.Folder, data fabcore.UpdateFolder
 func (o *operationsFolder) Validate(newEntity fabcore.Folder, existing []fabcore.Folder) (int, error) {
 	for _, entity := range existing {
 		if *entity.DisplayName == *newEntity.DisplayName && *entity.WorkspaceID == *newEntity.WorkspaceID {
-			if entity.ParentFolderID != nil && newEntity.ParentFolderID != nil && *entity.ParentFolderID == *newEntity.ParentFolderID {
+			if (entity.ParentFolderID != nil && newEntity.ParentFolderID != nil && *entity.ParentFolderID == *newEntity.ParentFolderID) ||
+				(entity.ParentFolderID == nil && newEntity.ParentFolderID == nil) {
 				return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error(), fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error())
 			}
 		}
@@ -99,37 +99,24 @@ func FakeMoveFolder(
 	handler *typedHandler[fabcore.Folder],
 ) func(ctx context.Context, workspaceID, folderID string, moveFolderRequest fabcore.MoveFolderRequest, options *fabcore.FoldersClientMoveFolderOptions) (resp azfake.Responder[fabcore.FoldersClientMoveFolderResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, folderID string, moveReq fabcore.MoveFolderRequest, _ *fabcore.FoldersClientMoveFolderOptions) (resp azfake.Responder[fabcore.FoldersClientMoveFolderResponse], errResp azfake.ErrorResponder) {
-		// Create a move updater that updates the ParentFolderID
-		moveUpdater := &moveFolderUpdater{}
+		moveUpdater := &moveFolderOperations{}
+		moveTransformer := &moveFolderOperations{}
 
-		// Create a transform updater that transforms the response
-		updateTransformer := &operationsFolder{}
-
-		// Generate the full ID for the folder
 		id := generateID(workspaceID, folderID)
 
-		// Use updateByID instead of direct Upsert
-		_, updateErrResp := updateByID(handler, id, moveReq, moveUpdater, updateTransformer)
-
-		// If there's an error response, return it directly
-		if updateErrResp != (azfake.ErrorResponder{}) {
-			return resp, updateErrResp
-		}
-
-		if handler.Contains(id) {
-			element := handler.Get(id)
-			resp.SetResponse(http.StatusOK, fabcore.FoldersClientMoveFolderResponse{
-				Folder: element,
-			}, nil)
-		}
-
-		return
+		return updateByID(handler, id, moveReq, moveUpdater, moveTransformer)
 	}
 }
 
-type moveFolderUpdater struct{}
+type moveFolderOperations struct{}
 
-func (m *moveFolderUpdater) Update(base fabcore.Folder, moveReq fabcore.MoveFolderRequest) fabcore.Folder {
+func (m *moveFolderOperations) TransformUpdate(entity fabcore.Folder) fabcore.FoldersClientMoveFolderResponse {
+	return fabcore.FoldersClientMoveFolderResponse{
+		Folder: entity,
+	}
+}
+
+func (m *moveFolderOperations) Update(base fabcore.Folder, moveReq fabcore.MoveFolderRequest) fabcore.Folder {
 	base.ParentFolderID = moveReq.TargetFolderID
 	return base
 }
