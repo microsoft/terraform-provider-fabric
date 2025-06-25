@@ -97,9 +97,6 @@ func (r *resourceFolder) Create(ctx context.Context, req resource.CreateRequest,
 	var reqCreate requestCreateFolder
 
 	reqCreate.set(plan)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
 
 	respCreate, err := r.client.CreateFolder(ctx, plan.WorkspaceID.ValueString(), reqCreate.CreateFolderRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -107,14 +104,6 @@ func (r *resourceFolder) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	state.set(respCreate.Folder)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
