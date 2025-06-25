@@ -19,6 +19,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
@@ -79,6 +80,11 @@ func (r *resourceShortcut) Configure(_ context.Context, req resource.ConfigureRe
 	}
 
 	r.pConfigData = pConfigData
+
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewOneLakeShortcutsClient()
 }
 
