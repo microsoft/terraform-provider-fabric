@@ -2,8 +2,8 @@ output "onelake" {
   value = fabric_onelake_shortcut.onelake
 }
 
-output "adlsGen2" {
-  value = fabric_onelake_shortcut.adlsGen2
+output "adls_gen2" {
+  value = fabric_onelake_shortcut.adls_gen2
 }
 
 output "amazon_s3" {

@@ -13,13 +13,13 @@ resource "fabric_onelake_shortcut" "onelake" {
   }
 }
 
-resource "fabric_onelake_shortcut" "adlsgen2" {
+resource "fabric_onelake_shortcut" "adls_gen2" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
-    adlsGen2 = {
+    adls_gen2 = {
       location      = "MyLocation"
       subpath       = "MySubpath"
       connection_id = "00000000-0000-0000-0000-000000000000"
@@ -33,7 +33,7 @@ resource "fabric_onelake_shortcut" "amazon_s3" {
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
-    amazons3 = {
+    amazon_s3 = {
       location      = "MyLocation"
       subpath       = "MySubpath"
       connection_id = "00000000-0000-0000-0000-000000000000"
