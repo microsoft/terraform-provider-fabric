@@ -119,7 +119,6 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}
-
 	}
 
 	_, sha256Value, diags := transforms.SourceFileToPayload(source.ValueString(), processingMode.ValueString(), tokensValue, parametersSlice)

@@ -94,6 +94,8 @@ func getTmplFuncs() (template.FuncMap, error) {
 
 // SourceFileToPayload transforms a source file into a base64 encoded payload and calculates its SHA256 hash.
 // It optionally processes the file as a template with the provided tokens.
+//
+//nolint:gocognit
 func SourceFileToPayload(
 	srcPath string,
 	processingMode string,
@@ -112,7 +114,8 @@ func SourceFileToPayload(
 	var contentB64, contentSha256, contentStr string
 
 	if utf8.Valid(content) { //nolint:nestif
-		if strings.EqualFold(processingMode, ProcessingModeGoTemplate) {
+		switch strings.ToLower(processingMode) {
+		case strings.ToLower(ProcessingModeGoTemplate):
 			tmplFuncs, err := getTmplFuncs()
 			if err != nil {
 				diags.AddError("Template functions error", err.Error())
@@ -144,53 +147,27 @@ func SourceFileToPayload(
 			}
 
 			contentStr = contentBuf.String()
-		} else if strings.EqualFold(processingMode, ProcessingModeParameters) {
+		case strings.ToLower(ProcessingModeParameters):
 			contentStr = string(content)
+
 			for _, param := range parameters {
-				if strings.EqualFold(param.Type.ValueString(), ParameterTypeFindReplace) {
+				switch strings.ToLower(param.Type.ValueString()) {
+				case strings.ToLower(ParameterTypeFindReplace):
 					contentStr = strings.ReplaceAll(contentStr, param.Find.ValueString(), param.Value.ValueString())
-				} else if strings.EqualFold(param.Type.ValueString(), ParameterTypeKeyValueReplace) {
+				case strings.ToLower(ParameterTypeKeyValueReplace):
 					if IsJSON(contentStr) {
-						jpExpression, err := jp.ParseString(param.Find.ValueString())
-						if err != nil {
-							diags.AddError("JSONPath expression", err.Error())
-
-							return "", "", diags
-						}
-
-						var contentJSON any
-
-						if err := json.Unmarshal([]byte(contentStr), &contentJSON); err != nil {
-							diags.AddError("JSON unmarshal", err.Error())
-
-							return "", "", diags
-						}
-
-						jpIter := jpExpression.Get(contentJSON)
-
-						if len(jpIter) == 1 {
-							jpExpression.Set(contentJSON, param.Value.ValueString())
-
-							content, err = json.Marshal(contentJSON)
-							if err != nil {
-								diags.AddError("JSON marshal", err.Error())
-
-								return "", "", diags
-							}
-
-							contentStr = string(content)
-						} else if len(jpIter) > 1 {
-							diags.AddError("JSONPath expression", "Multiple matches found for JSONPath expression: "+param.Find.ValueString())
-
+						contentStr, diags = processJSONPathReplacement(contentStr, param)
+						if diags.HasError() {
 							return "", "", diags
 						}
 					}
-				} else {
+				default:
 					diags.AddError("Unsupported parameter type", "Invalid parameter type: "+param.Type.ValueString())
+
 					return "", "", diags
 				}
 			}
-		} else {
+		default:
 			contentStr = string(content)
 		}
 
@@ -265,4 +242,49 @@ func PayloadToGzip(content string) (string, diag.Diagnostics) {
 	}
 
 	return encoded, diags
+}
+
+// processJSONPathReplacement handles JSON path replacement for a parameter.
+func processJSONPathReplacement(contentStr string, param *params.ParametersModel) (string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	jpExpression, err := jp.ParseString(param.Find.ValueString())
+	if err != nil {
+		diags.AddError("JSONPath expression", err.Error())
+
+		return "", diags
+	}
+
+	var contentJSON any
+	if err := json.Unmarshal([]byte(contentStr), &contentJSON); err != nil {
+		diags.AddError("JSON unmarshal", err.Error())
+
+		return "", diags
+	}
+
+	jpIter := jpExpression.Get(contentJSON)
+
+	if len(jpIter) == 1 {
+		err := jpExpression.Set(contentJSON, param.Value.ValueString())
+		if err != nil {
+			diags.AddError("JSONPath set", err.Error())
+
+			return "", diags
+		}
+
+		content, err := json.Marshal(contentJSON)
+		if err != nil {
+			diags.AddError("JSON marshal", err.Error())
+
+			return "", diags
+		}
+
+		return string(content), diags
+	} else if len(jpIter) > 1 {
+		diags.AddError("JSONPath expression", "Multiple matches found for JSONPath expression: "+param.Find.ValueString())
+
+		return "", diags
+	}
+
+	return contentStr, diags
 }
