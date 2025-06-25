@@ -86,11 +86,23 @@ The source content may include placeholders for token substitution. Use the dot 
 
 Optional:
 
+- `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
+- `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
 - `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
 
 Read-Only:
 
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
+
+<a id="nestedatt--definition--parameters"></a>
+
+### Nested Schema for `definition.parameters`
+
+Required:
+
+- `find` (String) The find value of the parameter.
+- `type` (String) Processing type of the parameters. Possible values: `FindReplace`, `KeyValueReplace`.
+- `value` (String) The value of the parameter.
 
 <a id="nestedatt--timeouts"></a>
 
