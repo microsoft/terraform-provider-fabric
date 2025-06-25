@@ -67,8 +67,8 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
-              - .github/workflows/*.yml
-              - .github/workflows/*.yaml
+              - '.github/workflows/*.yml'
+              - '.github/workflows/*.yaml'
 
       - name: 🚧 Setup Go
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
