@@ -285,7 +285,6 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "true"),
 			),
 		},
