@@ -164,7 +164,6 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
-	// fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -196,6 +195,7 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "parent_folder_id", entityBefore.ParentFolderID),
 			),
 		},
 		// Move and Read
@@ -260,8 +260,8 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
-	entity := testhelp.WellKnown()["Folder"].(map[string]any)
-	entityID := entity["id"].(string)
+	folder := testhelp.WellKnown()["Folder"].(map[string]any)
+	folderID := folder["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -279,7 +279,7 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 			),
 		},
-		// Update - move and update and Read
+		// Update, Move and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -288,15 +288,15 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id":     workspaceID,
 						"display_name":     entityUpdateDisplayName,
-						"parent_folder_id": entityID,
+						"parent_folder_id": folderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "parent_folder_id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "parent_folder_id", folderID),
 			),
 		},
-		// Update - update and Read
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -305,14 +305,15 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id":     workspaceID,
 						"display_name":     entityCreateDisplayName,
-						"parent_folder_id": entityID,
+						"parent_folder_id": folderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "parent_folder_id", folderID),
 			),
 		},
-		// Update - move and Read
+		// Move and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -325,6 +326,7 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "parent_folder_id"),
 			),
 		},
 	},
