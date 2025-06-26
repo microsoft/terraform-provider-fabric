@@ -33,6 +33,7 @@ const (
 	OperationDelete    Operation = "delete"
 	OperationList      Operation = "list"
 	OperationImport    Operation = "import"
+	OperationOpen      Operation = "open"
 	OperationUndefined Operation = "undefined"
 )
 
@@ -111,6 +112,8 @@ func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, 
 		return common.ErrorListHeader, common.ErrorListDetails
 	case OperationImport:
 		return common.ErrorImportHeader, common.ErrorImportDetails
+	case OperationOpen:
+		return common.ErrorOpenHeader, common.ErrorOpenDetails
 	default:
 		return "", ""
 	}
@@ -211,6 +214,11 @@ func (h *ErrorHandler) processFabricError(
 func (h *ErrorHandler) processAuthFailedError(ctx context.Context, errAuthFailed *azidentity.AuthenticationFailedError) (string, string) { //revive:disable-line:confusing-results
 	var errAuthResp authErrorResponse
 
+	// Check if RawResponse is nil to avoid panic
+	if errAuthFailed.RawResponse == nil {
+		return "AuthenticationFailedError", errAuthFailed.Error()
+	}
+
 	err := errAuthResp.getErrFromResp(errAuthFailed.RawResponse)
 	if err != nil {
 		return "Failed to parse authentication error response", err.Error()
@@ -272,7 +280,7 @@ type authErrorResponse struct {
 
 // getErrFromResp parses an HTTP response body into an authErrorResponse.
 func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
-	if resp.Body == nil {
+	if resp == nil || resp.Body == nil {
 		return nil
 	}
 

@@ -34,7 +34,7 @@ data "fabric_reports" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Reports. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Reports. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 

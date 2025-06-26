@@ -19,11 +19,13 @@ type defaultConverter[TEntity any] struct{}
 func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEntity {
 	var entity TEntity
 
+	setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
 	setReflectedStringPropertyValue(&entity, "ID", *item.ID)
 	setReflectedStringPropertyValue(&entity, "WorkspaceID", *item.WorkspaceID)
 	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
 	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
-	setReflectedStringPropertyValue(&entity, "Type", string(*item.Type))
+	setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
+	setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
 
 	return entity
 }
@@ -101,7 +103,7 @@ func configureEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutp
 }
 
 // ConfigureEntityWithParentID configures an entity with a parent ID with sync creation.
-func configureNonLROEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
+func configureEntityWithParentIDNoLRO[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
 	handler *typedHandler[TEntity],
 	operations parentIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
 	getFunction *func(ctx context.Context, parentID, childID string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
@@ -112,6 +114,20 @@ func configureNonLROEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCrea
 ) {
 	handleGetWithParentID(handler, operations, getFunction)
 	handleUpdateWithParentID(handler, operations, operations, updateFunction)
+	handleNonLROCreate(handler, operations, operations, operations, createFunction)
+	handleListPagerWithParentID(handler, operations, operations, listFunction)
+	handleDeleteWithParentID(handler, deleteFunction)
+}
+
+func configureEntityWithParentIDNoLRONoUpdate[TEntity, TGetOutput, TCreateOutput, TDeleteResponse, TListOutput, TCreationData, TGetOptions, TCreateOptions, TListOptions, TDeleteOptions any](
+	handler *typedHandler[TEntity],
+	operations parentIDOperations[TEntity, TGetOutput, TEntity, TCreateOutput, TListOutput, TCreationData, TEntity],
+	getFunction *func(ctx context.Context, parentID, childID string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
+	createFunction *func(ctx context.Context, workspaceID string, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
+	listFunction *func(parentID string, options *TListOptions) (resp azfake.PagerResponder[TListOutput]),
+	deleteFunction *func(ctx context.Context, parentID, childID string, options *TDeleteOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
+) {
+	handleGetWithParentID(handler, operations, getFunction)
 	handleNonLROCreate(handler, operations, operations, operations, createFunction)
 	handleListPagerWithParentID(handler, operations, operations, listFunction)
 	handleDeleteWithParentID(handler, deleteFunction)
@@ -132,7 +148,7 @@ func configureDefinitions[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TLi
 }
 
 // This handles the case where entity creation doesn't involve long-running operations.
-func ConfigureDefinitionsNonLROCreation[TEntity, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput, TGetDefinitionsOptions any](
+func configureDefinitionsNonLROCreation[TEntity, TDefinition, TUpdateDefinitionOptions, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput, TGetDefinitionsOptions any](
 	handler *typedHandler[TEntity],
 	definitionOperations definitionOperationsNonLROCreation[TDefinition, TDefinitionUpdateData, TDefinitionTransformerOutput, TUpdateDefinitionTransformerOutput],
 	getDefinitionsFunction *func(ctx context.Context, parentID, childID string, options *TGetDefinitionsOptions) (resp azfake.PollerResponder[TDefinitionTransformerOutput], errResp azfake.ErrorResponder),
@@ -206,8 +222,11 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				//nolint
-				return element.(TEntity)
+				if typedElement, ok := element.(TEntity); ok {
+					return typedElement
+				}
+
+				panic("Element found but type assertion failed") // lintignore:R009
 			}
 		}
 
@@ -259,7 +278,9 @@ func (h *typedHandler[TEntity]) Contains(id string) bool {
 func (h *typedHandler[TEntity]) getPointer(id string) *TEntity {
 	for _, element := range h.elements {
 		if typedElement, ok := element.(TEntity); ok {
-			if h.identifier.GetID(typedElement) == id {
+			typedElementID := h.identifier.GetID(typedElement)
+			if id == typedElementID ||
+				(!strings.Contains(typedElementID, "/") && strings.HasSuffix(id, typedElementID)) {
 				return &typedElement
 			}
 		}
@@ -278,9 +299,52 @@ func asFabricItem(element any) fabcore.Item {
 		DisplayName: getReflectedStringPropertyValue(element, "DisplayName"),
 		ID:          getReflectedStringPropertyValue(element, "ID"),
 		WorkspaceID: getReflectedStringPropertyValue(element, "WorkspaceID"),
+		FolderID:    getReflectedStringPropertyValue(element, "FolderID"),
+		Tags:        getReflectedTagsPropertyValue(element, "Tags"),
 	}
 
 	return item
+}
+
+func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {
+	reflectedValue := reflect.ValueOf(element)
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// check if the property is a slice
+	if propertyValue.Kind() != reflect.Slice {
+		return nil
+	}
+
+	tags := make([]fabcore.ItemTag, propertyValue.Len())
+
+	for i := range propertyValue.Len() {
+		tag, ok := propertyValue.Index(i).Interface().(fabcore.ItemTag)
+		if !ok {
+			continue
+		}
+
+		tags[i] = tag
+	}
+
+	return tags
+}
+
+func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabcore.ItemTag) {
+	reflectedValue := reflect.ValueOf(element).Elem()
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// create a new slice of the same type as the property
+	slice := reflect.MakeSlice(propertyValue.Type(), len(tags), len(tags))
+
+	for i, tag := range tags {
+		// set the value as a pointer
+		ptr := reflect.New(reflect.TypeOf(tag))
+		ptr.Elem().Set(reflect.ValueOf(tag))
+		slice.Index(i).Set(ptr)
+	}
+
+	// set the value as a pointer
+	propertyValue.Set(slice)
 }
 
 // getReflectedStringPropertyValue gets a string property value from a reflected object.

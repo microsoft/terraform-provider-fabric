@@ -20,11 +20,11 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entity := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -102,6 +102,9 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// read by id - not found
@@ -130,6 +133,9 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// read by name - not found
@@ -170,6 +176,9 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// read by id - not found
@@ -197,6 +206,9 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
 			),
 		},
 		// read by name - not found

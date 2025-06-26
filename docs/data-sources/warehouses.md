@@ -3,13 +3,13 @@
 page_title: "fabric_warehouses Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Warehouse data-source allows you to retrieve details about a Fabric Warehouse https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
+  The Warehouses data-source allows you to retrieve a list of Fabric Warehouses https://learn.microsoft.com/fabric/data-warehouse/data-warehousing.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_warehouses (Data Source)
 
-The Warehouse data-source allows you to retrieve details about a Fabric [Warehouse](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
+The Warehouses data-source allows you to retrieve a list of Fabric [Warehouses](https://learn.microsoft.com/fabric/data-warehouse/data-warehousing).
 
 -> This data-source supports Service Principal authentication.
 
@@ -34,7 +34,7 @@ data "fabric_warehouses" "example" {
 
 ### Read-Only
 
-- `values` (Attributes Set) The list of Warehouses. (see [below for nested schema](#nestedatt--values))
+- `values` (Attributes Set) The set of Warehouses. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -62,6 +62,7 @@ Read-Only:
 
 Read-Only:
 
+- `collation_type` (String) The collation type of the warehouse. Possible values:`Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.

@@ -33,7 +33,7 @@ type baseSparkEnvironmentSettingsModel struct {
 	ExecutorMemory            types.String                                                                   `tfsdk:"executor_memory"`
 	Pool                      supertypes.SingleNestedObjectValueOf[instancePoolPropertiesModel]              `tfsdk:"pool"`
 	RuntimeVersion            types.String                                                                   `tfsdk:"runtime_version"`
-	SparkProperties           customtypes.MapOfString                                                        `tfsdk:"spark_properties"`
+	SparkProperties           supertypes.MapValueOf[types.String]                                            `tfsdk:"spark_properties"`
 }
 
 func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
@@ -67,7 +67,7 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 		return diags
 	}
 
-	sparkPropertiesMap := customtypes.NewMapValueOfNull[types.String](ctx)
+	sparkPropertiesMap := supertypes.NewMapValueOfNull[types.String](ctx)
 
 	if len(sparkProperties) > 0 {
 		sparkPropertiesTF := make(map[string]types.String)
@@ -76,7 +76,7 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 			sparkPropertiesTF[k] = types.StringValue(v)
 		}
 
-		sparkPropertiesMap, diags = customtypes.NewMapValueOf(ctx, sparkPropertiesTF)
+		sparkPropertiesMap, diags = supertypes.NewMapValueOfMap(ctx, sparkPropertiesTF)
 		if diags.HasError() {
 			return diags
 		}

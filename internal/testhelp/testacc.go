@@ -8,14 +8,17 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/provider"
 )
@@ -53,7 +56,7 @@ func TestAccPreCheckNoEnvs(t *testing.T) {
 func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
 	t.Helper()
 
-	return resource.TestCase{
+	testCase := resource.TestCase{
 		IsUnitTest: false,
 		PreCheck:   func() { preCheck(t) },
 		CheckDestroy: func(s *terraform.State) error {
@@ -66,18 +69,36 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 
 			return nil
 		},
-		ProtoV6ProviderFactories: GetTestAccProtoV6ProviderFactories(),
-		Steps:                    steps,
+		ProtoV6ProviderFactories: getTestAccProtoV6ProviderFactories(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"azurerm": {
+				Source: "hashicorp/azurerm",
+			},
+		},
+		Steps: steps,
 	}
+
+	// ephemeral specific configurations
+	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_10_0),
+		}
+		testCase.CheckDestroy = func(_ *terraform.State) error {
+			return nil // No need to check destroy for ephemeral resources
+		}
+	}
+
+	return testCase
 }
 
 // getTestAccProtoV6ProviderFactories are used to instantiate a provider during
 // acceptance testing. The factory function will be invoked for every Terraform
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
-func GetTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
+func getTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"fabric": providerserver.NewProtocol6WithError(provider.New("testAcc")),
+		"echo":   echoprovider.NewProviderServer(),
 	}
 }
 
@@ -89,6 +110,7 @@ func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, res
 		at.ResourceHeader(TypeName("fabric", "workspace"), "test"),
 		map[string]any{
 			"display_name": RandomName(),
+			"description":  "testacc",
 			"capacity_id":  capacityID,
 		},
 	)
@@ -102,7 +124,16 @@ func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, res
 func ShouldSkipTest(t *testing.T) bool {
 	t.Helper()
 
-	return strings.EqualFold(os.Getenv("FABRIC_TESTACC_SKIP_NO_SPN"), "true")
+	if skip, ok := os.LookupEnv("FABRIC_TESTACC_SKIP_NO_SPN"); ok && skip != "" {
+		skipBool, err := strconv.ParseBool(skip)
+		if err != nil {
+			return false
+		}
+
+		return skipBool
+	}
+
+	return false
 }
 
 func GetFixturesDirPath(fixtureDir ...string) string {

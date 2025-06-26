@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "jobMode": "Batch",
+    "source": {
+      "type": "LakehouseTable",
+      "connectionSettings": {
+        "type": "Lakehouse",
+        "typeProperties": {
+          "workspaceId": "{{.SOURCE_WORKSPACE_ID}}",
+          "artifactId": "{{.SOURCE_ARTIFACT_ID}}",
+          "rootFolder": "Tables"
+        }
+      }
+    },
+    "destination": {
+      "type": "LakehouseTable",
+      "connectionSettings": {
+        "type": "Lakehouse",
+        "typeProperties": {
+          "workspaceId": "{{.DESTINATION_WORKSPACE_ID}}",
+          "artifactId": "{{.DESTINATION_ARTIFACT_ID}}",
+          "rootFolder": "Tables"
+        }
+      }
+    },
+    "policy": {
+      "timeout": "0.12:00:00"
+    }
+  },
+  "activities": [
+    {
+      "properties": {
+        "source": {
+          "datasetSettings": {
+            "table": "publicholidays",
+            "firstRowAsHeader": true
+          }
+        },
+        "destination": {
+          "writeBehavior": "Append",
+          "datasetSettings": {
+            "table": "publicholidays",
+            "firstRowAsHeader": false
+          }
+        },
+        "translator": {
+          "type": "TabularTranslator"
+        },
+        "typeConversionSettings": {
+          "typeConversion": {
+            "allowDataTruncation": true,
+            "treatBooleanAsNumber": false
+          }
+        }
+      }
+    }
+  ]
+}

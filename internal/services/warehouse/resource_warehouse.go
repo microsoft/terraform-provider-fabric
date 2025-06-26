@@ -16,7 +16,15 @@ import (
 )
 
 func NewResourceWarehouse() resource.Resource {
-	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.ResourceFabricItemPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties]) diag.Diagnostics {
+	creationPayloadSetter := func(_ context.Context, from warehouseConfigurationModel) (*fabwarehouse.CreationPayload, diag.Diagnostics) {
+		cp := &fabwarehouse.CreationPayload{
+			CollationType: (*fabwarehouse.CollationType)(from.CollationType.ValueStringPointer()),
+		}
+
+		return cp, nil
+	}
+
+	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[warehousePropertiesModel](ctx)
 
 		if from != nil {
@@ -33,7 +41,7 @@ func NewResourceWarehouse() resource.Resource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties], fabricItem *fabricitem.FabricItemProperties[fabwarehouse.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload], fabricItem *fabricitem.FabricItemProperties[fabwarehouse.Properties]) error {
 		client := fabwarehouse.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetWarehouse(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -46,7 +54,7 @@ func NewResourceWarehouse() resource.Resource {
 		return nil
 	}
 
-	config := fabricitem.ResourceFabricItemProperties[warehousePropertiesModel, fabwarehouse.Properties]{
+	config := fabricitem.ResourceFabricItemConfigProperties[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload]{
 		ResourceFabricItem: fabricitem.ResourceFabricItem{
 			TypeInfo:             ItemTypeInfo,
 			FabricItemType:       FabricItemType,
@@ -54,10 +62,13 @@ func NewResourceWarehouse() resource.Resource {
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
 		},
-		PropertiesAttributes: getResourceWarehousePropertiesAttributes(),
-		PropertiesSetter:     propertiesSetter,
-		ItemGetter:           itemGetter,
+		PropertiesAttributes:  getResourceWarehousePropertiesAttributes(),
+		PropertiesSetter:      propertiesSetter,
+		ItemGetter:            itemGetter,
+		ConfigRequired:        false,
+		ConfigAttributes:      getResourceWarehouseConfigurationAttributes(),
+		CreationPayloadSetter: creationPayloadSetter,
 	}
 
-	return fabricitem.NewResourceFabricItemProperties(config)
+	return fabricitem.NewResourceFabricItemConfigProperties(config)
 }

@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -38,15 +39,19 @@ import (
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
@@ -64,6 +69,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -73,13 +79,15 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
 // Ensure FabricProvider satisfies various provider interfaces.
 var (
-	_ provider.Provider              = (*FabricProvider)(nil)
-	_ provider.ProviderWithFunctions = (*FabricProvider)(nil)
+	_ provider.Provider                       = (*FabricProvider)(nil)
+	_ provider.ProviderWithFunctions          = (*FabricProvider)(nil)
+	_ provider.ProviderWithEphemeralResources = (*FabricProvider)(nil)
 	// _ provider.ProviderWithConfigValidators = (*FabricProvider)(nil)
 	// _ provider.ProviderWithValidateConfig   = (*FabricProvider)(nil)
 	// _ provider.ProviderWithMetaSchema = (*FabricProvider)(nil).
@@ -130,11 +138,6 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 	fabricClientOpt := &policy.ClientOptions{}
 
-	// ApplicationID is an application-specific identification string to add to the User-Agent.
-	// It has a maximum length of 24 characters and must not contain any spaces.
-	fabricClientOpt.Telemetry.ApplicationID = "tffab/" + cfg.Version
-	fabricClientOpt.Telemetry.Disabled = false
-
 	// MaxRetries specifies the maximum number of attempts a failed operation will be retried before producing an error.
 	// Not really an unlimited cap, but sufficiently large enough to be considered as such.
 	fabricClientOpt.Retry.MaxRetries = math.MaxInt32
@@ -169,6 +172,10 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 			})
 		})
 	}
+
+	perCallPolicies := make([]policy.Policy, 0)
+	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
+	fabricClientOpt.PerCallPolicies = perCallPolicies
 
 	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
 	if err != nil {
@@ -324,6 +331,17 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				MarkdownDescription: "Enable preview mode to use preview features.",
 				Optional:            true,
 			},
+
+			// Telemetry
+			"partner_id": schema.StringAttribute{
+				MarkdownDescription: "A GUID/UUID that is [registered](https://learn.microsoft.com/partner-center/marketplace-offers/azure-partner-customer-usage-attribution#register-guids-and-offers) with Microsoft to facilitate partner resource usage attribution.",
+				Optional:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+			"disable_terraform_partner_id": schema.BoolAttribute{
+				MarkdownDescription: "Disable sending the Terraform Partner ID if a custom `partner_id` isn't specified, which allows Microsoft to better understand the usage of Terraform. The Partner ID does not give HashiCorp any direct access to usage information. This can also be sourced from the `FABRIC_DISABLE_TERRAFORM_PARTNER_ID` environment variable. Defaults to `false`.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -360,6 +378,8 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	p.mapConfig(ctx, &config, resp)
 	tflog.Debug(ctx, "Mapping configuration")
 
+	p.config.TerraformVersion = req.TerraformVersion
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -387,15 +407,22 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	resp.ResourceData = p.config.ProviderData
 
+	tflog.Debug(ctx, "Assigning Microsoft Fabric client to EphemeralResourceData")
+
+	resp.EphemeralResourceData = p.config.ProviderData
+
 	tflog.Info(ctx, "Configured Microsoft Fabric client", map[string]any{"success": true})
 }
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		copyjob.NewResourceCopyJob,
+		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
+		deploymentpipeline.NewResourceDeploymentPipeline,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
@@ -410,6 +437,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
@@ -423,6 +451,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		workspace.NewResourceWorkspace,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
+		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
 	}
 }
 
@@ -430,10 +459,16 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 	return []func() datasource.DataSource{
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
+		copyjob.NewDataSourceCopyJob,
+		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
+		dataflow.NewDataSourceDataflow,
+		dataflow.NewDataSourceDataflows,
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		deploymentpipeline.NewDataSourceDeploymentPipeline,
+		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
@@ -443,6 +478,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,
@@ -470,6 +506,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		shortcut.NewDataSourceShortcut,
+		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,
@@ -492,6 +530,14 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,
+		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoint,
+		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoints,
+	}
+}
+
+func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{
+		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
 
@@ -664,6 +710,17 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.Preview = putils.GetBoolValue(config.Preview, pconfig.GetEnvVarsPreview(), false)
 	ctx = tflog.SetField(ctx, "preview", config.Preview.ValueBool())
 
+	partnerID, diags := config.PartnerID.ToStringValue(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return ctx
+	}
+
+	config.PartnerID = customtypes.NewUUIDValue(putils.GetStringValue(partnerID, pconfig.GetEnvVarsPartnerID(), "").ValueString())
+	ctx = tflog.SetField(ctx, "partner_id", config.PartnerID.ValueString())
+
+	config.DisableTerraformPartnerID = putils.GetBoolValue(config.DisableTerraformPartnerID, pconfig.GetEnvVarsDisableTerraformPartnerID(), false)
+	ctx = tflog.SetField(ctx, "disable_terraform_partner_id", config.DisableTerraformPartnerID.ValueBool())
+
 	return ctx
 }
 
@@ -756,6 +813,8 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.validateConfigAuthSecret(resp)
 
 	p.config.Preview = config.Preview.ValueBool()
+	p.config.PartnerID = config.PartnerID.ValueString()
+	p.config.DisableTerraformPartnerID = config.DisableTerraformPartnerID.ValueBool()
 }
 
 func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse) {
@@ -776,6 +835,15 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 				common.ErrorInvalidConfig,
 				"Client ID is required"+infoAuthType+"\n"+
 					"Please provide a valid 'client_id' or 'client_id_file_path' in the provider configuration.",
+			)
+
+			return
+		}
+
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
 			)
 
 			return
@@ -825,6 +893,15 @@ func (p *FabricProvider) validateConfigAuthMSI(resp *provider.ConfigureResponse)
 
 			return
 		}
+
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
+			)
+
+			return
+		}
 	}
 }
 
@@ -846,6 +923,15 @@ func (p *FabricProvider) validateConfigAuthCertificate(resp *provider.ConfigureR
 				common.ErrorInvalidConfig,
 				"Client ID is required"+infoAuthType+"\n"+
 					"Please provide a valid 'client_id' or 'client_id_file_path' in the provider configuration.",
+			)
+
+			return
+		}
+
+		if p.config.Auth.ClientSecret != "" {
+			resp.Diagnostics.AddError(
+				common.ErrorInvalidConfig,
+				"'client_secret' is not accepted"+infoAuthType,
 			)
 
 			return
