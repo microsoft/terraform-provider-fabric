@@ -102,6 +102,7 @@ func TestUnit_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				// TBD: Add properties validation - validate specific property values based on API definition
 			),
 		},
 		// read by id - not found
@@ -130,6 +131,7 @@ func TestUnit_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				// TBD: Add properties validation - validate specific property values based on API definition
 			),
 		},
 		// read by name - not found
@@ -176,7 +178,7 @@ func TestAcc_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.default_schema"),
+				// TBD: Add properties validation - validate specific property values based on API definition
 			),
 		},
 		// read by id - not found
@@ -206,7 +208,7 @@ func TestAcc_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.default_schema"),
+				// TBD: Add properties validation - validate specific property values based on API definition
 			),
 		},
 		// read by name - not found

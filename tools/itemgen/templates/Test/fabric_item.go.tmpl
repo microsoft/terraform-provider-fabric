@@ -1,0 +1,206 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
+package fakes
+
+import (
+	"net/http"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
+	fab{{.Package}} "github.com/microsoft/fabric-sdk-go/fabric/{{.Package}}"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+)
+
+type operations{{.TypeInfo}} struct{}
+
+{{- if .HasDefinition}}
+
+// CreateDefinition implements concreteDefinitionOperations.
+func (o *operations{{.TypeInfo}}) CreateDefinition(data fab{{.Package}}.Create{{.TypeInfo}}Request) *fab{{.Package}}.Definition {
+	return data.Definition
+}
+
+// TransformDefinition implements concreteDefinitionOperations.
+func (o *operations{{.TypeInfo}}) TransformDefinition(entity *fab{{.Package}}.Definition) fab{{.Package}}.ItemsClientGet{{.TypeInfo}}DefinitionResponse {
+	return fab{{.Package}}.ItemsClientGet{{.TypeInfo}}DefinitionResponse{
+		DefinitionResponse: fab{{.Package}}.DefinitionResponse{
+			Definition: entity,
+		},
+	}
+}
+
+// UpdateDefinition implements concreteDefinitionOperations.
+func (o *operations{{.TypeInfo}}) UpdateDefinition(_ *fab{{.Package}}.Definition, data fab{{.Package}}.Update{{.TypeInfo}}DefinitionRequest) *fab{{.Package}}.Definition {
+	return data.Definition
+}
+{{- end}}
+
+// CreateWithParentID implements concreteOperations.
+func (o *operations{{.TypeInfo}}) CreateWithParentID(parentID string, data fab{{.Package}}.Create{{.TypeInfo}}Request) fab{{.Package}}.{{.TypeInfo}} {
+	entity := NewRandom{{.TypeInfo}}WithWorkspace(parentID)
+	entity.DisplayName = data.DisplayName
+	entity.Description = data.Description
+
+	return entity
+}
+
+// Filter implements concreteOperations.
+func (o *operations{{.TypeInfo}}) Filter(entities []fab{{.Package}}.{{.TypeInfo}}, parentID string) []fab{{.Package}}.{{.TypeInfo}} {
+	ret := make([]fab{{.Package}}.{{.TypeInfo}}, 0)
+
+	for _, entity := range entities {
+		if *entity.WorkspaceID == parentID {
+			ret = append(ret, entity)
+		}
+	}
+
+	return ret
+}
+
+// GetID implements concreteOperations.
+func (o *operations{{.TypeInfo}}) GetID(entity fab{{.Package}}.{{.TypeInfo}}) string {
+	return generateID(*entity.WorkspaceID, *entity.ID)
+}
+
+// TransformCreate implements concreteOperations.
+func (o *operations{{.TypeInfo}}) TransformCreate(entity fab{{.Package}}.{{.TypeInfo}}) fab{{.Package}}.ItemsClientCreate{{.TypeInfo}}Response {
+	return fab{{.Package}}.ItemsClientCreate{{.TypeInfo}}Response{
+		{{.TypeInfo}}: entity,
+	}
+}
+
+// TransformGet implements concreteOperations.
+func (o *operations{{.TypeInfo}}) TransformGet(entity fab{{.Package}}.{{.TypeInfo}}) fab{{.Package}}.ItemsClientGet{{.TypeInfo}}Response {
+	return fab{{.Package}}.ItemsClientGet{{.TypeInfo}}Response{
+		{{.TypeInfo}}: entity,
+	}
+}
+
+// TransformList implements concreteOperations.
+func (o *operations{{.TypeInfo}}) TransformList(entities []fab{{.Package}}.{{.TypeInfo}}) fab{{.Package}}.ItemsClientList{{.TypesInfo}}Response {
+	return fab{{.Package}}.ItemsClientList{{.TypesInfo}}Response{
+		{{.TypesInfo}}: fab{{.Package}}.{{.TypesInfo}}{
+			Value: entities,
+		},
+	}
+}
+
+// TransformUpdate implements concreteOperations.
+func (o *operations{{.TypeInfo}}) TransformUpdate(entity fab{{.Package}}.{{.TypeInfo}}) fab{{.Package}}.ItemsClientUpdate{{.TypeInfo}}Response {
+	return fab{{.Package}}.ItemsClientUpdate{{.TypeInfo}}Response{
+		{{.TypeInfo}}: entity,
+	}
+}
+
+// Update implements concreteOperations.
+func (o *operations{{.TypeInfo}}) Update(base fab{{.Package}}.{{.TypeInfo}}, data fab{{.Package}}.Update{{.TypeInfo}}Request) fab{{.Package}}.{{.TypeInfo}} {
+	base.Description = data.Description
+	base.DisplayName = data.DisplayName
+
+	return base
+}
+
+// Validate implements concreteOperations.
+func (o *operations{{.TypeInfo}}) Validate(newEntity fab{{.Package}}.{{.TypeInfo}}, existing []fab{{.Package}}.{{.TypeInfo}}) (int, error) {
+	for _, entity := range existing {
+		if *entity.DisplayName == *newEntity.DisplayName {
+			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error(), fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error())
+		}
+	}
+
+	return http.StatusCreated, nil
+}
+
+func configure{{.TypeInfo}}(server *fakeServer) fab{{.Package}}.{{.TypeInfo}} {
+	type concreteEntityOperations interface {
+		parentIDOperations[
+			fab{{.Package}}.{{.TypeInfo}},
+			fab{{.Package}}.ItemsClientGet{{.TypeInfo}}Response,
+			fab{{.Package}}.ItemsClientUpdate{{.TypeInfo}}Response,
+			fab{{.Package}}.ItemsClientCreate{{.TypeInfo}}Response,
+			fab{{.Package}}.ItemsClientList{{.TypesInfo}}Response,
+			fab{{.Package}}.Create{{.TypeInfo}}Request,
+			fab{{.Package}}.Update{{.TypeInfo}}Request]
+	}
+
+{{- if .HasDefinition}}
+	type concreteDefinitionOperations interface {
+		definitionOperations[
+			fab{{.Package}}.Definition,
+			fab{{.Package}}.Create{{.TypeInfo}}Request,
+			fab{{.Package}}.Update{{.TypeInfo}}DefinitionRequest,
+			fab{{.Package}}.ItemsClientGet{{.TypeInfo}}DefinitionResponse,
+			fab{{.Package}}.ItemsClientUpdate{{.TypeInfo}}DefinitionResponse]
+	}
+{{- end}}
+
+	var entityOperations concreteEntityOperations = &operations{{.TypeInfo}}{}
+
+{{- if .HasDefinition}}
+	var definitionOperations concreteDefinitionOperations = &operations{{.TypeInfo}}{}
+{{- end}}
+
+	handler := newTypedHandler(server, entityOperations)
+
+	configureEntityWithParentID(
+		handler,
+		entityOperations,
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.Get{{.TypeInfo}},
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.Update{{.TypeInfo}},
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.BeginCreate{{.TypeInfo}},
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.NewList{{.TypesInfo}}Pager,
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.Delete{{.TypeInfo}})
+
+{{- if .HasDefinition}}
+	configureDefinitions(
+		handler,
+		entityOperations,
+		definitionOperations,
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.BeginCreate{{.TypeInfo}},
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.BeginGet{{.TypeInfo}}Definition,
+		&server.ServerFactory.{{.TypeInfo}}.ItemsServer.BeginUpdate{{.TypeInfo}}Definition)
+{{- end}}
+
+	return fab{{.Package}}.{{.TypeInfo}}{}
+}
+
+func NewRandom{{.TypeInfo}}() fab{{.Package}}.{{.TypeInfo}} {
+	return fab{{.Package}}.{{.TypeInfo}}{
+		ID:          to.Ptr(testhelp.RandomUUID()),
+		DisplayName: to.Ptr(testhelp.RandomName()),
+		Description: to.Ptr(testhelp.RandomName()),
+		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		Type:        to.Ptr(fab{{.Package}}.ItemType{{.TypeInfo}}),
+	}
+}
+
+func NewRandom{{.TypeInfo}}WithWorkspace(workspaceID string) fab{{.Package}}.{{.TypeInfo}} {
+	result := NewRandom{{.TypeInfo}}()
+	result.WorkspaceID = &workspaceID
+
+	return result
+}
+
+{{- if .HasDefinition}}
+func NewRandom{{.TypeInfo}}Definition() fab{{.Package}}.Definition {
+	defPart := fab{{.Package}}.DefinitionPart{
+		PayloadType: to.Ptr(fab{{.Package}}.PayloadTypeInlineBase64),
+		Path:        to.Ptr("{{.Type}}-content.json"),
+		Payload: to.Ptr(
+			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==", // {"content":"Hello World"} in base64
+		),
+	}
+
+	var defParts []fab{{.Package}}.DefinitionPart
+
+	defParts = append(defParts, defPart)
+
+	return fab{{.Package}}.Definition{
+		Format: to.Ptr("json"),
+		Parts:  defParts,
+	}
+}
+{{- end}}

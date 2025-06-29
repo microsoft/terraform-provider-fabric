@@ -26,12 +26,12 @@ import (
 type ItemConfig struct {
 	Name              string
 	Type              string
-	TypeInfo		  string
+	TypeInfo          string
 	Names             string
 	Types             string
-	TypesInfo		  string
+	TypesInfo         string
 	RenameAllowed     bool
-	Package	 	      string
+	Package           string
 	FabricItemType    string
 	DefinitionFormats []string
 	DocsURL           string
@@ -44,7 +44,6 @@ type ItemConfig struct {
 	IsPreview         bool
 	IsSPNSupported    bool
 }
-
 
 type ItemType int
 
@@ -76,7 +75,6 @@ func (t ItemType) String() string {
 	}
 }
 
-
 func main() {
 	// Parse command line flags
 	itemName := flag.String("item-name", "", "Name of the new item (e.g. Data Pipeline)")
@@ -85,6 +83,8 @@ func main() {
 	renameAllowed := flag.Bool("rename-allowed", true, "Is item rename allowed?")
 	isPreview := flag.Bool("is-preview", false, "Is the item in preview?")
 	IsSPNSupported := flag.Bool("is-spn-supported", false, "Is the item supported for SPN?")
+	generateFakes := flag.Bool("generate-fakes", true, "Generate fake test server handlers")
+	generateExamples := flag.Bool("generate-examples", true, "Generate Terraform example files")
 	flag.Parse()
 
 	// Parse item type
@@ -111,12 +111,12 @@ func main() {
 	config := ItemConfig{
 		Name:              *itemName,
 		Type:              strings.ToLower(strings.ReplaceAll(*itemName, " ", "_")),
-		TypeInfo:		   strings.ReplaceAll(*itemName, " ", ""),
+		TypeInfo:          strings.ReplaceAll(*itemName, " ", ""),
 		Names:             *itemsName,
 		Types:             strings.ToLower(strings.ReplaceAll(*itemsName, " ", "_")),
-		TypesInfo:		   strings.ReplaceAll(*itemsName, " ", ""),
-		Package: 	       strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
-		RenameAllowed:	   *renameAllowed,
+		TypesInfo:         strings.ReplaceAll(*itemsName, " ", ""),
+		Package:           strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
+		RenameAllowed:     *renameAllowed,
 		DefinitionFormats: []string{"<part1>", "<part2>"},
 		DocsURL:           "<docs-url>",
 		DisplayNameMax:    123,
@@ -131,7 +131,7 @@ func main() {
 
 	// Create the item directory
 	itemDir := filepath.Join("internal", "services", config.Package)
-	if err := os.MkdirAll(itemDir, 0755); err != nil {
+	if err := os.MkdirAll(itemDir, 0o755); err != nil {
 		fmt.Printf("Error creating directory %s: %v\n", itemDir, err)
 		os.Exit(1)
 	}
@@ -164,12 +164,50 @@ func main() {
 		fmt.Printf("Generated %s\n", filepath.Join(itemDir, file.output))
 	}
 
+	// Generate fake test server handlers if requested
+	if *generateFakes {
+		fakeDir := "internal/testhelp/fakes"
+		fakeFile := "fabric_" + config.Type + ".go"
+		if err := generateFile(fakeDir, "tools/itemgen/templates/Test/fabric_item.go.tmpl", fakeFile, config); err != nil {
+			fmt.Printf("Error generating fake %s: %v\n", fakeFile, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Generated %s\n", filepath.Join(fakeDir, fakeFile))
+	}
+
+	// Generate Terraform example files if requested
+	if *generateExamples {
+		if err := generateExampleFiles(config); err != nil {
+			fmt.Printf("Error generating examples: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
 	fmt.Printf("\nSuccessfully generated item %s in %s\n", *itemName, itemDir)
+	if *generateFakes {
+		fmt.Printf("Also generated fake test handlers in internal/testhelp/fakes/\n")
+	}
+	if *generateExamples {
+		fmt.Printf("Also generated Terraform examples in examples/\n")
+	}
 	fmt.Println("\nNext steps:")
 	fmt.Println("1. Review the generated files")
 	fmt.Println("2. Update the documentation URL if needed")
 	fmt.Println("3. Add any service-specific logic")
-	fmt.Println("4. Run the tests to verify the implementation")
+	if *generateFakes {
+		fmt.Println("4. Register the fake handlers in the fake server")
+		nextStep := "5"
+		if *generateExamples {
+			fmt.Printf("%s. Review and customize the Terraform examples\n", nextStep)
+			nextStep = "6"
+		}
+		fmt.Printf("%s. Run the tests to verify the implementation\n", nextStep)
+	} else if *generateExamples {
+		fmt.Println("4. Review and customize the Terraform examples")
+		fmt.Println("5. Run the tests to verify the implementation")
+	} else {
+		fmt.Println("4. Run the tests to verify the implementation")
+	}
 }
 
 type fileInfo struct {
@@ -177,7 +215,7 @@ type fileInfo struct {
 	output   string
 }
 
-func getFilesForItemType(typeName string, typesName string, itemType ItemType) []fileInfo {
+func getFilesForItemType(typeName, typesName string, itemType ItemType) []fileInfo {
 	files := []fileInfo{
 		{"base.go.tmpl", "base.go"},
 		{"base_test.go.tmpl", "base_test.go"},
@@ -189,7 +227,6 @@ func getFilesForItemType(typeName string, typesName string, itemType ItemType) [
 		{"resource_item_test.go.tmpl", "resource_" + typeName + "_test.go"},
 	}
 
-
 	switch itemType {
 	case TypeProperties, TypeDefinitionProperties, TypeConfigProperties, TypeConfigDefinitionProperties:
 		typeSpecificFiles := []fileInfo{
@@ -199,7 +236,6 @@ func getFilesForItemType(typeName string, typesName string, itemType ItemType) [
 		}
 		files = append(files, typeSpecificFiles...)
 	}
-
 
 	return files
 }
@@ -227,6 +263,45 @@ func generateFile(dir, tmplPath, outputFile string, config ItemConfig) error {
 	// Execute template
 	if err := tmpl.Execute(f, config); err != nil {
 		return fmt.Errorf("error executing template %s: %v", tmplPath, err)
+	}
+
+	return nil
+}
+
+func generateExampleFiles(config ItemConfig) error {
+	exampleFiles := []struct {
+		template string
+		output   string
+		dir      string
+	}{
+		// Data source examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/data-source.tf.tmpl", "data-source.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/data-source-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+
+		// Plural data source examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+		{"tools/itemgen/templates/examples/data-sources.tf.tmpl", "data-source.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+		{"tools/itemgen/templates/examples/data-sources-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+
+		// Resource examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/resource.tf.tmpl", "resource.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/resource-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/import.sh.tmpl", "import.sh", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+	}
+
+	for _, file := range exampleFiles {
+		// Create directory if it doesn't exist
+		if err := os.MkdirAll(file.dir, 0o755); err != nil {
+			return fmt.Errorf("error creating directory %s: %v", file.dir, err)
+		}
+
+		// Generate file
+		if err := generateFile(file.dir, file.template, file.output, config); err != nil {
+			return fmt.Errorf("error generating example %s: %v", file.output, err)
+		}
+		fmt.Printf("Generated %s\n", filepath.Join(file.dir, file.output))
 	}
 
 	return nil
