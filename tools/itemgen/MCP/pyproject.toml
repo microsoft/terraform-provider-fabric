@@ -1,0 +1,17 @@
+[project]
+name = "tf-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Or Bauberg", email = "orbauberg@microsoft.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+tf-mcp = "tf_mcp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

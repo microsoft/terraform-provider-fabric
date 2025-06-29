@@ -29,7 +29,6 @@ go run tools/itemgen/main.go \
 
 The generator supports 6 different item types:
 
-
 1. **Definition Only** (`definition`)
    - Has definition but no properties or config
    - Example: `datapipeline`
@@ -58,6 +57,7 @@ The generator supports 6 different item types:
 ### Examples
 
 1. Generate an item with definition (like datapipeline):
+
 ```bash
 go run tools/itemgen/main.go \
   -item-name="Data Pipeline" \
@@ -69,6 +69,7 @@ go run tools/itemgen/main.go \
 ```
 
 2. Generate an item with properties (like environment):
+
 ```bash
 go run tools/itemgen/main.go \
   -item-name="Environment" \
@@ -84,6 +85,7 @@ go run tools/itemgen/main.go \
 The generator will create different files based on the item type:
 
 ### Common Files (All Types)
+
 1. `base.go` - Base functionality and type definitions
 2. `base_test.go` - Base test setup
 3. `data_<type>.go` - Single item data source
@@ -94,7 +96,9 @@ The generator will create different files based on the item type:
 8. `resource_<type>_test.go` - Resource tests
 
 ### Additional Files for Items with Properties
+
 For items with properties (including definition-properties, config-properties, and config-definition-properties), the following additional files are generated:
+
 1. `schema_data_<type>.go` - Data source schema
 2. `schema_resource_<type>.go` - Resource schema
 3. `models.go` - Data models
@@ -102,6 +106,7 @@ For items with properties (including definition-properties, config-properties, a
 ## File Naming Convention
 
 The generator automatically handles file naming based on the provided item name:
+
 - Single item files use the lowercase, underscore-separated version of the item name
 - Plural item files use the lowercase, underscore-separated version of the plural item name
 - Example: "Data Pipeline" becomes "data_pipeline" and "data_pipelines"
@@ -123,6 +128,7 @@ The templates are located in `tools/itemgen/templates/<item-type>/`. They follow
 ## Safety Features
 
 The generator includes several safety features:
+
 - Checks for existing files before overwriting
 - Prompts for confirmation when overwriting existing files
 - Provides clear error messages and guidance

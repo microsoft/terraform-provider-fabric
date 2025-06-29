@@ -16,6 +16,21 @@ import (
 
 type operations{{.TypeInfo}} struct{}
 
+{{- if .HasProperties}}
+
+// ConvertItemToEntity implements itemConverter.
+func (o *operations{{.TypeInfo}}) ConvertItemToEntity(item fabcore.Item) fab{{.Package}}.{{.TypeInfo}} {
+	return fab{{.Package}}.{{.TypeInfo}}{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fab{{.Package}}.ItemType{{.TypeInfo}}),
+		Properties:  NewRandom{{.TypeInfo}}().Properties,
+	}
+}
+{{- end}}
+
 {{- if .HasDefinition}}
 
 // CreateDefinition implements concreteDefinitionOperations.
@@ -143,7 +158,13 @@ func configure{{.TypeInfo}}(server *fakeServer) fab{{.Package}}.{{.TypeInfo}} {
 	var definitionOperations concreteDefinitionOperations = &operations{{.TypeInfo}}{}
 {{- end}}
 
+{{- if .HasProperties}}
+	var converter itemConverter[fab{{.Package}}.{{.TypeInfo}}] = &operations{{.TypeInfo}}{}
+
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
+{{- else}}
 	handler := newTypedHandler(server, entityOperations)
+{{- end}}
 
 	configureEntityWithParentID(
 		handler,
@@ -174,6 +195,9 @@ func NewRandom{{.TypeInfo}}() fab{{.Package}}.{{.TypeInfo}} {
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fab{{.Package}}.ItemType{{.TypeInfo}}),
+		{{- if .HasProperties}}
+		// TODO: Add Properties field with appropriate test data based on API definition
+		{{- end}}
 	}
 }
 
