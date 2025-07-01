@@ -97,8 +97,6 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 		md += fmt.Sprintf(" %s.", typeInfo.Name)
 	}
 
-	md += "\n\n-> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later."
-
 	if typeInfo.IsSPNSupported {
 		md += SPNSupportedResource
 	} else {
