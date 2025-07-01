@@ -25,7 +25,6 @@ func TestUnit_WorkspaceDataSource(t *testing.T) {
 	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, nil)
 	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, nil)
 
-
 	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entity)
