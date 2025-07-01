@@ -30,9 +30,10 @@ var (
 )
 
 type resourceWorkspace struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.WorkspacesClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData    *pconfig.ProviderData
+	client         *fabcore.WorkspacesClient
+	clientCapacity *fabcore.CapacitiesClient
+	TypeInfo       tftypeinfo.TFTypeInfo
 }
 
 func NewResourceWorkspace() resource.Resource {
@@ -463,6 +464,7 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 	})
 
 	var diags diag.Diagnostics
+	var capacityID *string
 
 	for {
 		respGet, err := r.client.GetWorkspace(ctx, model.ID.ValueString(), nil)
@@ -484,10 +486,60 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			return diags
 
 		case fabcore.CapacityAssignmentProgressCompleted:
-			return model.set(ctx, respGet.WorkspaceInfo)
+			diags = model.set(ctx, respGet.WorkspaceInfo)
+			if diags.HasError() {
+				return diags
+			}
+
+			capacityID = model.CapacityID.ValueStringPointer()
+
+			goto loopEnd
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018
 		}
 	}
+
+loopEnd:
+
+	if capacityID != nil {
+		return r.getCapacity(ctx, *capacityID)
+	}
+
+	return nil
+}
+
+func (r *resourceWorkspace) getCapacity(ctx context.Context, capacityID string) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var notFound string
+
+	pager := r.clientCapacity.NewListCapacitiesPager(nil)
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+			return diags
+		}
+
+		for _, entity := range page.Value {
+			if *entity.ID == capacityID {
+				if *entity.State != fabcore.CapacityStateActive {
+					diags.AddError(
+						"Fabric Capacity State",
+						"Fabric Capacity is NOT in Active state. Inactive Capacity may cause unrecoverable damage. Please ensure the Capacity is in Active state before continuing.",
+					)
+				}
+
+				return nil
+			}
+
+			notFound = "Unable to find Capacity with 'id': " + capacityID
+		}
+	}
+
+	diags.AddError(
+		common.ErrorReadHeader,
+		notFound,
+	)
+
+	return diags
 }
