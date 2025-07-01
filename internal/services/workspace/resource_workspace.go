@@ -465,7 +465,6 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 	})
 
 	var diags diag.Diagnostics
-	var capacityID *string
 
 	for {
 		respGet, err := r.client.GetWorkspace(ctx, model.ID.ValueString(), nil)
@@ -492,16 +491,10 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 				return diags
 			}
 
-			capacityID = model.CapacityID.ValueStringPointer()
-
-			goto loopEnd
+			return getCapacity(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018
 		}
 	}
-
-loopEnd:
-
-	return getCapacity(ctx, r.clientCapacity, capacityID)
 }

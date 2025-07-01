@@ -99,11 +99,13 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 }
 
 func TestUnit_WorkspaceResource_ImportState(t *testing.T) {
-	entity := fakes.NewRandomWorkspaceInfo()
+	capacity := fakes.NewRandomCapacity()
+	entity := fakes.NewRandomWorkspaceInfo(capacity.ID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -145,13 +147,15 @@ func TestUnit_WorkspaceResource_ImportState(t *testing.T) {
 }
 
 func TestUnit_WorkspaceResource_CRUD(t *testing.T) {
-	entityExist := fakes.NewRandomWorkspaceInfo()
-	entityBefore := fakes.NewRandomWorkspaceInfo()
-	entityAfter := fakes.NewRandomWorkspaceInfo()
+	capacity := fakes.NewRandomCapacity()
+	entityExist := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityBefore := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityAfter := fakes.NewRandomWorkspaceInfo(capacity.ID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entityExist)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity

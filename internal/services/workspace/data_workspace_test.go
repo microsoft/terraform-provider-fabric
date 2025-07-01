@@ -20,15 +20,18 @@ import (
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_WorkspaceDataSource(t *testing.T) {
-	entity := fakes.NewRandomWorkspaceInfo()
-	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal)
-	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace)
+	capacity := fakes.NewRandomCapacity()
+	entity := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, nil)
+	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, nil)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(entityTypePersonal)
 	fakes.FakeServer.Upsert(entityTypeAdmin)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
