@@ -67,6 +67,7 @@ func (r *resourceWorkspace) Configure(_ context.Context, req resource.ConfigureR
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
+	r.clientCapacity = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCapacitiesClient()
 }
 
 func (r *resourceWorkspace) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -502,44 +503,5 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 
 loopEnd:
 
-	if capacityID != nil {
-		return r.getCapacity(ctx, *capacityID)
-	}
-
-	return nil
-}
-
-func (r *resourceWorkspace) getCapacity(ctx context.Context, capacityID string) diag.Diagnostics {
-	var diags diag.Diagnostics
-	var notFound string
-
-	pager := r.clientCapacity.NewListCapacitiesPager(nil)
-	for pager.More() {
-		page, err := pager.NextPage(ctx)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-			return diags
-		}
-
-		for _, entity := range page.Value {
-			if *entity.ID == capacityID {
-				if *entity.State != fabcore.CapacityStateActive {
-					diags.AddError(
-						"Fabric Capacity State",
-						"Fabric Capacity is NOT in Active state. Inactive Capacity may cause unrecoverable damage. Please ensure the Capacity is in Active state before continuing.",
-					)
-				}
-
-				return nil
-			}
-
-			notFound = "Unable to find Capacity with 'id': " + capacityID
-		}
-	}
-
-	diags.AddError(
-		common.ErrorReadHeader,
-		notFound,
-	)
-
-	return diags
+	return getCapacity(ctx, r.clientCapacity, capacityID, true)
 }

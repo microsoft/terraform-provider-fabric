@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -14,7 +13,6 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
@@ -177,27 +175,4 @@ type oneLakeEndpointsModel struct {
 func (to *oneLakeEndpointsModel) set(from fabcore.OneLakeEndpoints) {
 	to.BlobEndpoint = customtypes.NewURLPointerValue(from.BlobEndpoint)
 	to.DfsEndpoint = customtypes.NewURLPointerValue(from.DfsEndpoint)
-}
-
-func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	switch *entity.Type {
-	case fabcore.WorkspaceTypePersonal:
-		diags.AddError(
-			common.ErrorWorkspaceNotSupportedHeader,
-			fmt.Sprintf(common.ErrorWorkspaceNotSupportedDetails, string(fabcore.WorkspaceTypePersonal)),
-		)
-
-		return diags
-	case fabcore.WorkspaceTypeAdminWorkspace:
-		diags.AddError(
-			common.ErrorWorkspaceNotSupportedHeader,
-			fmt.Sprintf(common.ErrorWorkspaceNotSupportedDetails, string(fabcore.WorkspaceTypeAdminWorkspace)),
-		)
-
-		return diags
-	default:
-		return nil
-	}
 }
