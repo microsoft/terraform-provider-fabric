@@ -503,5 +503,5 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 
 loopEnd:
 
-	return getCapacity(ctx, r.clientCapacity, capacityID, true)
+	return getCapacity(ctx, r.clientCapacity, capacityID)
 }

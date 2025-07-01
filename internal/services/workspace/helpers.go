@@ -38,7 +38,7 @@ func checkWorkspaceType(entity fabcore.WorkspaceInfo) diag.Diagnostics {
 	}
 }
 
-func getCapacity(ctx context.Context, client *fabcore.CapacitiesClient, capacityID *string, asDiagErr bool) diag.Diagnostics { //revive:disable-line:flag-parameter
+func getCapacity(ctx context.Context, client *fabcore.CapacitiesClient, capacityID *string) diag.Diagnostics {
 	if client == nil || capacityID == nil {
 		return nil
 	}
