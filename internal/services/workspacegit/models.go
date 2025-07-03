@@ -91,6 +91,7 @@ DATA-SOURCE
 
 type dataSourceWorkspaceGitModel struct {
 	baseWorkspaceGitModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -99,9 +100,10 @@ RESOURCE
 */
 
 type resourceWorkspaceGitModel struct {
-	InitializationStrategy types.String `tfsdk:"initialization_strategy"`
 	baseWorkspaceGitModel
-	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+
+	InitializationStrategy types.String    `tfsdk:"initialization_strategy"`
+	Timeouts               timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestGitConnect struct {

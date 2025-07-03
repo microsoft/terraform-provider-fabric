@@ -18,11 +18,13 @@ import (
 
 type dataSourceEventstreamSourceConnectionModel struct {
 	baseEventstreamSourceConnectionModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
 type ephemeralEventstreamSourceConnectionModel struct {
 	baseEventstreamSourceConnectionModel
+
 	Timeouts timeoutsE.Value `tfsdk:"timeouts"`
 }
 

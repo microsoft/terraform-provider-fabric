@@ -17,6 +17,7 @@ import (
 
 type dataSourceFabricItemDefinitionModel struct {
 	fabricItemModel
+
 	Format           types.String                                                               `tfsdk:"format"`
 	OutputDefinition types.Bool                                                                 `tfsdk:"output_definition"`
 	Definition       supertypes.MapNestedObjectValueOf[dataSourceFabricItemDefinitionPartModel] `tfsdk:"definition"`

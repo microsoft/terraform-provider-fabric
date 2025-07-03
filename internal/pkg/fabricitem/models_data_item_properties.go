@@ -9,5 +9,6 @@ import (
 
 type DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
 	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
