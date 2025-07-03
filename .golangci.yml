@@ -13,7 +13,6 @@ output:
 linters:
   default: all
   disable:
-    - noinlineerr # TODO: enable in the future
     - cyclop
     - depguard
     - err113
