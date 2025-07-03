@@ -29,6 +29,12 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  # required for all workflows
+  security-events: write
+  # required to fetch internal or private CodeQL packs
+  packages: read
+  # only required for workflows in private repositories
+  actions: read
   contents: read
 
 jobs:
@@ -46,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["go"]
+        language: ["actions", "go"]
 
     steps:
       - name: ⤵️ Checkout
@@ -61,6 +67,8 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
+              - '.github/workflows/*.yml'
+              - '.github/workflows/*.yaml'
 
       - name: 🚧 Setup Go
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
