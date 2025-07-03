@@ -55,6 +55,7 @@ DATA-SOURCE
 
 type dataSourceGatewayRoleAssignmentModel struct {
 	baseGatewayRoleAssignmentModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -90,6 +91,7 @@ RESOURCE
 
 type resourceGatewayRoleAssignmentModel struct {
 	baseGatewayRoleAssignmentModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
