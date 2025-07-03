@@ -39,6 +39,7 @@ DATA-SOURCE
 
 type dataSourceFolderModel struct {
 	baseFolderModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -72,6 +73,7 @@ RESOURCE
 
 type resourceFolderModel struct {
 	baseFolderModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

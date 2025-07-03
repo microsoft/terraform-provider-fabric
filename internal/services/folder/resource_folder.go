@@ -197,10 +197,12 @@ func (r *resourceFolder) Update(ctx context.Context, req resource.UpdateRequest,
 	if plan.ParentFolderID != state.ParentFolderID {
 		var reqMove requestMoveFolder
 		reqMove.set(plan)
+
 		respMove, err := r.client.MoveFolder(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMove.MoveFolderRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
+
 		updatedFolder = &respMove.Folder
 	}
 
@@ -319,5 +321,6 @@ func (r *resourceFolder) getByID(ctx context.Context, workspaceID, folderID stri
 	}
 
 	model.set(respGet.Folder)
+
 	return nil
 }

@@ -130,5 +130,6 @@ func (d *dataSourceFolders) list(ctx context.Context, model *dataSourceFoldersMo
 	}
 
 	model.setValues(ctx, respList)
+
 	return nil
 }

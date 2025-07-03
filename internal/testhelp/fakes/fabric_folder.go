@@ -118,6 +118,7 @@ func (m *moveFolderOperations) TransformUpdate(entity fabcore.Folder) fabcore.Fo
 
 func (m *moveFolderOperations) Update(base fabcore.Folder, moveReq fabcore.MoveFolderRequest) fabcore.Folder {
 	base.ParentFolderID = moveReq.TargetFolderID
+
 	return base
 }
 

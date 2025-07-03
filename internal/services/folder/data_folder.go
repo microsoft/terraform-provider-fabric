@@ -83,6 +83,7 @@ func (d *dataSourceFolder) Read(ctx context.Context, req datasource.ReadRequest,
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
 	diags = d.getByID(ctx, &data)
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
