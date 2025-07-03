@@ -555,7 +555,7 @@ func createAuthFailedError(t *testing.T) *azidentity.AuthenticationFailedError {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 
-		if _, err := w.Write([]byte(`{
+		_, err := w.Write([]byte(`{
 			"error": "invalid_client",
 			"error_description": "Client authentication failed",
 			"error_codes": [700016],
@@ -563,7 +563,8 @@ func createAuthFailedError(t *testing.T) *azidentity.AuthenticationFailedError {
 			"trace_id": "trace-123",
 			"correlation_id": "corr-456",
 			"error_uri": "https://login.microsoftonline.com/error"
-		}`)); err != nil {
+		}`))
+		if err != nil {
 			t.Fatalf("failed to write response: %v", err)
 		}
 	}))
