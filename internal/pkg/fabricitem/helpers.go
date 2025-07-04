@@ -150,7 +150,6 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 
 	for {
 		result, err = operation()
-
 		if err == nil {
 			if retryCount > 0 {
 				tflog.Debug(ctx, fmt.Sprintf("Operation succeeded after %d retries", retryCount))

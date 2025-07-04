@@ -204,7 +204,8 @@ func handleCreateWithoutWorkspace[TEntity, TOptions, TCreateRequest, TResponse a
 
 		newEntity := creator.Create(createRequest)
 
-		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+		statusCode, err := validator.Validate(newEntity, handler.Elements())
+		if err != nil {
 			var empty TEntity
 			respValue := createTransformer.TransformCreate(empty)
 			resp.SetResponse(statusCode, respValue, nil)
@@ -239,7 +240,8 @@ func handleNonLROCreate[TEntity, TOptions, TCreateRequest, TResponse any](
 
 		newEntity := creator.CreateWithParentID(parentID, createRequest)
 
-		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+		statusCode, err := validator.Validate(newEntity, handler.Elements())
+		if err != nil {
 			var empty TEntity
 			respValue := createTransformer.TransformCreate(empty)
 			resp.SetResponse(statusCode, respValue, nil)
@@ -393,7 +395,8 @@ func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinit
 
 		newEntity := creator.CreateWithParentID(parentID, createRequest)
 
-		if statusCode, err := validator.Validate(newEntity, handler.Elements()); err != nil {
+		statusCode, err := validator.Validate(newEntity, handler.Elements())
+		if err != nil {
 			var empty TEntity
 			respValue := createTransformer.TransformCreate(empty)
 			resp.SetTerminalResponse(statusCode, respValue, nil)
@@ -407,7 +410,7 @@ func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinit
 				definition := definitionCreator.CreateDefinition(createRequest)
 				if definition != nil {
 					id := handler.identifier.GetID(newEntity)
-					upsertDefinition[TDefinition](handler, id, definition)
+					upsertDefinition(handler, id, definition)
 				}
 			}
 

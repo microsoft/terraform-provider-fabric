@@ -16,6 +16,7 @@ on:
 
 permissions:
   pull-requests: write
+  statuses: write
 
 jobs:
   main:
@@ -25,6 +26,8 @@ jobs:
       - name: 🔍 Run Semantic PR validation
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
         id: check_pr_title
+        with:
+          wip: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
 

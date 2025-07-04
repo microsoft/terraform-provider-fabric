@@ -19,6 +19,7 @@ import (
 
 type resourceFabricItemDefinitionModel struct {
 	fabricItemModel
+
 	Format                  types.String                                                             `tfsdk:"format"`
 	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
 	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`

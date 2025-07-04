@@ -99,7 +99,9 @@ func SourceFileToPayload(srcPath string, tokens map[string]string) (string, stri
 
 		// Execute template
 		var contentBuf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData); err != nil {
+
+		err = tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData)
+		if err != nil {
 			diags.AddError(common.ErrorTmplParseHeader, err.Error())
 
 			return "", "", diags
