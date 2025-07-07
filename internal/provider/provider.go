@@ -424,6 +424,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
 		deploymentpipeline.NewResourceDeploymentPipeline,
+		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
