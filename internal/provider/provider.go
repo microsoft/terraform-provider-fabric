@@ -45,6 +45,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -469,6 +470,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
+		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
