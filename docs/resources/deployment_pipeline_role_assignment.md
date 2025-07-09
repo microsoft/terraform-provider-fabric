@@ -22,7 +22,7 @@ The Deployment Pipeline Role Assignment resource allows you to manage a Fabric [
 ### Required
 
 - `deployment_pipeline_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Deployment Pipeline ID.
-- `principal` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal. (see [below for nested schema](#nestedatt--principal))
+- `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
 - `role` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The deployment pipeline role of the principal. Value must be one of : `Admin`.
 
 ### Optional
