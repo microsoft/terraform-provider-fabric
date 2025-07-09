@@ -160,8 +160,11 @@ func (r *resourceDeploymentPipelineRoleAssignment) Read(ctx context.Context, req
 	}
 }
 
-func (r *resourceDeploymentPipelineRoleAssignment) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	panic("Update operation is not supported for Deployment Pipeline Role Assignment resource.")
+func (r *resourceDeploymentPipelineRoleAssignment) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError(
+		"Not Supported",
+		"Update operation is not supported for Deployment Pipeline Role Assignment resource.",
+	)
 }
 
 func (r *resourceDeploymentPipelineRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

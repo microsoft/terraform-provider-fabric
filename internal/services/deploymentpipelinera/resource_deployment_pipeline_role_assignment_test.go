@@ -10,6 +10,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -34,7 +35,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_Attributes(t *testing.T) 
 					"role": "Admin",
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "deployment_pipeline_id" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
 		// error - no required attributes - principal.id
 		{
@@ -150,6 +151,64 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_ImportState(t *testing.T)
 			ImportStateId: fmt.Sprintf("%s/%s", "00000000-0000-0000-0000-000000000000", "test"),
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+	}))
+}
+
+func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
+	deploymentPipelineResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "deployment_pipeline"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+			"description":  testhelp.RandomName(),
+			"stages": []map[string]any{
+				{
+					"display_name": testhelp.RandomName(),
+					"description":  testhelp.RandomName(),
+					"is_public":    testhelp.RandomBool(),
+				},
+				{
+					"display_name": testhelp.RandomName(),
+					"description":  testhelp.RandomName(),
+					"is_public":    testhelp.RandomBool(),
+				},
+			},
+		},
+	)
+
+	deploymentPipelineResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "deployment_pipeline", "test")
+
+	entity := testhelp.WellKnown()["Principal"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityType := entity["type"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				deploymentPipelineResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"deployment_pipeline_id": testhelp.RefByFQN(deploymentPipelineResourceFQN, "id"),
+						"principal": map[string]any{
+							"id":   entityID,
+							"type": entityType,
+						},
+						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", string(fabcore.DeploymentPipelineRoleAdmin)),
+			),
 		},
 	}))
 }

@@ -32,31 +32,17 @@ func (to *baseDeploymentPipelineRoleAssignmentModel) set(ctx context.Context, de
 	to.DeploymentPipelineID = customtypes.NewUUIDValue(deploymentPipelineID)
 	to.Role = types.StringPointerValue((*string)(from.Role))
 
-	principal := supertypes.NewSingleNestedObjectValueOfNull[principalModel](ctx)
-
 	if from.Principal != nil {
 		principalModel := &principalModel{}
 
 		principalModel.set(*from.Principal)
 
-		if diags := principal.Set(ctx, principalModel); diags.HasError() {
+		if diags := to.Principal.Set(ctx, principalModel); diags.HasError() {
 			return diags
 		}
 	}
 
-	to.Principal = principal
-
 	return nil
-}
-
-/*
-DATA-SOURCE
-*/
-
-type dataSourceDeploymentPipelineRoleAssignmentModel struct {
-	baseDeploymentPipelineRoleAssignmentModel
-
-	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
 /*
