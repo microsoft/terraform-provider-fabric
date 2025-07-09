@@ -34,22 +34,22 @@ The generator supports 6 different item types:
    - Example: `datapipeline`
    - Uses: `NewDataSourceFabricItemDefinition`, `NewDataSourceFabricItems`, `NewResourceFabricItemDefinition`
 
-2. **Properties Only** (`properties`)
+1. **Properties Only** (`properties`)
    - Has properties but no definition or config
    - Example: `environment`
    - Uses: `NewDataSourceFabricItemProperties`, `NewDataSourceFabricItemsProperties`, `NewResourceFabricItemProperties`
 
-3. **Definition and Properties** (`definition-properties`)
+1. **Definition and Properties** (`definition-properties`)
    - Has both definition and properties but no config
    - Example: `mirroreddatabase`
    - Uses: `NewDataSourceFabricItemDefinitionProperties`, `NewDataSourceFabricItemsProperties`, `NewResourceFabricItemDefinitionProperties`
 
-4. **Config and Properties** (`config-properties`)
+1. **Config and Properties** (`config-properties`)
    - Has config and properties but no definition
    - Example: `lakehouse`
    - Uses: `NewDataSourceFabricItemProperties`, `NewDataSourceFabricItemsProperties`, `NewResourceFabricItemConfigProperties`
 
-5. **Config, Definition, and Properties** (`config-definition-properties`)
+1. **Config, Definition, and Properties** (`config-definition-properties`)
    - Has config, definition, and properties
    - Example: `eventhouse`
    - Uses: `NewDataSourceFabricItemDefinitionProperties`, `NewDataSourceFabricItemsProperties`, `NewResourceFabricItemConfigDefinitionProperties`
@@ -58,27 +58,27 @@ The generator supports 6 different item types:
 
 1. Generate an item with definition (like datapipeline):
 
-```bash
-go run tools/itemgen/main.go \
-  -item-name="Data Pipeline" \
-  -items-name="Data Pipelines" \
-  -item-type=definition \
-  -rename-allowed=true \
-  -is-preview=false \
-  -is-spn-supported=true
-```
+   ```bash
+   go run tools/itemgen/main.go \
+   -item-name="Data Pipeline" \
+   -items-name="Data Pipelines" \
+   -item-type=definition \
+   -rename-allowed=true \
+   -is-preview=false \
+   -is-spn-supported=true
+   ```
 
-2. Generate an item with properties (like environment):
+1. Generate an item with properties (like environment):
 
-```bash
-go run tools/itemgen/main.go \
-  -item-name="Environment" \
-  -items-name="Environments" \
-  -item-type=properties \
-  -rename-allowed=true \
-  -is-preview=false \
-  -is-spn-supported=true
-```
+   ```bash
+   go run tools/itemgen/main.go \
+   -item-name="Environment" \
+   -items-name="Environments" \
+   -item-type=properties \
+   -rename-allowed=true \
+   -is-preview=false \
+   -is-spn-supported=true
+   ```
 
 ## Generated Files
 
@@ -87,21 +87,21 @@ The generator will create different files based on the item type:
 ### Common Files (All Types)
 
 1. `base.go` - Base functionality and type definitions
-2. `base_test.go` - Base test setup
-3. `data_<type>.go` - Single item data source
-4. `data_<type>_test.go` - Single item data source tests
-5. `data_<types>.go` - Multiple items data source
-6. `data_<types>_test.go` - Multiple items data source tests
-7. `resource_<type>.go` - Resource definition
-8. `resource_<type>_test.go` - Resource tests
+1. `base_test.go` - Base test setup
+1. `data_<type>.go` - Single item data source
+1. `data_<type>_test.go` - Single item data source tests
+1. `data_<types>.go` - Multiple items data source
+1. `data_<types>_test.go` - Multiple items data source tests
+1. `resource_<type>.go` - Resource definition
+1. `resource_<type>_test.go` - Resource tests
 
 ### Additional Files for Items with Properties
 
 For items with properties (including definition-properties, config-properties, and config-definition-properties), the following additional files are generated:
 
 1. `schema_data_<type>.go` - Data source schema
-2. `schema_resource_<type>.go` - Resource schema
-3. `models.go` - Data models
+1. `schema_resource_<type>.go` - Resource schema
+1. `models.go` - Data models
 
 ## File Naming Convention
 
@@ -116,10 +116,10 @@ The generator automatically handles file naming based on the provided item name:
 After generating the files, you may need to:
 
 1. Review and update the generated files.
-2. Complete all `TBD` placeholders.
-3. Add the resource/data-source/s to the provider configuration.
-4. Update the well-known script.
-5. Run the tests to verify the implementation.
+1. Complete all `TBD` placeholders.
+1. Add the resource/data-source/s to the provider configuration.
+1. Update the well-known script.
+1. Run the tests to verify the implementation.
 
 ## Templates
 
