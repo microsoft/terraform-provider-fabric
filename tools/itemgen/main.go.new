@@ -1,0 +1,472 @@
+package main
+
+import (
+	"bufio"
+	"errors"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"text/template"
+)
+
+// Constants for better maintainability.
+const (
+	DefaultDisplayNameMax = 123
+	DefaultDescriptionMax = 256
+	DefaultFilePermission = 0o755
+	TemplateBaseDir       = "tools/itemgen/templates"
+	FakeTestDir           = "internal/testhelp/fakes"
+	ServicesDir           = "internal/services"
+)
+
+// Exit codes for different error types.
+const (
+	ExitSuccess       = 0
+	ExitInvalidArgs   = 1
+	ExitFileError     = 2
+	ExitUserCancelled = 3
+)
+
+type ItemConfig struct {
+	Name              string
+	Type              string
+	TypeInfo          string
+	Names             string
+	Types             string
+	TypesInfo         string
+	RenameAllowed     bool
+	Package           string
+	FabricItemType    string
+	DefinitionFormats []string
+	DocsURL           string
+	DisplayNameMax    int
+	DescriptionMax    int
+	ItemType          ItemType
+	HasDefinition     bool
+	HasProperties     bool
+	HasConfig         bool
+	IsPreview         bool
+	IsSPNSupported    bool
+	// Internal fields for generation options
+	generateFakes    bool
+	generateExamples bool
+}
+
+type ItemType int
+
+const (
+	TypeBasic ItemType = iota
+	TypeDefinition
+	TypeProperties
+	TypeDefinitionProperties
+	TypeConfigProperties
+	TypeConfigDefinitionProperties
+)
+
+// validItemTypes returns a slice of valid item type strings.
+func validItemTypes() []string {
+	return []string{"basic", "definition", "properties", "definition-properties", "config-properties", "config-definition-properties"}
+}
+
+func (t ItemType) String() string {
+	switch t {
+	case TypeBasic:
+		return "basic"
+	case TypeDefinition:
+		return "definition"
+	case TypeProperties:
+		return "properties"
+	case TypeDefinitionProperties:
+		return "definition-properties"
+	case TypeConfigProperties:
+		return "config-properties"
+	case TypeConfigDefinitionProperties:
+		return "config-definition-properties"
+	default:
+		return "unknown"
+	}
+}
+
+// hasDefinition returns true if the item type supports definitions.
+func (t ItemType) hasDefinition() bool {
+	return t == TypeDefinition || t == TypeDefinitionProperties || t == TypeConfigDefinitionProperties
+}
+
+// hasProperties returns true if the item type supports properties.
+func (t ItemType) hasProperties() bool {
+	return t == TypeProperties || t == TypeDefinitionProperties || t == TypeConfigProperties || t == TypeConfigDefinitionProperties
+}
+
+// hasConfig returns true if the item type supports configuration.
+func (t ItemType) hasConfig() bool {
+	return t == TypeConfigProperties || t == TypeConfigDefinitionProperties
+}
+
+func main() {
+	config, err := parseFlags()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		flag.Usage()
+		os.Exit(ExitInvalidArgs)
+	}
+
+	if err := validateConfig(config); err != nil {
+		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
+		os.Exit(ExitInvalidArgs)
+	}
+
+	// Create the item directory and check for existing files
+	itemDir := filepath.Join(ServicesDir, config.Package)
+	if err := createItemDirectory(itemDir); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating directory: %v\n", err)
+		os.Exit(ExitFileError)
+	}
+
+	// Generate main service files
+	if err := generateServiceFiles(itemDir, config); err != nil {
+		fmt.Fprintf(os.Stderr, "Error generating service files: %v\n", err)
+		os.Exit(ExitFileError)
+	}
+
+	// Generate optional components
+	if err := generateOptionalFiles(config); err != nil {
+		fmt.Fprintf(os.Stderr, "Error generating optional files: %v\n", err)
+		os.Exit(ExitFileError)
+	}
+
+	printSuccessMessage(config, itemDir)
+}
+
+// parseFlags parses command line flags and returns configuration.
+func parseFlags() (ItemConfig, error) {
+	itemName := flag.String("item-name", "", "Name of the new item (e.g. Data Pipeline)")
+	itemsName := flag.String("items-name", "", "Name of the new item in plural form (e.g. Data Pipelines)")
+	itemTypeFlag := flag.String("item-type", "", fmt.Sprintf("Type of item (%s)", strings.Join(validItemTypes(), "|")))
+	renameAllowed := flag.Bool("rename-allowed", true, "Is item rename allowed?")
+	isPreview := flag.Bool("is-preview", false, "Is the item in preview?")
+	isSPNSupported := flag.Bool("is-spn-supported", false, "Is the item supported for SPN?")
+	generateFakes := flag.Bool("generate-fakes", true, "Generate fake test server handlers")
+	generateExamples := flag.Bool("generate-examples", true, "Generate Terraform example files")
+
+	flag.Parse()
+
+	// Validate required flags
+	if *itemName == "" {
+		return ItemConfig{}, errors.New("item-name is required")
+	}
+
+	if *itemsName == "" {
+		return ItemConfig{}, errors.New("items-name is required")
+	}
+
+	if *itemTypeFlag == "" {
+		return ItemConfig{}, errors.New("item-type is required")
+	}
+
+	// Parse item type
+	itemTypeEnum, err := parseItemType(*itemTypeFlag)
+	if err != nil {
+		return ItemConfig{}, err
+	}
+
+	// Create configuration
+	return ItemConfig{
+		Name:              *itemName,
+		Type:              normalizeTypeName(*itemName),
+		TypeInfo:          strings.ReplaceAll(*itemName, " ", ""),
+		Names:             *itemsName,
+		Types:             normalizeTypeName(*itemsName),
+		TypesInfo:         strings.ReplaceAll(*itemsName, " ", ""),
+		Package:           strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
+		RenameAllowed:     *renameAllowed,
+		DefinitionFormats: []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
+		DocsURL:           "<docs-url>",                   // Placeholder - should be configurable
+		DisplayNameMax:    DefaultDisplayNameMax,
+		DescriptionMax:    DefaultDescriptionMax,
+		ItemType:          itemTypeEnum,
+		HasDefinition:     itemTypeEnum.hasDefinition(),
+		HasProperties:     itemTypeEnum.hasProperties(),
+		HasConfig:         itemTypeEnum.hasConfig(),
+		IsPreview:         *isPreview,
+		IsSPNSupported:    *isSPNSupported,
+		// Store flags for optional generation
+		generateFakes:    *generateFakes,
+		generateExamples: *generateExamples,
+	}, nil
+}
+
+// parseItemType converts string to ItemType enum.
+func parseItemType(itemTypeFlag string) (ItemType, error) {
+	switch itemTypeFlag {
+	case "basic":
+		return TypeBasic, nil
+	case "definition":
+		return TypeDefinition, nil
+	case "properties":
+		return TypeProperties, nil
+	case "definition-properties":
+		return TypeDefinitionProperties, nil
+	case "config-properties":
+		return TypeConfigProperties, nil
+	case "config-definition-properties":
+		return TypeConfigDefinitionProperties, nil
+	default:
+		return TypeBasic, fmt.Errorf("invalid item type %s. Must be one of: %s",
+			itemTypeFlag, strings.Join(validItemTypes(), ", "))
+	}
+}
+
+// normalizeTypeName converts a display name to a normalized type name.
+func normalizeTypeName(name string) string {
+	return strings.ToLower(strings.ReplaceAll(name, " ", "_"))
+}
+
+// validateConfig performs additional validation on the configuration.
+func validateConfig(config ItemConfig) error {
+	// Add any additional validation logic here
+	if strings.TrimSpace(config.Name) == "" {
+		return errors.New("item name cannot be empty or whitespace")
+	}
+
+	if strings.TrimSpace(config.Names) == "" {
+		return errors.New("item names (plural) cannot be empty or whitespace")
+	}
+
+	return nil
+}
+
+// createItemDirectory creates the item directory and handles existing files.
+func createItemDirectory(itemDir string) error {
+	if err := os.MkdirAll(itemDir, DefaultFilePermission); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", itemDir, err)
+	}
+
+	// Check if directory already contains files
+	files, err := os.ReadDir(itemDir)
+	if err != nil {
+		return fmt.Errorf("failed to read directory %s: %w", itemDir, err)
+	}
+
+	if len(files) > 0 {
+		if !confirmOverwrite(itemDir) {
+			os.Exit(ExitUserCancelled)
+		}
+	}
+
+	return nil
+}
+
+// confirmOverwrite prompts the user to confirm overwriting existing files.
+func confirmOverwrite(itemDir string) bool {
+	fmt.Printf("Warning: Directory %s already contains files. This may overwrite existing files.\n", itemDir)
+	fmt.Print("Do you want to continue? [y/N]: ")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		response := strings.ToLower(strings.TrimSpace(scanner.Text()))
+
+		return response == "y" || response == "yes"
+	}
+
+	return false
+}
+
+// generateServiceFiles generates the main service files.
+func generateServiceFiles(itemDir string, config ItemConfig) error {
+	filesToGenerate := getFilesForItemType(config.Type, config.Types, config.ItemType)
+	templateDir := filepath.Join(TemplateBaseDir, config.ItemType.String())
+
+	for _, file := range filesToGenerate {
+		templatePath := filepath.Join(templateDir, file.template)
+		if err := generateFile(itemDir, templatePath, file.output, config); err != nil {
+			return fmt.Errorf("failed to generate %s: %w", file.output, err)
+		}
+
+		fmt.Printf("Generated %s\n", filepath.Join(itemDir, file.output))
+	}
+
+	return nil
+}
+
+// generateOptionalFiles generates fake handlers and examples if requested.
+func generateOptionalFiles(config ItemConfig) error {
+	if config.generateFakes {
+		if err := generateFakeHandlers(config); err != nil {
+			return fmt.Errorf("failed to generate fake handlers: %w", err)
+		}
+	}
+
+	if config.generateExamples {
+		if err := generateExampleFiles(config); err != nil {
+			return fmt.Errorf("failed to generate examples: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// generateFakeHandlers generates fake test server handlers.
+func generateFakeHandlers(config ItemConfig) error {
+	fakeFile := "fabric_" + config.Type + ".go"
+	templatePath := filepath.Join(TemplateBaseDir, "Test", "fabric_item.go.tmpl")
+
+	if err := generateFile(FakeTestDir, templatePath, fakeFile, config); err != nil {
+		return fmt.Errorf("failed to generate fake %s: %w", fakeFile, err)
+	}
+
+	fmt.Printf("Generated %s\n", filepath.Join(FakeTestDir, fakeFile))
+
+	return nil
+}
+
+// printSuccessMessage displays the success message and next steps.
+func printSuccessMessage(config ItemConfig, itemDir string) {
+	fmt.Printf("\nSuccessfully generated item %s in %s\n", config.Name, itemDir)
+
+	if config.generateFakes {
+		fmt.Printf("Also generated fake test handlers in %s/\n", FakeTestDir)
+	}
+
+	if config.generateExamples {
+		fmt.Printf("Also generated Terraform examples in examples/\n")
+	}
+
+	printNextSteps(config)
+}
+
+// printNextSteps displays the recommended next steps.
+func printNextSteps(config ItemConfig) {
+	fmt.Println("\nNext steps:")
+
+	step := 1
+
+	fmt.Printf("%d. Review the generated files\n", step)
+
+	step++
+	fmt.Printf("%d. Update the documentation URL if needed\n", step)
+
+	step++
+	fmt.Printf("%d. Add any service-specific logic\n", step)
+
+	step++
+
+	if config.generateFakes {
+		fmt.Printf("%d. Register the fake handlers in the fake server\n", step)
+
+		step++
+	}
+
+	if config.generateExamples {
+		fmt.Printf("%d. Review and customize the Terraform examples\n", step)
+
+		step++
+	}
+
+	fmt.Printf("%d. Run the tests to verify the implementation\n", step)
+}
+
+type fileInfo struct {
+	template string
+	output   string
+}
+
+func getFilesForItemType(typeName, typesName string, itemType ItemType) []fileInfo {
+	files := []fileInfo{
+		{"base.go.tmpl", "base.go"},
+		{"base_test.go.tmpl", "base_test.go"},
+		{"data_item.go.tmpl", "data_" + typeName + ".go"},
+		{"data_item_test.go.tmpl", "data_" + typeName + "_test.go"},
+		{"data_items.go.tmpl", "data_" + typesName + ".go"},
+		{"data_items_test.go.tmpl", "data_" + typesName + "_test.go"},
+		{"resource_item.go.tmpl", "resource_" + typeName + ".go"},
+		{"resource_item_test.go.tmpl", "resource_" + typeName + "_test.go"},
+	}
+
+	switch itemType {
+	case TypeProperties, TypeDefinitionProperties, TypeConfigProperties, TypeConfigDefinitionProperties:
+		typeSpecificFiles := []fileInfo{
+			{"schema_data_item.go.tmpl", "schema_data_" + typeName + ".go"},
+			{"schema_resource_item.go.tmpl", "schema_resource_" + typeName + ".go"},
+			{"models.go.tmpl", "models.go"},
+		}
+		files = append(files, typeSpecificFiles...)
+	}
+
+	return files
+}
+
+func generateFile(dir, tmplPath, outputFile string, config ItemConfig) error {
+	// Check if template file exists
+	if _, err := os.Stat(tmplPath); os.IsNotExist(err) {
+		return fmt.Errorf("template file not found: %s", tmplPath)
+	}
+
+	// Read template
+	tmpl, err := template.ParseFiles(tmplPath)
+	if err != nil {
+		return fmt.Errorf("error parsing template %s: %w", tmplPath, err)
+	}
+
+	// Create directory if it doesn't exist
+	if err := os.MkdirAll(dir, DefaultFilePermission); err != nil {
+		return fmt.Errorf("error creating directory %s: %w", dir, err)
+	}
+
+	// Create output file
+	output := filepath.Join(dir, outputFile)
+	f, err := os.Create(output)
+	if err != nil {
+		return fmt.Errorf("error creating output file %s: %w", output, err)
+	}
+
+	defer f.Close()
+
+	// Execute template
+	if err := tmpl.Execute(f, config); err != nil {
+		return fmt.Errorf("error executing template %s: %w", tmplPath, err)
+	}
+
+	return nil
+}
+
+func generateExampleFiles(config ItemConfig) error {
+	exampleFiles := []struct {
+		template string
+		output   string
+		dir      string
+	}{
+		// Data source examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/data-source.tf.tmpl", "data-source.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/data-source-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Type)},
+
+		// Plural data source examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+		{"tools/itemgen/templates/examples/data-sources.tf.tmpl", "data-source.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+		{"tools/itemgen/templates/examples/data-sources-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "data-sources", "fabric_"+config.Types)},
+
+		// Resource examples
+		{"tools/itemgen/templates/examples/providers.tf.tmpl", "providers.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/resource.tf.tmpl", "resource.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/resource-outputs.tf.tmpl", "outputs.tf", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+		{"tools/itemgen/templates/examples/import.sh.tmpl", "import.sh", filepath.Join("examples", "resources", "fabric_"+config.Type)},
+	}
+
+	for _, file := range exampleFiles {
+		// Create directory if it doesn't exist
+		if err := os.MkdirAll(file.dir, DefaultFilePermission); err != nil {
+			return fmt.Errorf("error creating directory %s: %v", file.dir, err)
+		}
+
+		// Generate file
+		if err := generateFile(file.dir, file.template, file.output, config); err != nil {
+			return fmt.Errorf("error generating example %s: %v", file.output, err)
+		}
+
+		fmt.Printf("Generated %s\n", filepath.Join(file.dir, file.output))
+	}
+
+	return nil
+}
