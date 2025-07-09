@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "tf-mcp": {
+      "command": "go",
+      "args": [
+        "run",
+        "main.go",
+      ],
+      "cwd": "${workspaceFolder}/tools/itemgen/tf-mcp"
+    }
+  }
+}
