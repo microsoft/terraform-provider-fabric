@@ -156,10 +156,6 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_ImportState(t *testing.T)
 }
 
 func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	deploymentPipelineResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "deployment_pipeline"), "test"),
 		map[string]any{
