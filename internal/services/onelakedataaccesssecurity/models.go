@@ -22,14 +22,14 @@ type dataSourceOneLakeDataAccessSecurityModel struct {
 }
 
 type baseOneLakeDataAccessSecurityModel struct {
-	Value supertypes.MapNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
+	Value supertypes.SetNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
 }
 
 type dataAccessRole struct {
 	ID            customtypes.UUID                                `tfsdk:"id"`
 	Name          types.String                                    `tfsdk:"name"`
 	DecisionRules supertypes.SetNestedObjectValueOf[decisionRule] `tfsdk:"decision_rules"`
-	Member        Member                                          `tfsdk:"member"`
+	Members       supertypes.SingleNestedObjectValueOf[Member]    `tfsdk:"members"`
 }
 
 type decisionRule struct {
@@ -48,8 +48,8 @@ type Member struct {
 }
 
 type FabricItemMember struct {
-	ItemAccess supertypes.SetNestedObjectValueOf[types.String] `tfsdk:"item_access"`
-	SourcePath types.String                                    `tfsdk:"source_path"`
+	ItemAccess supertypes.SetValueOf[types.String] `tfsdk:"item_access"`
+	SourcePath types.String                        `tfsdk:"source_path"`
 }
 
 type MicrosoftEntraMember struct {
@@ -86,11 +86,22 @@ func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, fro
 			}
 		}
 
-		if diags := role.Member.set(ctx, item.Members); diags.HasError() {
+		role.Members.SetNull(ctx)
+
+		members := &Member{}
+		if diags := members.set(ctx, item.Members); diags.HasError() {
+			return diags
+		}
+
+		if diags := role.Members.Set(ctx, members); diags.HasError() {
 			return diags
 		}
 
 		slice = append(slice, role)
+	}
+
+	if diags := to.Value.Set(ctx, slice); diags.HasError() {
+		return diags
 	}
 
 	return nil
@@ -152,17 +163,19 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 				SourcePath: types.StringPointerValue(item.SourcePath),
 			}
 
+			fabricItemMember.ItemAccess.SetNull(ctx)
+
 			if item.ItemAccess != nil {
-				itemAccess := make([]*types.String, 0, len(item.ItemAccess))
+				itemAccess := make([]types.String, 0, len(item.ItemAccess))
 
 				for _, access := range item.ItemAccess {
 					itemAccessString := types.StringValue((string)(access))
-					itemAccess = append(itemAccess, &itemAccessString)
+					itemAccess = append(itemAccess, itemAccessString)
 				}
 
-				fabricItemMember.ItemAccess.Set(ctx, itemAccess)
-			} else {
-				fabricItemMember.ItemAccess = supertypes.NewSetNestedObjectValueOfNull[types.String](ctx)
+				if diags := fabricItemMember.ItemAccess.Set(ctx, itemAccess); diags.HasError() {
+					return diags
+				}
 			}
 
 			fabricItemMembers = append(fabricItemMembers, fabricItemMember)
@@ -172,6 +185,8 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 			return diags
 		}
 	}
+
+	to.MicrosoftEntraMembers.SetNull(ctx)
 
 	if from.MicrosoftEntraMembers != nil {
 		microsoftEntraMembers := make([]*MicrosoftEntraMember, 0, len(from.MicrosoftEntraMembers))

@@ -81,7 +81,7 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
@@ -95,6 +95,11 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 func (d *dataSourceOneLakeDataAccessSecurity) list(ctx context.Context, model *dataSourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
 	respList, err := d.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+		diags.AddError(
+			common.ErrorReadHeader,
+			"Unable to find an item with 'item_id' "+model.ItemID.ValueString()+" and 'workspace_id': "+model.WorkspaceID.ValueString()+".",
+		)
+
 		return diags
 	}
 

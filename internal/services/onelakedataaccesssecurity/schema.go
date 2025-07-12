@@ -55,14 +55,14 @@ func itemSchema() superschema.Schema {
 					Required: true,
 				},
 			},
-			"value": superschema.SuperMapNestedAttributeOf[dataAccessRole]{
-				Common: &schemaR.MapNestedAttribute{
+			"value": superschema.SuperSetNestedAttributeOf[dataAccessRole]{
+				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "Map of data access roles.",
 				},
-				Resource: &schemaR.MapNestedAttribute{
+				Resource: &schemaR.SetNestedAttribute{
 					Required: true,
 				},
-				DataSource: &schemaD.MapNestedAttribute{
+				DataSource: &schemaD.SetNestedAttribute{
 					Computed: true,
 				},
 				Attributes: superschema.Attributes{

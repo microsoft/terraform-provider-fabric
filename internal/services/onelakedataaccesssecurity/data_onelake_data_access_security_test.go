@@ -60,14 +60,19 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 					"item_id":      itemID,
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.id"),
+			),
 		},
 	}))
 }
 
 func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
-	randomWorkspaceID := testhelp.RandomUUID()
-	itemID := testhelp.RandomUUID()
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	lakehouse := testhelp.WellKnown()["Lakehouse"].(map[string]any)
+	itemID := lakehouse["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Read - not found
@@ -75,11 +80,24 @@ func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemsHeader,
 				map[string]any{
-					"workspace_id": randomWorkspaceID,
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// Read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
 					"item_id":      itemID,
 				},
 			),
-			ExpectError: regexp.MustCompile(common.ErrorListHeader),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.id"),
+			),
 		},
 	}))
 }
