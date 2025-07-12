@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelake_data_access_security
+package onelakedataaccesssecurity
 
 import (
 	"context"
 
-	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -17,25 +16,25 @@ import (
 
 type dataSourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
-	workspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	itemID      customtypes.UUID `tfsdk:"item_id"`
-	Timeouts    timeoutsD.Value  `tfsdk:"timeouts"`
+
+	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID `tfsdk:"item_id"`
 }
 
 type baseOneLakeDataAccessSecurityModel struct {
-	value supertypes.MapNestedObjectTypeOf[dataAccessRole] `tfsdk:"value"`
+	Value supertypes.MapNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
 }
 
 type dataAccessRole struct {
-	ID            customtypes.UUID                    `tfsdk:"id"`
-	Name          types.String                        `tfsdk:"name"`
-	DecisionRules supertypes.SetValueOf[decisionRule] `tfsdk:"decision_rules"`
-	Member        Member                              `tfsdk:"member"`
+	ID            customtypes.UUID                                `tfsdk:"id"`
+	Name          types.String                                    `tfsdk:"name"`
+	DecisionRules supertypes.SetNestedObjectValueOf[decisionRule] `tfsdk:"decision_rules"`
+	Member        Member                                          `tfsdk:"member"`
 }
 
 type decisionRule struct {
-	Effect          types.String                           `tfsdk:"effect"`
-	PermissionScope supertypes.SetValueOf[permissionScope] `tfsdk:"permission"`
+	Effect          types.String                                       `tfsdk:"effect"`
+	PermissionScope supertypes.SetNestedObjectValueOf[permissionScope] `tfsdk:"permission"`
 }
 
 type permissionScope struct {
@@ -44,13 +43,13 @@ type permissionScope struct {
 }
 
 type Member struct {
-	FabricItemMembers     supertypes.ListNestedObjectValueOf[FabricItemMember]     `tfsdk:"fabric_item_members"`
-	MicrosoftEntraMembers supertypes.ListNestedObjectValueOf[MicrosoftEntraMember] `tfsdk:"microsoft_entra_members"`
+	FabricItemMembers     supertypes.SetNestedObjectValueOf[FabricItemMember]     `tfsdk:"fabric_item_members"`
+	MicrosoftEntraMembers supertypes.SetNestedObjectValueOf[MicrosoftEntraMember] `tfsdk:"microsoft_entra_members"`
 }
 
 type FabricItemMember struct {
-	ItemAccess supertypes.ListNestedObjectValueOf[types.String] `tfsdk:"item_access"`
-	SourcePath types.String                                     `tfsdk:"source_path"`
+	ItemAccess supertypes.SetNestedObjectValueOf[types.String] `tfsdk:"item_access"`
+	SourcePath types.String                                    `tfsdk:"source_path"`
 }
 
 type MicrosoftEntraMember struct {
@@ -67,14 +66,11 @@ func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, fro
 			ID:   customtypes.NewUUIDPointerValue(item.ID),
 			Name: types.StringPointerValue(item.Name),
 		}
-		if diags := role.Member.set(ctx, item.Members); diags.HasError() {
-			return diags
-		}
 
-		role.DecisionRules = supertypes.NewSetValueOfNull[decisionRule](ctx)
+		role.DecisionRules = supertypes.NewSetNestedObjectValueOfNull[decisionRule](ctx)
 
 		if item.DecisionRules != nil {
-			decisionRules := make([]decisionRule, 0, len(item.DecisionRules))
+			decisionRules := make([]*decisionRule, 0, len(item.DecisionRules))
 
 			for _, rule := range item.DecisionRules {
 				decisionRule := decisionRule{}
@@ -82,14 +78,12 @@ func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, fro
 					return diags
 				}
 
-				decisionRules = append(decisionRules, decisionRule)
+				decisionRules = append(decisionRules, &decisionRule)
 			}
 
 			if diags := role.DecisionRules.Set(ctx, decisionRules); diags.HasError() {
 				return diags
 			}
-		} else {
-			role.DecisionRules = supertypes.NewSetValueOfNull[decisionRule](ctx)
 		}
 
 		if diags := role.Member.set(ctx, item.Members); diags.HasError() {
@@ -104,10 +98,10 @@ func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, fro
 
 func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag.Diagnostics {
 	to.Effect = types.StringPointerValue((*string)(from.Effect))
-	to.PermissionScope = supertypes.NewSetValueOfNull[permissionScope](ctx)
+	to.PermissionScope.SetNull(ctx)
 
 	if from.Permission != nil {
-		permissions := make([]permissionScope, 0, len(from.Permission))
+		permissions := make([]*permissionScope, 0, len(from.Permission))
 
 		for _, perm := range from.Permission {
 			permission := permissionScope{}
@@ -115,7 +109,7 @@ func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag
 				return diags
 			}
 
-			permissions = append(permissions, permission)
+			permissions = append(permissions, &permission)
 		}
 
 		if diags := to.PermissionScope.Set(ctx, permissions); diags.HasError() {
@@ -127,16 +121,23 @@ func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag
 }
 
 func (to *permissionScope) set(ctx context.Context, from fabcore.PermissionScope) diag.Diagnostics {
-	to.AttributeName = types.StringPointerValue((*string)(from.AttributeName))
-	to.AttributeValueIncludedIn = supertypes.NewSetValueOfNull[types.String](ctx)
+	to.AttributeValueIncludedIn.SetNull(ctx)
 
-	attributes := make([]types.String, 0, len(from.AttributeValueIncludedIn))
-	for _, attr := range from.AttributeValueIncludedIn {
-		attributes = append(attributes, types.StringValue(attr))
+	if from.AttributeName != nil {
+		to.AttributeName = types.StringPointerValue((*string)(from.AttributeName))
+	} else {
+		to.AttributeName = types.StringNull()
 	}
 
-	if diags := to.AttributeValueIncludedIn.Set(ctx, attributes); diags.HasError() {
-		return diags
+	if from.AttributeValueIncludedIn != nil {
+		values := make([]types.String, 0, len(from.AttributeValueIncludedIn))
+		for _, value := range from.AttributeValueIncludedIn {
+			values = append(values, types.StringValue(value))
+		}
+
+		if diags := to.AttributeValueIncludedIn.Set(ctx, values); diags.HasError() {
+			return diags
+		}
 	}
 
 	return nil
@@ -161,7 +162,7 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 
 				fabricItemMember.ItemAccess.Set(ctx, itemAccess)
 			} else {
-				fabricItemMember.ItemAccess = supertypes.NewListNestedObjectValueOfNull[types.String](ctx)
+				fabricItemMember.ItemAccess = supertypes.NewSetNestedObjectValueOfNull[types.String](ctx)
 			}
 
 			fabricItemMembers = append(fabricItemMembers, fabricItemMember)

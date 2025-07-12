@@ -66,7 +66,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/onelake_data_access_security"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -507,7 +507,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
-		onelake_data_access_security.NewDataSourceOneLakeDataAccessSecurity,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,

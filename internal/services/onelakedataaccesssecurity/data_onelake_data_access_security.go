@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package onelake_data_access_security
+package onelakedataaccesssecurity
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	//revive:disable-line:import-alias-naming
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -41,21 +39,7 @@ func (d *dataSourceOneLakeDataAccessSecurity) Metadata(_ context.Context, _ data
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	s := itemSchema().GetDataSource(ctx)
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: s.GetMarkdownDescription(),
-		Attributes: map[string]schema.Attribute{
-			"value": schema.SetNestedAttribute{
-				MarkdownDescription: "The list of " + d.TypeInfo.Names + ".",
-				Computed:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseOneLakeDataAccessSecurityModel](ctx),
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: s.Attributes,
-				},
-			},
-		},
-	}
+	resp.Schema = itemSchema().GetDataSource(ctx)
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -93,14 +77,6 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 		return
 	}
 
-	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
 	if resp.Diagnostics.Append(d.list(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -117,7 +93,7 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) list(ctx context.Context, model *dataSourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
-	respList, err := d.client.ListDataAccessRoles(ctx, model.workspaceID.ValueString(), model.itemID.ValueString(), nil)
+	respList, err := d.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}
