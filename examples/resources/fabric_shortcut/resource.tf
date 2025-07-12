@@ -1,5 +1,5 @@
-# Example of using the fabric_onelake_shortcut resource
-resource "fabric_onelake_shortcut" "onelake" {
+# Example of using the fabric_shortcut resource
+resource "fabric_shortcut" "onelake" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -8,12 +8,12 @@ resource "fabric_onelake_shortcut" "onelake" {
     onelake = {
       workspace_id = "00000000-0000-0000-0000-000000000000"
       item_id      = "00000000-0000-0000-0000-000000000000"
-      path         = "/MyTargetPath"
+      path         = "MyTargetPath"
     }
   }
 }
 
-resource "fabric_onelake_shortcut" "adls_gen2" {
+resource "fabric_shortcut" "adls_gen2" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -27,7 +27,7 @@ resource "fabric_onelake_shortcut" "adls_gen2" {
   }
 }
 
-resource "fabric_onelake_shortcut" "amazon_s3" {
+resource "fabric_shortcut" "amazon_s3" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -41,7 +41,7 @@ resource "fabric_onelake_shortcut" "amazon_s3" {
   }
 }
 
-resource "fabric_onelake_shortcut" "google_cloud_storage" {
+resource "fabric_shortcut" "google_cloud_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -55,7 +55,7 @@ resource "fabric_onelake_shortcut" "google_cloud_storage" {
   }
 }
 
-resource "fabric_onelake_shortcut" "s3_compatible" {
+resource "fabric_shortcut" "s3_compatible" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -70,7 +70,7 @@ resource "fabric_onelake_shortcut" "s3_compatible" {
   }
 }
 
-resource "fabric_onelake_shortcut" "dataverse" {
+resource "fabric_shortcut" "dataverse" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
@@ -78,7 +78,7 @@ resource "fabric_onelake_shortcut" "dataverse" {
   target = {
     dataverse = {
       table_name         = "MyTableName"
-      deltaLake_folder   = "MyDeltaLakeFolder"
+      deltalake_folder   = "MyDeltaLakeFolder"
       environment_domain = "MyEnvironmentDomainURI"
       bucket             = "MyBucket"
       subpath            = "MySubpath"
@@ -87,13 +87,15 @@ resource "fabric_onelake_shortcut" "dataverse" {
   }
 }
 
-resource "fabric_onelake_shortcut" "external_data_share_target" {
+resource "fabric_shortcut" "azure_blob_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
-    external_data_share_target = {
+    azure_blob_storage = {
+      location      = "MyLocation"
+      subpath       = "MySubpath"
       connection_id = "00000000-0000-0000-0000-000000000000"
     }
   }
