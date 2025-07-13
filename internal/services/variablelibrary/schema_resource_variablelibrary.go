@@ -12,6 +12,7 @@ func getResourceVariableLibraryPropertiesAttributes() map[string]schema.Attribut
 		"active_value_set_name": schema.StringAttribute{
 			MarkdownDescription: "The VariableLibrary current active value set.",
 			Computed:            true,
+			Optional:            true, // Optional to allow setting it during creation
 		},
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/microsoft/fabric-sdk-go/fabric/variablelibrary"
 	fabvariablelibrary "github.com/microsoft/fabric-sdk-go/fabric/variablelibrary"
 )
 
@@ -16,11 +17,15 @@ type variablelibraryPropertiesModel struct {
 }
 
 func (to *variablelibraryPropertiesModel) set(ctx context.Context, from *fabvariablelibrary.Properties) diag.Diagnostics {
-	if from == nil {
-		return nil
-	}
-
 	to.ActiveValueSetName = types.StringPointerValue(from.ActiveValueSetName)
 
 	return nil
+}
+
+type requestUpdateProperties struct {
+	variablelibrary.UpdateVariableLibraryRequest
+}
+
+func (to *requestUpdateProperties) setProperties(ctx context.Context, from variablelibraryPropertiesModel) {
+	to.Properties.ActiveValueSetName = from.ActiveValueSetName.ValueStringPointer()
 }

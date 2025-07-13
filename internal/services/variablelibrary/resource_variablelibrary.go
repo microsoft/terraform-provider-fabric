@@ -36,6 +36,20 @@ func NewResourceVariableLibrary() resource.Resource {
 		return nil
 	}
 
+	propertiesUpdater := func(ctx context.Context, from *fabricitem.ResourceFabricItemPropertiesModel[variablelibraryPropertiesModel, fabvariablelibrary.Properties], to *fabvariablelibrary.Properties) (requestUpdateProperties, diag.Diagnostics) {
+		var updatePropertiesRequest requestUpdateProperties
+
+		entity, diags := from.Properties.Get(ctx)
+
+		if diags.HasError() {
+			return updatePropertiesRequest, diags
+		}
+
+		updatePropertiesRequest.setProperties(ctx, *entity)
+
+		return updatePropertiesRequest, nil
+	}
+
 	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemPropertiesModel[variablelibraryPropertiesModel, fabvariablelibrary.Properties], fabricItem *fabricitem.FabricItemProperties[fabvariablelibrary.Properties]) error {
 		client := fabvariablelibrary.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
