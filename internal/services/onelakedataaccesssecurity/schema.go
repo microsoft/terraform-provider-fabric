@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -55,6 +56,15 @@ func itemSchema() superschema.Schema {
 					Required: true,
 				},
 			},
+			"etag": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The ETag of the item.",
+					CustomType:          supertypes.StringType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+				},
+			},
 			"value": superschema.SuperSetNestedAttributeOf[dataAccessRole]{
 				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "Map of data access roles.",
@@ -66,18 +76,6 @@ func itemSchema() superschema.Schema {
 					Computed: true,
 				},
 				Attributes: superschema.Attributes{
-					"id": superschema.SuperStringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The unique id for the Data access role.",
-							CustomType:          customtypes.UUIDType{},
-						},
-						Resource: &schemaR.StringAttribute{
-							Required: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
 					"name": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The name of the Data access role.",
@@ -257,6 +255,9 @@ func itemSchema() superschema.Schema {
 										DataSource: &schemaD.StringAttribute{
 											Computed: true,
 										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
+										},
 									},
 									"tenant_id": superschema.SuperStringAttribute{
 										Common: &schemaR.StringAttribute{
@@ -265,6 +266,9 @@ func itemSchema() superschema.Schema {
 										},
 										DataSource: &schemaD.StringAttribute{
 											Computed: true,
+										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
 										},
 									},
 								},

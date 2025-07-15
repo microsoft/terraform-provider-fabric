@@ -39,7 +39,9 @@ func (d *dataSourceOneLakeDataAccessSecurity) Metadata(_ context.Context, _ data
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = itemSchema().GetDataSource(ctx)
+	s := itemSchema()
+	delete(s.Attributes, "etag")
+	resp.Schema = s.GetDataSource(ctx)
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

@@ -6,6 +6,8 @@ package onelakedataaccesssecurity
 import (
 	"context"
 
+	//revive:disable-line:import-alias-naming
+	//revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -21,12 +23,19 @@ type dataSourceOneLakeDataAccessSecurityModel struct {
 	ItemID      customtypes.UUID `tfsdk:"item_id"`
 }
 
+type resourceOneLakeDataAccessSecurityModel struct {
+	baseOneLakeDataAccessSecurityModel
+
+	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID `tfsdk:"item_id"`
+	Etag        types.String     `tfsdk:"etag"`
+}
+
 type baseOneLakeDataAccessSecurityModel struct {
 	Value supertypes.SetNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
 }
 
 type dataAccessRole struct {
-	ID            customtypes.UUID                                `tfsdk:"id"`
 	Name          types.String                                    `tfsdk:"name"`
 	DecisionRules supertypes.SetNestedObjectValueOf[decisionRule] `tfsdk:"decision_rules"`
 	Members       supertypes.SingleNestedObjectValueOf[Member]    `tfsdk:"members"`
@@ -63,7 +72,6 @@ func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, fro
 
 	for _, item := range from.Value {
 		role := &dataAccessRole{
-			ID:   customtypes.NewUUIDPointerValue(item.ID),
 			Name: types.StringPointerValue(item.Name),
 		}
 
@@ -209,6 +217,131 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 		if diags := to.MicrosoftEntraMembers.Set(ctx, microsoftEntraMembers); diags.HasError() {
 			return diags
 		}
+	}
+
+	return nil
+}
+
+func (to *resourceOneLakeDataAccessSecurityModel) set(from *string) {
+	to.Etag = types.StringValue(*from)
+}
+
+type requestCreateOrUpdateOneLakeDataAccessSecurity struct {
+	fabcore.CreateOrUpdateDataAccessRolesRequest
+}
+
+func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) set(ctx context.Context, from resourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+	fromValueElements, diags := from.Value.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	values := make([]fabcore.DataAccessRole, 0, len(fromValueElements))
+
+	for _, item := range fromValueElements {
+		role := &fabcore.DataAccessRole{
+			Name: item.Name.ValueStringPointer(),
+		}
+		decisionRules, diags := item.DecisionRules.Get(ctx)
+
+		if diags.HasError() {
+			return diags
+		}
+
+		role.DecisionRules = make([]fabcore.DecisionRule, 0, len(decisionRules))
+
+		for _, rule := range decisionRules {
+			decisionRule := fabcore.DecisionRule{
+				Effect: (*fabcore.Effect)(rule.Effect.ValueStringPointer()),
+			}
+
+			permissions, diags := rule.PermissionScope.Get(ctx)
+
+			if diags.HasError() {
+				return diags
+			}
+
+			decisionRule.Permission = make([]fabcore.PermissionScope, 0, len(permissions))
+
+			for _, permission := range permissions {
+				attributesIncludedIn, diags := permission.AttributeValueIncludedIn.Get(ctx)
+
+				if diags.HasError() {
+					return diags
+				}
+
+				permissionScope := fabcore.PermissionScope{
+					AttributeName: (*fabcore.AttributeName)(permission.AttributeName.ValueStringPointer()),
+				}
+
+				if len(attributesIncludedIn) > 0 {
+					permissionScope.AttributeValueIncludedIn = make([]string, 0, len(attributesIncludedIn))
+					for _, attr := range attributesIncludedIn {
+						permissionScope.AttributeValueIncludedIn = append(permissionScope.AttributeValueIncludedIn, attr.ValueString())
+					}
+				}
+				decisionRule.Permission = append(decisionRule.Permission, permissionScope)
+			}
+			role.DecisionRules = append(role.DecisionRules, decisionRule)
+		}
+
+		if diags := setMembers(ctx, role, item); diags.HasError() {
+			return diags
+		}
+		values = append(values, *role)
+	}
+
+	to.Value = values
+
+	return nil
+}
+
+func setMembers(ctx context.Context, role *fabcore.DataAccessRole, item *dataAccessRole) diag.Diagnostics {
+	members, diags := item.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	role.Members = &fabcore.Members{}
+
+	fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	role.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
+	for _, fim := range fabricItemMembers {
+		member := fabcore.FabricItemMember{
+			SourcePath: fim.SourcePath.ValueStringPointer(),
+		}
+
+		itemAccess, diags := fim.ItemAccess.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if len(itemAccess) > 0 {
+			member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
+			for _, access := range itemAccess {
+				member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+			}
+		}
+
+		role.Members.FabricItemMembers = append(role.Members.FabricItemMembers, member)
+	}
+
+	microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	role.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
+	for _, mem := range microsoftEntraMembers {
+		role.Members.MicrosoftEntraMembers = append(role.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
+			ObjectID:   mem.ObjectID.ValueStringPointer(),
+			TenantID:   mem.TenantID.ValueStringPointer(),
+			ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
+		})
 	}
 
 	return nil

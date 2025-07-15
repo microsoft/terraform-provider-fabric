@@ -438,6 +438,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,

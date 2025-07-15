@@ -15,7 +15,8 @@ type operationsOneLakeDataAccessSecurity struct{}
 
 func (o *operationsOneLakeDataAccessSecurity) TransformGet(entity fabcore.DataAccessRoles) fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse {
 	return fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{
-		Etag: to.Ptr("123"),
+		DataAccessRoles: entity,
+		Etag:            to.Ptr("123"),
 	}
 }
 
