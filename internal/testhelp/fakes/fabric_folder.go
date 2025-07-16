@@ -138,25 +138,20 @@ func (m *moveFolderOperations) Update(base fabcore.Folder, moveReq fabcore.MoveF
 	return base
 }
 
-// FakeListFolders creates a custom list folders handler that supports options.
 func FakeListFolders(
 	handler *typedHandler[fabcore.Folder],
 ) func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
 	return func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
 		entityOperations := &operationsFolder{}
 
-		// Get all entities and filter them
 		allEntities := handler.Elements()
 		filteredEntities := entityOperations.FilterWithOptions(allEntities, workspaceID, options)
 
-		// Transform to response format
 		response := entityOperations.TransformList(filteredEntities)
 
-		// Create and return pager
-		var pager azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]
-		pager.AddPage(200, response, nil)
+		resp.AddPage(http.StatusOK, response, nil)
 
-		return pager
+		return resp
 	}
 }
 
@@ -178,10 +173,8 @@ func (o *operationsFolder) getDescendants(parentID string, folders []fabcore.Fol
 	result := make([]fabcore.Folder, 0)
 	children := o.getChildren(parentID, folders)
 
-	// Add direct children
 	result = append(result, children...)
 
-	// Add descendants of each child
 	for _, child := range children {
 		descendants := o.getDescendants(*child.ID, folders)
 		result = append(result, descendants...)
