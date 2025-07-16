@@ -24,10 +24,11 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 func TestUnit_FoldersDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomFolderWithWorkspace(workspaceID)
-
+	childEntity := fakes.NewRandomSubfolder(workspaceID, *entity.ID)
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(childEntity)
+	fakes.FakeServer.Upsert(fakes.NewRandomSubfolder(workspaceID, *childEntity.ID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -84,12 +85,50 @@ func TestUnit_FoldersDataSource(t *testing.T) {
 				),
 			},
 		},
+		// read with options - recursive defaults to true
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"root_folder_id": *entity.ID,
+				},
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetSizeExact(2),
+				),
+			},
+		},
+		// read with options - recursive false
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"root_folder_id": *entity.ID,
+					"recursive":      false,
+				},
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetSizeExact(1),
+				),
+			},
+		},
 	}))
 }
 
 func TestAcc_FoldersDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+
+	folder := testhelp.WellKnown()["Folder"].(map[string]any)
+	folderID := folder["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -104,6 +143,41 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 			),
+		},
+		// read with options - recursive defaults to true
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"root_folder_id": folderID,
+				},
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetSizeExact(2),
+				),
+			},
+		},
+		// read with options - recursive = false
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"root_folder_id": folderID,
+					"recursive":      false,
+				},
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetSizeExact(1),
+				),
+			},
 		},
 	},
 	))

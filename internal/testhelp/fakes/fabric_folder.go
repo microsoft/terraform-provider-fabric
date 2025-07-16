@@ -39,16 +39,8 @@ func (o *operationsFolder) CreateWithParentID(parentID string, data fabcore.Crea
 }
 
 // Filter implements concreteOperations.
-func (o *operationsFolder) Filter(entities []fabcore.Folder, parentID string) []fabcore.Folder {
-	ret := make([]fabcore.Folder, 0)
-
-	for _, entity := range entities {
-		if *entity.WorkspaceID == parentID {
-			ret = append(ret, entity)
-		}
-	}
-
-	return ret
+func (o *operationsFolder) Filter(entities []fabcore.Folder, _ string) []fabcore.Folder {
+	return entities
 }
 
 // TransformGet implements concreteOperations.
@@ -95,6 +87,30 @@ func (o *operationsFolder) Validate(newEntity fabcore.Folder, existing []fabcore
 	return http.StatusCreated, nil
 }
 
+// FilterWithOptions filters folders by workspace and optionally by root folder and recursion.
+func (o *operationsFolder) FilterWithOptions(entities []fabcore.Folder, workspaceID string, options *fabcore.FoldersClientListFoldersOptions) []fabcore.Folder {
+	// Filter by workspace
+	workspaceFolders := make([]fabcore.Folder, 0)
+
+	for _, folder := range entities {
+		if *folder.WorkspaceID == workspaceID {
+			workspaceFolders = append(workspaceFolders, folder)
+		}
+	}
+
+	// No root folder specified
+	if options == nil || options.RootFolderID == nil {
+		return workspaceFolders
+	}
+
+	recursive := *options.Recursive // Default true
+	if recursive {
+		return o.getDescendants(*options.RootFolderID, workspaceFolders)
+	}
+
+	return o.getChildren(*options.RootFolderID, workspaceFolders)
+}
+
 func FakeMoveFolder(
 	handler *typedHandler[fabcore.Folder],
 ) func(ctx context.Context, workspaceID, folderID string, moveFolderRequest fabcore.MoveFolderRequest, options *fabcore.FoldersClientMoveFolderOptions) (resp azfake.Responder[fabcore.FoldersClientMoveFolderResponse], errResp azfake.ErrorResponder) {
@@ -122,6 +138,58 @@ func (m *moveFolderOperations) Update(base fabcore.Folder, moveReq fabcore.MoveF
 	return base
 }
 
+// FakeListFolders creates a custom list folders handler that supports options.
+func FakeListFolders(
+	handler *typedHandler[fabcore.Folder],
+) func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
+	return func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
+		entityOperations := &operationsFolder{}
+
+		// Get all entities and filter them
+		allEntities := handler.Elements()
+		filteredEntities := entityOperations.FilterWithOptions(allEntities, workspaceID, options)
+
+		// Transform to response format
+		response := entityOperations.TransformList(filteredEntities)
+
+		// Create and return pager
+		var pager azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]
+		pager.AddPage(200, response, nil)
+
+		return pager
+	}
+}
+
+// getChildren returns direct children of a parent folder.
+func (o *operationsFolder) getChildren(parentID string, folders []fabcore.Folder) []fabcore.Folder {
+	result := make([]fabcore.Folder, 0)
+
+	for _, folder := range folders {
+		if folder.ParentFolderID != nil && *folder.ParentFolderID == parentID {
+			result = append(result, folder)
+		}
+	}
+
+	return result
+}
+
+// getDescendants returns all descendants of a parent folder recursively.
+func (o *operationsFolder) getDescendants(parentID string, folders []fabcore.Folder) []fabcore.Folder {
+	result := make([]fabcore.Folder, 0)
+	children := o.getChildren(parentID, folders)
+
+	// Add direct children
+	result = append(result, children...)
+
+	// Add descendants of each child
+	for _, child := range children {
+		descendants := o.getDescendants(*child.ID, folders)
+		result = append(result, descendants...)
+	}
+
+	return result
+}
+
 func configureFolder(server *fakeServer) fabcore.Folder {
 	type concreteEntityOperations interface {
 		parentIDOperations[
@@ -147,6 +215,7 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 		&server.ServerFactory.Core.FoldersServer.NewListFoldersPager,
 		&server.ServerFactory.Core.FoldersServer.DeleteFolder)
 
+	server.ServerFactory.Core.FoldersServer.NewListFoldersPager = FakeListFolders(handler)
 	server.ServerFactory.Core.FoldersServer.MoveFolder = FakeMoveFolder(handler)
 
 	return fabcore.Folder{}
@@ -163,6 +232,13 @@ func NewRandomFolder() fabcore.Folder {
 func NewRandomFolderWithWorkspace(workspaceID string) fabcore.Folder {
 	result := NewRandomFolder()
 	result.WorkspaceID = &workspaceID
+
+	return result
+}
+
+func NewRandomSubfolder(workspaceID, parentFolderID string) fabcore.Folder {
+	result := NewRandomFolderWithWorkspace(workspaceID)
+	result.ParentFolderID = &parentFolderID
 
 	return result
 }

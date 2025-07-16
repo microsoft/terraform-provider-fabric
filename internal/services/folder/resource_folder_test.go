@@ -254,6 +254,56 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 	}))
 }
 
+func TestAcc_FolderResource_ImportState(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	folder := testhelp.WellKnown()["Folder"].(map[string]any)
+	subfolder := testhelp.WellKnown()["Subfolder"].(map[string]any)
+	folderID := folder["id"].(string)
+	subfolderID := subfolder["id"].(string)
+	subfolderDisplayName := subfolder["displayName"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		{
+			ResourceName:  testResourceItemFQN,
+			ImportState:   true,
+			ImportStateId: fmt.Sprintf("%s/%s", workspaceID, subfolderID),
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":     workspaceID,
+						"display_name":     subfolderDisplayName,
+						"parent_folder_id": folderID,
+					},
+				)),
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return fmt.Errorf("expected 1 instance state, got %d", len(is))
+				}
+
+				// Verify the imported state
+				state := is[0]
+
+				if state.ID != subfolderID {
+					return fmt.Errorf("expected ID %s, got %s", subfolderID, state.ID)
+				}
+
+				if state.Attributes["workspace_id"] != workspaceID {
+					return fmt.Errorf("expected workspace_id %s, got %s", workspaceID, state.Attributes["workspace_id"])
+				}
+
+				if state.Attributes["display_name"] != subfolderDisplayName {
+					return fmt.Errorf("expected display_name %s, got %s", subfolderDisplayName, state.Attributes["display_name"])
+				}
+
+				return nil
+			},
+		},
+	}))
+}
+
 func TestAcc_FolderResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)

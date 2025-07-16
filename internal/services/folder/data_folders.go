@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -51,6 +52,15 @@ func (d *dataSourceFolders) Schema(ctx context.Context, _ datasource.SchemaReque
 				MarkdownDescription: "The Workspace ID.",
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
+			},
+			"root_folder_id": schema.StringAttribute{
+				MarkdownDescription: "This parameter allows users to filter folders based on a specific root folder. If not provided, the workspace is used as the root folder.",
+				Optional:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+			"recursive": schema.BoolAttribute{
+				MarkdownDescription: "Lists folders in a folder and its nested folders, or just a folder only. True - All folders in the folder and its nested folders are listed, False - Only folders in the folder are listed. The default value is true.",
+				Optional:            true,
 			},
 			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
@@ -124,7 +134,21 @@ func (d *dataSourceFolders) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 func (d *dataSourceFolders) list(ctx context.Context, model *dataSourceFoldersModel) diag.Diagnostics {
-	respList, err := d.client.ListFolders(ctx, model.WorkspaceID.ValueString(), nil)
+	var options *fabcore.FoldersClientListFoldersOptions
+
+	recursive := true
+	if !model.Recursive.IsNull() && !model.Recursive.IsUnknown() {
+		recursive = model.Recursive.ValueBool()
+	}
+
+	if !model.RootFolderID.IsNull() && !model.RootFolderID.IsUnknown() {
+		options = &fabcore.FoldersClientListFoldersOptions{
+			RootFolderID: model.RootFolderID.ValueStringPointer(),
+			Recursive:    to.Ptr(recursive),
+		}
+	}
+
+	respList, err := d.client.ListFolders(ctx, model.WorkspaceID.ValueString(), options)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}

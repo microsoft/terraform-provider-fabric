@@ -48,9 +48,11 @@ DATA-SOURCE (list)
 */
 
 type dataSourceFoldersModel struct {
-	WorkspaceID customtypes.UUID                                   `tfsdk:"workspace_id"`
-	Values      supertypes.SetNestedObjectValueOf[baseFolderModel] `tfsdk:"values"`
-	Timeouts    timeoutsD.Value                                    `tfsdk:"timeouts"`
+	WorkspaceID  customtypes.UUID                                   `tfsdk:"workspace_id"`
+	RootFolderID customtypes.UUID                                   `tfsdk:"root_folder_id"`
+	Recursive    types.Bool                                         `tfsdk:"recursive"`
+	Values       supertypes.SetNestedObjectValueOf[baseFolderModel] `tfsdk:"values"`
+	Timeouts     timeoutsD.Value                                    `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceFoldersModel) setValues(ctx context.Context, from []fabcore.Folder) {
