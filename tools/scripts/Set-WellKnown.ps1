@@ -848,7 +848,8 @@ function Set-FabricFolder {
   if (!$ParentFolderId) {
     # Looking for a root folder - folder that doesn't have parentFolderId property
     $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and -not $_.parentFolderId } | Select-Object -First 1
-  } else {
+  }
+  else {
     # Looking for a subfolder with a specific parentFolderId
     $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and $_.parentFolderId -eq $ParentFolderId } | Select-Object -First 1
   }
@@ -1594,6 +1595,24 @@ $wellKnown['Folder'] = @{
   displayName    = $folder.displayName
   parentFolderId = $folder.parentFolderId
 }
+
+#Create subfolders if not exist
+$displayNameTemp = "${displayName}_sub$($itemNaming['Folder'])"
+$subFolder = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp `
+  -ParentFolderId $wellKnown['Folder'].id
+
+$wellKnown['Subfolder'] = @{
+  id             = $subFolder.id
+  displayName    = $subFolder.displayName
+  parentFolderId = $subFolder.parentFolderId
+}
+
+Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp `
+  -ParentFolderId $subFolder.id
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
