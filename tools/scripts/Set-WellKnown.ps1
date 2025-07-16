@@ -1596,7 +1596,7 @@ $wellKnown['Folder'] = @{
   parentFolderId = $folder.parentFolderId
 }
 
-#Create subfolders if not exist
+#Create subfolder if not exists
 $displayNameTemp = "${displayName}_sub$($itemNaming['Folder'])"
 $subFolder = Set-FabricFolder `
   -WorkspaceId $wellKnown['WorkspaceDS'].id `
@@ -1608,11 +1608,6 @@ $wellKnown['Subfolder'] = @{
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
 }
-
-Set-FabricFolder `
-  -WorkspaceId $wellKnown['WorkspaceDS'].id `
-  -DisplayName $displayNameTemp `
-  -ParentFolderId $subFolder.id
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
