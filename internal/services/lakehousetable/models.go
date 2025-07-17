@@ -45,6 +45,7 @@ DATA-SOURCE
 
 type dataSourceLakehouseTableModel struct {
 	baseLakehouseTableModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 

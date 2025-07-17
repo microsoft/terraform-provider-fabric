@@ -50,13 +50,15 @@ func TestUnit_ConvertFileToBase64(t *testing.T) {
 
 			// Write content to the file if not expecting a read error
 			if !testCase.expectError {
-				if _, err := tmpfile.WriteString(testCase.fileContent); err != nil {
+				_, err := tmpfile.WriteString(testCase.fileContent)
+				if err != nil {
 					t.Fatal(err)
 				}
 			}
 
 			// Close the file
-			if err := tmpfile.Close(); err != nil {
+			err = tmpfile.Close()
+			if err != nil {
 				t.Fatal(err)
 			}
 

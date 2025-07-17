@@ -44,6 +44,7 @@ func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProp
 
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported
 	fabcore.Item
+
 	Properties *Titemprop
 }
 

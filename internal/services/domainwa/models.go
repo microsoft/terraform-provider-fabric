@@ -48,6 +48,7 @@ DATA-SOURCE
 
 type dataSourceDomainWorkspaceAssignmentsModel struct {
 	baseDomainWorkspaceAssignmentsModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -57,6 +58,7 @@ RESOURCE
 
 type resourceDomainWorkspaceAssignmentsModel struct {
 	baseDomainWorkspaceAssignmentsModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

@@ -41,6 +41,7 @@ DATA-SOURCE
 
 type dataSourceCapacityModel struct {
 	baseCapacityModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 

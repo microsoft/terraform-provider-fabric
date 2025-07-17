@@ -42,6 +42,7 @@ DATA-SOURCE
 
 type dataSourceDomainModel struct {
 	baseDomainModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -72,6 +73,7 @@ RESOURCE
 
 type resourceDomainModel struct {
 	baseDomainModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

@@ -148,11 +148,12 @@ terraform apply
 
 ## FAQ
 
-### I am getting error `The feature is not available`
+### I am getting error `The feature is not available`, error code: `FeatureNotAvailable`
 
 - Check if your SPN, MSI or User that is used for Provider authentication is added to Fabric `Capacity administrators`.
 - Check if your Fabric Capacity is not in the `paused` state.
 - Majority of Fabric Items require to have Fabric Capacity assigned to the workspace. If you manage Workspace using [`fabric_workspace`](../resources/workspace.md) resource, ensure that you have assigned Fabric Capacity to the Workspace.
+- Check if you have enabled `Users can create Fabric Items` feature in the [Fabric Admin Portal](https://app.fabric.microsoft.com/admin-portal/tenantSettings).
 
 ### I am getting error `Unable to find Capacity...`
 
@@ -167,6 +168,12 @@ terraform apply
 ### I am getting error `Workspace name already exists`
 
 - Ensure that you have provided the unique name for the Workspace that does not exist in the Fabric yet.
+
+### I am getting error `Datamart creation failed with the error 'Required feature switch disabled'`, error code: `DatamartCreationFaildDueToBadRequest`
+
+- Check under [Fabric Admin Portal](https://app.fabric.microsoft.com/admin-portal/tenantSettings) if both features are enebled:
+  - Users can create Fabric Items
+  - Create Datamarts
 
 ### Operations take too long to complete or timeout
 

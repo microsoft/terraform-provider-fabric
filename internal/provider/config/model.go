@@ -27,6 +27,7 @@ type ProviderData struct {
 
 type ProviderConfig struct {
 	*ProviderData
+
 	Auth *auth.Config
 }
 

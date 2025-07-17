@@ -195,6 +195,7 @@ DATA-SOURCE
 
 type dataSourceShortcutModel struct {
 	baseShortcutModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -227,6 +228,7 @@ func (to *dataSourceShortcutsModel) setValues(ctx context.Context, workspaceID, 
 
 type resourceShortcutModel struct {
 	baseShortcutModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

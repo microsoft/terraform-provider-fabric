@@ -73,6 +73,7 @@ DATA-SOURCE
 
 type dataSourceWorkspaceManagedPrivateEndpointModel struct {
 	baseWorkspaceManagedPrivateEndpointModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -107,6 +108,7 @@ RESOURCE
 
 type resourceWorkspaceManagedPrivateEndpointModel struct {
 	baseWorkspaceManagedPrivateEndpointModel
+
 	RequestMessage types.String    `tfsdk:"request_message"`
 	Timeouts       timeoutsR.Value `tfsdk:"timeouts"`
 }

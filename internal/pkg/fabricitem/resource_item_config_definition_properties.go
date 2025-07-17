@@ -36,6 +36,7 @@ var (
 
 type ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
 	ResourceFabricItemDefinition
+
 	ConfigRequired             bool
 	ConfigOrDefinitionRequired bool
 	ConfigAttributes           map[string]schema.Attribute

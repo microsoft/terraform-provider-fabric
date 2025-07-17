@@ -119,6 +119,7 @@ DATA-SOURCE
 
 type dataSourceSparkEnvironmentSettingsModel struct {
 	baseSparkEnvironmentSettingsModel
+
 	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
@@ -128,6 +129,7 @@ RESOURCE
 
 type resourceSparkEnvironmentSettingsModel struct {
 	baseSparkEnvironmentSettingsModel
+
 	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 

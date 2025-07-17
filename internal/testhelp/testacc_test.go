@@ -12,6 +12,6 @@ import (
 func TestDevEnv_WellKnown(t *testing.T) {
 	// if the file does not exist, the test will fail
 	if !testhelp.IsWellKnownDataAvailable() {
-		t.Fatalf("well-known resources file does not exist")
+		t.Fatal("well-known resources file does not exist")
 	}
 }

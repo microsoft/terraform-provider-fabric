@@ -11,6 +11,7 @@ import (
 
 type ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
 	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
 	Configuration           supertypes.SingleNestedObjectValueOf[Ttfconfig]                          `tfsdk:"configuration"`
 	Format                  types.String                                                             `tfsdk:"format"`
 	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`

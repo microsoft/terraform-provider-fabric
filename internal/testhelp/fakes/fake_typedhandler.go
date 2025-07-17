@@ -33,6 +33,7 @@ func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEnti
 // typedHandler is a handler for a specific entity type.
 type typedHandler[TEntity any] struct {
 	*fakeServer
+
 	identifier identifier[TEntity]
 	converter  itemConverter[TEntity]
 }

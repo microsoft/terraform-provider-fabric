@@ -32,6 +32,7 @@ var (
 
 type ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
 	ResourceFabricItem
+
 	ConfigRequired        bool
 	ConfigAttributes      map[string]schema.Attribute
 	PropertiesAttributes  map[string]schema.Attribute

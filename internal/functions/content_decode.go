@@ -82,7 +82,8 @@ func (f *functionContentDecode) Run(ctx context.Context, req function.RunRequest
 	if transforms.IsJSON(contentDecoded) { //nolint:nestif
 		var contentJSON any
 
-		if err := json.Unmarshal([]byte(contentDecoded), &contentJSON); err != nil {
+		err = json.Unmarshal([]byte(contentDecoded), &contentJSON)
+		if err != nil {
 			resp.Error = function.NewFuncError("Failed to unmarshal JSON: " + err.Error())
 
 			return

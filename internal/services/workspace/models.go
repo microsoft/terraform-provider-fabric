@@ -40,6 +40,7 @@ func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
 
 type baseWorkspaceInfoModel struct {
 	baseWorkspaceModel
+
 	CapacityAssignmentProgress types.String                                                 `tfsdk:"capacity_assignment_progress"`
 	CapacityRegion             types.String                                                 `tfsdk:"capacity_region"`
 	OneLakeEndpoints           supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
@@ -90,6 +91,7 @@ DATA-SOURCE
 
 type dataSourceWorkspaceModel struct {
 	baseWorkspaceInfoModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -120,6 +122,7 @@ RESOURCE
 
 type resourceWorkspaceModel struct {
 	baseWorkspaceInfoModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

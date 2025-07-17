@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package utils
+package utils //revive:disable-line:var-naming
 
 import (
 	"crypto/sha256"

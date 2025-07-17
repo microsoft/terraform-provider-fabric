@@ -274,7 +274,6 @@ func (r *resourceWorkspaceGit) Delete(ctx context.Context, req resource.DeleteRe
 	_, err := r.client.Disconnect(ctx, state.WorkspaceID.ValueString(), nil)
 
 	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrGit.WorkspaceNotConnectedToGit)
-
 	if diags.HasError() && !utils.IsErr(diags, fabcore.ErrGit.WorkspaceNotConnectedToGit) {
 		resp.Diagnostics.Append(diags...)
 

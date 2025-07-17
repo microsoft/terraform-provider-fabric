@@ -128,6 +128,7 @@ DATA-SOURCE
 
 type dataSourceGatewayModel struct {
 	baseGatewayModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -162,6 +163,7 @@ RESOURCE
 
 type resourceGatewayModel struct {
 	baseGatewayModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

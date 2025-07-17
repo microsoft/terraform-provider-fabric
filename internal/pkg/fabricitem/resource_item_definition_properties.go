@@ -34,6 +34,7 @@ var (
 
 type ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop any] struct {
 	ResourceFabricItemDefinition
+
 	PropertiesAttributes map[string]schema.Attribute
 	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
 	ItemGetter           func(ctx context.Context, fabricClient fabric.Client, model ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop], fabricItem *FabricItemProperties[Titemprop]) error

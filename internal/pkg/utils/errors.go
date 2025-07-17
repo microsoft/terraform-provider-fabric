@@ -295,7 +295,8 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 		return err
 	}
 
-	if err := json.Unmarshal(respBody, &e); err != nil {
+	err = json.Unmarshal(respBody, &e)
+	if err != nil {
 		return err
 	}
 

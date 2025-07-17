@@ -44,12 +44,14 @@ func jsonTransform(content string, prettyJSON bool) (string, error) { //revive:d
 	}
 
 	var result any
-	if err := json.Unmarshal([]byte(content), &result); err != nil {
+	var err error
+
+	err = json.Unmarshal([]byte(content), &result)
+	if err != nil {
 		return content, fmt.Errorf("invalid JSON format: %w", err)
 	}
 
 	var resultRaw []byte
-	var err error
 
 	if prettyJSON {
 		resultRaw, err = json.MarshalIndent(result, "", "  ")
@@ -95,7 +97,9 @@ func JSONBase64GzipDecode(content string) (any, error) {
 	}
 
 	var result any
-	if err := json.Unmarshal([]byte(decoded), &result); err != nil {
+
+	err = json.Unmarshal([]byte(decoded), &result)
+	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
@@ -149,13 +153,15 @@ func Base64GzipEncode(content string) (string, error) {
 		return "", fmt.Errorf("failed to create gzip writer: %w", err)
 	}
 
-	if _, err := gz.Write([]byte(content)); err != nil {
+	_, err = gz.Write([]byte(content))
+	if err != nil {
 		gz.Close() //revive:disable-line:unhandled-error
 
 		return "", fmt.Errorf("failed to write to gzip: %w", err)
 	}
 
-	if err := gz.Close(); err != nil {
+	err = gz.Close()
+	if err != nil {
 		return "", fmt.Errorf("failed to close gzip writer: %w", err)
 	}
 

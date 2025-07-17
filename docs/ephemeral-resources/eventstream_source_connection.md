@@ -4,7 +4,6 @@ page_title: "fabric_eventstream_source_connection Ephemeral Resource - terraform
 subcategory: ""
 description: |-
   The Eventstream Source Connection ephemeral resource allows you to manage a temporary Fabric Eventstream Source Connection https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview.
-  -> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later.
   -> This resource supports Service Principal authentication.
   ~> This ephemeral resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
@@ -12,8 +11,6 @@ description: |-
 # fabric_eventstream_source_connection (Ephemeral Resource)
 
 The Eventstream Source Connection ephemeral resource allows you to manage a temporary Fabric [Eventstream Source Connection](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview).
-
--> Ephemeral Resources are supported in HashiCorp Terraform version 1.11 and later.
 
 -> This resource supports Service Principal authentication.
 

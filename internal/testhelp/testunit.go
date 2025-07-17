@@ -89,7 +89,7 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 	// ephemeral specific configurations
 	if testResource != nil && strings.HasPrefix(*testResource, "ephemeral") {
 		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version1_10_0),
+			tfversion.SkipBelow(tfversion.Version1_11_0),
 		}
 		testCase.CheckDestroy = func(_ *terraform.State) error {
 			return nil // No need to check destroy for ephemeral resources

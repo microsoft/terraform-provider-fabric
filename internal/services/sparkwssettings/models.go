@@ -109,6 +109,7 @@ DATA-SOURCE
 
 type dataSourceSparkWorkspaceSettingsModel struct {
 	baseSparkWorkspaceSettingsModel
+
 	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
@@ -118,6 +119,7 @@ RESOURCE
 
 type resourceSparkWorkspaceSettingsModel struct {
 	baseSparkWorkspaceSettingsModel
+
 	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 
