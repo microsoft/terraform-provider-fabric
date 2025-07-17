@@ -87,9 +87,7 @@ func (o *operationsFolder) Validate(newEntity fabcore.Folder, existing []fabcore
 	return http.StatusCreated, nil
 }
 
-// FilterWithOptions filters folders by workspace and optionally by root folder and recursion.
 func (o *operationsFolder) FilterWithOptions(entities []fabcore.Folder, workspaceID string, options *fabcore.FoldersClientListFoldersOptions) []fabcore.Folder {
-	// Filter by workspace
 	workspaceFolders := make([]fabcore.Folder, 0)
 
 	for _, folder := range entities {
@@ -98,12 +96,15 @@ func (o *operationsFolder) FilterWithOptions(entities []fabcore.Folder, workspac
 		}
 	}
 
-	// No root folder specified
 	if options == nil || options.RootFolderID == nil {
 		return workspaceFolders
 	}
 
-	recursive := *options.Recursive // Default true
+	recursive := true
+	if options.Recursive != nil {
+		recursive = *options.Recursive
+	}
+
 	if recursive {
 		return o.getDescendants(*options.RootFolderID, workspaceFolders)
 	}
@@ -140,8 +141,9 @@ func (m *moveFolderOperations) Update(base fabcore.Folder, moveReq fabcore.MoveF
 
 func FakeListFolders(
 	handler *typedHandler[fabcore.Folder],
-) func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
-	return func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) (resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]) {
+) func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse] {
+	return func(workspaceID string, options *fabcore.FoldersClientListFoldersOptions) azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse] {
+		var resp azfake.PagerResponder[fabcore.FoldersClientListFoldersResponse]
 		entityOperations := &operationsFolder{}
 
 		allEntities := handler.Elements()
@@ -155,7 +157,6 @@ func FakeListFolders(
 	}
 }
 
-// getChildren returns direct children of a parent folder.
 func (o *operationsFolder) getChildren(parentID string, folders []fabcore.Folder) []fabcore.Folder {
 	result := make([]fabcore.Folder, 0)
 
@@ -168,7 +169,6 @@ func (o *operationsFolder) getChildren(parentID string, folders []fabcore.Folder
 	return result
 }
 
-// getDescendants returns all descendants of a parent folder recursively.
 func (o *operationsFolder) getDescendants(parentID string, folders []fabcore.Folder) []fabcore.Folder {
 	result := make([]fabcore.Folder, 0)
 	children := o.getChildren(parentID, folders)
