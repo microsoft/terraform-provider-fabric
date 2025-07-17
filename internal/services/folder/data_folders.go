@@ -134,18 +134,17 @@ func (d *dataSourceFolders) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 func (d *dataSourceFolders) list(ctx context.Context, model *dataSourceFoldersModel) diag.Diagnostics {
-	var options *fabcore.FoldersClientListFoldersOptions
-
 	recursive := true
 	if !model.Recursive.IsNull() && !model.Recursive.IsUnknown() {
 		recursive = model.Recursive.ValueBool()
 	}
 
+	options := &fabcore.FoldersClientListFoldersOptions{
+		Recursive: to.Ptr(recursive),
+	}
+
 	if !model.RootFolderID.IsNull() && !model.RootFolderID.IsUnknown() {
-		options = &fabcore.FoldersClientListFoldersOptions{
-			RootFolderID: model.RootFolderID.ValueStringPointer(),
-			Recursive:    to.Ptr(recursive),
-		}
+		options.RootFolderID = model.RootFolderID.ValueStringPointer()
 	}
 
 	respList, err := d.client.ListFolders(ctx, model.WorkspaceID.ValueString(), options)

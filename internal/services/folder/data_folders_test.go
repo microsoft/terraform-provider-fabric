@@ -4,13 +4,16 @@
 package folder_test
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -130,8 +133,11 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 	folder := testhelp.WellKnown()["Folder"].(map[string]any)
 	folderID := folder["id"].(string)
 
+	subfolder := testhelp.WellKnown()["Subfolder"].(map[string]any)
+	subfolderID := subfolder["id"].(string)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read
+		// read - recursive defaults to true
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemsHeader,
@@ -143,6 +149,20 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact(folderID),
+						}),
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact(subfolderID),
+						}),
+					}),
+				),
+			},
 		},
 		// read with options - recursive defaults to true
 		{
@@ -157,7 +177,11 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 				statecheck.ExpectKnownValue(
 					testDataSourceItemsFQN,
 					tfjsonpath.New("values"),
-					knownvalue.SetSizeExact(2),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact(subfolderID),
+						}),
+					}),
 				),
 			},
 		},
@@ -166,18 +190,27 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemsHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"root_folder_id": folderID,
-					"recursive":      false,
+					"workspace_id": workspaceID,
+					"recursive":    false,
 				},
 			),
-			ConfigStateChecks: []statecheck.StateCheck{
-				statecheck.ExpectKnownValue(
-					testDataSourceItemsFQN,
-					tfjsonpath.New("values"),
-					knownvalue.SetSizeExact(1),
-				),
-			},
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.id", folderID),
+				func(s *terraform.State) error {
+					rs, ok := s.RootModule().Resources[testDataSourceItemsFQN]
+					if !ok {
+						return fmt.Errorf("resource not found: %s", testDataSourceItemsFQN)
+					}
+
+					for key, value := range rs.Primary.Attributes {
+						if strings.HasPrefix(key, "values.") && strings.HasSuffix(key, ".id") && value == subfolderID {
+							return fmt.Errorf("subfolder %s should not be present in non-recursive results", subfolderID)
+						}
+					}
+
+					return nil
+				},
+			),
 		},
 	},
 	))
