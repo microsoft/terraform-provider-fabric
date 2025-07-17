@@ -38,6 +38,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 			"definition/report.json",
 			"definition/version.json",
 			"definition.pbir",
+			"definition/bookmarks/*.json",
 			"definition/pages/*.json",
 			"StaticResources/RegisteredResources/*",
 			"StaticResources/SharedResources/*",
