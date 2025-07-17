@@ -160,8 +160,24 @@ func (r *resourceDeploymentPipelineRoleAssignment) Read(ctx context.Context, req
 	}
 }
 
-func (r *resourceDeploymentPipelineRoleAssignment) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
-	panic("Update operation is not supported for Deployment Pipeline Role Assignment resource") // lintignore:R009
+func (r *resourceDeploymentPipelineRoleAssignment) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+	tflog.Debug(ctx, "UPDATE", map[string]any{
+		"action": "start",
+	})
+
+	// in real world, this should not reach here
+	resp.Diagnostics.AddError(
+		common.ErrorUpdateHeader,
+		"Update is not supported. Requires delete and recreate.",
+	)
+
+	tflog.Debug(ctx, "UPDATE", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceDeploymentPipelineRoleAssignment) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
