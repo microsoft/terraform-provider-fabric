@@ -68,7 +68,7 @@ resource "fabric_report" "example_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). Accepted path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). Accepted path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/bookmarks/*.json`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Report display name.
 - `format` (String) The Report format. Possible values: `PBIR`, `PBIR-Legacy`
 - `workspace_id` (String) The Workspace ID.
