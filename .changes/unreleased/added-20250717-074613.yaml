@@ -1,0 +1,6 @@
+kind: added
+body: |
+  Supported report definition paths: `definition/bookmarks/*.json`
+time: 2025-07-17T07:46:13.8538459-07:00
+custom:
+  Issue: "543"
