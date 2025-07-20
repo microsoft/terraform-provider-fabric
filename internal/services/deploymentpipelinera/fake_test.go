@@ -4,6 +4,7 @@
 package deploymentpipelinera_test
 
 import (
+	"context"
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
@@ -19,6 +20,33 @@ func fakeDeploymentPipelineRoleAssignments(
 	return func(_ string, _ *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
 		resp = azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse{DeploymentPipelineRoleAssignments: exampleResp}, nil)
+
+		return
+	}
+}
+
+func fakeAddDeploymentPipelineRoleAssignment() func(ctx context.Context, deploymentPipelineID string, deploymentPipelineRoleAssignmentRequest fabcore.AddDeploymentPipelineRoleAssignmentRequest, options *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _ string, body fabcore.AddDeploymentPipelineRoleAssignmentRequest, _ *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		// Return a response that matches the request
+		response := fabcore.DeploymentPipelineRoleAssignment{
+			ID:   body.Principal.ID,
+			Role: body.Role,
+			Principal: &fabcore.Principal{
+				ID:   body.Principal.ID,
+				Type: body.Principal.Type,
+			},
+		}
+		resp = azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse{DeploymentPipelineRoleAssignment: response}, nil)
+
+		return
+	}
+}
+
+func fakeDeleteDeploymentPipelineRoleAssignment() func(ctx context.Context, deploymentPipelineID, principalID string, options *fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _ string, _ *fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse{}, nil)
 
 		return
 	}

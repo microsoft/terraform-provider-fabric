@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -75,6 +76,9 @@ func TestAcc_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 	deploymentPipeline := testhelp.WellKnown()["DeploymentPipeline"].(map[string]any)
 	deploymentPipelineID := deploymentPipeline["id"].(string)
 
+	group := testhelp.WellKnown()["Group"].(map[string]any)
+	groupType := group["type"].(string)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{
@@ -87,6 +91,8 @@ func TestAcc_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "deployment_pipeline_id", deploymentPipelineID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.principal.type", groupType),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
 		},
 	},

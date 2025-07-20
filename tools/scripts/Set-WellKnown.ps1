@@ -388,6 +388,38 @@ function Set-DeploymentPipeline {
   return $result
 }
 
+function Set-DeploymentPipelineRoleAssignment {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DeploymentPipelineID,
+
+    [Parameter(Mandatory = $true)]
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Admin')]
+    [string]$Role
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
+  if (!$result) {
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to DeploymentPipeline: $($DeploymentPipelineID)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $PrincipalId
+        type = $PrincipalType
+      }
+      role      = $Role
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments" -Payload $payload).Response
+  }
+}
+
 function Set-FabricDomain {
   param (
     [Parameter(Mandatory = $true)]
@@ -1183,6 +1215,8 @@ $wellKnown['DeploymentPipeline'] = @{
   description = $deploymentPipeline.description
   stages      = $deploymentPipeline.stages
 }
+
+Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
