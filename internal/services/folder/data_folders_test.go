@@ -196,22 +196,29 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.id", folderID),
-				func(s *terraform.State) error {
-					rs, ok := s.RootModule().Resources[testDataSourceItemsFQN]
-					if !ok {
-						return fmt.Errorf("resource not found: %s", testDataSourceItemsFQN)
-					}
-
-					for key, value := range rs.Primary.Attributes {
-						if strings.HasPrefix(key, "values.") && strings.HasSuffix(key, ".id") && value == subfolderID {
-							return fmt.Errorf("subfolder %s should not be present in non-recursive results", subfolderID)
-						}
-					}
-
-					return nil
-				},
+				checkIDNotPresentInSet(testDataSourceItemsFQN, subfolderID),
 			),
 		},
 	},
 	))
+}
+
+/*
+HELPER FUNCTION.
+*/
+func checkIDNotPresentInSet(resourceName, id string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		for key, value := range rs.Primary.Attributes {
+			if strings.HasPrefix(key, "values.") && strings.HasSuffix(key, ".id") && value == id {
+				return fmt.Errorf("id %s should not be present in results", id)
+			}
+		}
+
+		return nil
+	}
 }

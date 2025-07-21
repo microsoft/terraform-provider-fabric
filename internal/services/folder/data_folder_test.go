@@ -21,9 +21,11 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_FolderDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomFolderWithWorkspace(workspaceID)
+	childEntity := fakes.NewRandomSubfolder(workspaceID, *entity.ID)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(childEntity)
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -78,7 +80,7 @@ func TestUnit_FolderDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
-		// read by id
+		// read by id - folder
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -94,7 +96,7 @@ func TestUnit_FolderDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "parent_folder_id", entity.ParentFolderID),
 			),
 		},
-		// read by id - not found
+		// read by id folder- not found
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -104,6 +106,22 @@ func TestUnit_FolderDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id - subfolder
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           *childEntity.ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "workspace_id", childEntity.WorkspaceID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", childEntity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", childEntity.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "parent_folder_id", childEntity.ParentFolderID),
+			),
 		},
 	}))
 }
@@ -112,12 +130,15 @@ func TestAcc_FolderDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["Folder"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityDisplayName := entity["displayName"].(string)
+	folder := testhelp.WellKnown()["Folder"].(map[string]any)
+	folderID := folder["id"].(string)
+	folderDisplayName := folder["displayName"].(string)
 
+	subfolder := testhelp.WellKnown()["Subfolder"].(map[string]any)
+	subfolderID := subfolder["id"].(string)
+	subfolderDisplayName := subfolder["displayName"].(string)
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read by id - not found
+		// read by id folder- not found
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -128,19 +149,34 @@ func TestAcc_FolderDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by id
+		// read by id folder
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"id":           entityID,
+					"id":           folderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", folderID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", folderDisplayName),
+			),
+		},
+		// read by id subfolder
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           subfolderID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", subfolderID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", subfolderDisplayName),
 			),
 		},
 	}))
