@@ -10,8 +10,6 @@ import (
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-
-	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
 // Returns a fake pager function that simulates listing deployment pipeline role assignments with a provided example response.
@@ -55,16 +53,14 @@ func fakeDeleteDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 	}
 }
 
-func NewRandomDeploymentPipelineRoleAssignments(_ string) fabcore.DeploymentPipelineRoleAssignments {
-	principal0ID := testhelp.RandomUUID()
-
+func NewRandomDeploymentPipelineRoleAssignments(principalID string) fabcore.DeploymentPipelineRoleAssignments {
 	return fabcore.DeploymentPipelineRoleAssignments{
 		Value: []fabcore.DeploymentPipelineRoleAssignment{
 			{
-				ID:   azto.Ptr(principal0ID),
+				ID:   azto.Ptr(principalID),
 				Role: azto.Ptr(fabcore.DeploymentPipelineRoleAdmin),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal0ID),
+					ID:   azto.Ptr(principalID),
 					Type: azto.Ptr(fabcore.PrincipalTypeGroup),
 				},
 			},
