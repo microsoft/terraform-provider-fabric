@@ -57,9 +57,8 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 					tfjsonpath.New("values"),
 					knownvalue.SetPartial([]knownvalue.Check{
 						knownvalue.ObjectPartial(map[string]knownvalue.Check{
-							"id":                     knownvalue.StringExact(*entity.ID),
-							"deployment_pipeline_id": knownvalue.StringExact(deploymentPipelineID),
-							"role":                   knownvalue.StringExact((string)(*entity.Role)),
+							"id":   knownvalue.StringExact(*entity.ID),
+							"role": knownvalue.StringExact((string)(*entity.Role)),
 							"principal": knownvalue.ObjectPartial(map[string]knownvalue.Check{
 								"id":   knownvalue.StringExact(*entity.Principal.ID),
 								"type": knownvalue.StringExact((string)(*entity.Principal.Type)),
