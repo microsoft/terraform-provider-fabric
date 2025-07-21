@@ -156,7 +156,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_ImportState(t *testing.T)
 }
 
 func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
-	entityExist := NewRandomDeploymentPipelineRoleAssignments().Value[0]
+	entityExist := NewRandomDeploymentPipelineRoleAssignments(testhelp.RandomUUID()).Value[0]
 
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(fabcore.DeploymentPipelineRoleAssignments{
 		Value: []fabcore.DeploymentPipelineRoleAssignment{entityExist},
