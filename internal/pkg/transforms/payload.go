@@ -84,7 +84,10 @@ func SourceFileToPayload(srcPath string, tokens map[string]string) (string, stri
 			return "", "", diags
 		}
 
-		tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
+		// Create template with the correct name that matches the file base name
+		// This ensures ExecuteTemplate can find the template by name
+		templateName := filepath.Base(srcPath)
+		tmpl, err := template.New(templateName).Funcs(tmplFuncs).ParseFiles(srcPath)
 		if err != nil {
 			diags.AddError(common.ErrorFileReadHeader, err.Error())
 
@@ -100,7 +103,7 @@ func SourceFileToPayload(srcPath string, tokens map[string]string) (string, stri
 		// Execute template
 		var contentBuf bytes.Buffer
 
-		err = tmpl.ExecuteTemplate(&contentBuf, filepath.Base(srcPath), tokensData)
+		err = tmpl.ExecuteTemplate(&contentBuf, templateName, tokensData)
 		if err != nil {
 			diags.AddError(common.ErrorTmplParseHeader, err.Error())
 
