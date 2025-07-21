@@ -63,7 +63,7 @@ output "example_definition_report_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/bookmarks/*.json`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Report description.
 - `display_name` (String) The Report display name.
 
