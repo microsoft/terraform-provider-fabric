@@ -80,9 +80,8 @@ func TestUnit_FoldersDataSource(t *testing.T) {
 					tfjsonpath.New("values"),
 					knownvalue.SetPartial([]knownvalue.Check{
 						knownvalue.ObjectPartial(map[string]knownvalue.Check{
-							"id":               knownvalue.StringExact(*entity.ID),
-							"display_name":     knownvalue.StringExact(*entity.DisplayName),
-							"parent_folder_id": knownvalue.StringExact(*entity.ParentFolderID),
+							"id":           knownvalue.StringExact(*entity.ID),
+							"display_name": knownvalue.StringExact(*entity.DisplayName),
 						}),
 					}),
 				),

@@ -216,9 +216,9 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 
 func NewRandomFolder() fabcore.Folder {
 	return fabcore.Folder{
-		ID:             to.Ptr(testhelp.RandomUUID()),
-		DisplayName:    to.Ptr(testhelp.RandomName()),
-		ParentFolderID: to.Ptr(testhelp.RandomUUID()),
+		ID:          to.Ptr(testhelp.RandomUUID()),
+		DisplayName: to.Ptr(testhelp.RandomName()),
+		// no parent folder id, only for subfolders
 	}
 }
 

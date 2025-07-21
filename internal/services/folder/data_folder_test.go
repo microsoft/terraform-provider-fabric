@@ -93,7 +93,7 @@ func TestUnit_FolderDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "workspace_id", entity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "parent_folder_id", entity.ParentFolderID),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "parent_folder_id"),
 			),
 		},
 		// read by id folder- not found
@@ -120,7 +120,7 @@ func TestUnit_FolderDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "workspace_id", childEntity.WorkspaceID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", childEntity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", childEntity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "parent_folder_id", childEntity.ParentFolderID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "parent_folder_id", entity.ID),
 			),
 		},
 	}))
@@ -149,7 +149,7 @@ func TestAcc_FolderDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// read by id folder
+		// read by id - folder
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -162,9 +162,10 @@ func TestAcc_FolderDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", folderID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", folderDisplayName),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "parent_folder_id"),
 			),
 		},
-		// read by id subfolder
+		// read by id - subfolder
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -177,6 +178,7 @@ func TestAcc_FolderDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", subfolderID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", subfolderDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "parent_folder_id", folderID),
 			),
 		},
 	}))

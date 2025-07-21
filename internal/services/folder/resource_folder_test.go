@@ -88,7 +88,7 @@ func TestUnit_FolderResource_Attributes(t *testing.T) {
 	}))
 }
 
-func TestUnit_FolderResource_ImportState(t *testing.T) {
+func TestUnit_FolderResource_ImportState_Folder(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomFolderWithWorkspace(workspaceID)
 
@@ -96,7 +96,7 @@ func TestUnit_FolderResource_ImportState(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 
-	testCase := at.JoinConfigs(
+	testCaseFolder := at.JoinConfigs(
 		at.CompileConfig(
 			testResourceItemHeader,
 			map[string]any{
@@ -108,36 +108,36 @@ func TestUnit_FolderResource_ImportState(t *testing.T) {
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
-			Config:        testCase,
+			Config:        testCaseFolder,
 			ImportStateId: "not-valid",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/FolderID")),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
-			Config:        testCase,
+			Config:        testCaseFolder,
 			ImportStateId: "test/id",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
-			Config:        testCase,
+			Config:        testCaseFolder,
 			ImportStateId: fmt.Sprintf("%s/%s", "test", *entity.ID),
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
-			Config:        testCase,
+			Config:        testCaseFolder,
 			ImportStateId: fmt.Sprintf("%s/%s", *entity.WorkspaceID, "test"),
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// Import state testing
+		// Import state testing - folder
 		{
 			ResourceName:       testResourceItemFQN,
-			Config:             testCase,
+			Config:             testCaseFolder,
 			ImportStateId:      fmt.Sprintf("%s/%s", *entity.WorkspaceID, *entity.ID),
 			ImportState:        true,
 			ImportStatePersist: true,
@@ -156,11 +156,54 @@ func TestUnit_FolderResource_ImportState(t *testing.T) {
 	}))
 }
 
+func TestUnit_FolderResource_ImportState_SubFolder(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entity := fakes.NewRandomFolderWithWorkspace(workspaceID)
+	childEntity := fakes.NewRandomSubfolder(workspaceID, *entity.ID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(childEntity)
+	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
+
+	testCaseSubfolder := at.JoinConfigs(
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": *childEntity.WorkspaceID,
+				"display_name": *childEntity.DisplayName,
+			},
+		))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Import state testing - subfolder
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             testCaseSubfolder,
+			ImportStateId:      fmt.Sprintf("%s/%s", *childEntity.WorkspaceID, *childEntity.ID),
+			ImportState:        true,
+			ImportStatePersist: true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				if is[0].ID != *childEntity.ID {
+					return errors.New(testResourceItemFQN + ": unexpected ID")
+				}
+
+				return nil
+			},
+		},
+	}))
+}
+
 func TestUnit_FolderResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entityExist := fakes.NewRandomFolderWithWorkspace(workspaceID)
-	entityBefore := fakes.NewRandomFolderWithWorkspace(workspaceID)
-	entityAfter := fakes.NewRandomFolderWithWorkspace(workspaceID)
+	randomFolderIDAfter := testhelp.RandomUUID()
+	entityBefore := fakes.NewRandomSubfolder(workspaceID, *entityExist.ID)
+	entityAfter := fakes.NewRandomSubfolder(workspaceID, randomFolderIDAfter)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -174,9 +217,8 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id":     *entityExist.WorkspaceID,
-						"display_name":     *entityExist.DisplayName,
-						"parent_folder_id": *entityExist.ParentFolderID,
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
 					},
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
