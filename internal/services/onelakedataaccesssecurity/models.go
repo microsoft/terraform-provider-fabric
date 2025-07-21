@@ -26,9 +26,9 @@ type dataSourceOneLakeDataAccessSecurityModel struct {
 type resourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
 
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	ItemID      customtypes.UUID `tfsdk:"item_id"`
-	Etag        types.String     `tfsdk:"etag"`
+	WorkspaceID customtypes.UUID       `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID       `tfsdk:"item_id"`
+	Etag        supertypes.StringValue `tfsdk:"etag"`
 }
 
 type baseOneLakeDataAccessSecurityModel struct {
@@ -223,7 +223,7 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 }
 
 func (to *resourceOneLakeDataAccessSecurityModel) set(from *string) {
-	to.Etag = types.StringValue(*from)
+	to.Etag = supertypes.NewStringValue(*from)
 }
 
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {
@@ -335,13 +335,15 @@ func setMembers(ctx context.Context, role *fabcore.DataAccessRole, item *dataAcc
 		return diags
 	}
 
-	role.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
-	for _, mem := range microsoftEntraMembers {
-		role.Members.MicrosoftEntraMembers = append(role.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
-			ObjectID:   mem.ObjectID.ValueStringPointer(),
-			TenantID:   mem.TenantID.ValueStringPointer(),
-			ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
-		})
+	if len(microsoftEntraMembers) > 0 {
+		role.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
+		for _, mem := range microsoftEntraMembers {
+			role.Members.MicrosoftEntraMembers = append(role.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
+				ObjectID:   mem.ObjectID.ValueStringPointer(),
+				TenantID:   mem.TenantID.ValueStringPointer(),
+				ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
+			})
+		}
 	}
 
 	return nil

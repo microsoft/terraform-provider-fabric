@@ -117,11 +117,9 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		return
 	}
 
+	// Copy the plan data to state and set the etag
+	state = plan
 	state.set(respCreate.Etag)
-
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -149,10 +147,13 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 
 	reqUpdate.set(ctx, plan)
 
-	_, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqUpdate.CreateOrUpdateDataAccessRolesRequest, nil)
+	respUpdate, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqUpdate.CreateOrUpdateDataAccessRolesRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Set the etag from the response
+	plan.set(respUpdate.Etag)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -166,7 +167,18 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 }
 
 func (r *resourceOneLakeDataAccessSecurity) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	panic("Delete operation is not supported for OneLake Data Access Security resource. This should never happen, please report this issue.") // lintignore:R009
+	tflog.Debug(ctx, "DELETE", map[string]any{
+		"action": "start",
+	})
+
+	resp.Diagnostics.AddError(
+		"Delete operation not supported",
+		"Delete operation is not supported for OneLake Data Access Security resource. Please remove the resource from your configuration instead.",
+	)
+
+	tflog.Debug(ctx, "DELETE", map[string]any{
+		"action": "end",
+	})
 }
 
 func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
