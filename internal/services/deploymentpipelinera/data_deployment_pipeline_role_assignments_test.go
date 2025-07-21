@@ -9,9 +9,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
-	"github.com/hashicorp/terraform-plugin-testing/statecheck"
-	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -50,23 +47,10 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "deployment_pipeline_id", deploymentPipelineID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.0.id", entity.ID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.principal.type", string(*entity.Principal.Type)),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
-			ConfigStateChecks: []statecheck.StateCheck{
-				statecheck.ExpectKnownValue(
-					testDataSourceItemsFQN,
-					tfjsonpath.New("values"),
-					knownvalue.SetPartial([]knownvalue.Check{
-						knownvalue.ObjectPartial(map[string]knownvalue.Check{
-							"id":   knownvalue.StringExact(*entity.ID),
-							"role": knownvalue.StringExact((string)(*entity.Role)),
-							"principal": knownvalue.ObjectPartial(map[string]knownvalue.Check{
-								"id":   knownvalue.StringExact(*entity.Principal.ID),
-								"type": knownvalue.StringExact((string)(*entity.Principal.Type)),
-							}),
-						}),
-					}),
-				),
-			},
 		},
 	}))
 }
