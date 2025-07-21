@@ -55,7 +55,7 @@ func fakeDeleteDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 	}
 }
 
-func NewRandomDeploymentPipelineRoleAssignments() fabcore.DeploymentPipelineRoleAssignments {
+func NewRandomDeploymentPipelineRoleAssignments(_ string) fabcore.DeploymentPipelineRoleAssignments {
 	principal0ID := testhelp.RandomUUID()
 
 	return fabcore.DeploymentPipelineRoleAssignments{
