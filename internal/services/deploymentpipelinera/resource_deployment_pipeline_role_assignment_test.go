@@ -158,10 +158,10 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_ImportState(t *testing.T)
 func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	entityExist := NewRandomDeploymentPipelineRoleAssignments().Value[0]
 
-	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeDeploymentPipelineRoleAssignments(fabcore.DeploymentPipelineRoleAssignments{
+	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(fabcore.DeploymentPipelineRoleAssignments{
 		Value: []fabcore.DeploymentPipelineRoleAssignment{entityExist},
 	})
-	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.AddDeploymentPipelineRoleAssignment = fakeAddDeploymentPipelineRoleAssignment()
+	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.AddDeploymentPipelineRoleAssignment = fakeCreateDeploymentPipelineRoleAssignment()
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.DeleteDeploymentPipelineRoleAssignment = fakeDeleteDeploymentPipelineRoleAssignment()
 
 	deploymentPipelineResourceHCL := at.CompileConfig(
@@ -190,6 +190,10 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
 
+	groupEntity := testhelp.WellKnown()["Group"].(map[string]any)
+	groupEntityID := groupEntity["id"].(string)
+	groupEntityType := groupEntity["type"].(string)
+
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -211,6 +215,29 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", string(fabcore.DeploymentPipelineRoleAdmin)),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				deploymentPipelineResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"deployment_pipeline_id": testhelp.RefByFQN(deploymentPipelineResourceFQN, "id"),
+						"principal": map[string]any{
+							"id":   groupEntityID,
+							"type": groupEntityType,
+						},
+						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", groupEntityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", groupEntityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
 		},
@@ -244,6 +271,10 @@ func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
 
+	groupEntity := testhelp.WellKnown()["Group"].(map[string]any)
+	groupEntityID := groupEntity["id"].(string)
+	groupEntityType := groupEntity["type"].(string)
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -265,6 +296,29 @@ func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", string(fabcore.DeploymentPipelineRoleAdmin)),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				deploymentPipelineResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"deployment_pipeline_id": testhelp.RefByFQN(deploymentPipelineResourceFQN, "id"),
+						"principal": map[string]any{
+							"id":   groupEntityID,
+							"type": groupEntityType,
+						},
+						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", groupEntityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", groupEntityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
 		},

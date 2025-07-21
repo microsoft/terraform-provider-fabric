@@ -14,7 +14,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-func fakeDeploymentPipelineRoleAssignments(
+// Returns a fake pager function that simulates listing deployment pipeline role assignments with a provided example response.
+func fakeListDeploymentPipelineRoleAssignments(
 	exampleResp fabcore.DeploymentPipelineRoleAssignments,
 ) func(deploymentPipelineID string, options *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
 	return func(_ string, _ *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
@@ -25,7 +26,8 @@ func fakeDeploymentPipelineRoleAssignments(
 	}
 }
 
-func fakeAddDeploymentPipelineRoleAssignment() func(ctx context.Context, deploymentPipelineID string, deploymentPipelineRoleAssignmentRequest fabcore.AddDeploymentPipelineRoleAssignmentRequest, options *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+// Returns a fake function that simulates creating a deployment pipeline role assignment, echoing back the request as the response.
+func fakeCreateDeploymentPipelineRoleAssignment() func(ctx context.Context, deploymentPipelineID string, deploymentPipelineRoleAssignmentRequest fabcore.AddDeploymentPipelineRoleAssignmentRequest, options *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _ string, body fabcore.AddDeploymentPipelineRoleAssignmentRequest, _ *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		// Return a response that matches the request
 		response := fabcore.DeploymentPipelineRoleAssignment{
@@ -43,6 +45,7 @@ func fakeAddDeploymentPipelineRoleAssignment() func(ctx context.Context, deploym
 	}
 }
 
+// Returns a fake function that simulates deleting a deployment pipeline role assignment, always returning a successful response.
 func fakeDeleteDeploymentPipelineRoleAssignment() func(ctx context.Context, deploymentPipelineID, principalID string, options *fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _, _ string, _ *fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse]{}

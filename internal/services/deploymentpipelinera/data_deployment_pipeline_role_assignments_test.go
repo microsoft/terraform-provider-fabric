@@ -24,7 +24,7 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 	deploymentPipelineID := testhelp.RandomUUID()
 	deploymentPipelineRoleAssignments := NewRandomDeploymentPipelineRoleAssignments()
-	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeDeploymentPipelineRoleAssignments(deploymentPipelineRoleAssignments)
+	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(deploymentPipelineRoleAssignments)
 
 	entity := deploymentPipelineRoleAssignments.Value[0]
 
