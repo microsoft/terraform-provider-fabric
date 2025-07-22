@@ -388,6 +388,38 @@ function Set-DeploymentPipeline {
   return $result
 }
 
+function Set-DeploymentPipelineRoleAssignment {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DeploymentPipelineID,
+
+    [Parameter(Mandatory = $true)]
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Admin')]
+    [string]$Role
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
+  if (!$result) {
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to DeploymentPipeline: $($DeploymentPipelineID)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $PrincipalId
+        type = $PrincipalType
+      }
+      role      = $Role
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments" -Payload $payload).Response
+  }
+}
+
 function Set-FabricDomain {
   param (
     [Parameter(Mandatory = $true)]
@@ -848,7 +880,8 @@ function Set-FabricFolder {
   if (!$ParentFolderId) {
     # Looking for a root folder - folder that doesn't have parentFolderId property
     $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and -not $_.parentFolderId } | Select-Object -First 1
-  } else {
+  }
+  else {
     # Looking for a subfolder with a specific parentFolderId
     $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and $_.parentFolderId -eq $ParentFolderId } | Select-Object -First 1
   }
@@ -1182,6 +1215,8 @@ $wellKnown['DeploymentPipeline'] = @{
   description = $deploymentPipeline.description
   stages      = $deploymentPipeline.stages
 }
+
+Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
@@ -1593,6 +1628,19 @@ $wellKnown['Folder'] = @{
   id             = $folder.id
   displayName    = $folder.displayName
   parentFolderId = $folder.parentFolderId
+}
+
+#Create subfolder if not exists
+$displayNameTemp = "${displayName}_sub$($itemNaming['Folder'])"
+$subFolder = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp `
+  -ParentFolderId $wellKnown['Folder'].id
+
+$wellKnown['Subfolder'] = @{
+  id             = $subFolder.id
+  displayName    = $subFolder.displayName
+  parentFolderId = $subFolder.parentFolderId
 }
 
 # Save wellknown.json file
