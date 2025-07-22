@@ -23,7 +23,6 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 
 	deploymentPipelineRoleAssignments := NewRandomDeploymentPipelineRoleAssignments()
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(
-		deploymentPipelineID,
 		deploymentPipelineRoleAssignments,
 	)
 

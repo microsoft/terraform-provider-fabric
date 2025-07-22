@@ -16,10 +16,9 @@ import (
 
 // Returns a fake pager function that simulates listing deployment pipeline role assignments with a provided example response.
 func fakeListDeploymentPipelineRoleAssignments(
-	deploymentPipelineID string,
 	exampleResp fabcore.DeploymentPipelineRoleAssignments,
 ) func(deploymentPipelineID string, options *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
-	return func(deploymentPipelineID string, _ *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
+	return func(_ string, _ *fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]) {
 		resp = azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse{DeploymentPipelineRoleAssignments: exampleResp}, nil)
 

@@ -162,7 +162,6 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	deploymentPipelineID := testhelp.RefByFQN(deploymentPipelineResourceFQN, "id")
 
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(
-		deploymentPipelineID,
 		fabcore.DeploymentPipelineRoleAssignments{
 			Value: []fabcore.DeploymentPipelineRoleAssignment{entityExist},
 		},
