@@ -20,8 +20,8 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 	deploymentPipelineID := testhelp.RandomUUID()
-	principalID := testhelp.RandomUUID()
-	deploymentPipelineRoleAssignments := NewRandomDeploymentPipelineRoleAssignments(principalID)
+
+	deploymentPipelineRoleAssignments := NewRandomDeploymentPipelineRoleAssignments()
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(deploymentPipelineRoleAssignments)
 
 	entity := deploymentPipelineRoleAssignments.Value[0]
@@ -48,7 +48,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "deployment_pipeline_id", deploymentPipelineID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "values.0.id", entity.ID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.id", *entity.ID),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.principal.type", string(*entity.Principal.Type)),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
