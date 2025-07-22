@@ -194,9 +194,19 @@ func TestAcc_FoldersDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.id", folderID),
 				checkIDNotPresentInSet(testDataSourceItemsFQN, subfolderID),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact(folderID),
+						}),
+					}),
+				),
+			},
 		},
 	},
 	))
