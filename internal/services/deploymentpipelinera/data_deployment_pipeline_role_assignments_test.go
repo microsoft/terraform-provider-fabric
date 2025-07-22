@@ -48,7 +48,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "deployment_pipeline_id", deploymentPipelineID),
-				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.id", *entity.ID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.principal.id", *entity.ID),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.principal.type", string(*entity.Principal.Type)),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.role", string(fabcore.DeploymentPipelineRoleAdmin)),
 			),
