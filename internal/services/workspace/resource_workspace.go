@@ -491,7 +491,7 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 				return diags
 			}
 
-			return getCapacity(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
+			return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018
