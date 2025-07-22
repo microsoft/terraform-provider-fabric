@@ -156,11 +156,17 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_ImportState(t *testing.T)
 }
 
 func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
-	entityExist := NewRandomDeploymentPipelineRoleAssignments().Value[0]
+	deploymentPipelineResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "deployment_pipeline", "test")
 
-	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(fabcore.DeploymentPipelineRoleAssignments{
-		Value: []fabcore.DeploymentPipelineRoleAssignment{entityExist},
-	})
+	entityExist := NewRandomDeploymentPipelineRoleAssignments().Value[0]
+	deploymentPipelineID := testhelp.RefByFQN(deploymentPipelineResourceFQN, "id")
+
+	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(
+		deploymentPipelineID,
+		fabcore.DeploymentPipelineRoleAssignments{
+			Value: []fabcore.DeploymentPipelineRoleAssignment{entityExist},
+		},
+	)
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.AddDeploymentPipelineRoleAssignment = fakeCreateDeploymentPipelineRoleAssignment()
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.DeleteDeploymentPipelineRoleAssignment = fakeDeleteDeploymentPipelineRoleAssignment()
 
@@ -184,8 +190,6 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 		},
 	)
 
-	deploymentPipelineResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "deployment_pipeline", "test")
-
 	entity := testhelp.WellKnown()["Principal"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
@@ -203,7 +207,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"deployment_pipeline_id": testhelp.RefByFQN(deploymentPipelineResourceFQN, "id"),
+						"deployment_pipeline_id": deploymentPipelineID,
 						"principal": map[string]any{
 							"id":   entityID,
 							"type": entityType,

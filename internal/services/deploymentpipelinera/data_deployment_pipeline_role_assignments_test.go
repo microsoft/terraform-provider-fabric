@@ -22,11 +22,14 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 	deploymentPipelineID := testhelp.RandomUUID()
 
 	deploymentPipelineRoleAssignments := NewRandomDeploymentPipelineRoleAssignments()
-	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(deploymentPipelineRoleAssignments)
+	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelineRoleAssignmentsPager = fakeListDeploymentPipelineRoleAssignments(
+		deploymentPipelineID,
+		deploymentPipelineRoleAssignments,
+	)
 
 	entity := deploymentPipelineRoleAssignments.Value[0]
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
 		{
 			Config: at.CompileConfig(
