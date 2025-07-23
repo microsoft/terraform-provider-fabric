@@ -87,6 +87,7 @@ func (d *dataSourceConnection) Configure(_ context.Context, req datasource.Confi
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 }
 
+// should we get all types all connections? if so, maybe credentialDetails privacyLevel and displayName will be null and add tests
 func (d *dataSourceConnection) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
@@ -105,6 +106,7 @@ func (d *dataSourceConnection) Read(ctx context.Context, req datasource.ReadRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	// should we get unsupported connection types?
 	if data.ID.ValueString() != "" {
 		diags = d.getByID(ctx, &data)
 	} else {
@@ -158,6 +160,11 @@ func (d *dataSourceConnection) getByDisplayName(ctx context.Context, model *data
 		}
 
 		for _, entity := range page.Value {
+			// PersonalCloud and OnPremisesGatewayPersonal display names might be null
+			if entity.DisplayName == nil {
+				continue
+			}
+
 			if *entity.DisplayName == model.DisplayName.ValueString() {
 				if diags := model.set(ctx, entity); diags.HasError() {
 					return diags

@@ -22,7 +22,7 @@ import (
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_ConnectionDataSource(t *testing.T) {
-	entity := fakes.NewRandomConnection()
+	entity := fakes.NewRandomShareableCloudConnection()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomConnection())
 	fakes.FakeServer.Upsert(entity)
@@ -196,6 +196,114 @@ func TestUnit_ConnectionDataSource(t *testing.T) {
 					}),
 				),
 			},
+		},
+	}))
+}
+
+func TestAcc_ConnectionDataSource(t *testing.T) {
+	shareableCloudConnection := testhelp.WellKnown()["ShareableCloudConnection"].(map[string]any)
+	shareableCloudConnectionID := shareableCloudConnection["id"].(string)
+	shareableCloudConnectionDisplayName := shareableCloudConnection["displayName"].(string)
+	virtualNetworkGatewayConnection := testhelp.WellKnown()["VirtualNetworkGatewayConnection"].(map[string]any)
+	virtualNetworkGatewayConnectionID := virtualNetworkGatewayConnection["id"].(string)
+	virtualNetworkGatewayConnectionDisplayName := virtualNetworkGatewayConnection["displayName"].(string)
+	virtualNetworkGatewayConnectionGatewayID := virtualNetworkGatewayConnection["gatewayId"].(string)
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by id - ShareableCloudConnection
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": shareableCloudConnectionID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", shareableCloudConnectionID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", shareableCloudConnectionDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connectivity_type", "ShareableCloud"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "privacy_level"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.connection_encryption"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+			),
+		},
+		// read by name - ShareableCloudConnection
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": shareableCloudConnectionDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", shareableCloudConnectionID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", shareableCloudConnectionDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connectivity_type", "ShareableCloud"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "privacy_level"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.connection_encryption"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+			),
+		},
+		// read by id - VirtualNetworkGatewayConnection
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": virtualNetworkGatewayConnectionID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", virtualNetworkGatewayConnectionID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", virtualNetworkGatewayConnectionDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connectivity_type", "VirtualNetworkGateway"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "gateway_id", virtualNetworkGatewayConnectionGatewayID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "privacy_level"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.connection_encryption"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+			),
+		},
+		// read by name - VirtualNetworkGatewayConnection
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": virtualNetworkGatewayConnectionDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", virtualNetworkGatewayConnectionID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", virtualNetworkGatewayConnectionDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connectivity_type", "VirtualNetworkGateway"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "gateway_id", virtualNetworkGatewayConnectionGatewayID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "privacy_level"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_details.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.connection_encryption"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+			),
 		},
 	}))
 }
