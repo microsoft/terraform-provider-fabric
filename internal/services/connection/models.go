@@ -44,7 +44,8 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			return diags
 		}
 	} else {
-		connectionDetails = supertypes.NewSingleNestedObjectValueOfNull[ConnectionDetails](ctx)
+		var defaultModel ConnectionDetails
+		connectionDetailsModel = &defaultModel
 	}
 
 	if from.ConnectionDetails != nil {
@@ -53,11 +54,13 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		switch v := any(connectionDetailsModel).(type) {
 		case *dsConnectionDetailsModel:
 			setDSConnectionDetails(*from.ConnectionDetails, v)
+
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
 			}
 		case *rsConnectionDetailsModel:
 			setRSConnectionDetails(*from.ConnectionDetails, v)
+
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
 			}
@@ -80,21 +83,25 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		if diags.HasError() {
 			return diags
 		}
-
 	} else {
 		credentialDetails = supertypes.NewSingleNestedObjectValueOfNull[CredentialDetails](ctx)
+		var defaultModel CredentialDetails
+		credentialDetailsModel = &defaultModel
 	}
 
 	if from.CredentialDetails != nil {
 		var credentialDetailsModelPtr *CredentialDetails
+
 		switch v := any(credentialDetailsModel).(type) {
 		case *dsCredentialDetailsModel:
 			setDSCredentialDetails(*from.CredentialDetails, v)
+
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue
 			}
 		case *rsCredentialDetailsModel:
 			setRSCredentialDetails(*from.CredentialDetails, v)
+
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue
 			}
@@ -132,48 +139,3 @@ type credentialsSharedAccessSignatureModel struct {
 	TokenWO        types.String `tfsdk:"token_wo"`
 	TokenWOVersion types.Int32  `tfsdk:"token_wo_version"`
 }
-
-type credentialsWindowsModel struct {
-	Username          types.String `tfsdk:"username"`
-	PasswordWO        types.String `tfsdk:"password_wo"`
-	PasswordWOVersion types.Int32  `tfsdk:"password_wo_version"`
-}
-
-type credentialsOAuth2Model struct {
-	AccessTokenWO        types.String `tfsdk:"access_token_wo"`
-	AccessTokenWOVersion types.Int32  `tfsdk:"access_token_wo_version"`
-}
-
-// type credentialsEncryptedModel struct {
-// 	ValueWO        types.String `tfsdk:"value_wo"`
-// 	ValueWOVersion types.Int32  `tfsdk:"value_wo_version"`
-// }
-
-// type credentialsOnPremisesGatewayModel struct {
-// 	GatewayID customtypes.UUID `tfsdk:"gateway_id"`
-// 	// EncryptedCredentialsWO        types.String     `tfsdk:"encrypted_credentials_wo"`
-// 	// EncryptedCredentialsWOVersion types.Int32      `tfsdk:"encrypted_credentials_wo_version"`
-// 	EncryptedCredentials supertypes.SingleNestedObjectValueOf[credentialsEncryptedModel] `tfsdk:"encrypted_credentials"`
-
-// 	CredentialType     types.String                                                  `tfsdk:"credential_type"`
-// 	BasicCredentials   supertypes.SingleNestedObjectValueOf[credentialsBasicModel]   `tfsdk:"basic_credentials"`
-// 	WindowsCredentials supertypes.SingleNestedObjectValueOf[credentialsWindowsModel] `tfsdk:"windows_credentials"`
-// 	KeyCredentials     supertypes.SingleNestedObjectValueOf[credentialsKeyModel]     `tfsdk:"key_credentials"`
-// 	OAuth2Credentials  supertypes.SingleNestedObjectValueOf[credentialsOAuth2Model]  `tfsdk:"oauth2_credentials"`
-// 	PublicKey          supertypes.SingleNestedObjectValueOf[publicKeyModel]          `tfsdk:"public_key"`
-// }
-
-// type publicKeyModel struct {
-// 	Exponent types.String `tfsdk:"exponent"`
-// 	Modulus  types.String `tfsdk:"modulus"`
-// }
-
-// func (to *publicKeyModel) set(from fabcore.PublicKey) {
-// 	to.Exponent = types.StringPointerValue(from.Exponent)
-// 	to.Modulus = types.StringPointerValue(from.Modulus)
-// }
-
-// type publicKey struct {
-// 	Exponent string
-// 	Modulus  string
-// }

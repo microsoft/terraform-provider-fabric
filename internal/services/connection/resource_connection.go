@@ -12,6 +12,7 @@ import (
 	"time"
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -28,8 +29,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure  = (*resourceConnection)(nil)
-	_ resource.ResourceWithModifyPlan = (*resourceConnection)(nil)
+	_ resource.ResourceWithConfigure        = (*resourceConnection)(nil)
+	_ resource.ResourceWithModifyPlan       = (*resourceConnection)(nil)
+	_ resource.ResourceWithConfigValidators = (*resourceConnection)(nil)
 )
 
 type resourceConnection struct {
@@ -54,6 +56,17 @@ func (r *resourceConnection) Metadata(_ context.Context, req resource.MetadataRe
 
 func (r *resourceConnection) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema(ctx, false).GetResource(ctx)
+}
+
+func (r *resourceConnection) ConfigValidators(_ context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.Conflicting(
+			path.MatchRoot("credential_details").AtName("basic_credentials"),
+			path.MatchRoot("credential_details").AtName("key_credentials"),
+			path.MatchRoot("credential_details").AtName("service_principal_credentials"),
+			path.MatchRoot("credential_details").AtName("shared_access_signature_credentials"),
+		),
+	}
 }
 
 func (r *resourceConnection) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -85,6 +98,7 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		"action": "start",
 	})
 
+	//nolint:nestif
 	if !req.Plan.Raw.IsNull() {
 		var plan resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]
 
@@ -167,14 +181,9 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	gwMembers, diags := r.getGatewayMembers(ctx, plan)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
-
 	var reqCreate requestCreateConnection
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, config, gwMembers)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqCreate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -264,14 +273,9 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	gwMembers, diags := r.getGatewayMembers(ctx, plan)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-		return
-	}
-
 	var reqUpdate requestUpdateConnection
 
-	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan, config, gwMembers)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -344,17 +348,24 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 }
 
 func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
-	respList, err := r.client.ListSupportedConnectionTypes(ctx, &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
+	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: azto.Ptr(true),
 	})
 
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		return diags
+	var allConnections []fabcore.ConnectionCreationMetadata
+
+	for pager.More() {
+		resp, err := pager.NextPage(ctx)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+			return diags
+		}
+
+		allConnections = append(allConnections, resp.Value...)
 	}
 
-	vNames := make([]string, 0, len(respList))
+	vNames := make([]string, 0, len(allConnections))
 
-	for _, v := range respList {
+	for _, v := range allConnections {
 		if *v.Type == model.Type.ValueString() {
 			*supportedConnectionType = v
 
@@ -455,6 +466,7 @@ func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetail
 	return nil
 }
 
+//nolint:gocognit,gocyclo
 func (r *resourceConnection) validateCreationMethodParameters(ctx context.Context, model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
@@ -687,23 +699,4 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 	}
 
 	return nil
-}
-
-func (r *resourceConnection) getGatewayMembers(
-	ctx context.Context,
-	model resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
-) ([]fabcore.OnPremisesGatewayMember, diag.Diagnostics) {
-	var gwMembers []fabcore.OnPremisesGatewayMember
-
-	if !model.GatewayID.IsNull() && !model.GatewayID.IsUnknown() {
-		respList, err := r.clientGw.ListGatewayMembers(ctx, model.GatewayID.ValueString(), nil)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-			return nil, diags
-		}
-
-		gwMembers = respList.Value
-
-	}
-
-	return gwMembers, nil
 }

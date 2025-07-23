@@ -11,6 +11,7 @@ import (
 
 type dataSourceConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnectionDetailsModel, CredentialDetails dsCredentialDetailsModel | rsCredentialDetailsModel] struct {
 	baseConnectionModel[ConnectionDetails, CredentialDetails]
+
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
