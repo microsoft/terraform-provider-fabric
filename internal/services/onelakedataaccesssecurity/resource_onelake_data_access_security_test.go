@@ -67,7 +67,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 }
 
 func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID())
+	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), testhelp.RandomUUID())
 
 	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateDataAccessRoles = fakeCreateOrUpdateOneLakeDataAccessSecurity()
 
@@ -80,6 +80,59 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": testhelp.RandomUUID(),
 					"item_id":      testhelp.RandomUUID(),
+					"value": []map[string]any{
+						{
+							"name": *entity.Value[0].Name,
+							"decision_rules": []map[string]any{
+								{
+									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
+									"permission": []map[string]any{
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
+											"attribute_value_included_in": []string{"*"},
+										},
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
+											"attribute_value_included_in": []string{"Read"},
+										},
+									},
+								},
+							},
+							"members": map[string]any{
+								"fabric_item_members": []map[string]any{
+									{
+										"item_access": []string{"ReadAll"},
+										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
+									},
+								},
+							},
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
+			),
+		},
+	}))
+}
+
+func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	lakehouse := testhelp.WellKnown()["LakehouseRS"].(map[string]any)
+	itemID := lakehouse["id"].(string)
+
+	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		{
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
 					"value": []map[string]any{
 						{
 							"name": *entity.Value[0].Name,

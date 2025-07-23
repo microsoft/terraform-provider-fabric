@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -81,7 +82,7 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 		return
 	}
 
-	// TODO: implement the read logic
+	r.get(ctx, &state)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -117,9 +118,8 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		return
 	}
 
-	// Copy the plan data to state and set the etag
 	state = plan
-	state.set(respCreate.Etag)
+	state.setEtag(respCreate.Etag)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -153,7 +153,7 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 	}
 
 	// Set the etag from the response
-	plan.set(respUpdate.Etag)
+	plan.setEtag(respUpdate.Etag)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -166,15 +166,20 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 	}
 }
 
-func (r *resourceOneLakeDataAccessSecurity) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceOneLakeDataAccessSecurity) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
 
-	resp.Diagnostics.AddError(
-		"Delete operation not supported",
-		"Delete operation is not supported for OneLake Data Access Security resource. Please remove the resource from your configuration instead.",
+	resp.Diagnostics.AddWarning(
+		"delete operation not supported",
+		fmt.Sprintf(
+			"Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.",
+			r.TypeInfo.Names,
+		),
 	)
+
+	resp.State.RemoveResource(ctx)
 
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",
@@ -203,4 +208,20 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *resourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+	respList, err := r.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+		diags.AddError(
+			common.ErrorReadHeader,
+			"Unable to find an item with 'item_id' "+model.ItemID.ValueString()+" and 'workspace_id': "+model.WorkspaceID.ValueString()+".",
+		)
+
+		return diags
+	}
+
+	model.set(respList)
+
+	return nil
 }

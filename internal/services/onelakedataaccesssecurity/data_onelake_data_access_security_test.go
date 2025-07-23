@@ -18,12 +18,13 @@ import (
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
+	workspaeID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID)
+	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaeID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID()))
+	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), testhelp.RandomUUID()))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID()))
+	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), testhelp.RandomUUID()))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no required attributes - item_id

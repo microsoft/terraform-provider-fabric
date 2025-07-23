@@ -93,7 +93,7 @@ func NewRandomOneLakeDataAccessSecurityClient() fabcore.DataAccessRole {
 	}
 }
 
-func NewRandomOneLakeDataAccessesSecurityClient(itemID string) fabcore.DataAccessRoles {
+func NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID string) fabcore.DataAccessRoles {
 	return fabcore.DataAccessRoles{
 		Value: []fabcore.DataAccessRole{
 			{
@@ -118,7 +118,7 @@ func NewRandomOneLakeDataAccessesSecurityClient(itemID string) fabcore.DataAcces
 					FabricItemMembers: []fabcore.FabricItemMember{
 						{
 							ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-							SourcePath: to.Ptr("cfafbeb1-8037-4d0c-896e-a46fb27ff222/25bac802-080d-4f73-8a42-1b406eb1fceb"),
+							SourcePath: to.Ptr(workspaceID + "/" + itemID),
 						},
 					},
 				},

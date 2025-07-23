@@ -67,6 +67,10 @@ type MicrosoftEntraMember struct {
 	TenantID   types.String     `tfsdk:"tenant_id"`
 }
 
+func (to *resourceOneLakeDataAccessSecurityModel) set(from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) {
+	to.Etag.Set(*from.Etag)
+}
+
 func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
 	slice := make([]*dataAccessRole, 0, len(from.Value))
 
@@ -222,7 +226,7 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 	return nil
 }
 
-func (to *resourceOneLakeDataAccessSecurityModel) set(from *string) {
+func (to *resourceOneLakeDataAccessSecurityModel) setEtag(from *string) {
 	to.Etag = supertypes.NewStringValue(*from)
 }
 
@@ -280,14 +284,17 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) set(ctx context.Contex
 						permissionScope.AttributeValueIncludedIn = append(permissionScope.AttributeValueIncludedIn, attr.ValueString())
 					}
 				}
+
 				decisionRule.Permission = append(decisionRule.Permission, permissionScope)
 			}
+
 			role.DecisionRules = append(role.DecisionRules, decisionRule)
 		}
 
 		if diags := setMembers(ctx, role, item); diags.HasError() {
 			return diags
 		}
+
 		values = append(values, *role)
 	}
 

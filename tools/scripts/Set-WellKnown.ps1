@@ -902,6 +902,19 @@ function Set-FabricFolder {
   return $result
 }
 
+function Set-LakehouseResourceItem {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName
+  )
+  $displayNameTemp = "${DisplayName}_$($itemNaming['Lakehouse'])"
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+  $wellKnown['LakehouseRS'] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
 
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
@@ -1117,6 +1130,9 @@ foreach ($itemType in $itemTypes) {
     description = $item.description
   }
 }
+
+#Set Lakehouse for WorkspaceRS
+Set-LakehouseResourceItem -DisplayName $displayName
 
 # Create KQLDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['KQLDatabase'])"
