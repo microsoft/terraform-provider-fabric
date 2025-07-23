@@ -31,6 +31,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"Variables.json"},
+		Paths: []string{"variables.json"},
 	},
 }

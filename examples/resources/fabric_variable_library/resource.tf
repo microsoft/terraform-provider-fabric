@@ -13,7 +13,7 @@ resource "fabric_variable_library" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "content.json" = {
-      source = "${path.module}/content.json"
+      source = "${path.module}/variablelibrary-content.json"
     }
   }
 }
@@ -26,7 +26,7 @@ resource "fabric_variable_library" "example_definition_update" {
   format       = "Default"
   definition = {
     "content.json" = {
-      source = "${path.module}/content.json"
+      source = "${path.module}/variablelibrary-content.json"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"
