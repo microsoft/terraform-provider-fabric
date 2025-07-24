@@ -341,6 +341,20 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 					)),
 				},
 			},
+			"tokens_delimiter": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf("The delimiter for the tokens in the source content. Possible values: %s. Default: `%s`",
+					utils.ConvertStringSlicesToString(transforms.PossibleTokensDelimiterValues(), true, true),
+					transforms.TokensDelimiterCurlyBraces,
+				),
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(transforms.TokensDelimiterCurlyBraces),
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("tokens")),
+					stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("parameters")),
+					stringvalidator.OneOf(transforms.PossibleTokensDelimiterValues()...),
+				},
+			},
 			"source_content_sha256": schema.StringAttribute{
 				MarkdownDescription: "SHA256 of source's content of definition part.",
 				Computed:            true,
@@ -350,6 +364,7 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 						path.MatchRelative().AtParent().AtName("processing_mode"),
 						path.MatchRelative().AtParent().AtName("tokens"),
 						path.MatchRelative().AtParent().AtName("parameters"),
+						path.MatchRelative().AtParent().AtName("tokens_delimiter"),
 					),
 				},
 			},

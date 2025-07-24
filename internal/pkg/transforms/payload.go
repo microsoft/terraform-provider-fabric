@@ -60,6 +60,22 @@ func PossibleProcessingModeValues() []string {
 	}
 }
 
+const (
+	TokensDelimiterCurlyBraces string = "{{}}"
+	TokensDelimiterAngles      string = "<<>>"
+	TokensDelimiterAt          string = "@{}@"
+	TokensDelimiterUnderscore  string = "____"
+)
+
+func PossibleTokensDelimiterValues() []string {
+	return []string{
+		TokensDelimiterCurlyBraces,
+		TokensDelimiterAngles,
+		TokensDelimiterAt,
+		TokensDelimiterUnderscore,
+	}
+}
+
 // getTmplFuncs initializes and returns template functions from the sprout library.
 func getTmplFuncs() (template.FuncMap, error) {
 	handler := sprout.New()
@@ -101,6 +117,7 @@ func SourceFileToPayload(
 	processingMode string,
 	tokens map[string]string,
 	parameters []*params.ParametersModel,
+	tokensDelimiter string,
 ) (string, string, diag.Diagnostics) { //revive:disable-line:confusing-results
 	var diags diag.Diagnostics
 
@@ -123,7 +140,16 @@ func SourceFileToPayload(
 				return "", "", diags
 			}
 
-			tmpl, err := template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
+			var tmpl *template.Template
+
+			if tokensDelimiter == TokensDelimiterCurlyBraces {
+				tmpl, err = template.New("tmpl").Funcs(tmplFuncs).ParseFiles(srcPath)
+			} else {
+				leftDelim := tokensDelimiter[:2]
+				rightDelim := tokensDelimiter[len(tokensDelimiter)-2:]
+				tmpl, err = template.New("tmpl").Delims(leftDelim, rightDelim).Funcs(tmplFuncs).ParseFiles(srcPath)
+			}
+
 			if err != nil {
 				diags.AddError(common.ErrorFileReadHeader, err.Error())
 
@@ -256,7 +282,9 @@ func processJSONPathReplacement(contentStr string, param *params.ParametersModel
 	}
 
 	var contentJSON any
-	if err := json.Unmarshal([]byte(contentStr), &contentJSON); err != nil {
+
+	err = json.Unmarshal([]byte(contentStr), &contentJSON)
+	if err != nil {
 		diags.AddError("JSON unmarshal", err.Error())
 
 		return "", diags
