@@ -705,9 +705,7 @@ function Set-FabricConnection {
         connectionEncryption = "NotEncrypted"
         skipTestConnection   = $false
         credentials          = @{
-          credentialType = "Basic"
-          username       = "admin"
-          password       = "12345"
+          credentialType = "Anonymous"
         }
       }
     }
@@ -716,6 +714,7 @@ function Set-FabricConnection {
     if ($ConnectivityType -eq "VirtualNetworkGateway") {
       if (!$GatewayId) {
         Write-Log -Message "GatewayId is required for VirtualNetworkGateway connections" -Level 'ERROR'
+        return
       }
       $payload['gatewayId'] = $GatewayId
     }
