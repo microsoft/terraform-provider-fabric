@@ -1135,6 +1135,48 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
+function Set-LakehouseResourceItem {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName
+  )
+  $displayNameTemp = "${DisplayName}_$($itemNaming['Lakehouse'])"
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+  $wellKnown['LakehouseRS'] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+function Set-OneLakeDataAccessSecurityItem {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceID,
+
+    [Parameter(Mandatory = $true)]
+    [string]$LakehouseID
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$LakehouseID/dataAccessRoles"
+
+  $result = $results.Response.value
+  if (!$result) {
+    Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Turn this feature on in the Fabric Admin Portal." -Level 'WARN'
+    return
+  }
+
+  Write-Log -Message "Assigning OneLake Data Access Security for Lakehouse: $($LakehouseID)"
+  $wellKnown['OneLakeDataAccessSecurity'] = @{
+    value = $result
+  }
+}
+
+#Set Lakehouse for WorkspaceRS
+Set-LakehouseResourceItem -DisplayName $displayName
+
+Set-OneLakeDataAccessSecurityItem -WorkspaceID $wellKnown['WorkspaceRS'].id -LakehouseID $wellKnown['LakehouseRS'].id
+
 # Create MirroredDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MirroredDatabase'])"
 $definition = @{
