@@ -1175,8 +1175,6 @@ function Set-OneLakeDataAccessSecurityItem {
 #Set Lakehouse for WorkspaceRS
 Set-LakehouseResourceItem -DisplayName $displayName
 
-Set-OneLakeDataAccessSecurityItem -WorkspaceID $wellKnown['WorkspaceRS'].id -LakehouseID $wellKnown['LakehouseRS'].id
-
 # Create MirroredDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MirroredDatabase'])"
 $definition = @{
@@ -1688,6 +1686,8 @@ $wellKnown['Subfolder'] = @{
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
 }
+
+Set-OneLakeDataAccessSecurityItem -WorkspaceID $wellKnown['WorkspaceDS'].id -LakehouseID $wellKnown['Lakehouse'].id
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
