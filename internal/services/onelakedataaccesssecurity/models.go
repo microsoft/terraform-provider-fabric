@@ -7,7 +7,6 @@ import (
 	"context"
 
 	//revive:disable-line:import-alias-naming
-	//revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"

@@ -83,6 +83,9 @@ func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 	lakehouse := testhelp.WellKnown()["Lakehouse"].(map[string]any)
 	itemID := lakehouse["id"].(string)
 
+	oneLakeDataAccessSecurity := testhelp.WellKnown()["OneLakeDataAccessSecurity"].(map[string]any)
+	oneLakeDataAccessSecurityName := oneLakeDataAccessSecurity["value"].([]any)[0].(map[string]any)["name"].(string)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Read - not found
 		{
@@ -105,7 +108,7 @@ func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.name"),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "value.0.name", oneLakeDataAccessSecurityName),
 			),
 		},
 	}))
