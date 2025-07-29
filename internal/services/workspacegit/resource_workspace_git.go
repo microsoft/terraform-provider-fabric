@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -19,7 +20,10 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ resource.ResourceWithConfigure = (*resourceWorkspaceGit)(nil)
+var (
+	_ resource.ResourceWithConfigure      = (*resourceWorkspaceGit)(nil)
+	_ resource.ResourceWithValidateConfig = (*resourceWorkspaceGit)(nil)
+)
 
 type resourceWorkspaceGit struct {
 	pConfigData *pconfig.ProviderData
@@ -62,6 +66,50 @@ func (r *resourceWorkspaceGit) Configure(_ context.Context, req resource.Configu
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
+	}
+}
+
+func (r *resourceWorkspaceGit) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var config resourceWorkspaceGitModel
+
+	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	gitProviderDetails, diags := config.GitProviderDetails.Get(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if gitProviderDetails.GitProviderType.ValueString() == string(fabcore.GitProviderTypeGitHub) {
+		gitCredentials, diags := config.GitCredentials.Get(ctx)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if gitCredentials == nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("git_credentials"),
+				common.ErrorAttConfigMissing,
+				fmt.Sprintf("If git_provider_details.git_provider_type attribute is set and the value is '%s' this attribute is REQUIRED",
+					string(fabcore.GitProviderTypeGitHub),
+				),
+			)
+
+			return
+		}
+
+		if !gitCredentials.Source.IsNull() && !gitCredentials.Source.IsUnknown() &&
+			gitCredentials.Source.ValueString() != string(fabcore.GitCredentialsSourceConfiguredConnection) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("git_credentials").AtName("source"),
+				common.ErrorAttComboInvalid,
+				fmt.Sprintf("If git_provider_details.git_provider_type attribute is set to '%s', the git_credentials.source attribute must either be unset or set to '%s'",
+					string(fabcore.GitProviderTypeGitHub),
+					string(fabcore.GitCredentialsSourceConfiguredConnection),
+				),
+			)
+		}
 	}
 }
 

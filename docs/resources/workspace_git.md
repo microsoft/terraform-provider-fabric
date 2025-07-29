@@ -4,7 +4,7 @@ page_title: "fabric_workspace_git Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The Workspace Git resource allows you to manage a Fabric Workspace Git https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration.
-  -> This resource supports Service Principal authentication.
+  -> This resource supports Service Principal authentication only when git_credentials.connection_id is configured.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Workspace Git resource allows you to manage a Fabric [Workspace Git](https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration).
 
--> This resource supports Service Principal authentication.
+-> This resource supports Service Principal authentication only when git_credentials.connection_id is configured.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -61,7 +61,7 @@ resource "fabric_workspace_git" "github" {
 
 ### Optional
 
-- `git_credentials` (Attributes) The Git credentials details. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--git_credentials))
+- `git_credentials` (Attributes) The Git credentials details. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--git_credentials))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -93,11 +93,8 @@ Optional:
 
 Optional:
 
-- `connection_id` (String) The connection ID. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**.
-
-Read-Only:
-
-- `source` (String) The Git credentials source. Value must be one of : `Automatic`, `ConfiguredConnection`, `None`.
+- `connection_id` (String) The connection ID. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `ConfiguredConnection` this attribute is **REQUIRED**. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `Automatic` this attribute is **NULL**.
+- `source` (String) The Git credentials source. If the value of `git_provider_details.git_provider_type` attribute is `GitHub` this attribute MUST be `ConfiguredConnection`. If the value of `git_provider_details.git_provider_type` attribute is `AzureDevOps` this attribute MUST be one of `ConfiguredConnection`, `Automatic`, and it defaults to `Automatic`. Value must be one of : `Automatic`, `ConfiguredConnection`, `None`.
 
 <a id="nestedatt--timeouts"></a>
 

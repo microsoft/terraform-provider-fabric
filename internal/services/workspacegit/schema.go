@@ -286,10 +286,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					Computed: true,
 					Optional: true,
 					Validators: []validator.Object{
-						superobjectvalidator.NullIfAttributeIsOneOf(
-							gitProviderTypeAttPath,
-							[]attr.Value{gitProviderTypeAzureDevOps},
-						),
 						superobjectvalidator.RequireIfAttributeIsOneOf(
 							gitProviderTypeAttPath,
 							[]attr.Value{gitProviderTypeGitHub},
@@ -302,16 +298,18 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Attributes: map[string]superschema.Attribute{
 					"source": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The Git credentials source.",
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitCredentialsSourceValues(), true)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
+							MarkdownDescription: "The Git credentials source. If the value of `git_provider_details.git_provider_type` attribute is `GitHub` this attribute MUST be `ConfiguredConnection`. If the value of `git_provider_details.git_provider_type` attribute is `AzureDevOps` this attribute MUST be one of `ConfiguredConnection`, `Automatic`, and it defaults to `Automatic`.",
+							Computed:            true,
+							Optional:            true,
 						},
 						DataSource: &schemaD.StringAttribute{
-							Computed: true,
+							MarkdownDescription: "The Git credentials source.",
+							Computed:            true,
 						},
 					},
 					"connection_id": superschema.SuperStringAttribute{
@@ -323,13 +321,17 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							Computed: true,
 							Optional: true,
 							Validators: []validator.String{
-								superstringvalidator.NullIfAttributeIsOneOf(
-									gitProviderTypeAttPath,
-									[]attr.Value{gitProviderTypeAzureDevOps},
-								),
 								superstringvalidator.RequireIfAttributeIsOneOf(
 									gitProviderTypeAttPath,
 									[]attr.Value{gitProviderTypeGitHub},
+								),
+								superstringvalidator.RequireIfAttributeIsOneOf(
+									path.MatchRoot("git_credentials").AtName("source"),
+									[]attr.Value{types.StringValue(string(fabcore.GitCredentialsSourceConfiguredConnection))},
+								),
+								superstringvalidator.NullIfAttributeIsOneOf(
+									path.MatchRoot("git_credentials").AtName("source"),
+									[]attr.Value{types.StringValue(string(fabcore.GitCredentialsSourceAutomatic))},
 								),
 							},
 						},
