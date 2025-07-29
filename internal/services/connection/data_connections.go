@@ -123,7 +123,8 @@ func (d *dataSourceConnections) Read(ctx context.Context, req datasource.ReadReq
 }
 
 func (d *dataSourceConnections) list(ctx context.Context, model *dataSourceConnectionsModel) diag.Diagnostics {
-	// when getting connections, we support only a partial list of connections, should we return all?
+	// when listing connections, we support only a partial list of connectivity types, should we return all?
+	// if so, need to change schema to allow null display names
 	respList, err := d.client.ListConnections(ctx, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags

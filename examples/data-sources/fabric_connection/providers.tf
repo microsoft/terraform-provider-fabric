@@ -3,9 +3,11 @@ terraform {
   required_providers {
     fabric = {
       source  = "microsoft/fabric"
-      version = "0.0.0" # Check for the latest version on the Terraform Registry
+      version = "1.3.0" # Check for the latest version on the Terraform Registry
     }
   }
 }
 
-provider "fabric" {}
+provider "fabric" {
+  preview = true
+}
