@@ -56,6 +56,10 @@ linters:
           disabled: true
         - name: confusing-naming
           disabled: true
+        - name: enforce-switch-style
+          disabled: false
+          exclude:
+            - "**/*_test.go"
     varnamelen:
       min-name-length: 1
     wsl_v5:
