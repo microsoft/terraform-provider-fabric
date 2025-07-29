@@ -142,6 +142,7 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 		if gitGitCredentials != nil && !gitGitCredentials.Source.IsNull() && !gitGitCredentials.Source.IsUnknown() {
 			gitGitCredentialsSource = (fabcore.GitCredentialsSource)(gitGitCredentials.Source.ValueString())
 		}
+
 		switch gitGitCredentialsSource {
 		case fabcore.GitCredentialsSourceAutomatic:
 			reqGitCredentials = &fabcore.AutomaticGitCredentials{
