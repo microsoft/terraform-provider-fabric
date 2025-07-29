@@ -39,6 +39,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 		}
 	}
 
+	// will support all when on prem GW connections are supported
 	possibleConnectionEncryptionValues := []string{
 		string(fabcore.ConnectionEncryptionEncrypted),
 		string(fabcore.ConnectionEncryptionNotEncrypted),
@@ -324,7 +325,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
 							Validators: []validator.String{
-								// note to self: which one will need authentication outside of the provider?
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), true)...),
 							},
 						},
