@@ -1142,33 +1142,11 @@ function Set-LakehouseResourceItem {
   )
   $displayNameTemp = "${DisplayName}_$($itemNaming['Lakehouse'])"
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   $wellKnown['LakehouseRS'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description
-  }
-}
-
-function Set-OneLakeDataAccessSecurityItem {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$WorkspaceID,
-
-    [Parameter(Mandatory = $true)]
-    [string]$LakehouseID
-  )
-
-  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$LakehouseID/dataAccessRoles"
-
-  $result = $results.Response.value
-  if (!$result) {
-    Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Turn this feature on in the Fabric Admin Portal." -Level 'WARN'
-    return
-  }
-
-  Write-Log -Message "Assigning OneLake Data Access Security for Lakehouse: $($LakehouseID)"
-  $wellKnown['OneLakeDataAccessSecurity'] = @{
-    value = $result
   }
 }
 
@@ -1320,6 +1298,7 @@ $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['W
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
   Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 else {
@@ -1686,8 +1665,6 @@ $wellKnown['Subfolder'] = @{
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
 }
-
-Set-OneLakeDataAccessSecurityItem -WorkspaceID $wellKnown['WorkspaceDS'].id -LakehouseID $wellKnown['Lakehouse'].id
 
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
