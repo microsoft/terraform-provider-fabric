@@ -19,16 +19,18 @@ import (
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_WorkspaceDataSource(t *testing.T) {
-	entity := fakes.NewRandomWorkspaceInfo()
-	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal)
-	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace)
+func TestUnit_WorkspaceDataSource_Capacity(t *testing.T) {
+	capacity := fakes.NewRandomCapacity()
+	entity := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, nil)
+	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, nil)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(entityTypePersonal)
 	fakes.FakeServer.Upsert(entityTypeAdmin)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -91,6 +93,70 @@ func TestUnit_WorkspaceDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorWorkspaceNotSupportedHeader),
 		},
+		// read by id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": *entity.ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+			),
+		},
+		// read by id - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+
+		// read by name
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": *entity.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+			),
+		},
+		// read by name - not found
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+	}))
+}
+
+func TestUnit_WorkspaceDataSource_NoCapacity(t *testing.T) {
+	entity := fakes.NewRandomWorkspaceInfo(nil)
+	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, nil)
+	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, nil)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(nil))
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(entityTypePersonal)
+	fakes.FakeServer.Upsert(entityTypeAdmin)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(nil))
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// read by id
 		{
 			Config: at.CompileConfig(
