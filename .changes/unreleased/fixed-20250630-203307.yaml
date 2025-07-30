@@ -1,0 +1,6 @@
+---
+kind: fixed
+body: Check Capacity state and throw error if state is not Active in the `fabric_workspace` resource and data-source.
+time: 2025-06-30T20:33:07.4528555-07:00
+custom:
+  Issue: "141"

@@ -233,6 +233,15 @@ func (to *requestUpdateGitCredentials) set(ctx context.Context, from resourceWor
 		reqUpdate = &fabcore.UpdateGitCredentialsToNoneRequest{
 			Source: azto.Ptr(fabcore.GitCredentialsSourceNone),
 		}
+	default:
+		var diags diag.Diagnostics
+
+		diags.AddError(
+			"Unsupported Git credentials source",
+			fmt.Sprintf("The Git credentials source '%s' is not supported.", gitCredentialsSource),
+		)
+
+		return diags
 	}
 
 	to.UpdateGitCredentialsRequestClassification = reqUpdate

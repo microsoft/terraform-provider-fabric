@@ -30,9 +30,10 @@ var (
 )
 
 type resourceWorkspace struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.WorkspacesClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData    *pconfig.ProviderData
+	client         *fabcore.WorkspacesClient
+	clientCapacity *fabcore.CapacitiesClient
+	TypeInfo       tftypeinfo.TFTypeInfo
 }
 
 func NewResourceWorkspace() resource.Resource {
@@ -66,6 +67,7 @@ func (r *resourceWorkspace) Configure(_ context.Context, req resource.ConfigureR
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
+	r.clientCapacity = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCapacitiesClient()
 }
 
 func (r *resourceWorkspace) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -484,7 +486,12 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			return diags
 
 		case fabcore.CapacityAssignmentProgressCompleted:
-			return model.set(ctx, respGet.WorkspaceInfo)
+			diags = model.set(ctx, respGet.WorkspaceInfo)
+			if diags.HasError() {
+				return diags
+			}
+
+			return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018
