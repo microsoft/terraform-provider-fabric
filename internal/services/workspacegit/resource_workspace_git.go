@@ -21,8 +21,6 @@ import (
 
 var _ resource.ResourceWithConfigure = (*resourceWorkspaceGit)(nil)
 
-// _ resource.ResourceWithValidateConfig = (*resourceWorkspaceGit)(nil)
-
 type resourceWorkspaceGit struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.GitClient
@@ -66,50 +64,6 @@ func (r *resourceWorkspaceGit) Configure(_ context.Context, req resource.Configu
 		return
 	}
 }
-
-// func (r *resourceWorkspaceGit) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-// 	var config resourceWorkspaceGitModel
-
-// 	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
-// 		return
-// 	}
-
-// 	gitProviderDetails, diags := config.GitProviderDetails.Get(ctx)
-// 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-// 		return
-// 	}
-
-// 	if gitProviderDetails.GitProviderType.ValueString() == string(fabcore.GitProviderTypeGitHub) {
-// 		gitCredentials, diags := config.GitCredentials.Get(ctx)
-// 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-// 			return
-// 		}
-
-// 		if gitCredentials == nil {
-// 			resp.Diagnostics.AddAttributeError(
-// 				path.Root("git_credentials"),
-// 				common.ErrorAttConfigMissing,
-// 				fmt.Sprintf("If git_provider_details.git_provider_type attribute is set and the value is '%s' this attribute is REQUIRED",
-// 					string(fabcore.GitProviderTypeGitHub),
-// 				),
-// 			)
-
-// 			return
-// 		}
-
-// 		if !gitCredentials.Source.IsNull() && !gitCredentials.Source.IsUnknown() &&
-// 			gitCredentials.Source.ValueString() != string(fabcore.GitCredentialsSourceConfiguredConnection) {
-// 			resp.Diagnostics.AddAttributeError(
-// 				path.Root("git_credentials").AtName("source"),
-// 				common.ErrorAttComboInvalid,
-// 				fmt.Sprintf("If git_provider_details.git_provider_type attribute is set to '%s', the git_credentials.source attribute must either be unset or set to '%s'",
-// 					string(fabcore.GitProviderTypeGitHub),
-// 					string(fabcore.GitCredentialsSourceConfiguredConnection),
-// 				),
-// 			)
-// 		}
-// 	}
-// }
 
 func (r *resourceWorkspaceGit) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
@@ -278,12 +232,16 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate, nil)
+	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate.UpdateGitCredentialsRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if resp.Diagnostics.Append(plan.setCredentials(ctx, respUpdate.GitCredentialsConfigurationResponseClassification)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 

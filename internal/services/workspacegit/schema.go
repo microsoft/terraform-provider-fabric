@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
-	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -228,7 +227,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							MarkdownDescription: "The GitHub owner name.",
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
 							Optional: true,
 							Validators: []validator.String{
 								stringvalidator.LengthAtMost(100),
@@ -299,14 +297,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					MarkdownDescription: "The Git credentials details.",
 				},
 				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-					Optional: true,
-					Validators: []validator.Object{
-						superobjectvalidator.RequireIfAttributeIsOneOf(
-							gitProviderTypeAttPath,
-							[]attr.Value{gitProviderTypeGitHub},
-						),
-					},
+					Required: true,
 				},
 				DataSource: &schemaD.SingleNestedAttribute{
 					Computed: true,
@@ -314,8 +305,8 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Attributes: map[string]superschema.Attribute{
 					"source": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The Git credentials source.",
 							Validators: []validator.String{
-								// stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitCredentialsSourceValues(), true)...),
 								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
 									gitProviderTypeAttPath,
 									[]attr.Value{gitProviderTypeGitHub},
@@ -330,17 +321,9 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
-							// Default:  stringdefault.StaticString("aaa"),
-							// PlanModifiers: []planmodifier.String{
-							// 	superstringplanmodifier.SetDefaultFunc(func(_ context.Context, req planmodifier.StringRequest, resp *superstringplanmodifier.DefaultFuncResponse) {
-							// 		_ = req
-							// 		resp.Value = "expectedValue"
-							// 	}),
-							// },
 						},
 						DataSource: &schemaD.StringAttribute{
-							MarkdownDescription: "The Git credentials source.",
-							Computed:            true,
+							Computed: true,
 						},
 					},
 					"connection_id": superschema.SuperStringAttribute{
@@ -349,13 +332,8 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
 							Optional: true,
 							Validators: []validator.String{
-								superstringvalidator.RequireIfAttributeIsOneOf(
-									gitProviderTypeAttPath,
-									[]attr.Value{gitProviderTypeGitHub},
-								),
 								superstringvalidator.RequireIfAttributeIsOneOf(
 									path.MatchRoot("git_credentials").AtName("source"),
 									[]attr.Value{types.StringValue(string(fabcore.GitCredentialsSourceConfiguredConnection))},

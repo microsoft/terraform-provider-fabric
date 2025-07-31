@@ -1,6 +1,6 @@
 kind: breaking
 body: |
-  `git_credentials.source` attribute is now *REQUIRED* for `fabric_workspace_git`
+  `git_credentials` and `git_credentials.source` attributes are now *REQUIRED* for `fabric_workspace_git`
 
   To keep the same behavior for Azure DevOps integration as before, use the `Automatic` for the `source`:
   ```terraform
