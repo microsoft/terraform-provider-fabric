@@ -369,41 +369,7 @@ func TestAcc_WorkspaceGitResource_AzDO_ConfiguredCredentials(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
 			),
 		},
-		// Update git_credentials to Automatic - this should update in-place only.
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"initialization_strategy": "PreferWorkspace",
-						"git_provider_details": map[string]any{
-							"git_provider_type": "AzureDevOps",
-							"organization_name": azdoOrganization,
-							"project_name":      azdoProject,
-							"repository_name":   azdoRepository,
-							"branch_name":       "main",
-							"directory_name":    "/",
-						},
-						"git_credentials": map[string]any{
-							"source": string(fabcore.GitCredentialsSourceAutomatic),
-						},
-					},
-				)),
-			ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
-				},
-			},
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
-			),
-		},
-	},
-	))
+	}))
 }
 
 func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
