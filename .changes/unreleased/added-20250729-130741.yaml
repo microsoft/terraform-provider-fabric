@@ -1,5 +1,5 @@
 kind: added
-body: '* Added `ConfiguredConnection` credential support to the `fabric_workspace_git` Azure DevOps provider.'
+body: "Added `ConfiguredConnection` credential support to the `fabric_workspace_git` Azure DevOps provider."
 time: 2025-07-29T13:07:41.047994826Z
 custom:
-    Issue: "558"
+  Issue: "558"

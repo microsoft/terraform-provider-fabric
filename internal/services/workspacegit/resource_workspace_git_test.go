@@ -180,6 +180,9 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testHelperGitProviderDetails,
+					"git_credentials": map[string]any{
+						"source": string(fabcore.GitCredentialsSourceAutomatic),
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -195,6 +198,9 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferRemote",
 					"git_provider_details":    testHelperGitProviderDetails,
+					"git_credentials": map[string]any{
+						"source": string(fabcore.GitCredentialsSourceAutomatic),
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -237,6 +243,9 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"repository_name":   azdoRepository,
 							"branch_name":       "main",
 							"directory_name":    "/",
+						},
+						"git_credentials": map[string]any{
+							"source": string(fabcore.GitCredentialsSourceAutomatic),
 						},
 					},
 				)),
@@ -447,7 +456,7 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute git_credentials.source`),
 		},
 		// ok - PreferWorkspace
 		{
@@ -459,6 +468,7 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testHelperGitProviderDetails,
 					"git_credentials": map[string]any{
+						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 						"connection_id": *gitCredentialsResponse.ConnectionID,
 					},
 				},
@@ -477,6 +487,7 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"initialization_strategy": "PreferRemote",
 					"git_provider_details":    testHelperGitProviderDetails,
 					"git_credentials": map[string]any{
+						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 						"connection_id": *gitCredentialsResponse.ConnectionID,
 					},
 				},
@@ -537,6 +548,7 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 							"directory_name":    "/",
 						},
 						"git_credentials": map[string]any{
+							"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 							"connection_id": ghConnectionID,
 						},
 					},

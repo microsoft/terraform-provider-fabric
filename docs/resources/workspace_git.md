@@ -19,7 +19,24 @@ The Workspace Git resource allows you to manage a Fabric [Workspace Git](https:/
 ## Example Usage
 
 ```terraform
-# Example of Azure DevOps integration
+# Example of Azure DevOps integration with automatic credentials (no SPN support, only User identity is supported)
+resource "fabric_workspace_git" "azdo_automatic" {
+  workspace_id            = "00000000-0000-0000-0000-000000000000"
+  initialization_strategy = "PreferWorkspace"
+  git_provider_details = {
+    git_provider_type = "AzureDevOps"
+    organization_name = "MyExampleOrg"
+    project_name      = "MyExampleProject"
+    repository_name   = "ExampleRepo"
+    branch_name       = "ExampleBranch"
+    directory_name    = "/ExampleDirectory"
+  }
+  git_credentials = {
+    source = "Automatic"
+  }
+}
+
+# Example of Azure DevOps integration with configured credentials
 resource "fabric_workspace_git" "azdo" {
   workspace_id            = "00000000-0000-0000-0000-000000000000"
   initialization_strategy = "PreferWorkspace"
@@ -31,9 +48,13 @@ resource "fabric_workspace_git" "azdo" {
     branch_name       = "ExampleBranch"
     directory_name    = "/ExampleDirectory"
   }
+  git_credentials = {
+    source        = "ConfiguredConnection"
+    connection_id = "11111111-1111-1111-1111-111111111111"
+  }
 }
 
-# Example of GitHub integration
+# Example of GitHub integration with configured credentials
 resource "fabric_workspace_git" "github" {
   workspace_id            = "00000000-0000-0000-0000-000000000000"
   initialization_strategy = "PreferWorkspace"
@@ -45,6 +66,7 @@ resource "fabric_workspace_git" "github" {
     directory_name    = "/ExampleDirectory"
   }
   git_credentials = {
+    source        = "ConfiguredConnection"
     connection_id = "11111111-1111-1111-1111-111111111111"
   }
 }
@@ -91,10 +113,17 @@ Optional:
 
 ### Nested Schema for `git_credentials`
 
+Required:
+
+- `source` (String) .
+
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>.
+
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `AzureDevOps` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>- `"Automatic"` - Automatic<br>.
+
 Optional:
 
 - `connection_id` (String) The connection ID. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `ConfiguredConnection` this attribute is **REQUIRED**. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `Automatic` this attribute is **NULL**.
-- `source` (String) The Git credentials source. If the value of `git_provider_details.git_provider_type` attribute is `GitHub` this attribute MUST be `ConfiguredConnection`. If the value of `git_provider_details.git_provider_type` attribute is `AzureDevOps` this attribute MUST be one of `ConfiguredConnection`, `Automatic`, and it defaults to `Automatic`. Value must be one of : `Automatic`, `ConfiguredConnection`, `None`.
 
 <a id="nestedatt--timeouts"></a>
 

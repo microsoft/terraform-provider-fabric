@@ -32,6 +32,22 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 	gitProviderTypeAzureDevOps := types.StringValue(string(fabcore.GitProviderTypeAzureDevOps))
 	gitProviderTypeGitHub := types.StringValue(string(fabcore.GitProviderTypeGitHub))
 	possibleInitializationStrategyValues := utils.RemoveSliceByValue(fabcore.PossibleInitializationStrategyValues(), fabcore.InitializationStrategyNone)
+	allowedGitCredentialSourceValuesGitHub := []superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+		{
+			Description: string(fabcore.GitCredentialsSourceConfiguredConnection),
+			Value:       string(fabcore.GitCredentialsSourceConfiguredConnection),
+		},
+	}
+	allowedGitCredentialSourceValuesAzureDevOps := []superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+		{
+			Description: string(fabcore.GitCredentialsSourceConfiguredConnection),
+			Value:       string(fabcore.GitCredentialsSourceConfiguredConnection),
+		},
+		{
+			Description: string(fabcore.GitCredentialsSourceAutomatic),
+			Value:       string(fabcore.GitCredentialsSourceAutomatic),
+		},
+	}
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
@@ -299,13 +315,28 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					"source": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitCredentialsSourceValues(), true)...),
+								// stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitCredentialsSourceValues(), true)...),
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									gitProviderTypeAttPath,
+									[]attr.Value{gitProviderTypeGitHub},
+									allowedGitCredentialSourceValuesGitHub...,
+								),
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									gitProviderTypeAttPath,
+									[]attr.Value{gitProviderTypeAzureDevOps},
+									allowedGitCredentialSourceValuesAzureDevOps...,
+								),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
-							MarkdownDescription: "The Git credentials source. If the value of `git_provider_details.git_provider_type` attribute is `GitHub` this attribute MUST be `ConfiguredConnection`. If the value of `git_provider_details.git_provider_type` attribute is `AzureDevOps` this attribute MUST be one of `ConfiguredConnection`, `Automatic`, and it defaults to `Automatic`.",
-							Computed:            true,
-							Optional:            true,
+							Required: true,
+							// Default:  stringdefault.StaticString("aaa"),
+							// PlanModifiers: []planmodifier.String{
+							// 	superstringplanmodifier.SetDefaultFunc(func(_ context.Context, req planmodifier.StringRequest, resp *superstringplanmodifier.DefaultFuncResponse) {
+							// 		_ = req
+							// 		resp.Value = "expectedValue"
+							// 	}),
+							// },
 						},
 						DataSource: &schemaD.StringAttribute{
 							MarkdownDescription: "The Git credentials source.",

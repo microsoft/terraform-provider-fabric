@@ -58,7 +58,11 @@ Optional:
 Read-Only:
 
 - `connection_id` (String) The connection ID.
-- `source` (String) The Git credentials source. Value must be one of : `Automatic`, `ConfiguredConnection`, `None`.
+- `source` (String) The Git credentials source.
+
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>.
+
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `AzureDevOps` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>- `"Automatic"` - Automatic<br>.
 
 <a id="nestedatt--git_provider_details"></a>
 
