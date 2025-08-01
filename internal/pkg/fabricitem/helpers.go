@@ -106,9 +106,9 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 	}
 
 	if typeInfo.IsSPNSupported {
-		md += SPNSupportedResource
+		md += SPNSupportedEphemeralResource
 	} else {
-		md += SPNNotSupportedResource
+		md += SPNNotSupportedEphemeralResource
 	}
 
 	if typeInfo.IsPreview {
