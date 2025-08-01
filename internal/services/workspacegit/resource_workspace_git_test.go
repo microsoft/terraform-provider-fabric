@@ -328,6 +328,10 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 }
 
 func TestAcc_WorkspaceGitResource_AzDO_ConfiguredCredentials(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
