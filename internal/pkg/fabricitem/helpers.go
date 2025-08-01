@@ -36,7 +36,11 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 	}
 
 	if typeInfo.IsSPNSupported {
-		md += SPNSupportedResource
+		if typeInfo.Type == "workspace_git" {
+			md += "\n\n-> This resource supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\" and `git_credentials.source` is \"ConfiguredConnection\"."
+		} else {
+			md += SPNSupportedResource
+		}
 	} else {
 		md += SPNNotSupportedResource
 	}
@@ -67,7 +71,11 @@ func NewDataSourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural boo
 	}
 
 	if typeInfo.IsSPNSupported {
-		md += SPNSupportedDataSource
+		if typeInfo.Type == "workspace_git" {
+			md += "\n\n-> This data-source supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\" and `git_credentials.source` is \"ConfiguredConnection\"."
+		} else {
+			md += SPNSupportedDataSource
+		}
 	} else {
 		md += SPNNotSupportedDataSource
 	}
@@ -98,9 +106,9 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 	}
 
 	if typeInfo.IsSPNSupported {
-		md += SPNSupportedResource
+		md += SPNSupportedEphemeralResource
 	} else {
-		md += SPNNotSupportedResource
+		md += SPNNotSupportedEphemeralResource
 	}
 
 	if typeInfo.IsPreview {
