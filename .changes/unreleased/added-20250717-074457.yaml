@@ -1,6 +1,0 @@
-kind: added
-body: |
-  Supported semantic model definition paths: `definition/roles/*.tmdl`, `definition/perspectives/*.tmdl`, `definition/cultures/*.tmdl`, `definition/dataSources.tmdl`
-time: 2025-07-17T07:44:57.0234718-07:00
-custom:
-  Issue: "543"
