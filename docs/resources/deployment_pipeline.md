@@ -22,6 +22,7 @@ The Deployment Pipeline resource allows you to manage a Fabric [Deployment Pipel
 resource "fabric_deployment_pipeline" "example" {
   display_name = "Deployment Pipeline Example"
   description  = "Deployment Pipeline Example"
+  id           = data.fabric_deployment_pipeline.example.id
   stages = [
     {
       display_name = "Stage 1",

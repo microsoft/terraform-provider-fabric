@@ -232,16 +232,12 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate.UpdateGitCredentialsRequestClassification, nil)
+	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if resp.Diagnostics.Append(plan.setCredentials(ctx, respUpdate.GitCredentialsConfigurationResponseClassification)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 

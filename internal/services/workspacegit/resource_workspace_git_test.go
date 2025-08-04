@@ -9,7 +9,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -66,19 +65,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
-		// error - no required git_credentials
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"initialization_strategy": "PreferWorkspace",
-				},
-			),
-			ExpectError: regexp.MustCompile(`Missing required argument`),
-		},
 		// error - no required git_provider_details
 		{
 			ResourceName: testResourceItemFQN,
@@ -87,9 +73,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 				map[string]any{
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
@@ -102,9 +85,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 				map[string]any{
 					"workspace_id":         "00000000-0000-0000-0000-000000000000",
 					"git_provider_details": testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
@@ -118,9 +98,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "test",
 					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -134,9 +111,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidGitProviderType,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -150,9 +124,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidDirectoryName,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -166,9 +137,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidOwnerName,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile("Invalid configuration for attribute git_provider_details.owner_name"),
@@ -182,9 +150,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseMissingBranchName,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Incorrect attribute value type`),
@@ -199,12 +164,11 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testHelperGitProviderDetails,
 					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
 						"connection_id": "00000000-0000-0000-0000-000000000000",
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile("Invalid configuration for attribute git_credentials.connection_id"),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute git_credentials"),
 		},
 		// ok - PreferWorkspace
 		{
@@ -215,9 +179,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -233,9 +194,6 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferRemote",
 					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -245,7 +203,7 @@ func TestUnit_WorkspaceGitResource_AzDO(t *testing.T) {
 	}))
 }
 
-func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
+func TestAcc_WorkspaceGitResource_AzDO(t *testing.T) {
 	if testhelp.ShouldSkipTest(t) {
 		t.Skip("No SPN support")
 	}
@@ -257,7 +215,6 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 	azdoOrganization := doPlatform["organizationName"].(string)
 	azdoProject := doPlatform["projectName"].(string)
 	azdoRepository := doPlatform["repositoryName"].(string)
-	adoConnectionID := doPlatform["connectionId"].(string)
 
 	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
@@ -280,9 +237,6 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"branch_name":       "main",
 							"directory_name":    "/",
 						},
-						"git_credentials": map[string]any{
-							"source": string(fabcore.GitCredentialsSourceAutomatic),
-						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -290,90 +244,8 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
 			),
 		},
-		// Update git_credentials to ConfiguredConnection - this should update in-place only.
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"initialization_strategy": "PreferWorkspace",
-						"git_provider_details": map[string]any{
-							"git_provider_type": "AzureDevOps",
-							"organization_name": azdoOrganization,
-							"project_name":      azdoProject,
-							"repository_name":   azdoRepository,
-							"branch_name":       "main",
-							"directory_name":    "/",
-						},
-						"git_credentials": map[string]any{
-							"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
-							"connection_id": adoConnectionID,
-						},
-					},
-				)),
-			ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
-				},
-			},
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
-			),
-		},
-	}))
-}
-
-func TestAcc_WorkspaceGitResource_AzDO_ConfiguredCredentials(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
-	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-	capacityID := capacity["id"].(string)
-
-	doPlatform := testhelp.WellKnown()["AzDO"].(map[string]any)
-	azdoOrganization := doPlatform["organizationName"].(string)
-	azdoProject := doPlatform["projectName"].(string)
-	azdoRepository := doPlatform["repositoryName"].(string)
-	adoConnectionID := doPlatform["connectionId"].(string)
-
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"initialization_strategy": "PreferWorkspace",
-						"git_provider_details": map[string]any{
-							"git_provider_type": "AzureDevOps",
-							"organization_name": azdoOrganization,
-							"project_name":      azdoProject,
-							"repository_name":   azdoRepository,
-							"branch_name":       "main",
-							"directory_name":    "/",
-						},
-						"git_credentials": map[string]any{
-							"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
-							"connection_id": adoConnectionID,
-						},
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
-			),
-		},
-	}))
+	},
+	))
 }
 
 func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
@@ -432,58 +304,9 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 				map[string]any{
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
-		},
-		// error - no required git_credentials
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"initialization_strategy": "PreferWorkspace",
-				},
-			),
-			ExpectError: regexp.MustCompile(`Missing required argument`),
-		},
-		// error - no required git_credentials.connection_id
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"initialization_strategy": "PreferWorkspace",
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceConfiguredConnection),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute git_credentials.connection_id`),
-		},
-		// error - invalid git_credentials.source
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"initialization_strategy": "PreferWorkspace",
-					"git_credentials": map[string]any{
-						"source": string(fabcore.GitCredentialsSourceAutomatic),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute git_credentials.source`),
 		},
 		// error - no required initialization_strategy
 		{
@@ -493,10 +316,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 				map[string]any{
 					"workspace_id":         "00000000-0000-0000-0000-000000000000",
 					"git_provider_details": testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
@@ -510,10 +329,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "test",
 					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -527,10 +342,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidGitProviderType,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -544,10 +355,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidDirectoryName,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
@@ -561,10 +368,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseInvalidOrganizationName,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile("Invalid configuration for attribute git_provider_details.organization_name"),
@@ -578,30 +381,9 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"workspace_id":            "00000000-0000-0000-0000-000000000000",
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testCaseMissingBranchName,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Incorrect attribute value type`),
-		},
-		// error - invalid git_credentials source
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"initialization_strategy": "PreferWorkspace",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceAutomatic),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute git_credentials.source`),
 		},
 		// ok - PreferWorkspace
 		{
@@ -613,7 +395,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"initialization_strategy": "PreferWorkspace",
 					"git_provider_details":    testHelperGitProviderDetails,
 					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 						"connection_id": *gitCredentialsResponse.ConnectionID,
 					},
 				},
@@ -632,26 +413,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 					"initialization_strategy": "PreferRemote",
 					"git_provider_details":    testHelperGitProviderDetails,
 					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
-						"connection_id": *gitCredentialsResponse.ConnectionID,
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "git_connection_state", (*string)(gitConnection.GitConnectionState)),
-			),
-		},
-		// ok - optional git_credentials source
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":            "00000000-0000-0000-0000-000000000000",
-					"initialization_strategy": "PreferWorkspace",
-					"git_provider_details":    testHelperGitProviderDetails,
-					"git_credentials": map[string]any{
-						"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 						"connection_id": *gitCredentialsResponse.ConnectionID,
 					},
 				},
@@ -663,7 +424,7 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 	}))
 }
 
-func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
+func TestAcc_WorkspaceGitResource_GitHub(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
@@ -693,7 +454,6 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 							"directory_name":    "/",
 						},
 						"git_credentials": map[string]any{
-							"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
 							"connection_id": ghConnectionID,
 						},
 					},
