@@ -1354,7 +1354,7 @@ $IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
-  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
