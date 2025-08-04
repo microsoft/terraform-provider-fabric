@@ -1107,7 +1107,6 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_NAME_BASE',
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
-  'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1478,14 +1477,6 @@ if (!$azdoRepo) {
   $azdoRepo = New-ADOPSRepository -Project $azdoProject.name -Name 'test'
   Initialize-ADOPSRepository -RepositoryId $azdoRepo.id | Out-Null
 }
-
-if (!$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID) {
-  Write-Log -Message "!!! Please go to the Connections and manually add 'Azure DevOps - Source control' connection !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
-  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID" -Level 'ERROR' -Stop $true
-}
-
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID"
 Write-Log -Message "AzDO Repository - Name: $($azdoRepo.name) / ID: $($azdoRepo.id)"
 $wellKnown['AzDO'] = @{
   organizationName = $azdoContext.Organization
@@ -1493,7 +1484,6 @@ $wellKnown['AzDO'] = @{
   projectName      = $azdoProject.name
   repositoryId     = $azdoRepo.id
   repositoryName   = $azdoRepo.name
-  connectionId     = $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID
 }
 
 $body = @{
