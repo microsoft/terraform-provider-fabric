@@ -1,5 +1,0 @@
-kind: changed
-body: Enabled SPN support for `fabric_activator` resource/data-source
-time: 2025-08-04T13:36:26.391316656Z
-custom:
-    Issue: "570"
