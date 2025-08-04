@@ -75,8 +75,9 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `variables.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `settings.json`, `valueSets/valueSet1.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Variable Library description.
+- `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -94,3 +95,11 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Read-Only:
+
+- `active_value_set_name` (String) The VariableLibrary current active value set.

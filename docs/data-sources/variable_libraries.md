@@ -54,4 +54,13 @@ Read-Only:
 - `description` (String) The Variable Library description.
 - `display_name` (String) The Variable Library display name.
 - `id` (String) The Variable Library ID.
+- `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--properties"></a>
+
+### Nested Schema for `values.properties`
+
+Read-Only:
+
+- `active_value_set_name` (String) The VariableLibrary current active value set.

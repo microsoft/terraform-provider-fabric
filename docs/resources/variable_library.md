@@ -64,7 +64,7 @@ resource "fabric_variable_library" "example_definition_update" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Variable Library definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/variable-library-definition). Accepted path keys: **Default** format: `variables.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Variable Library definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/variable-library-definition). Accepted path keys: **Default** format: `settings.json`, `valueSets/valueSet1.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Variable Library description.
 - `format` (String) The Variable Library format. Possible values: `Default`
@@ -73,6 +73,7 @@ resource "fabric_variable_library" "example_definition_update" {
 ### Read-Only
 
 - `id` (String) The Variable Library ID.
+- `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--definition"></a>
 
@@ -102,6 +103,14 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Read-Only:
+
+- `active_value_set_name` (String) The VariableLibrary current active value set.
 
 ## Import
 
