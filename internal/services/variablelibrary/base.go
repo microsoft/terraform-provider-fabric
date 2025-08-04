@@ -31,6 +31,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"variables.json"},
+		Paths: []string{"variables.json", "valueSets/valueSet1.json", "settings.json"},
 	},
 }

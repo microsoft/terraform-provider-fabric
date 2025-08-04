@@ -150,14 +150,14 @@ func TestUnit_VariableLibraryResource_ImportState(t *testing.T) {
 
 func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityExist := fakes.NewRandomVariableLibraryWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomVariableLibraryWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomVariableLibraryWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomVariableLibraryWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomVariableLibraryWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -185,6 +185,7 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 		// Update and Read
@@ -201,6 +202,7 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

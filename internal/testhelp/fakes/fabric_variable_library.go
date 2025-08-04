@@ -16,6 +16,18 @@ import (
 
 type operationsVariableLibrary struct{}
 
+// ConvertItemToEntity implements itemConverter.
+func (o *operationsVariableLibrary) ConvertItemToEntity(item fabcore.Item) fabvariablelibrary.VariableLibrary {
+	return fabvariablelibrary.VariableLibrary{
+		ID:          item.ID,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		WorkspaceID: item.WorkspaceID,
+		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
+		Properties:  NewRandomVariableLibrary().Properties,
+	}
+}
+
 // CreateDefinition implements concreteDefinitionOperations.
 func (o *operationsVariableLibrary) CreateDefinition(data fabvariablelibrary.CreateVariableLibraryRequest) *fabvariablelibrary.PublicDefinition {
 	return data.Definition
@@ -133,7 +145,10 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 
 	var entityOperations concreteEntityOperations = &operationsVariableLibrary{}
 	var definitionOperations concreteDefinitionOperations = &operationsVariableLibrary{}
-	handler := newTypedHandler(server, entityOperations)
+
+	var converter itemConverter[fabvariablelibrary.VariableLibrary] = &operationsVariableLibrary{}
+
+	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
 	configureEntityWithParentID(
 		handler,
@@ -161,6 +176,9 @@ func NewRandomVariableLibrary() fabvariablelibrary.VariableLibrary {
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
+		Properties: &fabvariablelibrary.Properties{
+			ActiveValueSetName: to.Ptr(testhelp.RandomName()),
+		},
 	}
 }
 
@@ -172,17 +190,44 @@ func NewRandomVariableLibraryWithWorkspace(workspaceID string) fabvariablelibrar
 }
 
 func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
-	defPart := fabvariablelibrary.PublicDefinitionPart{
+	defPart1 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("variable_library-content.json"),
+		Path:        to.Ptr("variables.json"),
 		Payload: to.Ptr(
-			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==", // {"content":"Hello World"} in base64
+			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
+		),
+	}
+
+	defPart2 := fabvariablelibrary.PublicDefinitionPart{
+		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
+		Path:        to.Ptr("valueSet/valueSet1.json"),
+		Payload: to.Ptr(
+			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
+		),
+	}
+
+	defPart3 := fabvariablelibrary.PublicDefinitionPart{
+		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
+		Path:        to.Ptr("valueSet/valueSet2.json"),
+		Payload: to.Ptr(
+			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
+		),
+	}
+
+	defPart4 := fabvariablelibrary.PublicDefinitionPart{
+		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
+		Path:        to.Ptr("settings.json"),
+		Payload: to.Ptr(
+			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	var defParts []fabvariablelibrary.PublicDefinitionPart
 
-	defParts = append(defParts, defPart)
+	defParts = append(defParts, defPart1)
+	defParts = append(defParts, defPart2)
+	defParts = append(defParts, defPart3)
+	defParts = append(defParts, defPart4)
 
 	return fabvariablelibrary.PublicDefinition{
 		Format: to.Ptr("json"),
