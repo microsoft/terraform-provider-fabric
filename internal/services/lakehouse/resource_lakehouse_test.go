@@ -193,11 +193,13 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
@@ -212,11 +214,13 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
@@ -234,20 +238,27 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
+
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
 			),
@@ -255,17 +266,22 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-				},
-			),
+			Config: at.JoinConfigs(
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
 			),
@@ -273,18 +289,21 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 		// Recreate resource and read - goal is to check handling for "ItemDisplayNameNotAvailableYet" error
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"configuration": map[string]any{
-						"enable_schemas": true,
+			Config: at.JoinConfigs(
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"configuration": map[string]any{
+							"enable_schemas": true,
+						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.enable_schemas", "true"),
 			),
 		},

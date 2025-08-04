@@ -148,6 +148,8 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 	var errRespFabric *fabcore.ResponseError
 	retryCount := 0
 
+	maxRetries := 5 // Add a cap to avoid infinite retries
+	
 	for {
 		result, err = operation()
 		if err == nil {
@@ -164,9 +166,28 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 			return result, ctx.Err()
 		}
 
-		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
+		// Check for retryable errors (ItemDisplayNameNotAvailableYet or FolderNotEmpty)
+		if errors.As(err, &errRespFabric) && 
+			(errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() || 
+			 errRespFabric.ErrorCode == "FolderNotEmpty") {
+			
 			retryCount++
-			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", retryCount, config.RetryInterval))
+			
+			// Check if we've reached max retries
+			if retryCount > maxRetries {
+				tflog.Error(ctx, fmt.Sprintf("Max retries (%d) reached for %s operation: %v", maxRetries, config.Operation, err))
+				return result, err
+			}
+			
+			retryMsg := "Retry %d failed with %s, retrying in %v..."
+			errorType := "unknown error"
+			if errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
+				errorType = "ItemDisplayNameNotAvailableYet"
+			} else if errRespFabric.ErrorCode == "FolderNotEmpty" {
+				errorType = "FolderNotEmpty"
+			}
+			
+			tflog.Info(ctx, fmt.Sprintf(retryMsg, retryCount, errorType, config.RetryInterval))
 
 			timer := time.NewTimer(config.RetryInterval)
 			select {

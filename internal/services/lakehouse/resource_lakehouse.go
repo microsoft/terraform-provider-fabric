@@ -81,7 +81,16 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 				}
 
 			case fablakehouse.SQLEndpointProvisioningStatusSuccess:
+				// Save folder_id from model before setting from response
+				folderID := model.FolderID.ValueString()
+
+				// Set values from response
 				fabricItem.Set(respGet.Lakehouse)
+
+				// Override folder_id from response with our saved value to ensure consistency
+				if !model.FolderID.IsNull() && !model.FolderID.IsUnknown() {
+					fabricItem.FolderID = &folderID
+				}
 
 				return nil
 			default:

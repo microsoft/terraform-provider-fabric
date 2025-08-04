@@ -39,6 +39,7 @@ func (o *operationsItem) CreateWithParentID(parentID string, data fabcore.Create
 	result := NewRandomItemWithWorkspace(*data.Type, parentID)
 	result.DisplayName = data.DisplayName
 	result.Description = data.Description
+	result.FolderID = data.FolderID
 
 	return result
 }
