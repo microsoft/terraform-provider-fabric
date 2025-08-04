@@ -30,7 +30,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Types:          "activators",
 	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator",
 	IsPreview:      true,
-	IsSPNSupported: false,
+	IsSPNSupported: true,
 }
 
 const FabricItemType = fabcore.ItemTypeReflex
