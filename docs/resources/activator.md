@@ -4,7 +4,7 @@ page_title: "fabric_activator Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The Activator resource allows you to manage a Fabric Activator https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator.
-  -> This resource supports Service Principal authentication.
+  -> This resource does not support Service Principal. Please use a User context authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Activator resource allows you to manage a Fabric [Activator](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator).
 
--> This resource supports Service Principal authentication.
+-> This resource does not support Service Principal. Please use a User context authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
