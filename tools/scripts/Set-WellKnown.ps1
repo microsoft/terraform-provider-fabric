@@ -667,6 +667,68 @@ function Set-FabricGatewayRoleAssignment {
   }
 }
 
+function Set-FabricConnection {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet("ShareableCloud", "VirtualNetworkGateway")]
+    [string]$ConnectivityType,
+
+    [Parameter(Mandatory = $false)]
+    [string]$GatewayId
+  )
+
+  # Check if connection already exists
+  $connections = Invoke-FabricRest -Method 'GET' -Endpoint 'connections'
+  $result = $connections.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+
+  if (!$result) {
+    Write-Log -Message "Creating $ConnectivityType FTP Connection: $DisplayName" -Level 'WARN'
+
+    # Create the base FTP connection payload
+    $payload = @{
+      connectivityType  = $ConnectivityType
+      displayName       = $DisplayName
+      connectionDetails = @{
+        type           = "FTP"
+        creationMethod = "FTP.Contents"
+        parameters     = @(
+          @{
+            dataType = "Text"
+            name     = "server"
+            value    = "ftp.example.com"
+          }
+        )
+      }
+      privacyLevel      = "Organizational"
+      credentialDetails = @{
+        singleSignOnType     = "None"
+        connectionEncryption = "NotEncrypted"
+        skipTestConnection   = $false
+        credentials          = @{
+          credentialType = "Anonymous"
+        }
+      }
+    }
+
+    # Add gatewayId for VirtualNetworkGateway connections
+    if ($ConnectivityType -eq "VirtualNetworkGateway") {
+      if (!$GatewayId) {
+        Write-Log -Message "GatewayId is required for VirtualNetworkGateway connections" -Level 'ERROR'
+        return
+      }
+      $payload['gatewayId'] = $GatewayId
+    }
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint 'connections' -Payload $payload).Response
+  }
+
+  Write-Log -Message "$ConnectivityType Connection - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
 function Set-AzureVirtualNetwork {
   param(
     [Parameter(Mandatory = $true)]
@@ -976,55 +1038,57 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
-  'ApacheAirflowJob'       = 'aaj'
-  'AzureDataFactory'       = 'adf'
-  'CopyJob'                = 'cj'
-  'Dashboard'              = 'dash'
-  'Dataflow'               = 'df'
-  'Datamart'               = 'dm'
-  'DataPipeline'           = 'dp'
-  'DeploymentPipeline'     = 'deployp'
-  'Environment'            = 'env'
-  'Eventhouse'             = 'eh'
-  'Eventstream'            = 'es'
-  'Folder'                 = 'fld'
-  'GraphQLApi'             = 'gql'
-  'KQLDashboard'           = 'kqldash'
-  'KQLDatabase'            = 'kqldb'
-  'KQLQueryset'            = 'kqlqs'
-  'Lakehouse'              = 'lh'
-  'MirroredDatabase'       = 'mdb'
-  'MirroredWarehouse'      = 'mwh'
-  'MLExperiment'           = 'mle'
-  'MLModel'                = 'mlm'
-  'MountedDataFactory'     = 'mdf'
-  'Notebook'               = 'nb'
-  'Shortcut'               = 'srt'
-  'PaginatedReport'        = 'prpt'
-  'Reflex'                 = 'rx'
-  'Report'                 = 'rpt'
-  'SemanticModel'          = 'sm'
-  'SparkJobDefinition'     = 'sjd'
-  'SQLDatabase'            = 'sqldb'
-  'SQLEndpoint'            = 'sqle'
-  'Warehouse'              = 'wh'
-  'WorkspaceDS'            = 'wsds'
-  'WorkspaceRS'            = 'wsrs'
-  'WorkspaceMPE'           = 'wsmpe'
-  'DomainParent'           = 'parent'
-  'DomainChild'            = 'child'
-  'EntraServicePrincipal'  = 'sp'
-  'EntraGroup'             = 'grp'
-  'AzDOProject'            = 'proj'
-  'VariableLibrary'        = 'varlib'
-  'VirtualNetwork01'       = 'vnet01'
-  'VirtualNetwork02'       = 'vnet02'
-  'VirtualNetworkSubnet'   = 'subnet'
-  'GatewayVirtualNetwork'  = 'gvnet'
-  'ManagedPrivateEndpoint' = 'mpe'
-  'StorageAccount'         = 'st'
-  'ResourceGroup'          = 'rg'
-  'FabricCapacity'         = 'fc'
+  'ApacheAirflowJob'                = 'aaj'
+  'AzureDataFactory'                = 'adf'
+  'CopyJob'                         = 'cj'
+  'Dashboard'                       = 'dash'
+  'Dataflow'                        = 'df'
+  'Datamart'                        = 'dm'
+  'DataPipeline'                    = 'dp'
+  'DeploymentPipeline'              = 'deployp'
+  'Environment'                     = 'env'
+  'Eventhouse'                      = 'eh'
+  'Eventstream'                     = 'es'
+  'Folder'                          = 'fld'
+  'GraphQLApi'                      = 'gql'
+  'KQLDashboard'                    = 'kqldash'
+  'KQLDatabase'                     = 'kqldb'
+  'KQLQueryset'                     = 'kqlqs'
+  'Lakehouse'                       = 'lh'
+  'MirroredDatabase'                = 'mdb'
+  'MirroredWarehouse'               = 'mwh'
+  'MLExperiment'                    = 'mle'
+  'MLModel'                         = 'mlm'
+  'MountedDataFactory'              = 'mdf'
+  'Notebook'                        = 'nb'
+  'Shortcut'                        = 'srt'
+  'PaginatedReport'                 = 'prpt'
+  'Reflex'                          = 'rx'
+  'Report'                          = 'rpt'
+  'SemanticModel'                   = 'sm'
+  'SparkJobDefinition'              = 'sjd'
+  'SQLDatabase'                     = 'sqldb'
+  'SQLEndpoint'                     = 'sqle'
+  'Warehouse'                       = 'wh'
+  'WorkspaceDS'                     = 'wsds'
+  'WorkspaceRS'                     = 'wsrs'
+  'WorkspaceMPE'                    = 'wsmpe'
+  'DomainParent'                    = 'parent'
+  'DomainChild'                     = 'child'
+  'EntraServicePrincipal'           = 'sp'
+  'EntraGroup'                      = 'grp'
+  'AzDOProject'                     = 'proj'
+  'VariableLibrary'                 = 'varlib'
+  'VirtualNetwork01'                = 'vnet01'
+  'VirtualNetwork02'                = 'vnet02'
+  'VirtualNetworkSubnet'            = 'subnet'
+  'GatewayVirtualNetwork'           = 'gvnet'
+  'ManagedPrivateEndpoint'          = 'mpe'
+  'StorageAccount'                  = 'st'
+  'ResourceGroup'                   = 'rg'
+  'FabricCapacity'                  = 'fc'
+  'ShareableCloudConnection'        = 'scc'
+  'VirtualNetworkGatewayConnection' = 'vngc'
 }
 
 $baseName = Get-BaseName
@@ -1133,6 +1197,16 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
+}
+
+$displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
+$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
+Write-Log -Message "LakehouseRS: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+$wellKnown['LakehouseRS'] = @{
+  id          = $item.id
+  displayName = $item.displayName
+  description = $item.description
 }
 
 # Create MirroredDatabase if not exists
@@ -1279,7 +1353,8 @@ $IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
-  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 else {
@@ -1522,6 +1597,25 @@ $wellKnown['GatewayVirtualNetwork'] = @{
 
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
+
+# Create Shareable Cloud Connection if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ShareableCloudConnection'])"
+$shareableCloudConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "ShareableCloud"
+
+$wellKnown['ShareableCloudConnection'] = @{
+  id          = $shareableCloudConnection.id
+  displayName = $shareableCloudConnection.displayName
+}
+
+# Create Virtual Network Gateway Connection if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['VirtualNetworkGatewayConnection'])"
+$virtualNetworkGatewayConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "VirtualNetworkGateway" -GatewayId $gateway.id
+
+$wellKnown['VirtualNetworkGatewayConnection'] = @{
+  id          = $virtualNetworkGatewayConnection.id
+  displayName = $virtualNetworkGatewayConnection.displayName
+  gatewayId   = $virtualNetworkGatewayConnection.gatewayId
+}
 
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
