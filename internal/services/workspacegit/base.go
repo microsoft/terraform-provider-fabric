@@ -12,5 +12,5 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "workspace_git",
 	DocsURL:        "https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration",
 	IsPreview:      true,
-	IsSPNSupported: true,
+	IsSPNSupported: false,
 }

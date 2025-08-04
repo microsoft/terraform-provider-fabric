@@ -1107,7 +1107,6 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_NAME_BASE',
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
-  'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1198,6 +1197,16 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
+}
+
+$displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
+$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
+Write-Log -Message "LakehouseRS: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+$wellKnown['LakehouseRS'] = @{
+  id          = $item.id
+  displayName = $item.displayName
+  description = $item.description
 }
 
 # Create MirroredDatabase if not exists
@@ -1344,7 +1353,8 @@ $IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
-  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 else {
@@ -1478,14 +1488,6 @@ if (!$azdoRepo) {
   $azdoRepo = New-ADOPSRepository -Project $azdoProject.name -Name 'test'
   Initialize-ADOPSRepository -RepositoryId $azdoRepo.id | Out-Null
 }
-
-if (!$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID) {
-  Write-Log -Message "!!! Please go to the Connections and manually add 'Azure DevOps - Source control' connection !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
-  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID" -Level 'ERROR' -Stop $true
-}
-
-$results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID"
 Write-Log -Message "AzDO Repository - Name: $($azdoRepo.name) / ID: $($azdoRepo.id)"
 $wellKnown['AzDO'] = @{
   organizationName = $azdoContext.Organization
@@ -1493,7 +1495,6 @@ $wellKnown['AzDO'] = @{
   projectName      = $azdoProject.name
   repositoryId     = $azdoRepo.id
   repositoryName   = $azdoRepo.name
-  connectionId     = $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID
 }
 
 $body = @{
