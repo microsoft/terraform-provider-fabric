@@ -40,6 +40,7 @@ func (o *operationsNotebook) CreateWithParentID(parentID string, data fabnoteboo
 	entity := NewRandomNotebookWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -164,6 +165,7 @@ func NewRandomNotebook() fabnotebook.Notebook {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabnotebook.ItemTypeNotebook),
 	}
 }

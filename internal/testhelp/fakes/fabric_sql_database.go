@@ -23,6 +23,7 @@ func (o *operationsSQLDatabase) ConvertItemToEntity(item fabcore.Item) fabsqldat
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID: item.FolderID,
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties:  NewRandomSQLDatabase().Properties,
 	}
@@ -33,6 +34,7 @@ func (o *operationsSQLDatabase) CreateWithParentID(parentID string, data fabsqld
 	entity := NewRandomSQLDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -137,6 +139,7 @@ func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties: &fabsqldatabase.Properties{
 			ConnectionString: to.Ptr(testhelp.RandomName()),

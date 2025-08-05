@@ -353,6 +353,11 @@ func getReflectedStringPropertyValue(element any, propertyName string) *string {
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)
 
+	// Check if the property value is nil or invalid
+	if !propertyValue.IsValid() || propertyValue.IsNil() {
+		return nil
+	}
+
 	str := propertyValue.Elem().String()
 
 	return &str
@@ -386,7 +391,7 @@ func (h *typedHandler[TEntity]) entityTypeCanBeConvertedToFabricItem() bool {
 		return false
 	}
 
-	requiredPropertyNames := []string{"ID", "WorkspaceID", "DisplayName", "Description", "Type"}
+	requiredPropertyNames := []string{"ID", "WorkspaceID", "DisplayName", "Description", "Type", "FolderID"}
 
 	for _, propertyName := range requiredPropertyNames {
 		// check if the property exists

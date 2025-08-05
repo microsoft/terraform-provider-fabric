@@ -329,7 +329,7 @@ func (r *resourceFolder) getByID(ctx context.Context, workspaceID, folderID stri
 
 func DefaultDeleteRetryConfig() fabricitem.RetryConfig {
 	return fabricitem.RetryConfig{
-		RetryInterval: 3 * time.Minute, // Increased to handle FolderNotEmpty errors
+		RetryInterval: 2 * time.Minute,
 		Operation:     "delete",
 	}
 }
