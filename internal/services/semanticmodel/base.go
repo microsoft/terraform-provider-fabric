@@ -29,7 +29,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  "TMSL",
 		API:   "TMSL",
-		Paths: []string{"model.bim", "definition.pbism", "diagramLayp.json"},
+		Paths: []string{"model.bim", "definition.pbism", "diagramLayout.json"},
 	},
 	{
 		Type: "TMDL",
@@ -39,9 +39,13 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 			"definition/model.tmdl",
 			"definition/expressions.tmdl",
 			"definition/relationships.tmdl",
+			"definition/dataSources.tmdl",
 			"definition.pbism",
-			"diagramLayp.json",
+			"diagramLayout.json",
 			"definition/tables/*.tmdl",
+			"definition/roles/*.tmdl",
+			"definition/perspectives/*.tmdl",
+			"definition/cultures/*.tmdl",
 		},
 	},
 }

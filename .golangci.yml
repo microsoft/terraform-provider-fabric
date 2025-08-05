@@ -25,6 +25,7 @@ linters:
     - mnd
     - paralleltest
     - wrapcheck
+    - wsl
   settings:
     exhaustive:
       default-signifies-exhaustive: true
@@ -55,11 +56,18 @@ linters:
           disabled: true
         - name: confusing-naming
           disabled: true
+        - name: enforce-switch-style
+          disabled: false
+          exclude:
+            - "**/*_test.go"
     varnamelen:
       min-name-length: 1
-    wsl:
-      allow-trailing-comment: true
-      allow-cuddle-declarations: true
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+      disable:
+        - decl
   exclusions:
     generated: lax
     presets:

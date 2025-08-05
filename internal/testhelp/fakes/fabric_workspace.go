@@ -17,10 +17,9 @@ import (
 type operationsWorkspace struct{}
 
 func (o *operationsWorkspace) Create(data fabcore.CreateWorkspaceRequest) fabcore.WorkspaceInfo {
-	entity := NewRandomWorkspaceInfo()
+	entity := NewRandomWorkspaceInfo(data.CapacityID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
-	entity.CapacityID = data.CapacityID
 
 	return entity
 }
@@ -115,13 +114,13 @@ func configureWorkspace(server *fakeServer) fabcore.WorkspaceInfo {
 	return fabcore.WorkspaceInfo{}
 }
 
-func NewRandomWorkspaceInfo() fabcore.WorkspaceInfo {
+func NewRandomWorkspaceInfo(capacityID *string) fabcore.WorkspaceInfo {
 	return fabcore.WorkspaceInfo{
 		ID:                         to.Ptr(testhelp.RandomUUID()),
 		DisplayName:                to.Ptr(testhelp.RandomName()),
 		Description:                to.Ptr(testhelp.RandomName()),
 		Type:                       to.Ptr(fabcore.WorkspaceTypeWorkspace),
-		CapacityID:                 to.Ptr(testhelp.RandomUUID()),
+		CapacityID:                 capacityID,
 		CapacityRegion:             to.Ptr(fabcore.CapacityRegionWestUS2),
 		CapacityAssignmentProgress: to.Ptr(fabcore.CapacityAssignmentProgressCompleted),
 		OneLakeEndpoints: &fabcore.OneLakeEndpoints{
@@ -131,15 +130,15 @@ func NewRandomWorkspaceInfo() fabcore.WorkspaceInfo {
 	}
 }
 
-func NewRandomWorkspaceInfoWithType(entityType fabcore.WorkspaceType) fabcore.WorkspaceInfo {
-	entity := NewRandomWorkspaceInfo()
+func NewRandomWorkspaceInfoWithType(entityType fabcore.WorkspaceType, capacityID *string) fabcore.WorkspaceInfo {
+	entity := NewRandomWorkspaceInfo(capacityID)
 	entity.Type = &entityType
 
 	return entity
 }
 
-func NewRandomWorkspaceInfoWithIdentity() fabcore.WorkspaceInfo {
-	entity := NewRandomWorkspaceInfo()
+func NewRandomWorkspaceInfoWithIdentity(capacityID *string) fabcore.WorkspaceInfo {
+	entity := NewRandomWorkspaceInfo(capacityID)
 	entity.WorkspaceIdentity = &fabcore.WorkspaceIdentity{
 		ApplicationID:      to.Ptr(testhelp.RandomUUID()),
 		ServicePrincipalID: to.Ptr(testhelp.RandomUUID()),

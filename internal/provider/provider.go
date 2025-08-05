@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -40,14 +41,19 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
@@ -65,6 +71,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -81,8 +88,9 @@ import (
 
 // Ensure FabricProvider satisfies various provider interfaces.
 var (
-	_ provider.Provider              = (*FabricProvider)(nil)
-	_ provider.ProviderWithFunctions = (*FabricProvider)(nil)
+	_ provider.Provider                       = (*FabricProvider)(nil)
+	_ provider.ProviderWithFunctions          = (*FabricProvider)(nil)
+	_ provider.ProviderWithEphemeralResources = (*FabricProvider)(nil)
 	// _ provider.ProviderWithConfigValidators = (*FabricProvider)(nil)
 	// _ provider.ProviderWithValidateConfig   = (*FabricProvider)(nil)
 	// _ provider.ProviderWithMetaSchema = (*FabricProvider)(nil).
@@ -402,19 +410,27 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	resp.ResourceData = p.config.ProviderData
 
+	tflog.Debug(ctx, "Assigning Microsoft Fabric client to EphemeralResourceData")
+
+	resp.EphemeralResourceData = p.config.ProviderData
+
 	tflog.Info(ctx, "Configured Microsoft Fabric client", map[string]any{"success": true})
 }
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		copyjob.NewResourceCopyJob,
+		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
+		deploymentpipeline.NewResourceDeploymentPipeline,
+		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
@@ -426,6 +442,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
@@ -451,9 +468,14 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
+		dataflow.NewDataSourceDataflow,
+		dataflow.NewDataSourceDataflows,
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		deploymentpipeline.NewDataSourceDeploymentPipeline,
+		deploymentpipeline.NewDataSourceDeploymentPipelines,
+		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
@@ -463,6 +485,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		folder.NewDataSourceFolder,
+		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,
@@ -490,6 +515,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		shortcut.NewDataSourceShortcut,
+		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,
@@ -516,6 +543,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacegit.NewDataSourceWorkspaceGit,
 		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoint,
 		workspacempe.NewDataSourceWorkspaceManagedPrivateEndpoints,
+	}
+}
+
+func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{
+		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
 

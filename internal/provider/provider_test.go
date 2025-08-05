@@ -19,7 +19,8 @@ import (
 )
 
 var (
-	testHelperEntity = fakes.NewRandomWorkspaceInfo()
+	capacity         = fakes.NewRandomCapacity()
+	testHelperEntity = fakes.NewRandomWorkspaceInfo(capacity.ID)
 	testHelperHCL    = fmt.Sprintf(`
 		data "fabric_workspace" "test" {
 			id = "%s"
@@ -29,6 +30,7 @@ var (
 func TestUnit_Provider_Configurations(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	tenantID := testhelp.RandomUUID()
@@ -63,6 +65,7 @@ func TestUnit_Provider_Configurations(t *testing.T) {
 func TestUnit_Provider_AuthAttributes(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -92,6 +95,7 @@ func TestUnit_Provider_AuthAttributes(t *testing.T) {
 func TestUnit_Provider_AuthOIDC(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -158,6 +162,7 @@ func TestUnit_Provider_AuthOIDC(t *testing.T) {
 func TestUnit_Provider_AuthAzDevOpsWI(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -207,6 +212,7 @@ func TestUnit_Provider_AuthAzDevOpsWI(t *testing.T) {
 func TestUnit_Provider_AuthMSI(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -250,6 +256,7 @@ func TestUnit_Provider_AuthMSI(t *testing.T) {
 func TestUnit_Provider_AuthCLI(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -292,6 +299,7 @@ func TestUnit_Provider_AuthCLI(t *testing.T) {
 func TestUnit_Provider_AuthDevCLI(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -324,6 +332,7 @@ func TestUnit_Provider_AuthDevCLI(t *testing.T) {
 func TestUnit_Provider_AuthSecret(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, testhelp.TestUnitPreCheckNoEnvs, []resource.TestStep{
@@ -366,6 +375,7 @@ func TestUnit_Provider_AuthSecret(t *testing.T) {
 func TestUnit_Provider_AuthCertificate(t *testing.T) {
 	testState := testhelp.NewTestState()
 
+	fakes.FakeServer.Upsert(capacity)
 	fakes.FakeServer.Upsert(testHelperEntity)
 
 	certPass := testhelp.RandomUUID()

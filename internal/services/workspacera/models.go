@@ -55,6 +55,7 @@ DATA-SOURCE
 
 type dataSourceWorkspaceRoleAssignmentModel struct {
 	baseWorkspaceRoleAssignmentModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -90,6 +91,7 @@ RESOURCE
 
 type resourceWorkspaceRoleAssignmentModel struct {
 	baseWorkspaceRoleAssignmentModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

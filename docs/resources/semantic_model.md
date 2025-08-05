@@ -56,7 +56,7 @@ resource "fabric_semantic_model" "example_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). Accepted path keys: **TMDL** format: `definition.pbism`, `definition/database.tmdl`, `definition/expressions.tmdl`, `definition/model.tmdl`, `definition/relationships.tmdl`, `definition/tables/*.tmdl`, `diagramLayp.json` **TMSL** format: `definition.pbism`, `diagramLayp.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). Accepted path keys: **TMDL** format: `definition.pbism`, `definition/cultures/*.tmdl`, `definition/dataSources.tmdl`, `definition/database.tmdl`, `definition/expressions.tmdl`, `definition/model.tmdl`, `definition/perspectives/*.tmdl`, `definition/relationships.tmdl`, `definition/roles/*.tmdl`, `definition/tables/*.tmdl`, `diagramLayout.json` **TMSL** format: `definition.pbism`, `diagramLayout.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Semantic Model display name.
 - `format` (String) The Semantic Model format. Possible values: `TMDL`, `TMSL`
 - `workspace_id` (String) The Workspace ID.
@@ -103,6 +103,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # terraform import fabric_semantic_model.example "<WorkspaceID>/<SemanticModelID>"

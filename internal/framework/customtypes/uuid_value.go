@@ -85,7 +85,8 @@ func (v UUIDValue) ValidateAttribute(_ context.Context, req xattr.ValidateAttrib
 		return
 	}
 
-	if _, err := uuid.ParseUUID(v.ValueString()); err != nil {
+	_, err := uuid.ParseUUID(v.ValueString())
+	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			UUIDTypeErrorInvalidStringHeader,
@@ -101,7 +102,8 @@ func (v UUIDValue) ValidateParameter(_ context.Context, req function.ValidatePar
 		return
 	}
 
-	if _, err := uuid.ParseUUID(v.ValueString()); err != nil {
+	_, err := uuid.ParseUUID(v.ValueString())
+	if err != nil {
 		resp.Error = function.NewArgumentFuncError(
 			req.Position,
 			UUIDTypeErrorInvalidStringHeader+": "+fmt.Sprintf(UUIDTypeErrorInvalidStringDetails, v.ValueString(), err.Error()),

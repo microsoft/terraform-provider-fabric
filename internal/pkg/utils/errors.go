@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package utils
+package utils //revive:disable-line:var-naming
 
 import (
 	"context"
@@ -33,6 +33,7 @@ const (
 	OperationDelete    Operation = "delete"
 	OperationList      Operation = "list"
 	OperationImport    Operation = "import"
+	OperationOpen      Operation = "open"
 	OperationUndefined Operation = "undefined"
 )
 
@@ -111,6 +112,8 @@ func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, 
 		return common.ErrorListHeader, common.ErrorListDetails
 	case OperationImport:
 		return common.ErrorImportHeader, common.ErrorImportDetails
+	case OperationOpen:
+		return common.ErrorOpenHeader, common.ErrorOpenDetails
 	default:
 		return "", ""
 	}
@@ -292,7 +295,8 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 		return err
 	}
 
-	if err := json.Unmarshal(respBody, &e); err != nil {
+	err = json.Unmarshal(respBody, &e)
+	if err != nil {
 		return err
 	}
 

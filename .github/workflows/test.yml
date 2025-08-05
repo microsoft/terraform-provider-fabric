@@ -329,7 +329,7 @@ jobs:
           - cli: tofu
             version: "1.7"
           - cli: tofu
-            version: "1.9"
+            version: "1.10"
     steps:
       - name: ⤵️ Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -439,7 +439,7 @@ jobs:
 
       - name: 📢 Publish test results
         if: always()
-        uses: dorny/test-reporter@890a17cecf52a379fc869ab770a71657660be727 # v2.1.0
+        uses: dorny/test-reporter@dc3a92680fcc15842eef52e8c4606ea7ce6bd3f3 # v2.1.1
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
           reporter: jest-junit
