@@ -27,6 +27,7 @@ func NewResourceWarehouseSnapshot() resource.Resource {
 				if diags.HasError() {
 					return nil
 				}
+
 				return to.Ptr(t)
 			}(),
 		}
@@ -73,7 +74,7 @@ func NewResourceWarehouseSnapshot() resource.Resource {
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
 		},
-		ConfigRequired:        false,
+		ConfigRequired:        true,
 		ConfigAttributes:      getResourceWarehouseSnapshotConfigurationAttributes(),
 		CreationPayloadSetter: creationPayloadSetter,
 		PropertiesAttributes:  getResourceWarehouseSnapshotPropertiesAttributes(),

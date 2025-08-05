@@ -41,6 +41,9 @@ func TestUnit_WarehouseSnapshotResource_Attributes(t *testing.T) {
 				map[string]any{
 					"workspace_id": "invalid uuid",
 					"display_name": "test",
+					"configuration": map[string]any{
+						"parent_warehouse_id": testhelp.RandomUUID(),
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -85,6 +88,18 @@ func TestUnit_WarehouseSnapshotResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "configuration" is required, but no definition was found.`),
+		},
+		// error - no required configuration attributes (parent_warehouse_id)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
 					"workspace_id":  "00000000-0000-0000-0000-000000000000",
 					"display_name":  "test",
 					"configuration": map[string]any{},
@@ -108,6 +123,9 @@ func TestUnit_WarehouseSnapshotResource_ImportState(t *testing.T) {
 		map[string]any{
 			"workspace_id": *entity.WorkspaceID,
 			"display_name": *entity.DisplayName,
+			"configuration": map[string]any{
+				"parent_warehouse_id": *entity.Properties.ParentWarehouseID,
+			},
 		},
 	)
 
@@ -182,6 +200,10 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityExist.WorkspaceID,
 					"display_name": *entityExist.DisplayName,
+					"configuration": map[string]any{
+						"parent_warehouse_id": *entityExist.Properties.ParentWarehouseID,
+						"snapshot_date_time":  entityExist.Properties.SnapshotDateTime.Format(time.RFC3339),
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
@@ -194,11 +216,18 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
+					"configuration": map[string]any{
+						"parent_warehouse_id": *entityBefore.Properties.ParentWarehouseID,
+						"snapshot_date_time":  entityBefore.Properties.SnapshotDateTime.Format(time.RFC3339),
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
 			),
 		},
 		// Update and Read
@@ -210,11 +239,18 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
+					"configuration": map[string]any{
+						"parent_warehouse_id": *entityBefore.Properties.ParentWarehouseID,
+						"snapshot_date_time":  entityBefore.Properties.SnapshotDateTime.Format(time.RFC3339),
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -228,155 +264,56 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+	warehouseResourceHCL, warehouseResourceFQN := warehouseResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				warehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"configuration": map[string]any{
+							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
+						},
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
 			),
 		},
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-				},
-			),
+			Config: at.JoinConfigs(
+				warehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"configuration": map[string]any{
+							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
+						},
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
 			),
 		},
 	},
 	))
-}
-
-func TestAcc_WarehouseSnapshotConfigurationResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-	warehouse := testhelp.WellKnown()["Warehouse"].(map[string]any)
-	warehouseID := warehouse["id"].(string)
-
-	entityCreateDisplayName1 := testhelp.RandomName()
-	entityUpdateDisplayName1 := testhelp.RandomName()
-	entityUpdateDescription1 := testhelp.RandomName()
-
-	entityCreateDisplayName2 := testhelp.RandomName()
-	entityUpdateDisplayName2 := testhelp.RandomName()
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read (configuration)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName1,
-					"configuration": map[string]any{
-						"parent_warehouse_id": warehouseID,
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
-
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
-			),
-		},
-		// Update and Read (configuration)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName1,
-					"description":  entityUpdateDescription1,
-					"configuration": map[string]any{
-						"parentId": warehouseID,
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
-
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
-			),
-		},
-		// Create and Read (configuration)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName2,
-					"configuration": map[string]any{
-						"parentId": warehouseID,
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
-
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
-			),
-		},
-		// Update and Read (configuration)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName2,
-					"configuration": map[string]any{
-						"parentId":           warehouseID,
-						"snapshot_date_time": time.Now().Format(time.RFC3339),
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.parent_warehouse_id", warehouseID),
-
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "configuration.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
-			),
-		},
-	}))
 }

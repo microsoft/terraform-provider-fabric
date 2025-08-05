@@ -69,6 +69,9 @@ func TestUnit_WarehouseSnapshotsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.parent_warehouse_id"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(
@@ -104,6 +107,8 @@ func TestAcc_WarehouseSnapshotsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.snapshot_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.parent_warehouse_id"),
 			),
 		},
 	},
