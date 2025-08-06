@@ -1746,17 +1746,22 @@ $wellKnown['Subfolder'] = @{
 }
 
 # Create Warehouse Snapshot if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
-$creationPayload = @{
-  parentWarehouseId = $wellKnown['Warehouse'].id
+if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
+  Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
 }
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
+  $creationPayload = @{
+    parentWarehouseId = $wellKnown['Warehouse'].id
+  }
 
-$warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
+  $warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
 
-$wellKnown['WarehouseSnapshot'] = @{
-  id          = $warehouseSnapshot.id
-  displayName = $warehouseSnapshot.displayName
-  description = $warehouseSnapshot.description
+  $wellKnown['WarehouseSnapshot'] = @{
+    id          = $warehouseSnapshot.id
+    displayName = $warehouseSnapshot.displayName
+    description = $warehouseSnapshot.description
+  }
 }
 
 # Save wellknown.json file
