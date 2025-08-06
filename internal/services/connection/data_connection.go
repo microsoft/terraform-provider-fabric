@@ -7,10 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -23,8 +21,7 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSourceWithConfigValidators = (*dataSourceConnection)(nil)
-	_ datasource.DataSourceWithConfigure        = (*dataSourceConnection)(nil)
+	_ datasource.DataSourceWithConfigure = (*dataSourceConnection)(nil)
 )
 
 type dataSourceConnection struct {
@@ -48,19 +45,6 @@ func (d *dataSourceConnection) Metadata(_ context.Context, _ datasource.Metadata
 
 func (d *dataSourceConnection) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = itemSchema(ctx, false).GetDataSource(ctx)
-}
-
-func (d *dataSourceConnection) ConfigValidators(_ context.Context) []datasource.ConfigValidator {
-	return []datasource.ConfigValidator{
-		datasourcevalidator.Conflicting(
-			path.MatchRoot("id"),
-			path.MatchRoot("display_name"),
-		),
-		datasourcevalidator.ExactlyOneOf(
-			path.MatchRoot("id"),
-			path.MatchRoot("display_name"),
-		),
-	}
 }
 
 func (d *dataSourceConnection) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -87,7 +71,6 @@ func (d *dataSourceConnection) Configure(_ context.Context, req datasource.Confi
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 }
 
-// should we get all types all connections? if so, maybe credentialDetails privacyLevel and displayName will be null and add tests
 func (d *dataSourceConnection) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
@@ -106,12 +89,7 @@ func (d *dataSourceConnection) Read(ctx context.Context, req datasource.ReadRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// should we get unsupported connection types?
-	if data.ID.ValueString() != "" {
-		diags = d.getByID(ctx, &data)
-	} else {
-		diags = d.getByDisplayName(ctx, &data)
-	}
+	diags = d.getByID(ctx, &data)
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -138,47 +116,5 @@ func (d *dataSourceConnection) getByID(ctx context.Context, model *dataSourceCon
 		return diags
 	}
 
-	if diags := model.set(ctx, respGet.Connection); diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
-func (d *dataSourceConnection) getByDisplayName(ctx context.Context, model *dataSourceConnectionModel[dsConnectionDetailsModel, dsCredentialDetailsModel]) diag.Diagnostics {
-	tflog.Trace(ctx, "GET BY DISPLAY NAME", map[string]any{
-		"display_name": model.DisplayName.ValueString(),
-	})
-
-	var diags diag.Diagnostics
-
-	pager := d.client.NewListConnectionsPager(nil)
-	for pager.More() {
-		page, err := pager.NextPage(ctx)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-			return diags
-		}
-
-		for _, entity := range page.Value {
-			// PersonalCloud and OnPremisesGatewayPersonal display names might be null
-			if entity.DisplayName == nil {
-				continue
-			}
-
-			if *entity.DisplayName == model.DisplayName.ValueString() {
-				if diags := model.set(ctx, entity); diags.HasError() {
-					return diags
-				}
-
-				return nil
-			}
-		}
-	}
-
-	diags.AddError(
-		common.ErrorReadHeader,
-		fmt.Sprintf("Unable to find %s with display_name: '%s'", d.Name, model.DisplayName.ValueString()),
-	)
-
-	return diags
+	return model.set(ctx, respGet.Connection)
 }

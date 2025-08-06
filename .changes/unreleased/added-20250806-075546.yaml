@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_connection` Resource
+time: 2025-08-06T07:55:46.0338641Z
+custom:
+    Issue: "487"

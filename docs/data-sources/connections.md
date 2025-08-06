@@ -3,14 +3,14 @@
 page_title: "fabric_connections Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Connections data-source allows you to retrieve a list of Fabric Connections TODO.
+  The Connections data-source allows you to retrieve a list of Fabric Connections https://learn.microsoft.com/fabric/data-factory/data-source-management.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_connections (Data Source)
 
-The Connections data-source allows you to retrieve a list of Fabric [Connections](TODO).
+The Connections data-source allows you to retrieve a list of Fabric [Connections](https://learn.microsoft.com/fabric/data-factory/data-source-management).
 
 -> This data-source supports Service Principal authentication.
 
@@ -45,14 +45,21 @@ Optional:
 
 ### Nested Schema for `values`
 
+Required:
+
+- `id` (String) The Connection ID.
+
+Optional:
+
+- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
+- `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
+
 Read-Only:
 
 - `connection_details` (Attributes) The Connection connection details. (see [below for nested schema](#nestedatt--values--connection_details))
-- `connectivity_type` (String) The Connection connectivity type. Value must be one of : `Automatic`, `None`, `OnPremisesGateway`, `OnPremisesGatewayPersonal`, `PersonalCloud`, `ShareableCloud`, `VirtualNetworkGateway`.
+- `connectivity_type` (String) The Connection connectivity type. Value must be one of : `ShareableCloud`, `VirtualNetworkGateway`.
 - `credential_details` (Attributes) The Connection credential details. (see [below for nested schema](#nestedatt--values--credential_details))
 - `display_name` (String) The Connection display name.
-- `gateway_id` (String) The Connection gateway object ID.
-- `id` (String) The Connection ID.
 - `privacy_level` (String) The Connection privacy level. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 
 <a id="nestedatt--values--connection_details"></a>
