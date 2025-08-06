@@ -15,13 +15,14 @@ import (
 )
 
 type baseConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnectionDetailsModel, CredentialDetails dsCredentialDetailsModel | rsCredentialDetailsModel] struct {
-	ID                customtypes.UUID                                        `tfsdk:"id"`
-	DisplayName       types.String                                            `tfsdk:"display_name"`
-	GatewayID         customtypes.UUID                                        `tfsdk:"gateway_id"`
-	ConnectivityType  types.String                                            `tfsdk:"connectivity_type"`
-	PrivacyLevel      types.String                                            `tfsdk:"privacy_level"`
-	ConnectionDetails supertypes.SingleNestedObjectValueOf[ConnectionDetails] `tfsdk:"connection_details"`
-	CredentialDetails supertypes.SingleNestedObjectValueOf[CredentialDetails] `tfsdk:"credential_details"`
+	ID                            customtypes.UUID                                        `tfsdk:"id"`
+	DisplayName                   types.String                                            `tfsdk:"display_name"`
+	GatewayID                     customtypes.UUID                                        `tfsdk:"gateway_id"`
+	ConnectivityType              types.String                                            `tfsdk:"connectivity_type"`
+	PrivacyLevel                  types.String                                            `tfsdk:"privacy_level"`
+	AllowConnectionUsageInGateway types.Bool                                              `tfsdk:"allow_connection_usage_in_gateway"`
+	ConnectionDetails             supertypes.SingleNestedObjectValueOf[ConnectionDetails] `tfsdk:"connection_details"`
+	CredentialDetails             supertypes.SingleNestedObjectValueOf[CredentialDetails] `tfsdk:"credential_details"`
 }
 
 func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx context.Context, from fabcore.Connection) diag.Diagnostics {
@@ -30,6 +31,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 	to.GatewayID = customtypes.NewUUIDPointerValue(from.GatewayID)
 	to.ConnectivityType = types.StringPointerValue((*string)(from.ConnectivityType))
 	to.PrivacyLevel = types.StringPointerValue((*string)(from.PrivacyLevel))
+	// to.AllowConnectionUsageInGateway = types.BoolPointerValue(from.AllowConnectionUsageInGateway)
 
 	var diags diag.Diagnostics
 

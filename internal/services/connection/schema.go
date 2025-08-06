@@ -11,7 +11,7 @@ import (
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -21,6 +21,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superboolvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/boolvalidator"
 	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
@@ -37,12 +38,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 		dsTimeout = &superschema.DatasourceTimeoutAttribute{
 			Read: true,
 		}
-	}
-
-	// will support all when on prem GW connections are supported
-	possibleConnectionEncryptionValues := []string{
-		string(fabcore.ConnectionEncryptionEncrypted),
-		string(fabcore.ConnectionEncryptionNotEncrypted),
 	}
 
 	possibleSupportedConnectivityTypes := []string{
@@ -70,8 +65,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Optional: !isList,
-					Computed: true,
+					Required: true,
 				},
 			},
 			"display_name": superschema.StringAttribute{
@@ -85,7 +79,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Optional: !isList,
 					Computed: true,
 				},
 			},
@@ -119,8 +112,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
 					Computed: true,
-					// why optional, why this default value?
-					Default: stringdefault.StaticString(string(fabcore.PrivacyLevelOrganizational)),
+					Default:  stringdefault.StaticString(string(fabcore.PrivacyLevelOrganizational)),
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -130,6 +122,16 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " gateway object ID.",
 					CustomType:          customtypes.UUIDType{},
+					Validators: []validator.String{
+						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
+							}),
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
+							}),
+					},
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
@@ -137,28 +139,34 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						stringplanmodifier.RequiresReplace(),
 						stringplanmodifier.UseStateForUnknown(),
 					},
-					Validators: []validator.String{
-						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
-							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
-							}),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
 					Optional: true,
-					Validators: []validator.String{
-						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+				},
+			},
+			"allow_connection_usage_in_gateway": superschema.BoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Allow this connection to be utilized with either on-premises data gateways or VNet data gateways.",
+				},
+				Resource: &schemaR.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
+					Validators: []validator.Bool{
+						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
 							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+					},
+				},
+				DataSource: &schemaD.BoolAttribute{
+					Computed: true,
+					Optional: true,
+					Validators: []validator.Bool{
+						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
 							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
+								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
 							}),
 					},
 				},
@@ -221,7 +229,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Attributes: superschema.Attributes{
 							"name": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "Name.",
+									MarkdownDescription: "The name of the parameter..",
 									Required:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
@@ -230,13 +238,13 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"data_type": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "Data Type.",
+									MarkdownDescription: "The data type of the parameter.",
 									Computed:            true,
 								},
 							},
 							"value": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "Value.",
+									MarkdownDescription: "The value of the parameter.",
 									Required:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
@@ -264,14 +272,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The connection encryption type.",
 							Validators: []validator.String{
-								stringvalidator.OneOf(possibleConnectionEncryptionValues...),
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleConnectionEncryptionValues(), true)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
 							Computed: true,
 							Default:  stringdefault.StaticString(string(fabcore.ConnectionEncryptionNotEncrypted)),
 						},
@@ -288,9 +293,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
 							Computed: true,
 							Default:  stringdefault.StaticString(string(fabcore.SingleSignOnTypeNone)),
 						},
@@ -303,10 +305,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							MarkdownDescription: "Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.",
 						},
 						Resource: &schemaR.BoolAttribute{
-							Required: true,
-							PlanModifiers: []planmodifier.Bool{
-								boolplanmodifier.RequiresReplace(),
-							},
+							Optional: true,
+							Computed: true,
+							Default:  booldefault.StaticBool(false),
 						},
 						DataSource: &schemaD.BoolAttribute{
 							Computed: true,
@@ -315,18 +316,15 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					"credential_type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The credential type.",
-						},
-						Resource: &schemaR.StringAttribute{
-							Required: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), true)...),
 							},
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
 						},
 					},
 					"basic_credentials": superschema.SuperSingleNestedAttributeOf[credentialsBasicModel]{
@@ -347,9 +345,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The username.",
 									Required:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
 								},
 							},
 							"password_wo": superschema.StringAttribute{
@@ -414,18 +409,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The tenant ID.",
 									Required:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
 								},
 							},
 							"client_id": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The client ID.",
 									Required:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
 								},
 							},
 							"client_secret_wo": superschema.StringAttribute{
@@ -445,7 +434,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 					"shared_access_signature_credentials": superschema.SuperSingleNestedAttributeOf[credentialsSharedAccessSignatureModel]{
 						Resource: &schemaR.SingleNestedAttribute{
-							MarkdownDescription: "The hared access signature credentials.",
+							MarkdownDescription: "The shared access signature credentials.",
 							Optional:            true,
 							Validators: []validator.Object{
 								superobjectvalidator.RequireIfAttributeIsOneOf(

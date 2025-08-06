@@ -108,11 +108,8 @@ func (to *requestCreateConnection) set(
 	}
 
 	var requestCreateCredentialDetails requestCreateCredentialDetails
-	if connectivityType == fabcore.ConnectivityTypeShareableCloud ||
-		connectivityType == fabcore.ConnectivityTypeVirtualNetworkGateway {
-		if diags := requestCreateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
-			return diags
-		}
+	if diags := requestCreateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
+		return diags
 	}
 
 	displayName := plan.DisplayName.ValueStringPointer()
@@ -126,6 +123,7 @@ func (to *requestCreateConnection) set(
 			ConnectivityType:  &connectivityType,
 			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
 			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
+			// AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
@@ -482,6 +480,7 @@ func (to *requestUpdateConnection) set(
 			ConnectivityType:  &connectivityType,
 			PrivacyLevel:      privacyLevel,
 			CredentialDetails: &requestUpdateCredentialDetails.UpdateCredentialDetails,
+			// AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:

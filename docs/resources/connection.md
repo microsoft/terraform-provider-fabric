@@ -3,14 +3,14 @@
 page_title: "fabric_connection Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Connection resource allows you to manage a Fabric Connection TODO.
+  The Connection resource allows you to manage a Fabric Connection https://learn.microsoft.com/fabric/data-factory/data-source-management.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_connection (Resource)
 
-The Connection resource allows you to manage a Fabric [Connection](TODO).
+The Connection resource allows you to manage a Fabric [Connection](https://learn.microsoft.com/fabric/data-factory/data-source-management).
 
 -> This resource supports Service Principal authentication.
 
@@ -19,9 +19,43 @@ The Connection resource allows you to manage a Fabric [Connection](TODO).
 ## Example Usage
 
 ```terraform
-resource "fabric_connection" "example" {
-  display_name      = "example"
+# Example 1 - ShareableCloud Connection
+resource "fabric_connection" "example_cloud" {
+  display_name      = "example1"
   connectivity_type = "ShareableCloud"
+  privacy_level     = "Organizational"
+  connection_details = {
+    type            = "FTP"
+    creation_method = "FTP.Contents"
+    parameters = [
+      {
+        name  = "server"
+        value = "ftp.example.com"
+      }
+    ]
+  }
+  credential_details = {
+    connection_encryption = "NotEncrypted"
+    credential_type       = "Basic"
+    single_sign_on_type   = "None"
+    skip_test_connection  = false
+    basic_credentials = {
+      username            = "user"
+      password_wo         = "...secret_password1..."
+      password_wo_version = 2
+    }
+  }
+}
+
+# Example 2 - OnPremisesGateway Connection
+output "example_on_premises_gateway" {
+  value = resource.fabric_connection.example_on_premises_gateway
+}
+
+resource "fabric_connection" "example_on_premises_gateway" {
+  gateway_id        = "f0e7cc2c-f62c-4511-a50b-4e54216b92a2"
+  display_name      = "example"
+  connectivity_type = "OnPremisesGateway"
   privacy_level     = "Organizational"
   connection_details = {
     type            = "FTP"
@@ -53,13 +87,14 @@ resource "fabric_connection" "example" {
 ### Required
 
 - `connection_details` (Attributes) The Connection connection details. (see [below for nested schema](#nestedatt--connection_details))
-- `connectivity_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection connectivity type. Value must be one of : `OnPremisesGateway`, `ShareableCloud`, `VirtualNetworkGateway`.
+- `connectivity_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection connectivity type. Value must be one of : `ShareableCloud`, `VirtualNetworkGateway`.
 - `credential_details` (Attributes) The Connection credential details. (see [below for nested schema](#nestedatt--credential_details))
 - `display_name` (String) The Connection display name. String length must be at most 123.
 
 ### Optional
 
-- `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is one of `VirtualNetworkGateway`, `OnPremisesGateway` or `OnPremisesGatewayPersonal` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is one of `Automatic`, `None`, `PersonalCloud` or `ShareableCloud` this attribute is **NULL**.
+- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. Value defaults to `false`. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
+- `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
 - `privacy_level` (String) The Connection privacy level. Value defaults to `Organizational`. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -90,12 +125,12 @@ Read-Only:
 
 Required:
 
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name.
-- `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Value.
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter..
+- `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The value of the parameter.
 
 Read-Only:
 
-- `data_type` (String) Data Type.
+- `data_type` (String) The data type of the parameter.
 
 <a id="nestedatt--credential_details"></a>
 
@@ -103,24 +138,17 @@ Read-Only:
 
 Required:
 
-- `credential_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The credential type.
-
--> **If the value of the attribute [`connectivity_type`](#connectivity_type) is `OnPremisesGateway` the value is one of** - `"Anonymous"` - Anonymous<br>- `"Basic"` - Basic<br>- `"Key"` - Key<br>- `"OAuth2"` - OAuth2<br>- `"Windows"` - Windows<br>.
-
--> **If the value of the attribute [`connectivity_type`](#connectivity_type) is one of `ShareableCloud` or `VirtualNetworkGateway`** : - `"Anonymous"` - Anonymous<br>- `"Basic"` - Basic<br>- `"Key"` - Key<br>- `"ServicePrincipal"` - ServicePrincipal<br>- `"SharedAccessSignature"` - SharedAccessSignature<br>- `"Windows"` - Windows<br>- `"WindowsWithoutImpersonation"` - WindowsWithoutImpersonation<br>- `"WorkspaceIdentity"` - WorkspaceIdentity<br>.
-
-- `skip_test_connection` (Boolean) <i style="color:red;font-weight: bold">(ForceNew)</i> Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.
+- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
 
 Optional:
 
-- `basic_credentials` (Attributes) The basic credentials. Ensure that if an attribute is set, these are not set: "[<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
-- `connection_encryption` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The connection encryption type. Value defaults to `NotEncrypted`. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
-- `key_credentials` (Attributes) The key credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
-- `oauth2_credentials` (Attributes) The OAuth2 credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.windows_credentials]". Value must satisfy all of the validations: If connectivity_type attribute is set and the value is "OnPremisesGateway" this attribute is REQUIRED + If <.credential_type attribute is set and the value is "OAuth2" this attribute is REQUIRED. (see [below for nested schema](#nestedatt--credential_details--oauth2_credentials))
-- `service_principal_credentials` (Attributes) The service principal credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.shared_access_signature_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `ServicePrincipal` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
-- `shared_access_signature_credentials` (Attributes) The hared access signature credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.windows_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `SharedAccessSignature` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
-- `single_sign_on_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The single sign-on type. Value defaults to `None`. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
-- `windows_credentials` (Attributes) The Windows credentials. Ensure that if an attribute is set, these are not set: "[<.basic_credentials,<.key_credentials,<.service_principal_credentials,<.shared_access_signature_credentials,<.oauth2_credentials]". If the value of [`<.credential_type`](#<.credential_type) attribute is `Windows` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--windows_credentials))
+- `basic_credentials` (Attributes) The basic credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
+- `connection_encryption` (String) The connection encryption type. Value defaults to `NotEncrypted`. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
+- `key_credentials` (Attributes) The key credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
+- `service_principal_credentials` (Attributes) The service principal credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `ServicePrincipal` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
+- `shared_access_signature_credentials` (Attributes) The shared access signature credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `SharedAccessSignature` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
+- `single_sign_on_type` (String) The single sign-on type. Value defaults to `None`. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
+- `skip_test_connection` (Boolean) Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection. Value defaults to `false`.
 
 <a id="nestedatt--credential_details--basic_credentials"></a>
 
@@ -130,7 +158,7 @@ Required:
 
 - `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
 - `password_wo_version` (Number) The version of the `password_wo`.
-- `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
+- `username` (String) The username.
 
 <a id="nestedatt--credential_details--key_credentials"></a>
 
@@ -141,25 +169,16 @@ Required:
 - `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
 - `key_wo_version` (Number) The version of the `key_wo`.
 
-<a id="nestedatt--credential_details--oauth2_credentials"></a>
-
-### Nested Schema for `credential_details.oauth2_credentials`
-
-Required:
-
-- `access_token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
-- `access_token_wo_version` (Number) The version of the `access_token_wo`.
-
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
 ### Nested Schema for `credential_details.service_principal_credentials`
 
 Required:
 
-- `client_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The client ID.
+- `client_id` (String) The client ID.
 - `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO).
 - `client_secret_wo_version` (Number) The version of the `client_secret_wo`.
-- `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID.
+- `tenant_id` (String) The tenant ID.
 
 <a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
 
@@ -169,16 +188,6 @@ Required:
 
 - `sas_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The sas (WO).
 - `sas_wo_version` (Number) The version of the `sas_wo`.
-
-<a id="nestedatt--credential_details--windows_credentials"></a>
-
-### Nested Schema for `credential_details.windows_credentials`
-
-Required:
-
-- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) The version of the `password_wo`.
-- `username` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The username.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -190,3 +199,14 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+# terraform import fabric_connection.example "<ConnectionID>"
+terraform import fabric_connection.example "00000000-0000-0000-0000-000000000000"
+```

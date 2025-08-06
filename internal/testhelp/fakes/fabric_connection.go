@@ -48,6 +48,7 @@ func (o *operationsConnection) Create(data fabcore.CreateConnectionRequestClassi
 				ConnectionEncryption: req.CredentialDetails.ConnectionEncryption,
 				SingleSignOnType:     req.CredentialDetails.SingleSignOnType,
 				SkipTestConnection:   req.CredentialDetails.SkipTestConnection,
+				// AllowConnectionUsageInGateway: req.CredentialDetails.AllowConnectionUsageInGateway,
 			}
 		}
 	case *fabcore.CreateVirtualNetworkGatewayConnectionRequest:
@@ -99,8 +100,8 @@ func (o *operationsConnection) Update(base fabcore.Connection, data fabcore.Upda
 	// Handle specific update request types
 	switch req := data.(type) {
 	case *fabcore.UpdateShareableCloudConnectionRequest:
-		// Handle UpdateShareableCloudConnectionRequest specific fields
 		base.DisplayName = req.DisplayName
+		base.PrivacyLevel = req.PrivacyLevel
 
 		if req.CredentialDetails != nil {
 			base.CredentialDetails = &fabcore.ListCredentialDetails{
@@ -108,11 +109,12 @@ func (o *operationsConnection) Update(base fabcore.Connection, data fabcore.Upda
 				ConnectionEncryption: req.CredentialDetails.ConnectionEncryption,
 				SingleSignOnType:     req.CredentialDetails.SingleSignOnType,
 				SkipTestConnection:   req.CredentialDetails.SkipTestConnection,
+				// AllowConnectionUsageInGateway: req.CredentialDetails.AllowConnectionUsageInGateway,
 			}
 		}
 	case *fabcore.UpdateVirtualNetworkGatewayConnectionRequest:
-		// Handle UpdateVirtualNetworkGatewayConnectionRequest specific fields
 		base.DisplayName = req.DisplayName
+		base.PrivacyLevel = req.PrivacyLevel
 
 		if req.CredentialDetails != nil {
 			base.CredentialDetails = &fabcore.ListCredentialDetails{
@@ -181,10 +183,10 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 			ListSupportedConnectionTypesResponse: fabcore.ListSupportedConnectionTypesResponse{
 				Value: []fabcore.ConnectionCreationMetadata{
 					{
-						Type: to.Ptr("SQL"),
+						Type: to.Ptr("FTP"),
 						CreationMethods: []fabcore.ConnectionCreationMethod{
 							{
-								Name: to.Ptr("FTP"),
+								Name: to.Ptr("FTP.Contents"),
 								Parameters: []fabcore.ConnectionCreationParameter{
 									{
 										Name:     to.Ptr("server"),

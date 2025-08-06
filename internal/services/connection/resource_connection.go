@@ -340,11 +340,7 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 		return diags
 	}
 
-	if diags := model.set(ctx, respGet.Connection); diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return model.set(ctx, respGet.Connection)
 }
 
 func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {

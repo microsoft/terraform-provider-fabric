@@ -10,7 +10,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "connection",
 	Names:          "Connections",
 	Types:          "connections",
-	DocsURL:        "https://learn.microsoft.com/en-us/fabric/data-factory/data-source-management",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-factory/data-source-management",
 	IsPreview:      true,
 	IsSPNSupported: true,
 }
