@@ -282,6 +282,9 @@ function Set-FabricItem {
     'Warehouse' {
       $itemEndpoint = 'warehouses'
     }
+    'WarehouseSnapshot' {
+      $itemEndpoint = 'warehousesnapshots'
+    }
     default {
       $itemEndpoint = 'items'
     }
@@ -1070,6 +1073,7 @@ $itemNaming = @{
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
   'Warehouse'                       = 'wh'
+  'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
@@ -1739,6 +1743,25 @@ $wellKnown['Subfolder'] = @{
   id             = $subFolder.id
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
+}
+
+# Create Warehouse Snapshot if not exists
+if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
+  Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
+  $creationPayload = @{
+    parentWarehouseId = $wellKnown['Warehouse'].id
+  }
+
+  $warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
+
+  $wellKnown['WarehouseSnapshot'] = @{
+    id          = $warehouseSnapshot.id
+    displayName = $warehouseSnapshot.displayName
+    description = $warehouseSnapshot.description
+  }
 }
 
 # Save wellknown.json file
