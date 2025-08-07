@@ -160,7 +160,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyOverwriteOnly
+	// TODO: Handle shortcut conflict policy? OverwriteOnly does not exist anymore
+	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyAbort
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
 		ShortcutConflictPolicy: &overwriteOnlyPolicy,
 	}
