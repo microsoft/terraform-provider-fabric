@@ -125,6 +125,11 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		return
 	}
 
+	// Validate that the API returned the pool configuration as requested
+	if resp.Diagnostics.Append(r.validatePoolConfiguration(ctx, &reqCreate, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	plan.ID = plan.EnvironmentID
 
 	if resp.Diagnostics.Append(r.publish(ctx, plan)...); resp.Diagnostics.HasError() {
@@ -218,6 +223,11 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 	}
 
 	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.SparkCompute)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Validate that the API returned the pool configuration as requested
+	if resp.Diagnostics.Append(r.validatePoolConfiguration(ctx, &reqUpdate, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -327,4 +337,90 @@ func (r *resourceSparkEnvironmentSettings) publish(ctx context.Context, model re
 	}
 
 	return nil
+}
+
+// validatePoolConfiguration checks if the API returned the pool configuration as requested
+func (r *resourceSparkEnvironmentSettings) validatePoolConfiguration(ctx context.Context, request *requestUpdateSparkEnvironmentSettings, model *resourceSparkEnvironmentSettingsModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	// Only validate if a pool was requested
+	if request.InstancePool == nil {
+		return diags
+	}
+
+	// Get the actual pool configuration from the model
+	if model.Pool.IsNull() {
+		// API returned no pool configuration, but we requested one
+		diags.AddError(
+			"Pool configuration not applied",
+			"A pool configuration was specified, but the API did not return any pool configuration. "+
+				"This may indicate that the specified pool name does not exist or is not accessible.",
+		)
+		return diags
+	}
+
+	actualPool, poolDiags := model.Pool.Get(ctx)
+	if poolDiags.HasError() {
+		diags.Append(poolDiags...)
+		return diags
+	}
+
+	// Validate pool type if it was specified in the request
+	if request.InstancePool.Type != nil {
+		requestedType := string(*request.InstancePool.Type)
+		
+		if actualPool.Type.IsNull() || actualPool.Type.ValueString() != requestedType {
+			actualType := "null"
+			if !actualPool.Type.IsNull() {
+				actualType = actualPool.Type.ValueString()
+			}
+			
+			diags.AddError(
+				"Pool type mismatch",
+				fmt.Sprintf(
+					"Requested pool type '%s' but the API returned pool type '%s'. "+
+						"This may indicate that the specified pool name '%s' is not of the requested type, "+
+						"does not exist, or is not accessible. "+
+						"Please verify that the pool name exists and is a %s pool.",
+					requestedType,
+					actualType,
+					getPoolNameFromRequest(request.InstancePool),
+					requestedType,
+				),
+			)
+		}
+	}
+
+	// Validate pool name if it was specified in the request
+	if request.InstancePool.Name != nil {
+		requestedName := *request.InstancePool.Name
+		
+		if actualPool.Name.IsNull() || actualPool.Name.ValueString() != requestedName {
+			actualName := "null"
+			if !actualPool.Name.IsNull() {
+				actualName = actualPool.Name.ValueString()
+			}
+			
+			diags.AddError(
+				"Pool name mismatch",
+				fmt.Sprintf(
+					"Requested pool name '%s' but the API returned pool name '%s'. "+
+						"This indicates that the specified pool name does not exist or is not accessible. "+
+						"The API may have fallen back to the default 'Starter Pool'.",
+					requestedName,
+					actualName,
+				),
+			)
+		}
+	}
+
+	return diags
+}
+
+// getPoolNameFromRequest extracts the pool name from the request for error messages
+func getPoolNameFromRequest(pool *fabenvironment.InstancePool) string {
+	if pool != nil && pool.Name != nil {
+		return *pool.Name
+	}
+	return "unknown"
 }
