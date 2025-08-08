@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Dataflow description.
 - `display_name` (String) The Dataflow display name.
+- `folder_id` (String) The Dataflow Folder ID.
 - `id` (String) The Dataflow ID.
 - `workspace_id` (String) The Workspace ID.

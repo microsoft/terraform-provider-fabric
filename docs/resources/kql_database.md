@@ -130,7 +130,9 @@ Any changes to this configuration will result in recreation of the KQL Database.
 - `definition` (Attributes Map) Definition parts. Read more about [KQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition). Accepted path keys: **Default** format: `DatabaseProperties.json`, `DatabaseSchema.kql` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The KQL Database description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Database format. Possible values: `Default`
+- `test_attribute` (String) The KQL Database description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

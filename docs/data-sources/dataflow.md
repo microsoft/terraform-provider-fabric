@@ -79,6 +79,7 @@ output "example_definition_pq_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Dataflow description.
+- `folder_id` (String) The Dataflow Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -26,6 +26,7 @@ func (o *operationsMirroredDatabase) ConvertItemToEntity(item fabcore.Item) fabm
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		// Set the type to mirrored database.
 		Type:       to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: NewRandomMirroredDatabase().Properties,
@@ -57,6 +58,7 @@ func (o *operationsMirroredDatabase) CreateWithParentID(parentID string, data fa
 	entity := NewRandomMirroredDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -196,6 +198,7 @@ func NewRandomMirroredDatabase() fabmirroreddatabase.MirroredDatabase {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: &fabmirroreddatabase.Properties{
 			DefaultSchema:     to.Ptr(testhelp.RandomName()),
