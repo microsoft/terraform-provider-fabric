@@ -33,6 +33,8 @@ resource "fabric_graphql_api" "example" {
 ### Optional
 
 - `description` (String) The GraphQL API description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The GraphQL API description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

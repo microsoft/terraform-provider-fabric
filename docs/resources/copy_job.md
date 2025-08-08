@@ -21,6 +21,8 @@ resource "fabric_copy_job" "example_definition" {
   display_name = "example"
   description  = "example without definition"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  #folder_id    = "00000000-0000-0000-0000-000000000000"
+  test_attribute = "test"
 }
 
 # Example 2 - Item with definition bootstrapping only
@@ -70,7 +72,9 @@ resource "fabric_copy_job" "example_definition_update" {
 - `definition` (Attributes Map) Definition parts. Read more about [Copy Job definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/copyjob-definition). Accepted path keys: **Default** format: `copyjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Copy Job description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Copy Job format. Possible values: `Default`
+- `test_attribute` (String) The Copy Job description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

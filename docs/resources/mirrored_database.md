@@ -61,6 +61,8 @@ resource "fabric_mirrored_database" "example_definition_update" {
 
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Database description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The Mirrored Database description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

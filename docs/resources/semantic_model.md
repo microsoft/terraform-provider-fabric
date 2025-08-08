@@ -65,6 +65,8 @@ resource "fabric_semantic_model" "example_update" {
 
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Semantic Model description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The Semantic Model description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

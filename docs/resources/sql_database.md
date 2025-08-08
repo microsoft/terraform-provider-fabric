@@ -36,6 +36,8 @@ resource "fabric_sql_database" "example" {
 ### Optional
 
 - `description` (String) The SQL Database description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The SQL Database description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

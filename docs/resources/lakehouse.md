@@ -49,6 +49,8 @@ resource "fabric_lakehouse" "example2" {
 Any changes to this configuration will result in recreation of the Lakehouse. (see [below for nested schema](#nestedatt--configuration))
 
 - `description` (String) The Lakehouse description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The Lakehouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

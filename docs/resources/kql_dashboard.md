@@ -67,7 +67,9 @@ resource "fabric_kql_dashboard" "example_definition_update" {
 - `definition` (Attributes Map) Definition parts. Read more about [KQL Dashboard definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-dashboard-definition). Accepted path keys: **Default** format: `RealTimeDashboard.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The KQL Dashboard description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Dashboard format. Possible values: `Default`
+- `test_attribute` (String) The KQL Dashboard description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
