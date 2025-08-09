@@ -83,6 +83,7 @@ Optional:
 - `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
 - `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
 - `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+- `tokens_delimiter` (String) The delimiter for the tokens in the source content. Possible values: `<<>>`, `@{}@`, `____`, `{{}}`. Default: `{{}}`
 
 Read-Only:
 

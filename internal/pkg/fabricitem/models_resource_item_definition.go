@@ -32,6 +32,7 @@ type resourceFabricItemDefinitionPartModel struct {
 	Parameters          supertypes.SetNestedObjectValueOf[params.ParametersModel] `tfsdk:"parameters"`
 	ProcessingMode      types.String                                              `tfsdk:"processing_mode"`
 	Tokens              supertypes.MapValueOf[types.String]                       `tfsdk:"tokens"`
+	TokensDelimiter     types.String                                              `tfsdk:"tokens_delimiter"`
 	SourceContentSha256 types.String                                              `tfsdk:"source_content_sha256"`
 }
 
@@ -99,7 +100,13 @@ func (to *fabricItemDefinition) setParts(
 				}
 			}
 
-			payloadB64, _, diags := transforms.SourceFileToPayload(defPartValue.Source.ValueString(), defPartValue.ProcessingMode.ValueString(), tokensValue, nil)
+			payloadB64, _, diags := transforms.SourceFileToPayload(
+				defPartValue.Source.ValueString(),
+				defPartValue.ProcessingMode.ValueString(),
+				tokensValue,
+				nil,
+				defPartValue.TokensDelimiter.ValueString(),
+			)
 			if diags.HasError() {
 				return diags
 			}

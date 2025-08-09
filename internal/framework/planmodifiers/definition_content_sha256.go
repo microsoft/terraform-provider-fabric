@@ -17,20 +17,22 @@ import (
 
 var _ planmodifier.String = (*definitionContentSha256)(nil)
 
-func DefinitionContentSha256(sourceAttr, processingModeAttr, tokensAttr, parametersAttr path.Expression) planmodifier.String {
+func DefinitionContentSha256(sourceAttr, processingModeAttr, tokensAttr, parametersAttr, tokensDelimiterAttr path.Expression) planmodifier.String {
 	return &definitionContentSha256{
-		source:         sourceAttr,
-		processingMode: processingModeAttr,
-		tokens:         tokensAttr,
-		parameters:     parametersAttr,
+		source:          sourceAttr,
+		processingMode:  processingModeAttr,
+		tokens:          tokensAttr,
+		parameters:      parametersAttr,
+		tokensDelimiter: tokensDelimiterAttr,
 	}
 }
 
 type definitionContentSha256 struct {
-	source         path.Expression
-	processingMode path.Expression
-	tokens         path.Expression
-	parameters     path.Expression
+	source          path.Expression
+	processingMode  path.Expression
+	tokens          path.Expression
+	parameters      path.Expression
+	tokensDelimiter path.Expression
 }
 
 func (pm *definitionContentSha256) Description(_ context.Context) string {
@@ -41,7 +43,7 @@ func (pm *definitionContentSha256) MarkdownDescription(ctx context.Context) stri
 	return pm.Description(ctx)
 }
 
-func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) { //nolint:gocognit
 	sourcePlanPaths, diags := req.Plan.PathMatches(ctx, req.PathExpression.Merge(pm.source))
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -57,6 +59,11 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 		return
 	}
 
+	tokensDelimiterPlanPaths, diags := req.Plan.PathMatches(ctx, req.PathExpression.Merge(pm.tokensDelimiter))
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	parametersPlanPaths, diags := req.Plan.PathMatches(ctx, req.PathExpression.Merge(pm.parameters))
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -64,6 +71,7 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 
 	var source types.String
 	var tokens supertypes.MapValueOf[types.String]
+	var tokensDelimiter types.String
 	var parameters supertypes.SetNestedObjectValueOf[params.ParametersModel]
 	var processingMode types.String
 
@@ -72,6 +80,10 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 	}
 
 	if resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, tokensPlanPaths[0], &tokens)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, tokensDelimiterPlanPaths[0], &tokensDelimiter)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -121,7 +133,7 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 		}
 	}
 
-	_, sha256Value, diags := transforms.SourceFileToPayload(source.ValueString(), processingMode.ValueString(), tokensValue, parametersSlice)
+	_, sha256Value, diags := transforms.SourceFileToPayload(source.ValueString(), processingMode.ValueString(), tokensValue, parametersSlice, tokensDelimiter.ValueString())
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}

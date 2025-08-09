@@ -212,7 +212,7 @@ func TestUnit_SourceFileToPayload(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, tt.processingMode, tt.tokens, nil)
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, tt.processingMode, tt.tokens, nil, transforms.TokensDelimiterCurlyBraces)
 			errCount := diags.ErrorsCount()
 
 			if tt.expectError {
@@ -238,7 +238,7 @@ func TestUnit_SourceFileToPayload(t *testing.T) {
 	t.Run("null_tokens", func(t *testing.T) {
 		var tokens map[string]string
 
-		contentB64, contentSha256, diags := transforms.SourceFileToPayload(regularFilePath, "GoTemplate", tokens, nil)
+		contentB64, contentSha256, diags := transforms.SourceFileToPayload(regularFilePath, "GoTemplate", tokens, nil, transforms.TokensDelimiterCurlyBraces)
 
 		assert.False(t, diags.HasError(), "Unexpected error diagnostics with null tokens: %v", diags)
 		require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
@@ -326,4 +326,161 @@ func TestUnit_PayloadToGzip(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUnit_SourceFileToPayload_TokensDelimiter(t *testing.T) {
+	tempDir := t.TempDir()
+
+	tokens := map[string]string{
+		"Name":    "World",
+		"Value":   "123",
+		"Service": "TestService",
+	}
+
+	testFiles := []struct {
+		content   string
+		delimiter string
+		expected  string
+		filename  string
+	}{
+		{
+			content:   `Hello {{.Name}}! Welcome to {{.Service}}.`,
+			delimiter: transforms.TokensDelimiterCurlyBraces,
+			expected:  "Hello World! Welcome to TestService.",
+			filename:  "curly.tmpl",
+		},
+		{
+			content:   `Hello <<.Name>>! Welcome to <<.Service>>.`,
+			delimiter: transforms.TokensDelimiterAngles,
+			expected:  "Hello World! Welcome to TestService.",
+			filename:  "angles.tmpl",
+		},
+		{
+			content:   `Hello @{.Name}@! Welcome to @{.Service}@.`,
+			delimiter: transforms.TokensDelimiterAt,
+			expected:  "Hello World! Welcome to TestService.",
+			filename:  "at.tmpl",
+		},
+		{
+			content:   `{"name": "{{.Name}}", "service": "{{.Service}}", "value": {{.Value}}}`,
+			delimiter: transforms.TokensDelimiterCurlyBraces,
+			expected:  `{"name":"World","service":"TestService","value":123}`,
+			filename:  "curly.json",
+		},
+		{
+			content:   `{"name": "<<.Name>>", "service": "<<.Service>>", "value": <<.Value>>}`,
+			delimiter: transforms.TokensDelimiterAngles,
+			expected:  `{"name":"World","service":"TestService","value":123}`,
+			filename:  "angles.json",
+		},
+		{
+			content:   `{"name": "@{.Name}@", "service": "@{.Service}@", "value": @{.Value}@}`,
+			delimiter: transforms.TokensDelimiterAt,
+			expected:  `{"name":"World","service":"TestService","value":123}`,
+			filename:  "at.json",
+		},
+	}
+
+	filePaths := make(map[string]string)
+
+	for _, tf := range testFiles {
+		filePath := filepath.Join(tempDir, tf.filename)
+		err := os.WriteFile(filePath, []byte(tf.content), 0o600)
+		require.NoError(t, err, "Failed to write test file: %s", tf.filename)
+		filePaths[tf.filename] = filePath
+	}
+
+	for _, tf := range testFiles {
+		t.Run("correct_delimiter_"+tf.filename, func(t *testing.T) {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(
+				filePaths[tf.filename],
+				"GoTemplate",
+				tokens,
+				nil,
+				tf.delimiter,
+			)
+
+			assert.False(t, diags.HasError(), "Unexpected error diagnostics: %v", diags)
+			require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
+			require.NotEmpty(t, contentSha256, "Expected non-empty contentSha256")
+
+			decodedContent, err := transforms.Base64Decode(contentB64)
+			require.NoError(t, err)
+			assert.Equal(t, tf.expected, decodedContent)
+		})
+	}
+
+	wrongDelimiterTests := []struct {
+		name            string
+		filename        string
+		delimiter       string
+		expectedContent string
+	}{
+		{
+			name:            "curly_template_with_angles_delimiter",
+			filename:        "curly.tmpl",
+			delimiter:       transforms.TokensDelimiterAngles,
+			expectedContent: `Hello {{.Name}}! Welcome to {{.Service}}.`,
+		},
+		{
+			name:            "angles_template_with_curly_delimiter",
+			filename:        "angles.tmpl",
+			delimiter:       transforms.TokensDelimiterCurlyBraces,
+			expectedContent: `Hello <<.Name>>! Welcome to <<.Service>>.`,
+		},
+		{
+			name:            "at_template_with_curly_delimiter",
+			filename:        "at.tmpl",
+			delimiter:       transforms.TokensDelimiterCurlyBraces,
+			expectedContent: `Hello @{.Name}@! Welcome to @{.Service}@.`,
+		},
+		{
+			name:            "curly_json_with_at_delimiter",
+			filename:        "curly.json",
+			delimiter:       transforms.TokensDelimiterAt,
+			expectedContent: `{"name": "{{.Name}}", "service": "{{.Service}}", "value": {{.Value}}}`,
+		},
+	}
+
+	for _, test := range wrongDelimiterTests {
+		t.Run("wrong_delimiter_"+test.name, func(t *testing.T) {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(
+				filePaths[test.filename],
+				"GoTemplate",
+				tokens,
+				nil,
+				test.delimiter,
+			)
+
+			assert.False(t, diags.HasError(), "Unexpected error diagnostics: %v", diags)
+			require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
+			require.NotEmpty(t, contentSha256, "Expected non-empty contentSha256")
+
+			// Decode and verify content is unchanged
+			decodedContent, err := transforms.Base64Decode(contentB64)
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedContent, decodedContent, "Content should remain unchanged when delimiter doesn't match")
+		})
+	}
+
+	// Test None processing mode with different delimiters (should ignore delimiter)
+	t.Run("none_mode_ignores_delimiter", func(t *testing.T) {
+		for _, tf := range testFiles {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(
+				filePaths[tf.filename],
+				"None",
+				tokens,
+				nil,
+				tf.delimiter,
+			)
+
+			assert.False(t, diags.HasError(), "Unexpected error diagnostics: %v", diags)
+			require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
+			require.NotEmpty(t, contentSha256, "Expected non-empty contentSha256")
+
+			decodedContent, err := transforms.Base64Decode(contentB64)
+			require.NoError(t, err)
+			assert.Equal(t, tf.content, decodedContent, "Content should be unchanged in None mode")
+		}
+	})
 }
