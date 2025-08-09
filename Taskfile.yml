@@ -142,6 +142,7 @@ tasks:
             yamllint,
             markdownlint,
             gh,
+            deadcode,
           ]
         task: install:{{.ITEM}}
       - task: test:tools
@@ -456,6 +457,11 @@ tasks:
     desc: Install tfplugindocs
     cmds:
       - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+  install:deadcode:
+    desc: Install deadcode
+    cmds:
+      - go install golang.org/x/tools/cmd/deadcode@latest
 
   install:goimports:
     desc: Install goimports
