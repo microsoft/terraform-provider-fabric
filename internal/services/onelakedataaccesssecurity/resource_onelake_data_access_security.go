@@ -6,9 +6,9 @@ package onelakedataaccesssecurity
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -194,12 +194,38 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 		"id": req.ID,
 	})
 
-	_, diags := customtypes.NewUUIDValueMust(req.ID)
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+	parts := strings.Split(req.ID, "/")
+	if len(parts) != 2 {
+		resp.Diagnostics.AddError(
+			common.ErrorImportIdentifierHeader,
+			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID"),
+		)
+
 		return
 	}
 
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	workspaceID, itemID := parts[0], parts[1]
+
+	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
+	resp.Diagnostics.Append(diags...)
+
+	uuidID, diags := customtypes.NewUUIDValueMust(itemID)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	state := resourceOneLakeDataAccessSecurityModel{
+		WorkspaceID: uuidWorkspaceID,
+		ItemID:      uuidID,
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "end",
@@ -221,7 +247,5 @@ func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *reso
 		return diags
 	}
 
-	model.set(respList)
-
-	return nil
+	return model.set(ctx, respList)
 }

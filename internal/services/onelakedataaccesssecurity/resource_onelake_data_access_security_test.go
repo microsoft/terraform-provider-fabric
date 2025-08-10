@@ -4,13 +4,17 @@
 package onelakedataaccesssecurity_test
 
 import (
+	"errors"
+	"fmt"
 	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -62,6 +66,84 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+		},
+	}))
+}
+
+func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), workspaceID))
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), workspaceID))
+
+	testCase := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"item_id":      itemID,
+			"value": []map[string]any{
+				{
+					"name": *entity.Value[0].Name,
+					"decision_rules": []map[string]any{
+						{
+							"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
+							"permission": []map[string]any{
+								{
+									"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
+									"attribute_value_included_in": []string{"*"},
+								},
+								{
+									"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
+									"attribute_value_included_in": []string{"Read"},
+								},
+							},
+						},
+					},
+					"members": map[string]any{
+						"fabric_item_members": []map[string]any{
+							{
+								"item_access": []string{"ReadAll"},
+								"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
+							},
+						},
+					},
+				},
+			},
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "not-valid",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID")),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "test/id",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// Import state testing - onelake data access security
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             testCase,
+			ImportStateId:      fmt.Sprintf("%s/%s", workspaceID, itemID),
+			ImportState:        true,
+			ImportStatePersist: true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				return nil
+			},
 		},
 	}))
 }

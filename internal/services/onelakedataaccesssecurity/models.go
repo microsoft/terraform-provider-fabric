@@ -66,8 +66,53 @@ type MicrosoftEntraMember struct {
 	TenantID   types.String     `tfsdk:"tenant_id"`
 }
 
-func (to *resourceOneLakeDataAccessSecurityModel) set(from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) {
+func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
 	to.Etag.Set(*from.Etag)
+	slice := make([]*dataAccessRole, 0, len(from.Value))
+
+	for _, item := range from.Value {
+		role := &dataAccessRole{
+			Name: types.StringPointerValue(item.Name),
+		}
+
+		role.DecisionRules = supertypes.NewSetNestedObjectValueOfNull[decisionRule](ctx)
+
+		if item.DecisionRules != nil {
+			decisionRules := make([]*decisionRule, 0, len(item.DecisionRules))
+
+			for _, rule := range item.DecisionRules {
+				decisionRule := decisionRule{}
+				if diags := decisionRule.set(ctx, rule); diags.HasError() {
+					return diags
+				}
+
+				decisionRules = append(decisionRules, &decisionRule)
+			}
+
+			if diags := role.DecisionRules.Set(ctx, decisionRules); diags.HasError() {
+				return diags
+			}
+		}
+
+		role.Members.SetNull(ctx)
+
+		members := &Member{}
+		if diags := members.set(ctx, item.Members); diags.HasError() {
+			return diags
+		}
+
+		if diags := role.Members.Set(ctx, members); diags.HasError() {
+			return diags
+		}
+
+		slice = append(slice, role)
+	}
+
+	if diags := to.Value.Set(ctx, slice); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }
 
 func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
