@@ -58,8 +58,8 @@ func NewResourceVariableLibrary() resource.Resource {
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 			DefinitionFormats:     itemDefinitionFormats,
 			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtLeast(2),
-				mapvalidator.SizeAtMost(2),
+				mapvalidator.SizeAtLeast(3),
+				mapvalidator.SizeAtMost(3),
 				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 			},
 			DefinitionRequired: false,

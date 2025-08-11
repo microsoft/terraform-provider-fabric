@@ -157,6 +157,18 @@ func TestAcc_VariableLibraryDataSource(t *testing.T) {
 	entityDescription := entity["description"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// missing format
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
+		},
 		// read by id
 		{
 			Config: at.CompileConfig(
@@ -171,6 +183,7 @@ func TestAcc_VariableLibraryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 		// read by id - not found
@@ -198,6 +211,7 @@ func TestAcc_VariableLibraryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 		// read by name - not found
