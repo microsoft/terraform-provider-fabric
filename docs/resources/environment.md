@@ -36,6 +36,8 @@ resource "fabric_environment" "example" {
 ### Optional
 
 - `description` (String) The Environment description.
+- `folder_id` (String) The Folder ID.
+- `test_attribute` (String) The Environment description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

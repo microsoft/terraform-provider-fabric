@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type resourceFabricItemModel struct {
@@ -35,6 +37,10 @@ func (to *requestCreateFabricItem) setDisplayName(v types.String) {
 
 func (to *requestCreateFabricItem) setDescription(v types.String) {
 	to.Description = v.ValueStringPointer()
+}
+
+func (to *requestCreateFabricItem) setFolderID(v customtypes.UUID) {
+	to.FolderID = v.ValueStringPointer()
 }
 
 func (to *requestCreateFabricItem) setType(v fabcore.ItemType) {

@@ -225,12 +225,14 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"display_name": *entityBefore.DisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
+						//	"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			//	resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Update and Read
@@ -245,11 +247,13 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
+						//"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			//	resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -262,6 +266,7 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -269,6 +274,7 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
@@ -276,12 +282,14 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
 			),
 		},
 		// Update and Read
@@ -289,6 +297,7 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
@@ -296,11 +305,13 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
 			),
 		},
 	}))

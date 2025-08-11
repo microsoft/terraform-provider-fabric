@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `copyjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Copy Job description.
+- `folder_id` (String) The Copy Job Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

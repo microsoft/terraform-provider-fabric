@@ -23,6 +23,7 @@ func (o *operationsEventhouse) ConvertItemToEntity(item fabcore.Item) fabeventho
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties:  NewRandomEventhouse().Properties,
 	}
@@ -52,6 +53,7 @@ func (o *operationsEventhouse) CreateWithParentID(parentID string, data fabevent
 	entity := NewRandomEventhouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -178,6 +180,7 @@ func NewRandomEventhouse() fabeventhouse.Eventhouse {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties: &fabeventhouse.Properties{
 			IngestionServiceURI:     to.Ptr(testhelp.RandomURI()),

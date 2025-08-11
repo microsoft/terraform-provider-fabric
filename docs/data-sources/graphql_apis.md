@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The GraphQL API description.
 - `display_name` (String) The GraphQL API display name.
+- `folder_id` (String) The GraphQL API Folder ID.
 - `id` (String) The GraphQL API ID.
 - `workspace_id` (String) The Workspace ID.
