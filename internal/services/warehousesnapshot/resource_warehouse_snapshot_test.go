@@ -279,6 +279,7 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"configuration": map[string]any{
 							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
+							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
 						},
 					},
 				)),
@@ -286,8 +287,8 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.snapshot_date_time", warehouseResourceFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.parent_warehouse_id", warehouseResourceFQN, "id"),
 			),
 		},
 		// Update and Read
@@ -303,6 +304,7 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"configuration": map[string]any{
 							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
+							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
 						},
 					},
 				)),
@@ -310,8 +312,8 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.snapshot_date_time", warehouseResourceFQN, "properties.last_updated_time"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.parent_warehouse_id", warehouseResourceFQN, "id"),
 			),
 		},
 	},

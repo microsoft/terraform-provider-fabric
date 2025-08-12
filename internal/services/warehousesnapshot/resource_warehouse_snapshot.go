@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/microsoft/fabric-sdk-go/fabric"
@@ -28,7 +28,7 @@ func NewResourceWarehouseSnapshot() resource.Resource {
 					return nil
 				}
 
-				return to.Ptr(t)
+				return azto.Ptr(t)
 			}(),
 		}
 
