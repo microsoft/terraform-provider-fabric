@@ -208,7 +208,7 @@ function Set-FabricItem {
 
   switch ($Type) {
     'ApacheAirflowJob' {
-      $itemEndpoint = 'apacheAirflowJobs'
+      $itemEndpoint = 'ApacheAirflowJobs'
     }
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
@@ -291,7 +291,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1172,7 +1172,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1655,26 +1655,6 @@ $wellKnown['MountedDataFactory'] = @{
   id          = $mountedDataFactory.id
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
-}
-
-# Create the Apache Airflow Job if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = 'apacheAirflowJob-content.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheairflowjob-content.json.tmpl'
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-
-$apacheAirflowJob = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'ApacheAirflowJob' -Definition $definition
-
-$wellKnown['ApacheAirflowJob'] = @{
-  id          = $apacheAirflowJob.id
-  displayName = $apacheAirflowJob.displayName
-  description = $apacheAirflowJob.description
 }
 
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
