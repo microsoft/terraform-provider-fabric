@@ -11,8 +11,10 @@ import (
 )
 
 const (
-	FabricItemType            = fabcore.ItemTypeApacheAirflowJob
-	ItemDefinitionEmpty       = `{"properties":{}}`
+	FabricItemType      = fabcore.ItemTypeApacheAirflowJob
+	ItemDefinitionEmpty = `{"properties":{}}`
+	//nolint:godox
+	// TODO: ItemDefinitionPathDocsURL needs to be updated once definition article is out.
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/fabric/data-factory/apache-airflow-jobs-concepts"
 )
 
