@@ -55,15 +55,15 @@ resource "fabric_apache_airflow_job" "example_definition_update" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Apache Airflow Job definition part paths](https://learn.microsoft.com/fabric/data-factory/apache-airflow-jobs-concepts). Accepted path keys: **Default** format: `apacheairflowjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Apache Airflow Job display name.
-- `format` (String) The Apache Airflow Job format. Possible values: `Default`
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
 
+- `definition` (Attributes Map) Definition parts. Read more about [Apache Airflow Job definition part paths](https://learn.microsoft.com/fabric/data-factory/apache-airflow-jobs-concepts). Accepted path keys: **Default** format: `apacheairflowjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Apache Airflow Job description.
+- `format` (String) The Apache Airflow Job format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -102,6 +102,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # terraform import fabric_apache_airflow_job.example "<WorkspaceID>/<ApacheAirflowJobID>"
