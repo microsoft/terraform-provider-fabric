@@ -155,8 +155,8 @@ github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27k
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/microsoft/fabric-sdk-go v0.10.0 h1:0mmWIuQNE8IS9Y/CPKMEFjFoKCQAdGWB6bfvxH2Om5g=
-github.com/microsoft/fabric-sdk-go v0.10.0/go.mod h1:uj8eBgx/G/kPQDKUDAemH2RMayBLS06oj/KaAsmGYcU=
+github.com/microsoft/fabric-sdk-go v0.11.0 h1:+Y6HRcAyOaQPOFOorWpJZyHWelFm4HptrgxtlUMqKtE=
+github.com/microsoft/fabric-sdk-go v0.11.0/go.mod h1:uj8eBgx/G/kPQDKUDAemH2RMayBLS06oj/KaAsmGYcU=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
 github.com/mitchellh/go-testing-interface v1.14.1 h1:jrgshOhYAUVNMAJiKbEu7EqAwgJJ2JqpQmpLJOu07cU=
