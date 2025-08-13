@@ -29,9 +29,10 @@ var (
 
 // DataSource is the data source for the Fabric Workspace.
 type dataSourceWorkspace struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.WorkspacesClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData    *pconfig.ProviderData
+	client         *fabcore.WorkspacesClient
+	clientCapacity *fabcore.CapacitiesClient
+	TypeInfo       tftypeinfo.TFTypeInfo
 }
 
 // NewDataSource creates a new data source for the Fabric Workspace.
@@ -81,6 +82,7 @@ func (d *dataSourceWorkspace) Configure(_ context.Context, req datasource.Config
 
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
+	d.clientCapacity = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCapacitiesClient()
 }
 
 func (d *dataSourceWorkspace) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -137,7 +139,12 @@ func (d *dataSourceWorkspace) getByID(ctx context.Context, model *dataSourceWork
 		return diags
 	}
 
-	return model.set(ctx, respGet.WorkspaceInfo)
+	diags := model.set(ctx, respGet.WorkspaceInfo)
+	if diags.HasError() {
+		return diags
+	}
+
+	return validateCapacityState(ctx, d.clientCapacity, model.CapacityID.ValueStringPointer())
 }
 
 func (d *dataSourceWorkspace) getByDisplayName(ctx context.Context, model *dataSourceWorkspaceModel) diag.Diagnostics {

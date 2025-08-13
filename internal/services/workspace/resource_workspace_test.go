@@ -99,11 +99,13 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 }
 
 func TestUnit_WorkspaceResource_ImportState(t *testing.T) {
-	entity := fakes.NewRandomWorkspaceInfo()
+	capacity := fakes.NewRandomCapacity()
+	entity := fakes.NewRandomWorkspaceInfo(capacity.ID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
@@ -144,14 +146,16 @@ func TestUnit_WorkspaceResource_ImportState(t *testing.T) {
 	}))
 }
 
-func TestUnit_WorkspaceResource_CRUD(t *testing.T) {
-	entityExist := fakes.NewRandomWorkspaceInfo()
-	entityBefore := fakes.NewRandomWorkspaceInfo()
-	entityAfter := fakes.NewRandomWorkspaceInfo()
+func TestUnit_WorkspaceResource_Capacity_CRUD(t *testing.T) {
+	capacity := fakes.NewRandomCapacity()
+	entityExist := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityBefore := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entityAfter := fakes.NewRandomWorkspaceInfo(capacity.ID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 	fakes.FakeServer.Upsert(entityExist)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo())
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -165,6 +169,49 @@ func TestUnit_WorkspaceResource_CRUD(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityBefore.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityAfter.DisplayName,
+					"description":  *entityAfter.Description,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+func TestUnit_WorkspaceResource_NoCapacity_CRUD(t *testing.T) {
+	entityExist := fakes.NewRandomWorkspaceInfo(nil)
+	entityBefore := fakes.NewRandomWorkspaceInfo(nil)
+	entityAfter := fakes.NewRandomWorkspaceInfo(nil)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(nil))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(nil))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

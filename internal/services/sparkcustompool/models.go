@@ -73,6 +73,7 @@ DATA-SOURCE
 
 type dataSourceSparkCustomPoolModel struct {
 	baseSparkCustomPoolModel
+
 	Timeouts timeoutsd.Value `tfsdk:"timeouts"`
 }
 
@@ -82,6 +83,7 @@ RESOURCE
 
 type resourceSparkCustomPoolModel struct {
 	baseSparkCustomPoolModel
+
 	Timeouts timeoutsr.Value `tfsdk:"timeouts"`
 }
 

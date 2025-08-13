@@ -91,6 +91,7 @@ DATA-SOURCE
 
 type dataSourceWorkspaceGitModel struct {
 	baseWorkspaceGitModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -99,9 +100,10 @@ RESOURCE
 */
 
 type resourceWorkspaceGitModel struct {
-	InitializationStrategy types.String `tfsdk:"initialization_strategy"`
 	baseWorkspaceGitModel
-	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+
+	InitializationStrategy types.String    `tfsdk:"initialization_strategy"`
+	Timeouts               timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestGitConnect struct {
@@ -231,6 +233,15 @@ func (to *requestUpdateGitCredentials) set(ctx context.Context, from resourceWor
 		reqUpdate = &fabcore.UpdateGitCredentialsToNoneRequest{
 			Source: azto.Ptr(fabcore.GitCredentialsSourceNone),
 		}
+	default:
+		var diags diag.Diagnostics
+
+		diags.AddError(
+			"Unsupported Git credentials source",
+			fmt.Sprintf("The Git credentials source '%s' is not supported.", gitCredentialsSource),
+		)
+
+		return diags
 	}
 
 	to.UpdateGitCredentialsRequestClassification = reqUpdate
