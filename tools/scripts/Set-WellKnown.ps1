@@ -208,7 +208,7 @@ function Set-FabricItem {
 
   switch ($Type) {
     'ApacheAirflowJob' {
-      $itemEndpoint = 'ApacheAirflowJobs'
+      $itemEndpoint = 'apacheAirflowJobs'
     }
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
