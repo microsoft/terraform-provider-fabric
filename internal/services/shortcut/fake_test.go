@@ -127,10 +127,10 @@ func GenerateShortcutID(workspaceID, itemID, path, name string) string {
 	return fmt.Sprintf("%s/%s/%s/%s", workspaceID, itemID, path, name)
 }
 
-func GetAllStoredShortcuts() []fabcore.Shortcut {
-	shortcuts := make([]fabcore.Shortcut, 0, len(fakeShortcutStore))
+func GetAllStoredShortcuts() []fabcore.ShortcutTransformFlagged {
+	shortcuts := make([]fabcore.ShortcutTransformFlagged, 0, len(fakeShortcutStore))
 	for _, shortcut := range fakeShortcutStore {
-		shortcuts = append(shortcuts, shortcut)
+		shortcuts = append(shortcuts, toShortcutTransformFlagged(shortcut))
 	}
 
 	return shortcuts
@@ -139,4 +139,13 @@ func GetAllStoredShortcuts() []fabcore.Shortcut {
 func fakeTestUpsert(workspaceID, itemID string, entity fabcore.Shortcut) {
 	id := GenerateShortcutID(workspaceID, itemID, *entity.Path, *entity.Name)
 	fakeShortcutStore[id] = entity
+}
+
+func toShortcutTransformFlagged(v fabcore.Shortcut) fabcore.ShortcutTransformFlagged {
+	return fabcore.ShortcutTransformFlagged{
+		Path:      v.Path,
+		Name:      v.Name,
+		Target:    v.Target,
+		Transform: v.Transform,
+	}
 }
