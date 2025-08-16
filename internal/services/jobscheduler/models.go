@@ -603,3 +603,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 
 	return nil
 }
+
+var JobTypeActions = map[string][]string{
+	"dataflow": {"Execute", "ApplyChanges"},
+}

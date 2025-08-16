@@ -3,6 +3,7 @@ package jobscheduler
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
@@ -27,9 +28,10 @@ var (
 )
 
 type resourceJobScheduler struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.JobSchedulerClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData  *pconfig.ProviderData
+	client       *fabcore.JobSchedulerClient
+	fabricClient *fabcore.ItemsClient
+	TypeInfo     tftypeinfo.TFTypeInfo
 }
 
 func NewResourceJobScheduler() resource.Resource {
@@ -68,6 +70,7 @@ func (r *resourceJobScheduler) Configure(_ context.Context, req resource.Configu
 	}
 
 	r.client = (*fabcore.JobSchedulerClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewJobSchedulerClient())
+	r.fabricClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
 func (r *resourceJobScheduler) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -93,6 +96,18 @@ func (r *resourceJobScheduler) Create(ctx context.Context, req resource.CreateRe
 
 	var reqCreate requestCreateJobSchedule
 	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	respItem, err := r.fabricClient.GetItem(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), nil)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Validate job type
+	if err := r.validateJobType(respItem.Type, plan.JobType.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Invalid Job Type", err.Error())
+
 		return
 	}
 
@@ -301,6 +316,29 @@ func (r *resourceJobScheduler) ImportState(ctx context.Context, req resource.Imp
 	}
 }
 
+// validateJobType validates that the job type is supported for the given item type.
+func (r *resourceJobScheduler) validateJobType(itemType *fabcore.ItemType, jobType string) error {
+	if itemType == nil {
+		return fmt.Errorf("item type is nil")
+	}
+
+	itemTypeLowercase := strings.ToLower(string(*itemType))
+	validJobTypes, exists := JobTypeActions[itemTypeLowercase]
+
+	if !exists {
+		return fmt.Errorf("item type '%s' does not support job scheduling. Supported types are: %v",
+			*itemType, getMapKeys(JobTypeActions))
+	}
+
+	jobTypeLowercase := strings.ToLower(jobType)
+	if !slices.Contains(validJobTypes, jobTypeLowercase) {
+		return fmt.Errorf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v",
+			jobType, *itemType, *itemType, validJobTypes)
+	}
+
+	return nil
+}
+
 func (r *resourceJobScheduler) get(ctx context.Context, model *resourceJobScheduleModel) diag.Diagnostics {
 	respGet, err := r.client.GetItemSchedule(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
@@ -308,4 +346,13 @@ func (r *resourceJobScheduler) get(ctx context.Context, model *resourceJobSchedu
 	}
 
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), respGet.ItemSchedule)
+}
+
+func getMapKeys(m map[string][]string) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	return keys
 }

@@ -42,6 +42,19 @@ func fakeGetItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jo
 	}
 }
 
+func fakeGetFabricItem(
+	itemType string,
+) func(ctx context.Context, workspaceID, itemID string, options *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, itemID string, _ *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
+		item := fabcore.Item{
+			Type: to.Ptr(fabcore.ItemType(itemType)),
+		}
+		resp.SetResponse(http.StatusOK, fabcore.ItemsClientGetItemResponse{Item: item}, nil)
+
+		return
+	}
+}
+
 func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jobType string, createScheduleRequest fabcore.CreateScheduleRequest, options *fabcore.JobSchedulerClientCreateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID, jobType string, createScheduleRequest fabcore.CreateScheduleRequest, _ *fabcore.JobSchedulerClientCreateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse]{}

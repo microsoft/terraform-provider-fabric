@@ -21,6 +21,8 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
+
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
@@ -31,6 +33,66 @@ func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "job_type" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "enabled" is required, but no definition was found.`),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     testhelp.RandomName(),
+					"enabled":      true,
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "configuration" is required, but no definition was found.`),
+		},
 		// error - workspace_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,
@@ -39,7 +101,15 @@ func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
 				map[string]any{
 					"workspace_id": "invalid uuid",
 					"item_id":      testhelp.RandomUUID(),
-					"job_type":     testhelp.RandomName(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"local_time_zone": testhelp.RandomName(),
+						"start_date_time": time.Now().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -50,33 +120,43 @@ func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":    "00000000-0000-0000-0000-000000000000",
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"local_time_zone": testhelp.RandomName(),
+						"start_date_time": time.Now().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+					},
 					"unexpected_attr": "test",
 				},
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
-		// error - no required attributes
+
+		// error  - not a valid item type
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name": "test",
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"local_time_zone": testhelp.RandomName(),
+						"start_date_time": time.Now().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
-		},
-		// error - no required attributes
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-				},
-			),
-			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`Error: Invalid Job Type`),
 		},
 	}))
 }
