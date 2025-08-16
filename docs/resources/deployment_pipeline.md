@@ -22,7 +22,6 @@ The Deployment Pipeline resource allows you to manage a Fabric [Deployment Pipel
 resource "fabric_deployment_pipeline" "example" {
   display_name = "Deployment Pipeline Example"
   description  = "Deployment Pipeline Example"
-  id           = data.fabric_deployment_pipeline.example.id
   stages = [
     {
       display_name = "Stage 1",
@@ -88,6 +87,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # terraform import fabric_deployment_pipeline.example "<DeploymentPipelineID>"

@@ -36,6 +36,7 @@ type baseDeploymentPipelineStageModel struct {
 
 type baseDeploymentPipelineExtendedInfoModel struct {
 	baseDeploymentPipelineModel
+
 	Stages supertypes.ListNestedObjectValueOf[baseDeploymentPipelineStageModel] `tfsdk:"stages"`
 }
 
@@ -97,6 +98,7 @@ DATA-SOURCE
 
 type dataSourceDeploymentPipelineModel struct {
 	baseDeploymentPipelineExtendedInfoModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -128,6 +130,7 @@ RESOURCE
 
 type resourceDeploymentPipelineModel struct {
 	baseDeploymentPipelineExtendedInfoModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 

@@ -247,8 +247,8 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 	}
 
 	_, err := r.client.RoleAssignmentsBulkUnassign(ctx, state.DomainID.ValueString(), reqDelete.DomainRoleUnassignmentRequest, nil)
-	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError)
 
+	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError)
 	if diags.HasError() && !utils.IsErr(diags, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError) {
 		resp.Diagnostics.Append(diags...)
 

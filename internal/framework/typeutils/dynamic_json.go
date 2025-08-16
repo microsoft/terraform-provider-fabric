@@ -127,7 +127,9 @@ func JSONToDynamic(b []byte, typ attr.Type) (types.Dynamic, error) {
 
 func attrListFromJSON(b []byte, etyp attr.Type) ([]attr.Value, error) {
 	var l []json.RawMessage
-	if err := json.Unmarshal(b, &l); err != nil {
+
+	err := json.Unmarshal(b, &l)
+	if err != nil {
 		return nil, err
 	}
 
@@ -153,7 +155,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var v bool
-		if err := json.Unmarshal(b, &v); err != nil {
+
+		err := json.Unmarshal(b, &v)
+		if err != nil {
 			return nil, err
 		}
 
@@ -164,7 +168,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var v string
-		if err := json.Unmarshal(b, &v); err != nil {
+
+		err := json.Unmarshal(b, &v)
+		if err != nil {
 			return nil, err
 		}
 
@@ -175,7 +181,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var v int64
-		if err := json.Unmarshal(b, &v); err != nil {
+
+		err := json.Unmarshal(b, &v)
+		if err != nil {
 			return nil, err
 		}
 
@@ -186,7 +194,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var v float64
-		if err := json.Unmarshal(b, &v); err != nil {
+
+		err := json.Unmarshal(b, &v)
+		if err != nil {
 			return nil, err
 		}
 
@@ -197,7 +207,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var v float64
-		if err := json.Unmarshal(b, &v); err != nil {
+
+		err := json.Unmarshal(b, &v)
+		if err != nil {
 			return nil, err
 		}
 
@@ -244,7 +256,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var l []json.RawMessage
-		if err := json.Unmarshal(b, &l); err != nil {
+
+		err := json.Unmarshal(b, &l)
+		if err != nil {
 			return nil, err
 		}
 
@@ -277,7 +291,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var m map[string]json.RawMessage
-		if err := json.Unmarshal(b, &m); err != nil {
+
+		err := json.Unmarshal(b, &m)
+		if err != nil {
 			return nil, err
 		}
 
@@ -306,7 +322,9 @@ func attrValueFromJSON(b []byte, typ attr.Type) (attr.Value, error) { //nolint:g
 		}
 
 		var m map[string]json.RawMessage
-		if err := json.Unmarshal(b, &m); err != nil {
+
+		err := json.Unmarshal(b, &m)
+		if err != nil {
 			return nil, err
 		}
 
@@ -369,7 +387,9 @@ func attrValueFromJSONImplied(b []byte) (attr.Type, attr.Value, error) {
 	}
 
 	var object map[string]json.RawMessage
-	if err := json.Unmarshal(b, &object); err == nil {
+
+	err := json.Unmarshal(b, &object)
+	if err == nil {
 		attrTypes := map[string]attr.Type{}
 		attrVals := map[string]attr.Value{}
 
@@ -393,7 +413,9 @@ func attrValueFromJSONImplied(b []byte) (attr.Type, attr.Value, error) {
 	}
 
 	var array []json.RawMessage
-	if err := json.Unmarshal(b, &array); err == nil {
+
+	err = json.Unmarshal(b, &array)
+	if err == nil {
 		eTypes := []attr.Type{}
 		eVals := []attr.Value{}
 
@@ -421,7 +443,9 @@ func attrValueFromJSONImplied(b []byte) (attr.Type, attr.Value, error) {
 
 	// Primitives
 	var v any
-	if err := json.Unmarshal(b, &v); err != nil {
+
+	err = json.Unmarshal(b, &v)
+	if err != nil {
 		return nil, nil, fmt.Errorf("failed to unmarshal %s: %w", string(b), err)
 	}
 

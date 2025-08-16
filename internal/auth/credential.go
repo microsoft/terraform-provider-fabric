@@ -96,10 +96,6 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 
 		return newCredentialResponse(cred, authMethod, info), err
 
-	case TokenAuth:
-		cred, err := NewTokenCredential(cfg.Token)
-
-		return newCredentialResponse(cred, authMethod, info), err
 	default:
 		cred, err := azidentity.NewAzureCLICredential(&azidentity.AzureCLICredentialOptions{
 			AdditionallyAllowedTenants: cfg.AuxiliaryTenantIDs,
@@ -136,9 +132,6 @@ func getAuthMethod(cfg Config) (AuthenticationMethod, string) {
 
 	case cfg.ClientID != "" && cfg.ClientSecret != "":
 		return ServicePrincipalSecretAuth, "Using Service Principal Secret authentication"
-
-	case cfg.Token != "":
-		return TokenAuth, "Using Token authentication"
 
 	default:
 		return AzureCLIAuth, "Using Azure CLI authentication"

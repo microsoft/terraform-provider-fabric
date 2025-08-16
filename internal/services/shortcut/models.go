@@ -80,16 +80,14 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 
 	shortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, strings.TrimPrefix(to.Path.ValueString(), "/"), to.Name.ValueString())
 
-	to.ID = types.StringPointerValue(&shortcutComputedID)
+	to.ID = types.StringValue(shortcutComputedID)
 
 	to.Target = supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 	target := supertypes.NewSingleNestedObjectValueOfNull[targetModel](ctx)
 
 	if from.Target != nil {
 		targetModel := &targetModel{}
-		if diags := targetModel.set(ctx, from.Target); diags.HasError() {
-			return diags
-		}
+		targetModel.set(ctx, *from.Target)
 
 		if diags := target.Set(ctx, targetModel); diags.HasError() {
 			return diags
@@ -101,9 +99,7 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 	return nil
 }
 
-func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagnostics {
-	var diagnostics diag.Diagnostics
-
+func (to *targetModel) set(ctx context.Context, from fabcore.Target) {
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
 	to.AdlsGen2 = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
@@ -185,8 +181,6 @@ func (to *targetModel) set(ctx context.Context, from *fabcore.Target) diag.Diagn
 		}
 		to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOf(ctx, externalDataShareModel)
 	}
-
-	return diagnostics
 }
 
 /*
@@ -195,6 +189,7 @@ DATA-SOURCE
 
 type dataSourceShortcutModel struct {
 	baseShortcutModel
+
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
@@ -209,13 +204,13 @@ type dataSourceShortcutsModel struct {
 	Timeouts    timeoutsD.Value                                      `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceShortcutsModel) setValues(ctx context.Context, workspaceID, itemID string, from []fabcore.Shortcut) diag.Diagnostics {
+func (to *dataSourceShortcutsModel) setValues(ctx context.Context, workspaceID, itemID string, from []fabcore.ShortcutTransformFlagged) diag.Diagnostics {
 	slice := make([]*baseShortcutModel, 0, len(from))
 
 	for _, entity := range from {
 		var entityModel baseShortcutModel
 
-		if diags := entityModel.set(ctx, workspaceID, itemID, entity); diags.HasError() {
+		if diags := entityModel.set(ctx, workspaceID, itemID, toShortcut(entity)); diags.HasError() {
 			return diags
 		}
 
@@ -225,8 +220,18 @@ func (to *dataSourceShortcutsModel) setValues(ctx context.Context, workspaceID, 
 	return to.Values.Set(ctx, slice)
 }
 
+func toShortcut(v fabcore.ShortcutTransformFlagged) fabcore.Shortcut {
+	return fabcore.Shortcut{
+		Path:      v.Path,
+		Name:      v.Name,
+		Target:    v.Target,
+		Transform: v.Transform,
+	}
+}
+
 type resourceShortcutModel struct {
 	baseShortcutModel
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
@@ -243,94 +248,102 @@ func (to *requestCreateShortcut) set(ctx context.Context, from resourceShortcutM
 		return diags
 	}
 
-	to.Target = &fabcore.CreatableShortcutTarget{
-		OneLake: func() *fabcore.OneLake {
-			onelake, diags := target.Onelake.Get(ctx)
-			if diags.HasError() || onelake == nil {
-				return nil
-			}
+	creatableShortcutTarget := &fabcore.CreatableShortcutTarget{}
 
-			return &fabcore.OneLake{
-				ItemID:      onelake.ItemID.ValueStringPointer(),
-				Path:        onelake.Path.ValueStringPointer(),
-				WorkspaceID: onelake.WorkspaceID.ValueStringPointer(),
-			}
-		}(),
-		AdlsGen2: func() *fabcore.AdlsGen2 {
-			adlsGen2, diags := target.AdlsGen2.Get(ctx)
-			if diags.HasError() || adlsGen2 == nil {
-				return nil
-			}
+	if !target.Onelake.IsNull() {
+		entity, diags := target.Onelake.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
 
-			return &fabcore.AdlsGen2{
-				ConnectionID: adlsGen2.ConnectionID.ValueStringPointer(),
-				Location:     adlsGen2.Location.ValueStringPointer(),
-				Subpath:      adlsGen2.Subpath.ValueStringPointer(),
-			}
-		}(),
-		AmazonS3: func() *fabcore.AmazonS3 {
-			amazonS3, diags := target.AmazonS3.Get(ctx)
-			if diags.HasError() || amazonS3 == nil {
-				return nil
-			}
-
-			return &fabcore.AmazonS3{
-				ConnectionID: amazonS3.ConnectionID.ValueStringPointer(),
-				Location:     amazonS3.Location.ValueStringPointer(),
-				Subpath:      amazonS3.Subpath.ValueStringPointer(),
-			}
-		}(),
-		Dataverse: func() *fabcore.Dataverse {
-			dataverse, diags := target.Dataverse.Get(ctx)
-			if diags.HasError() || dataverse == nil {
-				return nil
-			}
-
-			return &fabcore.Dataverse{
-				ConnectionID:      dataverse.ConnectionID.ValueStringPointer(),
-				DeltaLakeFolder:   dataverse.DeltaLakeFolder.ValueStringPointer(),
-				EnvironmentDomain: dataverse.EnvironmentDomain.ValueStringPointer(),
-				TableName:         dataverse.TableName.ValueStringPointer(),
-			}
-		}(),
-		GoogleCloudStorage: func() *fabcore.GoogleCloudStorage {
-			googleCloudStorage, diags := target.GoogleCloudStorage.Get(ctx)
-			if diags.HasError() || googleCloudStorage == nil {
-				return nil
-			}
-
-			return &fabcore.GoogleCloudStorage{
-				ConnectionID: googleCloudStorage.ConnectionID.ValueStringPointer(),
-				Location:     googleCloudStorage.Location.ValueStringPointer(),
-				Subpath:      googleCloudStorage.Subpath.ValueStringPointer(),
-			}
-		}(),
-		S3Compatible: func() *fabcore.S3Compatible {
-			s3Compatible, diags := target.S3Compatible.Get(ctx)
-			if diags.HasError() || s3Compatible == nil {
-				return nil
-			}
-
-			return &fabcore.S3Compatible{
-				ConnectionID: s3Compatible.ConnectionID.ValueStringPointer(),
-				Location:     s3Compatible.Location.ValueStringPointer(),
-				Subpath:      s3Compatible.Subpath.ValueStringPointer(),
-				Bucket:       s3Compatible.Bucket.ValueStringPointer(),
-			}
-		}(),
-		AzureBlobStorage: func() *fabcore.AzureBlobStorage {
-			azureBlobStorage, diags := target.GoogleCloudStorage.Get(ctx)
-			if diags.HasError() || azureBlobStorage == nil {
-				return nil
-			}
-
-			return &fabcore.AzureBlobStorage{
-				ConnectionID: azureBlobStorage.ConnectionID.ValueStringPointer(),
-				Location:     azureBlobStorage.Location.ValueStringPointer(),
-				Subpath:      azureBlobStorage.Subpath.ValueStringPointer(),
-			}
-		}(),
+		creatableShortcutTarget.OneLake = &fabcore.OneLake{
+			ItemID:      entity.ItemID.ValueStringPointer(),
+			Path:        entity.Path.ValueStringPointer(),
+			WorkspaceID: entity.WorkspaceID.ValueStringPointer(),
+		}
 	}
+
+	if !target.AdlsGen2.IsNull() {
+		entity, diags := target.AdlsGen2.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.AdlsGen2 = &fabcore.AdlsGen2{
+			ConnectionID: entity.ConnectionID.ValueStringPointer(),
+			Location:     entity.Location.ValueStringPointer(),
+			Subpath:      entity.Subpath.ValueStringPointer(),
+		}
+	}
+
+	if !target.AmazonS3.IsNull() {
+		entity, diags := target.AmazonS3.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.AmazonS3 = &fabcore.AmazonS3{
+			ConnectionID: entity.ConnectionID.ValueStringPointer(),
+			Location:     entity.Location.ValueStringPointer(),
+			Subpath:      entity.Subpath.ValueStringPointer(),
+		}
+	}
+
+	if !target.Dataverse.IsNull() {
+		entity, diags := target.Dataverse.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.Dataverse = &fabcore.Dataverse{
+			ConnectionID:      entity.ConnectionID.ValueStringPointer(),
+			DeltaLakeFolder:   entity.DeltaLakeFolder.ValueStringPointer(),
+			EnvironmentDomain: entity.EnvironmentDomain.ValueStringPointer(),
+			TableName:         entity.TableName.ValueStringPointer(),
+		}
+	}
+
+	if !target.GoogleCloudStorage.IsNull() {
+		entity, diags := target.GoogleCloudStorage.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.GoogleCloudStorage = &fabcore.GoogleCloudStorage{
+			ConnectionID: entity.ConnectionID.ValueStringPointer(),
+			Location:     entity.Location.ValueStringPointer(),
+			Subpath:      entity.Subpath.ValueStringPointer(),
+		}
+	}
+
+	if !target.S3Compatible.IsNull() {
+		entity, diags := target.S3Compatible.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.S3Compatible = &fabcore.S3Compatible{
+			ConnectionID: entity.ConnectionID.ValueStringPointer(),
+			Location:     entity.Location.ValueStringPointer(),
+			Subpath:      entity.Subpath.ValueStringPointer(),
+			Bucket:       entity.Bucket.ValueStringPointer(),
+		}
+	}
+
+	if !target.AzureBlobStorage.IsNull() {
+		entity, diags := target.AzureBlobStorage.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.AzureBlobStorage = &fabcore.AzureBlobStorage{
+			ConnectionID: entity.ConnectionID.ValueStringPointer(),
+			Location:     entity.Location.ValueStringPointer(),
+			Subpath:      entity.Subpath.ValueStringPointer(),
+		}
+	}
+
+	to.Target = creatableShortcutTarget
 
 	return nil
 }

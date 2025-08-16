@@ -19,7 +19,7 @@ The Shortcuts data-source allows you to retrieve a list of Fabric [Shortcuts](ht
 ## Example Usage
 
 ```terraform
-data "fabric_onelake_shortcuts" "example" {
+data "fabric_shortcuts" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "00000000-0000-0000-0000-000000000000"
 }
