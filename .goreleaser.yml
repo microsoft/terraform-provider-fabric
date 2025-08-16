@@ -5,13 +5,14 @@ version: 2
 
 before:
   hooks:
+    - go mod tidy
     - go mod download
 
 archives:
   - files:
       - src: LICENSE
         dst: LICENSE.txt
-    formats: [ 'zip' ]
+    formats: [zip]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 builds:

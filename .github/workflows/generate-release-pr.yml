@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: Generate release PR
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-release-pr:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: 🚧 Setup Task
+        uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
+        with:
+          repo-token: ${{ github.token }}
+
+      - name: 🚧 Setup Changie
+        uses: miniscruff/changie-action@6dcc2533cac0495148ed4046c438487e4dceaa23 # v2.0.0
+        with:
+          version: latest
+          args: --version
+
+      - name: 📜 Compile Changelog
+        id: changelog
+        run: |
+          changie batch auto
+          changie merge
+          echo "version=$(changie latest)" >>"$GITHUB_OUTPUT"
+          task docs
+
+      - name: 📤 Create Pull Request
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          title: "chore(release): ${{ steps.changelog.outputs.version }}"
+          branch: "release/${{ steps.changelog.outputs.version }}"
+          commit-message: "chore(release): ${{ steps.changelog.outputs.version }}"
+          body-path: "./.changes/${{ steps.changelog.outputs.version }}.md"
