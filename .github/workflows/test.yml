@@ -12,6 +12,9 @@ on:
     types:
       - opened
       - synchronize
+  push:
+    branches:
+      - main
   schedule:
     - cron: "0 2 * * *"
   workflow_dispatch:
@@ -39,7 +42,7 @@ jobs:
       src: ${{ steps.filter.outputs.src }}
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: 🔂 Check for changes
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: filter
@@ -64,7 +67,7 @@ jobs:
         method: [oidc, certificate, secret]
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
@@ -128,7 +131,7 @@ jobs:
   #       method: [system, user]
   #   steps:
   #     - name: ⤵️ Checkout
-  #       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
   #     - name: ✔️ Check for changes
   #       uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
@@ -190,7 +193,7 @@ jobs:
       pull-requests: read
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
@@ -247,13 +250,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
@@ -265,7 +268,7 @@ jobs:
       contents: read
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
@@ -332,7 +335,7 @@ jobs:
             version: "1.10"
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
@@ -419,7 +422,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
-          path: testresults.xml
+          path: testresults.json
           if-no-files-found: warn
           overwrite: true
 
@@ -430,9 +433,7 @@ jobs:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
           path: |
             coverage.html
-            coverage.json
             coverage.out
-            coverage.txt
             coverage.xml
           if-no-files-found: warn
           overwrite: true
@@ -442,8 +443,8 @@ jobs:
         uses: dorny/test-reporter@dc3a92680fcc15842eef52e8c4606ea7ce6bd3f3 # v2.1.1
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
-          reporter: jest-junit
-          path: testresults.xml
+          reporter: golang-json
+          path: testresults.json
 
       - name: ⚙️ Get Coverage summary
         if: always()
@@ -479,6 +480,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      # actions: read
       pull-requests: write
       id-token: write
     steps:
@@ -498,7 +500,7 @@ jobs:
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       # - name: 📤 Upload test results to Codecov
-      #   uses: codecov/test-results-action@f2dba722c67b86c6caa034178c6e4d35335f6706 # v1.1.0
+      #   uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
       #   with:
       #     # use_oidc: true
       #     token: ${{ secrets.CODECOV_TOKEN }}
@@ -510,6 +512,12 @@ jobs:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out
+
+      # - name: 📝 Code Coverage report
+      #   uses: fgrosse/go-coverage-report@8c1d1a09864211d258937b1b1a5b849f7e4f2682 # v1.2.0
+      #   with:
+      #     coverage-artifact-name: terraform-1_12-test-coverage-results
+      #     coverage-file-name: coverage.out
 
       - name: 🔎 Find comment
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
