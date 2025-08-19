@@ -25,13 +25,25 @@ type baseConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnecti
 	CredentialDetails             supertypes.SingleNestedObjectValueOf[CredentialDetails] `tfsdk:"credential_details"`
 }
 
-func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx context.Context, from fabcore.Connection) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.GatewayID = customtypes.NewUUIDPointerValue(from.GatewayID)
-	to.ConnectivityType = types.StringPointerValue((*string)(from.ConnectivityType))
-	to.PrivacyLevel = types.StringPointerValue((*string)(from.PrivacyLevel))
-	// to.AllowConnectionUsageInGateway = types.BoolPointerValue(from.AllowConnectionUsageInGateway)
+func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx context.Context, from fabcore.ConnectionClassification) diag.Diagnostics { //nolint:gocognit
+	// connectivity type specific information
+	switch v := from.(type) {
+	case *fabcore.ShareableCloudConnection:
+		if v.AllowConnectionUsageInGateway != nil {
+			to.AllowConnectionUsageInGateway = types.BoolValue(*v.AllowConnectionUsageInGateway)
+		} else {
+			to.AllowConnectionUsageInGateway = types.BoolValue(false) // default to false
+		}
+	case *fabcore.VirtualNetworkGatewayConnection:
+		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
+		to.AllowConnectionUsageInGateway = types.BoolNull()
+	}
+
+	fromConnection := from.GetConnection()
+	to.ID = customtypes.NewUUIDPointerValue(fromConnection.ID)
+	to.DisplayName = types.StringPointerValue(fromConnection.DisplayName)
+	to.ConnectivityType = types.StringPointerValue((*string)(fromConnection.ConnectivityType))
+	to.PrivacyLevel = types.StringPointerValue((*string)(fromConnection.PrivacyLevel))
 
 	var diags diag.Diagnostics
 
@@ -50,18 +62,18 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		connectionDetailsModel = &defaultModel
 	}
 
-	if from.ConnectionDetails != nil {
+	if fromConnection.ConnectionDetails != nil {
 		var connectionDetailsModelPtr *ConnectionDetails
 
 		switch v := any(connectionDetailsModel).(type) {
 		case *dsConnectionDetailsModel:
-			setDSConnectionDetails(*from.ConnectionDetails, v)
+			setDSConnectionDetails(*fromConnection.ConnectionDetails, v)
 
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
 			}
 		case *rsConnectionDetailsModel:
-			setRSConnectionDetails(*from.ConnectionDetails, v)
+			setRSConnectionDetails(*fromConnection.ConnectionDetails, v)
 
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
@@ -91,18 +103,18 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		credentialDetailsModel = &defaultModel
 	}
 
-	if from.CredentialDetails != nil {
+	if fromConnection.CredentialDetails != nil {
 		var credentialDetailsModelPtr *CredentialDetails
 
 		switch v := any(credentialDetailsModel).(type) {
 		case *dsCredentialDetailsModel:
-			setDSCredentialDetails(*from.CredentialDetails, v)
+			setDSCredentialDetails(*fromConnection.CredentialDetails, v)
 
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue
 			}
 		case *rsCredentialDetailsModel:
-			setRSCredentialDetails(*from.CredentialDetails, v)
+			setRSCredentialDetails(*fromConnection.CredentialDetails, v)
 
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue

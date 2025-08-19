@@ -99,6 +99,11 @@ func TestUnit_ConnectionDataSource(t *testing.T) {
 				),
 				statecheck.ExpectKnownValue(
 					testDataSourceItemFQN,
+					tfjsonpath.New("allow_connection_usage_in_gateway"),
+					knownvalue.Bool(*entity.AllowConnectionUsageInGateway),
+				),
+				statecheck.ExpectKnownValue(
+					testDataSourceItemFQN,
 					tfjsonpath.New("connection_details"),
 					knownvalue.ObjectExact(map[string]knownvalue.Check{
 						"path": knownvalue.StringExact(*entity.ConnectionDetails.Path),
@@ -158,6 +163,8 @@ func TestAcc_ConnectionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "allow_connection_usage_in_gateway"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "gateway_id"),
 			),
 		},
 		// read by id - VirtualNetworkGatewayConnection
@@ -180,6 +187,8 @@ func TestAcc_ConnectionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.credential_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "gateway_id"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
 	}))

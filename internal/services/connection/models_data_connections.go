@@ -17,7 +17,7 @@ type dataSourceConnectionsModel struct {
 	Timeouts timeouts.Value                                                                                             `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceConnectionsModel) setValues(ctx context.Context, from []fabcore.Connection) diag.Diagnostics {
+func (to *dataSourceConnectionsModel) setValues(ctx context.Context, from []fabcore.ConnectionClassification) diag.Diagnostics {
 	slice := make([]*baseConnectionModel[dsConnectionDetailsModel, dsCredentialDetailsModel], 0, len(from))
 
 	for _, entity := range from {

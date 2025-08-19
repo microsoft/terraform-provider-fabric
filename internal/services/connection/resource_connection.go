@@ -192,7 +192,7 @@ func (r *resourceConnection) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Connection)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.ConnectionClassification)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -284,7 +284,7 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.Connection)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.ConnectionClassification)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -340,7 +340,7 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 		return diags
 	}
 
-	return model.set(ctx, respGet.Connection)
+	return model.set(ctx, respGet.ConnectionClassification)
 }
 
 func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {

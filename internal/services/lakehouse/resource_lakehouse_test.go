@@ -210,12 +210,12 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityAfter.DisplayName,
+					"display_name": *entityBefore.DisplayName,
 					"description":  *entityAfter.Description,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),

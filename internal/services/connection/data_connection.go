@@ -116,5 +116,5 @@ func (d *dataSourceConnection) getByID(ctx context.Context, model *dataSourceCon
 		return diags
 	}
 
-	return model.set(ctx, respGet.Connection)
+	return model.set(ctx, respGet.ConnectionClassification)
 }

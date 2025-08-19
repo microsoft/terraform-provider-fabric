@@ -355,6 +355,111 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Combination|conflicts with|mutually exclusive`),
 		},
+		// step 12: error - VirtualNetworkGateway connection missing required gateway_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "VirtualNetworkGateway",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": "NotEncrypted",
+						"single_sign_on_type":   "None",
+						"skip_test_connection":  false,
+						"credential_type":       "Basic",
+						"basic_credentials": map[string]any{
+							"username":            "test",
+							"password_wo":         "test",
+							"password_wo_version": 1,
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute gateway_id`),
+		},
+		// step 13: error - VirtualNetworkGateway connection with AllowConnectionUsageInGateway set
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                      "test",
+					"connectivity_type":                 "VirtualNetworkGateway",
+					"privacy_level":                     "Organizational",
+					"gateway_id":                        testhelp.RandomUUID(),
+					"allow_connection_usage_in_gateway": true,
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": "NotEncrypted",
+						"single_sign_on_type":   "None",
+						"skip_test_connection":  false,
+						"credential_type":       "Basic",
+						"basic_credentials": map[string]any{
+							"username":            "test",
+							"password_wo":         "test",
+							"password_wo_version": 1,
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute allow_connection_usage_in_gateway`),
+		},
+		// step 14: error - ShareableCloud connection with gateway_id set
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"gateway_id":        testhelp.RandomUUID(),
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": "NotEncrypted",
+						"single_sign_on_type":   "None",
+						"skip_test_connection":  false,
+						"credential_type":       "Basic",
+						"basic_credentials": map[string]any{
+							"username":            "test",
+							"password_wo":         "test",
+							"password_wo_version": 1,
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute gateway_id`),
+		},
 	}))
 }
 
@@ -440,6 +545,8 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.connection_encryption", (*string)(entityBefore.CredentialDetails.ConnectionEncryption)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.single_sign_on_type", (*string)(entityBefore.CredentialDetails.SingleSignOnType)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.credential_type", (*string)(entityBefore.CredentialDetails.CredentialType)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
 		// Update and Read - no replacement
@@ -448,9 +555,10 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":      *entityAfter.DisplayName,
-					"connectivity_type": string(fabcore.ConnectivityTypeShareableCloud),
-					"privacy_level":     string(*entityAfter.PrivacyLevel),
+					"display_name":                      *entityAfter.DisplayName,
+					"connectivity_type":                 string(fabcore.ConnectivityTypeShareableCloud),
+					"privacy_level":                     string(*entityAfter.PrivacyLevel),
+					"allow_connection_usage_in_gateway": true,
 					"connection_details": map[string]any{
 						"type":            "FTP",
 						"creation_method": "FTP.Contents",
@@ -480,6 +588,7 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.connection_encryption", (*string)(entityBefore.CredentialDetails.ConnectionEncryption)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.single_sign_on_type", (*string)(entityBefore.CredentialDetails.SingleSignOnType)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.credential_type", (*string)(entityBefore.CredentialDetails.CredentialType)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "true"),
 			),
 		},
 		// Update key and Read - no replacement
@@ -520,6 +629,7 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.connection_encryption", (*string)(entityBefore.CredentialDetails.ConnectionEncryption)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.single_sign_on_type", (*string)(entityBefore.CredentialDetails.SingleSignOnType)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.credential_type", (*string)(entityBefore.CredentialDetails.CredentialType)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
 			),
 		},
 		// Update connectivity type - replacement
@@ -558,6 +668,8 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "connectivity_type", (string)(fabcore.ConnectivityTypeVirtualNetworkGateway)),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "privacy_level", (*string)(entityAfter.PrivacyLevel)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "gateway_id"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -1041,6 +1153,8 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", "Anonymous"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", "None"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
 		// Update display name and Read
@@ -1081,6 +1195,8 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", "Anonymous"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", "None"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
 	},
@@ -1145,6 +1261,8 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", "None"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.basic_credentials.username", SQLUsername),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
 	},
@@ -1198,6 +1316,8 @@ func TestAcc_ConnectionResource_VirtualNetworkGateway(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", "Anonymous"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", "None"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "gateway_id", entityVirtualNetworkID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
 		// Update and Read
@@ -1239,6 +1359,8 @@ func TestAcc_ConnectionResource_VirtualNetworkGateway(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", "Anonymous"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", "None"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "gateway_id", entityVirtualNetworkID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
 	},

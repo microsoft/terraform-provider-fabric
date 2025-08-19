@@ -152,7 +152,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				Resource: &schemaR.BoolAttribute{
 					Optional: true,
 					Computed: true,
-					Default:  booldefault.StaticBool(false),
 					Validators: []validator.Bool{
 						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
 							[]attr.Value{

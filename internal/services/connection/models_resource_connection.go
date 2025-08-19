@@ -118,12 +118,12 @@ func (to *requestCreateConnection) set(
 	switch connectivityType {
 	case fabcore.ConnectivityTypeShareableCloud: // fabcore.ConnectivityTypePersonalCloud:
 		to.CreateConnectionRequestClassification = &fabcore.CreateCloudConnectionRequest{
-			DisplayName:       displayName,
-			PrivacyLevel:      privacyLevel,
-			ConnectivityType:  &connectivityType,
-			ConnectionDetails: &requestCreateConnectionDetails.CreateConnectionDetails,
-			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
-			// AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
+			DisplayName:                   displayName,
+			PrivacyLevel:                  privacyLevel,
+			ConnectivityType:              &connectivityType,
+			ConnectionDetails:             &requestCreateConnectionDetails.CreateConnectionDetails,
+			CredentialDetails:             &requestCreateCredentialDetails.CreateCredentialDetails,
+			AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
@@ -476,11 +476,11 @@ func (to *requestUpdateConnection) set(
 	switch connectivityType {
 	case fabcore.ConnectivityTypeShareableCloud:
 		to.UpdateConnectionRequestClassification = &fabcore.UpdateShareableCloudConnectionRequest{
-			DisplayName:       displayName,
-			ConnectivityType:  &connectivityType,
-			PrivacyLevel:      privacyLevel,
-			CredentialDetails: &requestUpdateCredentialDetails.UpdateCredentialDetails,
-			// AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
+			DisplayName:                   displayName,
+			ConnectivityType:              &connectivityType,
+			PrivacyLevel:                  privacyLevel,
+			CredentialDetails:             &requestUpdateCredentialDetails.UpdateCredentialDetails,
+			AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:
