@@ -124,7 +124,7 @@ func TestAcc_JobScheduleDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["JobSchedulerItem"].(map[string]any)
+	entity := testhelp.WellKnown()["ItemJobScheduler"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityJobType := entity["jobType"].(string)
 	entityItemId := entity["itemId"].(string)
@@ -146,6 +146,9 @@ func TestAcc_JobScheduleDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", entity["configurationType"].(string)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity["createdDateTime"].(string)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", entity["ownerType"].(string)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", entity["ownerId"].(string)),
 			),
 		},
 		// read by id - not found

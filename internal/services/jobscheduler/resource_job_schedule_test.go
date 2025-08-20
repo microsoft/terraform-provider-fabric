@@ -250,11 +250,12 @@ func TestUnit_JobSchedulerResource_ImportState(t *testing.T) {
 func TestUnit_JobSchedulerResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	jobType := testhelp.RandomName()
+	// jobType := testhelp.RandomName()
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 
 	fakeTestUpsert(workspaceID, entity)
 
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("Dataflow")
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.GetItemSchedule = fakeGetItemScheduleFunc()
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.DeleteItemSchedule = fakeDeleteItemScheduleFunc()
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.UpdateItemSchedule = fakeUpdateItemScheduleFunc()
@@ -269,7 +270,7 @@ func TestUnit_JobSchedulerResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"job_type":     jobType,
+					"job_type":     "Execute",
 					"enabled":      *entity.Enabled,
 					"configuration": map[string]any{
 						"local_time_zone": *entity.Configuration.GetScheduleConfig().LocalTimeZoneID,
@@ -292,7 +293,7 @@ func TestUnit_JobSchedulerResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"job_type":     jobType,
+					"job_type":     "Execute",
 					"enabled":      *entity.Enabled,
 					"configuration": map[string]any{
 						"local_time_zone": *entity.Configuration.GetScheduleConfig().LocalTimeZoneID,

@@ -330,8 +330,8 @@ func (r *resourceJobScheduler) validateJobType(itemType *fabcore.ItemType, jobTy
 			*itemType, getMapKeys(JobTypeActions))
 	}
 
-	jobTypeLowercase := strings.ToLower(jobType)
-	if !slices.Contains(validJobTypes, jobTypeLowercase) {
+	//	jobTypeLowercase := strings.ToLower(jobType)
+	if !slices.Contains(validJobTypes, jobType) {
 		return fmt.Errorf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v",
 			jobType, *itemType, *itemType, validJobTypes)
 	}
