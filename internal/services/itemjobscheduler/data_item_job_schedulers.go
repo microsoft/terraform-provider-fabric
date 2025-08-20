@@ -1,4 +1,4 @@
-package jobscheduler
+package itemjobscheduler
 
 import (
 	"context"
@@ -20,25 +20,25 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceJobSchedules)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceItemJobSchedulers)(nil)
 
-type dataSourceJobSchedules struct {
+type dataSourceItemJobSchedulers struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.JobSchedulerClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewDataSourceJobSchedules() datasource.DataSource {
-	return &dataSourceJobSchedules{
+func NewDataSourceItemJobSchedulers() datasource.DataSource {
+	return &dataSourceItemJobSchedulers{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceJobSchedules) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *dataSourceItemJobSchedulers) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = d.TypeInfo.FullTypeName(true)
 }
 
-func (d *dataSourceJobSchedules) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *dataSourceItemJobSchedulers) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	s := itemSchema(true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
@@ -61,7 +61,7 @@ func (d *dataSourceJobSchedules) Schema(ctx context.Context, _ datasource.Schema
 			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseJobScheduleModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseItemJobSchedulerModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: s.Attributes,
 				},
@@ -71,7 +71,7 @@ func (d *dataSourceJobSchedules) Schema(ctx context.Context, _ datasource.Schema
 	}
 }
 
-func (d *dataSourceJobSchedules) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *dataSourceItemJobSchedulers) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (d *dataSourceJobSchedules) Configure(_ context.Context, req datasource.Con
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewJobSchedulerClient()
 }
 
-func (d *dataSourceJobSchedules) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *dataSourceItemJobSchedulers) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -129,7 +129,7 @@ func (d *dataSourceJobSchedules) Read(ctx context.Context, req datasource.ReadRe
 	}
 }
 
-func (d *dataSourceJobSchedules) list(ctx context.Context, model *dataSourceJobSchedulesModel) diag.Diagnostics {
+func (d *dataSourceItemJobSchedulers) list(ctx context.Context, model *dataSourceJobSchedulesModel) diag.Diagnostics {
 	tflog.Trace(ctx, "LIST", map[string]any{
 		"action": "start",
 		"model":  model,

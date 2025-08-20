@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
-package jobscheduler
+package itemjobscheduler
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -342,8 +342,8 @@ func ownerSchema() superschema.SuperSingleNestedAttributeOf[baseOwnerModel] {
 	}
 }
 
-func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseJobScheduleConfigurationModel] {
-	return superschema.SuperSingleNestedAttributeOf[baseJobScheduleConfigurationModel]{
+func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigurationModel] {
+	return superschema.SuperSingleNestedAttributeOf[baseConfigurationModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "The actual data contains the time/weekdays of this schedule.",
 		},

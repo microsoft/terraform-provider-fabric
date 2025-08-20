@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package jobscheduler_test
+package itemjobscheduler_test
 
 import (
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/services/jobscheduler"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/itemjobscheduler"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-var itemTypeInfo = jobscheduler.ItemTypeInfo
+var itemTypeInfo = itemjobscheduler.ItemTypeInfo
 
 func dataflowResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

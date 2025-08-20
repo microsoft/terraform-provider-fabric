@@ -1,4 +1,4 @@
-package jobscheduler_test
+package itemjobscheduler_test
 
 import (
 	"context"

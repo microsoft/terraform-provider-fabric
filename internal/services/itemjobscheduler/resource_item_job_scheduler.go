@@ -1,4 +1,4 @@
-package jobscheduler
+package itemjobscheduler
 
 import (
 	"context"
@@ -23,32 +23,32 @@ import (
 )
 
 var (
-	_ resource.ResourceWithConfigure   = (*resourceJobScheduler)(nil)
-	_ resource.ResourceWithImportState = (*resourceJobScheduler)(nil)
+	_ resource.ResourceWithConfigure   = (*resourceItemJobScheduler)(nil)
+	_ resource.ResourceWithImportState = (*resourceItemJobScheduler)(nil)
 )
 
-type resourceJobScheduler struct {
+type resourceItemJobScheduler struct {
 	pConfigData  *pconfig.ProviderData
 	client       *fabcore.JobSchedulerClient
 	fabricClient *fabcore.ItemsClient
 	TypeInfo     tftypeinfo.TFTypeInfo
 }
 
-func NewResourceJobScheduler() resource.Resource {
-	return &resourceJobScheduler{
+func NewResourceItemJobScheduler() resource.Resource {
+	return &resourceItemJobScheduler{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceJobScheduler) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *resourceItemJobScheduler) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
-func (r *resourceJobScheduler) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *resourceItemJobScheduler) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
-func (r *resourceJobScheduler) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *resourceItemJobScheduler) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (r *resourceJobScheduler) Configure(_ context.Context, req resource.Configu
 	r.fabricClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
-func (r *resourceJobScheduler) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
@@ -128,7 +128,7 @@ func (r *resourceJobScheduler) Create(ctx context.Context, req resource.CreateRe
 	}
 }
 
-func (r *resourceJobScheduler) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *resourceItemJobScheduler) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
@@ -171,7 +171,7 @@ func (r *resourceJobScheduler) Read(ctx context.Context, req resource.ReadReques
 	}
 }
 
-func (r *resourceJobScheduler) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceItemJobScheduler) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -224,7 +224,7 @@ func (r *resourceJobScheduler) Update(ctx context.Context, req resource.UpdateRe
 	}
 }
 
-func (r *resourceJobScheduler) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceItemJobScheduler) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
@@ -253,7 +253,7 @@ func (r *resourceJobScheduler) Delete(ctx context.Context, req resource.DeleteRe
 	})
 }
 
-func (r *resourceJobScheduler) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *resourceItemJobScheduler) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "start",
 	})
@@ -292,7 +292,7 @@ func (r *resourceJobScheduler) ImportState(ctx context.Context, req resource.Imp
 	}
 
 	state := resourceJobScheduleModel{
-		baseJobScheduleModel: baseJobScheduleModel{
+		baseItemJobSchedulerModel: baseItemJobSchedulerModel{
 			ItemID:      uuitemID,
 			WorkspaceID: uuidWorkspaceID,
 			JobType:     types.StringValue(jobType),
@@ -317,7 +317,7 @@ func (r *resourceJobScheduler) ImportState(ctx context.Context, req resource.Imp
 }
 
 // validateJobType validates that the job type is supported for the given item type.
-func (r *resourceJobScheduler) validateJobType(itemType *fabcore.ItemType, jobType string) error {
+func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, jobType string) error {
 	if itemType == nil {
 		return fmt.Errorf("item type is nil")
 	}
@@ -339,7 +339,7 @@ func (r *resourceJobScheduler) validateJobType(itemType *fabcore.ItemType, jobTy
 	return nil
 }
 
-func (r *resourceJobScheduler) get(ctx context.Context, model *resourceJobScheduleModel) diag.Diagnostics {
+func (r *resourceItemJobScheduler) get(ctx context.Context, model *resourceJobScheduleModel) diag.Diagnostics {
 	respGet, err := r.client.GetItemSchedule(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags

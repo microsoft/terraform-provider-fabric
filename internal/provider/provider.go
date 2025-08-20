@@ -57,7 +57,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/jobscheduler"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/itemjobscheduler"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
@@ -434,7 +434,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
-		jobscheduler.NewResourceJobScheduler,
+		itemjobscheduler.NewResourceItemJobScheduler,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
@@ -494,8 +494,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		gatewayra.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
-		jobscheduler.NewDataSourceJobScheduler,
-		jobscheduler.NewDataSourceJobSchedules,
+		itemjobscheduler.NewDataSourceItemJobScheduler,
+		itemjobscheduler.NewDataSourceItemJobSchedulers,
 		kqldashboard.NewDataSourceKQLDashboard,
 		kqldashboard.NewDataSourceKQLDashboards,
 		kqldatabase.NewDataSourceKQLDatabase,

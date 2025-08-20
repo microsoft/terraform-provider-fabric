@@ -1,4 +1,4 @@
-package jobscheduler_test
+package itemjobscheduler_test
 
 import (
 	"errors"
@@ -20,7 +20,7 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
+func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -161,7 +161,7 @@ func TestUnit_JobSchedulerResource_Attributes(t *testing.T) {
 	}))
 }
 
-func TestUnit_JobSchedulerResource_ImportState(t *testing.T) {
+func TestUnit_ItemJobSchedulerResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	jobType := testhelp.RandomName()
@@ -247,7 +247,7 @@ func TestUnit_JobSchedulerResource_ImportState(t *testing.T) {
 	}))
 }
 
-func TestUnit_JobSchedulerResource_CRUD(t *testing.T) {
+func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	// jobType := testhelp.RandomName()
@@ -311,7 +311,7 @@ func TestUnit_JobSchedulerResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_JobScheduleResource_CRUD(t *testing.T) {
+func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	jobType := "Execute"

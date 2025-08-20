@@ -1,4 +1,4 @@
-package jobscheduler
+package itemjobscheduler
 
 import (
 	"context"
@@ -20,18 +20,18 @@ import (
 BASE MODEL
 */
 
-type baseJobScheduleModel struct {
-	ID              customtypes.UUID                                                        `tfsdk:"id"`
-	Enabled         types.Bool                                                              `tfsdk:"enabled"`
-	ItemID          customtypes.UUID                                                        `tfsdk:"item_id"`
-	WorkspaceID     customtypes.UUID                                                        `tfsdk:"workspace_id"`
-	JobType         types.String                                                            `tfsdk:"job_type"`
-	CreatedDateTime timetypes.RFC3339                                                       `tfsdk:"created_date_time"`
-	Owner           supertypes.SingleNestedObjectValueOf[baseOwnerModel]                    `tfsdk:"owner"`
-	Configuration   supertypes.SingleNestedObjectValueOf[baseJobScheduleConfigurationModel] `tfsdk:"configuration"`
+type baseItemJobSchedulerModel struct {
+	ID              customtypes.UUID                                             `tfsdk:"id"`
+	Enabled         types.Bool                                                   `tfsdk:"enabled"`
+	ItemID          customtypes.UUID                                             `tfsdk:"item_id"`
+	WorkspaceID     customtypes.UUID                                             `tfsdk:"workspace_id"`
+	JobType         types.String                                                 `tfsdk:"job_type"`
+	CreatedDateTime timetypes.RFC3339                                            `tfsdk:"created_date_time"`
+	Owner           supertypes.SingleNestedObjectValueOf[baseOwnerModel]         `tfsdk:"owner"`
+	Configuration   supertypes.SingleNestedObjectValueOf[baseConfigurationModel] `tfsdk:"configuration"`
 }
 
-type baseJobScheduleConfigurationModel struct {
+type baseConfigurationModel struct {
 	StartDateTime   timetypes.RFC3339                   `tfsdk:"start_date_time"`
 	EndDateTime     timetypes.RFC3339                   `tfsdk:"end_date_time"`
 	LocalTimeZoneId types.String                        `tfsdk:"local_time_zone"`
@@ -74,20 +74,20 @@ type userDetailsModel struct {
 	UserPrincipalName types.String `tfsdk:"user_principal_name"`
 }
 
-func (to *baseJobScheduleModel) set(ctx context.Context, workspaceID, itemID, jobType string, from fabcore.ItemSchedule) diag.Diagnostics {
+func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemID, jobType string, from fabcore.ItemSchedule) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Enabled = types.BoolPointerValue(from.Enabled)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.JobType = types.StringValue(jobType)
 	to.CreatedDateTime = timetypes.NewRFC3339TimePointerValue(from.CreatedDateTime)
-	to.Configuration = supertypes.NewSingleNestedObjectValueOfNull[baseJobScheduleConfigurationModel](ctx)
-	configuration := supertypes.NewSingleNestedObjectValueOfNull[baseJobScheduleConfigurationModel](ctx)
+	to.Configuration = supertypes.NewSingleNestedObjectValueOfNull[baseConfigurationModel](ctx)
+	configuration := supertypes.NewSingleNestedObjectValueOfNull[baseConfigurationModel](ctx)
 	owner := supertypes.NewSingleNestedObjectValueOfNull[baseOwnerModel](ctx)
 	to.Owner = owner
 
 	if from.Configuration != nil {
-		baseJobScheduleConfigurationModel := &baseJobScheduleConfigurationModel{}
+		baseJobScheduleConfigurationModel := &baseConfigurationModel{}
 		if diags := baseJobScheduleConfigurationModel.set(ctx, from.Configuration); diags.HasError() {
 			return diags
 		}
@@ -295,7 +295,7 @@ func (to *servicePrincipalBaseOwnerModel) set(ctx context.Context, from *fabcore
 	return nil
 }
 
-func (to *baseJobScheduleConfigurationModel) set(ctx context.Context, from fabcore.ScheduleConfigClassification) diag.Diagnostics {
+func (to *baseConfigurationModel) set(ctx context.Context, from fabcore.ScheduleConfigClassification) diag.Diagnostics {
 	schConfig := from.GetScheduleConfig()
 	to.StartDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.StartDateTime)
 	to.EndDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.EndDateTime)
@@ -373,7 +373,7 @@ DATA-SOURCE
 */
 
 type dataSourceJobScheduleModel struct {
-	baseJobScheduleModel
+	baseItemJobSchedulerModel
 
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
@@ -383,18 +383,18 @@ DATA-SOURCE (list)
 */
 
 type dataSourceJobSchedulesModel struct {
-	WorkspaceID customtypes.UUID                                        `tfsdk:"workspace_id"`
-	ItemID      customtypes.UUID                                        `tfsdk:"item_id"`
-	JobType     types.String                                            `tfsdk:"job_type"`
-	Values      supertypes.SetNestedObjectValueOf[baseJobScheduleModel] `tfsdk:"values"`
-	Timeouts    timeoutsD.Value                                         `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                             `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID                                             `tfsdk:"item_id"`
+	JobType     types.String                                                 `tfsdk:"job_type"`
+	Values      supertypes.SetNestedObjectValueOf[baseItemJobSchedulerModel] `tfsdk:"values"`
+	Timeouts    timeoutsD.Value                                              `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceJobSchedulesModel) setValues(ctx context.Context, workspaceID, itemID, jobType string, from []fabcore.ItemSchedule) diag.Diagnostics {
-	slice := make([]*baseJobScheduleModel, 0, len(from))
+	slice := make([]*baseItemJobSchedulerModel, 0, len(from))
 
 	for _, entity := range from {
-		var entityModel baseJobScheduleModel
+		var entityModel baseItemJobSchedulerModel
 
 		if diags := entityModel.set(ctx, workspaceID, itemID, jobType, entity); diags.HasError() {
 			return diags
@@ -411,7 +411,7 @@ RESOURCE
 */
 
 type resourceJobScheduleModel struct {
-	baseJobScheduleModel
+	baseItemJobSchedulerModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
