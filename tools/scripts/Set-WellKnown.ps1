@@ -970,6 +970,33 @@ function Set-FabricFolder {
   return $result
 }
 
+function Set-ItemJobScheduler {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+    [Parameter(Mandatory = $true)]
+    [string]$JobType,
+    [Parameter(Mandatory = $true)]
+    [object]$Payload
+  )
+
+  # Attempt to get an existing item schedule - will get the first occurrence of our payload type and item id
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/jobs/$JobType/schedules"
+  $result = $results.Response.value | Where-Object { $_.configuration.type -eq $Payload.configuration.type } | Select-Object -First 1
+
+  if (!$result) {
+    # Item Schedule does not exist, so create it
+    Write-Log -Message "Creating $($Payload.configuration.type) Item Schedule" -Level 'INFO'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/jobs/$JobType/schedules" -Payload $Payload).Response
+  }
+  Write-Log -Message "Item Schedule - Id: $($result.id)"
+
+  return $result
+}
+
 
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
@@ -1742,6 +1769,37 @@ else {
     displayName = $warehouseSnapshot.displayName
     description = $warehouseSnapshot.description
   }
+}
+
+# Create Item Schedule if not exists
+$itemJobSchedulerPayload = @{
+  enabled       = $false
+  configuration = @{
+    endDateTime     = (Get-Date).AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ")
+    startDateTime   = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+    localTimeZoneId = "Central Standard Time"
+    type            = "Weekly"
+    times           = @("10:00")
+    weekdays        = @("Monday")
+  }
+}
+
+$JOB_TYPE = "Execute"
+$itemJobScheduler = Set-ItemJobScheduler `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -ItemId $wellKnown['Dataflow'].id `
+  -Jobtype $JOB_TYPE `
+  -Payload $itemJobSchedulerPayload
+
+$wellKnown['ItemJobScheduler'] = @{
+  id                = $itemJobScheduler.id
+  ownerType         = $itemJobScheduler.owner.type
+  ownerId           = $itemJobScheduler.owner.id
+  itemId            = $wellKnown['Dataflow'].id
+  enabled           = $itemJobScheduler.enabled
+  configurationType = $itemJobScheduler.configuration.type
+  createdDateTime   = ([DateTime]::Parse($itemJobScheduler.createdDateTime)).ToString('yyyy-MM-ddTHH:mm:ssZ')
+  jobType           = $JOB_TYPE
 }
 
 # Save wellknown.json file
