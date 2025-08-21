@@ -282,6 +282,9 @@ function Set-FabricItem {
     'Warehouse' {
       $itemEndpoint = 'warehouses'
     }
+    'WarehouseSnapshot' {
+      $itemEndpoint = 'warehousesnapshots'
+    }
     default {
       $itemEndpoint = 'items'
     }
@@ -291,7 +294,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1070,6 +1073,7 @@ $itemNaming = @{
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
   'Warehouse'                       = 'wh'
+  'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
@@ -1172,7 +1176,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1657,26 +1661,6 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-# Create the Apache Airflow Job if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = 'apacheAirflowJob-content.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheairflowjob-content.json.tmpl'
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-
-$apacheAirflowJob = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'ApacheAirflowJob' -Definition $definition
-
-$wellKnown['ApacheAirflowJob'] = @{
-  id          = $apacheAirflowJob.id
-  displayName = $apacheAirflowJob.displayName
-  description = $apacheAirflowJob.description
-}
-
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {
   Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
@@ -1739,6 +1723,25 @@ $wellKnown['Subfolder'] = @{
   id             = $subFolder.id
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
+}
+
+# Create Warehouse Snapshot if not exists
+if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
+  Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
+  $creationPayload = @{
+    parentWarehouseId = $wellKnown['Warehouse'].id
+  }
+
+  $warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
+
+  $wellKnown['WarehouseSnapshot'] = @{
+    id          = $warehouseSnapshot.id
+    displayName = $warehouseSnapshot.displayName
+    description = $warehouseSnapshot.description
+  }
 }
 
 # Save wellknown.json file

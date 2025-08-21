@@ -3,7 +3,7 @@
   "name": "Terraform Provider",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   // Available base images: https://mcr.microsoft.com/v2/devcontainers/base/tags/list
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu22.04",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu24.04",
   // Features to add to the dev container. More info: https://containers.dev/features
   "features": {
     "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
@@ -11,7 +11,7 @@
       "configureZshAsDefaultShell": true
     },
     "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.24.5"
+      "version": "1.25.0"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.13",
@@ -28,13 +28,13 @@
       "jaqVersion": "latest"
     },
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.12.2",
+      "version": "1.13.0",
       "installSentinel": true,
       "installTFsec": true,
       "installTerraformDocs": true
     },
     "ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-      "version": "1.10.3"
+      "version": "1.10.5"
     },
     "ghcr.io/eitsupi/devcontainer-features/go-task:1": {},
     "./features/tfprovider-local-dev": {
