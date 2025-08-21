@@ -1775,8 +1775,8 @@ else {
 $itemJobSchedulerPayload = @{
   enabled       = $false
   configuration = @{
-    endDateTime     = (Get-Date).AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ")
-    startDateTime   = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+    endDateTime     = (Get-Date).AddDays(7)
+    startDateTime   = Get-Date
     localTimeZoneId = "Central Standard Time"
     type            = "Weekly"
     times           = @("10:00")
@@ -1784,7 +1784,7 @@ $itemJobSchedulerPayload = @{
   }
 }
 
-$JOB_TYPE = "Execute"
+$JOB_TYPE = "ApplyChanges"
 $itemJobScheduler = Set-ItemJobScheduler `
   -WorkspaceId $wellKnown['WorkspaceDS'].id `
   -ItemId $wellKnown['Dataflow'].id `
@@ -1798,7 +1798,7 @@ $wellKnown['ItemJobScheduler'] = @{
   itemId            = $wellKnown['Dataflow'].id
   enabled           = $itemJobScheduler.enabled
   configurationType = $itemJobScheduler.configuration.type
-  createdDateTime   = ([DateTime]::Parse($itemJobScheduler.createdDateTime)).ToString('yyyy-MM-ddTHH:mm:ssZ')
+  createdDateTime   = $itemJobScheduler.createdDateTime
   jobType           = $JOB_TYPE
 }
 
