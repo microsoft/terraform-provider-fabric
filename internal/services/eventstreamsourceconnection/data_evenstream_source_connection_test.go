@@ -183,6 +183,10 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 }
 
 func TestAcc_EventstreamSourceConnectionDataSource(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Throttling issues which blocks all PR tests in the pipeline")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
