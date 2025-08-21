@@ -2,7 +2,9 @@ package itemjobscheduler_test
 
 import (
 	"regexp"
+	"strconv"
 	"testing"
+	"time"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,7 +18,7 @@ import (
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_JobScheduleDataSource(t *testing.T) {
+func TestUnit_ItemJobSchedulerDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	jobType := testhelp.RandomName()
@@ -101,7 +103,14 @@ func TestUnit_JobScheduleDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "configuration.local_time_zone", entity.Configuration.GetScheduleConfig().LocalTimeZoneID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(*entity.Enabled)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity.CreatedDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.ID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.display_name", *entity.Owner.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.Type)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", string(*entity.Configuration.GetScheduleConfig().Type)),
 			),
 		},
 		// read by id - not found
@@ -120,7 +129,7 @@ func TestUnit_JobScheduleDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_JobScheduleDataSource(t *testing.T) {
+func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

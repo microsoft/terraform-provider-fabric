@@ -143,7 +143,7 @@ func NewRandomItemSchedule(scheduleType fabcore.ScheduleType) fabcore.ItemSchedu
 		Enabled:         to.Ptr(testhelp.RandomBool()),
 		CreatedDateTime: to.Ptr(time.Now()),
 		Configuration:   NewRandomScheduleConfig(scheduleType),
-		Owner:           NewRadomOwner(),
+		Owner:           NewRandomOwner(),
 	}
 }
 
@@ -197,13 +197,19 @@ func NewRandomWeeklyScheduleConfig() *fabcore.WeeklyScheduleConfig {
 	}
 }
 
-func NewRadomOwner() *fabcore.Principal {
+func NewRandomOwner() *fabcore.Principal {
 	return &fabcore.Principal{
 		ID:          to.Ptr(testhelp.RandomUUID()),
 		DisplayName: to.Ptr(testhelp.RandomName()),
-		Type:        to.Ptr(fabcore.PrincipalTypeUser),
-		UserDetails: &fabcore.PrincipalUserDetails{
-			UserPrincipalName: to.Ptr(testhelp.RandomName()),
+		Type:        to.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
+		ServicePrincipalProfileDetails: &fabcore.PrincipalServicePrincipalProfileDetails{
+			ParentPrincipal: &fabcore.Principal{
+				ID:   to.Ptr(testhelp.RandomUUID()),
+				Type: to.Ptr(fabcore.PrincipalTypeServicePrincipal),
+				ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
+					AADAppID: to.Ptr(testhelp.RandomUUID()),
+				},
+			},
 		},
 	}
 }

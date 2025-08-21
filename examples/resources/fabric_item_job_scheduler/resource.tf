@@ -4,11 +4,10 @@ resource "fabric_item_job_scheduler" "cron_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Cron"
-    interval           = 10
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Cron"
+    interval        = 10
   }
 }
 
@@ -18,11 +17,10 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Daily"
-    times              = ["HH:mm:ss"]
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Daily"
+    times           = ["HH:mm:ss"]
   }
 }
 
@@ -32,11 +30,10 @@ resource "fabric_item_job_scheduler" "weekly_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Weekly"
-    times              = ["HH:mm:ss"]
-    weekdays           = ["Monday"]
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Weekly"
+    times           = ["HH:mm:ss"]
+    weekdays        = ["Monday"]
   }
 }

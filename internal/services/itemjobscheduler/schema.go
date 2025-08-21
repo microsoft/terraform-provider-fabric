@@ -3,8 +3,12 @@
 package itemjobscheduler
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -357,9 +361,16 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 			"start_date_time": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
+					CustomType:          timetypes.RFC3339Type{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`),
+							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
+						),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -368,20 +379,16 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 			"end_date_time": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
+					CustomType:          timetypes.RFC3339Type{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
-				},
-			},
-			"local_time_zone": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The time zone identifier registry on local computer for windows.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Required: true,
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`),
+							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
+						),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -398,7 +405,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 					Computed: true,
 				},
 			},
-			"interval": superschema.Int32Attribute{ // Changed from StringAttribute
+			"interval": superschema.Int32Attribute{
 				Common: &schemaR.Int32Attribute{
 					MarkdownDescription: "The time interval in minutes. A number between 1 and 5270400 (10 years).",
 				},
@@ -419,6 +426,9 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 				},
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
+					Validators: []validator.Set{
+						setvalidator.SizeAtMost(100),
+					},
 				},
 				DataSource: &schemaD.SetAttribute{
 					Computed: true,
@@ -431,6 +441,9 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 				},
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
+					Validators: []validator.Set{
+						setvalidator.SizeAtMost(10),
+					},
 				},
 				DataSource: &schemaD.SetAttribute{
 					Computed: true,

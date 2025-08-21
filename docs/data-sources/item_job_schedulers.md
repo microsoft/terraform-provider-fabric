@@ -74,7 +74,6 @@ Read-Only:
 
 - `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years).
-- `local_time_zone_id` (String) The time zone identifier registry on local computer for windows.
 - `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed.
 - `type` (String) A string represents the type of the plan. Additional planType types may be added over time.

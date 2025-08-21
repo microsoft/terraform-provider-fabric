@@ -16,7 +16,7 @@ import (
 
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
-func TestUnit_JobSchedulesDataSource(t *testing.T) {
+func TestUnit_ItemJobSchedulersDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	jobType := testhelp.RandomName()
@@ -90,6 +90,11 @@ func TestUnit_JobSchedulesDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.created_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.id"),
 			),
 		},
 	}))
@@ -118,6 +123,10 @@ func TestAcc_JobSchedulesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.created_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.id"),
 			),
 		},
 	},

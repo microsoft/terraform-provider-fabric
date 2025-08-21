@@ -22,11 +22,10 @@ resource "fabric_item_job_scheduler" "cron_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Cron"
-    interval           = 10
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Cron"
+    interval        = 10
   }
 }
 
@@ -36,11 +35,10 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Daily"
-    times              = ["HH:mm:ss"]
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Daily"
+    times           = ["HH:mm:ss"]
   }
 }
 
@@ -50,12 +48,11 @@ resource "fabric_item_job_scheduler" "weekly_configuration_example" {
   job_type     = "MyJobType"
   enabled      = true #or false
   configuration = {
-    start_date_time    = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time      = "YYYY-MM-DDTHH:mm:ssZ"
-    local_time_zone_id = "YourTimezoneId"
-    type               = "Weekly"
-    times              = ["HH:mm:ss"]
-    weekdays           = ["Monday"]
+    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
+    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    type            = "Weekly"
+    times           = ["HH:mm:ss"]
+    weekdays        = ["Monday"]
   }
 }
 ```
@@ -87,9 +84,8 @@ resource "fabric_item_job_scheduler" "weekly_configuration_example" {
 
 Required:
 
-- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. Automatically converts datetime to RFC3339 format with UTC timezone.
-- `local_time_zone_id` (String) The time zone identifier registry on local computer for windows.
-- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. Automatically converts datetime to RFC3339 format with UTC timezone.
+- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z' (e.g., 2024-04-28T14:30:00Z). Timezone offsets like +02:00 or -03:00 are not allowed.
+- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z' (e.g., 2024-04-28T14:30:00Z). Timezone offsets like +02:00 or -03:00 are not allowed.
 - `type` (String) A string represents the type of the plan. Additional planType types may be added over time.
 
 Optional:

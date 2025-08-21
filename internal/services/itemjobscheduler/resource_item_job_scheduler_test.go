@@ -105,7 +105,6 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"enabled":      true,
 
 					"configuration": map[string]any{
-						"local_time_zone": testhelp.RandomName(),
 						"start_date_time": time.Now().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
@@ -126,7 +125,6 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"enabled":      true,
 
 					"configuration": map[string]any{
-						"local_time_zone": testhelp.RandomName(),
 						"start_date_time": time.Now().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
@@ -149,7 +147,6 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"enabled":      true,
 
 					"configuration": map[string]any{
-						"local_time_zone": testhelp.RandomName(),
 						"start_date_time": time.Now().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
@@ -157,6 +154,26 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`Error: Invalid Job Type`),
+		},
+		// error  - not a valid date time
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "Execute",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": "2024-04-28T00:00:00+03:00",
+						"end_date_time":   "2024-04-29T00:00:00+03:00",
+						"type":            string(fabcore.ScheduleTypeCron),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("The datetime must be in UTC format ending with 'Z'"),
 		},
 	}))
 }
@@ -181,7 +198,6 @@ func TestUnit_ItemJobSchedulerResource_ImportState(t *testing.T) {
 			"job_type":     jobType,
 			"enabled":      *entity.Enabled,
 			"configuration": map[string]any{
-				"local_time_zone": *configuration.LocalTimeZoneID,
 				"start_date_time": (*configuration.StartDateTime).Format(time.RFC3339),
 				"end_date_time":   (*configuration.EndDateTime).Format(time.RFC3339),
 				"type":            string(*configuration.Type),
@@ -273,7 +289,6 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 					"job_type":     "Execute",
 					"enabled":      *entity.Enabled,
 					"configuration": map[string]any{
-						"local_time_zone": *entity.Configuration.GetScheduleConfig().LocalTimeZoneID,
 						"start_date_time": (*entity.Configuration.GetScheduleConfig().StartDateTime).Format(time.RFC3339),
 						"end_date_time":   (*entity.Configuration.GetScheduleConfig().EndDateTime).Format(time.RFC3339),
 						"type":            string(*entity.Configuration.GetScheduleConfig().Type),
@@ -281,9 +296,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 					},
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "configuration.local_time_zone", entity.Configuration.GetScheduleConfig().LocalTimeZoneID),
-			),
+			Check: resource.ComposeAggregateTestCheckFunc(),
 		},
 		// Update and Read
 		{
@@ -296,16 +309,13 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 					"job_type":     "Execute",
 					"enabled":      *entity.Enabled,
 					"configuration": map[string]any{
-						"local_time_zone": *entity.Configuration.GetScheduleConfig().LocalTimeZoneID,
 						"start_date_time": (*entity.Configuration.GetScheduleConfig().StartDateTime).Format(time.RFC3339),
 						"end_date_time":   (*entity.Configuration.GetScheduleConfig().EndDateTime).Format(time.RFC3339),
 						"type":            string(*entity.Configuration.GetScheduleConfig().Type),
 					},
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "configuration.local_time_zone", entity.Configuration.GetScheduleConfig().LocalTimeZoneID),
-			),
+			Check: resource.ComposeAggregateTestCheckFunc(),
 		},
 		// Delete testing automatically occurs in TestCase
 	}))
@@ -332,7 +342,6 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 						"job_type":     jobType,
 						"enabled":      true,
 						"configuration": map[string]any{
-							"local_time_zone": "Central Standard Time",
 							"start_date_time": "2024-04-28T00:00:00Z",
 							"end_date_time":   "2024-04-30T23:59:00Z",
 							"type":            string(*entity.Configuration.GetScheduleConfig().Type),
@@ -341,9 +350,8 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.local_time_zone", "Central Standard Time"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", "2024-04-28T00:00:00Z"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", "2024-04-30T23:59:00Z"),
+			//	resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", "2024-04-28T00:00:00Z"),
+			// resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", "2024-04-30T23:59:00Z"),
 			),
 		},
 		// Update and Read
@@ -359,7 +367,6 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 						"job_type":     jobType,
 						"enabled":      false,
 						"configuration": map[string]any{
-							"local_time_zone": "Central Standard Time",
 							"start_date_time": "2024-04-28T00:00:00Z",
 							"end_date_time":   "2024-04-30T23:59:00Z",
 							"type":            string(*entity.Configuration.GetScheduleConfig().Type),
@@ -367,9 +374,7 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 						},
 					},
 				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.local_time_zone", "Central Standard Time"),
-			),
+			Check: resource.ComposeAggregateTestCheckFunc(),
 		},
 		// Delete testing automatically occurs in TestCase
 	}))

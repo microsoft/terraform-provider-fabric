@@ -196,6 +196,18 @@ func (r *resourceItemJobScheduler) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	respItem, err := r.fabricClient.GetItem(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), nil)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Validate job type
+	if err := r.validateJobType(respItem.Type, plan.JobType.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Invalid Job Type", err.Error())
+
+		return
+	}
+
 	respUpdate, err := r.client.UpdateItemSchedule(
 		ctx,
 		plan.WorkspaceID.ValueString(),
@@ -330,10 +342,10 @@ func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, j
 			*itemType, getMapKeys(JobTypeActions))
 	}
 
-	//	jobTypeLowercase := strings.ToLower(jobType)
-	if !slices.Contains(validJobTypes, jobType) {
+	jobTypeLowercase := strings.ToLower(jobType)
+	if !slices.Contains(validJobTypes, jobTypeLowercase) {
 		return fmt.Errorf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v",
-			jobType, *itemType, *itemType, validJobTypes)
+			jobTypeLowercase, *itemType, *itemType, validJobTypes)
 	}
 
 	return nil
