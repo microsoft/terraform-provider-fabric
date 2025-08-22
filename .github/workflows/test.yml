@@ -326,7 +326,7 @@ jobs:
           - cli: terraform
             version: "1.8"
           - cli: terraform
-            version: "1.12"
+            version: "1.13"
 
           # OpenTofu - 2 specific versions
           - cli: tofu
@@ -487,13 +487,13 @@ jobs:
       - name: 📥 Download test results
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-          pattern: terraform-1_12-test-results
+          pattern: terraform-1_13-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-          pattern: terraform-1_12-test-coverage*
+          pattern: terraform-1_13-test-coverage*
           merge-multiple: true
 
       - name: 📝 Publish
@@ -507,7 +507,7 @@ jobs:
       #     files: ./testresults.xml
 
       - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
         with:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -516,7 +516,7 @@ jobs:
       # - name: 📝 Code Coverage report
       #   uses: fgrosse/go-coverage-report@8c1d1a09864211d258937b1b1a5b849f7e4f2682 # v1.2.0
       #   with:
-      #     coverage-artifact-name: terraform-1_12-test-coverage-results
+      #     coverage-artifact-name: terraform-1_13-test-coverage-results
       #     coverage-file-name: coverage.out
 
       - name: 🔎 Find comment
