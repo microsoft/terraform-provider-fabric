@@ -71,6 +71,12 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.effect"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_value_included_in.#"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_value_included_in.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.members.fabric_item_members.0.source_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.members.fabric_item_members.0.item_access.#"),
 			),
 		},
 	}))
@@ -106,6 +112,12 @@ func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.effect"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_value_included_in.#"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.decision_rules.0.permission.0.attribute_value_included_in.0"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.members.fabric_item_members.0.source_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.members.fabric_item_members.0.item_access.#"),
 			),
 		},
 	}))

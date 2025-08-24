@@ -16,7 +16,7 @@ type operationsOneLakeDataAccessSecurity struct{}
 func (o *operationsOneLakeDataAccessSecurity) TransformGet(entity fabcore.DataAccessRoles) fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse {
 	return fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{
 		DataAccessRoles: entity,
-		Etag:            to.Ptr("123"),
+		Etag:            to.Ptr(testhelp.RandomUUID()),
 	}
 }
 
@@ -86,7 +86,7 @@ func NewRandomOneLakeDataAccessSecurityClient() fabcore.DataAccessRole {
 			FabricItemMembers: []fabcore.FabricItemMember{
 				{
 					ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-					SourcePath: to.Ptr("cfafbeb1-8037-4d0c-896e-a46fb27ff222/25bac802-080d-4f73-8a42-1b406eb1fceb"),
+					SourcePath: to.Ptr(testhelp.RandomUUID() + "/" + testhelp.RandomUUID()),
 				},
 			},
 		},
