@@ -45,21 +45,18 @@ Optional:
 
 ### Nested Schema for `values`
 
-Required:
-
-- `id` (String) The Connection ID.
-
 Optional:
 
-- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
+- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways.
 - `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
 
 Read-Only:
 
 - `connection_details` (Attributes) The Connection connection details. (see [below for nested schema](#nestedatt--values--connection_details))
-- `connectivity_type` (String) The Connection connectivity type. Value must be one of : `ShareableCloud`, `VirtualNetworkGateway`.
+- `connectivity_type` (String) The Connection connectivity type.
 - `credential_details` (Attributes) The Connection credential details. (see [below for nested schema](#nestedatt--values--credential_details))
 - `display_name` (String) The Connection display name.
+- `id` (String) The Connection ID.
 - `privacy_level` (String) The Connection privacy level. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 
 <a id="nestedatt--values--connection_details"></a>

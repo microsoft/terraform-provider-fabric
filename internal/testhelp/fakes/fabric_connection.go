@@ -278,6 +278,7 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 							fabcore.CredentialTypeBasic,
 							fabcore.CredentialTypeOAuth2,
 							fabcore.CredentialTypeKey,
+							fabcore.CredentialTypeAnonymous,
 						},
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,

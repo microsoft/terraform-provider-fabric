@@ -26,19 +26,6 @@ type baseConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnecti
 }
 
 func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx context.Context, from fabcore.ConnectionClassification) diag.Diagnostics { //nolint:gocognit
-	// connectivity type specific information
-	switch v := from.(type) {
-	case *fabcore.ShareableCloudConnection:
-		if v.AllowConnectionUsageInGateway != nil {
-			to.AllowConnectionUsageInGateway = types.BoolValue(*v.AllowConnectionUsageInGateway)
-		} else {
-			to.AllowConnectionUsageInGateway = types.BoolValue(false) // default to false
-		}
-	case *fabcore.VirtualNetworkGatewayConnection:
-		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
-		to.AllowConnectionUsageInGateway = types.BoolNull()
-	}
-
 	fromConnection := from.GetConnection()
 	to.ID = customtypes.NewUUIDPointerValue(fromConnection.ID)
 	to.DisplayName = types.StringPointerValue(fromConnection.DisplayName)
@@ -127,6 +114,20 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 	}
 
 	to.CredentialDetails = credentialDetails
+
+	// connectivity type specific information
+	switch v := from.(type) {
+	case *fabcore.ShareableCloudConnection:
+		if v.AllowConnectionUsageInGateway != nil {
+			to.AllowConnectionUsageInGateway = types.BoolValue(*v.AllowConnectionUsageInGateway)
+		} else {
+			to.AllowConnectionUsageInGateway = types.BoolValue(false) // default is false
+		}
+	case *fabcore.VirtualNetworkGatewayConnection:
+		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
+		// keep it here due to default being "false"
+		to.AllowConnectionUsageInGateway = types.BoolNull()
+	}
 
 	return nil
 }

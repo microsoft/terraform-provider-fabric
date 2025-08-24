@@ -96,6 +96,13 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 		}
 	}
 
+	// writeOnly specific configurations
+	if testResource != nil && strings.Contains(*testResource, "WriteOnly") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_11_0),
+		}
+	}
+
 	return testCase
 }
 

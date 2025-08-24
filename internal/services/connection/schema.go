@@ -65,7 +65,8 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Required: true,
+					Required: !isList,
+					Computed: isList,
 				},
 			},
 			"display_name": superschema.StringAttribute{
@@ -97,9 +98,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
-					Validators: []validator.String{
-						stringvalidator.OneOf(possibleSupportedConnectivityTypes...),
-					},
 				},
 			},
 			"privacy_level": superschema.StringAttribute{
@@ -162,12 +160,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				DataSource: &schemaD.BoolAttribute{
 					Computed: true,
 					Optional: true,
-					Validators: []validator.Bool{
-						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
-							}),
-					},
 				},
 			},
 			"connection_details": superschema.SuperSingleNestedAttribute{
@@ -228,7 +220,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Attributes: superschema.Attributes{
 							"name": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The name of the parameter..",
+									MarkdownDescription: "The name of the parameter.",
 									Required:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),

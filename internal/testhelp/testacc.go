@@ -88,6 +88,13 @@ func newTestAccCase(t *testing.T, testResource *string, preCheck func(*testing.T
 		}
 	}
 
+	// writeOnly specific configurations
+	if testResource != nil && strings.Contains(*testResource, "WriteOnly") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_11_0),
+		}
+	}
+
 	return testCase
 }
 

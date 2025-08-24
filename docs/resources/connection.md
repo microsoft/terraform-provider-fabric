@@ -93,7 +93,7 @@ resource "fabric_connection" "example_on_premises_gateway" {
 
 ### Optional
 
-- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. Value defaults to `false`. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
+- `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
 - `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
 - `privacy_level` (String) The Connection privacy level. Value defaults to `Organizational`. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -125,7 +125,7 @@ Read-Only:
 
 Required:
 
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter..
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter.
 - `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The value of the parameter.
 
 Read-Only:

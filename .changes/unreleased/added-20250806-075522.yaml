@@ -1,5 +1,5 @@
 kind: added
-body: ' Onboard new `fabric_connection` Data Source'
+body: " Onboard new `fabric_connection` data source"
 time: 2025-08-06T07:55:22.5131225Z
 custom:
-    Issue: "488"
+  Issue: "488"
