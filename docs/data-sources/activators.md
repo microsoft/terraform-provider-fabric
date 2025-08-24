@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The Activator description.
 - `display_name` (String) The Activator display name.
+- `folder_id` (String) The Activator Folder ID.
 - `id` (String) The Activator ID.
 - `workspace_id` (String) The Workspace ID.

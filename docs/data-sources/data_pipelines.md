@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Data Pipeline description.
 - `display_name` (String) The Data Pipeline display name.
+- `folder_id` (String) The Data Pipeline Folder ID.
 - `id` (String) The Data Pipeline ID.
 - `workspace_id` (String) The Workspace ID.
