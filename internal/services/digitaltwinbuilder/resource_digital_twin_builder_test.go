@@ -286,11 +286,12 @@ func TestAcc_DigitalTwinBuilderResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
+	entityCreateDisplayNameNoDefinition := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
+		// Create and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -308,6 +309,23 @@ func TestAcc_DigitalTwinBuilderResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Create and Read - without definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayNameNoDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayNameNoDefinition),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 			),
 		},
 		// error - no required attributes
