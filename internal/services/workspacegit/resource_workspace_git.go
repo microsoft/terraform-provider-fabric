@@ -232,12 +232,16 @@ func (r *resourceWorkspaceGit) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate, nil)
+	respUpdate, err := r.client.UpdateMyGitCredentials(ctx, plan.WorkspaceID.ValueString(), reqUpdate.UpdateGitCredentialsRequestClassification, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if resp.Diagnostics.Append(plan.setCredentials(ctx, respUpdate.GitCredentialsConfigurationResponseClassification)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -274,7 +278,6 @@ func (r *resourceWorkspaceGit) Delete(ctx context.Context, req resource.DeleteRe
 	_, err := r.client.Disconnect(ctx, state.WorkspaceID.ValueString(), nil)
 
 	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrGit.WorkspaceNotConnectedToGit)
-
 	if diags.HasError() && !utils.IsErr(diags, fabcore.ErrGit.WorkspaceNotConnectedToGit) {
 		resp.Diagnostics.Append(diags...)
 

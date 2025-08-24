@@ -45,6 +45,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -52,6 +54,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
@@ -69,6 +72,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -422,9 +426,12 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
+		deploymentpipeline.NewResourceDeploymentPipeline,
+		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
@@ -436,6 +443,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
@@ -467,6 +475,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
+		deploymentpipeline.NewDataSourceDeploymentPipeline,
+		deploymentpipeline.NewDataSourceDeploymentPipelines,
+		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
@@ -477,6 +488,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		folder.NewDataSourceFolder,
+		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,
@@ -504,6 +517,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		shortcut.NewDataSourceShortcut,
+		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,

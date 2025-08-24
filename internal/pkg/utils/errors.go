@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package utils
+package utils //revive:disable-line:var-naming
 
 import (
 	"context"
@@ -295,7 +295,8 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 		return err
 	}
 
-	if err := json.Unmarshal(respBody, &e); err != nil {
+	err = json.Unmarshal(respBody, &e)
+	if err != nil {
 		return err
 	}
 

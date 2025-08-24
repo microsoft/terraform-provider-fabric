@@ -4,7 +4,7 @@ page_title: "fabric_activator Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The Activator resource allows you to manage a Fabric Activator https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator.
-  -> This resource does not support Service Principal. Please use a User context authentication.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Activator resource allows you to manage a Fabric [Activator](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator).
 
--> This resource does not support Service Principal. Please use a User context authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -109,6 +109,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # terraform import fabric_activator.example "<WorkspaceID>/<ActivatorID>"

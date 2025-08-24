@@ -276,8 +276,14 @@ function Set-FabricItem {
     'SQLDatabase' {
       $itemEndpoint = 'sqlDatabases'
     }
+    'VariableLibrary' {
+      $itemEndpoint = 'variableLibraries'
+    }
     'Warehouse' {
       $itemEndpoint = 'warehouses'
+    }
+    'WarehouseSnapshot' {
+      $itemEndpoint = 'warehousesnapshots'
     }
     default {
       $itemEndpoint = 'items'
@@ -288,7 +294,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('ApacheAirflowJob', 'Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -386,6 +392,38 @@ function Set-DeploymentPipeline {
   Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
 
   return $result
+}
+
+function Set-DeploymentPipelineRoleAssignment {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DeploymentPipelineID,
+
+    [Parameter(Mandatory = $true)]
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Admin')]
+    [string]$Role
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
+  if (!$result) {
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to DeploymentPipeline: $($DeploymentPipelineID)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $PrincipalId
+        type = $PrincipalType
+      }
+      role      = $Role
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "deploymentPipelines/$DeploymentPipelineID/roleAssignments" -Payload $payload).Response
+  }
 }
 
 function Set-FabricDomain {
@@ -632,6 +670,68 @@ function Set-FabricGatewayRoleAssignment {
   }
 }
 
+function Set-FabricConnection {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet("ShareableCloud", "VirtualNetworkGateway")]
+    [string]$ConnectivityType,
+
+    [Parameter(Mandatory = $false)]
+    [string]$GatewayId
+  )
+
+  # Check if connection already exists
+  $connections = Invoke-FabricRest -Method 'GET' -Endpoint 'connections'
+  $result = $connections.Response.value | Where-Object { $_.displayName -eq $DisplayName }
+
+  if (!$result) {
+    Write-Log -Message "Creating $ConnectivityType FTP Connection: $DisplayName" -Level 'WARN'
+
+    # Create the base FTP connection payload
+    $payload = @{
+      connectivityType  = $ConnectivityType
+      displayName       = $DisplayName
+      connectionDetails = @{
+        type           = "FTP"
+        creationMethod = "FTP.Contents"
+        parameters     = @(
+          @{
+            dataType = "Text"
+            name     = "server"
+            value    = "ftp.example.com"
+          }
+        )
+      }
+      privacyLevel      = "Organizational"
+      credentialDetails = @{
+        singleSignOnType     = "None"
+        connectionEncryption = "NotEncrypted"
+        skipTestConnection   = $false
+        credentials          = @{
+          credentialType = "Anonymous"
+        }
+      }
+    }
+
+    # Add gatewayId for VirtualNetworkGateway connections
+    if ($ConnectivityType -eq "VirtualNetworkGateway") {
+      if (!$GatewayId) {
+        Write-Log -Message "GatewayId is required for VirtualNetworkGateway connections" -Level 'ERROR'
+        return
+      }
+      $payload['gatewayId'] = $GatewayId
+    }
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint 'connections' -Payload $payload).Response
+  }
+
+  Write-Log -Message "$ConnectivityType Connection - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
 function Set-AzureVirtualNetwork {
   param(
     [Parameter(Mandatory = $true)]
@@ -831,6 +931,46 @@ function Set-Shortcut {
   return $result
 }
 
+function Set-FabricFolder {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DisplayName,
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParentFolderId
+  )
+  # Attempt to get the existing folder
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/folders"
+
+  if (!$ParentFolderId) {
+    # Looking for a root folder - folder that doesn't have parentFolderId property
+    $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and -not $_.parentFolderId } | Select-Object -First 1
+  }
+  else {
+    # Looking for a subfolder with a specific parentFolderId
+    $result = $results.Response.value | Where-Object { $_.displayName -eq $DisplayName -and $_.parentFolderId -eq $ParentFolderId } | Select-Object -First 1
+  }
+
+  if (!$result) {
+    # Folder does not exist, so create it
+    Write-Log -Message "Creating Folder: $DisplayName" -Level 'INFO'
+
+    $payload = @{
+      displayName    = $DisplayName
+      parentFolderId = $ParentFolderId
+    }
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/folders" -Payload $payload).Response
+  }
+  Write-Log -Message "Folder - Name: $($result.displayName) / ParentFolderId: $($result.parentFolderId)"
+
+  return $result
+}
+
+
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
 
@@ -901,53 +1041,58 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
-  'ApacheAirflowJob'       = 'aaj'
-  'AzureDataFactory'       = 'adf'
-  'CopyJob'                = 'cj'
-  'Dashboard'              = 'dash'
-  'Dataflow'               = 'df'
-  'Datamart'               = 'dm'
-  'DataPipeline'           = 'dp'
-  'DeploymentPipeline'     = 'deployp'
-  'Environment'            = 'env'
-  'Eventhouse'             = 'eh'
-  'Eventstream'            = 'es'
-  'GraphQLApi'             = 'gql'
-  'KQLDashboard'           = 'kqldash'
-  'KQLDatabase'            = 'kqldb'
-  'KQLQueryset'            = 'kqlqs'
-  'Lakehouse'              = 'lh'
-  'MirroredDatabase'       = 'mdb'
-  'MirroredWarehouse'      = 'mwh'
-  'MLExperiment'           = 'mle'
-  'MLModel'                = 'mlm'
-  'MountedDataFactory'     = 'mdf'
-  'Notebook'               = 'nb'
-  'Shortcut'               = 'srt'
-  'PaginatedReport'        = 'prpt'
-  'Reflex'                 = 'rx'
-  'Report'                 = 'rpt'
-  'SemanticModel'          = 'sm'
-  'SparkJobDefinition'     = 'sjd'
-  'SQLDatabase'            = 'sqldb'
-  'SQLEndpoint'            = 'sqle'
-  'Warehouse'              = 'wh'
-  'WorkspaceDS'            = 'wsds'
-  'WorkspaceRS'            = 'wsrs'
-  'WorkspaceMPE'           = 'wsmpe'
-  'DomainParent'           = 'parent'
-  'DomainChild'            = 'child'
-  'EntraServicePrincipal'  = 'sp'
-  'EntraGroup'             = 'grp'
-  'AzDOProject'            = 'proj'
-  'VirtualNetwork01'       = 'vnet01'
-  'VirtualNetwork02'       = 'vnet02'
-  'VirtualNetworkSubnet'   = 'subnet'
-  'GatewayVirtualNetwork'  = 'gvnet'
-  'ManagedPrivateEndpoint' = 'mpe'
-  'StorageAccount'         = 'st'
-  'ResourceGroup'          = 'rg'
-  'FabricCapacity'         = 'fc'
+  'ApacheAirflowJob'                = 'aaj'
+  'AzureDataFactory'                = 'adf'
+  'CopyJob'                         = 'cj'
+  'Dashboard'                       = 'dash'
+  'Dataflow'                        = 'df'
+  'Datamart'                        = 'dm'
+  'DataPipeline'                    = 'dp'
+  'DeploymentPipeline'              = 'deployp'
+  'Environment'                     = 'env'
+  'Eventhouse'                      = 'eh'
+  'Eventstream'                     = 'es'
+  'Folder'                          = 'fld'
+  'GraphQLApi'                      = 'gql'
+  'KQLDashboard'                    = 'kqldash'
+  'KQLDatabase'                     = 'kqldb'
+  'KQLQueryset'                     = 'kqlqs'
+  'Lakehouse'                       = 'lh'
+  'MirroredDatabase'                = 'mdb'
+  'MirroredWarehouse'               = 'mwh'
+  'MLExperiment'                    = 'mle'
+  'MLModel'                         = 'mlm'
+  'MountedDataFactory'              = 'mdf'
+  'Notebook'                        = 'nb'
+  'Shortcut'                        = 'srt'
+  'PaginatedReport'                 = 'prpt'
+  'Reflex'                          = 'rx'
+  'Report'                          = 'rpt'
+  'SemanticModel'                   = 'sm'
+  'SparkJobDefinition'              = 'sjd'
+  'SQLDatabase'                     = 'sqldb'
+  'SQLEndpoint'                     = 'sqle'
+  'Warehouse'                       = 'wh'
+  'WarehouseSnapshot'               = 'whs'
+  'WorkspaceDS'                     = 'wsds'
+  'WorkspaceRS'                     = 'wsrs'
+  'WorkspaceMPE'                    = 'wsmpe'
+  'DomainParent'                    = 'parent'
+  'DomainChild'                     = 'child'
+  'EntraServicePrincipal'           = 'sp'
+  'EntraGroup'                      = 'grp'
+  'AzDOProject'                     = 'proj'
+  'VariableLibrary'                 = 'varlib'
+  'VirtualNetwork01'                = 'vnet01'
+  'VirtualNetwork02'                = 'vnet02'
+  'VirtualNetworkSubnet'            = 'subnet'
+  'GatewayVirtualNetwork'           = 'gvnet'
+  'ManagedPrivateEndpoint'          = 'mpe'
+  'StorageAccount'                  = 'st'
+  'ResourceGroup'                   = 'rg'
+  'FabricCapacity'                  = 'fc'
+  'ShareableCloudConnection'        = 'scc'
+  'VirtualNetworkGatewayConnection' = 'vngc'
 }
 
 $baseName = Get-BaseName
@@ -1031,7 +1176,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1056,6 +1201,16 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
+}
+
+$displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
+$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
+Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
+Write-Log -Message "LakehouseRS: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
+$wellKnown['LakehouseRS'] = @{
+  id          = $item.id
+  displayName = $item.displayName
+  description = $item.description
 }
 
 # Create MirroredDatabase if not exists
@@ -1143,6 +1298,8 @@ $wellKnown['DeploymentPipeline'] = @{
   stages      = $deploymentPipeline.stages
 }
 
+Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
+
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
 $definition = @{
@@ -1200,7 +1357,8 @@ $IS_LAKEHOUSE_POPULATED = $false
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])/tables"
 $result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
 if (!$result) {
-  Write-Log -Message "!!! Please go to the Lakehouse and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceDS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 }
 else {
@@ -1444,6 +1602,25 @@ $wellKnown['GatewayVirtualNetwork'] = @{
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 Set-FabricGatewayRoleAssignment -GatewayId $gateway.id -PrincipalId $wellKnown['Principal'].id -PrincipalType $wellKnown['Principal'].type -Role 'ConnectionCreator'
 
+# Create Shareable Cloud Connection if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['ShareableCloudConnection'])"
+$shareableCloudConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "ShareableCloud"
+
+$wellKnown['ShareableCloudConnection'] = @{
+  id          = $shareableCloudConnection.id
+  displayName = $shareableCloudConnection.displayName
+}
+
+# Create Virtual Network Gateway Connection if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['VirtualNetworkGatewayConnection'])"
+$virtualNetworkGatewayConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "VirtualNetworkGateway" -GatewayId $gateway.id
+
+$wellKnown['VirtualNetworkGatewayConnection'] = @{
+  id          = $virtualNetworkGatewayConnection.id
+  displayName = $virtualNetworkGatewayConnection.displayName
+  gatewayId   = $virtualNetworkGatewayConnection.gatewayId
+}
+
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
 
@@ -1484,26 +1661,6 @@ $wellKnown['MountedDataFactory'] = @{
   description = $mountedDataFactory.description
 }
 
-# Create the Apache Airflow Job if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['ApacheAirflowJob'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = 'apacheAirflowJob-content.json'
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/apache_airflow_job/apacheairflowjob-content.json.tmpl'
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-
-$apacheAirflowJob = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'ApacheAirflowJob' -Definition $definition
-
-$wellKnown['ApacheAirflowJob'] = @{
-  id          = $apacheAirflowJob.id
-  displayName = $apacheAirflowJob.displayName
-  description = $apacheAirflowJob.description
-}
-
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {
   Write-Log -Message "Lakehouse is not populated. Skipping shortcut creation." -Level 'ERROR' -Stop:$false
@@ -1539,6 +1696,51 @@ else {
     shortcutPath = $shortcut.path
     workspaceId  = $wellKnown['WorkspaceDS'].id
     lakehouseId  = $wellKnown['Lakehouse'].id
+  }
+}
+
+# Create the Folder if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['Folder'])"
+
+$folder = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['Folder'] = @{
+  id             = $folder.id
+  displayName    = $folder.displayName
+  parentFolderId = $folder.parentFolderId
+}
+
+#Create subfolder if not exists
+$displayNameTemp = "${displayName}_sub$($itemNaming['Folder'])"
+$subFolder = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DisplayName $displayNameTemp `
+  -ParentFolderId $wellKnown['Folder'].id
+
+$wellKnown['Subfolder'] = @{
+  id             = $subFolder.id
+  displayName    = $subFolder.displayName
+  parentFolderId = $subFolder.parentFolderId
+}
+
+# Create Warehouse Snapshot if not exists
+if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
+  Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['WarehouseSnapshot'])"
+  $creationPayload = @{
+    parentWarehouseId = $wellKnown['Warehouse'].id
+  }
+
+  $warehouseSnapshot = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'WarehouseSnapshot' -CreationPayload $creationPayload
+
+  $wellKnown['WarehouseSnapshot'] = @{
+    id          = $warehouseSnapshot.id
+    displayName = $warehouseSnapshot.displayName
+    description = $warehouseSnapshot.description
   }
 }
 

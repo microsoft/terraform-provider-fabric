@@ -22,13 +22,15 @@ import (
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_WorkspacesDataSource(t *testing.T) {
-	entity := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace)
+	capacity := fakes.NewRandomCapacity()
+	entity := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace, capacity.ID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace))
+	fakes.FakeServer.Upsert(capacity)
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace, capacity.ID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal))
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace))
-	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace))
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, capacity.ID))
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeWorkspace, capacity.ID))
+	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, capacity.ID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr

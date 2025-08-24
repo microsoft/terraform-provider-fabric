@@ -4,7 +4,7 @@ page_title: "fabric_activator Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The Activator data-source allows you to retrieve details about a Fabric Activator https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Activator data-source allows you to retrieve details about a Fabric [Activator](https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/add-destination-activator).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
