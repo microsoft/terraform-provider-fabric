@@ -84,15 +84,15 @@ resource "fabric_item_job_scheduler" "weekly_configuration_example" {
 
 Required:
 
-- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z' (e.g., 2024-04-28T14:30:00Z). Timezone offsets like +02:00 or -03:00 are not allowed.
-- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z' (e.g., 2024-04-28T14:30:00Z). Timezone offsets like +02:00 or -03:00 are not allowed.
+- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
+- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
 - `type` (String) A string represents the type of the plan. Additional planType types may be added over time.
 
 Optional:
 
-- `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years). Value must be between 1 and 5270400.
-- `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed. Set must contain at most 100 elements.
-- `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed. Set must contain at most 10 elements.
+- `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years). Value must be between 1 and 5270400. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily` or `Weekly` this attribute is **NULL**.
+- `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed. Set must contain at most 100 elements. Element value must satisfy all validations: Each time entry must be in hh:mm format. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily` or `Weekly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **NULL**.
+- `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed. Set must contain at most 10 elements. If the value of [`configuration.type`](#configuration.type) attribute is `Weekly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Cron` or `Daily` this attribute is **NULL**.
 
 <a id="nestedatt--timeouts"></a>
 
