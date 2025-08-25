@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package activator_test
+package apacheairflowjob_test
 
 import (
 	"errors"
@@ -22,10 +22,17 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
-	"path": testhelp.GetFixturesDirPath("activator"),
+	"path": testhelp.GetFixturesDirPath("apache_airflow_job"),
 })
 
-func TestUnit_ActivatorResource_Attributes(t *testing.T) {
+var testHelperDefinition = map[string]any{
+	`"apacheairflowjob-content.json"`: map[string]any{
+		"source": "${local.path}/apacheairflowjob-content.json.tmpl",
+		"tokens": map[string]any{},
+	},
+}
+
+func TestUnit_ApacheAirflowJobResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
@@ -49,6 +56,8 @@ func TestUnit_ActivatorResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -62,7 +71,10 @@ func TestUnit_ActivatorResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"display_name":    "test",
 						"unexpected_attr": "test",
+						"format":          "Default",
+						"definition":      testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
@@ -76,6 +88,8 @@ func TestUnit_ActivatorResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"display_name": "test",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
@@ -89,6 +103,8 @@ func TestUnit_ActivatorResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"format":       "Default",
+						"definition":   testHelperDefinition,
 					},
 				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
@@ -96,7 +112,7 @@ func TestUnit_ActivatorResource_Attributes(t *testing.T) {
 	}))
 }
 
-func TestUnit_ActivatorResource_ImportState(t *testing.T) {
+func TestUnit_ApacheAirflowJobResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
@@ -109,8 +125,11 @@ func TestUnit_ActivatorResource_ImportState(t *testing.T) {
 		at.CompileConfig(
 			testResourceItemHeader,
 			map[string]any{
-				"workspace_id": *entity.WorkspaceID,
-				"display_name": *entity.DisplayName,
+				"workspace_id":              *entity.WorkspaceID,
+				"display_name":              *entity.DisplayName,
+				"format":                    "Default",
+				"definition":                testHelperDefinition,
+				"definition_update_enabled": true,
 			},
 		))
 
@@ -165,7 +184,7 @@ func TestUnit_ActivatorResource_ImportState(t *testing.T) {
 	}))
 }
 
-func TestUnit_ActivatorResource_CRUD(t *testing.T) {
+func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
@@ -177,7 +196,7 @@ func TestUnit_ActivatorResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - create - existing entity
+		// error create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -226,11 +245,10 @@ func TestUnit_ActivatorResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 			),
 		},
-		// Delete testing automatically occurs in TestCase
 	}))
 }
 
-func TestAcc_ActivatorResource_CRUD(t *testing.T) {
+func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -278,23 +296,13 @@ func TestAcc_ActivatorResource_CRUD(t *testing.T) {
 	))
 }
 
-func TestAcc_ActivatorDefinitionResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("SPN auth issue in the backend, fix on the way, ETA mid-September")
-	}
-
+func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-
-	testHelperDefinition := map[string]any{
-		`"ReflexEntities.json"`: map[string]any{
-			"source": "${local.path}/ReflexEntities.json",
-		},
-	}
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
