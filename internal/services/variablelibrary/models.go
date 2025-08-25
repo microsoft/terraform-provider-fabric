@@ -13,5 +13,5 @@ type variableLibraryPropertiesModel struct {
 }
 
 func (to *variableLibraryPropertiesModel) set(from fabvariablelibrary.Properties) {
-	to.ActiveValueSetName = types.StringPointerValue((*string)(from.ActiveValueSetName))
+	to.ActiveValueSetName = types.StringPointerValue(from.ActiveValueSetName)
 }

@@ -231,6 +231,7 @@ func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 		// Update and Read - no definition
@@ -247,6 +248,7 @@ func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
 	}))
