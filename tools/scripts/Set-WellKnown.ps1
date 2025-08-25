@@ -1772,34 +1772,39 @@ else {
 }
 
 # Create Item Schedule if not exists
-$itemJobSchedulerPayload = @{
-  enabled       = $false
-  configuration = @{
-    endDateTime     = (Get-Date).AddDays(7)
-    startDateTime   = Get-Date
-    localTimeZoneId = "Central Standard Time"
-    type            = "Weekly"
-    times           = @("10:00")
-    weekdays        = @("Monday")
-  }
+if (-not $wellKnown.ContainsKey('Dataflow') -or -not $wellKnown['Dataflow'] -or -not $wellKnown['Dataflow'].id) {
+  Write-Log -Message "Dataflow not found or missing 'id'. Cannot create Item Job Schedule." -Level 'WARN'
 }
+else {
+  $itemJobSchedulerPayload = @{
+    enabled       = $false
+    configuration = @{
+      endDateTime     = (Get-Date).AddDays(7)
+      startDateTime   = Get-Date
+      localTimeZoneId = "Central Standard Time"
+      type            = "Weekly"
+      times           = @("10:00")
+      weekdays        = @("Monday")
+    }
+  }
 
-$JOB_TYPE = "ApplyChanges"
-$itemJobScheduler = Set-ItemJobScheduler `
-  -WorkspaceId $wellKnown['WorkspaceDS'].id `
-  -ItemId $wellKnown['Dataflow'].id `
-  -Jobtype $JOB_TYPE `
-  -Payload $itemJobSchedulerPayload
+  $JOB_TYPE = "ApplyChanges"
+  $itemJobScheduler = Set-ItemJobScheduler `
+    -WorkspaceId $wellKnown['WorkspaceDS'].id `
+    -ItemId $wellKnown['Dataflow'].id `
+    -Jobtype $JOB_TYPE `
+    -Payload $itemJobSchedulerPayload
 
-$wellKnown['ItemJobScheduler'] = @{
-  id                = $itemJobScheduler.id
-  ownerType         = $itemJobScheduler.owner.type
-  ownerId           = $itemJobScheduler.owner.id
-  itemId            = $wellKnown['Dataflow'].id
-  enabled           = $itemJobScheduler.enabled
-  configurationType = $itemJobScheduler.configuration.type
-  createdDateTime   = $itemJobScheduler.createdDateTime
-  jobType           = $JOB_TYPE
+  $wellKnown['ItemJobScheduler'] = @{
+    id                = $itemJobScheduler.id
+    ownerType         = $itemJobScheduler.owner.type
+    ownerId           = $itemJobScheduler.owner.id
+    itemId            = $wellKnown['Dataflow'].id
+    enabled           = $itemJobScheduler.enabled
+    configurationType = $itemJobScheduler.configuration.type
+    createdDateTime   = $itemJobScheduler.createdDateTime
+    jobType           = $JOB_TYPE
+  }
 }
 
 # Save wellknown.json file
