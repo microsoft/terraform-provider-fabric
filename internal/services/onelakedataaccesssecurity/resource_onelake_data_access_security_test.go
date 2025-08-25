@@ -247,6 +247,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "value.0.name"),
 			),
 		},
 	}))

@@ -46,7 +46,7 @@ func itemSchema() superschema.Schema {
 			},
 			"item_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The ID of the Fabric item to put the roles.",
+					MarkdownDescription: "The ID of the Fabric item.",
 					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
