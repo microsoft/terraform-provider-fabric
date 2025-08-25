@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler_test
 
 import (
@@ -26,7 +29,7 @@ func fakeItemSchedulesFunc() func(workspaceID, itemID, jobType string, options *
 }
 
 func fakeGetItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jobType, scheduleID string, options *fabcore.JobSchedulerClientGetItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientGetItemScheduleResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, itemID, jobType, scheduleID string, _ *fabcore.JobSchedulerClientGetItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientGetItemScheduleResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, _, _, scheduleID string, _ *fabcore.JobSchedulerClientGetItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientGetItemScheduleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.JobSchedulerClientGetItemScheduleResponse]{}
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
 		id := GenerateItemScheduleID(workspaceID, scheduleID)
@@ -45,7 +48,7 @@ func fakeGetItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jo
 func fakeGetFabricItem(
 	itemType string,
 ) func(ctx context.Context, workspaceID, itemID string, options *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, itemID string, _ *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _ string, _ *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
 		item := fabcore.Item{
 			Type: to.Ptr(fabcore.ItemType(itemType)),
 		}
@@ -56,7 +59,7 @@ func fakeGetFabricItem(
 }
 
 func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jobType string, createScheduleRequest fabcore.CreateScheduleRequest, options *fabcore.JobSchedulerClientCreateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, itemID, jobType string, createScheduleRequest fabcore.CreateScheduleRequest, _ *fabcore.JobSchedulerClientCreateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, _, _ string, createScheduleRequest fabcore.CreateScheduleRequest, _ *fabcore.JobSchedulerClientCreateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.JobSchedulerClientCreateItemScheduleResponse]{}
 		itemScheduleID := testhelp.RandomUUID()
 
@@ -83,7 +86,7 @@ func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 }
 
 func fakeUpdateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jobType, scheduleID string, updateScheduleRequest fabcore.UpdateScheduleRequest, options *fabcore.JobSchedulerClientUpdateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientUpdateItemScheduleResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, itemID, jobType, scheduleID string, updateScheduleRequest fabcore.UpdateScheduleRequest, _ *fabcore.JobSchedulerClientUpdateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientUpdateItemScheduleResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, _, _, scheduleID string, updateScheduleRequest fabcore.UpdateScheduleRequest, _ *fabcore.JobSchedulerClientUpdateItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientUpdateItemScheduleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.JobSchedulerClientUpdateItemScheduleResponse]{}
 		id := GenerateItemScheduleID(workspaceID, scheduleID)
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
@@ -118,7 +121,7 @@ func fakeUpdateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 }
 
 func fakeDeleteItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jobType, scheduleID string, options *fabcore.JobSchedulerClientDeleteItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientDeleteItemScheduleResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, itemID, jobType, scheduleID string, _ *fabcore.JobSchedulerClientDeleteItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientDeleteItemScheduleResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, _, _, scheduleID string, _ *fabcore.JobSchedulerClientDeleteItemScheduleOptions) (resp azfake.Responder[fabcore.JobSchedulerClientDeleteItemScheduleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.JobSchedulerClientDeleteItemScheduleResponse]{}
 		id := GenerateItemScheduleID(workspaceID, scheduleID)
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
@@ -162,34 +165,38 @@ func NewRandomScheduleConfig(scheduleType fabcore.ScheduleType) fabcore.Schedule
 
 func NewRandomCronScheduleConfig() *fabcore.CronScheduleConfig {
 	return &fabcore.CronScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now()),
-		EndDateTime:     to.Ptr(time.Now()),
+		StartDateTime:   to.Ptr(time.Now().UTC()),
+		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
 		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeCron),
-		Interval:        to.Ptr(int32(testhelp.RandomIntRange(1, 60))),
+		Interval:        to.Ptr(testhelp.RandomIntRange(int32(1), int32(60))),
 	}
 }
 
 func NewRandomDailyScheduleConfig() *fabcore.DailyScheduleConfig {
+	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
+
 	return &fabcore.DailyScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now()),
-		EndDateTime:     to.Ptr(time.Now()),
+		StartDateTime:   to.Ptr(time.Now().UTC()),
+		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
 		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeDaily),
 		Times: []string{
-			time.Now().String(),
+			timeStr,
 		},
 	}
 }
 
 func NewRandomWeeklyScheduleConfig() *fabcore.WeeklyScheduleConfig {
+	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
+
 	return &fabcore.WeeklyScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now()),
-		EndDateTime:     to.Ptr(time.Now()),
+		StartDateTime:   to.Ptr(time.Now().UTC()),
+		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
 		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeWeekly),
 		Times: []string{
-			"09:00:00",
+			timeStr,
 		},
 		Weekdays: []fabcore.DayOfWeek{
 			fabcore.DayOfWeekMonday,

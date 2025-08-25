@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler_test
 
 import (
@@ -100,13 +103,13 @@ func TestUnit_ItemJobSchedulersDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_JobSchedulesDataSource(t *testing.T) {
+func TestAcc_ItemJobSchedulersDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["JobSchedulerItem"].(map[string]any)
+	entity := testhelp.WellKnown()["ItemJobScheduler"].(map[string]any)
 	entityJobType := entity["jobType"].(string)
-	entityItemId := entity["itemId"].(string)
+	entityItemID := entity["itemId"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -115,7 +118,7 @@ func TestAcc_JobSchedulesDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      entityItemId,
+					"item_id":      entityItemID,
 					"job_type":     entityJobType,
 				},
 			),

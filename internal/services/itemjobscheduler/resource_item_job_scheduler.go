@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler
 
 import (
@@ -69,7 +72,7 @@ func (r *resourceItemJobScheduler) Configure(_ context.Context, req resource.Con
 		return
 	}
 
-	r.client = (*fabcore.JobSchedulerClient)(fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewJobSchedulerClient())
+	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewJobSchedulerClient()
 	r.fabricClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
@@ -105,8 +108,8 @@ func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Validate job type
-	if err := r.validateJobType(respItem.Type, plan.JobType.ValueString()); err != nil {
-		resp.Diagnostics.AddError("Invalid Job Type", err.Error())
+	if diags := r.validateJobType(respItem.Type, plan.JobType.ValueString()); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 
 		return
 	}
@@ -202,8 +205,8 @@ func (r *resourceItemJobScheduler) Update(ctx context.Context, req resource.Upda
 	}
 
 	// Validate job type
-	if err := r.validateJobType(respItem.Type, plan.JobType.ValueString()); err != nil {
-		resp.Diagnostics.AddError("Invalid Job Type", err.Error())
+	if diags := r.validateJobType(respItem.Type, plan.JobType.ValueString()); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 
 		return
 	}
@@ -328,24 +331,32 @@ func (r *resourceItemJobScheduler) ImportState(ctx context.Context, req resource
 	}
 }
 
-// validateJobType validates that the job type is supported for the given item type.
-func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, jobType string) error {
+func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, jobType string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if itemType == nil {
-		return fmt.Errorf("item type is nil")
+		diags.AddError("Invalid Item Type", "item type is nil")
+
+		return diags
 	}
 
 	itemTypeLowercase := strings.ToLower(string(*itemType))
 	validJobTypes, exists := JobTypeActions[itemTypeLowercase]
 
 	if !exists {
-		return fmt.Errorf("item type '%s' does not support job scheduling. Supported types are: %v",
-			*itemType, getMapKeys(JobTypeActions))
+		diags.AddError(
+			"Invalid Item Type",
+			fmt.Sprintf("item type '%s' does not support job scheduling. Supported types are: %v", *itemType, JobTypeActions),
+		)
+
+		return diags
 	}
 
-	jobTypeLowercase := strings.ToLower(jobType)
-	if !slices.Contains(validJobTypes, jobTypeLowercase) {
-		return fmt.Errorf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v",
-			jobTypeLowercase, *itemType, *itemType, validJobTypes)
+	if !slices.Contains(validJobTypes, jobType) {
+		diags.AddError(
+			"Invalid Job Type",
+			fmt.Sprintf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v", jobType, *itemType, *itemType, validJobTypes),
+		)
 	}
 
 	return nil
@@ -358,13 +369,4 @@ func (r *resourceItemJobScheduler) get(ctx context.Context, model *resourceJobSc
 	}
 
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), respGet.ItemSchedule)
-}
-
-func getMapKeys(m map[string][]string) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-
-	return keys
 }

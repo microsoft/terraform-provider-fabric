@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -23,7 +24,7 @@ var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.Pro
 func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			ResourceName: testResourceItemFQN,
@@ -33,7 +34,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
-		// error - no required attributes
+		// error - no required attributes - item id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -44,18 +45,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
 		},
-		// error - no required attributes
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
-		},
-		// error - no required attributes
+		// error - no required attributes - job type
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -67,7 +57,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "job_type" is required, but no definition was found.`),
 		},
-		// error - no required attributes
+		// error - no required attributes - enabled
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -80,6 +70,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "enabled" is required, but no definition was found.`),
 		},
+		// error - no required attributes - configuration
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -92,6 +83,108 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "configuration" is required, but no definition was found.`),
+		},
+		// missing required attribute for cron type - interval
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.interval"),
+		},
+		// missing required attribute for daily type - times
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeDaily),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.times"),
+		},
+		// missing required attribute for weekly type - times
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeWeekly),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.times"),
+		},
+		// missing required attribute for weekly type - weekdays
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeWeekly),
+						"times":           []string{"09:00"},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.weekdays"),
+		},
+		// error - times - invalid string format
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeDaily),
+						"times":           []string{"9:0:0"},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 		// error - workspace_id - invalid UUID
 		{
@@ -108,6 +201,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 						"start_date_time": time.Now().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
 					},
 				},
 			),
@@ -128,13 +222,34 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 						"start_date_time": time.Now().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
 					},
 					"unexpected_attr": "test",
 				},
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
+		// error  - not a valid date time - start date time with UTC+3 offset
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
 
+					"configuration": map[string]any{
+						"start_date_time": time.Now().In(time.FixedZone("UTC+3", 3*60*60)).Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
 		// error  - not a valid item type
 		{
 			ResourceName: testResourceItemFQN,
@@ -147,33 +262,14 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"enabled":      true,
 
 					"configuration": map[string]any{
-						"start_date_time": time.Now().Format(time.RFC3339),
-						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
 						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Error: Invalid Job Type`),
-		},
-		// error  - not a valid date time
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"item_id":      testhelp.RandomUUID(),
-					"job_type":     "Execute",
-					"enabled":      true,
-
-					"configuration": map[string]any{
-						"start_date_time": "2024-04-28T00:00:00+03:00",
-						"end_date_time":   "2024-04-29T00:00:00+03:00",
-						"type":            string(fabcore.ScheduleTypeCron),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile("The datetime must be in UTC format ending with 'Z'"),
+			ExpectError: regexp.MustCompile(`Error: Invalid Item Type`),
 		},
 	}))
 }
@@ -198,9 +294,10 @@ func TestUnit_ItemJobSchedulerResource_ImportState(t *testing.T) {
 			"job_type":     jobType,
 			"enabled":      *entity.Enabled,
 			"configuration": map[string]any{
-				"start_date_time": (*configuration.StartDateTime).Format(time.RFC3339),
-				"end_date_time":   (*configuration.EndDateTime).Format(time.RFC3339),
+				"start_date_time": configuration.StartDateTime.Format(time.RFC3339),
+				"end_date_time":   configuration.EndDateTime.Format(time.RFC3339),
 				"type":            string(*configuration.Type),
+				"interval":        int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval),
 			},
 		},
 	)
@@ -264,14 +361,23 @@ func TestUnit_ItemJobSchedulerResource_ImportState(t *testing.T) {
 }
 
 func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
+	itemType := "dataflow"
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	// jobType := testhelp.RandomName()
+	jobType := jobTypeActionsTestDict[itemType][0]
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
+	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeWeekly)
+
+	weekdays := entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Weekdays
+
+	weekdaysStr := make([]string, len(weekdays))
+	for i, d := range weekdays {
+		weekdaysStr[i] = string(d)
+	}
 
 	fakeTestUpsert(workspaceID, entity)
 
-	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("Dataflow")
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem(itemType)
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.GetItemSchedule = fakeGetItemScheduleFunc()
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.DeleteItemSchedule = fakeDeleteItemScheduleFunc()
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.UpdateItemSchedule = fakeUpdateItemScheduleFunc()
@@ -286,17 +392,26 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"job_type":     "Execute",
+					"job_type":     jobType,
 					"enabled":      *entity.Enabled,
 					"configuration": map[string]any{
-						"start_date_time": (*entity.Configuration.GetScheduleConfig().StartDateTime).Format(time.RFC3339),
-						"end_date_time":   (*entity.Configuration.GetScheduleConfig().EndDateTime).Format(time.RFC3339),
+						"start_date_time": entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+						"end_date_time":   entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
 						"type":            string(*entity.Configuration.GetScheduleConfig().Type),
-						"interval":        12,
+						"interval":        int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval),
 					},
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(*entity.Enabled)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.display_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeCron)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.interval", strconv.Itoa(int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval))),
+			),
 		},
 		// Update and Read
 		{
@@ -306,16 +421,28 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"job_type":     "Execute",
-					"enabled":      *entity.Enabled,
+					"job_type":     jobType,
+					"enabled":      *entityUpdate.Enabled,
 					"configuration": map[string]any{
-						"start_date_time": (*entity.Configuration.GetScheduleConfig().StartDateTime).Format(time.RFC3339),
-						"end_date_time":   (*entity.Configuration.GetScheduleConfig().EndDateTime).Format(time.RFC3339),
-						"type":            string(*entity.Configuration.GetScheduleConfig().Type),
+						"start_date_time": entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+						"end_date_time":   entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
+						"type":            string(*entityUpdate.Configuration.GetScheduleConfig().Type),
+						"times":           entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Times,
+						"weekdays":        weekdaysStr,
 					},
 				},
 			),
-			Check: resource.ComposeAggregateTestCheckFunc(),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(*entityUpdate.Enabled)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.display_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeWeekly)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.times.0", entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Times[0]),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.weekdays.0", weekdaysStr[0]),
+			),
 		},
 		// Delete testing automatically occurs in TestCase
 	}))
@@ -324,9 +451,10 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
-	jobType := "Execute"
+	jobType := jobTypeActionsTestDict["dataflow"][0]
 	dataflowResourceHCL, dataflowResourceFQN := dataflowResource(t, workspaceID)
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
+	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeDaily)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{ // Create and Read
 		// Create and Read
@@ -342,16 +470,22 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 						"job_type":     jobType,
 						"enabled":      true,
 						"configuration": map[string]any{
-							"start_date_time": "2024-04-28T00:00:00Z",
-							"end_date_time":   "2024-04-30T23:59:00Z",
+							"start_date_time": entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+							"end_date_time":   entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
 							"type":            string(*entity.Configuration.GetScheduleConfig().Type),
-							"interval":        12,
+							"interval":        int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval),
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
-			//	resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", "2024-04-28T00:00:00Z"),
-			// resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", "2024-04-30T23:59:00Z"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(true)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.type"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeCron)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.interval", strconv.Itoa(int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval))),
 			),
 		},
 		// Update and Read
@@ -367,14 +501,23 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 						"job_type":     jobType,
 						"enabled":      false,
 						"configuration": map[string]any{
-							"start_date_time": "2024-04-28T00:00:00Z",
-							"end_date_time":   "2024-04-30T23:59:00Z",
-							"type":            string(*entity.Configuration.GetScheduleConfig().Type),
-							"interval":        12,
+							"start_date_time": entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+							"end_date_time":   entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
+							"type":            string(*entityUpdate.Configuration.GetScheduleConfig().Type),
+							"times":           []string{"10:00"},
 						},
 					},
 				)),
-			Check: resource.ComposeAggregateTestCheckFunc(),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(false)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.type"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeDaily)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.times.0", "10:00"),
+			),
 		},
 		// Delete testing automatically occurs in TestCase
 	}))

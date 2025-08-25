@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler_test
 
 import (
@@ -136,7 +139,8 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 	entity := testhelp.WellKnown()["ItemJobScheduler"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityJobType := entity["jobType"].(string)
-	entityItemId := entity["itemId"].(string)
+	entityItemID := entity["itemId"].(string)
+	createdDateTime, _ := time.Parse("2006-01-02T15:04:05.99", entity["createdDateTime"].(string))
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
 		// read by id
@@ -146,7 +150,7 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      entityItemId,
+					"item_id":      entityItemID,
 					"job_type":     entityJobType,
 					"id":           entityID,
 				},
@@ -155,7 +159,7 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", entity["configurationType"].(string)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity["createdDateTime"].(string)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", createdDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", entity["ownerType"].(string)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", entity["ownerId"].(string)),
 			),
@@ -167,7 +171,7 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      entityItemId,
+					"item_id":      entityItemID,
 					"job_type":     entityJobType,
 					"id":           testhelp.RandomUUID(),
 				},

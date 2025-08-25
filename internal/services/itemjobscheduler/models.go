@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler
 
 import (
@@ -55,7 +58,7 @@ type groupDetailsModel struct {
 }
 
 type servicePrincipalDetailsModel struct {
-	AadAppId types.String `tfsdk:"aad_app_id"`
+	AadAppID types.String `tfsdk:"aad_app_id"`
 }
 
 type servicePrincipalProfileDetailsModel struct {
@@ -248,7 +251,7 @@ func (to *userDetailsModel) set(from *fabcore.PrincipalUserDetails) diag.Diagnos
 }
 
 func (to *servicePrincipalDetailsModel) set(from *fabcore.PrincipalServicePrincipalDetails) diag.Diagnostics {
-	to.AadAppId = types.StringPointerValue(from.AADAppID)
+	to.AadAppID = types.StringPointerValue(from.AADAppID)
 
 	return nil
 }
@@ -425,7 +428,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneId := "Central Standard Time"
+	localTimeZoneID := "Central Standard Time"
 	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
@@ -443,7 +446,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Interval:        configuration.Interval.ValueInt32Pointer(),
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeDaily:
@@ -461,7 +464,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Times:           timesSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeWeekly:
@@ -490,7 +493,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Weekdays:        weekdaysSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	default:
@@ -519,7 +522,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneId := "Central Standard Time"
+	localTimeZoneID := "Central Standard Time"
 
 	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
@@ -538,7 +541,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Interval:        configuration.Interval.ValueInt32Pointer(),
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeDaily:
@@ -556,7 +559,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Times:           timesSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeWeekly:
@@ -585,7 +588,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Weekdays:        weekdaysSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneId,
+			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
 	default:
@@ -603,6 +606,6 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	return nil
 }
 
-var JobTypeActions = map[string][]string{
-	"dataflow": {"execute", "applychanges"},
+var JobTypeActions = map[string][]string{ //nolint:gochecknoglobals
+	"dataflow": {"Execute", "ApplyChanges"},
 }

@@ -9,13 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
+	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -413,6 +418,15 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 					Optional: true,
 					Validators: []validator.Int32{
 						int32validator.Between(1, 5270400),
+						superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeCron)),
+							}),
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeDaily)),
+								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+							}),
 					},
 				},
 				DataSource: &schemaD.Int32Attribute{
@@ -425,9 +439,25 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 					ElementType:         types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
-					Optional: true,
+					Optional:    true,
+					ElementType: types.StringType,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(100),
+						setvalidator.ValueStringsAre(
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$`),
+								"Each time entry must be in hh:mm format.",
+							),
+						),
+						supersetvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeDaily)),
+								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+							}),
+						supersetvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeCron)),
+							}),
 					},
 				},
 				DataSource: &schemaD.SetAttribute{
@@ -443,6 +473,15 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 					Optional: true,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(10),
+						supersetvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+							}),
+						supersetvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeCron)),
+								types.StringValue(string(fabcore.ScheduleTypeDaily)),
+							}),
 					},
 				},
 				DataSource: &schemaD.SetAttribute{
