@@ -58,7 +58,7 @@ resource "fabric_onelake_data_access_security" "example" {
 
 ### Required
 
-- `item_id` (String) The ID of the Fabric item to put the roles.
+- `item_id` (String) The ID of the Fabric item.
 - `value` (Attributes Set) Map of data access roles. (see [below for nested schema](#nestedatt--value))
 - `workspace_id` (String) The Workspace ID.
 
