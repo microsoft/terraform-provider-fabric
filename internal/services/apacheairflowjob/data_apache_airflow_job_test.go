@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package activator_test
+package apacheairflowjob_test
 
 import (
 	"regexp"
@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -18,7 +21,7 @@ import (
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-func TestUnit_ActivatorDataSource(t *testing.T) {
+func TestUnit_ApacheAirflowJobDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
@@ -27,7 +30,7 @@ func TestUnit_ActivatorDataSource(t *testing.T) {
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - no attributes
+		// error - no attributes provided
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -35,7 +38,7 @@ func TestUnit_ActivatorDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
 		},
-		// error - workspace_id - invalid UUID
+		// error - invalid workspace_id UUID
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -115,7 +118,6 @@ func TestUnit_ActivatorDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-
 		// read by name
 		{
 			Config: at.CompileConfig(
@@ -146,15 +148,11 @@ func TestUnit_ActivatorDataSource(t *testing.T) {
 	}))
 }
 
-func TestAcc_ActivatorDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("SPN auth issue in the backend, fix on the way, ETA mid-September")
-	}
-
+func TestAcc_ApacheAirflowJobDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	entity := testhelp.WellKnown()["Reflex"].(map[string]any)
+	entity := testhelp.WellKnown()["ApacheAirflowJob"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
@@ -174,6 +172,7 @@ func TestAcc_ActivatorDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
 		// read by id - not found
@@ -234,8 +233,8 @@ func TestAcc_ActivatorDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":      workspaceID,
 					"id":                entityID,
-					"output_definition": true,
 					"format":            "Default",
+					"output_definition": true,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -243,8 +242,10 @@ func TestAcc_ActivatorDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.ReflexEntities.json.content"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("apacheairflowjob-content.json").AtMapKey("content"), knownvalue.NotNull()),
+			},
 		},
 	}))
 }
