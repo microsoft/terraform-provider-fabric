@@ -47,6 +47,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -424,6 +425,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		copyjob.NewResourceCopyJob,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
+		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
@@ -477,6 +479,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
