@@ -69,7 +69,7 @@
     "FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS": "format;type;continuationToken"
   },
   "go.diagnostic.vulncheck": "Imports",
-  "go.testTimeout": "5m",
+  "go.testTimeout": "10m",
   "go.lintTool": "golangci-lint",
   "go.lintFlags": [
     "--fast-only"
