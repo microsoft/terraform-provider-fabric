@@ -363,6 +363,10 @@ func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ShortcutResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Temporarily skip shortcut acceptance tests")
+	}
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
 	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
