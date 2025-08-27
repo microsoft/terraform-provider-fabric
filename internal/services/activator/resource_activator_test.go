@@ -231,10 +231,6 @@ func TestUnit_ActivatorResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ActivatorResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -284,7 +280,7 @@ func TestAcc_ActivatorResource_CRUD(t *testing.T) {
 
 func TestAcc_ActivatorDefinitionResource_CRUD(t *testing.T) {
 	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
+		t.Skip("SPN auth issue in the backend, fix on the way, ETA mid-September")
 	}
 
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)

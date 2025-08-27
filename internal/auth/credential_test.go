@@ -130,13 +130,6 @@ func TestUnit_NewCredential(t *testing.T) {
 			expected:    auth.ServicePrincipalSecretAuth,
 			expectError: true,
 		},
-		"TokenAuth valid": {
-			cfg: auth.Config{
-				Token: "test-token",
-			},
-			expected:    auth.TokenAuth,
-			expectError: false,
-		},
 		"AzureCLIAuth valid": {
 			cfg: auth.Config{
 				UseCLI: true,

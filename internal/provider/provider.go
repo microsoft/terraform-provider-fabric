@@ -38,6 +38,7 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
@@ -45,6 +46,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -52,6 +55,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
@@ -417,16 +421,20 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
+		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
 		deploymentpipeline.NewResourceDeploymentPipeline,
+		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
@@ -461,6 +469,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		apacheairflowjob.NewDataSourceApacheAirflowJob,
+		apacheairflowjob.NewDataSourceApacheAirflowJobs,
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
 		copyjob.NewDataSourceCopyJob,
@@ -471,8 +481,11 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
+		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
 		domain.NewDataSourceDomain,
 		domain.NewDataSourceDomains,
 		domainwa.NewDataSourceDomainWorkspaceAssignments,
@@ -483,6 +496,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		folder.NewDataSourceFolder,
+		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
 		gateway.NewDataSourceGateways,
 		gatewayra.NewDataSourceGatewayRoleAssignment,

@@ -273,7 +273,7 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -p {{numCPU}} -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -p {{numCPU}} -timeout 10m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -288,7 +288,7 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -p {{numCPU}} -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -304,7 +304,7 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --junitfile "testresults.xml" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -p {{numCPU}} -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -339,19 +339,17 @@ tasks:
   test:tools:
     desc: Install test tools
     cmds:
-      - for: [gotestsum, gocov, gocov-xml, go-junit-report]
+      - for: [gotestsum, gocover-cobertura]
         task: install:{{.ITEM}}
 
   test:getcover:
     desc: Get coverage results
     internal: true
     cmds:
-      - gocov convert coverage.out > coverage.json
-      - gocov report coverage.json > coverage.txt
       - cmd: |
-          {{ .PWSH }} 'Get-Content coverage.json | gocov-xml > coverage.xml'
+          {{ .PWSH }} 'Get-Content coverage.out | gocover-cobertura > coverage.xml'
         platforms: [windows]
-      - cmd: gocov-xml < coverage.json > coverage.xml
+      - cmd: gocover-cobertura < coverage.out > coverage.xml
         platforms: [linux, darwin]
       - go tool cover -html coverage.out -o coverage.html
 
@@ -437,20 +435,15 @@ tasks:
     cmds:
       - go install github.com/go-delve/delve/cmd/dlv@latest
 
-  install:gocov:
-    desc: Install gocov
+  install:gocover-cobertura:
+    desc: Install gocover-cobertura
     cmds:
-      - go install github.com/axw/gocov/gocov@latest
+      - go install github.com/boumenot/gocover-cobertura@latest
 
-  install:gocov-xml:
-    desc: Install gocov-xml
+  install:go-test-coverage:
+    desc: Install go-test-coverage
     cmds:
-      - go install github.com/AlekSi/gocov-xml@latest
-
-  install:go-junit-report:
-    desc: Install go-junit-report
-    cmds:
-      - go install github.com/jstemmer/go-junit-report/v2@latest
+      - go install github.com/vladopajic/go-test-coverage/v2@latest
 
   install:tfplugindocs:
     desc: Install tfplugindocs

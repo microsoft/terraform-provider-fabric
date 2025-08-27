@@ -58,7 +58,8 @@ func (o *OIDCConfig) getAssertion(ctx context.Context) (string, error) {
 		Value *string `json:"value"`
 	}
 
-	if err := json.Unmarshal(body, &tokenResp); err != nil {
+	err = json.Unmarshal(body, &tokenResp)
+	if err != nil {
 		return "", fmt.Errorf("getAssertion: cannot unmarshal response: %w", err)
 	}
 

@@ -16,7 +16,6 @@ type Config struct {
 	UseDevCLI            bool
 	UseOIDC              bool
 	UseMSI               bool
-	Token                string
 	Environment          cloud.Configuration
 	AuxiliaryTenantIDs   []string
 	TenantID             string
@@ -47,5 +46,4 @@ const (
 	ManagedServiceIdentitySystemAuth          AuthenticationMethod = "ManagedServiceIdentitySystem"
 	AzureCLIAuth                              AuthenticationMethod = "AzureCLI"
 	AzureDevCLIAuth                           AuthenticationMethod = "AzureDeveloperCLI"
-	TokenAuth                                 AuthenticationMethod = "Token"
 )

@@ -116,6 +116,8 @@ Read-Only:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # terraform import fabric_spark_job_definition.example "<WorkspaceID>/<SparkJobDefinitionID>"
 terraform import fabric_spark_job_definition.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
