@@ -145,6 +145,8 @@ func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defau
 }
 
 // processFabricError handles Fabric-specific response errors.
+//
+//nolint:gocognit,nestif
 func (h *ErrorHandler) processFabricError(
 	ctx context.Context,
 	errResp *fabcore.ResponseError,
@@ -191,6 +193,7 @@ func (h *ErrorHandler) processFabricError(
 
 				if json.Valid([]byte(*errMoreDetail.Message)) {
 					var errMoreDetailJSON map[string]any
+
 					err := json.Unmarshal([]byte(*errMoreDetail.Message), &errMoreDetailJSON)
 					if err != nil {
 						tflog.Debug(ctx, "Failed to unmarshal JSON", map[string]any{
@@ -204,6 +207,7 @@ func (h *ErrorHandler) processFabricError(
 							"Error": err.Error(),
 						})
 					}
+
 					msg = string(jsonPretty)
 				} else {
 					msg = *errMoreDetail.Message

@@ -1192,13 +1192,27 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 
 func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T) {
 	var (
-		SQLUsername, SQLUsernameExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_USERNAME")
-		SQLPassword, SQLPasswordExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_PASSWORD")
-		SQLURL, SQLURLEexist          = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_URL")
+		sqlUsername, sqlUsernameExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_USERNAME")
+		sqlPassword, sqlPasswordExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_PASSWORD")
+		sqlURL, sqlURLEexist          = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_URL")
 	)
 
-	if !SQLUsernameExist || !SQLPasswordExist || !SQLURLEexist {
-		t.Skip("SQL credentials are not set, skipping test")
+	var missingEnvVars []string
+
+	if !sqlUsernameExist {
+		missingEnvVars = append(missingEnvVars, "FABRIC_CONNECTION_SQL_SERVER_USERNAME")
+	}
+
+	if !sqlPasswordExist {
+		missingEnvVars = append(missingEnvVars, "FABRIC_CONNECTION_SQL_SERVER_PASSWORD")
+	}
+
+	if !sqlURLEexist {
+		missingEnvVars = append(missingEnvVars, "FABRIC_CONNECTION_SQL_SERVER_URL")
+	}
+
+	if len(missingEnvVars) > 0 {
+		t.Fatalf("Required environment variables are not set: %v", missingEnvVars)
 	}
 
 	displayName := testhelp.RandomName()
@@ -1219,7 +1233,7 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 						"parameters": []map[string]any{
 							{
 								"name":  "server",
-								"value": SQLURL,
+								"value": sqlURL,
 							},
 						},
 					},
@@ -1229,8 +1243,8 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 						"skip_test_connection":  false,
 						"credential_type":       "Basic",
 						"basic_credentials": map[string]any{
-							"username":            SQLUsername,
-							"password_wo":         SQLPassword,
+							"username":            sqlUsername,
+							"password_wo":         sqlPassword,
 							"password_wo_version": 1,
 						},
 					},
@@ -1247,7 +1261,7 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", "Basic"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", string(fabcore.SingleSignOnTypeNone)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.basic_credentials.username", SQLUsername),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.basic_credentials.username", sqlUsername),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),

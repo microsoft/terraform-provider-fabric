@@ -5,6 +5,7 @@ package connection
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -135,6 +136,14 @@ func (to *requestCreateConnection) set(
 			CredentialDetails: &requestCreateCredentialDetails.CreateCredentialDetails,
 			GatewayID:         plan.GatewayID.ValueStringPointer(),
 		}
+	default:
+		var diags diag.Diagnostics
+		diags.AddError(
+			"Unsupported connectivity type",
+			fmt.Sprintf("Connectivity type '%s' is not supported", connectivityType),
+		)
+
+		return diags
 	}
 
 	return nil
@@ -275,6 +284,13 @@ func (to *requestCreateConnectionDetails) set(ctx context.Context, from supertyp
 					Name:     &name,
 					Value:    &timeValue,
 				}
+			default:
+				diags.AddError(
+					"Unsupported data type",
+					fmt.Sprintf("Data type '%s' is not supported", dataType),
+				)
+
+				return diags
 			}
 
 			params = append(params, requestParameter)
@@ -363,6 +379,14 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 		requestCreateCredential = &fabcore.WorkspaceIdentityCredentials{
 			CredentialType: &credentialType,
 		}
+	default:
+		var diags diag.Diagnostics
+		diags.AddError(
+			"Unsupported credential type",
+			fmt.Sprintf("Credential type '%s' is not supported", credentialType),
+		)
+
+		return diags
 	}
 
 	to.Credentials = requestCreateCredential
@@ -445,6 +469,14 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 		requestUpdateCredential = &fabcore.WorkspaceIdentityCredentials{
 			CredentialType: &credentialType,
 		}
+	default:
+		var diags diag.Diagnostics
+		diags.AddError(
+			"Unsupported credential type",
+			fmt.Sprintf("Credential type '%s' is not supported", credentialType),
+		)
+
+		return diags
 	}
 
 	to.Credentials = requestUpdateCredential
@@ -490,6 +522,14 @@ func (to *requestUpdateConnection) set(
 			PrivacyLevel:      privacyLevel,
 			CredentialDetails: &requestUpdateCredentialDetails.UpdateCredentialDetails,
 		}
+	default:
+		var diags diag.Diagnostics
+		diags.AddError(
+			"Unsupported connectivity type",
+			fmt.Sprintf("Connectivity type '%s' is not supported", connectivityType),
+		)
+
+		return diags
 	}
 
 	return nil

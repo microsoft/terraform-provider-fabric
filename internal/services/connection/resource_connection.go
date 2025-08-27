@@ -50,7 +50,7 @@ func NewResourceConnection() resource.Resource {
 	}
 }
 
-func (r *resourceConnection) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *resourceConnection) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
@@ -462,7 +462,7 @@ func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetail
 	return nil
 }
 
-//nolint:gocognit,gocyclo
+//nolint:gocognit,gocyclo,maintidx
 func (r *resourceConnection) validateCreationMethodParameters(ctx context.Context, model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
@@ -570,6 +570,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeDate:
 			// Use date as the parameter input value, using YYYY-MM-DD format.
+			//nolint:noinlineerr
 			if _, err := time.Parse(time.DateOnly, v); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -579,6 +580,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeDateTime:
 			// Use date time as the parameter input value, using YYYY-MM-DDTHH:mm:ss.FFFZ (ISO 8601) format.
+			//nolint:noinlineerr
 			if _, err := time.Parse("2006-01-02T15:04:05.000Z07:00", v); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -588,6 +590,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeDateTimeZone:
 			// Use date time zone as the parameter input value, using YYYY-MM-DDTHH:mm:ss.FFF±hh:mm format.
+			//nolint:noinlineerr
 			if _, err := time.Parse("2006-01-02T03:04:05.000-07:00", v); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -597,6 +600,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeDuration:
 			// Use duration as the parameter input value, using [-]P(n)DT(n)H(n)M(n)S format. For example: P3DT4H30M10S (for 3 days, 4 hours, 30 minutes, and 10 seconds).
+			//nolint:noinlineerr
 			if _, err := time.ParseDuration(v); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -609,6 +613,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeNumber:
 			// Use number as the parameter input value (integer or floating point).
+			//nolint:noinlineerr
 			if _, err := strconv.ParseFloat(v, 32); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -627,6 +632,7 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeTime:
 			// Use time as the parameter input value, using HH:mm:ss.FFFZ format.
+			//nolint:noinlineerr
 			if _, err := time.Parse("15:04:05.000Z07:00", v); err != nil {
 				diags.AddAttributeError(
 					path.Root("connection_details").AtName("parameters"),
@@ -634,6 +640,12 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 					fmt.Sprintf("The connection parameter '%s' value is invalid. Supported format: `HH:mm:ss.FFFZ`", k),
 				)
 			}
+		default:
+			diags.AddAttributeError(
+				path.Root("connection_details").AtName("parameters"),
+				"Unsupported data type",
+				fmt.Sprintf("Data type '%s' is not supported for parameter '%s'", dataType, k),
+			)
 		}
 
 		if len(allowedValues) > 0 {

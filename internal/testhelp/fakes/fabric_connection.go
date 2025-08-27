@@ -212,7 +212,7 @@ func configureConnection(server *fakeServer) {
 
 // FakeListSupportedConnectionTypes returns a fake handler for listing supported connection types.
 func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientListSupportedConnectionTypesOptions) azfake.PagerResponder[fabcore.ConnectionsClientListSupportedConnectionTypesResponse] {
-	return func(options *fabcore.ConnectionsClientListSupportedConnectionTypesOptions) azfake.PagerResponder[fabcore.ConnectionsClientListSupportedConnectionTypesResponse] {
+	return func(_ *fabcore.ConnectionsClientListSupportedConnectionTypesOptions) azfake.PagerResponder[fabcore.ConnectionsClientListSupportedConnectionTypesResponse] {
 		var resp azfake.PagerResponder[fabcore.ConnectionsClientListSupportedConnectionTypesResponse]
 
 		// Create the fake response data with comprehensive test parameters
