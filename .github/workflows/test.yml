@@ -512,6 +512,7 @@ jobs:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out
+          disable_search: true
 
       # - name: 📝 Code Coverage report
       #   uses: fgrosse/go-coverage-report@8c1d1a09864211d258937b1b1a5b849f7e4f2682 # v1.2.0
