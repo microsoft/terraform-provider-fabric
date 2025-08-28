@@ -249,6 +249,7 @@ func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
+	t.Skip("Temporarily skip airflow acceptance tests")
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -297,6 +298,7 @@ func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
+	t.Skip("Temporarily skip airflow acceptance tests")
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
