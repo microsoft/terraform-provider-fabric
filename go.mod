@@ -23,7 +23,7 @@ require (
 	github.com/orange-cloudavenue/terraform-plugin-framework-superschema v1.11.0
 	github.com/orange-cloudavenue/terraform-plugin-framework-supertypes v1.2.0
 	github.com/orange-cloudavenue/terraform-plugin-framework-validators v1.16.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
