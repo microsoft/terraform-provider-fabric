@@ -418,6 +418,9 @@ jobs:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
+          FABRIC_CONNECTION_SQL_SERVER_USERNAME: ${{ secrets.TESTACC_SQL_SERVER_USERNAME }}
+          FABRIC_CONNECTION_SQL_SERVER_PASSWORD: ${{ secrets.TESTACC_SQL_SERVER_PASSWORD }}
+          FABRIC_CONNECTION_SQL_SERVER_URL: ${{ secrets.TESTACC_SQL_SERVER_URL }}
           # ARM_SUBSCRIPTION_ID: ${{ secrets.TESTACC_SUBSCRIPTION_ID }}
 
       - name: 📤 Upload test results
