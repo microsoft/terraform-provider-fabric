@@ -41,7 +41,7 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_configuration" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   configuration = {
     catalog_name                       = "MyCatalogName",
-    mirroring_mode                     = "Partial/Full"
+    mirroring_mode                     = "Partial"
     databricks_workspace_connection_id = "00000000-0000-0000-0000-000000000000"
     storage_connection_id              = "11111111-1111-1111-1111-111111111111"
   }
