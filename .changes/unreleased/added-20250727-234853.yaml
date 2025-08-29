@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_variable_library` Data Source
+time: 2025-07-27T23:48:53.501476092Z
+custom:
+    Issue: "552"
