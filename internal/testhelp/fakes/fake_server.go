@@ -31,6 +31,8 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	// Register entities.
 	handleEntity(server, configureItem)
 	handleEntity(server, configureCapacity)
+	handleEntity(server, configureShareableCloudConnection)
+	handleEntity(server, configureVirtualNetworkGatewayConnection)
 	handleEntity(server, configureDataPipeline)
 	handleEntity(server, configureDeploymentPipeline)
 	handleEntity(server, configureDomain)

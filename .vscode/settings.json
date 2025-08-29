@@ -68,6 +68,7 @@
     "FABRIC_SDK_GO_LOGGING_ALLOWED_HEADERS": "requestid;x-ms-operation-id;x-ms-public-api-error-code;home-cluster-uri;location;date;retry-after",
     "FABRIC_SDK_GO_LOGGING_ALLOWED_QUERY_PARAMS": "format;type;continuationToken"
   },
+  "go.testEnvFile": "${workspaceFolder}/wellknown.env",
   "go.diagnostic.vulncheck": "Imports",
   "go.testTimeout": "10m",
   "go.lintTool": "golangci-lint",

@@ -732,6 +732,38 @@ function Set-FabricConnection {
   return $result
 }
 
+function Set-FabricConnectionRoleAssignment {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$ConnectionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Owner')]
+    [string]$Role
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$ConnectionId/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
+  if (!$result) {
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to Connection: $($ConnectionId)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $PrincipalId
+        type = $PrincipalType
+      }
+      role      = $Role
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "connections/$ConnectionId/roleAssignments" -Payload $payload).Response
+  }
+}
+
 function Set-AzureVirtualNetwork {
   param(
     [Parameter(Mandatory = $true)]
@@ -1611,6 +1643,8 @@ $wellKnown['ShareableCloudConnection'] = @{
   displayName = $shareableCloudConnection.displayName
 }
 
+Set-FabricConnectionRoleAssignment -ConnectionId $shareableCloudConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+
 # Create Virtual Network Gateway Connection if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['VirtualNetworkGatewayConnection'])"
 $virtualNetworkGatewayConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "VirtualNetworkGateway" -GatewayId $gateway.id
@@ -1620,6 +1654,8 @@ $wellKnown['VirtualNetworkGatewayConnection'] = @{
   displayName = $virtualNetworkGatewayConnection.displayName
   gatewayId   = $virtualNetworkGatewayConnection.gatewayId
 }
+
+Set-FabricConnectionRoleAssignment -ConnectionId $virtualNetworkGatewayConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
 
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
@@ -1748,3 +1784,4 @@ else {
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
+
