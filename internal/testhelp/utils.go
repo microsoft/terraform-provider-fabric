@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"strings"
+	"time"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/go-uuid"
@@ -29,6 +30,25 @@ func RandomName(length ...int) string {
 	}
 
 	return acctest.RandStringFromCharSet(size, acctest.CharSetAlpha+strings.ToUpper(acctest.CharSetAlpha))
+}
+
+func RandomTime(min, max time.Time) time.Time {
+	if !min.Before(max) {
+		panic("min must be before max")
+	}
+
+	// Duration between min and max
+	delta := max.Sub(min)
+
+	// Random duration offset
+	offset := time.Duration(rand.Int64N(int64(delta)))
+
+	return min.Add(offset)
+}
+
+// RandomTimeDefault returns a random time between Unix epoch and now.
+func RandomTimeDefault() time.Time {
+	return RandomTime(time.Unix(0, 0), time.Now())
 }
 
 // RandomIntRange returns a random integer between minInt (inclusive) and maxInt (exclusive).
