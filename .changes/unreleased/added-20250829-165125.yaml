@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_mirrored_azure_databricks_catalog` Resource
+time: 2025-08-29T16:51:25.163569001Z
+custom:
+    Issue: "625"
