@@ -130,6 +130,16 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
 		// read by name - not found
@@ -147,7 +157,6 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 }
 
 func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
-	
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -172,7 +181,14 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
 		// read by id - not found
@@ -202,8 +218,27 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
+		},
+		// read by id with definition - missing format error
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"output_definition": true,
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
 		},
 		// read by name - not found
 		{
@@ -217,5 +252,26 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
+
+		// // read by id with definition
+		// {
+		// 	ResourceName: testDataSourceItemFQN,
+		// 	Config: at.CompileConfig(
+		// 		testDataSourceItemHeader,
+		// 		map[string]any{
+		// 			"workspace_id":      workspaceID,
+		// 			"id":                entityID,
+		// 			"format":            "Default",
+		// 			"output_definition": true,
+		// 		},
+		// 	),
+		// 	Check: resource.ComposeAggregateTestCheckFunc(
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.mirroringAzureDatabricksCatalog.json.content"),
+		// 	),
+		// },
 	}))
 }

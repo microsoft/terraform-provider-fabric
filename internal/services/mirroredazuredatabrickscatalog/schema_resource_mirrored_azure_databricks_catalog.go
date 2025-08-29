@@ -7,10 +7,14 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	fabmirroredazuredatabrickscatalog "github.com/microsoft/fabric-sdk-go/fabric/mirroredazuredatabrickscatalog"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
@@ -103,20 +107,23 @@ func getResourceMirroredAzureDatabricksCatalogConfigurationAttributes() map[stri
 	return map[string]schema.Attribute{
 		"catalog_name": schema.StringAttribute{
 			MarkdownDescription: "Azure databricks catalog name.",
-			Computed:            true,
+			Optional:            true,
 		},
 		"databricks_workspace_connection_id": schema.StringAttribute{
 			MarkdownDescription: "The Azure databricks workspace connection id.",
-			Computed:            true,
+			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 		"mirroring_mode": schema.StringAttribute{
 			MarkdownDescription: "Mirroring mode. Additional mirroringMode may be added over time.",
-			Computed:            true,
+			Optional:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true)...),
+			},
 		},
 		"storage_connection_id": schema.StringAttribute{
 			MarkdownDescription: "The storage connection id.",
-			Computed:            true,
+			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 	}

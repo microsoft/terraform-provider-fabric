@@ -69,6 +69,16 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.properties.sql_endpoint_properties.connection_string"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(
@@ -88,7 +98,6 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 }
 
 func TestAcc_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
-	
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -104,6 +113,13 @@ func TestAcc_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.display_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.sql_endpoint_properties.connection_string"),
 			),
 		},
 	},

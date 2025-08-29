@@ -20,9 +20,14 @@ import (
 
 func NewResourceMirroredAzureDatabricksCatalog(ctx context.Context) resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from mirroredAzureDatabricksCatalogConfigurationModel) (*fabmirroredazuredatabrickscatalog.CreationPayload, diag.Diagnostics) {
-		creationPayload := fabmirroredazuredatabrickscatalog.CreationPayload{}
-		// TBD
-		return &creationPayload, nil
+		creationPayload := &fabmirroredazuredatabrickscatalog.CreationPayload{
+			CatalogName:                     from.CatalogName.ValueStringPointer(),
+			DatabricksWorkspaceConnectionID: from.DatabricksWorkspaceConnectionID.ValueStringPointer(),
+			StorageConnectionID:             from.StorageConnectionID.ValueStringPointer(),
+			MirroringMode:                   (*fabmirroredazuredatabrickscatalog.MirroringModes)(from.MirroringMode.ValueStringPointer()),
+		}
+
+		return creationPayload, nil
 	}
 
 	propertiesSetter := func(ctx context.Context, from *fabmirroredazuredatabrickscatalog.Properties, to *fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[mirroredAzureDatabricksCatalogPropertiesModel, fabmirroredazuredatabrickscatalog.Properties, mirroredAzureDatabricksCatalogConfigurationModel, fabmirroredazuredatabrickscatalog.CreationPayload]) diag.Diagnostics {
@@ -34,6 +39,7 @@ func NewResourceMirroredAzureDatabricksCatalog(ctx context.Context) resource.Res
 			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
 				return diags
 			}
+
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags
 			}
@@ -74,7 +80,7 @@ func NewResourceMirroredAzureDatabricksCatalog(ctx context.Context) resource.Res
 			DefinitionFormats:  itemDefinitionFormats,
 		},
 		ConfigRequired:             false,
-		ConfigOrDefinitionRequired: true,
+		ConfigOrDefinitionRequired: false,
 		ConfigAttributes:           getResourceMirroredAzureDatabricksCatalogConfigurationAttributes(),
 		CreationPayloadSetter:      creationPayloadSetter,
 		PropertiesAttributes:       getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx),

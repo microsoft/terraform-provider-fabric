@@ -10,7 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
-	fabMirroredAzureDatabricksCatalog "github.com/microsoft/fabric-sdk-go/fabric/mirroredazuredatabrickscatalog"
+	fabmirroredazuredatabrickscatalog "github.com/microsoft/fabric-sdk-go/fabric/mirroredazuredatabrickscatalog"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
@@ -18,30 +18,30 @@ import (
 type operationsMirroredAzureDatabricksCatalog struct{}
 
 // ConvertItemToEntity implements itemConverter.
-func (o *operationsMirroredAzureDatabricksCatalog) ConvertItemToEntity(item fabcore.Item) fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
-	return fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog{
+func (o *operationsMirroredAzureDatabricksCatalog) ConvertItemToEntity(item fabcore.Item) fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
+	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{
 		ID:          item.ID,
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
-		Type:        to.Ptr(fabMirroredAzureDatabricksCatalog.ItemTypeMirroredAzureDatabricksCatalog),
+		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
 		Properties:  NewRandomMirroredAzureDatabricksCatalog().Properties,
 	}
 }
 
 // CreateDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) CreateDefinition(
-	data fabMirroredAzureDatabricksCatalog.CreateMirroredAzureDatabricksCatalogRequest,
-) *fabMirroredAzureDatabricksCatalog.PublicDefinition {
+	data fabmirroredazuredatabrickscatalog.CreateMirroredAzureDatabricksCatalogRequest,
+) *fabmirroredazuredatabrickscatalog.PublicDefinition {
 	return data.Definition
 }
 
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) TransformDefinition(
-	entity *fabMirroredAzureDatabricksCatalog.PublicDefinition,
-) fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse {
-	return fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse{
-		DefinitionResponse: fabMirroredAzureDatabricksCatalog.DefinitionResponse{
+	entity *fabmirroredazuredatabrickscatalog.PublicDefinition,
+) fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse {
+	return fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse{
+		DefinitionResponse: fabmirroredazuredatabrickscatalog.DefinitionResponse{
 			Definition: entity,
 		},
 	}
@@ -49,17 +49,17 @@ func (o *operationsMirroredAzureDatabricksCatalog) TransformDefinition(
 
 // UpdateDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) UpdateDefinition(
-	_ *fabMirroredAzureDatabricksCatalog.PublicDefinition,
-	data fabMirroredAzureDatabricksCatalog.UpdatemirroredAzureDatabricksCatalogDefinitionRequest,
-) *fabMirroredAzureDatabricksCatalog.PublicDefinition {
+	_ *fabmirroredazuredatabrickscatalog.PublicDefinition,
+	data fabmirroredazuredatabrickscatalog.UpdatemirroredAzureDatabricksCatalogDefinitionRequest,
+) *fabmirroredazuredatabrickscatalog.PublicDefinition {
 	return data.Definition
 }
 
 // CreateWithParentID implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) CreateWithParentID(
 	parentID string,
-	data fabMirroredAzureDatabricksCatalog.CreateMirroredAzureDatabricksCatalogRequest,
-) fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
+	data fabmirroredazuredatabrickscatalog.CreateMirroredAzureDatabricksCatalogRequest,
+) fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	entity := NewRandomMirroredAzureDatabricksCatalogWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
@@ -69,10 +69,10 @@ func (o *operationsMirroredAzureDatabricksCatalog) CreateWithParentID(
 
 // Filter implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) Filter(
-	entities []fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
+	entities []fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
 	parentID string,
-) []fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
-	ret := make([]fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog, 0)
+) []fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
+	ret := make([]fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog, 0)
 
 	for _, entity := range entities {
 		if *entity.WorkspaceID == parentID {
@@ -84,34 +84,34 @@ func (o *operationsMirroredAzureDatabricksCatalog) Filter(
 }
 
 // GetID implements concreteOperations.
-func (o *operationsMirroredAzureDatabricksCatalog) GetID(entity fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog) string {
+func (o *operationsMirroredAzureDatabricksCatalog) GetID(entity fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog) string {
 	return generateID(*entity.WorkspaceID, *entity.ID)
 }
 
 // TransformCreate implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) TransformCreate(
-	entity fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-) fabMirroredAzureDatabricksCatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse {
-	return fabMirroredAzureDatabricksCatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse{
+	entity fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+) fabmirroredazuredatabrickscatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse {
+	return fabmirroredazuredatabrickscatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse{
 		MirroredAzureDatabricksCatalog: entity,
 	}
 }
 
 // TransformGet implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) TransformGet(
-	entity fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-) fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse {
-	return fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse{
+	entity fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+) fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse {
+	return fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse{
 		MirroredAzureDatabricksCatalog: entity,
 	}
 }
 
 // TransformList implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) TransformList(
-	entities []fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-) fabMirroredAzureDatabricksCatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse {
-	return fabMirroredAzureDatabricksCatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse{
-		MirroredAzureDatabricksCatalogs: fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalogs{
+	entities []fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+) fabmirroredazuredatabrickscatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse {
+	return fabmirroredazuredatabrickscatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse{
+		MirroredAzureDatabricksCatalogs: fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalogs{
 			Value: entities,
 		},
 	}
@@ -119,18 +119,18 @@ func (o *operationsMirroredAzureDatabricksCatalog) TransformList(
 
 // TransformUpdate implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) TransformUpdate(
-	entity fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-) fabMirroredAzureDatabricksCatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse {
-	return fabMirroredAzureDatabricksCatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse{
+	entity fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+) fabmirroredazuredatabrickscatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse {
+	return fabmirroredazuredatabrickscatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse{
 		MirroredAzureDatabricksCatalog: entity,
 	}
 }
 
 // Update implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) Update(
-	base fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-	data fabMirroredAzureDatabricksCatalog.UpdateMirroredAzureDatabricksCatalogRequest,
-) fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
+	base fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+	data fabmirroredazuredatabrickscatalog.UpdateMirroredAzureDatabricksCatalogRequest,
+) fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	base.DisplayName = data.DisplayName
 	base.Description = data.Description
 
@@ -139,8 +139,8 @@ func (o *operationsMirroredAzureDatabricksCatalog) Update(
 
 // Validate implements concreteOperations.
 func (o *operationsMirroredAzureDatabricksCatalog) Validate(
-	newEntity fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-	existing []fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
+	newEntity fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+	existing []fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
 ) (int, error) {
 	for _, entity := range existing {
 		if *entity.DisplayName == *newEntity.DisplayName {
@@ -151,32 +151,32 @@ func (o *operationsMirroredAzureDatabricksCatalog) Validate(
 	return http.StatusCreated, nil
 }
 
-func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
+func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	type concreteEntityOperations interface {
 		parentIDOperations[
-			fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog,
-			fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse,
-			fabMirroredAzureDatabricksCatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse,
-			fabMirroredAzureDatabricksCatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse,
-			fabMirroredAzureDatabricksCatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse,
-			fabMirroredAzureDatabricksCatalog.CreateMirroredAzureDatabricksCatalogRequest,
-			fabMirroredAzureDatabricksCatalog.UpdateMirroredAzureDatabricksCatalogRequest]
+			fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
+			fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogResponse,
+			fabmirroredazuredatabrickscatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogResponse,
+			fabmirroredazuredatabrickscatalog.ItemsClientCreateMirroredAzureDatabricksCatalogResponse,
+			fabmirroredazuredatabrickscatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse,
+			fabmirroredazuredatabrickscatalog.CreateMirroredAzureDatabricksCatalogRequest,
+			fabmirroredazuredatabrickscatalog.UpdateMirroredAzureDatabricksCatalogRequest]
 	}
 
 	type concreteDefinitionOperations interface {
 		definitionOperations[
-			fabMirroredAzureDatabricksCatalog.PublicDefinition,
-			fabMirroredAzureDatabricksCatalog.CreateMirroredAzureDatabricksCatalogRequest,
-			fabMirroredAzureDatabricksCatalog.UpdatemirroredAzureDatabricksCatalogDefinitionRequest,
-			fabMirroredAzureDatabricksCatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse,
-			fabMirroredAzureDatabricksCatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogDefinitionResponse]
+			fabmirroredazuredatabrickscatalog.PublicDefinition,
+			fabmirroredazuredatabrickscatalog.CreateMirroredAzureDatabricksCatalogRequest,
+			fabmirroredazuredatabrickscatalog.UpdatemirroredAzureDatabricksCatalogDefinitionRequest,
+			fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse,
+			fabmirroredazuredatabrickscatalog.ItemsClientUpdateMirroredAzureDatabricksCatalogDefinitionResponse]
 	}
 
 	var entityOperations concreteEntityOperations = &operationsMirroredAzureDatabricksCatalog{}
 
 	var definitionOperations concreteDefinitionOperations = &operationsMirroredAzureDatabricksCatalog{}
 
-	var converter itemConverter[fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog] = &operationsMirroredAzureDatabricksCatalog{}
+	var converter itemConverter[fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog] = &operationsMirroredAzureDatabricksCatalog{}
 
 	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
@@ -197,60 +197,55 @@ func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabMirroredAzur
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginGetMirroredAzureDatabricksCatalogDefinition,
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginUpdateMirroredAzureDatabricksCatalogDefinition)
 
-	return fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog{}
+	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{}
 }
 
-func NewRandomMirroredAzureDatabricksCatalog() fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
-	return fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog{
+func NewRandomMirroredAzureDatabricksCatalog() fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
+	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{
 		ID:          to.Ptr(testhelp.RandomUUID()),
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabMirroredAzureDatabricksCatalog.ItemTypeMirroredAzureDatabricksCatalog),
-		Properties: &fabMirroredAzureDatabricksCatalog.Properties{
-			AutoSync:                        to.Ptr(fabMirroredAzureDatabricksCatalog.AutoSyncEnabled),
+		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
+		Properties: &fabmirroredazuredatabrickscatalog.Properties{
+			AutoSync:                        to.Ptr(fabmirroredazuredatabrickscatalog.AutoSyncEnabled),
 			CatalogName:                     to.Ptr(testhelp.RandomName()),
 			DatabricksWorkspaceConnectionID: to.Ptr(testhelp.RandomUUID()),
-			MirrorStatus:                    to.Ptr(fabMirroredAzureDatabricksCatalog.MirrorStatusMirrored),
-			MirroringMode:                   to.Ptr(fabMirroredAzureDatabricksCatalog.MirroringModesFull),
+			MirrorStatus:                    to.Ptr(fabmirroredazuredatabrickscatalog.MirrorStatusMirrored),
+			MirroringMode:                   to.Ptr(fabmirroredazuredatabrickscatalog.MirroringModesFull),
 			OneLakeTablesPath:               to.Ptr(testhelp.RandomName()),
-			SQLEndpointProperties: &fabMirroredAzureDatabricksCatalog.SQLEndpointProperties{
+			SQLEndpointProperties: &fabmirroredazuredatabrickscatalog.SQLEndpointProperties{
 				ID:               to.Ptr(testhelp.RandomUUID()),
 				ConnectionString: to.Ptr(testhelp.RandomURI()),
 			},
 			StorageConnectionID: to.Ptr(testhelp.RandomUUID()),
-			SyncDetails: &fabMirroredAzureDatabricksCatalog.SyncDetails{
+			SyncDetails: &fabmirroredazuredatabrickscatalog.SyncDetails{
 				LastSyncDateTime: to.Ptr(time.Now()),
-				Status:           to.Ptr(fabMirroredAzureDatabricksCatalog.StatusSuccess),
-				ErrorInfo: &fabMirroredAzureDatabricksCatalog.ErrorInfo{
-					ErrorCode:    to.Ptr(testhelp.RandomName()),
-					ErrorDetails: to.Ptr(testhelp.RandomName()),
-					ErrorMessage: to.Ptr(testhelp.RandomName()),
-				},
+				Status:           to.Ptr(fabmirroredazuredatabrickscatalog.StatusSuccess),
 			},
 		},
 	}
 }
 
-func NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID string) fabMirroredAzureDatabricksCatalog.MirroredAzureDatabricksCatalog {
+func NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID string) fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	result := NewRandomMirroredAzureDatabricksCatalog()
 	result.WorkspaceID = &workspaceID
 
 	return result
 }
 
-func NewRandomMirroredAzureDatabricksCatalogDefinition() fabMirroredAzureDatabricksCatalog.PublicDefinition {
-	defPart := fabMirroredAzureDatabricksCatalog.PublicDefinitionPart{
-		PayloadType: to.Ptr(fabMirroredAzureDatabricksCatalog.PayloadTypeInlineBase64),
+func NewRandomMirroredAzureDatabricksCatalogDefinition() fabmirroredazuredatabrickscatalog.PublicDefinition {
+	defPart := fabmirroredazuredatabrickscatalog.PublicDefinitionPart{
+		PayloadType: to.Ptr(fabmirroredazuredatabrickscatalog.PayloadTypeInlineBase64),
 		Path:        to.Ptr("mirroringAzureDatabricksCatalog.json"),
 		Payload:     to.Ptr("e30="),
 	}
 
-	var defParts []fabMirroredAzureDatabricksCatalog.PublicDefinitionPart
+	var defParts []fabmirroredazuredatabrickscatalog.PublicDefinitionPart
 
 	defParts = append(defParts, defPart)
 
-	return fabMirroredAzureDatabricksCatalog.PublicDefinition{
+	return fabmirroredazuredatabrickscatalog.PublicDefinition{
 		Parts: defParts,
 	}
 }

@@ -29,7 +29,7 @@ type mirroredAzureDatabricksCatalogPropertiesModel struct {
 	MirrorStatus                    types.String                                                     `tfsdk:"mirror_status"`
 	MirroringMode                   types.String                                                     `tfsdk:"mirroring_mode"`
 	OneLakeTablesPath               types.String                                                     `tfsdk:"onelake_tables_path"`
-	SqlEndpointProperties           supertypes.SingleNestedObjectValueOf[sqlEndpointPropertiesModel] `tfsdk:"sql_endpoint_properties"`
+	SQLEndpointProperties           supertypes.SingleNestedObjectValueOf[sqlEndpointPropertiesModel] `tfsdk:"sql_endpoint_properties"`
 	StorageConnectionID             customtypes.UUID                                                 `tfsdk:"storage_connection_id"`
 	SyncDetails                     supertypes.SingleNestedObjectValueOf[syncDetailsModel]           `tfsdk:"sync_details"`
 }
@@ -58,8 +58,10 @@ func (to *mirroredAzureDatabricksCatalogPropertiesModel) set(ctx context.Context
 	to.MirrorStatus = types.StringPointerValue((*string)(from.MirrorStatus))
 	to.MirroringMode = types.StringPointerValue((*string)(from.MirroringMode))
 	to.OneLakeTablesPath = types.StringPointerValue(from.OneLakeTablesPath)
+	to.StorageConnectionID = customtypes.NewUUIDPointerValue(from.StorageConnectionID)
 	sqlEndpointProperties := supertypes.NewSingleNestedObjectValueOfNull[sqlEndpointPropertiesModel](ctx)
 	syncDetails := supertypes.NewSingleNestedObjectValueOfNull[syncDetailsModel](ctx)
+
 	if from.SQLEndpointProperties != nil {
 		sqlEndpointPropertiesModel := &sqlEndpointPropertiesModel{}
 
@@ -70,9 +72,9 @@ func (to *mirroredAzureDatabricksCatalogPropertiesModel) set(ctx context.Context
 		}
 	}
 
-	to.SqlEndpointProperties = sqlEndpointProperties
+	to.SQLEndpointProperties = sqlEndpointProperties
 
-	if from.SQLEndpointProperties != nil {
+	if from.SyncDetails != nil {
 		syncDetailsModel := &syncDetailsModel{}
 
 		syncDetailsModel.set(ctx, *from.SyncDetails)
@@ -83,6 +85,7 @@ func (to *mirroredAzureDatabricksCatalogPropertiesModel) set(ctx context.Context
 	}
 
 	to.SyncDetails = syncDetails
+
 	return nil
 }
 
@@ -103,7 +106,7 @@ func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabr
 			ErrorMessage: types.StringPointerValue(from.ErrorInfo.ErrorMessage),
 		}
 
-		if diags := errorInfo.Set(context.Background(), errorInfoModel); diags.HasError() {
+		if diags := errorInfo.Set(ctx, errorInfoModel); diags.HasError() {
 			return
 		}
 	}
