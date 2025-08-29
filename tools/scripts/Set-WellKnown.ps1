@@ -246,6 +246,9 @@ function Set-FabricItem {
     'Lakehouse' {
       $itemEndpoint = 'lakehouses'
     }
+    'MirroredAzureDatabricksCatalog' {
+      $itemEndpoint = 'mirroredAzureDatabricksCatalogs'
+    }
     'MirroredDatabase' {
       $itemEndpoint = 'mirroredDatabases'
     }
@@ -1058,6 +1061,7 @@ $itemNaming = @{
   'KQLDatabase'                     = 'kqldb'
   'KQLQueryset'                     = 'kqlqs'
   'Lakehouse'                       = 'lh'
+  'MirroredAzureDatabricksCatalog'  = 'madc'
   'MirroredDatabase'                = 'mdb'
   'MirroredWarehouse'               = 'mwh'
   'MLExperiment'                    = 'mle'
@@ -1176,7 +1180,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MirroredAzureDatabricksCatalog', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
