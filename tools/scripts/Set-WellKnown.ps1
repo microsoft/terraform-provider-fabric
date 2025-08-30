@@ -69,6 +69,20 @@ function Import-ModuleIfNotImported {
   }
 }
 
+function Set-ExternalDataShare {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
+  $result = $results.Response.value
+  return $result
+}
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -1296,6 +1310,19 @@ $wellKnown['DeploymentPipeline'] = @{
   displayName = $deploymentPipeline.displayName
   description = $deploymentPipeline.description
   stages      = $deploymentPipeline.stages
+}
+
+$externalDataShares = Set-ExternalDataShare -WorkspaceId $wellKnown['WorkspaceDS'].id -ItemId $wellKnown['Lakehouse'].id
+$wellKnown['ExternalDataShare'] = @{
+  id                = $externalDataShares[0].id
+  workspaceId       = $externalDataShares[0].workspaceId
+  itemId            = $externalDataShares[0].itemId
+  invitationUrl     = $externalDataShares[0].invitationUrl
+  expirationTimeUtc = $externalDataShares[0].expirationTimeUtc
+  status            = $externalDataShares[0].status
+  recipient         = $externalDataShares[0].recipient
+  creatorPrincipal  = $externalDataShares[0].creatorPrincipal
+  paths             = $externalDataShares[0].paths
 }
 
 Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
