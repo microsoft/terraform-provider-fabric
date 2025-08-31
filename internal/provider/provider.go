@@ -486,6 +486,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		externaldatasharesprovider.NewDataSourceExternalDataShareProvider,
 		externaldatasharesprovider.NewDataSourceExternalDataSharesProvider,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,

@@ -9,61 +9,74 @@ import (
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-// Returns a fake pager function that simulates listing deployment pipeline role assignments with a provided example response.
+func fakeGetExternalDataShareProvider(
+	exampleResp fabcore.ExternalDataShare,
+) func(ctx context.Context, workspaceID, itemID, externalDataShareID string, options *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _, _ string, _ *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse{ExternalDataShare: exampleResp}, nil)
+
+		return
+	}
+}
+
 func fakeListExternalDataSharesProvider(
-	exampleResp fabadmin.ExternalDataShares,
-) func(options *fabadmin.ExternalDataSharesProviderClientListExternalDataSharesOptions) (resp azfake.PagerResponder[fabadmin.ExternalDataSharesProviderClientListExternalDataSharesResponse]) {
-	return func(_ *fabadmin.ExternalDataSharesProviderClientListExternalDataSharesOptions) (resp azfake.PagerResponder[fabadmin.ExternalDataSharesProviderClientListExternalDataSharesResponse]) {
-		resp = azfake.PagerResponder[fabadmin.ExternalDataSharesProviderClientListExternalDataSharesResponse]{}
-		resp.AddPage(http.StatusOK, fabadmin.ExternalDataSharesProviderClientListExternalDataSharesResponse{ExternalDataShares: exampleResp}, nil)
+	exampleResp []fabcore.ExternalDataShare,
+) func(workspaceID, itemID string, options *fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemOptions) (resp azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]) {
+	return func(_, _ string, _ *fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemOptions) (resp azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]) {
+		resp = azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]{}
+		resp.AddPage(http.StatusOK, fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse{
+			ExternalDataShares: fabcore.ExternalDataShares{
+				Value: exampleResp,
+			},
+		}, nil)
 
 		return
 	}
 }
 
-func fakeRevokeExternalDataSharesProvider() func(
-	ctx context.Context,
-	workspaceID, itemID, externalDataShareID string,
-	options *fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareOptions,
-) (
-	resp azfake.Responder[fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareResponse],
-	errResp azfake.ErrorResponder,
-) {
-	return func(_ context.Context, _, _, _ string,
-		_ *fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareOptions,
-	) (
-		resp azfake.Responder[fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareResponse],
-		errResp azfake.ErrorResponder,
-	) {
-		resp = azfake.Responder[fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareResponse]{}
-		resp.SetResponse(http.StatusOK, fabadmin.ExternalDataSharesProviderClientRevokeExternalDataShareResponse{}, nil)
+func fakeCreateExternalDataShareProvider(
+	exampleResp fabcore.ExternalDataShare,
+) func(ctx context.Context, workspaceID, itemID string, createExternalDataShareRequest fabcore.CreateExternalDataShareRequest, options *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _ string, _ fabcore.CreateExternalDataShareRequest, _ *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse]{}
+		resp.SetResponse(http.StatusCreated, fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse{ExternalDataShare: exampleResp}, nil)
 
 		return
 	}
 }
 
-func NewRandomExternalDataShare(workspaceID string) fabadmin.ExternalDataShare {
-	return fabadmin.ExternalDataShare{
+func fakeDeleteExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, externalDataShareID string, options *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _, _ string, _ *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse{}, nil)
+
+		return
+	}
+}
+
+func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
+	return fabcore.ExternalDataShare{
 		ID:          to.Ptr(testhelp.RandomUUID()),
 		Paths:       []string{testhelp.RandomName()},
 		WorkspaceID: to.Ptr(workspaceID),
-		Recipient: &fabadmin.ExternalDataShareRecipient{
+		Recipient: &fabcore.ExternalDataShareRecipient{
 			UserPrincipalName: to.Ptr(testhelp.RandomName()),
 		},
-		CreatorPrincipal: &fabadmin.Principal{
+		CreatorPrincipal: &fabcore.Principal{
 			ID:          to.Ptr(testhelp.RandomUUID()),
 			DisplayName: to.Ptr(testhelp.RandomName()),
-			Type:        to.Ptr(fabadmin.PrincipalTypeUser),
-			UserDetails: &fabadmin.PrincipalUserDetails{
+			Type:        to.Ptr(fabcore.PrincipalTypeUser),
+			UserDetails: &fabcore.PrincipalUserDetails{
 				UserPrincipalName: to.Ptr(testhelp.RandomName()),
 			},
 		},
-		Status:             to.Ptr(fabadmin.ExternalDataShareStatusPending),
+		Status:             to.Ptr(fabcore.ExternalDataShareStatusPending),
 		ExpirationTimeUTC:  to.Ptr(testhelp.RandomTimeDefault()),
 		ItemID:             to.Ptr(testhelp.RandomUUID()),
 		InvitationURL:      to.Ptr(testhelp.RandomName()),
@@ -71,9 +84,9 @@ func NewRandomExternalDataShare(workspaceID string) fabadmin.ExternalDataShare {
 	}
 }
 
-func NewRandomExternalDataShares(workspaceID string) fabadmin.ExternalDataShares {
-	return fabadmin.ExternalDataShares{
-		Value: []fabadmin.ExternalDataShare{
+func NewRandomExternalDataShares(workspaceID string) fabcore.ExternalDataShares {
+	return fabcore.ExternalDataShares{
+		Value: []fabcore.ExternalDataShare{
 			NewRandomExternalDataShare(workspaceID),
 			NewRandomExternalDataShare(workspaceID),
 			NewRandomExternalDataShare(workspaceID),

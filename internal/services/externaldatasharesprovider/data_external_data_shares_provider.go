@@ -1,15 +1,22 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package externaldatasharesprovider
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -20,7 +27,7 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceExternalDataSharesProvide
 
 type dataSourceExternalDataSharesProvider struct {
 	pConfigData *pconfig.ProviderData
-	client      *fabadmin.ExternalDataSharesProviderClient
+	client      *fabcore.ExternalDataSharesProviderClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
@@ -35,7 +42,32 @@ func (d *dataSourceExternalDataSharesProvider) Metadata(_ context.Context, _ dat
 }
 
 func (d *dataSourceExternalDataSharesProvider) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = itemSchema().GetDataSource(ctx)
+	s := itemSchema(true).GetDataSource(ctx)
+
+	resp.Schema = schema.Schema{
+		MarkdownDescription: s.GetMarkdownDescription(),
+		Attributes: map[string]schema.Attribute{
+			"workspace_id": schema.StringAttribute{
+				MarkdownDescription: "The Workspace ID.",
+				Required:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+			"item_id": schema.StringAttribute{
+				MarkdownDescription: "The Item ID.",
+				Required:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+			"value": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
+				Computed:            true,
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[externalDataSharesModel](ctx),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: s.Attributes,
+				},
+			},
+			"timeouts": timeouts.Attributes(ctx),
+		},
+	}
 }
 
 func (d *dataSourceExternalDataSharesProvider) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -59,7 +91,7 @@ func (d *dataSourceExternalDataSharesProvider) Configure(_ context.Context, req 
 		return
 	}
 
-	d.client = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewExternalDataSharesProviderClient()
+	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewExternalDataSharesProviderClient()
 }
 
 func (d *dataSourceExternalDataSharesProvider) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -67,11 +99,19 @@ func (d *dataSourceExternalDataSharesProvider) Read(ctx context.Context, req dat
 		"action": "start",
 	})
 
-	var data baseExternalDataSharesProviderModel
+	var data dataSourceExternalDataSharesProviderModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	if resp.Diagnostics.Append(d.list(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -88,8 +128,8 @@ func (d *dataSourceExternalDataSharesProvider) Read(ctx context.Context, req dat
 	}
 }
 
-func (d *dataSourceExternalDataSharesProvider) list(ctx context.Context, model *baseExternalDataSharesProviderModel) diag.Diagnostics {
-	respList, err := d.client.ListExternalDataShares(ctx, nil)
+func (d *dataSourceExternalDataSharesProvider) list(ctx context.Context, model *dataSourceExternalDataSharesProviderModel) diag.Diagnostics {
+	respList, err := d.client.ListExternalDataSharesInItem(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		diags.AddError(
 			common.ErrorReadHeader,
@@ -99,5 +139,7 @@ func (d *dataSourceExternalDataSharesProvider) list(ctx context.Context, model *
 		return diags
 	}
 
-	return model.set(ctx, respList)
+	model.set(ctx, respList)
+
+	return nil
 }
