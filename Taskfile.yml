@@ -273,7 +273,7 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -p {{numCPU}} -timeout 5m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -timeout 10m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -283,12 +283,13 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 0
+      # CGO_ENABLED: 1
 
   testacc:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -298,13 +299,14 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 1
+      # CGO_ENABLED: 1
 
   test:
     desc: Run tests
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -p {{numCPU}} -timeout 30m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -322,6 +324,7 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 1
+      # CGO_ENABLED: 1
 
   testacc:setup:
     desc: Setup acceptence/development test environment
