@@ -231,6 +231,10 @@ func TestUnit_ActivatorResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ActivatorResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("PATCH issue on the API side")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
