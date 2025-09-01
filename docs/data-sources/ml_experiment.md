@@ -54,6 +54,7 @@ data "fabric_ml_experiment" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The ML Experiment description.
+- `folder_id` (String) The ML Experiment Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

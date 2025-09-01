@@ -18,6 +18,7 @@ type fabricItemModel struct {
 	ID          customtypes.UUID `tfsdk:"id"`
 	DisplayName types.String     `tfsdk:"display_name"`
 	Description types.String     `tfsdk:"description"`
+	FolderID    customtypes.UUID `tfsdk:"folder_id"`
 }
 
 func (to *fabricItemModel) set(from fabcore.Item) {
@@ -25,6 +26,7 @@ func (to *fabricItemModel) set(from fabcore.Item) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
+	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 }
 
 type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
@@ -32,6 +34,7 @@ type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable
 	ID          customtypes.UUID                              `tfsdk:"id"`
 	DisplayName types.String                                  `tfsdk:"display_name"`
 	Description types.String                                  `tfsdk:"description"`
+	FolderID    customtypes.UUID                              `tfsdk:"folder_id"`
 	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop] `tfsdk:"properties"`
 }
 
@@ -40,6 +43,7 @@ func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProp
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
+	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 }
 
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported
@@ -58,6 +62,7 @@ func (to *FabricItemProperties[Titemprop]) Set(from any) {
 	to.ID = getFieldStringValue(fromValue, "ID")
 	to.DisplayName = getFieldStringValue(fromValue, "DisplayName")
 	to.Description = getFieldStringValue(fromValue, "Description")
+	to.FolderID = getFieldStringValue(fromValue, "FolderID")
 	to.Properties = getFieldStructValue[Titemprop](fromValue, "Properties")
 }
 

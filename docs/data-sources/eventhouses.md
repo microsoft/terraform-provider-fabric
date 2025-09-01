@@ -52,6 +52,7 @@ Read-Only:
 
 - `description` (String) The Eventhouse description.
 - `display_name` (String) The Eventhouse display name.
+- `folder_id` (String) The Eventhouse Folder ID.
 - `id` (String) The Eventhouse ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

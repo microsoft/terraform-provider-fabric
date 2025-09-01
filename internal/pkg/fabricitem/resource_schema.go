@@ -199,6 +199,14 @@ func getResourceFabricItemBaseAttributes(
 				stringvalidator.LengthAtMost(descriptionMaxLength),
 			},
 		},
+		"folder_id": schema.StringAttribute{
+			MarkdownDescription: "The Folder ID.",
+			Optional:            true,
+			CustomType:          customtypes.UUIDType{},
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}
 

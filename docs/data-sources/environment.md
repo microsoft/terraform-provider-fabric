@@ -54,6 +54,7 @@ data "fabric_environment" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The Environment description.
+- `folder_id` (String) The Environment Folder ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

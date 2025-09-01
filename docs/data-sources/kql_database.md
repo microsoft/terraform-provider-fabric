@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `DatabaseProperties.json`, `DatabaseSchema.kql` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The KQL Database description.
+- `folder_id` (String) The KQL Database Folder ID.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
