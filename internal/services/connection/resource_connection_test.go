@@ -1270,7 +1270,6 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 	))
 }
 
-// what configuration should we do prior to this test to configure credntial validation on the virtual network gateway? Is it worth the ROY?
 func TestAcc_ConnectionResource_VirtualNetworkGateway(t *testing.T) {
 	entityVirtualNetwork := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
 	entityVirtualNetworkID := entityVirtualNetwork["id"].(string)
