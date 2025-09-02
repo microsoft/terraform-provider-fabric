@@ -363,63 +363,73 @@ func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ShortcutResource_CRUD(t *testing.T) {
-	entityCreateDisplayName := testhelp.RandomName()
-	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
-	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
-	workspaceID := testhelp.WellKnown()["Shortcut"].(map[string]any)["workspaceId"].(string)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	shortcutWorkspaceID := testhelp.WellKnown()["Shortcut"].(map[string]any)["workspaceId"].(string)
+	lakehouseTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
+	shortcutTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
 	lakehouseID := testhelp.WellKnown()["Shortcut"].(map[string]any)["lakehouseId"].(string)
+
+	lakehouseResourceHCL, lakehouseResourceFQN := lakehouseResource(t, workspaceID)
+	entityCreateDisplayName := testhelp.RandomName()
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"item_id":      lakehouseID,
-					"workspace_id": workspaceID,
-					"name":         entityCreateDisplayName,
-					"path":         "Tables",
-					"target": map[string]any{
-						"onelake": map[string]any{
-							"workspace_id": workspaceID,
-							"item_id":      lakehouseID,
-							"path":         entityTargetPath,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"item_id":      testhelp.RefByFQN(lakehouseResourceFQN, "id"),
+						"workspace_id": workspaceID,
+						"name":         entityCreateDisplayName,
+						"path":         "Tables",
+						"target": map[string]any{
+							"onelake": map[string]any{
+								"workspace_id": shortcutWorkspaceID,
+								"item_id":      lakehouseID,
+								"path":         lakehouseTargetPath,
+							},
 						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", shortcutWorkspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", lakehouseTargetPath),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
 		},
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"item_id":      lakehouseID,
-					"workspace_id": workspaceID,
-					"name":         entityCreateDisplayName,
-					"path":         "Tables",
-					"target": map[string]any{
-						"onelake": map[string]any{
-							"workspace_id": workspaceID,
-							"item_id":      lakehouseID,
-							"path":         entityUpdatedTargetPath,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"item_id":      testhelp.RefByFQN(lakehouseResourceFQN, "id"),
+						"workspace_id": workspaceID,
+						"name":         entityCreateDisplayName,
+						"path":         "Tables",
+						"target": map[string]any{
+							"onelake": map[string]any{
+								"workspace_id": shortcutWorkspaceID,
+								"item_id":      lakehouseID,
+								"path":         shortcutTargetPath,
+							},
 						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", shortcutWorkspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", shortcutTargetPath),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
 			),
 		},
