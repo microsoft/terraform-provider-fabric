@@ -21,7 +21,7 @@ The Connection resource allows you to manage a Fabric [Connection](https://learn
 ```terraform
 # Example 1 - ShareableCloud Connection
 resource "fabric_connection" "example_cloud" {
-  display_name      = "example1"
+  display_name      = "example"
   connectivity_type = "ShareableCloud"
   privacy_level     = "Organizational"
   connection_details = {
@@ -41,21 +41,17 @@ resource "fabric_connection" "example_cloud" {
     skip_test_connection  = false
     basic_credentials = {
       username            = "user"
-      password_wo         = "...secret_password1..."
-      password_wo_version = 2
+      password_wo         = "...secret_password..."
+      password_wo_version = 1
     }
   }
 }
 
-# Example 2 - OnPremisesGateway Connection
-output "example_on_premises_gateway" {
-  value = resource.fabric_connection.example_on_premises_gateway
-}
-
-resource "fabric_connection" "example_on_premises_gateway" {
-  gateway_id        = "f0e7cc2c-f62c-4511-a50b-4e54216b92a2"
+# Example 2 - VirtualNetworkGateway Connection
+resource "fabric_connection" "example_virtual_network_gateway" {
+  gateway_id        = "00000000-0000-0000-0000-000000000000"
   display_name      = "example"
-  connectivity_type = "OnPremisesGateway"
+  connectivity_type = "VirtualNetworkGateway"
   privacy_level     = "Organizational"
   connection_details = {
     type            = "FTP"
