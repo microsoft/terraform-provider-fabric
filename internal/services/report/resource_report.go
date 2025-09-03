@@ -40,6 +40,11 @@ func NewResourceReport() resource.Resource {
 					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "PBIR"), true, false),
 				),
 			),
+			fwvalidators.PBIRFormatRequiresPages(
+				path.MatchRoot("format"),
+				"definition/pages/*.json",
+				"PBIR format requires at least one page file matching 'definition/pages/*.json' pattern",
+			),
 		},
 		DefinitionRequired: true,
 		DefinitionEmpty:    "",

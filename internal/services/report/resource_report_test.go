@@ -26,6 +26,10 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("report_pbir_legacy"),
 })
 
+var testHelperLocalsPBIR = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("report_pbir"),
+})
+
 var testHelperDefinition = map[string]any{
 	`"report.json"`: map[string]any{
 		"source": "${local.path}/report.json",
@@ -44,6 +48,42 @@ var testHelperDefinition = map[string]any{
 	},
 }
 
+var testHelperDefinitionPBIR = map[string]any{
+	`"definition/report.json"`: map[string]any{
+		"source": "${local.path}/definition/report.json",
+	},
+	`"definition/version.json"`: map[string]any{
+		"source": "${local.path}/definition/version.json",
+	},
+	`"definition.pbir"`: map[string]any{
+		"source": "${local.path}/definition.pbir.tmpl",
+		"tokens": map[string]any{
+			"SemanticModelID": "00000000-0000-0000-0000-000000000000",
+		},
+	},
+	`"definition/pages/page1.json"`: map[string]any{
+		"source": "${local.path}/definition/pages/page1.json",
+	},
+	`"StaticResources/SharedResources/BaseThemes/CY24SU10.json"`: map[string]any{
+		"source": "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json",
+	},
+}
+
+var testHelperDefinitionPBIRWithoutPages = map[string]any{
+	`"definition/report.json"`: map[string]any{
+		"source": "${local.path}/definition/report.json",
+	},
+	`"definition/version.json"`: map[string]any{
+		"source": "${local.path}/definition/version.json",
+	},
+	`"definition.pbir"`: map[string]any{
+		"source": "${local.path}/definition.pbir.tmpl",
+		"tokens": map[string]any{
+			"SemanticModelID": "00000000-0000-0000-0000-000000000000",
+		},
+	},
+}
+
 func TestUnit_ReportResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -57,6 +97,39 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 				),
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
+		},
+		// error - PBIR format without pages - should fail validation
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocalsPBIR,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"display_name": "test",
+						"format":       "PBIR",
+						"definition":   testHelperDefinitionPBIRWithoutPages,
+					},
+				)),
+			ExpectError: regexp.MustCompile(`PBIR format requires at least one page file`),
+		},
+		// success - PBIR format with pages should pass validation
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocalsPBIR,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"display_name": "test",
+						"format":       "PBIR",
+						"definition":   testHelperDefinitionPBIR,
+					},
+				)),
+			PlanOnly:           true,
+			ExpectNonEmptyPlan: true,
 		},
 		// error - workspace_id - invalid UUID
 		{
