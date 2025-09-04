@@ -52,6 +52,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureSparkJobDefinition)
 	handleEntity(server, configureSQLDatabase)
 	handleEntity(server, configureWarehouse)
+	handleEntity(server, configureWarehouseSnapshot)
 	handleEntity(server, configureWorkspace)
 	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
 

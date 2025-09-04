@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_warehouse_snapshot` Resource
+time: 2025-08-05T11:05:48.911903038Z
+custom:
+    Issue: "485"

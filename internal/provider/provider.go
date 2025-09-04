@@ -83,6 +83,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
@@ -460,6 +461,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sqldatabase.NewResourceSQLDatabase,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
+		warehousesnapshot.NewResourceWarehouseSnapshot,
 		workspace.NewResourceWorkspace,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
@@ -548,6 +550,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
+		warehousesnapshot.NewDataSourceWarehouseSnapshot,
+		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
