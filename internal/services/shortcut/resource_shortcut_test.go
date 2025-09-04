@@ -95,7 +95,7 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
 		},
-		// error - no required attribute target
+		// error - name - invalid (only whitespaces)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -116,7 +116,7 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
 		},
-		// error - no required attribute target
+		// error - name - invalid character
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
