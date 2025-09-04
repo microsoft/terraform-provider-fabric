@@ -109,6 +109,17 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`\S`),
+							"Name must contain at least one non-whitespace character.",
+						),
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`^[^"\\/:|\<>*?.%+]*$`),
+							"Shortcut name cannot contain the following character(s): \" \\ / : | < > * ? . % +",
+						),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
