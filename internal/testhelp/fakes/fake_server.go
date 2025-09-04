@@ -38,6 +38,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
 	handleEntity(server, configureEnvironment)
+	handleEntity(server, configureVariableLibrary)
 	handleEntity(server, configureFolder)
 	handleEntity(server, configureVirtualNetworkGateway)
 	handleEntity(server, configureOnPremisesGateway)
