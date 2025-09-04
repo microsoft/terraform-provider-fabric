@@ -13,6 +13,8 @@ The Report resource allows you to manage a Fabric [Report](https://learn.microso
 
 -> This resource supports Service Principal authentication.
 
+~> **Important for PBIR Format**: When using `format = "PBIR"`, you must include at least one page file in your definition with a path matching `definition/pages/*.json`. This is required by the PBIR format specification. If you don't include pages, you'll get a validation error during planning.
+
 ## Example Usage
 
 ```terraform
@@ -55,6 +57,33 @@ resource "fabric_report" "example_update" {
       tokens = {
         "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
       }
+    }
+    "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
+      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"
+    }
+  }
+}
+
+# Report with PBIR format (requires pages)
+resource "fabric_report" "example_pbir" {
+  display_name = "example with PBIR format"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "PBIR"
+  definition = {
+    "definition/report.json" = {
+      source = "${local.path}/definition/report.json"
+    }
+    "definition/version.json" = {
+      source = "${local.path}/definition/version.json"
+    }
+    "definition.pbir" = {
+      source = "${local.path}/definition.pbir.tmpl"
+      tokens = {
+        "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
+      }
+    }
+    "definition/pages/page1.json" = {
+      source = "${local.path}/definition/pages/page1.json"
     }
     "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
       source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"

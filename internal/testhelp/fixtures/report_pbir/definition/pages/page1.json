@@ -1,0 +1,9 @@
+{
+  "id": "page1",
+  "name": "Test Page",
+  "displayName": "Test Page",
+  "ordinal": 0,
+  "width": 1280,
+  "height": 720,
+  "visualContainers": []
+}
