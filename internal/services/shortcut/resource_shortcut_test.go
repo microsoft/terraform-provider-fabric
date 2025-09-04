@@ -56,6 +56,31 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
 		},
+		// error - no required attribute name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "name" is required, but no definition was found.`),
+		},
+		// error - no required attribute path
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "path" is required, but no definition was found.`),
+		},
 		// error - no required attribute target
 		{
 			ResourceName: testResourceItemFQN,
@@ -69,6 +94,48 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
+		},
+		// error - no required attribute target
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         "          ",
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
+		},
+		// error - no required attribute target
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         "?",
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Shortcut name cannot contain the following character`),
 		},
 		// error - workspace_id - invalid UUID
 		{
