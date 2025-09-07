@@ -22,13 +22,15 @@ BASE MODEL
 */
 
 type baseConnectionRoleAssignmentModel struct {
-	ID        customtypes.UUID                                     `tfsdk:"id"`
-	Role      types.String                                         `tfsdk:"role"`
-	Principal supertypes.SingleNestedObjectValueOf[principalModel] `tfsdk:"principal"`
+	ConnectionID customtypes.UUID                                     `tfsdk:"connection_id"`
+	ID           customtypes.UUID                                     `tfsdk:"id"`
+	Role         types.String                                         `tfsdk:"role"`
+	Principal    supertypes.SingleNestedObjectValueOf[principalModel] `tfsdk:"principal"`
 }
 
-func (to *baseConnectionRoleAssignmentModel) set(ctx context.Context, from fabcore.ConnectionRoleAssignment) diag.Diagnostics {
+func (to *baseConnectionRoleAssignmentModel) set(ctx context.Context, connectionID string, from fabcore.ConnectionRoleAssignment) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.ConnectionID = customtypes.NewUUIDValue(connectionID)
 	to.Role = types.StringPointerValue((*string)(from.Role))
 
 	if from.Principal != nil {
@@ -51,7 +53,6 @@ DATA-SOURCE
 type dataSourceConnectionRoleAssignmentModel struct {
 	baseConnectionRoleAssignmentModel
 
-	ConnectionID               customtypes.UUID `tfsdk:"connection_id"`
 	ConnectionRoleAssignmentID customtypes.UUID `tfsdk:"connection_role_assignment_id"`
 
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
@@ -93,7 +94,7 @@ func (to *dataSourceConnectionRoleAssignmentsModel) setValues(ctx context.Contex
 	for _, entity := range from {
 		var entityModel baseConnectionRoleAssignmentModel
 
-		if diags := entityModel.set(ctx, entity); diags.HasError() {
+		if diags := entityModel.set(ctx, connectionID, entity); diags.HasError() {
 			return diags
 		}
 
@@ -110,8 +111,7 @@ RESOURCE
 type resourceConnectionRoleAssignmentModel struct {
 	baseConnectionRoleAssignmentModel
 
-	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
-	Timeouts     timeoutsR.Value  `tfsdk:"timeouts"`
+	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateConnectionRoleAssignment struct {

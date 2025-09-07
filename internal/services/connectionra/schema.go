@@ -50,22 +50,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 				},
 			},
-			"connection_role_assignment_id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The Connection Role Assignment ID.",
-					CustomType:          customtypes.UUIDType{},
-				},
-				Resource: &schemaR.StringAttribute{
-					Required: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: !isList,
-					Computed: isList,
-				},
-			},
 			"id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",

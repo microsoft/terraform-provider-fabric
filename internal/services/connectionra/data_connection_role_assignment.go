@@ -8,11 +8,13 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -44,7 +46,26 @@ func (d *dataSourceConnectionRoleAssignment) Metadata(_ context.Context, _ datas
 }
 
 func (d *dataSourceConnectionRoleAssignment) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = itemSchema(false).GetDataSource(ctx)
+	s := itemSchema(false).GetDataSource(ctx)
+
+	resp.Schema = schema.Schema{
+		MarkdownDescription: s.GetMarkdownDescription(),
+		Attributes: map[string]schema.Attribute{
+			"connection_role_assignment_id": schema.StringAttribute{
+				MarkdownDescription: "The Connection Role Assignment ID.",
+				Required:            true,
+				CustomType:          customtypes.UUIDType{},
+			},
+		},
+	}
+
+	for k, v := range s.Attributes {
+		if _, exists := resp.Schema.Attributes[k]; exists {
+			continue
+		}
+
+		resp.Schema.Attributes[k] = v
+	}
 }
 
 func (d *dataSourceConnectionRoleAssignment) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

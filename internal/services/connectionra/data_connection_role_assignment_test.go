@@ -56,3 +56,34 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 		},
 	}))
 }
+
+func TestAcc_ConnectionRoleAssignmentDataSource(t *testing.T) {
+	virtualNetworkGatewayConnection := testhelp.WellKnown()["VirtualNetworkGatewayConnection"].(map[string]any)
+	virtualNetworkGatewayConnectionID := virtualNetworkGatewayConnection["id"].(string)
+
+	virtualNetworkGatewayConnectionRoleAssignment := testhelp.WellKnown()["VirtualNetworkGatewayConnectionRoleAssignment"].(map[string]any)
+	virtualNetworkGatewayConnectionRoleAssignmentID := virtualNetworkGatewayConnectionRoleAssignment["id"].(string)
+	principalType := virtualNetworkGatewayConnectionRoleAssignment["principalType"].(string)
+	role := virtualNetworkGatewayConnectionRoleAssignment["role"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"connection_id":                 virtualNetworkGatewayConnectionID,
+					"connection_role_assignment_id": virtualNetworkGatewayConnectionRoleAssignmentID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "connection_id"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", virtualNetworkGatewayConnectionRoleAssignmentID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role", role),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.id", virtualNetworkGatewayConnectionRoleAssignmentID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "principal.type", principalType),
+			),
+		},
+	},
+	))
+}

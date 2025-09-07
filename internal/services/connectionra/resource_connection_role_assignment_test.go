@@ -27,31 +27,14 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
 					"principal": map[string]any{
 						"id":   "00000000-0000-0000-0000-000000000000",
 						"type": "User",
 					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "UserWithReshare",
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "connection_id" is required, but no definition was found.`),
-		},
-		// error - no required attributes - connection_role_assignment_id
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"connection_id": "00000000-0000-0000-0000-000000000000",
-					"principal": map[string]any{
-						"id":   "00000000-0000-0000-0000-000000000000",
-						"type": "User",
-					},
-					"role": "ConnectionCreatorWithResharing",
-				},
-			),
-			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
 		// error - no required attributes - principal.id
 		{
@@ -59,12 +42,11 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_id":                 "00000000-0000-0000-0000-000000000000",
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
+					"connection_id": "00000000-0000-0000-0000-000000000000",
 					"principal": map[string]any{
 						"type": "User",
 					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "UserWithReshare",
 				},
 			),
 			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "principal": attribute "id" is required.`),
@@ -75,12 +57,11 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_id":                 "00000000-0000-0000-0000-000000000000",
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
+					"connection_id": "00000000-0000-0000-0000-000000000000",
 					"principal": map[string]any{
 						"id": "00000000-0000-0000-0000-000000000000",
 					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "UserWithReshare",
 				},
 			),
 			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "principal": attribute "type" is required.`),
@@ -91,8 +72,7 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_id":                 "00000000-0000-0000-0000-000000000000",
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
+					"connection_id": "00000000-0000-0000-0000-000000000000",
 					"principal": map[string]any{
 						"id":   "00000000-0000-0000-0000-000000000000",
 						"type": "User",
@@ -107,30 +87,12 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_id":                 "invalid uuid",
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
+					"connection_id": "invalid uuid",
 					"principal": map[string]any{
 						"id":   "00000000-0000-0000-0000-000000000000",
 						"type": "User",
 					},
-					"role": "ConnectionCreatorWithResharing",
-				},
-			),
-			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
-		},
-		// error - invalid UUID - connection_role_assignment_id
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"connection_id":                 "00000000-0000-0000-0000-000000000000",
-					"connection_role_assignment_id": "invalid uuid",
-					"principal": map[string]any{
-						"id":   "00000000-0000-0000-0000-000000000000",
-						"type": "User",
-					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "UserWithReshare",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -141,13 +103,12 @@ func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"connection_id":                 "00000000-0000-0000-0000-000000000000",
-					"connection_role_assignment_id": "00000000-0000-0000-0000-000000000000",
+					"connection_id": "00000000-0000-0000-0000-000000000000",
 					"principal": map[string]any{
 						"id":   "invalid uuid",
 						"type": "User",
 					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "UserWithReshare",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -213,13 +174,13 @@ func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 						"id":   entityID,
 						"type": entityType,
 					},
-					"role": "ConnectionCreatorWithResharing",
+					"role": "User",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "role", "ConnectionCreatorWithResharing"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", "User"),
 			),
 		},
 		// Update and Read
@@ -233,13 +194,13 @@ func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 						"id":   entityID,
 						"type": entityType,
 					},
-					"role": "ConnectionCreator",
+					"role": "UserWithReshare",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "role", "ConnectionCreator"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", "UserWithReshare"),
 			),
 		},
 	}))

@@ -35,7 +35,6 @@ resource "fabric_connection_role_assignment" "example" {
 ### Required
 
 - `connection_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection ID.
-- `connection_role_assignment_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection Role Assignment ID.
 - `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
 - `role` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The connection role of the principal. Value must be one of : `Owner`, `User`, `UserWithReshare`.
 

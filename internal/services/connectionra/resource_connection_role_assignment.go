@@ -102,7 +102,7 @@ func (r *resourceConnectionRoleAssignment) Create(ctx context.Context, req resou
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respCreate.ConnectionRoleAssignment)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, plan.ConnectionID.ValueString(), respCreate.ConnectionRoleAssignment)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -188,7 +188,7 @@ func (r *resourceConnectionRoleAssignment) Update(ctx context.Context, req resou
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.ConnectionRoleAssignment)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, plan.ConnectionID.ValueString(), respUpdate.ConnectionRoleAssignment)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -266,9 +266,9 @@ func (r *resourceConnectionRoleAssignment) ImportState(ctx context.Context, req 
 	}
 
 	state := resourceConnectionRoleAssignmentModel{
-		ConnectionID: uuidConnectionID,
 		baseConnectionRoleAssignmentModel: baseConnectionRoleAssignmentModel{
-			ID: uuidConnectionRoleAssignmentID,
+			ConnectionID: uuidConnectionID,
+			ID:           uuidConnectionRoleAssignmentID,
 		},
 		Timeouts: timeout,
 	}
@@ -294,5 +294,5 @@ func (r *resourceConnectionRoleAssignment) get(ctx context.Context, model *resou
 		return diags
 	}
 
-	return model.set(ctx, respGetInfo.ConnectionRoleAssignment)
+	return model.set(ctx, model.ConnectionID.ValueString(), respGetInfo.ConnectionRoleAssignment)
 }
