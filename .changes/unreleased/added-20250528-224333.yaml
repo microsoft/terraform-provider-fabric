@@ -1,5 +1,0 @@
-kind: added
-body: Onboard new `fabric_apache_airflow_job` data source
-time: 2025-05-28T22:43:33.928392223Z
-custom:
-    Issue: "466"
