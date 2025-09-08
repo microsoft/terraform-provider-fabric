@@ -27,9 +27,6 @@ var (
 )
 
 type dataSourceConnectionRoleAssignment struct {
-	Name        string
-	TFName      string
-	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
@@ -85,7 +82,7 @@ func (d *dataSourceConnectionRoleAssignment) Configure(_ context.Context, req da
 
 	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -111,9 +108,7 @@ func (d *dataSourceConnectionRoleAssignment) Read(ctx context.Context, req datas
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = d.getByID(ctx, &data)
-
-	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(d.getByID(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
