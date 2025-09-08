@@ -46,7 +46,7 @@ This section provides a sample configuration that you can experiment with to pro
       required_providers {
         fabric = {
           source  = "microsoft/fabric"
-          version = "1.4.0"
+          version = "1.5.0"
         }
       }
     }
