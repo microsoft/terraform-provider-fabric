@@ -116,27 +116,6 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
 		},
-		// error - name - invalid character
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"item_id":      testhelp.RandomUUID(),
-					"name":         "?",
-					"path":         testhelp.RandomName(),
-					"target": map[string]any{
-						"onelake": map[string]any{
-							"workspace_id": testhelp.RandomUUID(),
-							"item_id":      testhelp.RandomUUID(),
-							"path":         testhelp.RandomName(),
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Shortcut name cannot contain the following character`),
-		},
 		// error - workspace_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,

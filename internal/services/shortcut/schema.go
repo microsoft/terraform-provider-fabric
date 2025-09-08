@@ -115,10 +115,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							regexp.MustCompile(`\S`),
 							"Name must contain at least one non-whitespace character.",
 						),
-						stringvalidator.RegexMatches(
-							regexp.MustCompile(`^[^"\\/:|\<>*?.%+]*$`),
-							"Shortcut name cannot contain the following character(s): \" \\ / : | < > * ? . % +",
-						),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
