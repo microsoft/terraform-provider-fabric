@@ -762,6 +762,7 @@ function Set-FabricConnectionRoleAssignment {
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "connections/$ConnectionId/roleAssignments" -Payload $payload).Response
   }
+  return $result
 }
 
 function Set-AzureVirtualNetwork {
@@ -1655,7 +1656,14 @@ $wellKnown['VirtualNetworkGatewayConnection'] = @{
   gatewayId   = $virtualNetworkGatewayConnection.gatewayId
 }
 
-Set-FabricConnectionRoleAssignment -ConnectionId $virtualNetworkGatewayConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+$connectionRoleAssignment = Set-FabricConnectionRoleAssignment -ConnectionId $virtualNetworkGatewayConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+
+$wellKnown['VirtualNetworkGatewayConnectionRoleAssignment'] = @{
+  id            = $connectionRoleAssignment.id
+  principalId   = $connectionRoleAssignment.principal.id
+  principalType = $connectionRoleAssignment.principal.type
+  role          = $connectionRoleAssignment.role
+}
 
 # Create the Azure Data Factory if not exists
 $displayNameTemp = "$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureDataFactory'])"
