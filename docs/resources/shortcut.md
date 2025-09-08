@@ -129,7 +129,7 @@ resource "fabric_shortcut" "azure_blob_storage" {
 ### Required
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut.
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut. String length must be at least 1. Name must contain at least one non-whitespace character.
 - `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Shortcut path can't start with forward slash '/'.
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
