@@ -1237,15 +1237,23 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
+# Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
 $displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
 $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
-Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
-Write-Log -Message "LakehouseRS: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 $wellKnown['LakehouseRS'] = @{
   id          = $item.id
   displayName = $item.displayName
   description = $item.description
 }
+
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceRS'].id)/lakehouses/$($wellKnown['LakehouseRS']['id'])/tables"
+$result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
+if (!$result) {
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
+  Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceRS'].id)/lakehouses/$($wellKnown['LakehouseRS']['id'])" -Level 'WARN'
+}
+
 
 # Create MirroredDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MirroredDatabase'])"
