@@ -25,6 +25,26 @@ func fakeConnectionRoleAssignment(
 	}
 }
 
+func fakeAddConnectionRoleAssignment(
+	exampleResp fabcore.ConnectionRoleAssignment,
+) func(ctx context.Context, connectionID string, addConnectionRoleAssignmentRequest fabcore.AddConnectionRoleAssignmentRequest, options *fabcore.ConnectionsClientAddConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _ string, _ fabcore.AddConnectionRoleAssignmentRequest, _ *fabcore.ConnectionsClientAddConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusCreated, fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse{ConnectionRoleAssignment: exampleResp}, nil)
+
+		return
+	}
+}
+
+func fakeDeleteConnectionRoleAssignment() func(ctx context.Context, connectionID, connectionRoleAssignmentID string, options *fabcore.ConnectionsClientDeleteConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _ string, _ *fabcore.ConnectionsClientDeleteConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse{}, nil)
+
+		return
+	}
+}
+
 func NewRandomConnectionRoleAssignment() fabcore.ConnectionRoleAssignment {
 	return fabcore.ConnectionRoleAssignment{
 		ID: azto.Ptr(testhelp.RandomUUID()),

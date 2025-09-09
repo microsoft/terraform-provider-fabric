@@ -53,28 +53,7 @@ DATA-SOURCE
 type dataSourceConnectionRoleAssignmentModel struct {
 	baseConnectionRoleAssignmentModel
 
-	ConnectionRoleAssignmentID customtypes.UUID `tfsdk:"connection_role_assignment_id"`
-
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
-}
-
-func (to *dataSourceConnectionRoleAssignmentModel) set(ctx context.Context, connectionID, connectionRoleAssignmentID string, from fabcore.ConnectionRoleAssignment) diag.Diagnostics {
-	to.ConnectionID = customtypes.NewUUIDPointerValue(&connectionID)
-	to.ConnectionRoleAssignmentID = customtypes.NewUUIDPointerValue(&connectionRoleAssignmentID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Role = types.StringPointerValue((*string)(from.Role))
-
-	if from.Principal != nil {
-		principalModel := &principalModel{}
-
-		principalModel.set(*from.Principal)
-
-		if diags := to.Principal.Set(ctx, principalModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	return nil
 }
 
 /*

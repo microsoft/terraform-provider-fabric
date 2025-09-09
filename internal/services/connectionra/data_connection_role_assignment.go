@@ -8,13 +8,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -43,26 +41,7 @@ func (d *dataSourceConnectionRoleAssignment) Metadata(_ context.Context, _ datas
 }
 
 func (d *dataSourceConnectionRoleAssignment) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	s := itemSchema(false).GetDataSource(ctx)
-
-	resp.Schema = schema.Schema{
-		MarkdownDescription: s.GetMarkdownDescription(),
-		Attributes: map[string]schema.Attribute{
-			"connection_role_assignment_id": schema.StringAttribute{
-				MarkdownDescription: "The Connection Role Assignment ID.",
-				Required:            true,
-				CustomType:          customtypes.UUIDType{},
-			},
-		},
-	}
-
-	for k, v := range s.Attributes {
-		if _, exists := resp.Schema.Attributes[k]; exists {
-			continue
-		}
-
-		resp.Schema.Attributes[k] = v
-	}
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceConnectionRoleAssignment) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -124,10 +103,10 @@ func (d *dataSourceConnectionRoleAssignment) Read(ctx context.Context, req datas
 }
 
 func (d *dataSourceConnectionRoleAssignment) getByID(ctx context.Context, model *dataSourceConnectionRoleAssignmentModel) diag.Diagnostics {
-	respGet, err := d.client.GetConnectionRoleAssignment(ctx, model.ConnectionID.ValueString(), model.ConnectionRoleAssignmentID.ValueString(), nil)
+	respGet, err := d.client.GetConnectionRoleAssignment(ctx, model.ConnectionID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}
 
-	return model.set(ctx, model.ConnectionID.ValueString(), model.ConnectionRoleAssignmentID.ValueString(), respGet.ConnectionRoleAssignment)
+	return model.set(ctx, model.ConnectionID.ValueString(), respGet.ConnectionRoleAssignment)
 }

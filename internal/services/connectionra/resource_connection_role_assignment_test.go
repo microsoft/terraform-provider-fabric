@@ -154,6 +154,41 @@ func TestUnit_ConnectionRoleAssignmentResource_ImportState(t *testing.T) {
 	}))
 }
 
+func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
+	connectionID := testhelp.RandomUUID()
+	entity := NewRandomConnectionRoleAssignment()
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.AddConnectionRoleAssignment = fakeAddConnectionRoleAssignment(entity)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeConnectionRoleAssignment(entity)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.DeleteConnectionRoleAssignment = fakeDeleteConnectionRoleAssignment()
+
+	entityID := *entity.Principal.ID
+	entityType := (string)(*entity.Principal.Type)
+	role := (string)(*entity.Role)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"connection_id": connectionID,
+					"principal": map[string]any{
+						"id":   entityID,
+						"type": entityType,
+					},
+					"role": role,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", role),
+			),
+		},
+	}))
+}
+
 func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	virtualNetworkGatewayConnection := testhelp.WellKnown()["VirtualNetworkGatewayConnection"].(map[string]any)
 	virtualNetworkGatewayConnectionID := virtualNetworkGatewayConnection["id"].(string)

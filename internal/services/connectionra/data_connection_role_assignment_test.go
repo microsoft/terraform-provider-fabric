@@ -29,9 +29,9 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"connection_id":                 connectionID,
-					"connection_role_assignment_id": connectionRoleAssignmentID,
-					"unexpected_attr":               "test",
+					"connection_id":   connectionID,
+					"id":              connectionRoleAssignmentID,
+					"unexpected_attr": "test",
 				},
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
@@ -41,13 +41,12 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"connection_id":                 connectionID,
-					"connection_role_assignment_id": connectionRoleAssignmentID,
+					"connection_id": connectionID,
+					"id":            connectionRoleAssignmentID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connection_id", connectionID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connection_role_assignment_id", connectionRoleAssignmentID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "role", (*string)(entity.Role)),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.id", entity.Principal.ID),
@@ -72,8 +71,8 @@ func TestAcc_ConnectionRoleAssignmentDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"connection_id":                 virtualNetworkGatewayConnectionID,
-					"connection_role_assignment_id": virtualNetworkGatewayConnectionRoleAssignmentID,
+					"connection_id": virtualNetworkGatewayConnectionID,
+					"id":            virtualNetworkGatewayConnectionRoleAssignmentID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

@@ -62,7 +62,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Required: !isList,
+					Computed: isList,
 				},
 			},
 			"role": superschema.StringAttribute{
@@ -74,9 +75,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

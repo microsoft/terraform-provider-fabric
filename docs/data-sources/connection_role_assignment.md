@@ -31,7 +31,7 @@ data "fabric_connection_role_assignment" "example" {
 ### Required
 
 - `connection_id` (String) The Connection ID.
-- `connection_role_assignment_id` (String) The Connection Role Assignment ID.
+- `id` (String) The Connection Role Assignment ID.
 
 ### Optional
 
@@ -39,7 +39,6 @@ data "fabric_connection_role_assignment" "example" {
 
 ### Read-Only
 
-- `id` (String) The Connection Role Assignment ID.
 - `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
 - `role` (String) The connection role of the principal. Value must be one of : `Owner`, `User`, `UserWithReshare`.
 
