@@ -1,0 +1,5 @@
+kind: changed
+body: Enabled SPN support for `fabric_workspace_git` only for `ConfiguredConnection` credentials.
+time: 2025-09-09T09:28:48.537662711Z
+custom:
+  Issue: "647"
