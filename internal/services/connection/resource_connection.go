@@ -35,9 +35,6 @@ var (
 )
 
 type resourceConnection struct {
-	Name        string
-	TFName      string
-	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
 	clientGw    *fabcore.GatewaysClient
@@ -88,7 +85,7 @@ func (r *resourceConnection) Configure(_ context.Context, req resource.Configure
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 	r.clientGw = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }

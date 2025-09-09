@@ -25,9 +25,6 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceConnections)(nil)
 
 type dataSourceConnections struct {
-	Name        string
-	TFName      string
-	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
@@ -80,7 +77,7 @@ func (d *dataSourceConnections) Configure(_ context.Context, req datasource.Conf
 	d.pConfigData = pConfigData
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
