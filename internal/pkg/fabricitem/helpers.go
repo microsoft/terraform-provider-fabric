@@ -37,7 +37,7 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 
 	if typeInfo.IsSPNSupported {
 		if typeInfo.Type == "workspace_git" {
-			md += "\n\n-> This resource supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\"."
+			md += "\n\n-> This resource supports Service Principal authentication only when `git_credentials.source` is \"ConfiguredConnection\"."
 		} else {
 			md += SPNSupportedResource
 		}
@@ -72,7 +72,7 @@ func NewDataSourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural boo
 
 	if typeInfo.IsSPNSupported {
 		if typeInfo.Type == "workspace_git" {
-			md += "\n\n-> This data-source supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\"."
+			md += "\n\n-> This data-source supports Service Principal authentication only when `git_credentials.source` is \"ConfiguredConnection\"."
 		} else {
 			md += SPNSupportedDataSource
 		}
