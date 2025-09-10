@@ -475,17 +475,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 		}
 	}
 
-	// in reality, this should never happen because the creation method is already validated
-	if len(vParameters) == 0 {
-		diags.AddAttributeError(
-			path.Root("connection_details").AtName("creation_method"),
-			"Unsupported creation method",
-			"The creation method is not supported.",
-		)
-
-		return diags
-	}
-
 	connectionDetailsParams, diags := model.getParameters(ctx)
 	if diags.HasError() {
 		return diags
@@ -681,6 +670,10 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 
 			break
 		}
+	}
+
+	if len(vParameters) == 0 {
+		return nil
 	}
 
 	parameters, diags := connectionDetails.Parameters.Get(ctx)
