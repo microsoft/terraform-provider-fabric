@@ -1,0 +1,5 @@
+kind: added
+body: Added `ConfiguredConnection` credential support to the `fabric_workspace_git` Azure DevOps provider.
+time: 2025-09-09T09:27:38.073178111Z
+custom:
+  Issue: "647"
