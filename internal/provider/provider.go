@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"math"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -152,6 +153,10 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	// MaxRetryDelay specifies the maximum delay allowed before retrying an operation.
 	// A value less than zero means there is no cap.
 	fabricClientOpt.Retry.MaxRetryDelay = -1
+
+	fabricClientOpt.Retry.StatusCodes = []int{
+		http.StatusTooManyRequests, // 429
+	}
 
 	ctx, lvl, err := pclient.NewFabricSDKLoggerSubsystem(ctx)
 	if err != nil {

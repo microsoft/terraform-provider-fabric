@@ -249,6 +249,10 @@ func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("API issue")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
