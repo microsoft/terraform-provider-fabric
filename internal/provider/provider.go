@@ -155,7 +155,11 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	fabricClientOpt.Retry.MaxRetryDelay = -1
 
 	fabricClientOpt.Retry.StatusCodes = []int{
-		http.StatusTooManyRequests, // 429
+		http.StatusRequestTimeout,     // 408
+		http.StatusTooManyRequests,    // 429
+		http.StatusBadGateway,         // 502
+		http.StatusServiceUnavailable, // 503
+		http.StatusGatewayTimeout,     // 504
 	}
 
 	ctx, lvl, err := pclient.NewFabricSDKLoggerSubsystem(ctx)
