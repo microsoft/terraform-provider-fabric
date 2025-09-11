@@ -35,9 +35,6 @@ var (
 )
 
 type resourceConnection struct {
-	Name        string
-	TFName      string
-	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
 	clientGw    *fabcore.GatewaysClient
@@ -88,7 +85,7 @@ func (r *resourceConnection) Configure(_ context.Context, req resource.Configure
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewConnectionsClient()
 	r.clientGw = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewGatewaysClient()
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.Name, r.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -462,7 +459,7 @@ func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetail
 	return nil
 }
 
-//nolint:gocognit,gocyclo,maintidx
+//nolint:gocognit,gocyclo
 func (r *resourceConnection) validateCreationMethodParameters(ctx context.Context, model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
@@ -473,17 +470,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 
 			break
 		}
-	}
-
-	// in reality, this should never happen because the creation method is already validated
-	if len(vParameters) == 0 {
-		diags.AddAttributeError(
-			path.Root("connection_details").AtName("creation_method"),
-			"Unsupported creation method",
-			"The creation method is not supported.",
-		)
-
-		return diags
 	}
 
 	connectionDetailsParams, diags := model.getParameters(ctx)
@@ -681,6 +667,10 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 
 			break
 		}
+	}
+
+	if len(vParameters) == 0 {
+		return nil
 	}
 
 	parameters, diags := connectionDetails.Parameters.Get(ctx)

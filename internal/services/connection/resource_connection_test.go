@@ -719,7 +719,35 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
-		// Delete testing automatically occurs in TestCase
+		// Creation method with empty parameters list
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test-empty-params",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "ConnectionWithEmptyParametersList",
+						"creation_method": "ConnectionWithEmptyParametersList.Actions",
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeAnonymous),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-empty-params"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connectivity_type", "ShareableCloud"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "privacy_level", "Organizational"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeAnonymous)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "true"),
+			),
+		},
 	}))
 }
 
