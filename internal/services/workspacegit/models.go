@@ -132,8 +132,36 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 			DirectoryName:    gitProviderDetails.DirectoryName.ValueStringPointer(),
 		}
 
-		reqGitCredentials = &fabcore.AutomaticGitCredentials{
-			Source: azto.Ptr(fabcore.GitCredentialsSourceAutomatic),
+		gitGitCredentials, diags := from.GitCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		// Default to Automatic if git_credentials or git_credentials.source are empty
+		gitGitCredentialsSource := fabcore.GitCredentialsSourceAutomatic
+		if gitGitCredentials != nil && !gitGitCredentials.Source.IsNull() && !gitGitCredentials.Source.IsUnknown() {
+			gitGitCredentialsSource = (fabcore.GitCredentialsSource)(gitGitCredentials.Source.ValueString())
+		}
+
+		switch gitGitCredentialsSource {
+		case fabcore.GitCredentialsSourceAutomatic:
+			reqGitCredentials = &fabcore.AutomaticGitCredentials{
+				Source: &gitGitCredentialsSource,
+			}
+
+		case fabcore.GitCredentialsSourceConfiguredConnection:
+			reqGitCredentials = &fabcore.ConfiguredConnectionGitCredentials{
+				Source:       &gitGitCredentialsSource,
+				ConnectionID: gitGitCredentials.ConnectionID.ValueStringPointer(),
+			}
+
+		default:
+			diags.AddError(
+				"Unsupported Git credentials source type",
+				fmt.Sprintf("The Git credentials source type '%T' is not supported.", gitGitCredentialsSource),
+			)
+
+			return diags
 		}
 
 	case fabcore.GitProviderTypeGitHub:
