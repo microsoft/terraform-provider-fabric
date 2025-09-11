@@ -10,6 +10,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -190,8 +191,36 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
-	virtualNetworkGatewayConnection := testhelp.WellKnown()["VirtualNetworkGatewayConnection"].(map[string]any)
-	virtualNetworkGatewayConnectionID := virtualNetworkGatewayConnection["id"].(string)
+	entityVirtualNetwork := testhelp.WellKnown()["GatewayVirtualNetwork"].(map[string]any)
+	entityVirtualNetworkID := entityVirtualNetwork["id"].(string)
+
+	connectionHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "connection"), "test"),
+		map[string]any{
+			"display_name":      testhelp.RandomName(),
+			"connectivity_type": "VirtualNetworkGateway",
+			"privacy_level":     "Organizational",
+			"gateway_id":        entityVirtualNetworkID,
+			"connection_details": map[string]any{
+				"type":            "FTP",
+				"creation_method": "FTP.Contents",
+				"parameters": []map[string]any{
+					{
+						"name":  "server",
+						"value": "ftp.example.com",
+					},
+				},
+			},
+			"credential_details": map[string]any{
+				"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+				"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+				"skip_test_connection":  false,
+				"credential_type":       string(fabcore.CredentialTypeAnonymous),
+			},
+		},
+	)
+
+	connectionFQN := testhelp.ResourceFQN(common.ProviderTypeName, "connection", "test")
 
 	entity := testhelp.WellKnown()["Principal"].(map[string]any)
 	entityID := entity["id"].(string)
@@ -201,16 +230,19 @@ func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"connection_id": virtualNetworkGatewayConnectionID,
-					"principal": map[string]any{
-						"id":   entityID,
-						"type": entityType,
+			Config: at.JoinConfigs(
+				connectionHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"connection_id": testhelp.RefByFQN(connectionFQN, "id"),
+						"principal": map[string]any{
+							"id":   entityID,
+							"type": entityType,
+						},
+						"role": "User",
 					},
-					"role": "User",
-				},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
@@ -221,16 +253,19 @@ func TestAcc_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"connection_id": virtualNetworkGatewayConnectionID,
-					"principal": map[string]any{
-						"id":   entityID,
-						"type": entityType,
+			Config: at.JoinConfigs(
+				connectionHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"connection_id": testhelp.RefByFQN(connectionFQN, "id"),
+						"principal": map[string]any{
+							"id":   entityID,
+							"type": entityType,
+						},
+						"role": "UserWithReshare",
 					},
-					"role": "UserWithReshare",
-				},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
