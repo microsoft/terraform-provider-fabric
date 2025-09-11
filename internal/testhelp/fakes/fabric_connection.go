@@ -285,6 +285,22 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						},
 						SupportsSkipTestConnection: to.Ptr(true),
 					},
+					{
+						Type: to.Ptr("ConnectionWithEmptyParametersList"),
+						CreationMethods: []fabcore.ConnectionCreationMethod{
+							{
+								Name:       to.Ptr("ConnectionWithEmptyParametersList.Actions"),
+								Parameters: []fabcore.ConnectionCreationParameter{},
+							},
+						},
+						SupportedCredentialTypes: []fabcore.CredentialType{
+							fabcore.CredentialTypeAnonymous,
+						},
+						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+							fabcore.ConnectionEncryptionNotEncrypted,
+						},
+						SupportsSkipTestConnection: to.Ptr(true),
+					},
 				},
 			},
 		}
