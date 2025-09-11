@@ -19,7 +19,6 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
-	connectionRoleAssignmentID := testhelp.RandomUUID()
 	entity := NewRandomConnectionRoleAssignment()
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeConnectionRoleAssignment(entity)
 
@@ -30,7 +29,7 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"connection_id":   connectionID,
-					"id":              connectionRoleAssignmentID,
+					"id":              *entity.ID,
 					"unexpected_attr": "test",
 				},
 			),
@@ -42,7 +41,7 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"connection_id": connectionID,
-					"id":            connectionRoleAssignmentID,
+					"id":            *entity.ID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
