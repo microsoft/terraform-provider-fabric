@@ -46,10 +46,12 @@ func fakeDeleteConnectionRoleAssignment() func(ctx context.Context, connectionID
 }
 
 func NewRandomConnectionRoleAssignment() fabcore.ConnectionRoleAssignment {
+	itemID := testhelp.RandomUUID()
+
 	return fabcore.ConnectionRoleAssignment{
-		ID: azto.Ptr(testhelp.RandomUUID()),
+		ID: azto.Ptr(itemID),
 		Principal: &fabcore.Principal{
-			ID:   azto.Ptr(testhelp.RandomUUID()),
+			ID:   azto.Ptr(itemID),
 			Type: azto.Ptr(fabcore.PrincipalTypeUser),
 		},
 		Role: azto.Ptr(fabcore.ConnectionRoleOwner),
