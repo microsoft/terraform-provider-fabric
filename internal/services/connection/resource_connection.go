@@ -459,7 +459,7 @@ func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetail
 	return nil
 }
 
-//nolint:gocognit,gocyclo,maintidx
+//nolint:gocognit,gocyclo
 func (r *resourceConnection) validateCreationMethodParameters(ctx context.Context, model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
