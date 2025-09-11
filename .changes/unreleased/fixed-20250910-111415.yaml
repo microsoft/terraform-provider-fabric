@@ -1,5 +1,0 @@
-kind: fixed
-body: fix resource `fabric_connection` to support creation methods with empty parameters list
-time: 2025-09-10T11:14:15.455265526Z
-custom:
-    Issue: "646"
