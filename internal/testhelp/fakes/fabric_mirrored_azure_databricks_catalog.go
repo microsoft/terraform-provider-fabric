@@ -213,7 +213,7 @@ func NewRandomMirroredAzureDatabricksCatalog() fabmirroredazuredatabrickscatalog
 			DatabricksWorkspaceConnectionID: to.Ptr(testhelp.RandomUUID()),
 			MirrorStatus:                    to.Ptr(fabmirroredazuredatabrickscatalog.MirrorStatusMirrored),
 			MirroringMode:                   to.Ptr(fabmirroredazuredatabrickscatalog.MirroringModesFull),
-			OneLakeTablesPath:               to.Ptr(testhelp.RandomName()),
+			OneLakeTablesPath:               to.Ptr(testhelp.RandomURI()),
 			SQLEndpointProperties: &fabmirroredazuredatabrickscatalog.SQLEndpointProperties{
 				ID:               to.Ptr(testhelp.RandomUUID()),
 				ConnectionString: to.Ptr(testhelp.RandomURI()),

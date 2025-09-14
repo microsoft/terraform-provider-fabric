@@ -25,12 +25,33 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("mirrored_azure_databricks_catalog"),
 })
 
-var testHelperDefinition = map[string]any{
-	`"mirroringAzureDatabricksCatalog.json"`: map[string]any{
-		"source": "${local.path}/mirroringAzureDatabricksCatalog.json.tmpl",
-		"tokens": map[string]any{},
-	},
-}
+var (
+	azureDatabricks                 = testhelp.WellKnown()["AzureDatabricks"].(map[string]any)
+	databricksWorkspaceConnectionId = azureDatabricks["databricksWorkspaceConnectionId"].(string)
+	catalogName                     = azureDatabricks["catalogName"].(string)
+
+	testHelperDefinition = map[string]any{
+		`"definition.json"`: map[string]any{
+			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
+			"tokens": map[string]any{
+				"CATALOG_NAME":                       catalogName,
+				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionId,
+				"MIRRORING_MODE":                     "Partial",
+			},
+		},
+	}
+
+	testHelperDefinitionUpdated = map[string]any{
+		`"definition.json"`: map[string]any{
+			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
+			"tokens": map[string]any{
+				"CATALOG_NAME":                       catalogName,
+				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionId,
+				"MIRRORING_MODE":                     "Full",
+			},
+		},
+	}
+)
 
 func TestUnit_MirroredAzureDatabricksCatalogResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -172,7 +193,7 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_ImportState(t *testing.T) {
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(common.ErrorImportIdentifierHeader),
+			ExpectError:   regexp.MustCompile(fmt.Sprintf("WorkspaceID/%sID", string(fabricItemType))),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
@@ -218,6 +239,91 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_ImportState(t *testing.T) {
 }
 
 func TestUnit_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+func TestUnit_MirroredAzureDatabricksCatalogResourceDefinition_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entityExist := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
@@ -309,6 +415,108 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_MirroredAzureDatabricksCatalogResourceConfiguration_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	catalogName := testhelp.RandomName()
+	databricksWorkspaceConnectionID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"configuration": map[string]any{
+							"catalog_name":                       catalogName,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionID,
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"configuration": map[string]any{
+							"catalog_name":                       catalogName,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionID,
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"configuration": map[string]any{
+							"catalog_name":                       catalogName,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionID,
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.storage_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
@@ -369,140 +577,143 @@ func TestAcc_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
 	))
 }
 
-// func TestAcc_MirroredAzureDatabricksCatalogDefinitionResource_CRUD(t *testing.T) {
-// 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-// 	workspaceID := workspace["id"].(string)
+func TestAcc_MirroredAzureDatabricksCatalogDefinitionResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
-// 	entityCreateDisplayName := testhelp.RandomName()
-// 	entityUpdateDisplayName := testhelp.RandomName()
-// 	entityUpdateDescription := testhelp.RandomName()
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityCreateDisplayName,
-// 						"format":       "Default",
-// 						"definition":   testHelperDefinition,
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityUpdateDisplayName,
-// 						"description":  entityUpdateDescription,
-// 						"format":       "Default",
-// 						"definition":   testHelperDefinition,
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinitionUpdated,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+	},
+	))
+}
 
-// func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing.T) {
-// 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-// 	workspaceID := workspace["id"].(string)
+func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	azureDatabricks := testhelp.WellKnown()["AzureDatabricks"].(map[string]any)
+	databricksWorkspaceConnectionId := azureDatabricks["databricksWorkspaceConnectionId"].(string)
+	catalogName := azureDatabricks["catalogName"].(string)
 
-// 	entityCreateDisplayName := testhelp.RandomName()
-// 	entityUpdateDisplayName := testhelp.RandomName()
-// 	entityUpdateDescription := testhelp.RandomName()
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
 
-// 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-// 		// Create and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityCreateDisplayName,
-// 						"configuration": map[string]any{
-// 							"catalog_name":                       "",
-// 							"databricks_workspace_connection_id": "00000000-0000-0000-0000-000000000000",
-// 							"mirroring_mode":                     "Partial",
-// 						},
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-// 			),
-// 		},
-// 		// Update and Read
-// 		{
-// 			ResourceName: testResourceItemFQN,
-// 			Config: at.JoinConfigs(
-// 				testHelperLocals,
-// 				at.CompileConfig(
-// 					testResourceItemHeader,
-// 					map[string]any{
-// 						"workspace_id": workspaceID,
-// 						"display_name": entityUpdateDisplayName,
-// 						"description":  entityUpdateDescription,
-// 						"configuration": map[string]any{
-// 							"catalog_name":                       "",
-// 							"databricks_workspace_connection_id": "00000000-0000-0000-0000-000000000000",
-// 							"mirroring_mode":                     "Partial",
-// 						},
-// 					},
-// 				)),
-// 			Check: resource.ComposeAggregateTestCheckFunc(
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-// 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-// 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-// 			),
-// 		},
-// 	},
-// 	))
-// }
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"configuration": map[string]any{
+							"catalog_name":                       catalogName,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionId,
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"configuration": map[string]any{
+							"catalog_name":                       catalogName,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionId,
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+			),
+		},
+	},
+	))
+}

@@ -28,7 +28,7 @@ type mirroredAzureDatabricksCatalogPropertiesModel struct {
 	DatabricksWorkspaceConnectionID customtypes.UUID                                                 `tfsdk:"databricks_workspace_connection_id"`
 	MirrorStatus                    types.String                                                     `tfsdk:"mirror_status"`
 	MirroringMode                   types.String                                                     `tfsdk:"mirroring_mode"`
-	OneLakeTablesPath               types.String                                                     `tfsdk:"onelake_tables_path"`
+	OneLakeTablesPath               customtypes.URL                                                  `tfsdk:"onelake_tables_path"`
 	SQLEndpointProperties           supertypes.SingleNestedObjectValueOf[sqlEndpointPropertiesModel] `tfsdk:"sql_endpoint_properties"`
 	StorageConnectionID             customtypes.UUID                                                 `tfsdk:"storage_connection_id"`
 	SyncDetails                     supertypes.SingleNestedObjectValueOf[syncDetailsModel]           `tfsdk:"sync_details"`
@@ -57,7 +57,7 @@ func (to *mirroredAzureDatabricksCatalogPropertiesModel) set(ctx context.Context
 	to.DatabricksWorkspaceConnectionID = customtypes.NewUUIDPointerValue(from.DatabricksWorkspaceConnectionID)
 	to.MirrorStatus = types.StringPointerValue((*string)(from.MirrorStatus))
 	to.MirroringMode = types.StringPointerValue((*string)(from.MirroringMode))
-	to.OneLakeTablesPath = types.StringPointerValue(from.OneLakeTablesPath)
+	to.OneLakeTablesPath = customtypes.NewURLPointerValue(from.OneLakeTablesPath)
 	to.StorageConnectionID = customtypes.NewUUIDPointerValue(from.StorageConnectionID)
 	sqlEndpointProperties := supertypes.NewSingleNestedObjectValueOfNull[sqlEndpointPropertiesModel](ctx)
 	syncDetails := supertypes.NewSingleNestedObjectValueOfNull[syncDetailsModel](ctx)

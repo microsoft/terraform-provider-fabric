@@ -31,6 +31,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"mirroringAzureDatabricksCatalog.json"},
+		Paths: []string{"definition.json"},
 	},
 }

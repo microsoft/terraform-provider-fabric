@@ -20,7 +20,7 @@ import (
 func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"auto_sync": schema.StringAttribute{
-			MarkdownDescription: "Auto sync the catalog. Additional autoSync types may be added over time.",
+			MarkdownDescription: "Auto sync the catalog.",
 			Computed:            true,
 		},
 		"catalog_name": schema.StringAttribute{
@@ -37,12 +37,13 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 			Computed:            true,
 		},
 		"mirroring_mode": schema.StringAttribute{
-			MarkdownDescription: "Mirroring mode. Additional mirroringMode may be added over time.",
+			MarkdownDescription: "Mirroring mode.",
 			Computed:            true,
 		},
 		"onelake_tables_path": schema.StringAttribute{
 			MarkdownDescription: "OneLake path to the MirroredAzureDatabricksCatalog tables directory.",
 			Computed:            true,
+			CustomType:          customtypes.URLType{},
 		},
 		"sql_endpoint_properties": schema.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the SQL endpoint.",
@@ -95,7 +96,7 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 					CustomType:          timetypes.RFC3339Type{},
 				},
 				"status": schema.StringAttribute{
-					MarkdownDescription: "The sync status. Additional status may be added over time.",
+					MarkdownDescription: "The sync status.",
 					Computed:            true,
 				},
 			},
@@ -115,7 +116,7 @@ func getResourceMirroredAzureDatabricksCatalogConfigurationAttributes() map[stri
 			CustomType:          customtypes.UUIDType{},
 		},
 		"mirroring_mode": schema.StringAttribute{
-			MarkdownDescription: "Mirroring mode. Additional mirroringMode may be added over time.",
+			MarkdownDescription: "Mirroring mode.",
 			Optional:            true,
 			Validators: []validator.String{
 				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true)...),
