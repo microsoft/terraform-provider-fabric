@@ -24,6 +24,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
@@ -63,44 +64,35 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"item_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The item ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"job_type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The job type.",
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"enabled": superschema.BoolAttribute{
@@ -141,8 +133,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 	}
 }
 
-func ownerSchema() superschema.SuperSingleNestedAttributeOf[baseOwnerModel] {
-	return superschema.SuperSingleNestedAttributeOf[baseOwnerModel]{
+func ownerSchema() superschema.SuperSingleNestedAttributeOf[ownerModel] {
+	return superschema.SuperSingleNestedAttributeOf[ownerModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "The user identity that created this schedule or last modified.",
 		},
@@ -351,10 +343,10 @@ func ownerSchema() superschema.SuperSingleNestedAttributeOf[baseOwnerModel] {
 	}
 }
 
-func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigurationModel] {
-	return superschema.SuperSingleNestedAttributeOf[baseConfigurationModel]{
+func configurationSchema() superschema.SuperSingleNestedAttributeOf[configurationModel] {
+	return superschema.SuperSingleNestedAttributeOf[configurationModel]{
 		Common: &schemaR.SingleNestedAttribute{
-			MarkdownDescription: "The actual data contains the time/weekdays of this schedule.",
+			MarkdownDescription: "The schedule configuration.",
 		},
 		Resource: &schemaR.SingleNestedAttribute{
 			Required: true,
@@ -405,6 +397,9 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[baseConfigur
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleScheduleTypeValues(), true)...),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

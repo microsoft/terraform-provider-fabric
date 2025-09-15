@@ -29,5 +29,3 @@ func dataflowResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQ
 
 	return resourceHCL, resourceFQN
 }
-
-var jobTypeActionsTestDict = itemjobscheduler.JobTypeActions

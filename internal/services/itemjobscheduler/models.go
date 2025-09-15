@@ -9,7 +9,6 @@ import (
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
-	//revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,26 +23,26 @@ BASE MODEL
 */
 
 type baseItemJobSchedulerModel struct {
-	ID              customtypes.UUID                                             `tfsdk:"id"`
-	Enabled         types.Bool                                                   `tfsdk:"enabled"`
-	ItemID          customtypes.UUID                                             `tfsdk:"item_id"`
-	WorkspaceID     customtypes.UUID                                             `tfsdk:"workspace_id"`
-	JobType         types.String                                                 `tfsdk:"job_type"`
-	CreatedDateTime timetypes.RFC3339                                            `tfsdk:"created_date_time"`
-	Owner           supertypes.SingleNestedObjectValueOf[baseOwnerModel]         `tfsdk:"owner"`
-	Configuration   supertypes.SingleNestedObjectValueOf[baseConfigurationModel] `tfsdk:"configuration"`
+	ID              customtypes.UUID                                         `tfsdk:"id"`
+	Enabled         types.Bool                                               `tfsdk:"enabled"`
+	ItemID          customtypes.UUID                                         `tfsdk:"item_id"`
+	WorkspaceID     customtypes.UUID                                         `tfsdk:"workspace_id"`
+	JobType         types.String                                             `tfsdk:"job_type"`
+	CreatedDateTime timetypes.RFC3339                                        `tfsdk:"created_date_time"`
+	Owner           supertypes.SingleNestedObjectValueOf[ownerModel]         `tfsdk:"owner"`
+	Configuration   supertypes.SingleNestedObjectValueOf[configurationModel] `tfsdk:"configuration"`
 }
 
-type baseConfigurationModel struct {
+type configurationModel struct {
 	StartDateTime timetypes.RFC3339                   `tfsdk:"start_date_time"`
 	EndDateTime   timetypes.RFC3339                   `tfsdk:"end_date_time"`
 	Type          types.String                        `tfsdk:"type"`
-	Interval      types.Int32                         `tfsdk:"interval"`
-	Times         supertypes.SetValueOf[types.String] `tfsdk:"times"`
-	Weekdays      supertypes.SetValueOf[types.String] `tfsdk:"weekdays"`
+	Interval      types.Int32                         `tfsdk:"interval"` // Cron
+	Times         supertypes.SetValueOf[types.String] `tfsdk:"times"`    // Daily and Weekly
+	Weekdays      supertypes.SetValueOf[types.String] `tfsdk:"weekdays"` // Weekly
 }
 
-type baseOwnerModel struct {
+type ownerModel struct {
 	ID                             customtypes.UUID                                                          `tfsdk:"id"`
 	DisplayName                    types.String                                                              `tfsdk:"display_name"`
 	GroupDetails                   supertypes.SingleNestedObjectValueOf[groupDetailsModel]                   `tfsdk:"group_details"`
@@ -83,13 +82,13 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.JobType = types.StringValue(jobType)
 	to.CreatedDateTime = timetypes.NewRFC3339TimePointerValue(from.CreatedDateTime)
-	to.Configuration = supertypes.NewSingleNestedObjectValueOfNull[baseConfigurationModel](ctx)
-	configuration := supertypes.NewSingleNestedObjectValueOfNull[baseConfigurationModel](ctx)
-	owner := supertypes.NewSingleNestedObjectValueOfNull[baseOwnerModel](ctx)
+	to.Configuration = supertypes.NewSingleNestedObjectValueOfNull[configurationModel](ctx)
+	configuration := supertypes.NewSingleNestedObjectValueOfNull[configurationModel](ctx)
+	owner := supertypes.NewSingleNestedObjectValueOfNull[ownerModel](ctx)
 	to.Owner = owner
 
 	if from.Configuration != nil {
-		baseJobScheduleConfigurationModel := &baseConfigurationModel{}
+		baseJobScheduleConfigurationModel := &configurationModel{}
 		if diags := baseJobScheduleConfigurationModel.set(ctx, from.Configuration); diags.HasError() {
 			return diags
 		}
@@ -101,10 +100,10 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 
 	to.Configuration = configuration
 
-	to.Owner = supertypes.NewSingleNestedObjectValueOfNull[baseOwnerModel](ctx)
+	to.Owner = supertypes.NewSingleNestedObjectValueOfNull[ownerModel](ctx)
 
 	if from.Owner != nil {
-		ownerModel := &baseOwnerModel{}
+		ownerModel := &ownerModel{}
 		if diags := ownerModel.set(ctx, from.Owner); diags.HasError() {
 			return diags
 		}
@@ -119,7 +118,7 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	return nil
 }
 
-func (to *baseOwnerModel) set(ctx context.Context, from *fabcore.Principal) diag.Diagnostics {
+func (to *ownerModel) set(ctx context.Context, from *fabcore.Principal) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Type = types.StringPointerValue((*string)(from.Type))
@@ -154,7 +153,7 @@ func (to *baseOwnerModel) set(ctx context.Context, from *fabcore.Principal) diag
 	}
 }
 
-func setGroupDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Principal) diag.Diagnostics {
+func setGroupDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
 	if from.GroupDetails == nil {
 		return nil
 	}
@@ -175,7 +174,7 @@ func setGroupDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Prin
 	return nil
 }
 
-func setUserDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Principal) diag.Diagnostics {
+func setUserDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
 	if from.UserDetails == nil {
 		return nil
 	}
@@ -196,7 +195,7 @@ func setUserDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Princ
 	return nil
 }
 
-func setServicePrincipalDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Principal) diag.Diagnostics {
+func setServicePrincipalDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
 	if from.ServicePrincipalDetails == nil {
 		return nil
 	}
@@ -217,7 +216,7 @@ func setServicePrincipalDetails(ctx context.Context, to *baseOwnerModel, from *f
 	return nil
 }
 
-func setServicePrincipalProfileDetails(ctx context.Context, to *baseOwnerModel, from *fabcore.Principal) diag.Diagnostics {
+func setServicePrincipalProfileDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
 	if from.ServicePrincipalProfileDetails == nil {
 		return nil
 	}
@@ -297,7 +296,7 @@ func (to *servicePrincipalBaseOwnerModel) set(ctx context.Context, from *fabcore
 	return nil
 }
 
-func (to *baseConfigurationModel) set(ctx context.Context, from fabcore.ScheduleConfigClassification) diag.Diagnostics {
+func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConfigClassification) diag.Diagnostics {
 	schConfig := from.GetScheduleConfig()
 	to.StartDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.StartDateTime)
 	to.EndDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.EndDateTime)

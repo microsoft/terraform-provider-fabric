@@ -15,6 +15,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/itemjobscheduler"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -364,7 +365,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	itemType := "dataflow"
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	jobType := jobTypeActionsTestDict[itemType][0]
+	jobType := itemjobscheduler.JobTypeActions[itemType][0]
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeWeekly)
 
@@ -451,7 +452,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
-	jobType := jobTypeActionsTestDict["dataflow"][0]
+	jobType := itemjobscheduler.JobTypeActions["dataflow"][0]
 	dataflowResourceHCL, dataflowResourceFQN := dataflowResource(t, workspaceID)
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeDaily)
