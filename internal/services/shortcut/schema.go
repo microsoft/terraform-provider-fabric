@@ -110,7 +110,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						stringplanmodifier.RequiresReplace(),
 					},
 					Validators: []validator.String{
-						stringvalidator.LengthAtLeast(1),
 						stringvalidator.RegexMatches(
 							regexp.MustCompile(`\S`),
 							"Name must contain at least one non-whitespace character.",
