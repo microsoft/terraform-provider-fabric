@@ -80,7 +80,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Role of the principals.",
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleDomainRoleValues(), true)...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(PossibleDomainRolePreviewValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{

@@ -73,3 +73,11 @@ func (to *requestDeleteDomainRoleAssignments) set(ctx context.Context, from reso
 
 	return nil
 }
+
+// PossibleDomainRolePreviewValues returns the possible values for the DomainRolePreview const type.
+func PossibleDomainRolePreviewValues() []fabadmin.DomainRole {
+	return []fabadmin.DomainRole{
+		fabadmin.DomainRole("Contributors"),
+		fabadmin.DomainRole("Admins"),
+	}
+}
