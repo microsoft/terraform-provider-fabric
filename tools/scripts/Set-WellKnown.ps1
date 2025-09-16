@@ -732,6 +732,39 @@ function Set-FabricConnection {
   return $result
 }
 
+function Set-FabricConnectionRoleAssignment {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$ConnectionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$PrincipalId,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('User', 'Group', 'ServicePrincipal')]
+    [string]$PrincipalType,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Owner')]
+    [string]$Role
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$ConnectionId/roleAssignments"
+  $result = $results.Response.value | Where-Object { $_.id -eq $PrincipalId }
+  if (!$result) {
+    Write-Log -Message "Assigning Principal ($PrincipalType / $PrincipalId) to Connection: $($ConnectionId)" -Level 'WARN'
+    $payload = @{
+      principal = @{
+        id   = $PrincipalId
+        type = $PrincipalType
+      }
+      role      = $Role
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "connections/$ConnectionId/roleAssignments" -Payload $payload).Response
+  }
+  return $result
+}
+
 function Set-AzureVirtualNetwork {
   param(
     [Parameter(Mandatory = $true)]
@@ -1111,6 +1144,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_NAME_BASE',
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
+  'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1203,15 +1237,23 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
+# Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
 $displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
 $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
-Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
-Write-Log -Message "LakehouseRS: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceDS'].id)/lakehouses/$($wellKnown['Lakehouse']['id'])" -Level 'WARN'
 $wellKnown['LakehouseRS'] = @{
   id          = $item.id
   displayName = $item.displayName
   description = $item.description
 }
+
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceRS'].id)/lakehouses/$($wellKnown['LakehouseRS']['id'])/tables"
+$result = $results.Response.data | Where-Object { $_.name -eq 'publicholidays' }
+if (!$result) {
+  Write-Log -Message "!!! Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually run 'Start with sample data' -> 'Public holidays' to populate the data !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "OneLake Data Access Security feature is not enabled for Lakehouse. Please go to the Lakehouse inside Workspace: $($wellKnown['WorkspaceRS'].displayName) and manually turn on this feature by clicking 'Manage OneLake data access'." -Level 'ERROR' -Stop $false
+  Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceRS'].id)/lakehouses/$($wellKnown['LakehouseRS']['id'])" -Level 'WARN'
+}
+
 
 # Create MirroredDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MirroredDatabase'])"
@@ -1492,6 +1534,14 @@ if (!$azdoRepo) {
   $azdoRepo = New-ADOPSRepository -Project $azdoProject.name -Name 'test'
   Initialize-ADOPSRepository -RepositoryId $azdoRepo.id | Out-Null
 }
+
+if (!$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID) {
+  Write-Log -Message "!!! Please go to the Connections and manually add 'Azure DevOps - Source control' connection !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
+  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID" -Level 'ERROR' -Stop $true
+}
+
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "connections/$Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID"
 Write-Log -Message "AzDO Repository - Name: $($azdoRepo.name) / ID: $($azdoRepo.id)"
 $wellKnown['AzDO'] = @{
   organizationName = $azdoContext.Organization
@@ -1499,6 +1549,7 @@ $wellKnown['AzDO'] = @{
   projectName      = $azdoProject.name
   repositoryId     = $azdoRepo.id
   repositoryName   = $azdoRepo.name
+  connectionId     = $Env:FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID
 }
 
 $body = @{
@@ -1611,6 +1662,8 @@ $wellKnown['ShareableCloudConnection'] = @{
   displayName = $shareableCloudConnection.displayName
 }
 
+Set-FabricConnectionRoleAssignment -ConnectionId $shareableCloudConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+
 # Create Virtual Network Gateway Connection if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['VirtualNetworkGatewayConnection'])"
 $virtualNetworkGatewayConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "VirtualNetworkGateway" -GatewayId $gateway.id
@@ -1619,6 +1672,15 @@ $wellKnown['VirtualNetworkGatewayConnection'] = @{
   id          = $virtualNetworkGatewayConnection.id
   displayName = $virtualNetworkGatewayConnection.displayName
   gatewayId   = $virtualNetworkGatewayConnection.gatewayId
+}
+
+$connectionRoleAssignment = Set-FabricConnectionRoleAssignment -ConnectionId $virtualNetworkGatewayConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+
+$wellKnown['VirtualNetworkGatewayConnectionRoleAssignment'] = @{
+  id            = $connectionRoleAssignment.id
+  principalId   = $connectionRoleAssignment.principal.id
+  principalType = $connectionRoleAssignment.principal.type
+  role          = $connectionRoleAssignment.role
 }
 
 # Create the Azure Data Factory if not exists
@@ -1748,3 +1810,4 @@ else {
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
+
