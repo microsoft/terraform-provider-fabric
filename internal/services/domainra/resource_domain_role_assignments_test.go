@@ -13,6 +13,7 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -28,7 +29,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				testResourceItemsHeader,
 				map[string]any{
 					"principals": []map[string]any{},
-					"role":       string(fabadmin.DomainRole("Contributors")),
+					"role":       string(domainra.DomainRoleContributors),
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "domain_id" is required, but no definition was found.`),
@@ -40,7 +41,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				testResourceItemsHeader,
 				map[string]any{
 					"domain_id": "00000000-0000-0000-0000-000000000000",
-					"role":      string(fabadmin.DomainRole("Contributors")),
+					"role":      string(domainra.DomainRoleContributors),
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "principals" is required, but no definition was found.`),
@@ -65,7 +66,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				map[string]any{
 					"domain_id":  "invalid uuid",
 					"principals": []map[string]any{},
-					"role":       string(fabadmin.DomainRole("Contributors")),
+					"role":       string(domainra.DomainRoleContributors),
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -90,7 +91,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				testResourceItemsHeader,
 				map[string]any{
 					"domain_id": "00000000-0000-0000-0000-000000000000",
-					"role":      string(fabadmin.DomainRole("Contributors")),
+					"role":      string(domainra.DomainRoleContributors),
 					"principals": []map[string]any{
 						{
 							"type": string(fabadmin.PrincipalTypeUser),
@@ -107,7 +108,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				testResourceItemsHeader,
 				map[string]any{
 					"domain_id": "00000000-0000-0000-0000-000000000000",
-					"role":      string(fabadmin.DomainRole("Contributors")),
+					"role":      string(domainra.DomainRoleContributors),
 					"principals": []map[string]any{
 						{
 							"id": "00000000-0000-0000-0000-000000000000",
@@ -124,7 +125,7 @@ func TestUnit_DomainRoleAssignmentsResource_Attributes(t *testing.T) {
 				testResourceItemsHeader,
 				map[string]any{
 					"domain_id": "00000000-0000-0000-0000-000000000000",
-					"role":      string(fabadmin.DomainRole("Contributors")),
+					"role":      string(domainra.DomainRoleContributors),
 					"principals": []map[string]any{
 						{
 							"id":   "invalid uuid",
@@ -167,7 +168,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 					testResourceItemsHeader,
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
-						"role":      string(fabadmin.DomainRole("Contributors")),
+						"role":      string(domainra.DomainRoleContributors),
 						"principals": []map[string]any{
 							{
 								"id":   entityID,
@@ -180,7 +181,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.type", entityType),
-				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(fabadmin.DomainRole("Contributors"))),
+				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(domainra.DomainRoleContributors)),
 			),
 		},
 		// Update and Read
@@ -192,7 +193,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 					testResourceItemsHeader,
 					map[string]any{
 						"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
-						"role":      string(fabadmin.DomainRole("Admins")),
+						"role":      string(domainra.DomainRoleAdmins),
 						"principals": []map[string]any{
 							{
 								"id":   entityID,
@@ -205,7 +206,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.type", entityType),
-				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(fabadmin.DomainRole("Admins"))),
+				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(domainra.DomainRoleAdmins)),
 			),
 		},
 	}))
