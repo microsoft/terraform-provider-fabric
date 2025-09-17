@@ -109,6 +109,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`\S`),
+							"Name must contain at least one non-whitespace character.",
+						),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
