@@ -1239,12 +1239,12 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 		missingEnvVars = append(missingEnvVars, "FABRIC_CONNECTION_SQL_SERVER_URL")
 	}
 
-	t.Fatalf("SQL Username is: %s", sqlUsername)
-	t.Fatalf("SQL URL is: %s", sqlURL)
-
 	if len(missingEnvVars) > 0 {
 		t.Fatalf("Required environment variables are not set: %v", missingEnvVars)
 	}
+
+	t.Logf("SQL Username is: %s", sqlUsername)
+	t.Logf("SQL URL is: %s", sqlURL)
 
 	displayName := testhelp.RandomName()
 
