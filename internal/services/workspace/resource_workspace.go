@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -33,6 +34,7 @@ type resourceWorkspace struct {
 	pConfigData    *pconfig.ProviderData
 	client         *fabcore.WorkspacesClient
 	clientCapacity *fabcore.CapacitiesClient
+	clientDomain   *fabadmin.DomainsClient
 	TypeInfo       tftypeinfo.TFTypeInfo
 }
 
@@ -68,6 +70,7 @@ func (r *resourceWorkspace) Configure(_ context.Context, req resource.ConfigureR
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewWorkspacesClient()
 	r.clientCapacity = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCapacitiesClient()
+	r.clientDomain = fabadmin.NewClientFactoryWithClient(*pConfigData.FabricClient).NewDomainsClient()
 }
 
 func (r *resourceWorkspace) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -133,6 +136,14 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	// Assign workspace to domain if domain_id is provided
+	if !plan.DomainID.IsNull() && !plan.DomainID.IsUnknown() {
+		if resp.Diagnostics.Append(r.assignWorkspaceToDomain(ctx, plan.ID.ValueString(), plan.DomainID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+		state.DomainID = plan.DomainID
+	}
+
 	if resp.Diagnostics.Append(resp.State.Set(ctx, state)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -165,6 +176,11 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
+	}
+
+	// Preserve domain assignment in state
+	if !plan.DomainID.IsNull() && !plan.DomainID.IsUnknown() {
+		state.DomainID = plan.DomainID
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
@@ -367,9 +383,29 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		}
 	}
 
+	// Handle domain assignment changes
+	if !plan.DomainID.Equal(state.DomainID) {
+		// Unassign from old domain if there was one
+		if !state.DomainID.IsNull() && !state.DomainID.IsUnknown() {
+			if resp.Diagnostics.Append(r.unassignWorkspaceFromDomain(ctx, plan.ID.ValueString(), state.DomainID.ValueString())...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
+
+		// Assign to new domain if provided
+		if !plan.DomainID.IsNull() && !plan.DomainID.IsUnknown() {
+			if resp.Diagnostics.Append(r.assignWorkspaceToDomain(ctx, plan.ID.ValueString(), plan.DomainID.ValueString())...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
+	}
+
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Preserve domain assignment in state
+	plan.DomainID = plan.DomainID
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -400,6 +436,13 @@ func (r *resourceWorkspace) Delete(ctx context.Context, req resource.DeleteReque
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
+	// Unassign workspace from domain if assigned
+	if !state.DomainID.IsNull() && !state.DomainID.IsUnknown() {
+		if resp.Diagnostics.Append(r.unassignWorkspaceFromDomain(ctx, state.ID.ValueString(), state.DomainID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	if !state.Identity.IsNull() && !state.Identity.IsUnknown() {
 		identityState, diags := state.Identity.Get(ctx)
@@ -497,4 +540,66 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			time.Sleep(30 * time.Second) // lintignore:R018
 		}
 	}
+}
+
+// assignWorkspaceToDomain assigns a workspace to a domain using the domain admin API
+func (r *resourceWorkspace) assignWorkspaceToDomain(ctx context.Context, workspaceID, domainID string) diag.Diagnostics {
+	if domainID == "" {
+		return nil
+	}
+
+	tflog.Debug(ctx, "ASSIGN WORKSPACE TO DOMAIN", map[string]any{
+		"action":      "start",
+		"workspaceId": workspaceID,
+		"domainId":    domainID,
+	})
+
+	assignRequest := fabadmin.AssignDomainWorkspacesByIDsRequest{
+		WorkspacesIDs: []string{workspaceID},
+	}
+
+	_, err := r.clientDomain.AssignDomainWorkspacesByIDs(ctx, domainID, assignRequest, nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil); diags.HasError() {
+		return diags
+	}
+
+	tflog.Debug(ctx, "ASSIGN WORKSPACE TO DOMAIN", map[string]any{
+		"action":      "end",
+		"workspaceId": workspaceID,
+		"domainId":    domainID,
+	})
+
+	return nil
+}
+
+// unassignWorkspaceFromDomain unassigns a workspace from a domain using the domain admin API
+func (r *resourceWorkspace) unassignWorkspaceFromDomain(ctx context.Context, workspaceID, domainID string) diag.Diagnostics {
+	if domainID == "" {
+		return nil
+	}
+
+	tflog.Debug(ctx, "UNASSIGN WORKSPACE FROM DOMAIN", map[string]any{
+		"action":      "start",
+		"workspaceId": workspaceID,
+		"domainId":    domainID,
+	})
+
+	unassignRequest := fabadmin.UnassignDomainWorkspacesByIDsRequest{
+		WorkspacesIDs: []string{workspaceID},
+	}
+
+	_, err := r.clientDomain.UnassignDomainWorkspacesByIDs(ctx, domainID, &fabadmin.DomainsClientUnassignDomainWorkspacesByIDsOptions{
+		UnassignDomainWorkspacesByIDsRequest: &unassignRequest,
+	})
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil); diags.HasError() {
+		return diags
+	}
+
+	tflog.Debug(ctx, "UNASSIGN WORKSPACE FROM DOMAIN", map[string]any{
+		"action":      "end",
+		"workspaceId": workspaceID,
+		"domainId":    domainID,
+	})
+
+	return nil
 }

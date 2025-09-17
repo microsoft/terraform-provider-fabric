@@ -26,6 +26,7 @@ type baseWorkspaceModel struct {
 	Description types.String     `tfsdk:"description"`
 	Type        types.String     `tfsdk:"type"`
 	CapacityID  customtypes.UUID `tfsdk:"capacity_id"`
+	DomainID    customtypes.UUID `tfsdk:"domain_id"`
 }
 
 func (to *baseWorkspaceModel) set(from fabcore.Workspace) {

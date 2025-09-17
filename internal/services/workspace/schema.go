@@ -124,6 +124,21 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Computed: true,
 				},
 			},
+			"domain_id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The ID of the Fabric Domain to assign to the Workspace.",
+					CustomType:          customtypes.UUIDType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
 			"capacity_assignment_progress": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A Workspace assignment to capacity progress status.",
@@ -243,6 +258,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		delete(r.Attributes, "capacity_region")
 		delete(r.Attributes, "onelake_endpoints")
 		delete(r.Attributes, "identity")
+		delete(r.Attributes, "domain_id")
 	}
 
 	return r
