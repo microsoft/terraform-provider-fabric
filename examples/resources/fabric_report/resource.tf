@@ -1,3 +1,4 @@
+# Create Report with PBIR format, no visuals
 resource "fabric_report" "example_pbir" {
   display_name = "test"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -21,6 +22,7 @@ resource "fabric_report" "example_pbir" {
   }
 }
 
+# Create Report with PBIR format, no visuals
 resource "fabric_report" "example_pbir_with_visuals" {
   display_name = "test"
   workspace_id = "00000000-0000-0000-0000-000000000000"
