@@ -404,9 +404,6 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Preserve domain assignment in state
-	plan.DomainID = plan.DomainID
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "UPDATE", map[string]any{
