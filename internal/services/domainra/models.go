@@ -73,3 +73,12 @@ func (to *requestDeleteDomainRoleAssignments) set(ctx context.Context, from reso
 
 	return nil
 }
+
+// These are no longer returned by the sdk PossibleDomainRoleValues func
+// but they are still available for API backwards compatibility.
+func PossibleDomainRolePreviewValues() []fabadmin.DomainRole {
+	return []fabadmin.DomainRole{
+		fabadmin.DomainRole("Contributors"),
+		fabadmin.DomainRole("Admins"),
+	}
+}
