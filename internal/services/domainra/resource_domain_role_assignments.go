@@ -7,12 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -247,28 +245,8 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 	}
 
 	_, err := r.client.RoleAssignmentsBulkUnassign(ctx, state.DomainID.ValueString(), reqDelete.DomainRoleUnassignmentRequest, nil)
-
-	diags = utils.GetDiagsFromError(ctx, err, utils.OperationDelete, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError)
-	if diags.HasError() && !utils.IsErr(diags, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError) {
-		resp.Diagnostics.Append(diags...)
-
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
-	}
-
-	if diags.HasError() && utils.IsErr(diags, fabcore.ErrDomain.DomainSpecificUsersScopeCannotBeEmptyError) {
-		_, err := r.client.UpdateDomain(ctx, state.DomainID.ValueString(), fabadmin.UpdateDomainRequest{
-			ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeAllTenant),
-		}, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		_, err = r.client.UpdateDomain(ctx, state.DomainID.ValueString(), fabadmin.UpdateDomainRequest{
-			ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
-		}, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	resp.State.RemoveResource(ctx)
@@ -281,7 +259,7 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, model resourceDomainRoleAssignmentsModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	respGet, err := r.client.GetDomain(ctx, model.DomainID.ValueString(), nil)
+	respGet, err := r.client.GetDomainPreview(ctx, model.DomainID.ValueString(), true, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil); diags.HasError() {
 		return diags
 	}
