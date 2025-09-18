@@ -50,7 +50,7 @@ resource "fabric_workspace_role_assignment" "example" {
 Required:
 
 - `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal ID.
-- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `EntireTenant`, `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

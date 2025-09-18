@@ -62,4 +62,4 @@ Read-Only:
 Read-Only:
 
 - `id` (String) The principal ID.
-- `type` (String) The type of the principal. Value must be one of : `EntireTenant`, `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `type` (String) The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
