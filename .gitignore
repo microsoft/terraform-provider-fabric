@@ -66,3 +66,4 @@ changie.md
 *.crt
 *.pfx
 *.p12
+terraform-provider-fabric

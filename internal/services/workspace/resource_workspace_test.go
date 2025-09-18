@@ -480,3 +480,30 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 	},
 	))
 }
+
+func TestUnit_WorkspaceResource_Domain_Attribute(t *testing.T) {
+	domainID := "11111111-1111-1111-1111-111111111111"
+	entityCreate := fakes.NewRandomWorkspaceInfo(nil)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read with domain_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityCreate.DisplayName,
+					"description":  *entityCreate.Description,
+					"domain_id":    domainID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "id", entityCreate.ID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityCreate.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityCreate.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "domain_id", domainID),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
