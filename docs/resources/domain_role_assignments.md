@@ -20,12 +20,16 @@ The Domain Role Assignments resource allows you to manage a Fabric [Domain Role 
 
 ```terraform
 resource "fabric_domain_role_assignments" "example" {
-  domain_id = "e0cc5b1e-4393-4fc0-bc98-6acaad6cf3fa"
-  role      = "Contributors"
+  domain_id = "00000000-0000-0000-0000-000000000000"
+  role      = "Admins"
   principals = [
     {
-      id   = "c1bcea08-0ba1-4cad-8b87-488f7e149da0"
-      type = "EntireTenant"
+      id   = "11111111-1111-1111-1111-111111111111"
+      type = "User"
+    },
+    {
+      id   = "22222222-2222-2222-2222-222222222222"
+      type = "Group"
     }
   ]
 }
