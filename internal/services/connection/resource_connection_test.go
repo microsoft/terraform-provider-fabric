@@ -1243,9 +1243,6 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 		t.Fatalf("Required environment variables are not set: %v", missingEnvVars)
 	}
 
-	t.Logf("SQL Username is: %s", sqlUsername)
-	t.Logf("SQL URL is: %s", sqlURL)
-
 	displayName := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
