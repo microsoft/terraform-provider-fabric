@@ -69,12 +69,8 @@ func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 			CreatedDateTime: to.Ptr(time.Now()),
 			Configuration:   createScheduleRequest.Configuration,
 			Owner: &fabcore.Principal{
-				ID:          to.Ptr(testhelp.RandomUUID()),
-				DisplayName: to.Ptr(testhelp.RandomName()),
-				Type:        to.Ptr(fabcore.PrincipalTypeUser),
-				UserDetails: &fabcore.PrincipalUserDetails{
-					UserPrincipalName: to.Ptr(testhelp.RandomName()),
-				},
+				ID:   to.Ptr(testhelp.RandomUUID()),
+				Type: to.Ptr(fabcore.PrincipalTypeUser),
 			},
 		}
 
@@ -104,12 +100,8 @@ func fakeUpdateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 			CreatedDateTime: to.Ptr(time.Now()),
 			Configuration:   updateScheduleRequest.Configuration,
 			Owner: &fabcore.Principal{
-				ID:          to.Ptr(testhelp.RandomUUID()),
-				DisplayName: to.Ptr(testhelp.RandomName()),
-				Type:        to.Ptr(fabcore.PrincipalTypeUser),
-				UserDetails: &fabcore.PrincipalUserDetails{
-					UserPrincipalName: to.Ptr(testhelp.RandomName()),
-				},
+				ID:   to.Ptr(testhelp.RandomUUID()),
+				Type: to.Ptr(fabcore.PrincipalTypeUser),
 			},
 		}
 
@@ -213,9 +205,6 @@ func NewRandomOwner() *fabcore.Principal {
 			ParentPrincipal: &fabcore.Principal{
 				ID:   to.Ptr(testhelp.RandomUUID()),
 				Type: to.Ptr(fabcore.PrincipalTypeServicePrincipal),
-				ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
-					AADAppID: to.Ptr(testhelp.RandomUUID()),
-				},
 			},
 		},
 	}

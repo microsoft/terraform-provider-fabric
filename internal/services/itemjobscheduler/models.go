@@ -29,7 +29,7 @@ type baseItemJobSchedulerModel struct {
 	WorkspaceID     customtypes.UUID                                         `tfsdk:"workspace_id"`
 	JobType         types.String                                             `tfsdk:"job_type"`
 	CreatedDateTime timetypes.RFC3339                                        `tfsdk:"created_date_time"`
-	Owner           supertypes.SingleNestedObjectValueOf[ownerModel]         `tfsdk:"owner"`
+	Owner           supertypes.SingleNestedObjectValueOf[principalModel]     `tfsdk:"owner"`
 	Configuration   supertypes.SingleNestedObjectValueOf[configurationModel] `tfsdk:"configuration"`
 }
 
@@ -42,39 +42,6 @@ type configurationModel struct {
 	Weekdays      supertypes.SetValueOf[types.String] `tfsdk:"weekdays"` // Weekly
 }
 
-type ownerModel struct {
-	ID                             customtypes.UUID                                                          `tfsdk:"id"`
-	DisplayName                    types.String                                                              `tfsdk:"display_name"`
-	GroupDetails                   supertypes.SingleNestedObjectValueOf[groupDetailsModel]                   `tfsdk:"group_details"`
-	ServicePrincipalDetails        supertypes.SingleNestedObjectValueOf[servicePrincipalDetailsModel]        `tfsdk:"service_principal_details"`
-	ServicePrincipalProfileDetails supertypes.SingleNestedObjectValueOf[servicePrincipalProfileDetailsModel] `tfsdk:"service_principal_profile_details"`
-	Type                           types.String                                                              `tfsdk:"type"`
-	UserDetails                    supertypes.SingleNestedObjectValueOf[userDetailsModel]                    `tfsdk:"user_details"`
-}
-
-type groupDetailsModel struct {
-	GroupType types.String `tfsdk:"group_type"`
-}
-
-type servicePrincipalDetailsModel struct {
-	AadAppID types.String `tfsdk:"aad_app_id"`
-}
-
-type servicePrincipalProfileDetailsModel struct {
-	ParentPrincipal supertypes.SingleNestedObjectValueOf[servicePrincipalBaseOwnerModel] `tfsdk:"parent_principal"`
-}
-
-type servicePrincipalBaseOwnerModel struct {
-	ID                      customtypes.UUID                                                   `tfsdk:"id"`
-	DisplayName             types.String                                                       `tfsdk:"display_name"`
-	ServicePrincipalDetails supertypes.SingleNestedObjectValueOf[servicePrincipalDetailsModel] `tfsdk:"service_principal_details"`
-	Type                    types.String                                                       `tfsdk:"type"`
-}
-
-type userDetailsModel struct {
-	UserPrincipalName types.String `tfsdk:"user_principal_name"`
-}
-
 func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemID, jobType string, from fabcore.ItemSchedule) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Enabled = types.BoolPointerValue(from.Enabled)
@@ -82,10 +49,21 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.JobType = types.StringValue(jobType)
 	to.CreatedDateTime = timetypes.NewRFC3339TimePointerValue(from.CreatedDateTime)
-	to.Configuration = supertypes.NewSingleNestedObjectValueOfNull[configurationModel](ctx)
+
 	configuration := supertypes.NewSingleNestedObjectValueOfNull[configurationModel](ctx)
-	owner := supertypes.NewSingleNestedObjectValueOfNull[ownerModel](ctx)
-	to.Owner = owner
+	principal := supertypes.NewSingleNestedObjectValueOfNull[principalModel](ctx)
+
+	if from.Owner != nil {
+		principalModel := &principalModel{}
+
+		principalModel.set(*from.Owner)
+
+		if diags := principal.Set(ctx, principalModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	to.Owner = principal
 
 	if from.Configuration != nil {
 		baseJobScheduleConfigurationModel := &configurationModel{}
@@ -99,199 +77,6 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	}
 
 	to.Configuration = configuration
-
-	to.Owner = supertypes.NewSingleNestedObjectValueOfNull[ownerModel](ctx)
-
-	if from.Owner != nil {
-		ownerModel := &ownerModel{}
-		if diags := ownerModel.set(ctx, from.Owner); diags.HasError() {
-			return diags
-		}
-
-		if diags := owner.Set(ctx, ownerModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.Owner = owner
-
-	return nil
-}
-
-func (to *ownerModel) set(ctx context.Context, from *fabcore.Principal) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Type = types.StringPointerValue((*string)(from.Type))
-
-	to.GroupDetails = supertypes.NewSingleNestedObjectValueOfNull[groupDetailsModel](ctx)
-	to.ServicePrincipalDetails = supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalDetailsModel](ctx)
-	to.ServicePrincipalProfileDetails = supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalProfileDetailsModel](ctx)
-	to.UserDetails = supertypes.NewSingleNestedObjectValueOfNull[userDetailsModel](ctx)
-
-	if from.Type == nil {
-		return nil
-	}
-
-	switch *from.Type {
-	case fabcore.PrincipalTypeGroup:
-		return setGroupDetails(ctx, to, from)
-	case fabcore.PrincipalTypeUser:
-		return setUserDetails(ctx, to, from)
-	case fabcore.PrincipalTypeServicePrincipal:
-		return setServicePrincipalDetails(ctx, to, from)
-	case fabcore.PrincipalTypeServicePrincipalProfile:
-		return setServicePrincipalProfileDetails(ctx, to, from)
-	default:
-		var diags diag.Diagnostics
-
-		diags.AddError(
-			"Unsupported Owner type",
-			"The owner type is not supported.",
-		)
-
-		return diags
-	}
-}
-
-func setGroupDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
-	if from.GroupDetails == nil {
-		return nil
-	}
-
-	groupDetails := supertypes.NewSingleNestedObjectValueOfNull[groupDetailsModel](ctx)
-
-	groupDetailsModel := &groupDetailsModel{}
-	if diags := groupDetailsModel.set(from.GroupDetails); diags.HasError() {
-		return diags
-	}
-
-	if diags := groupDetails.Set(ctx, groupDetailsModel); diags.HasError() {
-		return diags
-	}
-
-	to.GroupDetails = groupDetails
-
-	return nil
-}
-
-func setUserDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
-	if from.UserDetails == nil {
-		return nil
-	}
-
-	userDetails := supertypes.NewSingleNestedObjectValueOfNull[userDetailsModel](ctx)
-
-	userDetailsModel := &userDetailsModel{}
-	if diags := userDetailsModel.set(from.UserDetails); diags.HasError() {
-		return diags
-	}
-
-	if diags := userDetails.Set(ctx, userDetailsModel); diags.HasError() {
-		return diags
-	}
-
-	to.UserDetails = userDetails
-
-	return nil
-}
-
-func setServicePrincipalDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
-	if from.ServicePrincipalDetails == nil {
-		return nil
-	}
-
-	servicePrincipalDetails := supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalDetailsModel](ctx)
-
-	spDetailsModel := &servicePrincipalDetailsModel{}
-	if diags := spDetailsModel.set(from.ServicePrincipalDetails); diags.HasError() {
-		return diags
-	}
-
-	if diags := servicePrincipalDetails.Set(ctx, spDetailsModel); diags.HasError() {
-		return diags
-	}
-
-	to.ServicePrincipalDetails = servicePrincipalDetails
-
-	return nil
-}
-
-func setServicePrincipalProfileDetails(ctx context.Context, to *ownerModel, from *fabcore.Principal) diag.Diagnostics {
-	if from.ServicePrincipalProfileDetails == nil {
-		return nil
-	}
-
-	servicePrincipalProfileDetails := supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalProfileDetailsModel](ctx)
-
-	spProfileDetailsModel := &servicePrincipalProfileDetailsModel{}
-	if diags := spProfileDetailsModel.set(ctx, from.ServicePrincipalProfileDetails); diags.HasError() {
-		return diags
-	}
-
-	if diags := servicePrincipalProfileDetails.Set(ctx, spProfileDetailsModel); diags.HasError() {
-		return diags
-	}
-
-	to.ServicePrincipalProfileDetails = servicePrincipalProfileDetails
-
-	return nil
-}
-
-func (to *groupDetailsModel) set(from *fabcore.PrincipalGroupDetails) diag.Diagnostics {
-	to.GroupType = types.StringPointerValue((*string)(from.GroupType))
-
-	return nil
-}
-
-func (to *userDetailsModel) set(from *fabcore.PrincipalUserDetails) diag.Diagnostics {
-	to.UserPrincipalName = types.StringPointerValue(from.UserPrincipalName)
-
-	return nil
-}
-
-func (to *servicePrincipalDetailsModel) set(from *fabcore.PrincipalServicePrincipalDetails) diag.Diagnostics {
-	to.AadAppID = types.StringPointerValue(from.AADAppID)
-
-	return nil
-}
-
-func (to *servicePrincipalProfileDetailsModel) set(ctx context.Context, from *fabcore.PrincipalServicePrincipalProfileDetails) diag.Diagnostics {
-	to.ParentPrincipal = supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalBaseOwnerModel](ctx)
-	owner := supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalBaseOwnerModel](ctx)
-
-	if from.ParentPrincipal != nil {
-		ownerModel := &servicePrincipalBaseOwnerModel{}
-		if diags := ownerModel.set(ctx, from.ParentPrincipal); diags.HasError() {
-			return diags
-		}
-
-		if diags := owner.Set(ctx, ownerModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.ParentPrincipal = owner
-
-	return nil
-}
-
-func (to *servicePrincipalBaseOwnerModel) set(ctx context.Context, from *fabcore.Principal) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.ServicePrincipalDetails = supertypes.NewSingleNestedObjectValueOfNull[servicePrincipalDetailsModel](ctx)
-
-	if from.ServicePrincipalDetails != nil {
-		spDetailsModel := &servicePrincipalDetailsModel{}
-		if diags := spDetailsModel.set(from.ServicePrincipalDetails); diags.HasError() {
-			return diags
-		}
-
-		if diags := to.ServicePrincipalDetails.Set(ctx, spDetailsModel); diags.HasError() {
-			return diags
-		}
-	}
-
-	to.Type = types.StringPointerValue((*string)(from.Type))
 
 	return nil
 }
@@ -603,6 +388,16 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	to.Enabled = from.Enabled.ValueBoolPointer()
 
 	return nil
+}
+
+type principalModel struct {
+	ID   customtypes.UUID `tfsdk:"id"`
+	Type types.String     `tfsdk:"type"`
+}
+
+func (to *principalModel) set(from fabcore.Principal) {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Type = types.StringPointerValue((*string)(from.Type))
 }
 
 var JobTypeActions = map[string][]string{ //nolint:gochecknoglobals

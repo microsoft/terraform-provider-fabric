@@ -109,7 +109,6 @@ func TestUnit_ItemJobSchedulerDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(*entity.Enabled)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity.CreatedDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.ID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.display_name", *entity.Owner.DisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.Type)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),

@@ -133,8 +133,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 	}
 }
 
-func ownerSchema() superschema.SuperSingleNestedAttributeOf[ownerModel] {
-	return superschema.SuperSingleNestedAttributeOf[ownerModel]{
+func ownerSchema() superschema.SuperSingleNestedAttributeOf[principalModel] {
+	return superschema.SuperSingleNestedAttributeOf[principalModel]{
 		Common: &schemaR.SingleNestedAttribute{
 			MarkdownDescription: "The user identity that created this schedule or last modified.",
 		},
@@ -158,152 +158,6 @@ func ownerSchema() superschema.SuperSingleNestedAttributeOf[ownerModel] {
 					Computed: true,
 				},
 			},
-
-			"display_name": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The principal's display name.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.StringAttribute{
-					Optional: true,
-				},
-			},
-			"group_details": superschema.SuperSingleNestedAttributeOf[groupDetailsModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "Group specific details. Applicable when the principal type is Group.",
-				},
-				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Optional: true,
-				},
-				Attributes: map[string]superschema.Attribute{
-					"group_type": superschema.SuperStringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The type of the group. Additional group types may be added over time.",
-						},
-						Resource: &schemaR.StringAttribute{
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
-				},
-			},
-			"service_principal_details": superschema.SuperSingleNestedAttributeOf[servicePrincipalDetailsModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "Service principal specific details. Applicable when the principal type is ServicePrincipal.",
-				},
-				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Optional: true,
-				},
-				Attributes: map[string]superschema.Attribute{
-					"aad_app_id": superschema.SuperStringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The service principal's Microsoft Entra AppId.",
-						},
-						Resource: &schemaR.StringAttribute{
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
-				},
-			},
-			"service_principal_profile_details": superschema.SuperSingleNestedAttributeOf[servicePrincipalProfileDetailsModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "Service principal profile details. Applicable when the principal type is ServicePrincipalProfile.",
-				},
-				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Optional: true,
-				},
-				Attributes: map[string]superschema.Attribute{
-					"parent_principal": superschema.SuperSingleNestedAttributeOf[servicePrincipalBaseOwnerModel]{
-						Common: &schemaR.SingleNestedAttribute{
-							MarkdownDescription: "The service principal profile's parent principal.",
-						},
-						Resource: &schemaR.SingleNestedAttribute{
-							Computed: true,
-						},
-						DataSource: &schemaD.SingleNestedAttribute{
-							Computed: true,
-						},
-						Attributes: map[string]superschema.Attribute{
-							"id": superschema.SuperStringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The principal's ID.",
-									CustomType:          customtypes.UUIDType{},
-								},
-								Resource: &schemaR.StringAttribute{
-									Computed: true,
-								},
-
-								DataSource: &schemaD.StringAttribute{
-									Computed: true,
-								},
-							},
-
-							"display_name": superschema.SuperStringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The principal's display name.",
-								},
-								Resource: &schemaR.StringAttribute{
-									Computed: true,
-								},
-								DataSource: &schemaD.StringAttribute{
-									Optional: true,
-								},
-							},
-							"service_principal_details": superschema.SuperSingleNestedAttributeOf[servicePrincipalDetailsModel]{
-								Common: &schemaR.SingleNestedAttribute{
-									MarkdownDescription: "Service principal specific details. Applicable when the principal type is ServicePrincipal.",
-								},
-								Resource: &schemaR.SingleNestedAttribute{
-									Computed: true,
-								},
-								DataSource: &schemaD.SingleNestedAttribute{
-									Optional: true,
-								},
-								Attributes: map[string]superschema.Attribute{
-									"aad_app_id": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The service principal's Microsoft Entra AppId.",
-										},
-										Resource: &schemaR.StringAttribute{
-											Computed: true,
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-									},
-								},
-							},
-							"type": superschema.SuperStringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The type of the principal. Additional principal types may be added over time.",
-								},
-								Resource: &schemaR.StringAttribute{
-									Computed: true,
-								},
-								DataSource: &schemaD.StringAttribute{
-									Computed: true,
-								},
-							},
-						},
-					},
-				},
-			},
 			"type": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The type of the principal. Additional principal types may be added over time.",
@@ -313,30 +167,6 @@ func ownerSchema() superschema.SuperSingleNestedAttributeOf[ownerModel] {
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
-				},
-			},
-			"user_details": superschema.SuperSingleNestedAttributeOf[userDetailsModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "User principal specific details. Applicable when the principal type is User.",
-				},
-				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Optional: true,
-				},
-				Attributes: map[string]superschema.Attribute{
-					"user_principal_name": superschema.SuperStringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The user principal name.",
-						},
-						Resource: &schemaR.StringAttribute{
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
 				},
 			},
 		},
