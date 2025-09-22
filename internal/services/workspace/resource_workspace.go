@@ -163,6 +163,27 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		})
 	}
 
+	if !plan.DomainID.IsNull() {
+		tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
+			"action": "start",
+			"id":     plan.ID.ValueString(),
+		})
+
+		var reqCreateDomain assignWorkspaceToDomainRequest
+
+		reqCreateDomain.set(plan)
+
+		_, err := r.client.AssignToDomain(ctx, plan.ID.ValueString(), reqCreateDomain.AssignWorkspaceToDomainRequest, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
+			"action": "end",
+			"id":     plan.ID.ValueString(),
+		})
+	}
+
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -296,6 +317,52 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 			_, err = r.client.AssignToCapacity(ctx, plan.ID.ValueString(), reqUpdateCapacity.AssignWorkspaceToCapacityRequest, nil)
 
 			tflog.Debug(ctx, "ASSIGN CAPACITY", map[string]any{
+				"action": "end",
+				"id":     plan.ID.ValueString(),
+			})
+		}
+
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &intermediary)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(resp.State.Set(ctx, intermediary)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if !plan.DomainID.Equal(state.DomainID) {
+		var err error
+
+		if plan.DomainID.IsNull() {
+			tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
+				"action": "start",
+				"id":     plan.ID.ValueString(),
+			})
+
+			_, err = r.client.UnassignFromDomain(ctx, plan.ID.ValueString(), nil)
+
+			tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
+				"action": "end",
+				"id":     plan.ID.ValueString(),
+			})
+		} else {
+			tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
+				"action": "start",
+				"id":     plan.ID.ValueString(),
+			})
+
+			var reqUpdateDomain assignWorkspaceToDomainRequest
+
+			reqUpdateDomain.set(plan)
+
+			_, err = r.client.AssignToDomain(ctx, plan.ID.ValueString(), reqUpdateDomain.AssignWorkspaceToDomainRequest, nil)
+
+			tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
 				"action": "end",
 				"id":     plan.ID.ValueString(),
 			})

@@ -110,6 +110,18 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Computed: true,
 				},
 			},
+			"domain_id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The ID of the Domain to assign to the Workspace.",
+					CustomType:          customtypes.UUIDType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
 			"capacity_region": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The region of the capacity associated with this workspace.",
