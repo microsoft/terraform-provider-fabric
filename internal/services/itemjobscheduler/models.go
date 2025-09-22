@@ -34,12 +34,21 @@ type baseItemJobSchedulerModel struct {
 }
 
 type configurationModel struct {
-	StartDateTime timetypes.RFC3339                   `tfsdk:"start_date_time"`
-	EndDateTime   timetypes.RFC3339                   `tfsdk:"end_date_time"`
-	Type          types.String                        `tfsdk:"type"`
-	Interval      types.Int32                         `tfsdk:"interval"` // Cron
-	Times         supertypes.SetValueOf[types.String] `tfsdk:"times"`    // Daily and Weekly
-	Weekdays      supertypes.SetValueOf[types.String] `tfsdk:"weekdays"` // Weekly
+	StartDateTime timetypes.RFC3339                                     `tfsdk:"start_date_time"`
+	EndDateTime   timetypes.RFC3339                                     `tfsdk:"end_date_time"`
+	Type          types.String                                          `tfsdk:"type"`
+	Interval      types.Int32                                           `tfsdk:"interval"`   // Cron
+	Times         supertypes.SetValueOf[types.String]                   `tfsdk:"times"`      // Daily, Weekly and Monthly
+	Weekdays      supertypes.SetValueOf[types.String]                   `tfsdk:"weekdays"`   // Weekly
+	Occurrence    supertypes.SingleNestedObjectValueOf[occurrenceModel] `tfsdk:"occurrence"` // Monthly
+	Recurrence    types.Int32                                           `tfsdk:"recurrence"` // Monthly
+}
+
+type occurrenceModel struct {
+	DayOfMonth     types.Int32  `tfsdk:"day_of_month"`
+	OccurrenceType types.String `tfsdk:"occurrence_type"`
+	Weekday        types.String `tfsdk:"weekday"`
+	WeekIndex      types.String `tfsdk:"week_index"`
 }
 
 func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemID, jobType string, from fabcore.ItemSchedule) diag.Diagnostics {
@@ -88,6 +97,9 @@ func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConf
 	to.Type = types.StringPointerValue((*string)(schConfig.Type))
 	to.Times = supertypes.NewSetValueOfNull[types.String](ctx)
 	to.Weekdays = supertypes.NewSetValueOfNull[types.String](ctx)
+	to.Occurrence = supertypes.NewSingleNestedObjectValueOfNull[occurrenceModel](ctx)
+	to.Recurrence = types.Int32Null()
+	to.Interval = types.Int32Null()
 
 	switch entity := from.(type) {
 	case *fabcore.CronScheduleConfig:
@@ -102,49 +114,74 @@ func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConf
 		to.Times.Set(ctx, times)
 
 	case *fabcore.WeeklyScheduleConfig:
-		timesPtr := make([]*types.String, len(entity.Times))
+		times := make([]types.String, len(entity.Times))
+		weekdays := make([]types.String, len(entity.Weekdays))
 
 		for i, t := range entity.Times {
-			val := types.StringValue(t)
-			timesPtr[i] = &val
-		}
-
-		times := make([]types.String, len(timesPtr))
-
-		for i, t := range timesPtr {
-			if t != nil {
-				times[i] = *t
-			} else {
-				times[i] = types.StringNull()
-			}
+			times[i] = types.StringValue(t)
 		}
 
 		to.Times.Set(ctx, times)
 
-		weekdaysPtr := make([]*types.String, len(entity.Weekdays))
-
 		for i, w := range entity.Weekdays {
-			val := types.StringValue(string(w))
-			weekdaysPtr[i] = &val
-		}
-
-		weekdays := make([]types.String, len(weekdaysPtr))
-
-		for i, w := range weekdaysPtr {
-			if w != nil {
-				weekdays[i] = *w
-			} else {
-				weekdays[i] = types.StringNull()
-			}
+			weekdays[i] = types.StringValue(string(w))
 		}
 
 		to.Weekdays.Set(ctx, weekdays)
+	case *fabcore.MonthlyScheduleConfig:
+		to.Recurrence = types.Int32PointerValue(entity.Recurrence)
+		times := make([]types.String, len(entity.Times))
+
+		for i, t := range entity.Times {
+			times[i] = types.StringValue(t)
+		}
+
+		to.Times.Set(ctx, times)
+
+		occurrence := supertypes.NewSingleNestedObjectValueOfNull[occurrenceModel](ctx)
+		if entity.Occurrence != nil {
+			occurrenceModel := &occurrenceModel{}
+			if diags := occurrenceModel.set(entity.Occurrence); diags.HasError() {
+				return diags
+			}
+
+			if diags := occurrence.Set(ctx, occurrenceModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.Occurrence = occurrence
+
 	default:
 		var diags diag.Diagnostics
 
 		diags.AddError(
 			"Unsupported Configuration type",
 			fmt.Sprintf("The Configuration type '%T' is not supported.", entity),
+		)
+
+		return diags
+	}
+
+	return nil
+}
+
+func (to *occurrenceModel) set(from fabcore.MonthlyOccurrenceClassification) diag.Diagnostics {
+	monthlyOcc := from.GetMonthlyOccurrence()
+	to.OccurrenceType = types.StringPointerValue((*string)(monthlyOcc.OccurrenceType))
+
+	switch entity := from.(type) {
+	case *fabcore.DayOfMonth:
+		to.DayOfMonth = types.Int32PointerValue(entity.DayOfMonth)
+	case *fabcore.OrdinalWeekday:
+		to.Weekday = types.StringPointerValue((*string)(entity.Weekday))
+		to.WeekIndex = types.StringPointerValue((*string)(entity.WeekIndex))
+	default:
+		var diags diag.Diagnostics
+
+		diags.AddError(
+			"Unsupported Monthly Occurrence type",
+			fmt.Sprintf("The Monthly Occurrence type '%T' is not supported.", entity),
 		)
 
 		return diags
@@ -301,6 +338,7 @@ type requestUpdateJobSchedule struct {
 
 func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobScheduleModel) diag.Diagnostics {
 	configuration, diags := from.Configuration.Get(ctx)
+
 	if diags.HasError() {
 		return diags
 	}
@@ -375,6 +413,60 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
+	case fabcore.ScheduleTypeMonthly:
+		times, diags := configuration.Times.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		timesSlice := make([]string, 0, len(times))
+		for _, t := range times {
+			timesSlice = append(timesSlice, t.ValueString())
+		}
+
+		occurrence, diags := configuration.Occurrence.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+
+		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
+		switch occurrenceType {
+		case fabcore.OccurrenceTypeDayOfMonth:
+			occurrenceConfig = &fabcore.DayOfMonth{
+				DayOfMonth:     occurrence.DayOfMonth.ValueInt32Pointer(),
+				OccurrenceType: &occurrenceType,
+			}
+		case fabcore.OccurrenceTypeOrdinalWeekday:
+			weekday := fabcore.DayOfWeek(occurrence.Weekday.ValueString())
+			weekIndex := fabcore.WeekIndex(occurrence.WeekIndex.ValueString())
+			occurrenceConfig = &fabcore.OrdinalWeekday{
+				Weekday:        &weekday,
+				WeekIndex:      &weekIndex,
+				OccurrenceType: &occurrenceType,
+			}
+		default:
+			var diags diag.Diagnostics
+
+			diags.AddError(
+				"Unsupported Monthly Occurrence type",
+				fmt.Sprintf("The Monthly Occurrence type '%T' is not supported.", occurrenceType),
+			)
+
+			return diags
+		}
+
+		reqConfiguration = &fabcore.MonthlyScheduleConfig{
+			Times:           timesSlice,
+			Recurrence:      configuration.Recurrence.ValueInt32Pointer(),
+			Occurrence:      occurrenceConfig,
+			StartDateTime:   &startDateTime,
+			EndDateTime:     &endDateTime,
+			LocalTimeZoneID: &localTimeZoneID,
+			Type:            &configurationType,
+		}
+
 	default:
 		diags.AddError(
 			"Unsupported Configuration type",

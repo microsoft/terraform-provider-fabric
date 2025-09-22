@@ -20,7 +20,9 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
+	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -251,6 +253,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 							[]attr.Value{
 								types.StringValue(string(fabcore.ScheduleTypeDaily)),
 								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+								types.StringValue(string(fabcore.ScheduleTypeMonthly)),
 							}),
 					},
 				},
@@ -278,6 +281,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 							[]attr.Value{
 								types.StringValue(string(fabcore.ScheduleTypeDaily)),
 								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+								types.StringValue(string(fabcore.ScheduleTypeMonthly)),
 							}),
 						supersetvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
 							[]attr.Value{
@@ -297,7 +301,10 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
 					Validators: []validator.Set{
-						setvalidator.SizeAtMost(10),
+						setvalidator.SizeAtMost(7),
+						setvalidator.ValueStringsAre(
+							stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleDayOfWeekValues(), true)...),
+						),
 						supersetvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
@@ -306,10 +313,144 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 							[]attr.Value{
 								types.StringValue(string(fabcore.ScheduleTypeCron)),
 								types.StringValue(string(fabcore.ScheduleTypeDaily)),
+								types.StringValue(string(fabcore.ScheduleTypeMonthly)),
 							}),
 					},
 				},
 				DataSource: &schemaD.SetAttribute{
+					Computed: true,
+				},
+			},
+			"recurrence": superschema.Int32Attribute{
+				Common: &schemaR.Int32Attribute{
+					MarkdownDescription: "Specifies the monthly job repeat interval. For example, when set to 1 the job is triggered every month.",
+				},
+				Resource: &schemaR.Int32Attribute{
+					Optional: true,
+					Validators: []validator.Int32{
+						int32validator.Between(1, 12),
+						superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeMonthly)),
+							}),
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ScheduleTypeDaily)),
+								types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+								types.StringValue(string(fabcore.ScheduleTypeCron)),
+							}),
+					},
+				},
+				DataSource: &schemaD.Int32Attribute{
+					Computed: true,
+				},
+			},
+			"occurrence": occurrenceSchema(),
+		},
+	}
+}
+
+func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel] {
+	return superschema.SuperSingleNestedAttributeOf[occurrenceModel]{
+		Common: &schemaR.SingleNestedAttribute{
+			MarkdownDescription: "A date for triggering the job.",
+		},
+		Resource: &schemaR.SingleNestedAttribute{
+			Optional: true,
+			Validators: []validator.Object{
+				superobjectvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+					[]attr.Value{
+						types.StringValue(string(fabcore.ScheduleTypeMonthly)),
+					}),
+				superobjectvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("type"),
+					[]attr.Value{
+						types.StringValue(string(fabcore.ScheduleTypeDaily)),
+						types.StringValue(string(fabcore.ScheduleTypeWeekly)),
+						types.StringValue(string(fabcore.ScheduleTypeCron)),
+					}),
+			},
+		},
+		DataSource: &schemaD.SingleNestedAttribute{
+			Computed: true,
+		},
+		Attributes: map[string]superschema.Attribute{
+			"occurrence_type": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "An enumerator that lists the day for triggering jobs.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleOccurrenceTypeValues(), true)...),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"day_of_month": superschema.Int32Attribute{
+				Common: &schemaR.Int32Attribute{
+					MarkdownDescription: "Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day.",
+				},
+				Resource: &schemaR.Int32Attribute{
+					Optional: true,
+					Validators: []validator.Int32{
+						int32validator.Between(1, 31),
+						superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
+							}),
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
+							}),
+					},
+				},
+				DataSource: &schemaD.Int32Attribute{
+					Computed: true,
+				},
+			},
+			"week_index": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleWeekIndexValues(), true)...),
+						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
+							}),
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
+							}),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"weekday": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Days of the week.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleWeekIndexValues(), true)...),
+						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
+							}),
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
+							}),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
 					Computed: true,
 				},
 			},

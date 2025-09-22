@@ -455,7 +455,7 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	jobType := itemjobscheduler.JobTypeActions["dataflow"][0]
 	dataflowResourceHCL, dataflowResourceFQN := dataflowResource(t, workspaceID)
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
-	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeDaily)
+	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeMonthly)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{ // Create and Read
 		// Create and Read
@@ -506,6 +506,11 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 							"end_date_time":   entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
 							"type":            string(*entityUpdate.Configuration.GetScheduleConfig().Type),
 							"times":           []string{"10:00"},
+							"recurrence":      1,
+							"occurrence": map[string]any{
+								"occurrence_type": string(fabcore.OccurrenceTypeDayOfMonth),
+								"day_of_month":    15,
+							},
 						},
 					},
 				)),
@@ -516,7 +521,7 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "owner.type"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.start_date_time", entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeDaily)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeMonthly)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.times.0", "10:00"),
 			),
 		},

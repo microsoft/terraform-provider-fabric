@@ -150,6 +150,8 @@ func NewRandomScheduleConfig(scheduleType fabcore.ScheduleType) fabcore.Schedule
 		return NewRandomWeeklyScheduleConfig()
 	case fabcore.ScheduleTypeCron:
 		return NewRandomCronScheduleConfig()
+	case fabcore.ScheduleTypeMonthly:
+		return NewRandomMonthlyScheduleConfig()
 	default:
 		panic("Unsupported Schedule type") // lintignore:R009
 	}
@@ -196,17 +198,29 @@ func NewRandomWeeklyScheduleConfig() *fabcore.WeeklyScheduleConfig {
 	}
 }
 
+func NewRandomMonthlyScheduleConfig() *fabcore.MonthlyScheduleConfig {
+	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
+
+	return &fabcore.MonthlyScheduleConfig{
+		StartDateTime:   to.Ptr(time.Now().UTC()),
+		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
+		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
+		Type:            to.Ptr(fabcore.ScheduleTypeMonthly),
+		Times: []string{
+			timeStr,
+		},
+		Recurrence: to.Ptr(testhelp.RandomIntRange(int32(1), int32(12))),
+		Occurrence: &fabcore.DayOfMonth{
+			OccurrenceType: to.Ptr(fabcore.OccurrenceTypeDayOfMonth),
+			DayOfMonth:     to.Ptr(testhelp.RandomIntRange(int32(1), int32(31))),
+		},
+	}
+}
+
 func NewRandomOwner() *fabcore.Principal {
 	return &fabcore.Principal{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Type:        to.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
-		ServicePrincipalProfileDetails: &fabcore.PrincipalServicePrincipalProfileDetails{
-			ParentPrincipal: &fabcore.Principal{
-				ID:   to.Ptr(testhelp.RandomUUID()),
-				Type: to.Ptr(fabcore.PrincipalTypeServicePrincipal),
-			},
-		},
+		ID:   to.Ptr(testhelp.RandomUUID()),
+		Type: to.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
 	}
 }
 
