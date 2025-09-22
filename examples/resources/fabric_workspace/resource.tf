@@ -17,3 +17,22 @@ resource "fabric_workspace" "example2" {
     type = "SystemAssigned"
   }
 }
+
+# Workspace with Domain Assignment
+data "fabric_domain" "example" {
+  display_name = "example"
+}
+
+resource "fabric_workspace" "example3" {
+  display_name = "example3"
+  description  = "Example Workspace 3 with Domain"
+  domain_id    = data.fabric_domain.example.id
+}
+
+# Workspace with both Capacity and Domain
+resource "fabric_workspace" "example4" {
+  display_name = "example4"
+  description  = "Example Workspace 4 with Capacity and Domain"
+  capacity_id  = data.fabric_capacity.example.id
+  domain_id    = data.fabric_domain.example.id
+}
