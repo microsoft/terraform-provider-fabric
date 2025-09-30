@@ -96,28 +96,12 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	reqCreate.set(plan)
 
-	respCreate, err := r.client.CreateDomainPreview(ctx, true, reqCreate.CreateDomainRequest, nil)
+	respCreate, err := r.client.CreateDomain(ctx, ItemTypeInfo.IsPreview, reqCreate.CreateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	state.set(respCreate.DomainPreview)
-
-	if (!plan.ContributorsScope.IsNull() && !plan.ContributorsScope.IsUnknown()) && plan.ContributorsScope.ValueString() != string(fabadmin.ContributorsScopeTypeAllTenant) &&
-		plan.ParentDomainID.IsNull() {
-		tflog.Trace(ctx, "setting "+r.TypeInfo.Name+" contributors scope")
-
-		var reqUpdate requestUpdateDomain
-
-		reqUpdate.set(plan)
-
-		respUpdate, err := r.client.UpdateDomainPreview(ctx, state.ID.ValueString(), true, reqUpdate.UpdateDomainRequestPreview, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		state.set(respUpdate.DomainPreview)
-	}
+	state.set(respCreate.Domain)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -196,12 +180,12 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 
 	reqUpdate.set(plan)
 
-	respUpdate, err := r.client.UpdateDomainPreview(ctx, plan.ID.ValueString(), true, reqUpdate.UpdateDomainRequestPreview, nil)
+	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	plan.set(respUpdate.DomainPreview)
+	plan.set(respUpdate.Domain)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -268,12 +252,12 @@ func (r *resourceDomain) ImportState(ctx context.Context, req resource.ImportSta
 }
 
 func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) diag.Diagnostics {
-	respGet, err := r.client.GetDomainPreview(ctx, model.ID.ValueString(), true, nil)
+	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), ItemTypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
-	model.set(respGet.DomainPreview)
+	model.set(respGet.Domain)
 
 	return nil
 }

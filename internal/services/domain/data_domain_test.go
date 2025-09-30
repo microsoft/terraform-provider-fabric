@@ -67,7 +67,7 @@ func TestUnit_DomainDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "contributors_scope", (*string)(entity.ContributorsScope)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "default_label_id", entity.DefaultLabelID),
 			),
 		},
 		// read by id - not found

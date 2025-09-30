@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Domains",
 	Types:          "domains",
 	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
