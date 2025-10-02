@@ -66,6 +66,18 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - invalid uuid - domain_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"domain_id":    "invalid uuid",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
 		// error - missing capacity_id if identity enabled is true
 		{
 			ResourceName: testResourceItemFQN,
