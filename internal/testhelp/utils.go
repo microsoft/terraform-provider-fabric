@@ -166,7 +166,7 @@ func TypeName(providerName, typeName string) string {
 	return fmt.Sprintf("%s_%s", providerName, typeName)
 }
 
-// ResourceFQN ia a helper function to create a resource FQN.
+// ResourceFQN is a helper function to create a resource FQN.
 func ResourceFQN(providerName, typeName, resourceName string) string {
 	return fmt.Sprintf("%s.%s", TypeName(providerName, typeName), resourceName)
 }
@@ -176,7 +176,7 @@ func DataSourceFQN(providerName, typeName, dataSourceName string) string {
 	return fmt.Sprintf("data.%s.%s", TypeName(providerName, typeName), dataSourceName)
 }
 
-// EphemeralResourceFQN is a helper function to create a ephemeral resource FQN.
+// EphemeralResourceFQN is a helper function to create an ephemeral resource FQN.
 func EphemeralResourceFQN(providerName, typeName, ephemeralResource string) string {
 	return fmt.Sprintf("ephemeral.%s.%s", TypeName(providerName, typeName), ephemeralResource)
 }
