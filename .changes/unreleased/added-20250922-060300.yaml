@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_digital_twin_builder_flow` Data Source
+time: 2025-09-22T06:03:00.556439143Z
+custom:
+    Issue: "661"
