@@ -148,7 +148,7 @@ type RetryConfig struct {
 	Operation     string
 }
 
-// RetryOperation executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
+// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
 // This will retry indefinitely until the operation succeeds or encounters a non-retryable error.
 func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
 	var result T

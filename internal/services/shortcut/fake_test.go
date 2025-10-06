@@ -23,7 +23,7 @@ func fakeShortcutsFunc() func(workspaceID, itemID string, options *fabcore.OneLa
 		resp = azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Shortcuts: fabcore.Shortcuts{Value: GetAllStoredShortcuts()}}, nil)
 
-		return
+		return resp
 	}
 }
 
@@ -40,7 +40,7 @@ func fakeGetShortcutFunc() func(ctx context.Context, workspaceID, itemID, path, 
 			resp.SetResponse(http.StatusNotFound, fabcore.OneLakeShortcutsClientGetShortcutResponse{}, nil)
 		}
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -97,7 +97,7 @@ func fakeDeleteShortcutFunc() func(ctx context.Context, workspaceID, itemID, sho
 			resp.SetResponse(http.StatusNotFound, struct{}{}, nil)
 		}
 
-		return
+		return resp, errResp
 	}
 }
 
