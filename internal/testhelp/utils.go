@@ -161,37 +161,37 @@ func EphemeralResourceHeader(ephemeralResourceType, ephemeralResourceName string
 	return fmt.Sprintf(f, ephemeralResourceType, ephemeralResourceName)
 }
 
-// Helper function to create a base type name.
+// TypeName is a helper function to create a base type name.
 func TypeName(providerName, typeName string) string {
 	return fmt.Sprintf("%s_%s", providerName, typeName)
 }
 
-// Helper function to create a resource FQN.
+// ResourceFQN ia a helper function to create a resource FQN.
 func ResourceFQN(providerName, typeName, resourceName string) string {
 	return fmt.Sprintf("%s.%s", TypeName(providerName, typeName), resourceName)
 }
 
-// Helper function to create a data source FQN.
+// DataSourceFQN is a helper function to create a data source FQN.
 func DataSourceFQN(providerName, typeName, dataSourceName string) string {
 	return fmt.Sprintf("data.%s.%s", TypeName(providerName, typeName), dataSourceName)
 }
 
-// Helper function to create a ephemeral resource FQN.
+// EphemeralResourceFQN is a helper function to create a ephemeral resource FQN.
 func EphemeralResourceFQN(providerName, typeName, ephemeralResource string) string {
 	return fmt.Sprintf("ephemeral.%s.%s", TypeName(providerName, typeName), ephemeralResource)
 }
 
-// Helper function to create a function Header.
+// FunctionHeader is a helper function to create a function Header.
 func FunctionHeader(providerName, functionName string) string {
 	return fmt.Sprintf(`provider::%s::%s`, providerName, functionName)
 }
 
-// Helper function to create a reference by FQN.
+// RefByFQN is a helper function to create a reference by FQN.
 func RefByFQN(objectFQN, path string) string {
 	return fmt.Sprintf("${%s.%s}", objectFQN, path)
 }
 
-// Helper function to deep copy a map.
+// CopyMap is a helper function to deep copy a map.
 func CopyMap(src map[string]any) map[string]any {
 	cp := make(map[string]any)
 

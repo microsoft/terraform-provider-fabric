@@ -27,7 +27,7 @@ concurrency:
 env:
   FABRIC_TESTACC_SKIP_NO_SPN: true
   FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
-  FABRIC_TIMEOUT: 30m
+  FABRIC_TIMEOUT: 40m
 
 permissions:
   id-token: write

@@ -660,10 +660,6 @@ func TestUnit_WorkspaceGitResource_GitHub(t *testing.T) {
 }
 
 func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("Temporary skip")
-	}
-
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
