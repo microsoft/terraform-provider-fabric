@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_tag` Data Source
+time: 2025-10-12T22:54:00.605805004Z
+custom:
+    Issue: "678"
