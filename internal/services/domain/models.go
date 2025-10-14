@@ -28,7 +28,7 @@ type baseDomainModel struct {
 	ContributorsScope types.String     `tfsdk:"contributors_scope"`
 }
 
-func (to *baseDomainModel) set(from fabadmin.Domain) {
+func (to *baseDomainModel) set(from fabadmin.DomainPreview) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
@@ -55,7 +55,7 @@ type dataSourceDomainsModel struct {
 	Timeouts timeoutsD.Value                                    `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.Domain) diag.Diagnostics {
+func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.DomainPreview) diag.Diagnostics {
 	slice := make([]*baseDomainModel, 0, len(from))
 
 	for _, entity := range from {
@@ -88,7 +88,7 @@ func (to *requestCreateDomain) set(from resourceDomainModel) {
 }
 
 type requestUpdateDomain struct {
-	fabadmin.UpdateDomainRequest
+	fabadmin.UpdateDomainRequestPreview
 }
 
 func (to *requestUpdateDomain) set(from resourceDomainModel) {

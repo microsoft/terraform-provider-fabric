@@ -46,7 +46,7 @@ This section provides a sample configuration that you can experiment with to pro
       required_providers {
         fabric = {
           source  = "microsoft/fabric"
-          version = "1.5.0"
+          version = "1.6.0"
         }
       }
     }
@@ -101,7 +101,7 @@ This section provides a sample configuration that you can experiment with to pro
     }
     ```
 
-1. Create a file named notebook.ipynb in the same folder and copy the content of [this example notebook](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/single_tech_samples/fabric/fabric_ci_cd/src/notebooks/nb-city-safety.ipynb).
+1. Create a file named notebook.ipynb in the same folder and copy the content of [this example notebook](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/fabric/fabric_ci_cd/src/notebooks/nb-city-safety.ipynb).
 1. Create a file named `notebook.tf` and add the following hcl code to represent a Notebook. This Notebook references the workspace created in step 4, specifically using the workspace id.
 
     ```terraform

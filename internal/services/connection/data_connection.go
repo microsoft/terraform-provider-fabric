@@ -25,9 +25,6 @@ var (
 )
 
 type dataSourceConnection struct {
-	Name        string
-	TFName      string
-	IsPreview   bool
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ConnectionsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
@@ -64,7 +61,7 @@ func (d *dataSourceConnection) Configure(_ context.Context, req datasource.Confi
 
 	d.pConfigData = pConfigData
 
-	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.Name, d.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
 
