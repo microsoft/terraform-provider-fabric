@@ -151,7 +151,7 @@ func TestAcc_ExternalDataShareDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", externalDataShareID),
 			),
 		},
 	},

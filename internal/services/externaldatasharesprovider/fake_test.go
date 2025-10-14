@@ -21,7 +21,7 @@ func fakeGetExternalDataShareProvider(
 		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse{ExternalDataShare: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -36,7 +36,7 @@ func fakeListExternalDataSharesProvider(
 			},
 		}, nil)
 
-		return
+		return resp
 	}
 }
 
@@ -47,7 +47,7 @@ func fakeCreateExternalDataShareProvider(
 		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse]{}
 		resp.SetResponse(http.StatusCreated, fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse{ExternalDataShare: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -56,7 +56,7 @@ func fakeDeleteExternalDataShareProvider() func(ctx context.Context, workspaceID
 		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
