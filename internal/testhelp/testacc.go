@@ -33,6 +33,7 @@ var NewTestAccCase = func(t *testing.T, testResource *string, preCheck func(*tes
 	return newTestAccCase(t, testResource, preCheck, steps)
 }
 
+// TestAccPreCheck is a function to run prior to any acceptance test case execution.
 // lintignore:AT003
 func TestAccPreCheck(t *testing.T) {
 	t.Helper()
@@ -41,6 +42,7 @@ func TestAccPreCheck(t *testing.T) {
 	// function.
 }
 
+// TestAccPreCheckNoEnvs is a function to unset FABRIC_* environment variables prior to any acceptance test case execution.
 // lintignore:AT003
 func TestAccPreCheckNoEnvs(t *testing.T) {
 	t.Helper()
@@ -109,6 +111,7 @@ func getTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderS
 	}
 }
 
+// TestAccWorkspaceResource returns the HCL configuration and fully qualified name for a test workspace resource given a capacity ID.
 // lintignore:AT003
 func TestAccWorkspaceResource(t *testing.T, capacityID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
 	t.Helper()
