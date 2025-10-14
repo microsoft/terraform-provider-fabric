@@ -56,6 +56,31 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
 		},
+		// error - no required attribute name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "name" is required, but no definition was found.`),
+		},
+		// error - no required attribute path
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "path" is required, but no definition was found.`),
+		},
 		// error - no required attribute target
 		{
 			ResourceName: testResourceItemFQN,
@@ -69,6 +94,48 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "target" is required, but no definition was found.`),
+		},
+		// error - name - empty string
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         "",
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
+		},
+		// error - name - invalid (only whitespaces)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"name":         "          ",
+					"path":         testhelp.RandomName(),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
 		},
 		// error - workspace_id - invalid UUID
 		{
@@ -263,6 +330,7 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 				if len(is) != 1 {
 					return errors.New("expected one instance state")
 				}
+
 				expectedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, *entity.Path, *entity.Name)
 
 				if is[0].ID != expectedID {

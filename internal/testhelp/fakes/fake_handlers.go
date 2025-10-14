@@ -367,20 +367,6 @@ func handleListPager[TEntity, TOptions, TResponse any](
 	}
 }
 
-func handleList[TEntity, TOptions, TResponse any](
-	handler *typedHandler[TEntity],
-	listTransformer listTransformer[TEntity, TResponse],
-	f *func(ctx context.Context, options *TOptions) (resp azfake.Responder[TResponse], errResp azfake.ErrorResponder),
-) {
-	if f == nil {
-		return
-	}
-
-	*f = func(_ context.Context, options *TOptions) (azfake.Responder[TResponse], azfake.ErrorResponder) {
-		return listWithFilter[TEntity, TOptions](handler, nil, listTransformer)("", options)
-	}
-}
-
 func createLROWithOptionalDefinition[TEntity, TOptions, TCreateRequest, TDefinition, TResponse any](
 	handler *typedHandler[TEntity],
 	creator creatorWithParentID[TCreateRequest, TEntity],

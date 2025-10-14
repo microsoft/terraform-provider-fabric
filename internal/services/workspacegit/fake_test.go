@@ -20,7 +20,7 @@ func fakeGitConnect() func(ctx context.Context, workspaceID string, gitConnectRe
 		resp = azfake.Responder[fabcore.GitClientConnectResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.GitClientConnectResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -47,7 +47,7 @@ func fakeGitInitializeGitConnection(
 		resp = azfake.PollerResponder[fabcore.GitClientInitializeConnectionResponse]{}
 		resp.SetTerminalResponse(http.StatusOK, fabcore.GitClientInitializeConnectionResponse{InitializeGitConnectionResponse: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -64,7 +64,7 @@ func fakeGitUpdateFromGit() func(ctx context.Context, workspaceID string, update
 		resp = azfake.PollerResponder[fabcore.GitClientUpdateFromGitResponse]{}
 		resp.SetTerminalResponse(http.StatusOK, fabcore.GitClientUpdateFromGitResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -73,7 +73,7 @@ func fakeGitCommitToGit() func(ctx context.Context, workspaceID string, commitTo
 		resp = azfake.PollerResponder[fabcore.GitClientCommitToGitResponse]{}
 		resp.SetTerminalResponse(http.StatusOK, fabcore.GitClientCommitToGitResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -82,7 +82,7 @@ func fakeGitDisconnect() func(ctx context.Context, workspaceID string, options *
 		resp = azfake.Responder[fabcore.GitClientDisconnectResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.GitClientDisconnectResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -93,7 +93,7 @@ func fakeGitGetStatus( //nolint:unused
 		resp = azfake.PollerResponder[fabcore.GitClientGetStatusResponse]{}
 		resp.SetTerminalResponse(http.StatusOK, fabcore.GitClientGetStatusResponse{GitStatusResponse: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -104,7 +104,7 @@ func fakeGitGetConnection(
 		resp = azfake.Responder[fabcore.GitClientGetConnectionResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.GitClientGetConnectionResponse{GitConnection: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -119,7 +119,7 @@ func fakeGitGetMyGitCredentials(
 			nil,
 		)
 
-		return
+		return resp, errResp
 	}
 }
 

@@ -27,6 +27,11 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		}
 	}
 
+	possiblePrincipalTypeValues := utils.RemoveSlicesByValues(
+		fabcore.PossiblePrincipalTypeValues(),
+		[]fabcore.PrincipalType{fabcore.PrincipalTypeEntireTenant},
+	)
+
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
 			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
@@ -114,7 +119,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The type of the principal.",
 							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossiblePrincipalTypeValues(), true)...),
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(possiblePrincipalTypeValues, true)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
