@@ -19,6 +19,6 @@ func fakeCreateOrUpdateOneLakeDataAccessSecurity() func(ctx context.Context, wor
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateDataAccessRolesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateDataAccessRolesResponse{Etag: to.Ptr(testhelp.RandomName())}, nil)
 
-		return
+		return resp, errResp
 	}
 }
