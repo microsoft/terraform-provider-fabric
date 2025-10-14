@@ -394,6 +394,32 @@ function Set-DeploymentPipeline {
   return $result
 }
 
+function Set-ExternalDataShare {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceID,
+    [Parameter(Mandatory = $true)]
+    [string]$LakehouseID
+  )
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceID/items/$LakehouseID/externalDataShares"
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq "test@example.com" }
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $LakehouseID" -Level 'WARN'
+    $payload = @{
+      paths     = @(
+        "Tables/publicholidays"
+      )
+      recipient = @{
+        userPrincipalName = "test@example.com"
+      }
+    }
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceID/items/$LakehouseID/externalDataShares" -Payload $payload).Response
+  }
+
+  return $result
+}
+
 function Set-DeploymentPipelineRoleAssignment {
   param(
     [Parameter(Mandatory = $true)]
@@ -1254,6 +1280,10 @@ if (!$result) {
   Write-Log -Message "Lakehouse: https://app.fabric.microsoft.com/groups/$($wellKnown['WorkspaceRS'].id)/lakehouses/$($wellKnown['LakehouseRS']['id'])" -Level 'WARN'
 }
 
+$externalDataShare = Set-ExternalDataShare -WorkspaceID $workspace.id -LakehouseID $wellKnown['Lakehouse'].id
+$wellKnown['ExternalDataShare'] = @{
+  id = $externalDataShare.id
+}
 
 # Create MirroredDatabase if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MirroredDatabase'])"
