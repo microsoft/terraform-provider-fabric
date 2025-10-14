@@ -79,7 +79,19 @@ function Set-ExternalDataShare {
   )
 
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
-  $result = $results.Response.value
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq "test@example.com" }
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
+    $payload = @{
+      paths     = @(
+        "Tables/publicholidays"
+      )
+      recipient = @{
+        userPrincipalName = "test@example.com"
+      }
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares" -Payload $payload).Response
+  }
   return $result
 }
 
@@ -1354,19 +1366,6 @@ $wellKnown['DeploymentPipeline'] = @{
   stages      = $deploymentPipeline.stages
 }
 
-$externalDataShares = Set-ExternalDataShare -WorkspaceId $wellKnown['WorkspaceDS'].id -ItemId $wellKnown['Lakehouse'].id
-$wellKnown['ExternalDataShare'] = @{
-  id                = $externalDataShares[0].id
-  workspaceId       = $externalDataShares[0].workspaceId
-  itemId            = $externalDataShares[0].itemId
-  invitationUrl     = $externalDataShares[0].invitationUrl
-  expirationTimeUtc = $externalDataShares[0].expirationTimeUtc
-  status            = $externalDataShares[0].status
-  recipient         = $externalDataShares[0].recipient
-  creatorPrincipal  = $externalDataShares[0].creatorPrincipal
-  paths             = $externalDataShares[0].paths
-}
-
 Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 
 # Create Eventstream if not exists
@@ -1459,6 +1458,13 @@ $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
   displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
+}
+
+$externalDataShares = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id
+$wellKnown['ExternalDataShare'] = @{
+  id          = $externalDataShares[0].id
+  workspaceId = $externalDataShares[0].workspaceId
+  itemId      = $externalDataShares[0].itemId
 }
 
 # Create Resource Group if not exists
