@@ -22,7 +22,7 @@ func fakeListDeploymentPipelineRoleAssignments(
 		resp = azfake.PagerResponder[fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.DeploymentPipelinesClientListDeploymentPipelineRoleAssignmentsResponse{DeploymentPipelineRoleAssignments: exampleResp}, nil)
 
-		return
+		return resp
 	}
 }
 
@@ -41,7 +41,7 @@ func fakeCreateDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse{DeploymentPipelineRoleAssignment: response}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -51,7 +51,7 @@ func fakeDeleteDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientDeleteDeploymentPipelineRoleAssignmentResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 

@@ -20,7 +20,7 @@ func fakeLakehouseTablesFunc(
 		resp = azfake.PagerResponder[fablakehouse.TablesClientListTablesResponse]{}
 		resp.AddPage(http.StatusOK, fablakehouse.TablesClientListTablesResponse{Tables: lakehouseTables}, nil)
 
-		return
+		return resp
 	}
 }
 
