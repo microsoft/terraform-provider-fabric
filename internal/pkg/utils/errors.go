@@ -37,7 +37,7 @@ const (
 	OperationUndefined Operation = "undefined"
 )
 
-// DefaultErrorHandler implements the ErrorHandler interface with standard error handling logic.
+// ErrorHandler implements the ErrorHandler interface with standard error handling logic.
 type ErrorHandler struct{}
 
 // NewErrorHandler creates a new default error handler.
@@ -329,7 +329,7 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	return nil
 }
 
-// For backward compatibility.
+// IsErr for backward compatibility.
 func IsErr(diags diag.Diagnostics, err error) bool {
 	return NewErrorHandler().HasError(diags, err)
 }
