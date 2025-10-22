@@ -147,7 +147,7 @@ func (d *dataSourceTag) getByID(ctx context.Context, model *dataSourceTagModel) 
 
 	diags.AddError(
 		common.ErrorReadHeader,
-		"Unable to find Workspace with 'display_name': "+model.DisplayName.ValueString(),
+		"Unable to find Tag with 'display_name': "+model.DisplayName.ValueString(),
 	)
 
 	return diags
