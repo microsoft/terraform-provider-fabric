@@ -27,8 +27,7 @@ type baseTagModel struct {
 }
 
 type scopeModel struct {
-	Type     types.String     `tfsdk:"type"`
-	DomainID customtypes.UUID `tfsdk:"domain_id"`
+	Type types.String `tfsdk:"type"`
 }
 
 type dataSourceTagsModel struct {
@@ -88,20 +87,50 @@ func (to *scopeModel) set(from fabadmin.TagScopeClassification) {
 RESOURCE
 */
 
-type baseResourceTagModel struct {
-	DisplayName types.String `tfsdk:"display_name"`
-}
-
 type resourceTagsModel struct {
-	ID          customtypes.UUID                                        `tfsdk:"id"`
-	DisplayName types.String                                            `tfsdk:"display_name"`
-	Tags        supertypes.SetNestedObjectValueOf[baseResourceTagModel] `tfsdk:"tags"`
-	Scope       supertypes.SingleNestedObjectValueOf[scopeModel]        `tfsdk:"scope"`
-	Timeouts    timeoutsR.Value                                         `tfsdk:"timeouts"`
+	baseTagModel
+
+	Tags supertypes.SetNestedObjectValueOf[baseTagModel] `tfsdk:"tags"`
+
+	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateTags struct {
 	fabadmin.CreateTagsRequest
+}
+
+func (to *resourceTagsModel) set(ctx context.Context, from []fabadmin.Tag) diag.Diagnostics {
+	to.Tags = supertypes.NewSetNestedObjectValueOfNull[baseTagModel](ctx)
+	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
+
+	slice := make([]*baseTagModel, 0, len(from))
+
+	for _, entity := range from {
+		item := &baseTagModel{}
+		if diags := item.setValue(ctx, entity); diags.HasError() {
+			return diags
+		}
+
+		slice = append(slice, item)
+	}
+
+	return to.Tags.Set(ctx, slice)
+}
+
+func (to *baseTagModel) setValue(ctx context.Context, from fabadmin.Tag) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+
+	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
+
+	scope := &scopeModel{
+		Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
+	}
+	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
+		return diags
+	}
+
+	return nil
 }
 
 func (to *requestCreateTags) set(ctx context.Context, from resourceTagsModel) diag.Diagnostics {

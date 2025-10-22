@@ -1,9 +1,11 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package tags
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator" //revive:disable-line:import-alias-naming
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"    //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -15,7 +17,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func resource_itemSchema() superschema.Schema { //revive:disable-line:flag-parameter
+func resourceItemSchema() superschema.Schema { //revive:disable-line:flag-parameter
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
 			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
@@ -28,6 +30,7 @@ func resource_itemSchema() superschema.Schema { //revive:disable-line:flag-param
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
+					Optional: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -38,26 +41,60 @@ func resource_itemSchema() superschema.Schema { //revive:disable-line:flag-param
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
 				},
 				Resource: &schemaR.StringAttribute{
+					Computed: true,
 					Optional: true,
 					Validators: []validator.String{
 						stringvalidator.LengthAtMost(40),
 					},
 				},
 			},
-			"tags": superschema.SuperSetNestedAttributeOf[baseResourceTagModel]{
+			"tags": superschema.SuperSetNestedAttributeOf[baseTagModel]{
 				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "List of tags associated with the resource.",
 				},
 				Resource: &schemaR.SetNestedAttribute{
-					Required: true,
+					Optional: true,
 				},
 				Attributes: map[string]superschema.Attribute{
+					"id": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
+						},
+						Resource: &schemaR.StringAttribute{
+							Computed: true,
+							Optional: true,
+						},
+					},
 					"display_name": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
 						},
 						Resource: &schemaR.StringAttribute{
-							Required: true,
+							Optional: true,
+							Computed: true,
+						},
+					},
+					"scope": superschema.SuperSingleNestedAttributeOf[scopeModel]{
+						Common: &schemaR.SingleNestedAttribute{
+							MarkdownDescription: "Represents a tag scope.",
+						},
+						Resource: &schemaR.SingleNestedAttribute{
+							Optional: true,
+							Computed: true,
+						},
+						Attributes: map[string]superschema.Attribute{
+							"type": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "Scope Type.",
+									Validators: []validator.String{
+										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTagScopeTypeValues(), true)...),
+									},
+								},
+								Resource: &schemaR.StringAttribute{
+									Optional: true,
+									Computed: true,
+								},
+							},
 						},
 					},
 				},
@@ -70,9 +107,6 @@ func resource_itemSchema() superschema.Schema { //revive:disable-line:flag-param
 					Optional: true,
 					Computed: true,
 				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Computed: true,
-				},
 				Attributes: map[string]superschema.Attribute{
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
@@ -83,21 +117,6 @@ func resource_itemSchema() superschema.Schema { //revive:disable-line:flag-param
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
-					"domain_id": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "Domain ID.",
-						},
-						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
 							Computed: true,
 						},
 					},

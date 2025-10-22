@@ -130,6 +130,7 @@ func (d *dataSourceTag) getByID(ctx context.Context, model *dataSourceTagModel) 
 	})
 
 	var diags diag.Diagnostics
+
 	pager := d.client.NewListTagsPager(nil)
 	for pager.More() {
 		page, err := pager.NextPage(ctx)
@@ -177,7 +178,7 @@ func (d *dataSourceTag) getByDisplayName(ctx context.Context, model *dataSourceT
 
 	diags.AddError(
 		common.ErrorReadHeader,
-		"Unable to find Workspace with 'display_name': "+model.DisplayName.ValueString(),
+		"Unable to find Tag with 'display_name': "+model.DisplayName.ValueString(),
 	)
 
 	return diags

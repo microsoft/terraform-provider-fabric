@@ -9,13 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -44,7 +42,7 @@ func (r *resourceTag) Metadata(_ context.Context, _ resource.MetadataRequest, re
 }
 
 func (r *resourceTag) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_itemSchema().GetResource(ctx)
+	resp.Schema = resourceItemSchema().GetResource(ctx)
 }
 
 func (r *resourceTag) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -76,7 +74,7 @@ func (r *resourceTag) Create(ctx context.Context, req resource.CreateRequest, re
 		"action": "start",
 	})
 
-	var plan resourceTagsModel
+	var plan, state resourceTagsModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -90,18 +88,25 @@ func (r *resourceTag) Create(ctx context.Context, req resource.CreateRequest, re
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	state.Timeouts = plan.Timeouts
+
 	var reqCreate requestCreateTags
 
 	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.BulkCreateTags(ctx, reqCreate.CreateTagsRequest, nil)
+	respCreate, err := r.client.BulkCreateTags(ctx, reqCreate.CreateTagsRequest, nil)
+
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	if resp.Diagnostics.Append(state.set(ctx, respCreate.Tags)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
@@ -156,16 +161,13 @@ func (r *resourceTag) Update(ctx context.Context, req resource.UpdateRequest, re
 		"action": "start",
 	})
 
-	var plan, state resourceTagsModel
+	var plan resourceTagsModel
 
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-
-	if resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	timeout, diags := state.Timeouts.Update(ctx, r.pConfigData.Timeout)
+	timeout, diags := plan.Timeouts.Update(ctx, r.pConfigData.Timeout)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -177,8 +179,12 @@ func (r *resourceTag) Update(ctx context.Context, req resource.UpdateRequest, re
 
 	reqUpdate.set(plan)
 
-	_, err := r.client.UpdateTag(ctx, state.ID.ValueString(), reqUpdate.UpdateTagRequest, nil)
+	respUpdate, err := r.client.UpdateTag(ctx, plan.ID.ValueString(), reqUpdate.UpdateTagRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(plan.setValue(ctx, respUpdate.Tag)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -212,9 +218,23 @@ func (r *resourceTag) Delete(ctx context.Context, req resource.DeleteRequest, re
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err := r.client.DeleteTag(ctx, state.ID.ValueString(), nil)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
-		return
+	if state.ID.IsNull() {
+		tags, diags := state.Tags.Get(ctx)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		for _, tag := range tags {
+			_, err := r.client.DeleteTag(ctx, tag.ID.ValueString(), nil)
+			if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
+	} else {
+		_, err := r.client.DeleteTag(ctx, state.ID.ValueString(), nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.State.RemoveResource(ctx)
@@ -225,20 +245,12 @@ func (r *resourceTag) Delete(ctx context.Context, req resource.DeleteRequest, re
 }
 
 func (r *resourceTag) get(ctx context.Context, model *resourceTagsModel) diag.Diagnostics {
-	// Get requested tags from model
 	tagsRequested, diags := model.Tags.Get(ctx)
 	if diags.HasError() {
 		return diags
 	}
 
-	// Build a set of requested display names for quick lookup
-	requested := make(map[string]struct{}, len(tagsRequested))
-	for _, t := range tagsRequested {
-		requested[t.DisplayName.ValueString()] = struct{}{}
-	}
-
-	// Prepare result slice
-	found := make([]*baseResourceTagModel, 0)
+	var found []*baseTagModel
 
 	pager := r.client.NewListTagsPager(nil)
 	for pager.More() {
@@ -248,23 +260,17 @@ func (r *resourceTag) get(ctx context.Context, model *resourceTagsModel) diag.Di
 		}
 
 		for _, entity := range page.Value {
-			if _, ok := requested[*entity.DisplayName]; ok {
-				item := &baseResourceTagModel{
-					DisplayName: types.StringPointerValue(entity.DisplayName),
+			for _, requestedTag := range tagsRequested {
+				if *entity.DisplayName == requestedTag.DisplayName.ValueString() {
+					item := &baseTagModel{}
+					item.set(ctx, entity)
+
+					found = append(found, item)
 				}
-
-				// set ID if present
-				itemID := customtypes.NewUUIDPointerValue(entity.ID)
-				// assign ID into model by creating a temporary struct field
-				// baseResourceTagModel doesn't include ID in resource model; if needed, user can extend
-				_ = itemID
-
-				found = append(found, item)
 			}
 		}
 	}
 
-	// Set the found tags back into the model
 	if diags := model.Tags.Set(ctx, found); diags.HasError() {
 		return diags
 	}

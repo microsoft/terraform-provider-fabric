@@ -1,6 +1,6 @@
-#Example with default scope (Tenant)
+# Create example
 resource "fabric_tag" "example" {
-  create_tags_request = [
+  tags = [
     {
       display_name = "example"
     },
@@ -8,4 +8,10 @@ resource "fabric_tag" "example" {
       display_name = "example2"
     }
   ]
+}
+
+#Update
+resource "fabric_tag" "example_update" {
+  id           = "00000000-0000-0000-0000-000000000000"
+  display_name = "example_updated"
 }

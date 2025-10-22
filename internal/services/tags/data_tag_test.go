@@ -101,9 +101,24 @@ func TestAcc_TagDataSource(t *testing.T) {
 	entity := testhelp.WellKnown()["Tags"].(map[string]any)
 	entityID := entity["id"].(string)
 	entityDisplayName := entity["displayName"].(string)
+	entityScopeType := entity["scopeType"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read
+		// read by id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": entityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "scope.type", entityScopeType),
+			),
+		},
+		// read by display name
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -114,6 +129,7 @@ func TestAcc_TagDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "scope.type", entityScopeType),
 			),
 		},
 	},

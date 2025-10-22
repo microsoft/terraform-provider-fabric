@@ -16,6 +16,9 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestAcc_TagResource_CRUD(t *testing.T) {
+	entity := testhelp.WellKnown()["Tags"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityUpdateDisplayName := testhelp.RandomName()
 	entity1DisplayName := testhelp.RandomName()
 	entity2DisplayName := testhelp.RandomName()
 
@@ -37,9 +40,26 @@ func TestAcc_TagResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.0.display_name", entity1DisplayName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.0.display_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.1.display_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.0.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.1.id"),
 			),
 		},
-	},
-	))
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"id":           entityID,
+					"display_name": entityUpdateDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+			),
+		},
+	}))
 }

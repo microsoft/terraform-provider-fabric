@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package tags
 
 import (
@@ -81,18 +84,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTagScopeTypeValues(), true)...),
 							},
-						},
-						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-					},
-					"domain_id": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "Domain ID.",
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,

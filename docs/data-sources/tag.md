@@ -62,5 +62,4 @@ Optional:
 
 Read-Only:
 
-- `domain_id` (String) Domain ID.
 - `type` (String) Scope Type. Value must be one of : `Domain`, `Tenant`.
