@@ -1,0 +1,5 @@
+kind: changed
+body: Enhanced `fabric_workspace_git` resource by adding new allow_override_items attribute
+time: 2025-10-29T12:42:08.211811035Z
+custom:
+    Issue: "704"
