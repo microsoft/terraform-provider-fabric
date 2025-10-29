@@ -103,6 +103,7 @@ type resourceWorkspaceGitModel struct {
 	baseWorkspaceGitModel
 
 	InitializationStrategy types.String    `tfsdk:"initialization_strategy"`
+	AllowOverrideItems     types.Bool      `tfsdk:"allow_override_items"`
 	Timeouts               timeoutsR.Value `tfsdk:"timeouts"`
 }
 
@@ -211,14 +212,16 @@ type requestGitUpdateFrom struct {
 	fabcore.UpdateFromGitRequest
 }
 
-func (to *requestGitUpdateFrom) set(remoteCommitHash, conflictResolutionPolicy *string) {
+func (to *requestGitUpdateFrom) set(remoteCommitHash, conflictResolutionPolicy *string, allowOverrideItems *bool) {
 	policy := fabcore.ConflictResolutionPolicyPreferWorkspace
 	if *conflictResolutionPolicy != "None" {
 		policy = fabcore.ConflictResolutionPolicy(*conflictResolutionPolicy)
 	}
 
 	to.RemoteCommitHash = remoteCommitHash
-	to.Options = &fabcore.UpdateOptions{}
+	to.Options = &fabcore.UpdateOptions{
+		AllowOverrideItems: allowOverrideItems,
+	}
 	to.ConflictResolution = &fabcore.WorkspaceConflictResolution{
 		ConflictResolutionPolicy: azto.Ptr(policy),
 		ConflictResolutionType:   azto.Ptr(fabcore.ConflictResolutionTypeWorkspace),

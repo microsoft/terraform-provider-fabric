@@ -120,7 +120,7 @@ func (r *resourceWorkspaceGit) Create(ctx context.Context, req resource.CreateRe
 	case fabcore.RequiredActionUpdateFromGit: // Update from Git.
 		var reqGitUpdateFrom requestGitUpdateFrom
 
-		reqGitUpdateFrom.set(gitInitResp.RemoteCommitHash, plan.InitializationStrategy.ValueStringPointer())
+		reqGitUpdateFrom.set(gitInitResp.RemoteCommitHash, plan.InitializationStrategy.ValueStringPointer(), plan.AllowOverrideItems.ValueBoolPointer())
 
 		_, err = r.client.UpdateFromGit(ctx, plan.WorkspaceID.ValueString(), reqGitUpdateFrom.UpdateFromGitRequest, nil)
 	case fabcore.RequiredActionNone:
