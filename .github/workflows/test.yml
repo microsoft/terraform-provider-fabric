@@ -27,7 +27,7 @@ concurrency:
 env:
   FABRIC_TESTACC_SKIP_NO_SPN: true
   FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
-  FABRIC_TIMEOUT: 30m
+  FABRIC_TIMEOUT: 40m
 
 permissions:
   id-token: write
@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           cache: true
@@ -144,7 +144,7 @@ jobs:
   #             - 'go.sum'
 
   #     - name: 🚧 Setup Go
-  #       uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+  #       uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
   #       with:
   #         go-version-file: go.mod
   #         cache: true
@@ -196,7 +196,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           cache: true
@@ -271,7 +271,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           cache: true
@@ -340,7 +340,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           cache: true
@@ -402,6 +402,9 @@ jobs:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.TESTACC_SPN_TF_CLIENT_ID }}
+          FABRIC_CONNECTION_SQL_SERVER_USERNAME: ${{ secrets.TESTACC_SQL_SERVER_USERNAME }}
+          FABRIC_CONNECTION_SQL_SERVER_PASSWORD: ${{ secrets.TESTACC_SQL_SERVER_PASSWORD }}
+          FABRIC_CONNECTION_SQL_SERVER_URL: ${{ secrets.TESTACC_SQL_SERVER_URL }}
           # ARM_SUBSCRIPTION_ID: ${{ secrets.TESTACC_SUBSCRIPTION_ID }}
 
       - name: 🧪 Run tests
@@ -415,6 +418,9 @@ jobs:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.TESTACC_SPN_OT_CLIENT_ID }}
+          FABRIC_CONNECTION_SQL_SERVER_USERNAME: ${{ secrets.TESTACC_SQL_SERVER_USERNAME }}
+          FABRIC_CONNECTION_SQL_SERVER_PASSWORD: ${{ secrets.TESTACC_SQL_SERVER_PASSWORD }}
+          FABRIC_CONNECTION_SQL_SERVER_URL: ${{ secrets.TESTACC_SQL_SERVER_URL }}
           # ARM_SUBSCRIPTION_ID: ${{ secrets.TESTACC_SUBSCRIPTION_ID }}
 
       - name: 📤 Upload test results
@@ -507,7 +513,7 @@ jobs:
       #     files: ./testresults.xml
 
       - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -522,7 +528,7 @@ jobs:
 
       - name: 🔎 Find comment
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -531,14 +537,14 @@ jobs:
 
       - name: 📝 Create comment
         if: steps.fc.outputs.comment-id == '' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: code-coverage-results.md
 
       - name: 📝 Update comment
         if: steps.fc.outputs.comment-id != '' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           body-path: code-coverage-results.md

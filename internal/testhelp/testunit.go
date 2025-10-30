@@ -96,10 +96,17 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 		}
 	}
 
+	// writeOnly specific configurations
+	if strings.Contains(strings.ToLower(t.Name()), "writeonly") {
+		testCase.TerraformVersionChecks = []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_11_0),
+		}
+	}
+
 	return testCase
 }
 
-// getTestUnitProtoV6ProviderFactories are used to instantiate a provider during
+// GetTestUnitProtoV6ProviderFactories are used to instantiate a provider during
 // unit testing. The factory function will be invoked for every Terraform
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
