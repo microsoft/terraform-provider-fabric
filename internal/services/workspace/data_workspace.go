@@ -35,7 +35,7 @@ type dataSourceWorkspace struct {
 	TypeInfo       tftypeinfo.TFTypeInfo
 }
 
-// NewDataSource creates a new data source for the Fabric Workspace.
+// NewDataSourceWorkspace creates a new data source for the Fabric Workspace.
 func NewDataSourceWorkspace() datasource.DataSource {
 	return &dataSourceWorkspace{
 		TypeInfo: ItemTypeInfo,

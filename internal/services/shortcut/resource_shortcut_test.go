@@ -330,6 +330,7 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 				if len(is) != 1 {
 					return errors.New("expected one instance state")
 				}
+
 				expectedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, *entity.Path, *entity.Name)
 
 				if is[0].ID != expectedID {

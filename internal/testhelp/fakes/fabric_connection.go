@@ -353,7 +353,7 @@ func NewRandomConnection() fabcore.ConnectionClassification {
 	}
 }
 
-// ========== Connectivity Type Functions ==========.
+// NewRandomShareableCloudConnection creates a new random ShareableCloudConnection.
 func NewRandomShareableCloudConnection() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
 		ID:                            to.Ptr(testhelp.RandomUUID()),

@@ -21,7 +21,7 @@ func fakeWorkspaceRoleAssignment(
 		resp = azfake.Responder[fabcore.WorkspacesClientGetWorkspaceRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetWorkspaceRoleAssignmentResponse{WorkspaceRoleAssignment: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -47,7 +47,7 @@ func fakeWorkspaceRoleAssignments(
 		resp = azfake.PagerResponder[fabcore.WorkspacesClientListWorkspaceRoleAssignmentsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.WorkspacesClientListWorkspaceRoleAssignmentsResponse{WorkspaceRoleAssignments: exampleResp}, nil)
 
-		return
+		return resp
 	}
 }
 
