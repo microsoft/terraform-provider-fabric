@@ -128,7 +128,7 @@ Required:
 
 - `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
 - `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
-- `type` (String) A string represents the type of the plan. Additional planType types may be added over time. Value must be one of : `Cron`, `Daily`, `Monthly`, `Weekly`.
+- `type` (String) A string represents the type of the plan. Value must be one of : `Cron`, `Daily`, `Monthly`, `Weekly`.
 
 Optional:
 
@@ -144,13 +144,13 @@ Optional:
 
 Required:
 
-- `occurrence_type` (String) An enumerator that lists the day for triggering jobs. Value must be one of : `DayOfMonth`, `OrdinalWeekday`.
+- `occurrence_type` (String) An enumerator that lists the day for triggering jobs. Value must be one of : `DayOfMonth`, `OrdinalWeekday`. If the [`<`](#<) attribute is set this attribute is **REQUIRED**.
 
 Optional:
 
-- `day_of_month` (Number) Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day. Value must be between 1 and 31. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `DayOfMonth` this attribute is **REQUIRED**. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `OrdinalWeekday` this attribute is **NULL**.
-- `week_index` (String) Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day. Value must be one of : `Fifth`, `First`, `Fourth`, `Second`, `Third`. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
-- `weekday` (String) Days of the week. Value must be one of : `Fifth`, `First`, `Fourth`, `Second`, `Third`. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`configuration.occurrence.occurrence_type`](#configuration.occurrence.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
+- `day_of_month` (Number) Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day. Value must be between 1 and 31. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **NULL**.
+- `week_index` (String) The week of the month. Value must be one of : `Fifth`, `First`, `Fourth`, `Second`, `Third`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
+- `weekday` (String) Week day for triggering jobs. Value must be one of : `Friday`, `Monday`, `Saturday`, `Sunday`, `Thursday`, `Tuesday`, `Wednesday`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -170,7 +170,7 @@ Optional:
 Read-Only:
 
 - `id` (String) The principal's ID.
-- `type` (String) The type of the principal. Additional principal types may be added over time.
+- `type` (String) The type of the principal.
 
 ## Import
 

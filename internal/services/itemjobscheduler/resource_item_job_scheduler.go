@@ -87,6 +87,12 @@ func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	if diags := validateSchedulerConfig(ctx, plan); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	}
+
 	timeout, diags := plan.Timeouts.Create(ctx, r.pConfigData.Timeout)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -182,6 +188,12 @@ func (r *resourceItemJobScheduler) Update(ctx context.Context, req resource.Upda
 	var plan resourceJobScheduleModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if diags := validateSchedulerConfig(ctx, plan); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
 		return
 	}
 
@@ -369,4 +381,67 @@ func (r *resourceItemJobScheduler) get(ctx context.Context, model *resourceJobSc
 	}
 
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), respGet.ItemSchedule)
+}
+
+func validateSchedulerConfig(ctx context.Context, data resourceJobScheduleModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if data.Configuration.IsNull() || data.Configuration.IsUnknown() {
+		return diags
+	}
+
+	config, configDiags := data.Configuration.Get(ctx)
+	if configDiags.HasError() {
+		diags.Append(configDiags...)
+
+		return diags
+	}
+
+	if config.Type.ValueString() == string(fabcore.ScheduleTypeMonthly) {
+		occurrence, occDiags := config.Occurrence.Get(ctx)
+		if occDiags.HasError() {
+			diags.Append(occDiags...)
+
+			return diags
+		}
+
+		occurrenceType := occurrence.OccurrenceType.ValueString()
+
+		switch occurrenceType {
+		case string(fabcore.OccurrenceTypeDayOfMonth):
+			if occurrence.DayOfMonth.IsNull() {
+				diags.AddAttributeError(
+					path.Root("configuration").AtName("occurrence").AtName("day_of_month"),
+					"Missing day_of_month",
+					"When occurrence_type is DayOfMonth, day_of_month must be specified",
+				)
+			}
+		case string(fabcore.OccurrenceTypeOrdinalWeekday):
+			if occurrence.WeekIndex.IsNull() {
+				diags.AddAttributeError(
+					path.Root("configuration").AtName("occurrence").AtName("week_index"),
+					"Missing week_index",
+					"When occurrence_type is OrdinalWeekday, week_index must be specified",
+				)
+			}
+
+			if occurrence.Weekday.IsNull() {
+				diags.AddAttributeError(
+					path.Root("configuration").AtName("occurrence").AtName("weekday"),
+					"Missing weekday",
+					"When occurrence_type is OrdinalWeekday, weekday must be specified",
+				)
+			}
+		default:
+			diags.AddAttributeError(
+				path.Root("configuration").AtName("occurrence").AtName("occurrence_type"),
+				"Invalid occurrence_type",
+				fmt.Sprintf("occurrence_type must be either %s or %s",
+					string(fabcore.OccurrenceTypeDayOfMonth),
+					string(fabcore.OccurrenceTypeOrdinalWeekday)),
+			)
+		}
+	}
+
+	return diags
 }

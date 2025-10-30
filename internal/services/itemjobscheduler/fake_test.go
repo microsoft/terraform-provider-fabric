@@ -24,7 +24,7 @@ func fakeItemSchedulesFunc() func(workspaceID, itemID, jobType string, options *
 		resp = azfake.PagerResponder[fabcore.JobSchedulerClientListItemSchedulesResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.JobSchedulerClientListItemSchedulesResponse{ItemSchedules: fabcore.ItemSchedules{Value: GetAllStoredItemSchedules()}}, nil)
 
-		return
+		return resp
 	}
 }
 
@@ -41,7 +41,7 @@ func fakeGetItemScheduleFunc() func(ctx context.Context, workspaceID, itemID, jo
 			resp.SetResponse(http.StatusNotFound, fabcore.JobSchedulerClientGetItemScheduleResponse{}, nil)
 		}
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -54,7 +54,7 @@ func fakeGetFabricItem(
 		}
 		resp.SetResponse(http.StatusOK, fabcore.ItemsClientGetItemResponse{Item: item}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -77,7 +77,7 @@ func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 		fakeTestUpsert(workspaceID, itemSchedule)
 		resp.SetResponse(http.StatusCreated, fabcore.JobSchedulerClientCreateItemScheduleResponse{ItemSchedule: itemSchedule}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -122,13 +122,13 @@ func fakeDeleteItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Item not found"))
 			resp.SetResponse(http.StatusNotFound, fabcore.JobSchedulerClientDeleteItemScheduleResponse{}, nil)
 
-			return
+			return resp, errResp
 		}
 
 		delete(fakeItemScheduleStore, id)
 		resp.SetResponse(http.StatusOK, fabcore.JobSchedulerClientDeleteItemScheduleResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 

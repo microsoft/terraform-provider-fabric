@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package itemjobscheduler_test
 
 import (
@@ -85,6 +88,119 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "configuration" is required, but no definition was found.`),
 		},
+		// error - unexpected attribute
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+					"unexpected_attr": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// error - times - invalid string format
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeDaily),
+						"times":           []string{"9:0:0"},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error - workspace_id - invalid UUID
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "invalid uuid",
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error  - not a valid date time - start date time with UTC+3 offset
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().In(time.FixedZone("UTC+3", 3*60*60)).Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error  - not a valid item type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Error: Invalid Item Type`),
+		},
+	}))
+}
+
+func TestUnit_ItemJobSchedulerResource_ConfigurationMissingAttributes(t *testing.T) {
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// missing required attribute for cron type - interval
 		{
 			ResourceName: testResourceItemFQN,
@@ -166,7 +282,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.weekdays"),
 		},
-		// error - times - invalid string format
+		// missing required attribute for monthly type - times
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -180,78 +296,13 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"configuration": map[string]any{
 						"start_date_time": time.Now().UTC().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
-						"type":            string(fabcore.ScheduleTypeDaily),
-						"times":           []string{"9:0:0"},
+						"type":            string(fabcore.ScheduleTypeMonthly),
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.times"),
 		},
-		// error - workspace_id - invalid UUID
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "invalid uuid",
-					"item_id":      testhelp.RandomUUID(),
-					"job_type":     "test",
-					"enabled":      true,
-
-					"configuration": map[string]any{
-						"start_date_time": time.Now().Format(time.RFC3339),
-						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
-						"type":            string(fabcore.ScheduleTypeCron),
-						"interval":        testhelp.RandomIntRange(1, 60),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
-		},
-		// error - unexpected attribute
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"item_id":      testhelp.RandomUUID(),
-					"job_type":     "test",
-					"enabled":      true,
-
-					"configuration": map[string]any{
-						"start_date_time": time.Now().Format(time.RFC3339),
-						"end_date_time":   time.Now().Add(24 * time.Hour).Format(time.RFC3339),
-						"type":            string(fabcore.ScheduleTypeCron),
-						"interval":        testhelp.RandomIntRange(1, 60),
-					},
-					"unexpected_attr": "test",
-				},
-			),
-			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
-		},
-		// error  - not a valid date time - start date time with UTC+3 offset
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"item_id":      testhelp.RandomUUID(),
-					"job_type":     "test",
-					"enabled":      true,
-
-					"configuration": map[string]any{
-						"start_date_time": time.Now().In(time.FixedZone("UTC+3", 3*60*60)).Format(time.RFC3339),
-						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
-						"type":            string(fabcore.ScheduleTypeCron),
-						"interval":        testhelp.RandomIntRange(1, 60),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
-		},
-		// error  - not a valid item type
+		// missing required attribute for monthly type - recurrence
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -265,12 +316,132 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 					"configuration": map[string]any{
 						"start_date_time": time.Now().UTC().Format(time.RFC3339),
 						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
-						"type":            string(fabcore.ScheduleTypeCron),
-						"interval":        testhelp.RandomIntRange(1, 60),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Error: Invalid Item Type`),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.recurrence"),
+		},
+		// missing required attribute for monthly type - occurrence
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
+						"recurrence":      1,
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute configuration.occurrence"),
+		},
+		// missing required attribute for monthly type - occurrence.occurrence_type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
+						"recurrence":      1,
+						"occurrence":      map[string]any{},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("attribute \"occurrence_type\" is required"),
+		},
+		// missing required attribute for monthly type - occurrence.day_of_month
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
+						"recurrence":      1,
+						"occurrence": map[string]any{
+							"occurrence_type": string(fabcore.OccurrenceTypeDayOfMonth),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("When occurrence_type is DayOfMonth, day_of_month must be specified"),
+		},
+		// missing required attribute for monthly type - occurrence.week_index
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
+						"recurrence":      1,
+						"occurrence": map[string]any{
+							"occurrence_type": string(fabcore.OccurrenceTypeOrdinalWeekday),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("When occurrence_type is OrdinalWeekday, week_index must be specified"),
+		},
+		// missing required attribute for monthly type - occurrence.weekday
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeMonthly),
+						"times":           []string{"09:00"},
+						"recurrence":      1,
+						"occurrence": map[string]any{
+							"occurrence_type": string(fabcore.OccurrenceTypeOrdinalWeekday),
+							"week_index":      string(fabcore.WeekIndexFirst),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("When occurrence_type is OrdinalWeekday, weekday must be specified"),
 		},
 	}))
 }

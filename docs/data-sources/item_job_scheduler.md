@@ -68,7 +68,7 @@ Read-Only:
 - `recurrence` (Number) Specifies the monthly job repeat interval. For example, when set to 1 the job is triggered every month.
 - `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed.
-- `type` (String) A string represents the type of the plan. Additional planType types may be added over time.
+- `type` (String) A string represents the type of the plan.
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed.
 
 <a id="nestedatt--configuration--occurrence"></a>
@@ -79,8 +79,8 @@ Read-Only:
 
 - `day_of_month` (Number) Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day.
 - `occurrence_type` (String) An enumerator that lists the day for triggering jobs.
-- `week_index` (String) Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day.
-- `weekday` (String) Days of the week.
+- `week_index` (String) The week of the month.
+- `weekday` (String) Week day for triggering jobs.
 
 <a id="nestedatt--owner"></a>
 
@@ -89,4 +89,4 @@ Read-Only:
 Read-Only:
 
 - `id` (String) The principal's ID.
-- `type` (String) The type of the principal. Additional principal types may be added over time.
+- `type` (String) The type of the principal.

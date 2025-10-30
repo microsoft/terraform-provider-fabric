@@ -169,6 +169,9 @@ func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConf
 func (to *occurrenceModel) set(from fabcore.MonthlyOccurrenceClassification) diag.Diagnostics {
 	monthlyOcc := from.GetMonthlyOccurrence()
 	to.OccurrenceType = types.StringPointerValue((*string)(monthlyOcc.OccurrenceType))
+	to.DayOfMonth = types.Int32Null()
+	to.Weekday = types.StringNull()
+	to.WeekIndex = types.StringNull()
 
 	switch entity := from.(type) {
 	case *fabcore.DayOfMonth:
@@ -317,6 +320,60 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			LocalTimeZoneID: &localTimeZoneID,
 			Type:            &configurationType,
 		}
+	case fabcore.ScheduleTypeMonthly:
+		times, diags := configuration.Times.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		timesSlice := make([]string, 0, len(times))
+		for _, t := range times {
+			timesSlice = append(timesSlice, t.ValueString())
+		}
+
+		occurrence, diags := configuration.Occurrence.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+
+		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
+		switch occurrenceType {
+		case fabcore.OccurrenceTypeDayOfMonth:
+			occurrenceConfig = &fabcore.DayOfMonth{
+				DayOfMonth:     occurrence.DayOfMonth.ValueInt32Pointer(),
+				OccurrenceType: &occurrenceType,
+			}
+		case fabcore.OccurrenceTypeOrdinalWeekday:
+			weekday := fabcore.DayOfWeek(occurrence.Weekday.ValueString())
+			weekIndex := fabcore.WeekIndex(occurrence.WeekIndex.ValueString())
+			occurrenceConfig = &fabcore.OrdinalWeekday{
+				Weekday:        &weekday,
+				WeekIndex:      &weekIndex,
+				OccurrenceType: &occurrenceType,
+			}
+		default:
+			var diags diag.Diagnostics
+
+			diags.AddError(
+				"Unsupported Monthly Occurrence type",
+				fmt.Sprintf("The Monthly Occurrence type '%T' is not supported.", occurrenceType),
+			)
+
+			return diags
+		}
+
+		reqConfiguration = &fabcore.MonthlyScheduleConfig{
+			Times:           timesSlice,
+			Recurrence:      configuration.Recurrence.ValueInt32Pointer(),
+			Occurrence:      occurrenceConfig,
+			StartDateTime:   &startDateTime,
+			EndDateTime:     &endDateTime,
+			LocalTimeZoneID: &localTimeZoneID,
+			Type:            &configurationType,
+		}
+
 	default:
 		diags.AddError(
 			"Unsupported Configuration type",

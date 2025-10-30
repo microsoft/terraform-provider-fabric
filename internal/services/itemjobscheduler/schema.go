@@ -29,6 +29,12 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
+const (
+	datePattern = `\d{4}-\d{2}-\d{2}`
+	timePattern = `\d{2}:\d{2}:\d{2}`
+	utcPattern  = `^` + datePattern + `T` + timePattern + `Z$`
+)
+
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 
@@ -162,7 +168,7 @@ func ownerSchema() superschema.SuperSingleNestedAttributeOf[principalModel] {
 			},
 			"type": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The type of the principal. Additional principal types may be added over time.",
+					MarkdownDescription: "The type of the principal.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
@@ -196,7 +202,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
-							regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`),
+							regexp.MustCompile(utcPattern),
 							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
 						),
 					},
@@ -214,7 +220,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
-							regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`),
+							regexp.MustCompile(utcPattern),
 							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
 						),
 					},
@@ -225,7 +231,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 			},
 			"type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "A string represents the type of the plan. Additional planType types may be added over time.",
+					MarkdownDescription: "A string represents the type of the plan.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -382,6 +388,8 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleOccurrenceTypeValues(), true)...),
+						// Add validator to require it when occurrence block is present
+						superstringvalidator.RequireIfAttributeIsSet(path.MatchRelative().AtParent()),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
@@ -396,11 +404,11 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 					Optional: true,
 					Validators: []validator.Int32{
 						int32validator.Between(1, 31),
-						superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						superint32validator.RequireIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
 							}),
-						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
 							}),
@@ -412,17 +420,17 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 			},
 			"week_index": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Specifies a date to trigger the job, using a value between 1 and 31. For example, 2 means the second day of the month. The date must be valid. If an invalid date is provided, such as February 31st, it will automatically skip to the month that includes the 31st day.",
+					MarkdownDescription: "The week of the month.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleWeekIndexValues(), true)...),
-						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
 							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
 							}),
@@ -434,17 +442,17 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 			},
 			"weekday": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Days of the week.",
+					MarkdownDescription: "Week day for triggering jobs.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleWeekIndexValues(), true)...),
-						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleDayOfWeekValues(), true)...),
+						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeOrdinalWeekday)),
 							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("configuration").AtName("occurrence").AtName("occurrence_type"),
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("occurrence_type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.OccurrenceTypeDayOfMonth)),
 							}),
