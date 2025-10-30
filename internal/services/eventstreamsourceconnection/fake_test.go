@@ -34,7 +34,7 @@ func fakeGetEventstreamSourceConnection(
 			resp.SetResponse(http.StatusOK, entity, nil)
 		}
 
-		return
+		return resp, errResp
 	}
 }
 

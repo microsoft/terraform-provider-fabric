@@ -75,7 +75,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `settings.json`, `valueSets/valueSet1.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `settings.json`, `valueSets/*.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Variable Library description.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
 
