@@ -4,6 +4,8 @@
 package domainra
 
 import (
+	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
+
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
@@ -15,4 +17,19 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
 	IsPreview:      true,
 	IsSPNSupported: true,
+}
+
+const (
+	// DomainRoleAdmins- Domain admins.
+	DomainRoleAdmins fabadmin.DomainRole = "Admins"
+	// DomainRoleContributors - Domain contributors.
+	DomainRoleContributors fabadmin.DomainRole = "Contributors"
+)
+
+// PossibleDomainRoleValues returns the possible values for the DomainRole const type.
+func PossibleDomainRoleValues() []fabadmin.DomainRole {
+	return []fabadmin.DomainRole{
+		DomainRoleAdmins,
+		DomainRoleContributors,
+	}
 }

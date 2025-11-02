@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
+
 package shortcut
 
 import (
@@ -108,6 +109,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
+					},
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(`\S`),
+							"Name must contain at least one non-whitespace character.",
+						),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
