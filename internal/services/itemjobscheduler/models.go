@@ -139,6 +139,7 @@ func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConf
 		to.Times.Set(ctx, times)
 
 		occurrence := supertypes.NewSingleNestedObjectValueOfNull[occurrenceModel](ctx)
+
 		if entity.Occurrence != nil {
 			occurrenceModel := &occurrenceModel{}
 			if diags := occurrenceModel.set(entity.Occurrence); diags.HasError() {
@@ -339,6 +340,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
+
 		switch occurrenceType {
 		case fabcore.OccurrenceTypeDayOfMonth:
 			occurrenceConfig = &fabcore.DayOfMonth{
@@ -489,6 +491,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
+
 		switch occurrenceType {
 		case fabcore.OccurrenceTypeDayOfMonth:
 			occurrenceConfig = &fabcore.DayOfMonth{
