@@ -1872,8 +1872,9 @@ function Set-AzureDatabricks {
   $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
     $_.RoleDefinitionName -eq "Contributor"
   }
-  Write-Log "Assigning Contributor role to the principal on Databricks workspace $($databricksWorkspace.Name)"
+
   if (!$existingAssignment) {
+    Write-Log -Message "Assigning Contributor role to the principal on Databricks workspace $($databricksWorkspace.Name)"
     New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
   }
 
@@ -1881,8 +1882,8 @@ function Set-AzureDatabricks {
   $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $SG.Id -ErrorAction SilentlyContinue | Where-Object {
     $_.RoleDefinitionName -eq "Contributor"
   }
-  Write-Log "Assigning Contributor role to the SPNs security group $($SG.DisplayName) on Databricks workspace $($databricksWorkspace.Name)"
   if (!$existingAssignment) {
+    Write-Log -Message "Assigning Contributor role to the SPNs security group $($SG.DisplayName) on Databricks workspace $($databricksWorkspace.Name)"
     New-AzRoleAssignment -ObjectId $SG.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
   }
 
@@ -1900,9 +1901,10 @@ $databricksWorkspace = Set-AzureDatabricks `
   -SubscriptionId $wellKnown['Azure'].subscriptionId
 
 $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/azuredatabricks/catalogs?databricksWorkspaceConnectionId=$Env:FABRIC_TESTACC_WELLKNOWN_DATABRICKS_WS_CONNECTION_ID"
+$catalogName = ""
+
 if ($results.Response.value.Count -gt 0) {
     $catalogName = $results.Response.value[0].name
-    Write-Log -Message "Catalog Name: $catalogName" -Level 'INFO'
 } else {
     Write-Log -Message "No catalogs found in response" -Level 'WARN'
 }
