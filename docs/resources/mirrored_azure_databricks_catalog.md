@@ -83,7 +83,7 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_configuration" {
 
 Any changes to this configuration will result in recreation of the Mirrored Azure Databricks Catalog. (see [below for nested schema](#nestedatt--configuration))
 
-- `definition` (Attributes Map) Definition parts. Read more about [Mirrored Azure Databricks Catalog definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mirrored-azuredatabricks-unitycatalog-definition). Accepted path keys: **Default** format: `mirroringAzureDatabricksCatalog.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Mirrored Azure Databricks Catalog definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mirrored-azuredatabricks-unitycatalog-definition). Accepted path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Azure Databricks Catalog description.
 - `format` (String) The Mirrored Azure Databricks Catalog format. Possible values: `Default`
@@ -98,11 +98,14 @@ Any changes to this configuration will result in recreation of the Mirrored Azur
 
 ### Nested Schema for `configuration`
 
-Optional:
+Required:
 
 - `catalog_name` (String) Azure databricks catalog name.
 - `databricks_workspace_connection_id` (String) The Azure databricks workspace connection id.
-- `mirroring_mode` (String) Mirroring mode. Additional mirroringMode may be added over time.
+- `mirroring_mode` (String) Mirroring mode.
+
+Optional:
+
 - `storage_connection_id` (String) The storage connection id.
 
 <a id="nestedatt--definition"></a>
@@ -140,11 +143,11 @@ Optional:
 
 Read-Only:
 
-- `auto_sync` (String) Auto sync the catalog. Additional autoSync types may be added over time.
+- `auto_sync` (String) Auto sync the catalog.
 - `catalog_name` (String) Azure databricks catalog name.
 - `databricks_workspace_connection_id` (String) The Azure databricks workspace connection id.
 - `mirror_status` (String) The MirroredAzureDatabricksCatalog sync status.
-- `mirroring_mode` (String) Mirroring mode. Additional mirroringMode may be added over time.
+- `mirroring_mode` (String) Mirroring mode.
 - `onelake_tables_path` (String) OneLake path to the MirroredAzureDatabricksCatalog tables directory.
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--properties--sql_endpoint_properties))
 - `storage_connection_id` (String) The storage connection id.
@@ -167,7 +170,7 @@ Read-Only:
 
 - `error_info` (Attributes) The error information. (see [below for nested schema](#nestedatt--properties--sync_details--error_info))
 - `last_sync_date_time` (String) The last sync date time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
-- `status` (String) The sync status. Additional status may be added over time.
+- `status` (String) The sync status.
 
 <a id="nestedatt--properties--sync_details--error_info"></a>
 

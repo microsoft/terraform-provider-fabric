@@ -27,7 +27,7 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 
 var (
 	azureDatabricks                 = testhelp.WellKnown()["AzureDatabricks"].(map[string]any)
-	databricksWorkspaceConnectionId = azureDatabricks["databricksWorkspaceConnectionId"].(string)
+	databricksWorkspaceConnectionID = azureDatabricks["databricksWorkspaceConnectionId"].(string)
 	catalogName                     = azureDatabricks["catalogName"].(string)
 
 	testHelperDefinition = map[string]any{
@@ -35,7 +35,7 @@ var (
 			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
 			"tokens": map[string]any{
 				"CATALOG_NAME":                       catalogName,
-				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionId,
+				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionID,
 				"MIRRORING_MODE":                     "Partial",
 			},
 		},
@@ -46,7 +46,7 @@ var (
 			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
 			"tokens": map[string]any{
 				"CATALOG_NAME":                       catalogName,
-				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionId,
+				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionID,
 				"MIRRORING_MODE":                     "Full",
 			},
 		},
@@ -130,7 +130,7 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_Attributes(t *testing.T) {
 				)),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
-		// error - no required attributes
+		// error - invalid attribute combination
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -142,13 +142,30 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_Attributes(t *testing.T) {
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"definition":   testHelperDefinition,
 						"configuration": map[string]any{
-							"catalog_name": testhelp.RandomName(),
+							"catalog_name":                       testhelp.RandomName(),
+							"databricks_workspace_connection_id": testhelp.RandomUUID(),
+							"mirroring_mode":                     "Partial",
 						},
 					},
 				)),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 		},
-		// error - no required attributes
+		// error - missing configuration required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name":  "test",
+						"workspace_id":  "00000000-0000-0000-0000-000000000000",
+						"configuration": map[string]any{},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "configuration".`),
+		},
+		// error - invalid mirroring_mode
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -159,12 +176,32 @@ func TestUnit_MirroredAzureDatabricksCatalogResource_Attributes(t *testing.T) {
 						"display_name": "test",
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"configuration": map[string]any{
-							"catalog_name":   testhelp.RandomName(),
-							"mirroring_mode": "invalid mirroring mode",
+							"catalog_name":                       testhelp.RandomName(),
+							"databricks_workspace_connection_id": testhelp.RandomUUID(),
+							"mirroring_mode":                     "invalid mirroring mode",
 						},
 					},
 				)),
 			ExpectError: regexp.MustCompile(`Attribute configuration.mirroring_mode value must be one of`),
+		},
+		// error - invalid UUID
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": "test",
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"configuration": map[string]any{
+							"catalog_name":                       testhelp.RandomName(),
+							"databricks_workspace_connection_id": "test",
+							"mirroring_mode":                     "Partial",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 	}))
 }
@@ -647,7 +684,7 @@ func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	azureDatabricks := testhelp.WellKnown()["AzureDatabricks"].(map[string]any)
-	databricksWorkspaceConnectionId := azureDatabricks["databricksWorkspaceConnectionId"].(string)
+	databricksWorkspaceConnectionID := azureDatabricks["databricksWorkspaceConnectionId"].(string)
 	catalogName := azureDatabricks["catalogName"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
@@ -667,7 +704,7 @@ func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing
 						"display_name": entityCreateDisplayName,
 						"configuration": map[string]any{
 							"catalog_name":                       catalogName,
-							"databricks_workspace_connection_id": databricksWorkspaceConnectionId,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionID,
 							"mirroring_mode":                     "Partial",
 						},
 					},
@@ -697,7 +734,7 @@ func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing
 						"description":  entityUpdateDescription,
 						"configuration": map[string]any{
 							"catalog_name":                       catalogName,
-							"databricks_workspace_connection_id": databricksWorkspaceConnectionId,
+							"databricks_workspace_connection_id": databricksWorkspaceConnectionID,
 							"mirroring_mode":                     "Partial",
 						},
 					},

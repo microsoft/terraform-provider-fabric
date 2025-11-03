@@ -65,11 +65,11 @@ Read-Only:
 
 Read-Only:
 
-- `auto_sync` (String) Auto sync the catalog. Additional autoSync types may be added over time.
+- `auto_sync` (String) Auto sync the catalog.
 - `catalog_name` (String) Azure databricks catalog name.
 - `databricks_workspace_connection_id` (String) The Azure databricks workspace connection id.
 - `mirror_status` (String) The MirroredAzureDatabricksCatalog sync status.
-- `mirroring_mode` (String) Mirroring mode. Additional mirroringMode may be added over time.
+- `mirroring_mode` (String) Mirroring mode.
 - `onelake_tables_path` (String) OneLake path to the MirroredAzureDatabricksCatalog tables directory.
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--values--properties--sql_endpoint_properties))
 - `storage_connection_id` (String) The storage connection id.
@@ -92,7 +92,7 @@ Read-Only:
 
 - `error_info` (Attributes) The error information. (see [below for nested schema](#nestedatt--values--properties--sync_details--error_info))
 - `last_sync_date_time` (String) The last sync date time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
-- `status` (String) The sync status. Additional status may be added over time.
+- `status` (String) The sync status.
 
 <a id="nestedatt--values--properties--sync_details--error_info"></a>
 

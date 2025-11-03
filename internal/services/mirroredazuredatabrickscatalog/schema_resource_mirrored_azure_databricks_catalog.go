@@ -108,16 +108,16 @@ func getResourceMirroredAzureDatabricksCatalogConfigurationAttributes() map[stri
 	return map[string]schema.Attribute{
 		"catalog_name": schema.StringAttribute{
 			MarkdownDescription: "Azure databricks catalog name.",
-			Optional:            true,
+			Required:            true,
 		},
 		"databricks_workspace_connection_id": schema.StringAttribute{
 			MarkdownDescription: "The Azure databricks workspace connection id.",
-			Optional:            true,
+			Required:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 		"mirroring_mode": schema.StringAttribute{
 			MarkdownDescription: "Mirroring mode.",
-			Optional:            true,
+			Required:            true,
 			Validators: []validator.String{
 				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true)...),
 			},
