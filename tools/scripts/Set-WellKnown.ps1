@@ -1898,8 +1898,14 @@ $databricksWorkspace = Set-AzureDatabricks `
   -PricingTier 'premium' `
   -SG $SPNS_SG `
   -SubscriptionId $wellKnown['Azure'].subscriptionId
-Write-Log -Message "=== Databricks Workspace Details ===" -Level 'INFO'
-$databricksWorkspace | ConvertTo-Json -Depth 10
+
+$results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/azuredatabricks/catalogs?databricksWorkspaceConnectionId=$Env:FABRIC_TESTACC_WELLKNOWN_DATABRICKS_WS_CONNECTION_ID"
+if ($results.Response.value.Count -gt 0) {
+    $catalogName = $results.Response.value[0].name
+    Write-Log -Message "Catalog Name: $catalogName" -Level 'INFO'
+} else {
+    Write-Log -Message "No catalogs found in response" -Level 'WARN'
+}
 
 
 $wellKnown['AzureDatabricks'] = @{
@@ -1907,7 +1913,7 @@ $wellKnown['AzureDatabricks'] = @{
   name                            = $databricksWorkspace.Name
   workspaceUrl                    = $databricksWorkspace.Properties.workspaceUrl
   databricksWorkspaceConnectionId = $Env:FABRIC_TESTACC_WELLKNOWN_DATABRICKS_WS_CONNECTION_ID
-  catalogName                     = $databricksWorkspace.Name + "_$($databricksWorkspace.WorkspaceId)"
+  catalogName                     = $catalogName
 }
 
 # Save wellknown.json file
