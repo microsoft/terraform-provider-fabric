@@ -97,14 +97,12 @@ func (to *sqlEndpointPropertiesModel) set(from fabmirroredazuredatabrickscatalog
 func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabrickscatalog.SyncDetails) {
 	to.LastSyncDateTime = timetypes.NewRFC3339TimePointerValue(from.LastSyncDateTime)
 	to.Status = types.StringPointerValue((*string)(from.Status))
-
 	errorInfo := supertypes.NewSingleNestedObjectValueOfNull[errorInfoModel](ctx)
+
 	if from.ErrorInfo != nil {
-		errorInfoModel := &errorInfoModel{
-			ErrorCode:    types.StringPointerValue(from.ErrorInfo.ErrorCode),
-			ErrorDetails: types.StringPointerValue(from.ErrorInfo.ErrorDetails),
-			ErrorMessage: types.StringPointerValue(from.ErrorInfo.ErrorMessage),
-		}
+		errorInfoModel := &errorInfoModel{}
+
+		errorInfoModel.set(*from.ErrorInfo)
 
 		if diags := errorInfo.Set(ctx, errorInfoModel); diags.HasError() {
 			return
@@ -112,4 +110,10 @@ func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabr
 	}
 
 	to.ErrorInfo = errorInfo
+}
+
+func (to *errorInfoModel) set(from fabmirroredazuredatabrickscatalog.ErrorInfo) {
+	to.ErrorCode = types.StringPointerValue(from.ErrorCode)
+	to.ErrorDetails = types.StringPointerValue(from.ErrorDetails)
+	to.ErrorMessage = types.StringPointerValue(from.ErrorMessage)
 }
