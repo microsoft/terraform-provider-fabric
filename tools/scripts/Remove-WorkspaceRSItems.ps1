@@ -126,13 +126,7 @@ function Invoke-FabricRest {
   try {
     # Retrieve the Fabric access token
     try {
-      try {
-        $secureAccessToken = (Get-AzAccessToken -WarningAction SilentlyContinue -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com').Token
-      }
-      catch {
-        Write-Log -Message "Error retrieving Fabric access token: $($_.Exception.Message)" -Level 'ERROR'
-        throw
-      }
+      $secureAccessToken = (Get-AzAccessToken -WarningAction SilentlyContinue -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com').Token
     }
     catch {
       Write-Log -Message "Failed to retrieve access token." -Level 'ERROR'
