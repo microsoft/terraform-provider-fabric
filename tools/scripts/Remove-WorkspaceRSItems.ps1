@@ -353,7 +353,6 @@ function Remove-WorkspaceRSItems {
 
 # Main execution
 # Define an array of modules to install
-# $modules = @('Az.Accounts', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Resources', 'Az.Storage')
 $modules = @('Az.Accounts', 'Az.Fabric', 'pwsh-dotenv')
 
 # Loop through each module and install if not installed
