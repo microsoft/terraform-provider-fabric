@@ -371,6 +371,7 @@ if (
   are required environment variables.
 '@ `
     -Level 'ERROR'
+  return
 }
 
 
