@@ -37,6 +37,15 @@ var testHelperDefinition = map[string]any{
 	},
 }
 
+var testHelperDefinitionNoValueSets = map[string]any{
+	`"settings.json"`: map[string]any{
+		"source": "${local.path}/settings.json.tmpl",
+	},
+	`"variables.json"`: map[string]any{
+		"source": "${local.path}/variables.json.tmpl",
+	},
+}
+
 func TestUnit_VariableLibraryResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -232,6 +241,7 @@ func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+	entityCreateNoValueSetsName := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - no definition
@@ -284,6 +294,28 @@ func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+			),
+		},
+		// Create and Read - definition with definition - no valueSets
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateNoValueSetsName,
+						"format":       "Default",
+						"definition":   testHelperDefinitionNoValueSets,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateNoValueSetsName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),

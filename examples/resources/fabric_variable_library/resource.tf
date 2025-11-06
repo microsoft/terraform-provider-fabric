@@ -4,7 +4,7 @@ resource "fabric_variable_library" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
-# Example 2 - Item with definition bootstrapping only
+# Example 2 - Item with definition without valueSets
 resource "fabric_variable_library" "example_definition_bootstrap" {
   display_name              = "example"
   description               = "example with definition bootstrapping"
