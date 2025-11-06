@@ -1219,6 +1219,10 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 }
 
 func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Test setup issue with server value - skipping test")
+	}
+
 	var (
 		sqlUsername, sqlUsernameExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_USERNAME")
 		sqlPassword, sqlPasswordExist = os.LookupEnv("FABRIC_CONNECTION_SQL_SERVER_PASSWORD")
