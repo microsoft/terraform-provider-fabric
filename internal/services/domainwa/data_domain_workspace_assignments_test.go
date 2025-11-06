@@ -43,7 +43,7 @@ func TestUnit_DomainWorkspaceAssignmentsDataSource_Attributes(t *testing.T) {
 			},
 		}, nil)
 
-		return
+		return resp
 	}
 
 	entity := fakes.NewRandomDomain()

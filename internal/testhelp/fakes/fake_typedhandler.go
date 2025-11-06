@@ -70,22 +70,6 @@ func configureEntityPagerWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreat
 	handleDeleteWithSimpleID(handler, deleteFunction)
 }
 
-func configureEntityWithSimpleID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
-	handler *typedHandler[TEntity],
-	operations simpleIDOperations[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData],
-	getFunction *func(ctx context.Context, id string, options *TGetOptions) (resp azfake.Responder[TGetOutput], errResp azfake.ErrorResponder),
-	updateFunction *func(ctx context.Context, id string, updateRequest TUpdateData, options *TUpdateOptions) (resp azfake.Responder[TUpdateOutput], errResp azfake.ErrorResponder),
-	createFunction *func(ctx context.Context, createRequest TCreationData, options *TCreateOptions) (resp azfake.Responder[TCreateOutput], errResp azfake.ErrorResponder),
-	listFunction *func(ctx context.Context, options *TListOptions) (resp azfake.Responder[TListOutput], errResp azfake.ErrorResponder),
-	deleteFunction *func(ctx context.Context, id string, options *TDeleteOptions) (resp azfake.Responder[TDeleteResponse], errResp azfake.ErrorResponder),
-) {
-	handleGetWithSimpleID(handler, operations, getFunction)
-	handleUpdateWithSimpleID(handler, operations, operations, updateFunction)
-	handleCreateWithoutWorkspace(handler, operations, operations, operations, createFunction)
-	handleList(handler, operations, listFunction)
-	handleDeleteWithSimpleID(handler, deleteFunction)
-}
-
 // ConfigureEntityWithParentID configures an entity with a parent ID.
 func configureEntityWithParentID[TEntity, TGetOutput, TUpdateOutput, TCreateOutput, TListOutput, TCreationData, TUpdateData, TGetOptions, TUpdateOptions, TCreateOptions, TListOptions, TDeleteOptions, TDeleteResponse any](
 	handler *typedHandler[TEntity],

@@ -55,7 +55,7 @@ resource "fabric_domain_role_assignments" "example" {
 Required:
 
 - `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Principal ID.
-- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Principal type. Value must be one of : `Group`, `User`.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Principal type. Value must be one of : `EntireTenant`, `Group`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 

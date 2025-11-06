@@ -37,7 +37,7 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 
 	if typeInfo.IsSPNSupported {
 		if typeInfo.Type == "workspace_git" {
-			md += "\n\n-> This resource supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\"."
+			md += "\n\n-> This resource supports Service Principal authentication only when `git_credentials.source` is \"ConfiguredConnection\"."
 		} else {
 			md += SPNSupportedResource
 		}
@@ -72,7 +72,7 @@ func NewDataSourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural boo
 
 	if typeInfo.IsSPNSupported {
 		if typeInfo.Type == "workspace_git" {
-			md += "\n\n-> This data-source supports Service Principal authentication only when `git_provider_details.git_provider_type` is \"GitHub\"."
+			md += "\n\n-> This data-source supports Service Principal authentication only when `git_credentials.source` is \"ConfiguredConnection\"."
 		} else {
 			md += SPNSupportedDataSource
 		}
@@ -106,9 +106,9 @@ func NewEphemeralResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plu
 	}
 
 	if typeInfo.IsSPNSupported {
-		md += SPNSupportedResource
+		md += SPNSupportedEphemeralResource
 	} else {
-		md += SPNNotSupportedResource
+		md += SPNNotSupportedEphemeralResource
 	}
 
 	if typeInfo.IsPreview {
@@ -148,7 +148,7 @@ type RetryConfig struct {
 	Operation     string
 }
 
-// RetryOperation executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
+// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
 // This will retry indefinitely until the operation succeeds or encounters a non-retryable error.
 func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
 	var result T

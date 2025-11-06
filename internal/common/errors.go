@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
-package common
+package common //revive:disable-line:var-naming
 
 const (
 	ErrorWorkspaceNotSupportedHeader  = "Workspace type not supported"

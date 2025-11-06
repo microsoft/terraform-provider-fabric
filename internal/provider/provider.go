@@ -38,7 +38,9 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
@@ -46,6 +48,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -78,7 +81,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
@@ -418,12 +423,15 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
+		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
+		connection.NewResourceConnection,
 		deploymentpipeline.NewResourceDeploymentPipeline,
 		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
@@ -451,7 +459,9 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
 		sqldatabase.NewResourceSQLDatabase,
+		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
+		warehousesnapshot.NewResourceWarehouseSnapshot,
 		workspace.NewResourceWorkspace,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
@@ -461,8 +471,12 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		apacheairflowjob.NewDataSourceApacheAirflowJob,
+		apacheairflowjob.NewDataSourceApacheAirflowJobs,
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
+		connection.NewDataSourceConnection,
+		connection.NewDataSourceConnections,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
@@ -471,6 +485,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datapipeline.NewDataSourceDataPipeline,
 		datapipeline.NewDataSourceDataPipelines,
 		datamart.NewDataSourceDatamarts,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
+		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
@@ -530,8 +546,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
+		variablelibrary.NewDataSourceVariableLibrary,
+		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
+		warehousesnapshot.NewDataSourceWarehouseSnapshot,
+		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,

@@ -37,7 +37,7 @@ const (
 	OperationUndefined Operation = "undefined"
 )
 
-// DefaultErrorHandler implements the ErrorHandler interface with standard error handling logic.
+// ErrorHandler implements the ErrorHandler interface with standard error handling logic.
 type ErrorHandler struct{}
 
 // NewErrorHandler creates a new default error handler.
@@ -145,6 +145,8 @@ func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defau
 }
 
 // processFabricError handles Fabric-specific response errors.
+//
+//nolint:gocognit,nestif
 func (h *ErrorHandler) processFabricError(
 	ctx context.Context,
 	errResp *fabcore.ResponseError,
@@ -182,12 +184,36 @@ func (h *ErrorHandler) processFabricError(
 	// Collect additional error details
 	if len(errResp.ErrorResponse.MoreDetails) > 0 {
 		for _, errMoreDetail := range errResp.ErrorResponse.MoreDetails {
-			if errMoreDetail.ErrorCode != nil {
+			if errMoreDetail.ErrorCode != nil && *errMoreDetail.ErrorCode != "" {
 				errCodes = append(errCodes, *errMoreDetail.ErrorCode)
 			}
 
-			if errMoreDetail.Message != nil {
-				errMessages = append(errMessages, *errMoreDetail.Message)
+			if errMoreDetail.Message != nil && *errMoreDetail.Message != "" {
+				var msg string
+
+				if json.Valid([]byte(*errMoreDetail.Message)) {
+					var errMoreDetailJSON map[string]any
+
+					err := json.Unmarshal([]byte(*errMoreDetail.Message), &errMoreDetailJSON)
+					if err != nil {
+						tflog.Debug(ctx, "Failed to unmarshal JSON", map[string]any{
+							"Error": err.Error(),
+						})
+					}
+
+					jsonPretty, err := json.MarshalIndent(errMoreDetailJSON, "", "  ")
+					if err != nil {
+						tflog.Debug(ctx, "Failed to marshal JSON", map[string]any{
+							"Error": err.Error(),
+						})
+					}
+
+					msg = string(jsonPretty)
+				} else {
+					msg = *errMoreDetail.Message
+				}
+
+				errMessages = append(errMessages, msg)
 			}
 		}
 	}
@@ -303,7 +329,7 @@ func (e *authErrorResponse) getErrFromResp(resp *http.Response) error {
 	return nil
 }
 
-// For backward compatibility.
+// IsErr for backward compatibility.
 func IsErr(diags diag.Diagnostics, err error) bool {
 	return NewErrorHandler().HasError(diags, err)
 }
