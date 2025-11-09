@@ -135,6 +135,7 @@ func TestWorkspaceAPIRegex(t *testing.T) {
 			if tt.shouldMatch {
 				if len(matches) < 3 {
 					t.Errorf("Expected path %s to match regex, but it didn't", tt.path)
+
 					return
 				}
 
