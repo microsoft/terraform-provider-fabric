@@ -16,7 +16,7 @@ func fakeWorkspaceAssignmentStage() func(ctx context.Context, deploymentPipeline
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientAssignWorkspaceToStageResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientAssignWorkspaceToStageResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -25,7 +25,7 @@ func fakeWorkspaceUnassignmentStage() func(ctx context.Context, deploymentPipeli
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientUnassignWorkspaceFromStageResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientUnassignWorkspaceFromStageResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -36,6 +36,6 @@ func fakeGetDeploymentPipeline(
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientGetDeploymentPipelineResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.DeploymentPipelinesClientGetDeploymentPipelineResponse{DeploymentPipelineExtendedInfo: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }

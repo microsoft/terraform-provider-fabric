@@ -21,7 +21,7 @@ func fakeGatewayRoleAssignment(
 		resp = azfake.Responder[fabcore.GatewaysClientGetGatewayRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.GatewaysClientGetGatewayRoleAssignmentResponse{GatewayRoleAssignment: exampleResp}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -43,7 +43,7 @@ func fakeGatewayRoleAssignments(
 		resp = azfake.PagerResponder[fabcore.GatewaysClientListGatewayRoleAssignmentsResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.GatewaysClientListGatewayRoleAssignmentsResponse{GatewayRoleAssignments: exampleResp}, nil)
 
-		return
+		return resp
 	}
 }
 

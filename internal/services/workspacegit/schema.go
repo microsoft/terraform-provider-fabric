@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
-	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -32,6 +31,22 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 	gitProviderTypeAzureDevOps := types.StringValue(string(fabcore.GitProviderTypeAzureDevOps))
 	gitProviderTypeGitHub := types.StringValue(string(fabcore.GitProviderTypeGitHub))
 	possibleInitializationStrategyValues := utils.RemoveSliceByValue(fabcore.PossibleInitializationStrategyValues(), fabcore.InitializationStrategyNone)
+	allowedGitCredentialSourceValuesGitHub := []superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+		{
+			Description: string(fabcore.GitCredentialsSourceConfiguredConnection),
+			Value:       string(fabcore.GitCredentialsSourceConfiguredConnection),
+		},
+	}
+	allowedGitCredentialSourceValuesAzureDevOps := []superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{
+		{
+			Description: string(fabcore.GitCredentialsSourceConfiguredConnection),
+			Value:       string(fabcore.GitCredentialsSourceConfiguredConnection),
+		},
+		{
+			Description: string(fabcore.GitCredentialsSourceAutomatic),
+			Value:       string(fabcore.GitCredentialsSourceAutomatic),
+		},
+	}
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
@@ -212,7 +227,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							MarkdownDescription: "The GitHub owner name.",
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
 							Optional: true,
 							Validators: []validator.String{
 								stringvalidator.LengthAtMost(100),
@@ -283,18 +297,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					MarkdownDescription: "The Git credentials details.",
 				},
 				Resource: &schemaR.SingleNestedAttribute{
-					Computed: true,
-					Optional: true,
-					Validators: []validator.Object{
-						superobjectvalidator.NullIfAttributeIsOneOf(
-							gitProviderTypeAttPath,
-							[]attr.Value{gitProviderTypeAzureDevOps},
-						),
-						superobjectvalidator.RequireIfAttributeIsOneOf(
-							gitProviderTypeAttPath,
-							[]attr.Value{gitProviderTypeGitHub},
-						),
-					},
+					Required: true,
 				},
 				DataSource: &schemaD.SingleNestedAttribute{
 					Computed: true,
@@ -304,11 +307,20 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The Git credentials source.",
 							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGitCredentialsSourceValues(), true)...),
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									gitProviderTypeAttPath,
+									[]attr.Value{gitProviderTypeGitHub},
+									allowedGitCredentialSourceValuesGitHub...,
+								),
+								superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOf(
+									gitProviderTypeAttPath,
+									[]attr.Value{gitProviderTypeAzureDevOps},
+									allowedGitCredentialSourceValuesAzureDevOps...,
+								),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
+							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -320,16 +332,15 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
 							Optional: true,
 							Validators: []validator.String{
-								superstringvalidator.NullIfAttributeIsOneOf(
-									gitProviderTypeAttPath,
-									[]attr.Value{gitProviderTypeAzureDevOps},
-								),
 								superstringvalidator.RequireIfAttributeIsOneOf(
-									gitProviderTypeAttPath,
-									[]attr.Value{gitProviderTypeGitHub},
+									path.MatchRoot("git_credentials").AtName("source"),
+									[]attr.Value{types.StringValue(string(fabcore.GitCredentialsSourceConfiguredConnection))},
+								),
+								superstringvalidator.NullIfAttributeIsOneOf(
+									path.MatchRoot("git_credentials").AtName("source"),
+									[]attr.Value{types.StringValue(string(fabcore.GitCredentialsSourceAutomatic))},
 								),
 							},
 						},
