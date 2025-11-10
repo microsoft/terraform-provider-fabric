@@ -208,7 +208,10 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 
 	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
 
+	entityNameUpdate := testhelp.RandomName()
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
 		{
 			Config: at.CompileConfig(
 				testResourceItemHeader,
@@ -248,6 +251,52 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
+			),
+		},
+		// Update and Read
+		{
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"value": []map[string]any{
+						{
+							"name": entityNameUpdate,
+							"decision_rules": []map[string]any{
+								{
+									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
+									"permission": []map[string]any{
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
+											"attribute_value_included_in": []string{"*"},
+										},
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
+											"attribute_value_included_in": []string{"Read"},
+										},
+									},
+								},
+							},
+							"members": map[string]any{
+								"fabric_item_members": []map[string]any{
+									{
+										"item_access": []string{"ReadAll"},
+										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
+									},
+								},
+							},
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
 		},
 	}))
