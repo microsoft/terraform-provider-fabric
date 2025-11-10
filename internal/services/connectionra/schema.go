@@ -57,6 +57,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
+					Optional: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},

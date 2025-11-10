@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -20,7 +23,9 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 func TestUnit_ConnectionRoleAssignmentsDataSource(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
 	entities := NewRandomConnectionRoleAssignments()
-	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.NewListConnectionRoleAssignmentsPager = fakeConnectionRoleAssignments(entities)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.NewListConnectionRoleAssignmentsPager = fakeListConnectionRoleAssignments(entities)
+
+	entity := entities.Value[1]
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
@@ -44,8 +49,24 @@ func TestUnit_ConnectionRoleAssignmentsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "connection_id", connectionID),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id":            knownvalue.StringExact(*entity.ID),
+							"connection_id": knownvalue.StringExact(connectionID),
+							"role":          knownvalue.StringExact((string)(*entity.Role)),
+							"principal": knownvalue.ObjectPartial(map[string]knownvalue.Check{
+								"id":   knownvalue.StringExact(*entity.Principal.ID),
+								"type": knownvalue.StringExact((string)(*entity.Principal.Type)),
+							}),
+						}),
+					}),
+				),
+			},
 		},
 	}))
 }

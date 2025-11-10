@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"testing"
 
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -158,13 +159,19 @@ func TestUnit_ConnectionRoleAssignmentResource_ImportState(t *testing.T) {
 func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
 	entity := NewRandomConnectionRoleAssignment()
+
+	entityUpdate := entity
+	entityUpdate.Role = azto.Ptr(fabcore.ConnectionRoleUserWithReshare)
+
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.AddConnectionRoleAssignment = fakeAddConnectionRoleAssignment(entity)
-	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeConnectionRoleAssignment(entity)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeGetConnectionRoleAssignment(entity)
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.DeleteConnectionRoleAssignment = fakeDeleteConnectionRoleAssignment()
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.UpdateConnectionRoleAssignment = fakeUpdateConnectionRoleAssignment(entityUpdate)
 
 	entityID := *entity.Principal.ID
 	entityType := (string)(*entity.Principal.Type)
 	role := (string)(*entity.Role)
+	updatedRole := (string)(*entityUpdate.Role)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
@@ -185,6 +192,28 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "role", role),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"id":            *entity.ID,
+					"connection_id": connectionID,
+					"principal": map[string]any{
+						"id":   entityID,
+						"type": entityType,
+					},
+					"role": updatedRole,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "id", *entity.ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "principal.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role", updatedRole),
 			),
 		},
 	}))

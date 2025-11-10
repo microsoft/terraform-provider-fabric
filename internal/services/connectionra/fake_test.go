@@ -14,14 +14,25 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-func fakeConnectionRoleAssignment(
+func fakeGetConnectionRoleAssignment(
 	exampleResp fabcore.ConnectionRoleAssignment,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, options *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _, _ string, _ *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse{ConnectionRoleAssignment: exampleResp}, nil)
 
-		return
+		return resp, errResp
+	}
+}
+
+func fakeListConnectionRoleAssignments(
+	exampleResp fabcore.ConnectionRoleAssignments,
+) func(connectionID string, options *fabcore.ConnectionsClientListConnectionRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]) {
+	return func(_ string, _ *fabcore.ConnectionsClientListConnectionRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]) {
+		resp = azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]{}
+		resp.AddPage(http.StatusOK, fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse{ConnectionRoleAssignments: exampleResp}, nil)
+
+		return resp
 	}
 }
 
@@ -32,7 +43,18 @@ func fakeAddConnectionRoleAssignment(
 		resp = azfake.Responder[fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusCreated, fabcore.ConnectionsClientAddConnectionRoleAssignmentResponse{ConnectionRoleAssignment: exampleResp}, nil)
 
-		return
+		return resp, errResp
+	}
+}
+
+func fakeUpdateConnectionRoleAssignment(
+	exampleResp fabcore.ConnectionRoleAssignment,
+) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, updateConnectionRoleAssignmentRequest fabcore.UpdateConnectionRoleAssignmentRequest, options *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _ string, _ fabcore.UpdateConnectionRoleAssignmentRequest, _ *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse{ConnectionRoleAssignment: exampleResp}, nil)
+
+		return resp, errResp
 	}
 }
 
@@ -41,7 +63,7 @@ func fakeDeleteConnectionRoleAssignment() func(ctx context.Context, connectionID
 		resp = azfake.Responder[fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientDeleteConnectionRoleAssignmentResponse{}, nil)
 
-		return
+		return resp, errResp
 	}
 }
 
@@ -52,20 +74,9 @@ func NewRandomConnectionRoleAssignment() fabcore.ConnectionRoleAssignment {
 		ID: azto.Ptr(itemID),
 		Principal: &fabcore.Principal{
 			ID:   azto.Ptr(itemID),
-			Type: azto.Ptr(fabcore.PrincipalTypeUser),
+			Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 		},
-		Role: azto.Ptr(fabcore.ConnectionRoleOwner),
-	}
-}
-
-func fakeConnectionRoleAssignments(
-	exampleResp fabcore.ConnectionRoleAssignments,
-) func(connectionID string, options *fabcore.ConnectionsClientListConnectionRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]) {
-	return func(_ string, _ *fabcore.ConnectionsClientListConnectionRoleAssignmentsOptions) (resp azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]) {
-		resp = azfake.PagerResponder[fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse]{}
-		resp.AddPage(http.StatusOK, fabcore.ConnectionsClientListConnectionRoleAssignmentsResponse{ConnectionRoleAssignments: exampleResp}, nil)
-
-		return
+		Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 	}
 }
 
@@ -78,26 +89,26 @@ func NewRandomConnectionRoleAssignments() fabcore.ConnectionRoleAssignments {
 		Value: []fabcore.ConnectionRoleAssignment{
 			{
 				ID:   azto.Ptr(principal0ID),
-				Role: azto.Ptr(fabcore.ConnectionRoleOwner),
+				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
 					ID:   azto.Ptr(principal0ID),
-					Type: azto.Ptr(fabcore.PrincipalTypeGroup),
+					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 			{
 				ID:   azto.Ptr(principal1ID),
-				Role: azto.Ptr(fabcore.ConnectionRoleUser),
+				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
 					ID:   azto.Ptr(principal1ID),
-					Type: azto.Ptr(fabcore.PrincipalTypeUser),
+					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 			{
 				ID:   azto.Ptr(principal2ID),
-				Role: azto.Ptr(fabcore.ConnectionRoleUserWithReshare),
+				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
 					ID:   azto.Ptr(principal2ID),
-					Type: azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
+					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 		},

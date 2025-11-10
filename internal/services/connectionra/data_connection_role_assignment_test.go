@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -20,7 +21,7 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
 	entity := NewRandomConnectionRoleAssignment()
-	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeConnectionRoleAssignment(entity)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeGetConnectionRoleAssignment(entity)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
@@ -34,6 +35,28 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// error - invalid UUID - id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"connection_id": connectionID,
+					"id":            "invalid uuid",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - invalid UUID - connection_id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"connection_id": "invalid uuid",
+					"id":            *entity.ID,
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// read
 		{
