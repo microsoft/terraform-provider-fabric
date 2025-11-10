@@ -223,6 +223,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The name of the parameter.",
 									Required:            true,
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`\S`),
+											"Name must contain at least one non-whitespace character.",
+										),
+									},
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},

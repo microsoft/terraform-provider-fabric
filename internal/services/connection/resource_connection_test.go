@@ -160,7 +160,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "credential_details" is required, but no definition was found.`),
 		},
-		// step 7: error - name - empty string value
+		// step 7: error - value - empty string value
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -204,7 +204,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 						"parameters": []map[string]any{
 							{
 								"name":  "server",
-								"value": "               	",
+								"value": "  ",
 							},
 						},
 					},
@@ -218,7 +218,36 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Value must contain at least one non-whitespace character`),
 		},
-		// step 9: error - invalid attribute value - connectivity_type
+		// step 9: error - name - empty string value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "InvalidType",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  false,
+						"credential_type":       string(fabcore.CredentialTypeAnonymous),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Name must contain at least one non-whitespace character`),
+		},
+		// step 10: error - invalid attribute value - connectivity_type
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -247,7 +276,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 		},
-		// step 10: error - invalid attribute value - connectivity_type (PersonalCloud)
+		// step 11: error - invalid attribute value - connectivity_type (PersonalCloud)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -276,7 +305,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 		},
-		// step 11: error - invalid attribute value - privacy_level
+		// step 12: error - invalid attribute value - privacy_level
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -305,7 +334,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 		},
-		// step 12: error - invalid uuid - gateway_id
+		// step 13: error - invalid uuid - gateway_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -335,7 +364,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// step 13: error - VirtualNetworkGateway connection missing required gateway_id
+		// step 14: error - VirtualNetworkGateway connection missing required gateway_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -364,7 +393,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute gateway_id`),
 		},
-		// step 14: error - VirtualNetworkGateway connection with AllowConnectionUsageInGateway set
+		// step 15: error - VirtualNetworkGateway connection with AllowConnectionUsageInGateway set
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -395,7 +424,7 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute allow_connection_usage_in_gateway`),
 		},
-		// step 15: error - ShareableCloud connection with gateway_id set
+		// step 16: error - ShareableCloud connection with gateway_id set
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
