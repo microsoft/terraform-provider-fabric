@@ -40,8 +40,11 @@ resource "fabric_connection_role_assignment" "example" {
 
 ### Optional
 
-- `id` (String) The Connection Role Assignment ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
+### Read-Only
+
+- `id` (String) The Connection Role Assignment ID.
 
 <a id="nestedatt--principal"></a>
 

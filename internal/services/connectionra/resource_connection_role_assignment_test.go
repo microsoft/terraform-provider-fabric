@@ -200,7 +200,6 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"id":            *entity.ID,
 					"connection_id": connectionID,
 					"principal": map[string]any{
 						"id":   entityID,
