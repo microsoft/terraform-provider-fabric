@@ -40,11 +40,8 @@ resource "fabric_connection_role_assignment" "example" {
 
 ### Optional
 
-- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-
-### Read-Only
-
 - `id` (String) The Connection Role Assignment ID.
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--principal"></a>
 
@@ -53,7 +50,7 @@ resource "fabric_connection_role_assignment" "example" {
 Required:
 
 - `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal ID.
-- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `EntireTenant`, `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
 <a id="nestedatt--timeouts"></a>
 
