@@ -153,6 +153,10 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 
 	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateDataAccessRoles = fakeCreateOrUpdateOneLakeDataAccessSecurity()
 
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	entityNameUpdate := testhelp.RandomName()
+
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -160,8 +164,8 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"item_id":      testhelp.RandomUUID(),
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
 					"value": []map[string]any{
 						{
 							"name": *entity.Value[0].Name,
@@ -194,6 +198,54 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"value": []map[string]any{
+						{
+							"name": entityNameUpdate,
+							"decision_rules": []map[string]any{
+								{
+									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
+									"permission": []map[string]any{
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
+											"attribute_value_included_in": []string{"*"},
+										},
+										{
+											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
+											"attribute_value_included_in": []string{"Read"},
+										},
+									},
+								},
+							},
+							"members": map[string]any{
+								"fabric_item_members": []map[string]any{
+									{
+										"item_access": []string{"ReadAll"},
+										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
+									},
+								},
+							},
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
 		},
 	}))
