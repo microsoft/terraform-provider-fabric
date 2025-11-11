@@ -121,8 +121,8 @@ Read-Only:
 
 Required:
 
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter.
-- `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The value of the parameter.
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter. Name must contain at least one non-whitespace character.
+- `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The value of the parameter. Value must contain at least one non-whitespace character.
 
 Read-Only:
 

@@ -5,6 +5,7 @@ package connection
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -222,6 +223,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The name of the parameter.",
 									Required:            true,
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`\S`),
+											"Name must contain at least one non-whitespace character.",
+										),
+									},
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
@@ -237,6 +244,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The value of the parameter.",
 									Required:            true,
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`\S`),
+											"Value must contain at least one non-whitespace character.",
+										),
+									},
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
