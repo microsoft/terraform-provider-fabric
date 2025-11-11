@@ -1,0 +1,5 @@
+kind: fixed
+body: 'fabric_connection dynamic values not treated correctly '
+time: 2025-11-11T08:41:43.066784225Z
+custom:
+    Issue: "694"
