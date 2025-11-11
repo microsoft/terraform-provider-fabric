@@ -160,13 +160,17 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
 	entity := NewRandomConnectionRoleAssignment()
 
-	entityUpdate := entity
+	entityUpdate := NewRandomConnectionRoleAssignment()
+	entityUpdate.ID = entity.ID
+	entityUpdate.Principal = entity.Principal
 	entityUpdate.Role = azto.Ptr(fabcore.ConnectionRoleUserWithReshare)
 
+	getFakeHandler, updateFakeHandler := fakeStatefulConnectionRoleAssignmentCRUD(entity, entityUpdate)
+
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.AddConnectionRoleAssignment = fakeAddConnectionRoleAssignment(entity)
-	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeGetConnectionRoleAssignment(entity)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = getFakeHandler
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.DeleteConnectionRoleAssignment = fakeDeleteConnectionRoleAssignment()
-	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.UpdateConnectionRoleAssignment = fakeUpdateConnectionRoleAssignment(entityUpdate)
+	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.UpdateConnectionRoleAssignment = updateFakeHandler
 
 	entityID := *entity.Principal.ID
 	entityType := (string)(*entity.Principal.Type)
