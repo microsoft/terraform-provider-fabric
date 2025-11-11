@@ -69,6 +69,6 @@ Read-Only:
 Read-Only:
 
 - `connection_encryption` (String) The connection encryption type. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
-- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
+- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
 - `single_sign_on_type` (String) The single sign-on type. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
 - `skip_test_connection` (Boolean) Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.
