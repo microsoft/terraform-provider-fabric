@@ -516,14 +516,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 					fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
 				)
 			}
-
-			if connectionDetailsParams[*v.Name] == "" {
-				diags.AddAttributeError(
-					path.Root("connection_details").AtName("parameters"),
-					"Missing connection parameter value",
-					fmt.Sprintf("The required connection parameter '%s' value is missing.", *v.Name),
-				)
-			}
 		}
 	}
 
@@ -609,13 +601,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeText:
 			// Use text as the parameter input value.
-			if v == "" {
-				diags.AddAttributeError(
-					path.Root("connection_details").AtName("parameters"),
-					"Invalid connection parameter value",
-					fmt.Sprintf("The connection parameter '%s' value is invalid. It must not be empty.", k),
-				)
-			}
 		case fabcore.DataTypeTime:
 			// Use time as the parameter input value, using HH:mm:ss.FFFZ format.
 			//nolint:noinlineerr
