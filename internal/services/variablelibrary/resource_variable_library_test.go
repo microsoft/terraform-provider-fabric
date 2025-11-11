@@ -39,7 +39,7 @@ var testHelperDefinition = map[string]any{
 
 var testHelperDefinitionNoValueSets = map[string]any{
 	`"settings.json"`: map[string]any{
-		"source": "${local.path}/settings.json.tmpl",
+		"source": "${local.path}/settings_empty.json.tmpl",
 	},
 	`"variables.json"`: map[string]any{
 		"source": "${local.path}/variables.json.tmpl",
@@ -234,14 +234,13 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
+func TestAcc_VariableLibraryResource_CRUD_NoDefinition(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	entityCreateNoValueSetsName := testhelp.RandomName()
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - no definition
@@ -277,6 +276,17 @@ func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},
+	}))
+}
+
+func TestAcc_VariableLibraryResource_CRUD_WithDefinition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityCreateNoValueSetsName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - definition with definition
 		{
 			ResourceName: testResourceItemFQN,
