@@ -15,7 +15,7 @@ import (
 )
 
 func fakeGetConnectionRoleAssignment(
-	entityOrProvider interface{},
+	entityOrProvider any,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, options *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 	var entityProvider func() fabcore.ConnectionRoleAssignment
 
@@ -61,7 +61,7 @@ func fakeAddConnectionRoleAssignment(
 }
 
 func fakeUpdateConnectionRoleAssignment(
-	handlerOrEntity interface{},
+	handlerOrEntity any,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, updateConnectionRoleAssignmentRequest fabcore.UpdateConnectionRoleAssignmentRequest, options *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 	var updateHandler func(req fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment
 
