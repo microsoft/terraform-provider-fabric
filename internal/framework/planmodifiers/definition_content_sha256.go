@@ -128,6 +128,15 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 
 	if parameters.IsKnown() {
 		parametersSlice, diags = parameters.Get(ctx)
+
+		for _, param := range parametersSlice {
+			if param.Value.IsNull() || param.Value.IsUnknown() {
+				resp.PlanValue = types.StringUnknown()
+
+				return
+			}
+		}
+
 		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 			return
 		}

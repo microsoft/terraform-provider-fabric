@@ -100,11 +100,16 @@ func (to *fabricItemDefinition) setParts(
 				}
 			}
 
+			parameters, diags := defPartValue.Parameters.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
 			payloadB64, _, diags := transforms.SourceFileToPayload(
 				defPartValue.Source.ValueString(),
 				defPartValue.ProcessingMode.ValueString(),
 				tokensValue,
-				nil,
+				parameters,
 				defPartValue.TokensDelimiter.ValueString(),
 			)
 			if diags.HasError() {
