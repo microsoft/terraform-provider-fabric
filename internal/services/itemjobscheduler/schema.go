@@ -30,12 +30,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-const (
-	datePattern = `\d{4}-\d{2}-\d{2}`
-	timePattern = `\d{2}:\d{2}:\d{2}`
-	utcPattern  = `^` + datePattern + `T` + timePattern + `Z$`
-)
-
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 
@@ -203,8 +197,8 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
-							regexp.MustCompile(utcPattern),
-							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
+							regexp.MustCompile(`Z$`),
+							"The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
 					},
 				},
@@ -221,8 +215,8 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
-							regexp.MustCompile(utcPattern),
-							"The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.",
+							regexp.MustCompile(`Z$`),
+							"The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
 					},
 				},

@@ -28,6 +28,7 @@ import (
 var (
 	_ resource.ResourceWithConfigure   = (*resourceItemJobScheduler)(nil)
 	_ resource.ResourceWithImportState = (*resourceItemJobScheduler)(nil)
+	_ resource.ResourceWithModifyPlan  = (*resourceItemJobScheduler)(nil)
 )
 
 type resourceItemJobScheduler struct {
@@ -76,6 +77,38 @@ func (r *resourceItemJobScheduler) Configure(_ context.Context, req resource.Con
 	r.fabricClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
+func (r *resourceItemJobScheduler) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
+		"action": "start",
+	})
+
+	if !req.Plan.Raw.IsNull() {
+		var plan resourceJobScheduleModel
+
+		if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		configuration, diags := plan.Configuration.Get(ctx)
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.validateMonthlyConfigurationRequiredAttributes(*configuration, ctx)...); resp.Diagnostics.HasError() {
+			return
+		}
+		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
+	}
+
+	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
 func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
@@ -84,12 +117,6 @@ func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.Crea
 	var plan, state resourceJobScheduleModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	if diags := validateSchedulerConfig(ctx, plan); diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-
 		return
 	}
 
@@ -188,12 +215,6 @@ func (r *resourceItemJobScheduler) Update(ctx context.Context, req resource.Upda
 	var plan resourceJobScheduleModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	if diags := validateSchedulerConfig(ctx, plan); diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-
 		return
 	}
 
@@ -353,12 +374,12 @@ func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, j
 	}
 
 	itemTypeLowercase := strings.ToLower(string(*itemType))
-	validJobTypes, exists := JobTypeActions[itemTypeLowercase]
+	validJobTypes, exists := AllowedJobTypesByItemType[itemTypeLowercase]
 
 	if !exists {
 		diags.AddError(
 			"Invalid Item Type",
-			fmt.Sprintf("item type '%s' does not support job scheduling. Supported types are: %v", *itemType, JobTypeActions),
+			fmt.Sprintf("item type '%s' does not support job scheduling. Supported types are: %v", *itemType, AllowedJobTypesByItemType),
 		)
 
 		return diags
@@ -383,25 +404,10 @@ func (r *resourceItemJobScheduler) get(ctx context.Context, model *resourceJobSc
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), respGet.ItemSchedule)
 }
 
-func validateSchedulerConfig(ctx context.Context, data resourceJobScheduleModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if data.Configuration.IsNull() || data.Configuration.IsUnknown() {
-		return diags
-	}
-
-	config, configDiags := data.Configuration.Get(ctx)
-	if configDiags.HasError() {
-		diags.Append(configDiags...)
-
-		return diags
-	}
-
-	if config.Type.ValueString() == string(fabcore.ScheduleTypeMonthly) {
-		occurrence, occDiags := config.Occurrence.Get(ctx)
-		if occDiags.HasError() {
-			diags.Append(occDiags...)
-
+func (r *resourceItemJobScheduler) validateMonthlyConfigurationRequiredAttributes(model configurationModel, ctx context.Context) diag.Diagnostics {
+	if model.Type.ValueString() == string(fabcore.ScheduleTypeMonthly) {
+		occurrence, diags := model.Occurrence.Get(ctx)
+		if diags.HasError() {
 			return diags
 		}
 
@@ -441,7 +447,9 @@ func validateSchedulerConfig(ctx context.Context, data resourceJobScheduleModel)
 					string(fabcore.OccurrenceTypeOrdinalWeekday)),
 			)
 		}
+
+		return diags
 	}
 
-	return diags
+	return nil
 }

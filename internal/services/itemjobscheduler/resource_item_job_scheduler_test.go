@@ -536,7 +536,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	itemType := "dataflow"
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	jobType := itemjobscheduler.JobTypeActions[itemType][0]
+	jobType := itemjobscheduler.AllowedJobTypesByItemType[itemType][0]
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeWeekly)
 
@@ -623,7 +623,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
-	jobType := itemjobscheduler.JobTypeActions["dataflow"][0]
+	jobType := itemjobscheduler.AllowedJobTypesByItemType["dataflow"][0]
 	dataflowResourceHCL, dataflowResourceFQN := dataflowResource(t, workspaceID)
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeMonthly)

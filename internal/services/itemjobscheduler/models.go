@@ -551,7 +551,3 @@ func (to *principalModel) set(from fabcore.Principal) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Type = types.StringPointerValue((*string)(from.Type))
 }
-
-var JobTypeActions = map[string][]string{ //nolint:gochecknoglobals
-	"dataflow": {"Execute", "ApplyChanges"},
-}

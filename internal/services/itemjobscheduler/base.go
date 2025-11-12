@@ -12,7 +12,12 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "item_job_scheduler",
 	Names:          "Item Job Schedulers",
 	Types:          "item_job_schedulers",
-	DocsURL:        "https://learn.microsoft.com/rest/api/fabric/articles/",
+	DocsURL:        "https://learn.microsoft.com/fabric/fundamentals/job-scheduler",
 	IsPreview:      true,
 	IsSPNSupported: true,
+}
+
+var AllowedJobTypesByItemType = map[string][]string{ //nolint:gochecknoglobals
+	"dataflow":  {"Execute", "ApplyChanges"},
+	"lakehouse": {"RefreshMaterializedLakeViews"},
 }
