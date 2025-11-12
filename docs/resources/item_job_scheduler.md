@@ -3,14 +3,14 @@
 page_title: "fabric_item_job_scheduler Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Item Job Scheduler resource allows you to manage a Fabric Item Job Scheduler https://learn.microsoft.com/rest/api/fabric/articles/.
+  The Item Job Scheduler resource allows you to manage a Fabric Item Job Scheduler https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_scheduler (Resource)
 
-The Item Job Scheduler resource allows you to manage a Fabric [Item Job Scheduler](https://learn.microsoft.com/rest/api/fabric/articles/).
+The Item Job Scheduler resource allows you to manage a Fabric [Item Job Scheduler](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This resource supports Service Principal authentication.
 
@@ -22,11 +22,11 @@ The Item Job Scheduler resource allows you to manage a Fabric [Item Job Schedule
 resource "fabric_item_job_scheduler" "cron_configuration_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  job_type     = "MyJobType"
+  job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    start_date_time = "2025-11-11T10:00:00Z"
+    end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Cron"
     interval        = 10
   }
@@ -35,26 +35,26 @@ resource "fabric_item_job_scheduler" "cron_configuration_example" {
 resource "fabric_item_job_scheduler" "daily_configuration_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  job_type     = "MyJobType"
+  job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    start_date_time = "2025-11-11T10:00:00Z"
+    end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Daily"
-    times           = ["HH:mm:ss"]
+    times           = ["10:00"]
   }
 }
 
 resource "fabric_item_job_scheduler" "weekly_configuration_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  job_type     = "MyJobType"
+  job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    start_date_time = "2025-11-11T10:00:00Z"
+    end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Weekly"
-    times           = ["HH:mm:ss"]
+    times           = ["10:00"]
     weekdays        = ["Monday"]
   }
 }
@@ -62,14 +62,13 @@ resource "fabric_item_job_scheduler" "weekly_configuration_example" {
 resource "fabric_item_job_scheduler" "monthly_configuration_day_of_month_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  job_type     = "MyJobType"
+  job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    start_date_time = "2025-11-11T10:00:00Z"
+    end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Monthly"
-    times           = ["HH:mm:ss"]
-    weekdays        = ["Monday"]
+    times           = ["10:00"]
     recurrence      = 1
     occurrence = {
       occurrence_type = "DayOfMonth"
@@ -81,17 +80,16 @@ resource "fabric_item_job_scheduler" "monthly_configuration_day_of_month_example
 resource "fabric_item_job_scheduler" "monthly_configuration_ordinal_weekday_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  job_type     = "MyJobType"
+  job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "YYYY-MM-DDTHH:mm:ssZ"
-    end_date_time   = "YYYY-MM-DDTHH:mm:ssZ"
+    start_date_time = "2025-11-11T10:00:00Z"
+    end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Monthly"
-    times           = ["HH:mm:ss"]
-    weekdays        = ["Monday"]
+    times           = ["10:00"]
     recurrence      = 1
     occurrence = {
-      occurrence_type = "DayOfMonth"
+      occurrence_type = "OrdinalWeekday"
       week_index      = "First"
       weekday         = "Monday"
     }
@@ -107,7 +105,19 @@ resource "fabric_item_job_scheduler" "monthly_configuration_ordinal_weekday_exam
 - `configuration` (Attributes) The schedule configuration. (see [below for nested schema](#nestedatt--configuration))
 - `enabled` (Boolean) Whether this schedule is enabled. True - Enabled, False - Disabled.
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
-- `job_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The job type.
+- `job_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The job type.Allowed job types per item type:
+
+```json
+{
+  "dataflow": [
+    "Execute",
+    "ApplyChanges"
+  ],
+  "lakehouse": [
+    "RefreshMaterializedLakeViews"
+  ]
+}
+```.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
@@ -121,13 +131,12 @@ resource "fabric_item_job_scheduler" "monthly_configuration_ordinal_weekday_exam
 - `owner` (Attributes) The user identity that created this schedule or last modified. (see [below for nested schema](#nestedatt--owner))
 
 <a id="nestedatt--configuration"></a>
-
 ### Nested Schema for `configuration`
 
 Required:
 
-- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
-- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The datetime must be in UTC format ending with 'Z'. Timezone offsets are not allowed.
+- `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+- `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format. The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `type` (String) A string represents the type of the plan. Value must be one of : `Cron`, `Daily`, `Monthly`, `Weekly`.
 
 Optional:
@@ -139,7 +148,6 @@ Optional:
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed. Set must contain at most 7 elements. Element value must satisfy all validations: value must be one of: ["Friday" "Monday" "Saturday" "Sunday" "Thursday" "Tuesday" "Wednesday"]. If the value of [`configuration.type`](#configuration.type) attribute is `Weekly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Cron`, `Daily` or `Monthly` this attribute is **NULL**.
 
 <a id="nestedatt--configuration--occurrence"></a>
-
 ### Nested Schema for `configuration.occurrence`
 
 Required:
@@ -152,8 +160,9 @@ Optional:
 - `week_index` (String) The week of the month. Value must be one of : `Fifth`, `First`, `Fourth`, `Second`, `Third`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
 - `weekday` (String) Week day for triggering jobs. Value must be one of : `Friday`, `Monday`, `Saturday`, `Sunday`, `Thursday`, `Tuesday`, `Wednesday`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
 
-<a id="nestedatt--timeouts"></a>
 
+
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -163,8 +172,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--owner"></a>
 
+<a id="nestedatt--owner"></a>
 ### Nested Schema for `owner`
 
 Read-Only:

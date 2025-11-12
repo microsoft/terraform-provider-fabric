@@ -3,14 +3,14 @@
 page_title: "fabric_item_job_schedulers Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Item Job Schedulers data-source allows you to retrieve a list of Fabric Item Job Schedulers https://learn.microsoft.com/rest/api/fabric/articles/.
+  The Item Job Schedulers data-source allows you to retrieve a list of Fabric Item Job Schedulers https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_schedulers (Data Source)
 
-The Item Job Schedulers data-source allows you to retrieve a list of Fabric [Item Job Schedulers](https://learn.microsoft.com/rest/api/fabric/articles/).
+The Item Job Schedulers data-source allows you to retrieve a list of Fabric [Item Job Schedulers](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This data-source supports Service Principal authentication.
 
@@ -58,7 +58,19 @@ Optional:
 Required:
 
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type.
+- `job_type` (String) The job type.Allowed job types per item type:
+
+```json
+{
+  "dataflow": [
+    "Execute",
+    "ApplyChanges"
+  ],
+  "lakehouse": [
+    "RefreshMaterializedLakeViews"
+  ]
+}
+```.
 - `workspace_id` (String) The Workspace ID.
 
 Read-Only:
@@ -70,7 +82,6 @@ Read-Only:
 - `owner` (Attributes) The user identity that created this schedule or last modified. (see [below for nested schema](#nestedatt--values--owner))
 
 <a id="nestedatt--values--configuration"></a>
-
 ### Nested Schema for `values.configuration`
 
 Read-Only:
@@ -85,7 +96,6 @@ Read-Only:
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed.
 
 <a id="nestedatt--values--configuration--occurrence"></a>
-
 ### Nested Schema for `values.configuration.occurrence`
 
 Read-Only:
@@ -95,8 +105,9 @@ Read-Only:
 - `week_index` (String) The week of the month.
 - `weekday` (String) Week day for triggering jobs.
 
-<a id="nestedatt--values--owner"></a>
 
+
+<a id="nestedatt--values--owner"></a>
 ### Nested Schema for `values.owner`
 
 Read-Only:

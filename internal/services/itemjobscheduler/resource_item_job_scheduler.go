@@ -94,9 +94,10 @@ func (r *resourceItemJobScheduler) ModifyPlan(ctx context.Context, req resource.
 			return
 		}
 
-		if resp.Diagnostics.Append(r.validateMonthlyConfigurationRequiredAttributes(*configuration, ctx)...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(r.validateMonthlyConfigurationRequiredAttributes(ctx, *configuration)...); resp.Diagnostics.HasError() {
 			return
 		}
+
 		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 	}
 
@@ -140,7 +141,6 @@ func (r *resourceItemJobScheduler) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	// Validate job type
 	if diags := r.validateJobType(respItem.Type, plan.JobType.ValueString()); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 
@@ -324,10 +324,10 @@ func (r *resourceItemJobScheduler) ImportState(ctx context.Context, req resource
 	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
 	resp.Diagnostics.Append(diags...)
 
-	uuitemID, diags := customtypes.NewUUIDValueMust(itemID)
+	uuiditemID, diags := customtypes.NewUUIDValueMust(itemID)
 	resp.Diagnostics.Append(diags...)
 
-	uuScheduleID, diags := customtypes.NewUUIDValueMust(scheduleID)
+	uuidScheduleID, diags := customtypes.NewUUIDValueMust(scheduleID)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -341,10 +341,10 @@ func (r *resourceItemJobScheduler) ImportState(ctx context.Context, req resource
 
 	state := resourceJobScheduleModel{
 		baseItemJobSchedulerModel: baseItemJobSchedulerModel{
-			ItemID:      uuitemID,
+			ItemID:      uuiditemID,
 			WorkspaceID: uuidWorkspaceID,
 			JobType:     types.StringValue(jobType),
-			ID:          uuScheduleID,
+			ID:          uuidScheduleID,
 		},
 		Timeouts: timeout,
 	}
@@ -368,7 +368,7 @@ func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, j
 	var diags diag.Diagnostics
 
 	if itemType == nil {
-		diags.AddError("Invalid Item Type", "item type is nil")
+		diags.AddError("Missing Item Type", "Item type is missing")
 
 		return diags
 	}
@@ -379,7 +379,7 @@ func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, j
 	if !exists {
 		diags.AddError(
 			"Invalid Item Type",
-			fmt.Sprintf("item type '%s' does not support job scheduling. Supported types are: %v", *itemType, AllowedJobTypesByItemType),
+			fmt.Sprintf("Item type '%s' does not support job scheduling. Supported types are: %v", *itemType, AllowedJobTypesByItemType),
 		)
 
 		return diags
@@ -388,8 +388,10 @@ func (r *resourceItemJobScheduler) validateJobType(itemType *fabcore.ItemType, j
 	if !slices.Contains(validJobTypes, jobType) {
 		diags.AddError(
 			"Invalid Job Type",
-			fmt.Sprintf("job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v", jobType, *itemType, *itemType, validJobTypes),
+			fmt.Sprintf("Job type '%s' is not valid for item type '%s'. Valid job types for '%s' are: %v", jobType, *itemType, *itemType, validJobTypes),
 		)
+
+		return diags
 	}
 
 	return nil
@@ -404,7 +406,7 @@ func (r *resourceItemJobScheduler) get(ctx context.Context, model *resourceJobSc
 	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.JobType.ValueString(), respGet.ItemSchedule)
 }
 
-func (r *resourceItemJobScheduler) validateMonthlyConfigurationRequiredAttributes(model configurationModel, ctx context.Context) diag.Diagnostics {
+func (r *resourceItemJobScheduler) validateMonthlyConfigurationRequiredAttributes(ctx context.Context, model configurationModel) diag.Diagnostics {
 	if model.Type.ValueString() == string(fabcore.ScheduleTypeMonthly) {
 		occurrence, diags := model.Occurrence.Get(ctx)
 		if diags.HasError() {

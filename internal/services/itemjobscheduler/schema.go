@@ -4,6 +4,7 @@
 package itemjobscheduler
 
 import (
+	"encoding/json"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -89,7 +90,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"job_type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The job type.",
+					MarkdownDescription: "The job type." + allowedJobTypesMarkdownDescription(),
 					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
@@ -198,7 +199,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
 							regexp.MustCompile(`Z$`),
-							"The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
+							"The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
 					},
 				},
@@ -216,7 +217,7 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
 							regexp.MustCompile(`Z$`),
-							"The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
+							"The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
 					},
 				},
@@ -383,7 +384,6 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 					Required: true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleOccurrenceTypeValues(), true)...),
-						// Add validator to require it when occurrence block is present
 						superstringvalidator.RequireIfAttributeIsSet(path.MatchRelative().AtParent()),
 					},
 				},
@@ -459,4 +459,13 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 			},
 		},
 	}
+}
+
+func allowedJobTypesMarkdownDescription() string {
+	b, err := json.MarshalIndent(AllowedJobTypesByItemType, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return "Allowed job types per item type:\n\n```json\n" + string(b) + "\n```"
 }

@@ -173,6 +173,27 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
+		// error  - not a valid date time - must end with Z (UTC)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": "2006-01-02T15:04:05",
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        testhelp.RandomIntRange(1, 60),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
 		// error  - not a valid item type
 		{
 			ResourceName: testResourceItemFQN,
@@ -198,9 +219,30 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 }
 
 func TestUnit_ItemJobSchedulerResource_ConfigurationMissingAttributes(t *testing.T) {
-	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("dataflow")
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// invalid job type for allowed item type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+					"job_type":     "test",
+					"enabled":      true,
+
+					"configuration": map[string]any{
+						"start_date_time": time.Now().UTC().Format(time.RFC3339),
+						"end_date_time":   time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+						"type":            string(fabcore.ScheduleTypeCron),
+						"interval":        10,
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile("Invalid Job Type"),
+		},
 		// missing required attribute for cron type - interval
 		{
 			ResourceName: testResourceItemFQN,

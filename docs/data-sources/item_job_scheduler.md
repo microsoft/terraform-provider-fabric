@@ -3,14 +3,14 @@
 page_title: "fabric_item_job_scheduler Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Item Job Scheduler data-source allows you to retrieve details about a Fabric Item Job Scheduler https://learn.microsoft.com/rest/api/fabric/articles/.
+  The Item Job Scheduler data-source allows you to retrieve details about a Fabric Item Job Scheduler https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_scheduler (Data Source)
 
-The Item Job Scheduler data-source allows you to retrieve details about a Fabric [Item Job Scheduler](https://learn.microsoft.com/rest/api/fabric/articles/).
+The Item Job Scheduler data-source allows you to retrieve details about a Fabric [Item Job Scheduler](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This data-source supports Service Principal authentication.
 
@@ -34,7 +34,19 @@ data "fabric_item_job_scheduler" "example" {
 
 - `id` (String) The Item Job Scheduler ID.
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type.
+- `job_type` (String) The job type.Allowed job types per item type:
+
+```json
+{
+  "dataflow": [
+    "Execute",
+    "ApplyChanges"
+  ],
+  "lakehouse": [
+    "RefreshMaterializedLakeViews"
+  ]
+}
+```.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
@@ -49,15 +61,14 @@ data "fabric_item_job_scheduler" "example" {
 - `owner` (Attributes) The user identity that created this schedule or last modified. (see [below for nested schema](#nestedatt--owner))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--configuration"></a>
 
+<a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 Read-Only:
@@ -72,7 +83,6 @@ Read-Only:
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed.
 
 <a id="nestedatt--configuration--occurrence"></a>
-
 ### Nested Schema for `configuration.occurrence`
 
 Read-Only:
@@ -82,8 +92,9 @@ Read-Only:
 - `week_index` (String) The week of the month.
 - `weekday` (String) Week day for triggering jobs.
 
-<a id="nestedatt--owner"></a>
 
+
+<a id="nestedatt--owner"></a>
 ### Nested Schema for `owner`
 
 Read-Only:
