@@ -321,7 +321,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The credential type.",
 							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleCredentialTypeValues(), true)...),
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
+									utils.RemoveSliceByValue(fabcore.PossibleCredentialTypeValues(), fabcore.CredentialTypeOAuth2),
+									true)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
