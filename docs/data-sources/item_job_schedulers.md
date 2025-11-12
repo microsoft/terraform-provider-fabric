@@ -21,8 +21,8 @@ The Item Job Schedulers data-source allows you to retrieve a list of Fabric [Ite
 ```terraform
 data "fabric_item_job_schedulers" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
-  job_type     = "MyJobType"
+  item_id      = "11111111-1111-1111-1111-111111111111"
+  job_type     = "Execute"
 }
 ```
 
