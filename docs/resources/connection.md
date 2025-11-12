@@ -134,7 +134,7 @@ Read-Only:
 
 Required:
 
-- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `OAuth2`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
+- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
 
 Optional:
 
