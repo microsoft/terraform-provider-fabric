@@ -36,13 +36,13 @@ import (
 
 const (
 	ParameterTypeTextReplace     string = "TextReplace"
-	ParameterTypeJsonPathReplace string = "JsonPathReplace"
+	ParameterTypeJSONPathReplace string = "JsonPathReplace"
 )
 
 func PossibleParameterTypeValues() []string {
 	return []string{
 		ParameterTypeTextReplace,
-		ParameterTypeJsonPathReplace,
+		ParameterTypeJSONPathReplace,
 	}
 }
 
@@ -180,7 +180,7 @@ func SourceFileToPayload(
 				switch strings.ToLower(param.Type.ValueString()) {
 				case strings.ToLower(ParameterTypeTextReplace):
 					contentStr = strings.ReplaceAll(contentStr, param.Find.ValueString(), param.Value.ValueString())
-				case strings.ToLower(ParameterTypeJsonPathReplace):
+				case strings.ToLower(ParameterTypeJSONPathReplace):
 					if IsJSON(contentStr) {
 						contentStr, diags = processJSONPathReplacement(contentStr, param)
 						if diags.HasError() {

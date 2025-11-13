@@ -43,7 +43,7 @@ func (pm *definitionContentSha256) MarkdownDescription(ctx context.Context) stri
 	return pm.Description(ctx)
 }
 
-func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) { //nolint:gocognit
+func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) { //nolint:gocognit,gocyclo
 	sourcePlanPaths, diags := req.Plan.PathMatches(ctx, req.PathExpression.Merge(pm.source))
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
