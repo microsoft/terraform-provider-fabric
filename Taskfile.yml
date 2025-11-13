@@ -90,11 +90,6 @@ tasks:
       - task: golangci-lint
       - task: tfproviderlintx
 
-  govulncheck:
-    desc: Run govulncheck
-    cmds:
-      - govulncheck -test -show verbose ./...
-
   golangci-lint:
     desc: Run golangci-lint
     cmds:
@@ -122,6 +117,11 @@ tasks:
     desc: Run link checkers
     cmds:
       - lychee --config ./.github/linters/.lychee.toml --format markdown .
+
+  govulncheck:
+    desc: Run govulncheck
+    cmds:
+      - govulncheck -test -show verbose ./...
 
   tools:
     desc: Install required tools

@@ -796,6 +796,7 @@ func TestUnit_SourceFileToPayload_TokensDelimiter(t *testing.T) {
 // setupTextTestFile creates a text test file for parameter mode tests.
 func setupTextTestFile(t *testing.T) (filePath, content string) {
 	t.Helper()
+
 	content = "Hello PLACEHOLDER_NAME! Welcome to PLACEHOLDER_SERVICE. Your value is PLACEHOLDER_VALUE."
 	filePath = filepath.Join(t.TempDir(), testhelp.RandomUUID()+".txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o600))
@@ -806,6 +807,7 @@ func setupTextTestFile(t *testing.T) (filePath, content string) {
 // setupJSONTestFile creates a JSON test file for parameter mode tests.
 func setupJSONTestFile(t *testing.T) (filePath string) {
 	t.Helper()
+
 	content := `{"name":"PLACEHOLDER_NAME","service":"PLACEHOLDER_SERVICE","value":"PLACEHOLDER_VALUE","nested":{"key":"PLACEHOLDER_KEY"}}`
 	filePath = filepath.Join(t.TempDir(), testhelp.RandomUUID()+".json")
 	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o600))
@@ -816,6 +818,7 @@ func setupJSONTestFile(t *testing.T) (filePath string) {
 // setupComplexJSONTestFile creates a complex JSON test file with arrays and nested objects.
 func setupComplexJSONTestFile(t *testing.T) (filePath string) {
 	t.Helper()
+
 	content := `{
 		"users": [
 			{"name": "Alice", "age": 30},
