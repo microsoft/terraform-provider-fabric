@@ -423,7 +423,7 @@ func TestAcc_EventstreamDefinitionResource_CRUD_Parameters(t *testing.T) {
 	))
 }
 
-func TestUnit_EventstreamDefinitionResource_DefinitionPartProcessing_Attributes(t *testing.T) { //nolint:go-golangci-lint
+func TestUnit_EventstreamDefinitionResource_DefinitionPartProcessing_Attributes(t *testing.T) { //nolint:maintidx
 	workspaceID := testhelp.RandomUUID()
 
 	testHelperDefinitionBase := map[string]any{
