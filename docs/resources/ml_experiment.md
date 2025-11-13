@@ -37,7 +37,6 @@ resource "fabric_ml_experiment" "example" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The Folder ID.
-- `test_attribute` (String) The ML Experiment description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

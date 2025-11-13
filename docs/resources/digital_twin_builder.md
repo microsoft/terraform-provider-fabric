@@ -70,6 +70,7 @@ resource "fabric_digital_twin_builder" "example_definition_update" {
 - `definition` (Attributes Map) Definition parts. Read more about [Digital Twin Builder definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/digital-twin-builder-definition). Accepted path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Digital Twin Builder description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Digital Twin Builder format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

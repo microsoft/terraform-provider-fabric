@@ -49,7 +49,6 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Folder ID.
-- `test_attribute` (String) The Warehouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

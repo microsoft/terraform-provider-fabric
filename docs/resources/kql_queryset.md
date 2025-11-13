@@ -69,7 +69,6 @@ resource "fabric_kql_queryset" "example_definition_update" {
 - `description` (String) The KQL Queryset description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Queryset format. Possible values: `Default`
-- `test_attribute` (String) The KQL Queryset description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

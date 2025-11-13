@@ -18,9 +18,9 @@ The Dataflow resource allows you to manage a Fabric [Dataflow](https://learn.mic
 ```terraform
 # Item without definition
 resource "fabric_dataflow" "example" {
-  display_name    = "example"
-  workspace_id    = "00000000-0000-0000-0000-000000000000"
-  unexpected_attr = "test"
+  display_name = "example"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  folder_id    = "11111111-1111-1111-1111-111111111111"
 }
 
 # Dataflow bootstrapping only
@@ -74,7 +74,6 @@ resource "fabric_dataflow" "example_update" {
 - `description` (String) The Dataflow description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Dataflow format. Possible values: `Default`
-- `test_attribute` (String) The Dataflow description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

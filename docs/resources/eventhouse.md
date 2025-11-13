@@ -82,7 +82,6 @@ Any changes to this configuration will result in recreation of the Eventhouse. (
 - `description` (String) The Eventhouse description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Eventhouse format. Possible values: `Default`
-- `test_attribute` (String) The Eventhouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

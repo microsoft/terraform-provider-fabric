@@ -72,7 +72,6 @@ resource "fabric_activator" "example_definition_update" {
 - `description` (String) The Activator description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Activator format. Possible values: `Default`
-- `test_attribute` (String) The Activator description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

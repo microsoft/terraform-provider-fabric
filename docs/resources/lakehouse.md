@@ -50,7 +50,6 @@ Any changes to this configuration will result in recreation of the Lakehouse. (s
 
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Folder ID.
-- `test_attribute` (String) The Lakehouse description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

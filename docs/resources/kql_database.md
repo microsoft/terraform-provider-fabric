@@ -132,7 +132,6 @@ Any changes to this configuration will result in recreation of the KQL Database.
 - `description` (String) The KQL Database description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Database format. Possible values: `Default`
-- `test_attribute` (String) The KQL Database description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

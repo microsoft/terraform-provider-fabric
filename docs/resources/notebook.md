@@ -69,7 +69,6 @@ resource "fabric_notebook" "example_definition_update" {
 - `description` (String) The Notebook description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Notebook format. Possible values: `ipynb`, `py`
-- `test_attribute` (String) The Notebook description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

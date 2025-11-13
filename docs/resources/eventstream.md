@@ -69,7 +69,6 @@ resource "fabric_eventstream" "example_definition_update" {
 - `description` (String) The Eventstream description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Eventstream format. Possible values: `Default`
-- `test_attribute` (String) The Eventstream description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

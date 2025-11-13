@@ -71,7 +71,6 @@ resource "fabric_data_pipeline" "example_definition_update" {
 - `description` (String) The Data Pipeline description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Data Pipeline format. Possible values: `Default`
-- `test_attribute` (String) The Data Pipeline description.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
