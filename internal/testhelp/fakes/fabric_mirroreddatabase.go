@@ -198,7 +198,7 @@ func NewRandomMirroredDatabase() fabmirroreddatabase.MirroredDatabase {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: &fabmirroreddatabase.Properties{
 			DefaultSchema:     to.Ptr(testhelp.RandomName()),

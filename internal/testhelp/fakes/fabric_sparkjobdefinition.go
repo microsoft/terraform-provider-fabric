@@ -23,7 +23,7 @@ func (o *operationsSparkJobDefinition) ConvertItemToEntity(item fabcore.Item) fa
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
-		FolderID: item.FolderID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties:  NewRandomSparkJobDefinition().Properties,
 	}
@@ -181,7 +181,7 @@ func NewRandomSparkJobDefinition() fabsparkjobdefinition.SparkJobDefinition {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties: &fabsparkjobdefinition.Properties{
 			OneLakeRootPath: to.Ptr(testhelp.RandomURI()),

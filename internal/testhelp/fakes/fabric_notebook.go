@@ -165,7 +165,7 @@ func NewRandomNotebook() fabnotebook.Notebook {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabnotebook.ItemTypeNotebook),
 	}
 }
