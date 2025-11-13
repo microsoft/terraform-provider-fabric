@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -25,6 +26,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	supermapvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/mapvalidator"
+	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -282,12 +285,33 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 					"The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.",
 				Required: true,
 			},
+			"processing_mode": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf(
+					"Processing mode of the tokens/parameters. Possible values: %s. Default `%s`",
+					utils.ConvertStringSlicesToString(transforms.PossibleProcessingModeValues(), true, true),
+					transforms.ProcessingModeGoTemplate,
+				),
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(transforms.ProcessingModeGoTemplate),
+				Validators: []validator.String{
+					stringvalidator.OneOf(transforms.PossibleProcessingModeValues()...),
+				},
+			},
 			"parameters": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of parameters to be passed and processed in the source content.",
 				Optional:            true,
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[params.ParametersModel](ctx),
 				Validators: []validator.Set{
-					setvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("tokens")),
+					setvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("processing_mode")),
+					supersetvalidator.RequireIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeParameters)},
+					),
+					supersetvalidator.NullIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeGoTemplate), types.StringValue(transforms.ProcessingModeNone)},
+					),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -312,26 +336,12 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 					},
 				},
 			},
-			"processing_mode": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf(
-					"Processing mode of the tokens/parameters. Possible values: %s. Default `%s`",
-					utils.ConvertStringSlicesToString(transforms.PossibleProcessingModeValues(), true, true),
-					transforms.ProcessingModeGoTemplate,
-				),
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(transforms.ProcessingModeGoTemplate),
-				Validators: []validator.String{
-					stringvalidator.OneOf(transforms.PossibleProcessingModeValues()...),
-				},
-			},
 			"tokens": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of tokens substitutes in the source.",
 				Optional:            true,
 				CustomType:          supertypes.MapTypeOf[types.String]{MapType: types.MapType{ElemType: types.StringType}},
 				ElementType:         types.StringType,
 				Validators: []validator.Map{
-					mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("parameters")),
 					mapvalidator.KeysAre(stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$`),
 						"Token key:\n"+
@@ -339,6 +349,14 @@ func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.Neste
 							"- cannot contains any white spaces\n"+
 							"- underscore '_' is allowed but not at the start or end of the token key",
 					)),
+					supermapvalidator.RequireIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeGoTemplate)},
+					),
+					supermapvalidator.NullIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeParameters), types.StringValue(transforms.ProcessingModeNone)},
+					),
 				},
 			},
 			"tokens_delimiter": schema.StringAttribute{

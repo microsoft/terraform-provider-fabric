@@ -130,7 +130,9 @@ func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req pla
 		parametersSlice, diags = parameters.Get(ctx)
 
 		for _, param := range parametersSlice {
-			if param.Value.IsNull() || param.Value.IsUnknown() {
+			if param.Value.IsNull() || param.Value.IsUnknown() ||
+				param.Type.IsNull() || param.Type.IsUnknown() ||
+				param.Find.IsNull() || param.Find.IsUnknown() {
 				resp.PlanValue = types.StringUnknown()
 
 				return

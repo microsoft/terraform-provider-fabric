@@ -35,14 +35,14 @@ import (
 )
 
 const (
-	ParameterTypeFindReplace     string = "FindReplace"
-	ParameterTypeKeyValueReplace string = "KeyValueReplace"
+	ParameterTypeTextReplace     string = "TextReplace"
+	ParameterTypeJsonPathReplace string = "JsonPathReplace"
 )
 
 func PossibleParameterTypeValues() []string {
 	return []string{
-		ParameterTypeFindReplace,
-		ParameterTypeKeyValueReplace,
+		ParameterTypeTextReplace,
+		ParameterTypeJsonPathReplace,
 	}
 }
 
@@ -178,9 +178,9 @@ func SourceFileToPayload(
 
 			for _, param := range parameters {
 				switch strings.ToLower(param.Type.ValueString()) {
-				case strings.ToLower(ParameterTypeFindReplace):
+				case strings.ToLower(ParameterTypeTextReplace):
 					contentStr = strings.ReplaceAll(contentStr, param.Find.ValueString(), param.Value.ValueString())
-				case strings.ToLower(ParameterTypeKeyValueReplace):
+				case strings.ToLower(ParameterTypeJsonPathReplace):
 					if IsJSON(contentStr) {
 						contentStr, diags = processJSONPathReplacement(contentStr, param)
 						if diags.HasError() {
@@ -292,7 +292,7 @@ func processJSONPathReplacement(contentStr string, param *params.ParametersModel
 
 	jpIter := jpExpression.Get(contentJSON)
 
-	if len(jpIter) == 1 {
+	if len(jpIter) > 0 {
 		err := jpExpression.Set(contentJSON, param.Value.ValueString())
 		if err != nil {
 			diags.AddError("JSONPath set", err.Error())
@@ -308,10 +308,6 @@ func processJSONPathReplacement(contentStr string, param *params.ParametersModel
 		}
 
 		return string(content), diags
-	} else if len(jpIter) > 1 {
-		diags.AddError("JSONPath expression", "Multiple matches found for JSONPath expression: "+param.Find.ValueString())
-
-		return "", diags
 	}
 
 	return contentStr, diags

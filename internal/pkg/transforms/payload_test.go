@@ -6,11 +6,14 @@ package transforms_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/params"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
@@ -244,6 +247,311 @@ func TestUnit_SourceFileToPayload(t *testing.T) {
 		require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
 		require.NotEmpty(t, contentSha256, "Expected non-empty contentSha256")
 	})
+}
+
+func TestUnit_SourceFileToPayload_ParametersMode_TextReplace(t *testing.T) {
+	textPath, textContent := setupTextTestFile(t)
+
+	tests := []struct {
+		name           string
+		parameters     []*params.ParametersModel
+		expectedResult string
+	}{
+		{
+			name: "single_replacement",
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("PLACEHOLDER_NAME"), Value: types.StringValue("World")},
+			},
+			expectedResult: "Hello World! Welcome to PLACEHOLDER_SERVICE. Your value is PLACEHOLDER_VALUE.",
+		},
+		{
+			name: "multiple_replacements",
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("PLACEHOLDER_NAME"), Value: types.StringValue("World")},
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("PLACEHOLDER_SERVICE"), Value: types.StringValue("TestService")},
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("PLACEHOLDER_VALUE"), Value: types.StringValue("123")},
+			},
+			expectedResult: "Hello World! Welcome to TestService. Your value is 123.",
+		},
+		{
+			name: "no_match",
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("NONEXISTENT"), Value: types.StringValue("value")},
+			},
+			expectedResult: textContent,
+		},
+		{
+			name: "case_sensitive",
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("placeholder_name"), Value: types.StringValue("value")},
+			},
+			expectedResult: textContent,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(textPath, "Parameters", nil, tt.parameters, transforms.TokensDelimiterCurlyBraces)
+			assert.False(t, diags.HasError(), "Unexpected error: %v", diags)
+			require.NotEmpty(t, contentB64)
+			require.NotEmpty(t, contentSha256)
+
+			decodedContent, err := transforms.Base64Decode(contentB64)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedResult, decodedContent)
+		})
+	}
+}
+
+func TestUnit_SourceFileToPayload_ParametersMode_JSONPath(t *testing.T) {
+	jsonPath := setupJSONTestFile(t)
+	complexJSONPath := setupComplexJSONTestFile(t)
+
+	tests := []struct {
+		name           string
+		filePath       string
+		parameters     []*params.ParametersModel
+		expectError    bool
+		expectedResult string
+	}{
+		{
+			name:     "simple_replacement",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.name"), Value: types.StringValue("UpdatedName")},
+			},
+			expectedResult: `{"name":"UpdatedName","nested":{"key":"PLACEHOLDER_KEY"},"service":"PLACEHOLDER_SERVICE","value":"PLACEHOLDER_VALUE"}`,
+		},
+		{
+			name:     "nested_replacement",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.nested.key"), Value: types.StringValue("UpdatedKey")},
+			},
+			expectedResult: `{"name":"PLACEHOLDER_NAME","nested":{"key":"UpdatedKey"},"service":"PLACEHOLDER_SERVICE","value":"PLACEHOLDER_VALUE"}`,
+		},
+		{
+			name:     "multiple_replacements",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.name"), Value: types.StringValue("UpdatedName")},
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.service"), Value: types.StringValue("UpdatedService")},
+			},
+			expectedResult: `{"name":"UpdatedName","nested":{"key":"PLACEHOLDER_KEY"},"service":"UpdatedService","value":"PLACEHOLDER_VALUE"}`,
+		},
+		{
+			name:     "array_element",
+			filePath: complexJSONPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.users[0].name"), Value: types.StringValue("Charlie")},
+			},
+			expectedResult: `{"settings":{"language":"en","theme":"dark"},"users":[{"age":30,"name":"Charlie"},{"age":25,"name":"Bob"}]}`,
+		},
+		{
+			name:     "all_array_elements",
+			filePath: complexJSONPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.users[*].age"), Value: types.StringValue("35")},
+			},
+			expectedResult: `{"settings":{"language":"en","theme":"dark"},"users":[{"age":"35","name":"Alice"},{"age":"35","name":"Bob"}]}`,
+		},
+		{
+			name:     "nonexistent_path",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.nonexistent"), Value: types.StringValue("value")},
+			},
+			expectedResult: `{"name":"PLACEHOLDER_NAME","nested":{"key":"PLACEHOLDER_KEY"},"service":"PLACEHOLDER_SERVICE","value":"PLACEHOLDER_VALUE"}`,
+		},
+		{
+			name:     "invalid_expression",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.[invalid"), Value: types.StringValue("value")},
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, "Parameters", nil, tt.parameters, transforms.TokensDelimiterCurlyBraces)
+
+			if tt.expectError {
+				require.True(t, diags.HasError())
+			} else {
+				assert.False(t, diags.HasError(), "Unexpected error: %v", diags)
+				require.NotEmpty(t, contentB64)
+				require.NotEmpty(t, contentSha256)
+
+				decodedContent, err := transforms.Base64Decode(contentB64)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedResult, decodedContent)
+			}
+		})
+	}
+}
+
+func TestUnit_SourceFileToPayload_ParametersMode_Mixed(t *testing.T) {
+	textPath, textContent := setupTextTestFile(t)
+	jsonPath := setupJSONTestFile(t)
+
+	tests := []struct {
+		name           string
+		filePath       string
+		parameters     []*params.ParametersModel
+		expectError    bool
+		expectedResult string
+	}{
+		{
+			name:     "text_and_jsonpath",
+			filePath: jsonPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("TextReplace"), Find: types.StringValue("PLACEHOLDER_NAME"), Value: types.StringValue("TextUpdated")},
+				{Type: types.StringValue("JsonPathReplace"), Find: types.StringValue("$.service"), Value: types.StringValue("JsonPathUpdated")},
+			},
+			expectedResult: `{"name":"TextUpdated","nested":{"key":"PLACEHOLDER_KEY"},"service":"JsonPathUpdated","value":"PLACEHOLDER_VALUE"}`,
+		},
+		{
+			name:     "unsupported_type",
+			filePath: textPath,
+			parameters: []*params.ParametersModel{
+				{Type: types.StringValue("UnsupportedType"), Find: types.StringValue("test"), Value: types.StringValue("value")},
+			},
+			expectError: true,
+		},
+		{
+			name:           "empty_parameters",
+			filePath:       textPath,
+			parameters:     []*params.ParametersModel{},
+			expectedResult: textContent,
+		},
+		{
+			name:           "nil_parameters",
+			filePath:       textPath,
+			parameters:     nil,
+			expectedResult: textContent,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(tt.filePath, "Parameters", nil, tt.parameters, transforms.TokensDelimiterCurlyBraces)
+
+			if tt.expectError {
+				require.True(t, diags.HasError())
+			} else {
+				assert.False(t, diags.HasError(), "Unexpected error: %v", diags)
+				require.NotEmpty(t, contentB64)
+				require.NotEmpty(t, contentSha256)
+
+				if tt.expectedResult != "" {
+					decodedContent, err := transforms.Base64Decode(contentB64)
+					require.NoError(t, err)
+					assert.Equal(t, tt.expectedResult, decodedContent)
+				}
+			}
+		})
+	}
+}
+
+func TestUnit_SourceFileToPayload_ParametersMode_CaseSensitivity(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Test case sensitivity for parameter types
+	jsonContent := `{"name":"test","value":123}`
+	jsonFilePath := filepath.Join(tempDir, testhelp.RandomUUID()+".json")
+
+	err := os.WriteFile(jsonFilePath, []byte(jsonContent), 0o600)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name           string
+		parameterType  string
+		expectError    bool
+		expectedResult string
+	}{
+		{
+			name:           "textreplace_lowercase",
+			parameterType:  "textreplace",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+		{
+			name:           "TEXTREPLACE_uppercase",
+			parameterType:  "TEXTREPLACE",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+		{
+			name:           "TextReplace_mixedcase",
+			parameterType:  "TextReplace",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+		{
+			name:           "jsonpathreplace_lowercase",
+			parameterType:  "jsonpathreplace",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+		{
+			name:           "JSONPATHREPLACE_uppercase",
+			parameterType:  "JSONPATHREPLACE",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+		{
+			name:           "JsonPathReplace_mixedcase",
+			parameterType:  "JsonPathReplace",
+			expectError:    false,
+			expectedResult: `{"name":"updated","value":123}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var parameters []*params.ParametersModel
+
+			if strings.Contains(strings.ToLower(tt.parameterType), "text") {
+				parameters = []*params.ParametersModel{
+					{
+						Type:  types.StringValue(tt.parameterType),
+						Find:  types.StringValue("test"),
+						Value: types.StringValue("updated"),
+					},
+				}
+			} else {
+				parameters = []*params.ParametersModel{
+					{
+						Type:  types.StringValue(tt.parameterType),
+						Find:  types.StringValue("$.name"),
+						Value: types.StringValue("updated"),
+					},
+				}
+			}
+
+			contentB64, contentSha256, diags := transforms.SourceFileToPayload(
+				jsonFilePath,
+				"Parameters",
+				nil,
+				parameters,
+				transforms.TokensDelimiterCurlyBraces,
+			)
+
+			if tt.expectError {
+				require.True(t, diags.HasError(), "Expected error diagnostics for: %s", tt.name)
+			} else {
+				assert.False(t, diags.HasError(), "Unexpected error diagnostics for %s: %v", tt.name, diags)
+				require.NotEmpty(t, contentB64, "Expected non-empty contentB64")
+				require.NotEmpty(t, contentSha256, "Expected non-empty contentSha256")
+
+				decodedContent, err := transforms.Base64Decode(contentB64)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedResult, decodedContent)
+			}
+		})
+	}
 }
 
 func TestUnit_PayloadToGzip(t *testing.T) {
@@ -483,4 +791,43 @@ func TestUnit_SourceFileToPayload_TokensDelimiter(t *testing.T) {
 			assert.Equal(t, tf.content, decodedContent, "Content should be unchanged in None mode")
 		}
 	})
+}
+
+// setupTextTestFile creates a text test file for parameter mode tests.
+func setupTextTestFile(t *testing.T) (filePath, content string) {
+	t.Helper()
+	content = "Hello PLACEHOLDER_NAME! Welcome to PLACEHOLDER_SERVICE. Your value is PLACEHOLDER_VALUE."
+	filePath = filepath.Join(t.TempDir(), testhelp.RandomUUID()+".txt")
+	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o600))
+
+	return filePath, content
+}
+
+// setupJSONTestFile creates a JSON test file for parameter mode tests.
+func setupJSONTestFile(t *testing.T) (filePath string) {
+	t.Helper()
+	content := `{"name":"PLACEHOLDER_NAME","service":"PLACEHOLDER_SERVICE","value":"PLACEHOLDER_VALUE","nested":{"key":"PLACEHOLDER_KEY"}}`
+	filePath = filepath.Join(t.TempDir(), testhelp.RandomUUID()+".json")
+	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o600))
+
+	return filePath
+}
+
+// setupComplexJSONTestFile creates a complex JSON test file with arrays and nested objects.
+func setupComplexJSONTestFile(t *testing.T) (filePath string) {
+	t.Helper()
+	content := `{
+		"users": [
+			{"name": "Alice", "age": 30},
+			{"name": "Bob", "age": 25}
+		],
+		"settings": {
+			"theme": "dark",
+			"language": "en"
+		}
+	}`
+	filePath = filepath.Join(t.TempDir(), testhelp.RandomUUID()+".json")
+	require.NoError(t, os.WriteFile(filePath, []byte(content), 0o600))
+
+	return filePath
 }
