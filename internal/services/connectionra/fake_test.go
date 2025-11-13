@@ -15,24 +15,11 @@ import (
 )
 
 func fakeGetConnectionRoleAssignment(
-	entityOrProvider any,
+	entity fabcore.ConnectionRoleAssignment,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, options *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
-	var entityProvider func() fabcore.ConnectionRoleAssignment
-
-	switch v := entityOrProvider.(type) {
-	case fabcore.ConnectionRoleAssignment:
-		entityProvider = func() fabcore.ConnectionRoleAssignment {
-			return v
-		}
-	case func() fabcore.ConnectionRoleAssignment:
-		entityProvider = v
-	default:
-		panic("fakeGetConnectionRoleAssignment: entityOrProvider must be either fabcore.ConnectionRoleAssignment or func() fabcore.ConnectionRoleAssignment")
-	}
-
 	return func(_ context.Context, _, _ string, _ *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse{ConnectionRoleAssignment: entityProvider()}, nil)
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse{ConnectionRoleAssignment: entity}, nil)
 
 		return resp, errResp
 	}
@@ -61,25 +48,11 @@ func fakeAddConnectionRoleAssignment(
 }
 
 func fakeUpdateConnectionRoleAssignment(
-	handlerOrEntity any,
+	entity fabcore.ConnectionRoleAssignment,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, updateConnectionRoleAssignmentRequest fabcore.UpdateConnectionRoleAssignmentRequest, options *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
-	var updateHandler func(req fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment
-
-	switch v := handlerOrEntity.(type) {
-	case fabcore.ConnectionRoleAssignment:
-		updateHandler = func(_ fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment {
-			return v
-		}
-	case func(req fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment:
-		updateHandler = v
-	default:
-		panic("fakeUpdateConnectionRoleAssignment: handlerOrEntity must be either fabcore.ConnectionRoleAssignment or func(req fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment")
-	}
-
 	return func(_ context.Context, _, _ string, req fabcore.UpdateConnectionRoleAssignmentRequest, _ *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
-		updatedEntity := updateHandler(req)
 		resp = azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse{ConnectionRoleAssignment: updatedEntity}, nil)
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse{ConnectionRoleAssignment: entity}, nil)
 
 		return resp, errResp
 	}
@@ -120,20 +93,27 @@ func newConnectionRoleAssignmentState(initialEntity fabcore.ConnectionRoleAssign
 func fakeStatefulGetConnectionRoleAssignment(
 	state *connectionRoleAssignmentState,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, options *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
-	return fakeGetConnectionRoleAssignment(func() fabcore.ConnectionRoleAssignment {
-		return state.currentEntity
-	})
+	return func(_ context.Context, _, _ string, _ *fabcore.ConnectionsClientGetConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientGetConnectionRoleAssignmentResponse{ConnectionRoleAssignment: state.currentEntity}, nil)
+
+		return resp, errResp
+	}
 }
 
 func fakeStatefulUpdateConnectionRoleAssignment(
 	updatedEntity fabcore.ConnectionRoleAssignment,
 	state *connectionRoleAssignmentState,
 ) func(ctx context.Context, connectionID, connectionRoleAssignmentID string, updateConnectionRoleAssignmentRequest fabcore.UpdateConnectionRoleAssignmentRequest, options *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
-	return fakeUpdateConnectionRoleAssignment(func(_ fabcore.UpdateConnectionRoleAssignmentRequest) fabcore.ConnectionRoleAssignment {
-		state.currentEntity = updatedEntity
+	return func(_ context.Context, _, _ string, req fabcore.UpdateConnectionRoleAssignmentRequest, _ *fabcore.ConnectionsClientUpdateConnectionRoleAssignmentOptions) (resp azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse], errResp azfake.ErrorResponder) {
+		// Update the state with the new role from the request
+		state.currentEntity.Role = req.Role
 
-		return updatedEntity
-	})
+		resp = azfake.Responder[fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.ConnectionsClientUpdateConnectionRoleAssignmentResponse{ConnectionRoleAssignment: state.currentEntity}, nil)
+
+		return resp, errResp
+	}
 }
 
 func NewRandomConnectionRoleAssignments() fabcore.ConnectionRoleAssignments {
