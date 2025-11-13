@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	timeoutsd "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	timeoutsr "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -36,7 +37,7 @@ type baseSparkEnvironmentSettingsModel struct {
 	SparkProperties           supertypes.MapValueOf[types.String]                                            `tfsdk:"spark_properties"`
 }
 
-func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
+func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkComputePreview) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	to.DriverCores = types.Int32PointerValue(from.DriverCores)
@@ -134,7 +135,7 @@ type resourceSparkEnvironmentSettingsModel struct {
 }
 
 type requestUpdateSparkEnvironmentSettings struct {
-	fabenvironment.UpdateEnvironmentSparkComputeRequest
+	fabenvironment.UpdateEnvironmentSparkComputeRequestPreview
 }
 
 func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from resourceSparkEnvironmentSettingsModel) diag.Diagnostics { //nolint:gocognit, gocyclo
@@ -214,11 +215,14 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 			return diags
 		}
 
-		sparkPropertiesMap := make(map[string]string)
+		sparkPropertiesMap := make([]fabenvironment.SparkProperty, 0, len(sparkProperties))
 
 		for k, v := range sparkProperties {
 			if !v.IsNull() && !v.IsUnknown() {
-				sparkPropertiesMap[k] = v.ValueString()
+				sparkPropertiesMap = append(sparkPropertiesMap, fabenvironment.SparkProperty{
+					Key:   &k,
+					Value: azto.Ptr(v.ValueString()),
+				})
 			}
 		}
 

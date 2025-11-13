@@ -22,9 +22,10 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceSparkEnvironmentSettings)(nil)
 
 type dataSourceSparkEnvironmentSettings struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabenvironment.SparkComputeClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData   *pconfig.ProviderData
+	client        *fabenvironment.PublishedClient
+	clientLibrary *fabenvironment.StagingClient
+	TypeInfo      tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceSparkEnvironmentSettings() datasource.DataSource {
@@ -62,7 +63,8 @@ func (d *dataSourceSparkEnvironmentSettings) Configure(_ context.Context, req da
 		return
 	}
 
-	d.client = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewSparkComputeClient()
+	d.client = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewPublishedClient()
+	d.clientLibrary = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewStagingClient()
 }
 
 func (d *dataSourceSparkEnvironmentSettings) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -102,22 +104,22 @@ func (d *dataSourceSparkEnvironmentSettings) Read(ctx context.Context, req datas
 }
 
 func (d *dataSourceSparkEnvironmentSettings) get(ctx context.Context, model *dataSourceSparkEnvironmentSettingsModel) diag.Diagnostics {
-	var respEntity fabenvironment.SparkCompute
+	var respEntity fabenvironment.SparkComputePreview
 
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
-		respGet, err := d.client.GetPublishedSettings(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), nil)
+		respGet, err := d.client.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkCompute
+		respEntity = respGet.SparkComputePreview
 	} else {
-		respGet, err := d.client.GetStagingSettings(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), nil)
+		respGet, err := d.clientLibrary.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkCompute
+		respEntity = respGet.SparkComputePreview
 	}
 
 	return model.set(ctx, respEntity)
