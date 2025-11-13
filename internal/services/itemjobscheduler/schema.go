@@ -465,18 +465,22 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 
 func allowedJobTypesMarkdownDescription() string {
 	var b strings.Builder
-	b.WriteString("Allowed job types per item type: ")
+	_, _ = b.WriteString("Allowed job types per item type: ")
+
 	keys := make([]string, 0, len(AllowedJobTypesByItemType))
 	for k := range AllowedJobTypesByItemType {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
+
 	for i, k := range keys {
 		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
 		sort.Strings(vals)
-		b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+		_, _ = b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+
 		if i < len(keys)-1 {
-			b.WriteString("; ")
+			_, _ = b.WriteString("; ")
 		}
 	}
 
