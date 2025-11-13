@@ -34,7 +34,7 @@ data "fabric_item_job_scheduler" "example" {
 
 - `id` (String) The Item Job Scheduler ID.
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type. Allowed job types per item type: lakehouse: {RefreshMaterializedLakeViews}; dataflow: {Execute, ApplyChanges}; .
+- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; lakehouse: {RefreshMaterializedLakeViews}.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional

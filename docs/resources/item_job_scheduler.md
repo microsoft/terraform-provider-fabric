@@ -105,7 +105,7 @@ resource "fabric_item_job_scheduler" "monthly_configuration_ordinal_weekday_exam
 - `configuration` (Attributes) The schedule configuration. (see [below for nested schema](#nestedatt--configuration))
 - `enabled` (Boolean) Whether this schedule is enabled. True - Enabled, False - Disabled.
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
-- `job_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The job type. Allowed job types per item type: dataflow: {Execute, ApplyChanges}; lakehouse: {RefreshMaterializedLakeViews}; .
+- `job_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; lakehouse: {RefreshMaterializedLakeViews}.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional

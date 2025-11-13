@@ -6,6 +6,7 @@ package itemjobscheduler
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -463,10 +464,21 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 }
 
 func allowedJobTypesMarkdownDescription() string {
-	result := "Allowed job types per item type: "
-	for k, v := range AllowedJobTypesByItemType {
-		result += fmt.Sprintf("%s: {%s}; ", k, strings.Join(v, ", "))
+	var b strings.Builder
+	b.WriteString("Allowed job types per item type: ")
+	keys := make([]string, 0, len(AllowedJobTypesByItemType))
+	for k := range AllowedJobTypesByItemType {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for i, k := range keys {
+		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
+		sort.Strings(vals)
+		b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+		if i < len(keys)-1 {
+			b.WriteString("; ")
+		}
 	}
 
-	return result
+	return b.String()
 }

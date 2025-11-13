@@ -58,7 +58,7 @@ Optional:
 Required:
 
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type. Allowed job types per item type: dataflow: {Execute, ApplyChanges}; lakehouse: {RefreshMaterializedLakeViews}; .
+- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; lakehouse: {RefreshMaterializedLakeViews}.
 - `workspace_id` (String) The Workspace ID.
 
 Read-Only:
