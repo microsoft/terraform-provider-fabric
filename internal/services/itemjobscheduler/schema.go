@@ -4,8 +4,9 @@
 package itemjobscheduler
 
 import (
-	"encoding/json"
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
@@ -90,7 +91,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"job_type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The job type." + allowedJobTypesMarkdownDescription(),
+					MarkdownDescription: "The job type. " + allowedJobTypesMarkdownDescription(),
 					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
@@ -462,10 +463,10 @@ func occurrenceSchema() superschema.SuperSingleNestedAttributeOf[occurrenceModel
 }
 
 func allowedJobTypesMarkdownDescription() string {
-	b, err := json.MarshalIndent(AllowedJobTypesByItemType, "", "  ")
-	if err != nil {
-		return ""
+	result := "Allowed job types per item type: "
+	for k, v := range AllowedJobTypesByItemType {
+		result += fmt.Sprintf("%s: {%s}; ", k, strings.Join(v, ", "))
 	}
 
-	return "Allowed job types per item type:\n\n```json\n" + string(b) + "\n```"
+	return result
 }
