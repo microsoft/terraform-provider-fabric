@@ -32,8 +32,8 @@ var (
 
 type resourceSparkEnvironmentSettings struct {
 	pConfigData     *pconfig.ProviderData
-	client          *fabenvironment.PublishedClient
-	clientLibraries *fabenvironment.StagingClient
+	publishedClient *fabenvironment.PublishedClient
+	stagingClient   *fabenvironment.StagingClient
 	itemsClient     *fabenvironment.ItemsClient
 	TypeInfo        tftypeinfo.TFTypeInfo
 }
@@ -73,8 +73,8 @@ func (r *resourceSparkEnvironmentSettings) Configure(_ context.Context, req reso
 		return
 	}
 
-	r.client = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewPublishedClient()
-	r.clientLibraries = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewStagingClient()
+	r.publishedClient = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewPublishedClient()
+	r.stagingClient = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewStagingClient()
 	r.itemsClient = fabenvironment.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
 }
 
@@ -118,7 +118,7 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		return
 	}
 
-	respCreate, err := r.clientLibraries.UpdateSparkComputePreview(
+	respCreate, err := r.stagingClient.UpdateSparkComputePreview(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
@@ -221,7 +221,7 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 		return
 	}
 
-	respUpdate, err := r.clientLibraries.UpdateSparkComputePreview(
+	respUpdate, err := r.stagingClient.UpdateSparkComputePreview(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
@@ -280,14 +280,14 @@ func (r *resourceSparkEnvironmentSettings) get(ctx context.Context, model *resou
 	var respEntity fabenvironment.SparkComputePreview
 
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
-		respGet, err := r.client.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := r.publishedClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
 
 		respEntity = respGet.SparkComputePreview
 	} else {
-		respGet, err := r.client.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := r.stagingClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
