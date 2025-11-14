@@ -20,6 +20,7 @@ The Eventhouse resource allows you to manage a Fabric [Eventhouse](https://learn
 resource "fabric_eventhouse" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  folder_id    = "11111111-1111-1111-1111-111111111111"
 }
 
 # Example 2 - Item with definition bootstrapping only
