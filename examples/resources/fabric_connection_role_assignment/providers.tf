@@ -9,7 +9,3 @@ terraform {
 }
 
 provider "fabric" {}
-
-locals {
-  path = abspath(join("/", [path.root, "..", "..", "..", "internal", "testhelp", "fixtures", "variablelibrary"]))
-}
