@@ -225,14 +225,14 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"display_name": *entityBefore.DisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
-						//	"folder_id":    *entityBefore.FolderID,
+						"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-			//	resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Update and Read
@@ -247,13 +247,13 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
-						//"folder_id":    *entityBefore.FolderID,
+						"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-			//	resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

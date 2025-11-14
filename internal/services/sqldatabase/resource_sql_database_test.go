@@ -180,7 +180,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
-					"folder_id": *entityBefore.FolderID,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -201,7 +201,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"description":  *entityAfter.Description,
-					"folder_id": *entityBefore.FolderID,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -232,13 +232,13 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Config: at.JoinConfigs(
 				folderResourceHCL,
 				at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-					"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
-				},
-			)),
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -254,14 +254,14 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Config: at.JoinConfigs(
 				folderResourceHCL,
 				at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-					"description":  entityUpdateDescription,
-					"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
-				},
-			)),
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

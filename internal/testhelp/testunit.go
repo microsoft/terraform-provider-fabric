@@ -143,7 +143,7 @@ func NewTestState() *TestState {
 	return &TestState{}
 }
 
-func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
+func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
 	t.Helper()
 
 	resourceHCL = at.CompileConfig(

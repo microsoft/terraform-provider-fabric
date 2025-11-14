@@ -308,7 +308,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -330,7 +330,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 					},
 				)),
@@ -347,7 +347,7 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
-						"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 						"description":  entityUpdateDescription,
 						"definition":   testHelperDefinition,

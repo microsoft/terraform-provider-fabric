@@ -241,7 +241,7 @@ func TestAcc_KQLDashboardResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -255,7 +255,7 @@ folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -276,7 +276,7 @@ folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
-						"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(

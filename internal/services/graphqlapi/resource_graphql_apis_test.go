@@ -180,7 +180,7 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
-					"folder_id": *entityBefore.FolderID,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -198,7 +198,7 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
-					"folder_id": *entityBefore.FolderID,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -227,13 +227,13 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 			Config: at.JoinConfigs(
 				folderResourceHCL,
 				at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-					"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
-				},
-			)),
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -245,19 +245,19 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				folderResourceHCL,
-			at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-					"folder_id": testhelp.RefByFQN(folderResourceFQN, "id"),
-				},
-			)),
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-								resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
 			),
 		},
 	},
