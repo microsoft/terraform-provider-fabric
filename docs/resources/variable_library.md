@@ -22,7 +22,7 @@ resource "fabric_variable_library" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
-# Example 2 - Item with definition bootstrapping only
+# Example 2 - Item with definition without valueSets
 resource "fabric_variable_library" "example_definition_bootstrap" {
   display_name              = "example"
   description               = "example with definition bootstrapping"
@@ -30,25 +30,30 @@ resource "fabric_variable_library" "example_definition_bootstrap" {
   definition_update_enabled = false
   format                    = "Default"
   definition = {
-    "content.json" = {
-      source = "${local.path}/variablelibrary-content.json"
+    "settings.json" = {
+      source = "${local.path}/settings.json"
+    }
+    "variables.json" = {
+      source = "${local.path}/variables.json"
     }
   }
 }
 
-# Example 3 - Item with definition update when source or tokens changed
+# Example 3 - Item with definition with valueSets
 resource "fabric_variable_library" "example_definition_update" {
   display_name = "example"
-  description  = "example with definition update when source or tokens changed"
+  description  = "Item with definition with valueSets"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
   definition = {
-    "variablelibrary-content.json" = {
-      source = "${local.path}/variablelibrary-content.json"
-      tokens = {
-        "MyValue1" = "my value 1"
-        "MyValue2" = "my value 2"
-      }
+    "settings.json" = {
+      source = "${local.path}/settings.json"
+    }
+    "variables.json" = {
+      source = "${local.path}/variables.json"
+    }
+    "valueSets/valueSet1.json" = {
+      source = "${local.path}/valueSets/valueSet1.json"
     }
   }
 }
