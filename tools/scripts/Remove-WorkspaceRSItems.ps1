@@ -68,6 +68,43 @@ function Write-Log {
   }
 }
 
+function Install-ModuleIfNotInstalled {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$ModuleName
+  )
+
+  if (-not (Get-Module -Name $ModuleName -ListAvailable)) {
+    try {
+      Write-Log -Message "Installing module: $ModuleName" -Level 'DEBUG'
+      Install-Module -Name $ModuleName -AllowClobber -Force -Scope CurrentUser -Repository PSGallery -Confirm:$false -SkipPublisherCheck -AcceptLicense
+    }
+    catch {
+      Write-Error $_.Exception.Message
+      Write-Log -Message "Unable to install module: $ModuleName" -Level 'ERROR'
+    }
+  }
+}
+
+function Import-ModuleIfNotImported {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$ModuleName
+  )
+
+  if (-not (Get-Module -Name $ModuleName)) {
+    try {
+      Write-Log -Message "Importing module: $ModuleName" -Level 'DEBUG'
+      Import-Module -Name $ModuleName
+    }
+    catch {
+      Write-Error $_.Exception.Message
+      Write-Log -Message "Unable to import module: $ModuleName" -Level 'ERROR'
+    }
+  }
+}
+
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -309,6 +346,45 @@ function Remove-WorkspaceRSItems {
 }
 
 # Main execution
+# Define an array of modules to install
+$modules = @('Az.Accounts', 'Az.Fabric', 'pwsh-dotenv')
+
+# Loop through each module and install if not installed
+foreach ($module in $modules) {
+  Install-ModuleIfNotInstalled -ModuleName $module
+  Import-ModuleIfNotImported -ModuleName $module
+}
+
+
+# Import the .env file into the environment variables
+if (Test-Path -Path './wellknown.env') {
+  Import-Dotenv -Path ./wellknown.env -AllowClobber
+}
+
+if (
+  !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
+  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+) {
+  Write-Log -Message @'
+  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID,
+  are required environment variables.
+'@ `
+    -Level 'ERROR'
+  return
+}
+
+
+# Check if already logged in to Azure, if not then login
+$azContext = Get-AzContext
+if (!$azContext -or $azContext.Tenant.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or $azContext.Subscription.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID) {
+  Write-Log -Message 'Logging in to Azure.' -Level 'DEBUG'
+  Connect-AzAccount -Tenant $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -SubscriptionId $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -UseDeviceAuthentication
+  $azContext = Get-AzContext
+  Write-Log -Message 'Logged in successfully' -Level 'DEBUG'
+  # Disconnect-AzAccount
+}
+
 if (-not $WellKnownPath) {
   $WellKnownPath = Join-Path $PSScriptRoot "../../internal/testhelp/fixtures/.wellknown.json"
 }
