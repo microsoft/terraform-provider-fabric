@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -67,6 +66,9 @@ func TestUnitPreCheckNoEnvs(t *testing.T) {
 func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.ServerFactory, testState *TestState, preCheck func(*testing.T), steps []resource.TestStep) resource.TestCase {
 	t.Helper()
 
+	fabricClientOptions := &fabric.ClientOptions{}
+	fabricClientOptions.Transport = fabfake.NewServerFactoryTransport(fakeServer)
+
 	testCase := resource.TestCase{
 		IsUnitTest: true,
 		PreCheck:   func() { preCheck(t) },
@@ -80,10 +82,8 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 
 			return nil
 		},
-		ProtoV6ProviderFactories: GetTestUnitProtoV6ProviderFactories(&azcore.ClientOptions{
-			Transport: fabfake.NewServerFactoryTransport(fakeServer),
-		}, testState),
-		Steps: steps,
+		ProtoV6ProviderFactories: GetTestUnitProtoV6ProviderFactories(fabricClientOptions, testState),
+		Steps:                    steps,
 	}
 
 	// ephemeral specific configurations
@@ -110,7 +110,7 @@ func newTestUnitCase(t *testing.T, testResource *string, fakeServer *fabfake.Ser
 // unit testing. The factory function will be invoked for every Terraform
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
-func GetTestUnitProtoV6ProviderFactories(fabricClientOpts *azcore.ClientOptions, testState *TestState) map[string]func() (tfprotov6.ProviderServer, error) {
+func GetTestUnitProtoV6ProviderFactories(fabricClientOpts *fabric.ClientOptions, testState *TestState) map[string]func() (tfprotov6.ProviderServer, error) {
 	prov := provider.New("testUnit")
 	prov.ConfigureCreateClient(func(ctx context.Context, cfg *pconfig.ProviderConfig) (*fabric.Client, error) {
 		client, err := fabric.NewClient(&azfake.TokenCredential{}, &cfg.Endpoint, fabricClientOpts)
