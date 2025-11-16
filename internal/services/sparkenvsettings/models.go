@@ -36,7 +36,7 @@ type baseSparkEnvironmentSettingsModel struct {
 	SparkProperties           supertypes.MapValueOf[types.String]                                            `tfsdk:"spark_properties"`
 }
 
-func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
+func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkComputePreview) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	to.DriverCores = types.Int32PointerValue(from.DriverCores)
@@ -134,7 +134,7 @@ type resourceSparkEnvironmentSettingsModel struct {
 }
 
 type requestUpdateSparkEnvironmentSettings struct {
-	fabenvironment.UpdateEnvironmentSparkComputeRequest
+	fabenvironment.UpdateEnvironmentSparkComputeRequestPreview
 }
 
 func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from resourceSparkEnvironmentSettingsModel) diag.Diagnostics { //nolint:gocognit, gocyclo
