@@ -41,6 +41,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/connectionra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
@@ -143,7 +144,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 	tflog.Info(ctx, resp.Info)
 
-	fabricClientOpt := &policy.ClientOptions{}
+	fabricClientOpt := &fabric.ClientOptions{}
 
 	// MaxRetries specifies the maximum number of attempts a failed operation will be retried before producing an error.
 	// Not really an unlimited cap, but sufficiently large enough to be considered as such.
@@ -432,6 +433,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
 		connection.NewResourceConnection,
+		connectionra.NewResourceConnectionRoleAssignment,
 		deploymentpipeline.NewResourceDeploymentPipeline,
 		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
@@ -477,6 +479,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		capacity.NewDataSourceCapacities,
 		connection.NewDataSourceConnection,
 		connection.NewDataSourceConnections,
+		connectionra.NewDataSourceConnectionRoleAssignment,
+		connectionra.NewDataSourceConnectionRoleAssignments,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
