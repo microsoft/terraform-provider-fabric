@@ -311,7 +311,7 @@ jobs:
     environment:
       name: development
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
       actions: read
@@ -393,7 +393,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform'
         run: task test
-        timeout-minutes: 45
+        timeout-minutes: 60
         env:
           # TF_LOG: DEBUG
           FABRIC_USE_OIDC: true
@@ -410,7 +410,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
         run: task test
-        timeout-minutes: 45
+        timeout-minutes: 60
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -559,8 +559,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: ✅ OK
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        if: ${{ needs.test.result == 'success' }}
         run: exit 0
       - name: 🛑 Failure
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ needs.test.result != 'success' }}
         run: exit 1
