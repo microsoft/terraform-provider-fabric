@@ -357,7 +357,7 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 
 			// Workspace Private Links
 			"use_workspace_private_link_endpoint": schema.BoolAttribute{
-				MarkdownDescription: "Use the workspace private link endpoint for all the workspace-scoped API requests. When set to `true`, the provider routes all workspace-scoped API requests through the workspace's private link endpoint (workspace-specific hostname). This can also be sourced from the `FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT` environment variable. Defaults to `false`.",
+				MarkdownDescription: "Use the workspace private link endpoint. When set to `true`, the provider routes all workspace-scoped API requests through the workspace's private link endpoint (workspace-specific hostname). This can also be sourced from the `FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT` environment variable. Defaults to `false`.",
 				Optional:            true,
 			},
 		},
