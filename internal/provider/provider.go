@@ -186,7 +186,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	fabricClientOpt.PerCallPolicies = perCallPolicies
 
 	// Set workspace private links
-	fabricClientOpt.UseWorkspacePrivateLinks = cfg.EnableWorkspacePrivateLinks
+	fabricClientOpt.UseWorkspacePrivateLinks = cfg.UseWorkspacePrivateLinkEndpoint
 
 	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
 	if err != nil {
@@ -356,8 +356,8 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 			},
 
 			// Workspace Private Links
-			"enable_workspace_private_links": schema.BoolAttribute{
-				MarkdownDescription: "Enable workspace private links. When enabled, API requests for workspace-specific resources will use private link endpoints that include the workspace identifier in the host. This can also be sourced from the `FABRIC_ENABLE_WORKSPACE_PRIVATE_LINKS` environment variable. Defaults to `false`.",
+			"use_workspace_private_link_endpoint": schema.BoolAttribute{
+				MarkdownDescription: "Use the workspace private link endpoint for all the workspace-scoped API requests. When set to `true`, the provider routes all workspace-scoped API requests through the workspace's private link endpoint (workspace-specific hostname). This can also be sourced from the `FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT` environment variable. Defaults to `false`.",
 				Optional:            true,
 			},
 		},
@@ -762,8 +762,8 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.DisableTerraformPartnerID = putils.GetBoolValue(config.DisableTerraformPartnerID, pconfig.GetEnvVarsDisableTerraformPartnerID(), false)
 	ctx = tflog.SetField(ctx, "disable_terraform_partner_id", config.DisableTerraformPartnerID.ValueBool())
 
-	config.EnableWorkspacePrivateLinks = putils.GetBoolValue(config.EnableWorkspacePrivateLinks, pconfig.GetEnvVarsEnableWorkspacePrivateLinks(), false)
-	ctx = tflog.SetField(ctx, "enable_workspace_private_links", config.EnableWorkspacePrivateLinks.ValueBool())
+	config.UseWorkspacePrivateLinkEndpoint = putils.GetBoolValue(config.UseWorkspacePrivateLinkEndpoint, pconfig.GetEnvVarsUseWorkspacePrivateLinkEndpoint(), false)
+	ctx = tflog.SetField(ctx, "use_workspace_private_link_endpoint", config.UseWorkspacePrivateLinkEndpoint.ValueBool())
 
 	return ctx
 }
@@ -859,7 +859,7 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.config.Preview = config.Preview.ValueBool()
 	p.config.PartnerID = config.PartnerID.ValueString()
 	p.config.DisableTerraformPartnerID = config.DisableTerraformPartnerID.ValueBool()
-	p.config.EnableWorkspacePrivateLinks = config.EnableWorkspacePrivateLinks.ValueBool()
+	p.config.UseWorkspacePrivateLinkEndpoint = config.UseWorkspacePrivateLinkEndpoint.ValueBool()
 }
 
 func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse) {

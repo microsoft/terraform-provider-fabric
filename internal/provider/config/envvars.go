@@ -99,6 +99,6 @@ func GetEnvVarsDisableTerraformPartnerID() []string {
 	return []string{"FABRIC_DISABLE_TERRAFORM_PARTNER_ID", "ARM_DISABLE_TERRAFORM_PARTNER_ID"}
 }
 
-func GetEnvVarsEnableWorkspacePrivateLinks() []string {
-	return []string{"FABRIC_ENABLE_WORKSPACE_PRIVATE_LINKS"}
+func GetEnvVarsUseWorkspacePrivateLinkEndpoint() []string {
+	return []string{"FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT"}
 }
