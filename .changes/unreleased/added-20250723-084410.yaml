@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_onelake_data_access_security` resource
+time: 2025-07-23T08:44:10.411833672Z
+custom:
+    Issue: "521"
