@@ -57,6 +57,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatasharesprovider"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
@@ -451,6 +452,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		externaldatasharesprovider.NewResourceExternalDataSharesProvider,
 		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
@@ -518,6 +520,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		externaldatasharesprovider.NewDataSourceExternalDataShareProvider,
+		externaldatasharesprovider.NewDataSourceExternalDataSharesProvider,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
