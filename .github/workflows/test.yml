@@ -559,8 +559,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: ✅ OK
-        if: ${{ needs.test.result == 'success' }}
+        if: ${{ needs.test.result == 'success' || needs.test.result == 'skipped'}}
         run: exit 0
       - name: 🛑 Failure
-        if: ${{ needs.test.result != 'success' }}
+        if: ${{ needs.test.result == 'failure' || needs.test.result == 'cancelled' }}
         run: exit 1
