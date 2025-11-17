@@ -144,7 +144,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 	tflog.Info(ctx, resp.Info)
 
-	fabricClientOpt := &policy.ClientOptions{}
+	fabricClientOpt := &fabric.ClientOptions{}
 
 	// MaxRetries specifies the maximum number of attempts a failed operation will be retried before producing an error.
 	// Not really an unlimited cap, but sufficiently large enough to be considered as such.
