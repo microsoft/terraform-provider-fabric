@@ -41,6 +41,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/connectionra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
@@ -60,6 +61,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/itemjobscheduler"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
@@ -143,7 +145,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 
 	tflog.Info(ctx, resp.Info)
 
-	fabricClientOpt := &policy.ClientOptions{}
+	fabricClientOpt := &fabric.ClientOptions{}
 
 	// MaxRetries specifies the maximum number of attempts a failed operation will be retried before producing an error.
 	// Not really an unlimited cap, but sufficiently large enough to be considered as such.
@@ -432,6 +434,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
 		connection.NewResourceConnection,
+		connectionra.NewResourceConnectionRoleAssignment,
 		deploymentpipeline.NewResourceDeploymentPipeline,
 		deploymentpipelinera.NewResourceDeploymentPipelineRoleAssignment,
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
@@ -441,6 +444,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
+		itemjobscheduler.NewResourceItemJobScheduler,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
@@ -477,6 +481,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		capacity.NewDataSourceCapacities,
 		connection.NewDataSourceConnection,
 		connection.NewDataSourceConnections,
+		connectionra.NewDataSourceConnectionRoleAssignment,
+		connectionra.NewDataSourceConnectionRoleAssignments,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
 		dashboard.NewDataSourceDashboards,
@@ -508,6 +514,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		gatewayra.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
+		itemjobscheduler.NewDataSourceItemJobScheduler,
+		itemjobscheduler.NewDataSourceItemJobSchedulers,
 		kqldashboard.NewDataSourceKQLDashboard,
 		kqldashboard.NewDataSourceKQLDashboards,
 		kqldatabase.NewDataSourceKQLDatabase,

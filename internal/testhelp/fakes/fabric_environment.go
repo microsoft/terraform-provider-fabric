@@ -140,7 +140,7 @@ func NewRandomEnvironment() fabenvironment.Environment {
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
-		Properties: &fabenvironment.PublishInfo{
+		Properties: &fabenvironment.Properties{
 			PublishDetails: &fabenvironment.PublishDetails{
 				State:         to.Ptr(fabenvironment.PublishStateSuccess),
 				TargetVersion: to.Ptr(testhelp.RandomUUID()),
