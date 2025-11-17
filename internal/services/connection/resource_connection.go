@@ -402,10 +402,8 @@ func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsMod
 }
 
 func (r *resourceConnection) validateConnectionEncryption(model rsCredentialDetailsModel, elements []fabcore.ConnectionEncryption) diag.Diagnostics {
-	for _, v := range elements {
-		if v == fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString()) {
-			return nil
-		}
+	if slices.Contains(elements, fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString())) {
+		return nil
 	}
 
 	var diags diag.Diagnostics
