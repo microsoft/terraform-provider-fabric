@@ -6,6 +6,7 @@ package fabricitem
 import (
 	"context"
 	"fmt"
+	"maps"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
@@ -42,9 +43,7 @@ func getResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -66,9 +65,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -106,9 +103,7 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	attributes["configuration"] = attrConfiguration
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
