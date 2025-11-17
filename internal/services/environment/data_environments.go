@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabenvironment.PublishInfo, to *fabricitem.FabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabenvironment.Properties, to *fabricitem.FabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[environmentPropertiesModel](ctx)
 
 		if from != nil {
@@ -36,10 +36,10 @@ func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemsPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo], fabricItems *[]fabricitem.FabricItemProperties[fabenvironment.PublishInfo]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemsPropertiesModel[environmentPropertiesModel, fabenvironment.Properties], fabricItems *[]fabricitem.FabricItemProperties[fabenvironment.Properties]) error {
 		client := fabenvironment.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
-		fabItems := make([]fabricitem.FabricItemProperties[fabenvironment.PublishInfo], 0)
+		fabItems := make([]fabricitem.FabricItemProperties[fabenvironment.Properties], 0)
 
 		respList, err := client.ListEnvironments(ctx, model.WorkspaceID.ValueString(), nil)
 		if err != nil {
@@ -47,7 +47,7 @@ func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
 		}
 
 		for _, entity := range respList {
-			var fabricItem fabricitem.FabricItemProperties[fabenvironment.PublishInfo]
+			var fabricItem fabricitem.FabricItemProperties[fabenvironment.Properties]
 
 			fabricItem.Set(entity)
 
@@ -59,7 +59,7 @@ func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	config := fabricitem.DataSourceFabricItemsProperties[environmentPropertiesModel, fabenvironment.PublishInfo]{
+	config := fabricitem.DataSourceFabricItemsProperties[environmentPropertiesModel, fabenvironment.Properties]{
 		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
 			TypeInfo:       ItemTypeInfo,
 			FabricItemType: FabricItemType,

@@ -16,7 +16,7 @@ import (
 )
 
 func NewResourceEnvironment(ctx context.Context) resource.Resource {
-	propertiesSetter := func(ctx context.Context, from *fabenvironment.PublishInfo, to *fabricitem.ResourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabenvironment.Properties, to *fabricitem.ResourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[environmentPropertiesModel](ctx)
 
 		if from != nil {
@@ -36,7 +36,7 @@ func NewResourceEnvironment(ctx context.Context) resource.Resource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo], fabricItem *fabricitem.FabricItemProperties[fabenvironment.PublishInfo]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties], fabricItem *fabricitem.FabricItemProperties[fabenvironment.Properties]) error {
 		client := fabenvironment.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetEnvironment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -49,7 +49,7 @@ func NewResourceEnvironment(ctx context.Context) resource.Resource {
 		return nil
 	}
 
-	config := fabricitem.ResourceFabricItemProperties[environmentPropertiesModel, fabenvironment.PublishInfo]{
+	config := fabricitem.ResourceFabricItemProperties[environmentPropertiesModel, fabenvironment.Properties]{
 		ResourceFabricItem: fabricitem.ResourceFabricItem{
 			TypeInfo:             ItemTypeInfo,
 			FabricItemType:       FabricItemType,
