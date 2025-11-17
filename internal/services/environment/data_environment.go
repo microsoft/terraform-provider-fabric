@@ -17,7 +17,7 @@ import (
 )
 
 func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabenvironment.PublishInfo, to *fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabenvironment.Properties, to *fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[environmentPropertiesModel](ctx)
 
 		if from != nil {
@@ -37,7 +37,7 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo], fabricItem *fabricitem.FabricItemProperties[fabenvironment.PublishInfo]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties], fabricItem *fabricitem.FabricItemProperties[fabenvironment.Properties]) error {
 		client := fabenvironment.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetEnvironment(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -50,7 +50,7 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.PublishInfo], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabenvironment.PublishInfo]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabenvironment.Properties]) error {
 		client := fabenvironment.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		pager := client.NewListEnvironmentsPager(model.WorkspaceID.ValueString(), nil)
@@ -72,7 +72,7 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemProperties[environmentPropertiesModel, fabenvironment.PublishInfo]{
+	config := fabricitem.DataSourceFabricItemProperties[environmentPropertiesModel, fabenvironment.Properties]{
 		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
