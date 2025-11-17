@@ -15,14 +15,15 @@ import (
 )
 
 type ProviderData struct {
-	FabricClient              *fabric.Client
-	Timeout                   time.Duration
-	Endpoint                  string
-	Version                   string
-	Preview                   bool
-	TerraformVersion          string
-	PartnerID                 string
-	DisableTerraformPartnerID bool
+	FabricClient                *fabric.Client
+	Timeout                     time.Duration
+	Endpoint                    string
+	Version                     string
+	Preview                     bool
+	EnableWorkspacePrivateLinks bool
+	TerraformVersion            string
+	PartnerID                   string
+	DisableTerraformPartnerID   bool
 }
 
 type ProviderConfig struct {
@@ -57,4 +58,5 @@ type ProviderConfigModel struct {
 	Preview                        types.Bool           `tfsdk:"preview"`
 	PartnerID                      customtypes.UUID     `tfsdk:"partner_id"`
 	DisableTerraformPartnerID      types.Bool           `tfsdk:"disable_terraform_partner_id"`
+	EnableWorkspacePrivateLinks    types.Bool           `tfsdk:"enable_workspace_private_links"`
 }
