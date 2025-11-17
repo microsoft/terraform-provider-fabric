@@ -328,7 +328,7 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 			),
 		},
-		// error - no required attributes
+		// Create and Read - without definition
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
