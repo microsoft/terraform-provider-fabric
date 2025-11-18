@@ -6,6 +6,7 @@ package fabricitem
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -33,9 +34,7 @@ func getDataSourceFabricItemSchema(ctx context.Context, d DataSourceFabricItem) 
 func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFabricItemDefinition) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats))
 
 	return schema.Schema{
 		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
@@ -57,9 +56,7 @@ func getDataSourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](c
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
 
-	for key, value := range getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats))
 
 	return schema.Schema{
 		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
