@@ -254,7 +254,6 @@ function Remove-WorkspaceRSItems {
     $_.type -ne 'KQLDatabase' -and
     $_.type -ne 'SQLEndpoint' -and
     -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh')
-
   }
 
   Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
