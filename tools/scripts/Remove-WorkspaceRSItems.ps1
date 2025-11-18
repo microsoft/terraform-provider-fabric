@@ -3,7 +3,7 @@
 #
 # This script deletes all items in the "WorkspaceRS" workspace except for:
 # 1. Any lakehouse named "lh"
-# 2. Any SQLEndpoint named "lh"
+# 2. All SQLEndpoint items
 # 3. All KQLDatabase items
 #
 # It reads the workspace ID from the .wellknown.json file.
@@ -248,7 +248,7 @@ function Remove-WorkspaceRSItems {
 
   # Filter out items to preserve:
   # 1. Any lakehouse named "lh"
-  # 2. Any SQLEndpoint named "lh"
+  # 2. All SQLEndpoint items
   # 3. All KQLDatabase items
   $itemsToDelete = $items | Where-Object {
     $_.type -ne 'KQLDatabase' -and
@@ -258,8 +258,6 @@ function Remove-WorkspaceRSItems {
   }
 
   Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
-  Write-Log -Message "Preserving any SQLEndpoint named 'lh'" -Level 'INFO' -Stop $false
-  Write-Log -Message "Preserving all KQLDatabase items" -Level 'INFO' -Stop $false
 
   if ($itemsToDelete.Count -eq 0) {
     Write-Log -Message "No items to delete (only preserved items found)" -Level 'INFO'
