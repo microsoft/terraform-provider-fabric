@@ -2,9 +2,11 @@
 # Remove-WorkspaceRSItems.ps1
 #
 # This script deletes all items in the "WorkspaceRS" workspace except for:
-# 1. The "LakehouseRS" item (preserved by ID)
+# 1. Any lakehouse named "lh"
+# 2. Any SQLEndpoint named "lh"
+# 3. All KQLDatabase items
 #
-# It reads the workspace and lakehouse IDs from the .wellknown.json file.
+# It reads the workspace ID from the .wellknown.json file.
 #
 # Usage:
 #   .\Remove-WorkspaceRSItems.ps1 [-WellKnownPath <path>] [-Force] [-DryRun]
@@ -216,22 +218,15 @@ function Remove-WorkspaceRSItems {
     return
   }
 
-  # Extract WorkspaceRS and LakehouseRS IDs
+  # Extract WorkspaceRS ID
   if (-not $wellKnownContent.WorkspaceRS -or -not $wellKnownContent.WorkspaceRS.id) {
     Write-Log -Message "WorkspaceRS ID not found in .wellknown.json" -Level 'ERROR'
     return
   }
 
-  if (-not $wellKnownContent.LakehouseRS -or -not $wellKnownContent.LakehouseRS.id) {
-    Write-Log -Message "LakehouseRS ID not found in .wellknown.json" -Level 'ERROR'
-    return
-  }
-
   $workspaceId = $wellKnownContent.WorkspaceRS.id
-  $lakehouseRSId = $wellKnownContent.LakehouseRS.id
 
   Write-Log -Message "WorkspaceRS ID: $workspaceId" -Level 'INFO'
-  Write-Log -Message "LakehouseRS ID to preserve: $lakehouseRSId" -Level 'INFO'
 
   # Get all items in the WorkspaceRS
   Write-Log -Message "Fetching all items in WorkspaceRS..." -Level 'INFO'
@@ -252,14 +247,19 @@ function Remove-WorkspaceRSItems {
   Write-Log -Message "Found $($items.Count) items in WorkspaceRS" -Level 'INFO'
 
   # Filter out items to preserve:
-  # 1. The LakehouseRS item by ID (exact match)
+  # 1. Any lakehouse named "lh"
+  # 2. Any SQLEndpoint named "lh"
+  # 3. All KQLDatabase items
   $itemsToDelete = $items | Where-Object {
-    $_.id -ne $lakehouseRSId -and
+    $_.type -ne 'KQLDatabase' -and
     $_.type -ne 'SQLEndpoint' -and
-    $_.type -ne 'KQLDatabase'
+    -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh')
+
   }
 
-  Write-Log -Message "Preserving the LakehouseRS ID: $($lakehouseRSId)" -Level 'INFO' -Stop $false
+  Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
+  Write-Log -Message "Preserving any SQLEndpoint named 'lh'" -Level 'INFO' -Stop $false
+  Write-Log -Message "Preserving all KQLDatabase items" -Level 'INFO' -Stop $false
 
   if ($itemsToDelete.Count -eq 0) {
     Write-Log -Message "No items to delete (only preserved items found)" -Level 'INFO'
@@ -310,8 +310,13 @@ function Remove-WorkspaceRSItems {
     try {
       $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)"
 
-      if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204) {
-        Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
+      if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
+        if ($deleteResponse.StatusCode -eq 404) {
+          Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+        }
+        else {
+          Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
+        }
         $deletedCount++
       }
       else {
@@ -320,8 +325,16 @@ function Remove-WorkspaceRSItems {
       }
     }
     catch {
-      Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-      $failedCount++
+      # Check if the exception is a 404
+      $statusCode = $_.Exception.Response.StatusCode.value__
+      if ($statusCode -eq 404) {
+        Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+        $deletedCount++
+      }
+      else {
+        Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+        $failedCount++
+      }
     }
 
     # Add a small delay between deletions to avoid rate limiting
