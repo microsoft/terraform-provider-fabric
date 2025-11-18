@@ -220,7 +220,7 @@ jobs:
           task govulncheck || (echo "::warning::govulncheck found issues" && exit 0)
 
       - name: ✔️ Run Go linters
-        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # v8.0.0
+        uses: golangci/golangci-lint-action@0a35821d5c230e903fcfe077583637dea1b27b47 # v9.0.0
         with:
           version: latest
           only-new-issues: true
@@ -311,7 +311,7 @@ jobs:
     environment:
       name: development
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
       actions: read
@@ -393,7 +393,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform'
         run: task test
-        timeout-minutes: 45
+        timeout-minutes: 60
         env:
           # TF_LOG: DEBUG
           FABRIC_USE_OIDC: true
@@ -410,7 +410,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
         run: task test
-        timeout-minutes: 45
+        timeout-minutes: 60
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -425,7 +425,7 @@ jobs:
 
       - name: 📤 Upload test results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
           path: testresults.json
@@ -434,7 +434,7 @@ jobs:
 
       - name: 📤 Upload coverage results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -468,7 +468,7 @@ jobs:
 
       - name: 📤 Upload Coverage summary
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -491,13 +491,13 @@ jobs:
       id-token: write
     steps:
       - name: 📥 Download test results
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           pattern: terraform-1_13-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           pattern: terraform-1_13-test-coverage*
           merge-multiple: true
@@ -559,8 +559,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: ✅ OK
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        if: ${{ needs.test.result == 'success' || needs.test.result == 'skipped'}}
         run: exit 0
       - name: 🛑 Failure
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ needs.test.result == 'failure' || needs.test.result == 'cancelled' }}
         run: exit 1
