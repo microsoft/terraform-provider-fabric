@@ -1884,12 +1884,11 @@ else {
     $payload = @{
       displayName = $displayNameTemp
       description = $displayNameTemp
-      type        = 'Dataflow'
       folderId    = $wellKnown['Folder'].id
     }
     $dataflow = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dataflows" -Payload $payload).Response
   }
-  Write-Log -Message "Dataflow with folder_id - Name: $($dataflow.name) / ID: $($dataflow.id)"
+  Write-Log -Message "Dataflow with folder_id - Name: $($dataflow.displayName) / ID: $($dataflow.id)"
 
   $wellKnown['DataflowFolder'] = @{
     id          = $dataflow.id
