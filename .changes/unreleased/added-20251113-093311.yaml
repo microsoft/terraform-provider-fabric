@@ -1,11 +1,9 @@
 kind: added
 body: |
   Enhanced item definition processing capabilities for all resources with definition support by adding three new attributes:
-
-  - `tokens_delimiter` - Allows customizing the delimiter for token substitution in source content. Supported delimiters: `{{}}` (default), `<<>>`, `@{}@`, `____`
-  - `processing_mode` - Enables choosing the processing mode for tokens/parameters. Options: `GoTemplate` (default), `Parameters`, `None`
-  - `parameters` - Provides a structured approach for content transformation using jsonpath-replace or text-replace substitution operations
-
+    - `tokens_delimiter` - Allows customizing the delimiter for token substitution in source content. Supported delimiters: `{{}}` (default), `<<>>`, `@{}@`, `____`
+    - `processing_mode` - Enables choosing the processing mode for tokens/parameters. Options: `GoTemplate` (default), `Parameters`, `None`
+    - `parameters` - Provides a structured approach for content transformation using jsonpath-replace or text-replace substitution operations
   **Note:** The existing `tokens` attribute remains unchanged for backward compatibility.
 time: 2025-11-13T09:33:11.152657688Z
 custom:
