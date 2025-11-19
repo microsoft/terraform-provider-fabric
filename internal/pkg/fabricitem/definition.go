@@ -68,6 +68,8 @@ func getDefinitionFormatsPathsDocs(values []DefinitionFormat) string {
 	}
 	results += resultsSb57.String()
 
+	results += resultsSb57.String()
+
 	return results
 }
 
