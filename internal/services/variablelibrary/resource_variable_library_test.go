@@ -265,7 +265,7 @@ func TestAcc_VariableLibraryResource_CRUD_NoDefinition(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 			),
 		},
 		// Update and Read - no definition
@@ -286,7 +286,7 @@ func TestAcc_VariableLibraryResource_CRUD_NoDefinition(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 			),
 		},
 	}))

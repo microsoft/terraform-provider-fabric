@@ -259,7 +259,7 @@ func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
@@ -282,7 +282,7 @@ func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),

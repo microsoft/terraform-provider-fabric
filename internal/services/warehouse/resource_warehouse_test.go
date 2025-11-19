@@ -263,7 +263,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
@@ -288,7 +288,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),

@@ -242,7 +242,7 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
@@ -265,7 +265,7 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
