@@ -61,6 +61,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/graphqlapi"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/itemjobscheduler"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
@@ -72,6 +73,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -184,6 +186,9 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	perCallPolicies := make([]policy.Policy, 0)
 	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
 	fabricClientOpt.PerCallPolicies = perCallPolicies
+
+	// Set workspace private links
+	fabricClientOpt.UseWorkspacePrivateLinks = cfg.UseWorkspacePrivateLinkEndpoint
 
 	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
 	if err != nil {
@@ -346,8 +351,15 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 				Optional:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
+
 			"disable_terraform_partner_id": schema.BoolAttribute{
 				MarkdownDescription: "Disable sending the Terraform Partner ID if a custom `partner_id` isn't specified, which allows Microsoft to better understand the usage of Terraform. The Partner ID does not give HashiCorp any direct access to usage information. This can also be sourced from the `FABRIC_DISABLE_TERRAFORM_PARTNER_ID` environment variable. Defaults to `false`.",
+				Optional:            true,
+			},
+
+			// Workspace Private Links
+			"use_workspace_private_link_endpoint": schema.BoolAttribute{
+				MarkdownDescription: "Use the workspace private link endpoint. When set to `true`, the provider routes all workspace-scoped API requests through the workspace's private link endpoint (workspace-specific hostname). This can also be sourced from the `FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT` environment variable. Defaults to `false`.",
 				Optional:            true,
 			},
 		},
@@ -443,6 +455,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
 		graphqlapi.NewResourceGraphQLApi,
+		itemjobscheduler.NewResourceItemJobScheduler,
 		kqldashboard.NewResourceKQLDashboard,
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
@@ -451,6 +464,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
@@ -512,6 +526,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		gatewayra.NewDataSourceGatewayRoleAssignments,
 		graphqlapi.NewDataSourceGraphQLApi,
 		graphqlapi.NewDataSourceGraphQLApis,
+		itemjobscheduler.NewDataSourceItemJobScheduler,
+		itemjobscheduler.NewDataSourceItemJobSchedulers,
 		kqldashboard.NewDataSourceKQLDashboard,
 		kqldashboard.NewDataSourceKQLDashboards,
 		kqldatabase.NewDataSourceKQLDatabase,
@@ -533,6 +549,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
@@ -752,6 +769,9 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 	config.DisableTerraformPartnerID = putils.GetBoolValue(config.DisableTerraformPartnerID, pconfig.GetEnvVarsDisableTerraformPartnerID(), false)
 	ctx = tflog.SetField(ctx, "disable_terraform_partner_id", config.DisableTerraformPartnerID.ValueBool())
 
+	config.UseWorkspacePrivateLinkEndpoint = putils.GetBoolValue(config.UseWorkspacePrivateLinkEndpoint, pconfig.GetEnvVarsUseWorkspacePrivateLinkEndpoint(), false)
+	ctx = tflog.SetField(ctx, "use_workspace_private_link_endpoint", config.UseWorkspacePrivateLinkEndpoint.ValueBool())
+
 	return ctx
 }
 
@@ -846,6 +866,7 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 	p.config.Preview = config.Preview.ValueBool()
 	p.config.PartnerID = config.PartnerID.ValueString()
 	p.config.DisableTerraformPartnerID = config.DisableTerraformPartnerID.ValueBool()
+	p.config.UseWorkspacePrivateLinkEndpoint = config.UseWorkspacePrivateLinkEndpoint.ValueBool()
 }
 
 func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse) {
