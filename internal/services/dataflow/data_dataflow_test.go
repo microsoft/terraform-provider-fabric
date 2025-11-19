@@ -246,3 +246,32 @@ func TestAcc_DataflowDataSource(t *testing.T) {
 		},
 	}))
 }
+
+func TestAcc_DataflowWithFolderIDDataSource(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["DataflowFolder"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityFolderID := entity["folderId"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           entityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "folder_id", entityFolderID),
+			),
+		},
+	}))
+}
