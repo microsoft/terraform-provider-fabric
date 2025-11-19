@@ -19,7 +19,7 @@ type environmentPropertiesModel struct {
 	PublishDetails supertypes.SingleNestedObjectValueOf[environmentPublishDetailsModel] `tfsdk:"publish_details"`
 }
 
-func (to *environmentPropertiesModel) set(ctx context.Context, from fabenvironment.PublishInfo) diag.Diagnostics {
+func (to *environmentPropertiesModel) set(ctx context.Context, from fabenvironment.Properties) diag.Diagnostics {
 	publishDetails := supertypes.NewSingleNestedObjectValueOfNull[environmentPublishDetailsModel](ctx)
 
 	if from.PublishDetails != nil {
