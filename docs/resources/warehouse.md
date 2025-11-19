@@ -19,7 +19,6 @@ The Warehouse resource allows you to manage a Fabric [Warehouse](https://learn.m
 resource "fabric_warehouse" "example" {
   display_name = "warehouse_example"
   workspace_id = "11111111-1111-1111-1111-111111111111"
-  folder_id    = "11111111-1111-1111-1111-111111111111"
 }
 
 # Warehouse resource with enabled schemas

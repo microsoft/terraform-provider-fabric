@@ -2,7 +2,6 @@
 resource "fabric_kql_database" "example1" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  folder_id    = "11111111-1111-1111-1111-111111111111"
 
   configuration = {
     database_type = "ReadWrite"

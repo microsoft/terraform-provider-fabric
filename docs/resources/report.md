@@ -20,7 +20,6 @@ The Report resource allows you to manage a Fabric [Report](https://learn.microso
 resource "fabric_report" "example_pbir" {
   display_name = "test"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  folder_id    = "11111111-1111-1111-1111-111111111111"
   format       = "PBIR"
   definition = {
     "definition/report.json" = {

@@ -24,7 +24,6 @@ resource "fabric_digital_twin_builder" "example_definition" {
   display_name = "example"
   description  = "example without definition"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  folder_id    = "11111111-1111-1111-1111-111111111111"
 }
 
 # Example 2 - Item with definition bootstrapping only

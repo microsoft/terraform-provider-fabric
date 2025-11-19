@@ -22,7 +22,6 @@ The SQL Database resource allows you to manage a Fabric [SQL Database](https://l
 resource "fabric_sql_database" "example" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  folder_id    = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
