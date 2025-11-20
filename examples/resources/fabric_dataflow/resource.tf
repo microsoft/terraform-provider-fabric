@@ -38,3 +38,51 @@ resource "fabric_dataflow" "example_update" {
     }
   }
 }
+
+# Dataflow with custom tokens delimiter
+resource "fabric_dataflow" "example_custom_delimiter" {
+  display_name = "example with custom delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "queryMetadata.json" = {
+      source           = "${local.path}/queryMetadata.json.tmpl"
+      tokens_delimiter = "##"
+      tokens = {
+        "MyValue1" = "my value 1"
+        "MyValue2" = "my value 2"
+      }
+    }
+    "mashup.pq" = {
+      source = "${local.path}/mashup.pq.tmpl"
+    }
+  }
+}
+
+# Dataflow with parameters processing mode
+resource "fabric_dataflow" "example_parameters" {
+  display_name = "example with parameters"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "queryMetadata.json" = {
+      source          = "${local.path}/queryMetadata.json.tmpl"
+      processing_mode = "parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.queries[0].name"
+          value = "UpdatedQueryName"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldValue"
+          value = "NewValue"
+        }
+      ]
+    }
+    "mashup.pq" = {
+      source = "${local.path}/mashup.pq.tmpl"
+    }
+  }
+}

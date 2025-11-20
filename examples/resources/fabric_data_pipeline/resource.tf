@@ -36,3 +36,46 @@ resource "fabric_data_pipeline" "example_definition_update" {
     }
   }
 }
+
+# Example 4 - Data Pipeline with custom tokens delimiter
+resource "fabric_data_pipeline" "example_custom_delimiter" {
+  display_name = "example"
+  description  = "example with custom tokens delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "pipeline-content.json" = {
+      source           = "${local.path}/pipeline-content.json"
+      tokens_delimiter = "##"
+      tokens = {
+        "MyValue" = "World"
+      }
+    }
+  }
+}
+
+# Example 5 - Data Pipeline with parameters processing mode
+resource "fabric_data_pipeline" "example_parameters" {
+  display_name = "example"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "pipeline-content.json" = {
+      source          = "${local.path}/pipeline-content.json"
+      processing_mode = "parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.properties.activities[0].name"
+          value = "UpdatedActivityName"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldValue"
+          value = "NewValue"
+        }
+      ]
+    }
+  }
+}

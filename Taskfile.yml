@@ -90,11 +90,6 @@ tasks:
       - task: golangci-lint
       - task: tfproviderlintx
 
-  govulncheck:
-    desc: Run govulncheck
-    cmds:
-      - govulncheck -test -show verbose ./...
-
   golangci-lint:
     desc: Run golangci-lint
     cmds:
@@ -123,6 +118,11 @@ tasks:
     cmds:
       - lychee --config ./.github/linters/.lychee.toml --format markdown .
 
+  govulncheck:
+    desc: Run govulncheck
+    cmds:
+      - govulncheck -test -show verbose ./...
+
   tools:
     desc: Install required tools
     cmds:
@@ -142,6 +142,7 @@ tasks:
             yamllint,
             markdownlint,
             gh,
+            deadcode,
           ]
         task: install:{{.ITEM}}
       - task: test:tools
@@ -452,6 +453,11 @@ tasks:
     desc: Install tfplugindocs
     cmds:
       - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+  install:deadcode:
+    desc: Install deadcode
+    cmds:
+      - go install golang.org/x/tools/cmd/deadcode@latest
 
   install:goimports:
     desc: Install goimports

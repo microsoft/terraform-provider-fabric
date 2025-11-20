@@ -1109,6 +1109,7 @@ $itemNaming = @{
   'Datamart'                        = 'dm'
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
+  'DigitalTwinBuilder'              = 'dtb'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
