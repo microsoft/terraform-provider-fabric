@@ -84,6 +84,7 @@ resource "fabric_workspace_git" "github" {
 
 ### Optional
 
+- `allow_override_items` (Boolean) <i style="color:red;font-weight: bold">(ForceNew)</i> User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
