@@ -66,6 +66,18 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - invalid uuid - domain_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"domain_id":    "invalid uuid",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
 		// error - missing capacity_id if identity enabled is true
 		{
 			ResourceName: testResourceItemFQN,
@@ -475,6 +487,67 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_WorkspaceResource_Domain_CRUD(t *testing.T) {
+	domain := testhelp.WellKnown()["DomainParent"].(map[string]any)
+	domainID := domain["id"].(string)
+
+	domain2 := testhelp.WellKnown()["DomainChild"].(map[string]any)
+	domain2ID := domain2["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read - with domain
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entityCreateDisplayName,
+					"domain_id":    domainID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "domain_id", domainID),
+			),
+		},
+		// Update and Read - unassign domain
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entityCreateDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "domain_id"),
+			),
+		},
+		// Update and Read - assign domain
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entityCreateDisplayName,
+					"domain_id":    domain2ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "domain_id", domain2ID),
 			),
 		},
 	},

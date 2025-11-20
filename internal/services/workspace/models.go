@@ -26,6 +26,7 @@ type baseWorkspaceModel struct {
 	Description types.String     `tfsdk:"description"`
 	Type        types.String     `tfsdk:"type"`
 	CapacityID  customtypes.UUID `tfsdk:"capacity_id"`
+	DomainID    customtypes.UUID `tfsdk:"domain_id"`
 }
 
 func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
@@ -34,6 +35,7 @@ func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
 	to.Description = types.StringPointerValue(from.Description)
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
+	to.DomainID = customtypes.NewUUIDPointerValue(from.DomainID)
 }
 
 type baseWorkspaceInfoModel struct {
@@ -51,6 +53,7 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	to.Description = types.StringPointerValue(from.Description)
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.CapacityID = customtypes.NewUUIDPointerValue(from.CapacityID)
+	to.DomainID = customtypes.NewUUIDPointerValue(from.DomainID)
 	to.CapacityAssignmentProgress = types.StringPointerValue((*string)(from.CapacityAssignmentProgress))
 	to.CapacityRegion = types.StringPointerValue((*string)(from.CapacityRegion))
 
@@ -175,4 +178,12 @@ type oneLakeEndpointsModel struct {
 func (to *oneLakeEndpointsModel) set(from fabcore.OneLakeEndpoints) {
 	to.BlobEndpoint = customtypes.NewURLPointerValue(from.BlobEndpoint)
 	to.DfsEndpoint = customtypes.NewURLPointerValue(from.DfsEndpoint)
+}
+
+type assignWorkspaceToDomainRequest struct {
+	fabcore.AssignWorkspaceToDomainRequest
+}
+
+func (to *assignWorkspaceToDomainRequest) set(from resourceWorkspaceModel) {
+	to.DomainID = from.DomainID.ValueStringPointer()
 }
