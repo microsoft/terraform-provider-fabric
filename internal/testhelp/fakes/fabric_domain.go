@@ -20,18 +20,18 @@ import (
 type operationsDomain struct{}
 
 // GetID implements concreteOperations.
-func (o *operationsDomain) GetID(entity fabadmin.DomainPreview) string {
+func (o *operationsDomain) GetID(entity fabadmin.Domain) string {
 	return *entity.ID
 }
 
 // TransformCreate implements concreteOperations.
-func (o *operationsDomain) TransformCreate(entity fabadmin.DomainPreview) fabadmin.DomainsClientCreateDomainPreviewResponse {
-	return fabadmin.DomainsClientCreateDomainPreviewResponse{
-		DomainPreview: entity,
+func (o *operationsDomain) TransformCreate(entity fabadmin.Domain) fabadmin.DomainsClientCreateDomainResponse {
+	return fabadmin.DomainsClientCreateDomainResponse{
+		Domain: entity,
 	}
 }
 
-func (o *operationsDomain) Create(data fabadmin.CreateDomainRequest) fabadmin.DomainPreview {
+func (o *operationsDomain) Create(data fabadmin.CreateDomainRequest) fabadmin.Domain {
 	entity := NewRandomDomain()
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
@@ -41,39 +41,39 @@ func (o *operationsDomain) Create(data fabadmin.CreateDomainRequest) fabadmin.Do
 }
 
 // TransformGet implements concreteOperations.
-func (o *operationsDomain) TransformGet(entity fabadmin.DomainPreview) fabadmin.DomainsClientGetDomainPreviewResponse {
-	return fabadmin.DomainsClientGetDomainPreviewResponse{
-		DomainPreview: entity,
+func (o *operationsDomain) TransformGet(entity fabadmin.Domain) fabadmin.DomainsClientGetDomainResponse {
+	return fabadmin.DomainsClientGetDomainResponse{
+		Domain: entity,
 	}
 }
 
 // TransformList implements concreteOperations.
-func (o *operationsDomain) TransformList(entities []fabadmin.DomainPreview) fabadmin.DomainsClientListDomainsPreviewResponse {
-	return fabadmin.DomainsClientListDomainsPreviewResponse{
-		DomainsResponsePreview: fabadmin.DomainsResponsePreview{
+func (o *operationsDomain) TransformList(entities []fabadmin.Domain) fabadmin.DomainsClientListDomainsResponse {
+	return fabadmin.DomainsClientListDomainsResponse{
+		DomainsResponse: fabadmin.DomainsResponse{
 			Domains: entities,
 		},
 	}
 }
 
 // TransformUpdate implements concreteOperations.
-func (o *operationsDomain) TransformUpdate(entity fabadmin.DomainPreview) fabadmin.DomainsClientUpdateDomainPreviewResponse {
-	return fabadmin.DomainsClientUpdateDomainPreviewResponse{
-		DomainPreview: entity,
+func (o *operationsDomain) TransformUpdate(entity fabadmin.Domain) fabadmin.DomainsClientUpdateDomainResponse {
+	return fabadmin.DomainsClientUpdateDomainResponse{
+		Domain: entity,
 	}
 }
 
 // Update implements concreteOperations.
-func (o *operationsDomain) Update(base fabadmin.DomainPreview, data fabadmin.UpdateDomainRequestPreview) fabadmin.DomainPreview {
+func (o *operationsDomain) Update(base fabadmin.Domain, data fabadmin.UpdateDomainRequest) fabadmin.Domain {
 	base.Description = data.Description
 	base.DisplayName = data.DisplayName
-	base.ContributorsScope = data.ContributorsScope
+	base.DefaultLabelID = data.DefaultLabelID
 
 	return base
 }
 
 // Validate implements concreteOperations.
-func (o *operationsDomain) Validate(newEntity fabadmin.DomainPreview, existing []fabadmin.DomainPreview) (int, error) {
+func (o *operationsDomain) Validate(newEntity fabadmin.Domain, existing []fabadmin.Domain) (int, error) {
 	for _, entity := range existing {
 		if *entity.DisplayName == *newEntity.DisplayName {
 			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error(), fabcore.ErrItem.ItemDisplayNameAlreadyInUse.Error())
@@ -83,16 +83,16 @@ func (o *operationsDomain) Validate(newEntity fabadmin.DomainPreview, existing [
 	return http.StatusCreated, nil
 }
 
-func configureDomain(server *fakeServer) fabadmin.DomainPreview {
+func configureDomain(server *fakeServer) fabadmin.Domain {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
-			fabadmin.DomainPreview,
-			fabadmin.DomainsClientGetDomainPreviewResponse,
-			fabadmin.DomainsClientUpdateDomainPreviewResponse,
-			fabadmin.DomainsClientCreateDomainPreviewResponse,
-			fabadmin.DomainsClientListDomainsPreviewResponse,
+			fabadmin.Domain,
+			fabadmin.DomainsClientGetDomainResponse,
+			fabadmin.DomainsClientUpdateDomainResponse,
+			fabadmin.DomainsClientCreateDomainResponse,
+			fabadmin.DomainsClientListDomainsResponse,
 			fabadmin.CreateDomainRequest,
-			fabadmin.UpdateDomainRequestPreview,
+			fabadmin.UpdateDomainRequest,
 		]
 	}
 
@@ -100,57 +100,50 @@ func configureDomain(server *fakeServer) fabadmin.DomainPreview {
 
 	handler := newTypedHandler(server, entityOperations)
 
-	getDomainWrapper := func(_ context.Context, id string, _ bool, _ *fabadmin.DomainsClientGetDomainPreviewOptions) (_ azfake.Responder[fabadmin.DomainsClientGetDomainPreviewResponse], _ azfake.ErrorResponder) {
+	getDomainWrapper := func(_ context.Context, id string, _ bool, _ *fabadmin.DomainsClientGetDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientGetDomainResponse], _ azfake.ErrorResponder) {
 		return getByID(handler, id, entityOperations)
 	}
 
-	updateDomainWrapper := func(_ context.Context, id string, _ bool, updateRequest fabadmin.UpdateDomainRequestPreview, _ *fabadmin.DomainsClientUpdateDomainPreviewOptions) (_ azfake.Responder[fabadmin.DomainsClientUpdateDomainPreviewResponse], _ azfake.ErrorResponder) {
+	updateDomainWrapper := func(_ context.Context, id string, _ bool, updateRequest fabadmin.UpdateDomainRequest, _ *fabadmin.DomainsClientUpdateDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientUpdateDomainResponse], _ azfake.ErrorResponder) {
 		return updateByID(handler, id, updateRequest, entityOperations, entityOperations)
 	}
 
-	var createDomainWrapper func(context.Context, fabadmin.CreateDomainRequest, *fabadmin.DomainsClientCreateDomainPreviewOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainPreviewResponse], azfake.ErrorResponder)
+	var createDomainWrapper func(context.Context, fabadmin.CreateDomainRequest, *fabadmin.DomainsClientCreateDomainOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainResponse], azfake.ErrorResponder)
 	handleCreateWithoutWorkspace(handler, entityOperations, entityOperations, entityOperations, &createDomainWrapper)
 
-	createDomainWrapperWithPreview := func(ctx context.Context, _ bool, createRequest fabadmin.CreateDomainRequest, options *fabadmin.DomainsClientCreateDomainPreviewOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainPreviewResponse], azfake.ErrorResponder) {
+	createDomainWrapperWith := func(ctx context.Context, _ bool, createRequest fabadmin.CreateDomainRequest, options *fabadmin.DomainsClientCreateDomainOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainResponse], azfake.ErrorResponder) {
 		return createDomainWrapper(ctx, createRequest, options)
 	}
 
-	listDomainWrapper := func(_ context.Context, _ bool, options *fabadmin.DomainsClientListDomainsPreviewOptions) (_ azfake.Responder[fabadmin.DomainsClientListDomainsPreviewResponse], _ azfake.ErrorResponder) {
-		return listWithFilter[fabadmin.DomainPreview, fabadmin.DomainsClientListDomainsPreviewOptions](handler, nil, entityOperations)("", options)
+	listDomainWrapper := func(_ context.Context, _ bool, options *fabadmin.DomainsClientListDomainsOptions) (_ azfake.Responder[fabadmin.DomainsClientListDomainsResponse], _ azfake.ErrorResponder) {
+		return listWithFilter[fabadmin.Domain, fabadmin.DomainsClientListDomainsOptions](handler, nil, entityOperations)("", options)
 	}
 
 	deleteDomainWrapper := func(_ context.Context, id string, _ *fabadmin.DomainsClientDeleteDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientDeleteDomainResponse], _ azfake.ErrorResponder) {
-		return deleteByID[fabadmin.DomainPreview, fabadmin.DomainsClientDeleteDomainResponse](handler, id)
+		return deleteByID[fabadmin.Domain, fabadmin.DomainsClientDeleteDomainResponse](handler, id)
 	}
 
-	server.ServerFactory.Admin.DomainsServer.GetDomainPreview = getDomainWrapper
-	server.ServerFactory.Admin.DomainsServer.UpdateDomainPreview = updateDomainWrapper
-	server.ServerFactory.Admin.DomainsServer.CreateDomainPreview = createDomainWrapperWithPreview
-	server.ServerFactory.Admin.DomainsServer.ListDomainsPreview = listDomainWrapper
+	server.ServerFactory.Admin.DomainsServer.GetDomain = getDomainWrapper
+	server.ServerFactory.Admin.DomainsServer.UpdateDomain = updateDomainWrapper
+	server.ServerFactory.Admin.DomainsServer.CreateDomain = createDomainWrapperWith
+	server.ServerFactory.Admin.DomainsServer.ListDomains = listDomainWrapper
 	server.ServerFactory.Admin.DomainsServer.DeleteDomain = deleteDomainWrapper
 
-	return fabadmin.DomainPreview{}
+	return fabadmin.Domain{}
 }
 
-func NewRandomDomain() fabadmin.DomainPreview {
-	return fabadmin.DomainPreview{
-		ID:                to.Ptr(testhelp.RandomUUID()),
-		DisplayName:       to.Ptr(testhelp.RandomName()),
-		Description:       to.Ptr(testhelp.RandomName()),
-		ContributorsScope: to.Ptr(fabadmin.ContributorsScopeTypeAllTenant),
+func NewRandomDomain() fabadmin.Domain {
+	return fabadmin.Domain{
+		ID:             to.Ptr(testhelp.RandomUUID()),
+		DisplayName:    to.Ptr(testhelp.RandomName()),
+		Description:    to.Ptr(testhelp.RandomName()),
+		DefaultLabelID: to.Ptr(testhelp.RandomUUID()),
 	}
 }
 
-func NewRandomDomainWithParentDomain(parentDomainID string) fabadmin.DomainPreview {
+func NewRandomDomainWithParentDomain(parentDomainID string) fabadmin.Domain {
 	entity := NewRandomDomain()
 	entity.ParentDomainID = to.Ptr(parentDomainID)
-
-	return entity
-}
-
-func NewRandomDomainWithContributorsScope(contributorsScope fabadmin.ContributorsScopeType) fabadmin.DomainPreview {
-	entity := NewRandomDomain()
-	entity.ContributorsScope = to.Ptr(contributorsScope)
 
 	return entity
 }

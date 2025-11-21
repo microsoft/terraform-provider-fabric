@@ -11,7 +11,6 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/microsoft/fabric-sdk-go/fabric/admin"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -129,8 +128,8 @@ func TestUnit_DomainResource_ImportState(t *testing.T) {
 					return errors.New(testResourceItemFQN + ": unexpected description")
 				}
 
-				if is[0].Attributes["contributors_scope"] != string(*entity.ContributorsScope) {
-					return errors.New(testResourceItemFQN + ": unexpected contributors_scope")
+				if is[0].Attributes["default_label_id"] != *entity.DefaultLabelID {
+					return errors.New(testResourceItemFQN + ": unexpected default_label_id")
 				}
 
 				return nil
@@ -142,13 +141,11 @@ func TestUnit_DomainResource_ImportState(t *testing.T) {
 func TestUnit_DomainResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomDomain()
 	entityBefore := fakes.NewRandomDomain()
-	entityAfter := fakes.NewRandomDomainWithContributorsScope(admin.ContributorsScopeTypeAdminsOnly)
+	entityAfter := fakes.NewRandomDomainWithParentDomain(*entityExist.ID)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomDomain())
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomDomain())
-
-	defaultContributorsScope := string(admin.ContributorsScopeTypeAllTenant)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -174,7 +171,7 @@ func TestUnit_DomainResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "contributors_scope", defaultContributorsScope),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
 			),
 		},
 		// Update and Read
@@ -183,15 +180,14 @@ func TestUnit_DomainResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":       *entityBefore.DisplayName,
-					"description":        *entityAfter.Description,
-					"contributors_scope": string(*entityAfter.ContributorsScope),
+					"display_name": *entityBefore.DisplayName,
+					"description":  *entityAfter.Description,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "contributors_scope", string(*entityAfter.ContributorsScope)),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
 			),
 		},
 	}))
@@ -201,8 +197,6 @@ func TestAcc_DomainResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	defaultContributorsScope := string(admin.ContributorsScopeTypeAllTenant)
-	updatedContributorsScope := string(admin.ContributorsScopeTypeAdminsOnly)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -217,7 +211,7 @@ func TestAcc_DomainResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "contributors_scope", defaultContributorsScope),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
 			),
 		},
 		// Update and Read
@@ -226,15 +220,14 @@ func TestAcc_DomainResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":       entityUpdateDisplayName,
-					"description":        entityUpdateDescription,
-					"contributors_scope": updatedContributorsScope,
+					"display_name": entityUpdateDisplayName,
+					"description":  entityUpdateDescription,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "contributors_scope", updatedContributorsScope),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
 			),
 		},
 	},
