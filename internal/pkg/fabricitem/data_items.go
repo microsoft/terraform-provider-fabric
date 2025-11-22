@@ -76,6 +76,11 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 							MarkdownDescription: fmt.Sprintf("The %s description.", d.TypeInfo.Name),
 							Computed:            true,
 						},
+						"folder_id": schema.StringAttribute{
+							MarkdownDescription: fmt.Sprintf("The %s Folder ID.", d.TypeInfo.Name),
+							Computed:            true,
+							CustomType:          customtypes.UUIDType{},
+						},
 					},
 				},
 			},

@@ -151,6 +151,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 
 	reqCreate.setDisplayName(plan.DisplayName)
 	reqCreate.setDescription(plan.Description)
+	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {

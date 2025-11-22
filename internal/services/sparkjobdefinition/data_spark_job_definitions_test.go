@@ -80,6 +80,7 @@ func TestUnit_SparkJobDefinitionsDataSource(t *testing.T) {
 							"id":           knownvalue.StringExact(*entity.ID),
 							"display_name": knownvalue.StringExact(*entity.DisplayName),
 							"description":  knownvalue.StringExact(*entity.Description),
+							"folder_id":    knownvalue.StringExact(*entity.FolderID),
 						}),
 					}),
 				),

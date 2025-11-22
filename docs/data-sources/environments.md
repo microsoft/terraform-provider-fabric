@@ -55,6 +55,7 @@ Read-Only:
 
 - `description` (String) The Environment description.
 - `display_name` (String) The Environment display name.
+- `folder_id` (String) The Environment Folder ID.
 - `id` (String) The Environment ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

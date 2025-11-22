@@ -62,6 +62,11 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			MarkdownDescription: fmt.Sprintf("The %s description.", d.TypeInfo.Name),
 			Computed:            true,
 		},
+		"folder_id": schema.StringAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s Folder ID.", d.TypeInfo.Name),
+			Computed:            true,
+			CustomType:          customtypes.UUIDType{},
+		},
 	}
 
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)

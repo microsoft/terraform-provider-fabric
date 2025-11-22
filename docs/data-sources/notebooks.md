@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Notebook description.
 - `display_name` (String) The Notebook display name.
+- `folder_id` (String) The Notebook Folder ID.
 - `id` (String) The Notebook ID.
 - `workspace_id` (String) The Workspace ID.

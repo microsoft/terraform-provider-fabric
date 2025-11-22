@@ -22,6 +22,7 @@ func (o *operationsWarehouse) CreateWithParentID(parentID string, data fabwareho
 	entity := NewRandomWarehouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -100,6 +101,7 @@ func (o *operationsWarehouse) ConvertItemToEntity(entity fabcore.Item) fabwareho
 		DisplayName: entity.DisplayName,
 		Description: entity.Description,
 		WorkspaceID: entity.WorkspaceID,
+		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties:  NewRandomWarehouse().Properties,
 	}
@@ -140,6 +142,7 @@ func NewRandomWarehouse() fabwarehouse.Warehouse {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties: &fabwarehouse.Properties{
 			CollationType:    to.Ptr(fabwarehouse.CollationTypeLatin1General100BIN2UTF8),

@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The ML Model description.
 - `display_name` (String) The ML Model display name.
+- `folder_id` (String) The ML Model Folder ID.
 - `id` (String) The ML Model ID.
 - `workspace_id` (String) The Workspace ID.
