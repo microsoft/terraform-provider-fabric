@@ -1033,6 +1033,86 @@ function Set-ItemJobScheduler {
   return $result
 }
 
+function Set-AzureDatabricks {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ResourceGroupName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Location,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet('standard', 'premium')]
+    [string]$PricingTier = 'premium',
+
+    [Parameter(Mandatory = $true)]
+    [object]$SG,
+
+    [Parameter(Mandatory = $true)]
+    [string]$SubscriptionId
+  )
+
+  # Register the Microsoft.Databricks resource provider
+  $databricksProvider = Get-AzResourceProvider -ProviderNamespace "Microsoft.Databricks"
+  if ($databricksProvider.RegistrationState -ne 'Registered') {
+    Write-Log -Message "Registering Microsoft.Databricks resource provider" -Level 'WARN'
+    Register-AzResourceProvider -ProviderNamespace "Microsoft.Databricks"
+  }
+  else {
+    Write-Log -Message "Microsoft.Databricks resource provider already registered" -Level 'INFO'
+  }
+
+  # Attempt to get the existing Databricks workspace
+  try {
+    $databricksWorkspace = Get-AzDatabricksWorkspace -ResourceGroupName $ResourceGroupName -Name $WorkspaceName -ErrorAction Stop
+    Write-Log -Message "Found existing Databricks workspace: $WorkspaceName" -Level 'INFO'
+  }
+  catch {
+    # Databricks workspace does not exist, so create it
+    Write-Log -Message "Creating Databricks workspace: $WorkspaceName in Resource Group: $ResourceGroupName" -Level 'WARN'
+
+    $databricksWorkspace = New-AzDatabricksWorkspace `
+      -ResourceGroupName $ResourceGroupName `
+      -Name $WorkspaceName `
+      -Location $Location `
+      -SubscriptionId $SubscriptionId `
+      -Sku $PricingTier `
+      -EnableNoPublicIp:$false `
+      -DefaultCatalogInitialType 'UnityCatalog'
+
+    Write-Log -Message "Created Databricks workspace: $WorkspaceName" -Level 'INFO'
+  }
+
+  Write-Log -Message "Azure Databricks - Name: $($databricksWorkspace.Name) / Resource ID: $($databricksWorkspace.Id)"
+
+  $userPrincipalName = $azContext.Account.Id
+  $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
+
+  # Check if the principal already has the Contributor role on the Databricks workspace
+  $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Contributor"
+  }
+
+  if (!$existingAssignment) {
+    Write-Log -Message "Assigning Contributor role to the principal on Databricks workspace $($databricksWorkspace.Name)"
+    New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
+  }
+
+  # Check if the SPNs SG already has the Contributor role on the Databricks workspace
+  $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $SG.Id -ErrorAction SilentlyContinue | Where-Object {
+    $_.RoleDefinitionName -eq "Contributor"
+  }
+  if (!$existingAssignment) {
+    Write-Log -Message "Assigning Contributor role to the SPNs security group $($SG.DisplayName) on Databricks workspace $($databricksWorkspace.Name)"
+    New-AzRoleAssignment -ObjectId $SG.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
+  }
+
+  return $databricksWorkspace
+}
+
 
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Databricks')
@@ -1836,85 +1916,6 @@ else {
     displayName = $warehouseSnapshot.displayName
     description = $warehouseSnapshot.description
   }
-}
-
-function Set-AzureDatabricks {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$ResourceGroupName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$WorkspaceName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Location,
-
-    [Parameter(Mandatory = $false)]
-    [ValidateSet('standard', 'premium')]
-    [string]$PricingTier = 'premium',
-
-    [Parameter(Mandatory = $true)]
-    [object]$SG,
-    [Parameter(Mandatory = $true)]
-    [string]$SubscriptionId
-  )
-
-  # Register the Microsoft.Databricks resource provider
-  $databricksProvider = Get-AzResourceProvider -ProviderNamespace "Microsoft.Databricks"
-  if ($databricksProvider.RegistrationState -ne 'Registered') {
-    Write-Log -Message "Registering Microsoft.Databricks resource provider" -Level 'WARN'
-    Register-AzResourceProvider -ProviderNamespace "Microsoft.Databricks"
-  }
-  else {
-    Write-Log -Message "Microsoft.Databricks resource provider already registered" -Level 'INFO'
-  }
-
-  # Attempt to get the existing Databricks workspace
-  try {
-    $databricksWorkspace = Get-AzDatabricksWorkspace -ResourceGroupName $ResourceGroupName -Name $WorkspaceName -ErrorAction Stop
-    Write-Log -Message "Found existing Databricks workspace: $WorkspaceName" -Level 'INFO'
-  }
-  catch {
-    # Databricks workspace does not exist, so create it
-    Write-Log -Message "Creating Databricks workspace: $WorkspaceName in Resource Group: $ResourceGroupName" -Level 'WARN'
-
-    $databricksWorkspace = New-AzDatabricksWorkspace `
-      -ResourceGroupName $ResourceGroupName `
-      -Name $WorkspaceName `
-      -Location $Location `
-      -SubscriptionId $SubscriptionId `
-      -Sku $PricingTier `
-      -EnableNoPublicIp:$false `
-      -DefaultCatalogInitialType 'UnityCatalog'
-
-    Write-Log -Message "Created Databricks workspace: $WorkspaceName" -Level 'INFO'
-  }
-
-  Write-Log -Message "Azure Databricks - Name: $($databricksWorkspace.Name) / Resource ID: $($databricksWorkspace.Id)"
-
-  $userPrincipalName = $azContext.Account.Id
-  $principal = Get-AzADUser -UserPrincipalName $userPrincipalName
-
-  # Check if the principal already has the Contributor role on the Databricks workspace
-  $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $principal.Id -ErrorAction SilentlyContinue | Where-Object {
-    $_.RoleDefinitionName -eq "Contributor"
-  }
-
-  if (!$existingAssignment) {
-    Write-Log -Message "Assigning Contributor role to the principal on Databricks workspace $($databricksWorkspace.Name)"
-    New-AzRoleAssignment -ObjectId $principal.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
-  }
-
-  # Check if the SPNs SG already has the Contributor role on the Databricks workspace
-  $existingAssignment = Get-AzRoleAssignment -Scope $databricksWorkspace.Id -ObjectId $SG.Id -ErrorAction SilentlyContinue | Where-Object {
-    $_.RoleDefinitionName -eq "Contributor"
-  }
-  if (!$existingAssignment) {
-    Write-Log -Message "Assigning Contributor role to the SPNs security group $($SG.DisplayName) on Databricks workspace $($databricksWorkspace.Name)"
-    New-AzRoleAssignment -ObjectId $SG.Id -RoleDefinitionName "Contributor" -Scope $databricksWorkspace.Id
-  }
-
-  return $databricksWorkspace
 }
 
 # Create Azure Databricks workspace with Premium tier (Unity Catalog auto-enabled)
