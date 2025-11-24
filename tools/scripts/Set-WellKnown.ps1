@@ -1944,6 +1944,8 @@ $wellKnown['AzureDatabricks'] = @{
   workspaceUrl                    = $databricksWorkspace.Properties.workspaceUrl
   databricksWorkspaceConnectionId = $Env:FABRIC_TESTACC_WELLKNOWN_DATABRICKS_WS_CONNECTION_ID
   catalogName                     = $catalogName
+}
+
 # Create Item Schedule if not exists
 if (-not $wellKnown.ContainsKey('Dataflow') -or -not $wellKnown['Dataflow'] -or -not $wellKnown['Dataflow'].id) {
   Write-Log -Message "Dataflow not found or missing 'id'. Cannot create Item Job Schedule." -Level 'WARN'
