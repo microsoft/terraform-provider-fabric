@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_item_job_scheduler` Resource
+time: 2025-08-21T08:41:10.075249012Z
+custom:
+    Issue: "607"
