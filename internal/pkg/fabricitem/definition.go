@@ -6,6 +6,7 @@ package fabricitem
 import (
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -54,16 +55,19 @@ func getDefinitionFormatsPathsDocs(values []DefinitionFormat) string {
 
 	i := 0
 
+	var resultsSb57 strings.Builder
 	for _, k := range slices.Sorted(maps.Keys(elements)) {
-		results += "**" + k + "** format: "
-		results += utils.ConvertStringSlicesToString(elements[k], true, true)
+		resultsSb57.WriteString("**" + k + "** format: ")
+		resultsSb57.WriteString(utils.ConvertStringSlicesToString(elements[k], true, true))
 
 		if i != len(elements)-1 {
-			results += " "
+			resultsSb57.WriteString(" ")
 		}
 
 		i++
 	}
+
+	results += resultsSb57.String()
 
 	return results
 }
