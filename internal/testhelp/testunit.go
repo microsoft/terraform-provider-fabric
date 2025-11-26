@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -141,20 +140,4 @@ type TestState struct {
 
 func NewTestState() *TestState {
 	return &TestState{}
-}
-
-func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
-	t.Helper()
-
-	resourceHCL = at.CompileConfig(
-		at.ResourceHeader(TypeName("fabric", "folder"), "test_root_folder"),
-		map[string]any{
-			"display_name": RandomName(),
-			"workspace_id": workspaceID,
-		},
-	)
-
-	resourceFQN = ResourceFQN("fabric", "folder", "test_root_folder")
-
-	return resourceHCL, resourceFQN
 }

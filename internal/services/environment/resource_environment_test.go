@@ -213,23 +213,6 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
 			),
 		},
-		// Create without folderID and read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": testhelp.RandomName(),
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
-			),
-		},
 		// Delete testing automatically occurs in TestCase
 	}))
 }

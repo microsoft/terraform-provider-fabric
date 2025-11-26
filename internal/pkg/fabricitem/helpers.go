@@ -148,17 +148,14 @@ type RetryConfig struct {
 	Operation     string
 }
 
-// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
+// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" and "FolderNotEmpty" errors
 // This will retry indefinitely until the operation succeeds or encounters a non-retryable error.
 func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
+	const folderNotEmptyErrorCode = "FolderNotEmpty"
 	var result T
 	var err error
 	var errRespFabric *fabcore.ResponseError
 	retryCount := 0
-
-	maxRetries := 5 // Add a cap to avoid infinite retries
-
-	const folderNotEmptyErrorCode = "FolderNotEmpty"
 
 	for {
 		result, err = operation()
@@ -176,29 +173,11 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 			return result, ctx.Err()
 		}
 
-		// Check for retryable errors (ItemDisplayNameNotAvailableYet or FolderNotEmpty)
 		if errors.As(err, &errRespFabric) &&
 			(errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() ||
 				errRespFabric.ErrorCode == folderNotEmptyErrorCode) {
 			retryCount++
-
-			// Check if we've reached max retries
-			if retryCount > maxRetries {
-				tflog.Error(ctx, fmt.Sprintf("Max retries (%d) reached for %s operation: %v", maxRetries, config.Operation, err))
-
-				return result, err
-			}
-
-			retryMsg := "Retry %d failed with %s, retrying in %v..."
-
-			errorType := "unknown error"
-			if errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
-				errorType = "ItemDisplayNameNotAvailableYet"
-			} else if errRespFabric.ErrorCode == folderNotEmptyErrorCode {
-				errorType = "FolderNotEmpty"
-			}
-
-			tflog.Info(ctx, fmt.Sprintf(retryMsg, retryCount, errorType, config.RetryInterval))
+			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with %v, retrying in %v...", retryCount, err, config.RetryInterval))
 
 			timer := time.NewTimer(config.RetryInterval)
 			select {
