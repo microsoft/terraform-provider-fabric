@@ -148,10 +148,9 @@ type RetryConfig struct {
 	Operation     string
 }
 
-// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" and "FolderNotEmpty" errors
+// RetryOperationWithResult executes any operation with retry logic for handling "ItemDisplayNameNotAvailableYet" errors
 // This will retry indefinitely until the operation succeeds or encounters a non-retryable error.
 func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, operation func() (T, error)) (T, error) {
-	const folderNotEmptyErrorCode = "FolderNotEmpty"
 	var result T
 	var err error
 	var errRespFabric *fabcore.ResponseError
@@ -173,11 +172,9 @@ func RetryOperationWithResult[T any](ctx context.Context, config RetryConfig, op
 			return result, ctx.Err()
 		}
 
-		if errors.As(err, &errRespFabric) &&
-			(errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() ||
-				errRespFabric.ErrorCode == folderNotEmptyErrorCode) {
+		if errors.As(err, &errRespFabric) && errRespFabric.ErrorCode == fabcore.ErrItem.ItemDisplayNameNotAvailableYet.Error() {
 			retryCount++
-			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with %v, retrying in %v...", retryCount, err, config.RetryInterval))
+			tflog.Debug(ctx, fmt.Sprintf("Retry %d failed with ItemDisplayNameNotAvailableYet, retrying in %v...", retryCount, config.RetryInterval))
 
 			timer := time.NewTimer(config.RetryInterval)
 			select {

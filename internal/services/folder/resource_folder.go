@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -252,7 +251,7 @@ func (r *resourceFolder) Delete(ctx context.Context, req resource.DeleteRequest,
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err := DeleteItem(ctx, r.client, state.WorkspaceID.ValueString(), state.ID.ValueString())
+	_, err := r.client.DeleteFolder(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
 
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
@@ -325,17 +324,4 @@ func (r *resourceFolder) getByID(ctx context.Context, workspaceID, folderID stri
 	model.set(respGet.Folder)
 
 	return nil
-}
-
-func DefaultDeleteRetryConfig() fabricitem.RetryConfig {
-	return fabricitem.RetryConfig{
-		RetryInterval: 2 * time.Minute,
-		Operation:     "delete",
-	}
-}
-
-func DeleteItem(ctx context.Context, client *fabcore.FoldersClient, workspaceID, itemID string) (fabcore.FoldersClientDeleteFolderResponse, error) {
-	return fabricitem.RetryOperationWithResult(ctx, DefaultDeleteRetryConfig(), func() (fabcore.FoldersClientDeleteFolderResponse, error) {
-		return client.DeleteFolder(ctx, workspaceID, itemID, nil)
-	})
 }
