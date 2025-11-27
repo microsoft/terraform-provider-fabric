@@ -1,0 +1,5 @@
+kind: added
+body: Added capability to assign domain id to `fabric_workspace`
+time: 2025-11-20T14:27:38.693725772Z
+custom:
+    Issue: "659"
