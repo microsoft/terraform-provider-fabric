@@ -294,9 +294,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 								Resource: &schemaR.StringAttribute{
 									Optional: true,
 									Computed: true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
 									Validators: []validator.String{
 										stringvalidator.ConflictsWith(
 											path.MatchRelative().AtParent().AtName("name"),
@@ -315,9 +312,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 								Resource: &schemaR.StringAttribute{
 									Optional: true,
 									Computed: true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
 									Validators: []validator.String{
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("type")),
 										stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("id")),
@@ -337,9 +331,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 								Resource: &schemaR.StringAttribute{
 									Optional: true,
 									Computed: true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
 									Validators: []validator.String{
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("name")),
 										stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("id")),

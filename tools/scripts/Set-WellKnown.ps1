@@ -1870,6 +1870,34 @@ else {
   }
 }
 
+# Create Dataflow with folder_id if not exists
+if (-not $wellKnown.ContainsKey('Folder') -or -not $wellKnown['Folder'] -or -not $wellKnown['Folder'].id) {
+  Write-Log -Message "Folder not found or missing 'id'. Cannot create Dataflow with folder_id." -Level 'WARN'
+}
+else {
+  $displayNameTemp = "${displayName}_fld_$($itemNaming["Dataflow"])"
+
+  $dataflows = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dataflows"
+  $dataflow = $dataflows.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
+
+  if (!$dataflow) {
+    Write-Log -Message "Creating Dataflow with folder_id: $displayNameTemp" -Level 'WARN'
+    $payload = @{
+      displayName = $displayNameTemp
+      description = $displayNameTemp
+      folderId    = $wellKnown['Folder'].id
+    }
+    $dataflow = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dataflows" -Payload $payload).Response
+  }
+  Write-Log -Message "Dataflow with folder_id - Name: $($dataflow.displayName) / ID: $($dataflow.id)"
+
+  $wellKnown['DataflowFolder'] = @{
+    id          = $dataflow.id
+    displayName = $dataflow.displayName
+    folderId    = $dataflow.folderId
+  }
+}
+
 # Save wellknown.json file
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
