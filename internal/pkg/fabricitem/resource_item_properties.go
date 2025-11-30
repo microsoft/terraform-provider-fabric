@@ -71,7 +71,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.C
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
-	r.foldersClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewFoldersClient()
 }
 
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -93,10 +92,6 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
-
 	var reqCreate requestCreateFabricItem
 
 	reqCreate.setDisplayName(plan.DisplayName)
@@ -112,6 +107,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	plan.ID = customtypes.NewUUIDValue(*respCreate.ID)
 	plan.WorkspaceID = customtypes.NewUUIDValue(*respCreate.WorkspaceID)
 
+	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -192,18 +188,15 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
+	var reqUpdatePlan requestUpdateFabricItem
 
-	var reqUpdate requestUpdateFabricItem
+	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
+		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
-	reqUpdate.setDisplayName(plan.DisplayName)
-	reqUpdate.setDescription(plan.Description)
-
-	_, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
-		return
+		_, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	var reqMovePlan requestMoveFabricItem
@@ -217,6 +210,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 		}
 	}
 
+	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}

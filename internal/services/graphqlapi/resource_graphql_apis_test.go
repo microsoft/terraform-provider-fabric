@@ -177,19 +177,6 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
-		// error - create - folder does not exist
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityBefore.DisplayName,
-					"folder_id":    testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile("Invalid FolderID"),
-		},
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -236,8 +223,8 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID, "test_root_folder")
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID, "test_root_folder2")
+	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
+	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read

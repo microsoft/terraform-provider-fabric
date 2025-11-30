@@ -336,7 +336,7 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID, "test_root_folder")
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -392,8 +392,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID, "test_root_folder")
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID, "test_root_folder2")
+	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
+	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read

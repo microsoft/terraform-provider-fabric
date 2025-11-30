@@ -30,7 +30,6 @@ var (
 
 type ResourceFabricItem struct {
 	pConfigData          *pconfig.ProviderData
-	foldersClient        *fabcore.FoldersClient
 	client               *fabcore.ItemsClient
 	FabricItemType       fabcore.ItemType
 	TypeInfo             tftypeinfo.TFTypeInfo
@@ -73,7 +72,6 @@ func (r *ResourceFabricItem) Configure(_ context.Context, req resource.Configure
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
-	r.foldersClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewFoldersClient()
 }
 
 func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -94,10 +92,6 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
 
 	var reqCreate requestCreateFabricItem
 
@@ -190,18 +184,17 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
+	var reqUpdatePlan requestUpdateFabricItem
 
-	var reqUpdate requestUpdateFabricItem
+	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
+		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
-	reqUpdate.setDisplayName(plan.DisplayName)
-	reqUpdate.setDescription(plan.Description)
+		respUpdate, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
 
-	respUpdate, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdate.UpdateItemRequest)
-	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
-		return
+		plan.set(respUpdate.Item)
 	}
 
 	var reqMovePlan requestMoveFabricItem
@@ -214,10 +207,8 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 			return
 		}
 
-		respUpdate.FolderID = moveResp.MovedItems.Value[0].FolderID
+		plan.FolderID = customtypes.NewUUIDPointerValue(moveResp.MovedItems.Value[0].FolderID)
 	}
-
-	plan.set(respUpdate.Item)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 

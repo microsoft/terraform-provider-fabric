@@ -35,7 +35,6 @@ var (
 type ResourceFabricItemDefinition struct {
 	pConfigData                 *pconfig.ProviderData
 	client                      *fabcore.ItemsClient
-	foldersClient               *fabcore.FoldersClient
 	FabricItemType              fabcore.ItemType
 	TypeInfo                    tftypeinfo.TFTypeInfo
 	NameRenameAllowed           bool
@@ -126,7 +125,6 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
-	r.foldersClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewFoldersClient()
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -147,10 +145,6 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
 
 	var reqCreate requestCreateFabricItem
 
@@ -246,19 +240,17 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
-		return
-	}
-
 	var reqMovePlan requestMoveFabricItem
 
 	if fabricItemCheckMove(plan.FolderID, state.FolderID, &reqMovePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("moving %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
-		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
+		moveResp, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
+
+		plan.FolderID = customtypes.NewUUIDPointerValue(moveResp.MovedItems.Value[0].FolderID)
 	}
 
 	var reqUpdatePlan requestUpdateFabricItem
