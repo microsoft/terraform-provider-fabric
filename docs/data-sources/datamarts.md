@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The Datamart description.
 - `display_name` (String) The Datamart display name.
+- `folder_id` (String) The Datamart Folder ID.
 - `id` (String) The Datamart ID.
 - `workspace_id` (String) The Workspace ID.

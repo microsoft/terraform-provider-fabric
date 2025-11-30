@@ -40,6 +40,7 @@ func (o *operationsSemanticModel) CreateWithParentID(parentID string, data fabse
 	entity := NewRandomSemanticModelWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -164,6 +165,7 @@ func NewRandomSemanticModel() fabsemanticmodel.SemanticModel {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsemanticmodel.ItemTypeSemanticModel),
 	}
 }

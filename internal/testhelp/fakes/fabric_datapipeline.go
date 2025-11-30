@@ -21,6 +21,7 @@ func (o *operationsDataPipeline) CreateWithParentID(parentID string, data fabdat
 	entity := NewRandomDataPipelineWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -126,6 +127,7 @@ func NewRandomDataPipeline() fabdatapipeline.DataPipeline {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabdatapipeline.ItemTypeDataPipeline),
 	}
 }

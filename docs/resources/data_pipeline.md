@@ -112,6 +112,7 @@ resource "fabric_data_pipeline" "example_parameters" {
 - `definition` (Attributes Map) Definition parts. Read more about [Data Pipeline definition part paths](https://learn.microsoft.com/fabric/data-factory/pipeline-rest-api). Accepted path keys: **Default** format: `pipeline-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Data Pipeline description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Data Pipeline format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

@@ -52,6 +52,7 @@ Read-Only:
 
 - `description` (String) The Warehouse description.
 - `display_name` (String) The Warehouse display name.
+- `folder_id` (String) The Warehouse Folder ID.
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

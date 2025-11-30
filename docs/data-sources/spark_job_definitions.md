@@ -52,6 +52,7 @@ Read-Only:
 
 - `description` (String) The Spark Job Definition description.
 - `display_name` (String) The Spark Job Definition display name.
+- `folder_id` (String) The Spark Job Definition Folder ID.
 - `id` (String) The Spark Job Definition ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

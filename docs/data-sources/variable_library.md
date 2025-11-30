@@ -77,6 +77,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `settings.json`, `valueSets/*.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Variable Library description.
+- `folder_id` (String) The Variable Library Folder ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

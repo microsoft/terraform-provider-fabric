@@ -6,6 +6,7 @@ package fakes
 import (
 	"reflect"
 
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 )
 
@@ -15,15 +16,17 @@ var FakeServer = NewFakeServer()
 type fakeServer struct {
 	ServerFactory *fabfake.ServerFactory
 	elements      []any
+	folders       []fabcore.Folder // Separate storage for folders
 	definitions   map[string]any
 	types         []reflect.Type
 }
 
 // NewFakeServer creates a new fake server.
-func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
+func NewFakeServer() *fakeServer {
 	server := &fakeServer{
 		ServerFactory: &fabfake.ServerFactory{},
 		elements:      make([]any, 0),
+		folders:       make([]fabcore.Folder, 0),
 		definitions:   make(map[string]any),
 		types:         make([]reflect.Type, 0),
 	}
@@ -69,6 +72,12 @@ func handleEntity[TEntity any](server *fakeServer, configureFunction func(server
 // Upsert inserts or updates an element in the server.
 // It panics if the element type is not supported.
 func (s *fakeServer) Upsert(element any) {
+	// Route folders to separate storage
+	if folder, ok := element.(fabcore.Folder); ok {
+		s.UpsertFolder(folder)
+
+		return
+	}
 	elementType := reflect.TypeOf(element)
 	// if elementType is a pointer, get the underlying type
 	if elementType.Kind() == reflect.Ptr {
@@ -88,6 +97,27 @@ func (s *fakeServer) Upsert(element any) {
 	}
 
 	s.elements = append(s.elements, element)
+}
+
+// UpsertFolder inserts or updates a folder in the server.
+func (s *fakeServer) UpsertFolder(folder fabcore.Folder) {
+	if folder.ID == nil || folder.WorkspaceID == nil {
+		return
+	}
+
+	// Remove existing folder with same ID
+	newFolders := make([]fabcore.Folder, 0)
+	for _, f := range s.folders {
+		if f.ID != nil && f.WorkspaceID != nil {
+			if *f.ID != *folder.ID || *f.WorkspaceID != *folder.WorkspaceID {
+				newFolders = append(newFolders, f)
+			}
+		}
+	}
+
+	// Add the new/updated folder
+	newFolders = append(newFolders, folder)
+	s.folders = newFolders
 }
 
 // SupportsType returns true if the server supports the given type.

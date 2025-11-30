@@ -22,6 +22,7 @@ func (o *operationsWarehouseSnapshot) CreateWithParentID(parentID string, data f
 	entity := NewRandomWarehouseSnapshotWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -100,6 +101,7 @@ func (o *operationsWarehouseSnapshot) ConvertItemToEntity(entity fabcore.Item) f
 		DisplayName: entity.DisplayName,
 		Description: entity.Description,
 		WorkspaceID: entity.WorkspaceID,
+		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties:  NewRandomWarehouseSnapshot().Properties,
 	}
@@ -140,6 +142,7 @@ func NewRandomWarehouseSnapshot() fabwarehousesnapshot.WarehouseSnapshot {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties: &fabwarehousesnapshot.Properties{
 			ConnectionString:  to.Ptr(testhelp.RandomURI()),

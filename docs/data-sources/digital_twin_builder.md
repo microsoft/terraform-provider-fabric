@@ -81,6 +81,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Digital Twin Builder description.
+- `folder_id` (String) The Digital Twin Builder Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

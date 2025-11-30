@@ -51,6 +51,7 @@ data "fabric_graphql_api" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The GraphQL API description.
+- `folder_id` (String) The GraphQL API Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

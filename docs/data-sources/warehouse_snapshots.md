@@ -55,6 +55,7 @@ Read-Only:
 
 - `description` (String) The Warehouse Snapshot description.
 - `display_name` (String) The Warehouse Snapshot display name.
+- `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `id` (String) The Warehouse Snapshot ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

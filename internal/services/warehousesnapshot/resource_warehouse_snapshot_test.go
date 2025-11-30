@@ -216,6 +216,7 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
 					"configuration": map[string]any{
 						"parent_warehouse_id": *entityBefore.Properties.ParentWarehouseID,
 						"snapshot_date_time":  entityBefore.Properties.SnapshotDateTime.Format(time.RFC3339),
@@ -225,6 +226,7 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
@@ -238,6 +240,7 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
 					"description":  *entityAfter.Description,
 					"configuration": map[string]any{
 						"parent_warehouse_id": *entityBefore.Properties.ParentWarehouseID,
@@ -248,6 +251,7 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.snapshot_date_time"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.parent_warehouse_id"),
@@ -264,7 +268,18 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	warehouseResourceHCL, warehouseResourceFQN := warehouseResource(t, workspaceID)
+
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+	warehouseResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", "warehouse"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+			"workspace_id": workspaceID,
+			"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+		},
+	)
+
+	warehouseResourceFQN := testhelp.ResourceFQN("fabric", "warehouse", "test")
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -272,11 +287,13 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				warehouseResourceHCL,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"configuration": map[string]any{
 							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
 							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
@@ -286,6 +303,7 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.snapshot_date_time", warehouseResourceFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.parent_warehouse_id", warehouseResourceFQN, "id"),
@@ -296,12 +314,14 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				warehouseResourceHCL,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"configuration": map[string]any{
 							"parent_warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
 							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
@@ -311,6 +331,7 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.snapshot_date_time", warehouseResourceFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.parent_warehouse_id", warehouseResourceFQN, "id"),
