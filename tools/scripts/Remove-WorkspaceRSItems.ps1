@@ -304,16 +304,6 @@ function Remove-WorkspaceRSItems {
   }
 
   # Filter out items to preserve:
-<<<<<<< HEAD
-  # 1. The LakehouseRS item by ID (exact match)
-  $itemsToDelete = @()
-  if ($items -and $items.Count -gt 0) {
-    $itemsToDelete = $items | Where-Object {
-      $_.id -ne $lakehouseRSId -and
-      $_.type -ne 'SQLEndpoint' -and
-      $_.type -ne 'KQLDatabase'
-    }
-=======
   # 1. Any lakehouse named "lh"
   # 2. All SQLEndpoint items
   # 3. All KQLDatabase items
@@ -321,7 +311,6 @@ function Remove-WorkspaceRSItems {
     $_.type -ne 'KQLDatabase' -and
     $_.type -ne 'SQLEndpoint' -and
     -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh')
->>>>>>> f34bdc29bc166ea5402c8637445a5febebf0ee47
   }
 
   Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
@@ -432,46 +421,32 @@ function Remove-WorkspaceRSItems {
       try {
         $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)"
 
-<<<<<<< HEAD
-        if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204) {
-          Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
-          $deletedItemsCount++
+        if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
+          if ($deleteResponse.StatusCode -eq 404) {
+            Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          }
+          else {
+            Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
+          }
+          $deletedCount++
         }
         else {
           Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
-          $failedItemsCount++
+          $failedCount++
         }
-=======
-      if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
-        if ($deleteResponse.StatusCode -eq 404) {
-          Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
-        }
-        else {
-          Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
-        }
-        $deletedCount++
->>>>>>> f34bdc29bc166ea5402c8637445a5febebf0ee47
       }
       catch {
-        Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-        $failedItemsCount++
+        # Check if the exception is a 404
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        if ($statusCode -eq 404) {
+          Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          $deletedCount++
+        }
+        else {
+          Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+          $failedCount++
+        }
       }
-<<<<<<< HEAD
-=======
-    }
-    catch {
-      # Check if the exception is a 404
-      $statusCode = $_.Exception.Response.StatusCode.value__
-      if ($statusCode -eq 404) {
-        Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
-        $deletedCount++
-      }
-      else {
-        Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-        $failedCount++
-      }
-    }
->>>>>>> f34bdc29bc166ea5402c8637445a5febebf0ee47
 
       # Add a small delay between deletions to avoid rate limiting
       Start-Sleep -Milliseconds 500
