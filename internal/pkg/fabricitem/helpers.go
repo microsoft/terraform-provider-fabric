@@ -10,10 +10,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 )
 
@@ -220,4 +222,34 @@ func CreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID st
 	return RetryOperationWithResult(ctx, DefaultCreateRetryConfig(), func() (fabcore.ItemsClientCreateItemResponse, error) {
 		return client.CreateItem(ctx, workspaceID, request, nil)
 	})
+}
+
+func MoveItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.MoveItemRequest) (fabcore.ItemsClientMoveItemResponse, error) {
+	return client.MoveItem(ctx, workspaceID, itemID, request, nil)
+}
+
+func ValidateFolderID(ctx context.Context, client *fabcore.FoldersClient, workspaceID string, folderID customtypes.UUID) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if folderID.IsNull() || folderID.IsUnknown() {
+		return diags
+	}
+
+	folderIDStr := folderID.ValueString()
+
+	if !FolderExists(ctx, client, workspaceID, folderIDStr) {
+		diags.AddAttributeError(
+			path.Root("folder_id"),
+			"Invalid FolderID",
+			fmt.Sprintf("Folder with ID '%s' does not exist in workspace '%s' or is not accessible.", folderIDStr, workspaceID),
+		)
+	}
+
+	return diags
+}
+
+func FolderExists(ctx context.Context, foldersClient *fabcore.FoldersClient, workspaceID, folderID string) bool {
+	_, err := foldersClient.GetFolder(ctx, workspaceID, folderID, nil)
+
+	return err == nil
 }

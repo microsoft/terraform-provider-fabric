@@ -159,18 +159,18 @@ func GetFixturesDirPath(fixtureDir ...string) string {
 	return filepath.ToSlash(filepath.Join(tempPath...))
 }
 
-func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+func FolderResource(t *testing.T, workspaceID, resourceName string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
 	t.Helper()
 
 	resourceHCL = at.CompileConfig(
-		at.ResourceHeader(TypeName("fabric", "folder"), "test_root_folder"),
+		at.ResourceHeader(TypeName("fabric", "folder"), resourceName),
 		map[string]any{
 			"display_name": RandomName(),
 			"workspace_id": workspaceID,
 		},
 	)
 
-	resourceFQN = ResourceFQN("fabric", "folder", "test_root_folder")
+	resourceFQN = ResourceFQN("fabric", "folder", resourceName)
 
 	return resourceHCL, resourceFQN
 }

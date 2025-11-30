@@ -269,7 +269,7 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID, "test_root_folder")
 	warehouseResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName("fabric", "warehouse"), "test"),
 		map[string]any{

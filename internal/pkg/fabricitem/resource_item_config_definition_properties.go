@@ -157,6 +157,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 
 	r.pConfigData = pConfigData
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	r.foldersClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewFoldersClient()
 
 	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
@@ -189,6 +190,10 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
+	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	var reqCreate requestCreateFabricItem
 
@@ -304,12 +309,33 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	var reqUpdatePlan requestUpdateFabricItem
 
 	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
 		_, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	}
+
+	var reqMovePlan requestMoveFabricItem
+
+	if fabricItemCheckMove(plan.FolderID, state.FolderID, &reqMovePlan) {
+		tflog.Trace(ctx, fmt.Sprintf("moving %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
+
+		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}

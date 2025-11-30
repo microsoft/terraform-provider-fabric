@@ -336,7 +336,7 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID, "test_root_folder")
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -392,16 +392,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2 := at.CompileConfig(
-		at.ResourceHeader(testhelp.TypeName("fabric", "folder"), "test_root_folder2"),
-		map[string]any{
-			"display_name": testhelp.RandomName(),
-			"workspace_id": workspaceID,
-		},
-	)
-
-	folderResourceFQN2 := testhelp.ResourceFQN("fabric", "folder", "test_root_folder2")
+	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID, "test_root_folder")
+	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID, "test_root_folder2")
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -424,7 +416,7 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
 			),
 		},
-		// Modify folder_id and Read - should trigger recreate
+		// Modify folder_id and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -445,7 +437,7 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
 			),
 		},
-		// Remove folder_id and Read - should trigger recreate
+		// Remove folder_id and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -462,6 +454,26 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+			),
+		},
+		// Move folder_id and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				folderResourceHCL1,
+				folderResourceHCL2,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": testhelp.RandomName(),
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
 			),
 		},
 	}))

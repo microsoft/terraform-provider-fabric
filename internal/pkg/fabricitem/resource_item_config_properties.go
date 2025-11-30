@@ -87,6 +87,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	r.foldersClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewFoldersClient()
 }
 
 func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Create(
@@ -115,6 +116,10 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
+	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	var reqCreate requestCreateFabricItem
 
@@ -226,6 +231,10 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	if resp.Diagnostics.Append(ValidateFolderID(ctx, r.foldersClient, plan.WorkspaceID.ValueString(), plan.FolderID)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	var reqUpdate requestUpdateFabricItem
 
 	reqUpdate.setDisplayName(plan.DisplayName)
@@ -236,8 +245,19 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
-		return
+	var reqMovePlan requestMoveFabricItem
+
+	if fabricItemCheckMove(plan.FolderID, state.FolderID, &reqMovePlan) {
+		tflog.Trace(ctx, fmt.Sprintf("moving %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
+
+		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)

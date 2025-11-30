@@ -198,9 +198,6 @@ func getResourceFabricItemBaseAttributes(
 			MarkdownDescription: "The Folder ID.",
 			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.RequiresReplace(),
-			},
 		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}

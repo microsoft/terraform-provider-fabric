@@ -4,8 +4,10 @@
 package fakes
 
 import (
+	"context"
 	"net/http"
 
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
@@ -154,8 +156,40 @@ func configureItem(server *fakeServer) fabcore.Item {
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,
 		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition)
+	server.ServerFactory.Core.ItemsServer.MoveItem = FakeMoveItem(handler)
 
 	return fabcore.Item{}
+}
+
+type moveItemOperations struct{}
+
+func (m *moveItemOperations) TransformUpdate(entity fabcore.Item) fabcore.ItemsClientMoveItemResponse {
+	return fabcore.ItemsClientMoveItemResponse{
+		MovedItems: fabcore.MovedItems{
+			Value: []fabcore.Item{
+				entity,
+			},
+		},
+	}
+}
+
+func (m *moveItemOperations) Update(base fabcore.Item, moveReq fabcore.MoveItemRequest) fabcore.Item {
+	base.FolderID = moveReq.TargetFolderID
+
+	return base
+}
+
+func FakeMoveItem(
+	handler *typedHandler[fabcore.Item],
+) func(ctx context.Context, workspaceID, itemID string, moveItemRequest fabcore.MoveItemRequest, options *fabcore.ItemsClientMoveItemOptions) (resp azfake.Responder[fabcore.ItemsClientMoveItemResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, itemID string, moveReq fabcore.MoveItemRequest, _ *fabcore.ItemsClientMoveItemOptions) (azfake.Responder[fabcore.ItemsClientMoveItemResponse], azfake.ErrorResponder) {
+		moveUpdater := &moveItemOperations{}
+		moveTransformer := &moveItemOperations{}
+
+		id := generateID(workspaceID, itemID)
+
+		return updateByID(handler, id, moveReq, moveUpdater, moveTransformer)
+	}
 }
 
 func NewRandomItem(itemType fabcore.ItemType) fabcore.Item {

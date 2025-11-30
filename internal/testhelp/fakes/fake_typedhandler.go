@@ -148,9 +148,27 @@ func generateID(parentID, childID string) string {
 	return parentID + "/" + childID
 }
 
+func (h *typedHandler[TEntity]) isFolderHandler() bool {
+	var entity TEntity
+	_, ok := any(entity).(fabcore.Folder)
+
+	return ok
+}
+
 // Elements returns all the elements in the for the type.
 func (h *typedHandler[TEntity]) Elements() []TEntity {
 	ret := make([]TEntity, 0)
+
+	// If this is a folder handler, use separate folder storage
+	if h.isFolderHandler() {
+		for _, folder := range h.folders {
+			if castedElement, ok := any(folder).(TEntity); ok {
+				ret = append(ret, castedElement)
+			}
+		}
+
+		return ret
+	}
 
 	for _, element := range h.elements {
 		// if it already is the right type, add it.
@@ -168,6 +186,19 @@ func (h *typedHandler[TEntity]) Elements() []TEntity {
 
 // Delete deletes an element by ID.
 func (h *typedHandler[TEntity]) Delete(id string) {
+	// If this is a folder, delete from separate storage
+	if h.isFolderHandler() {
+		newFolders := make([]fabcore.Folder, 0)
+		for _, folder := range h.folders {
+			if h.identifier.GetID(any(folder).(TEntity)) != id {
+				newFolders = append(newFolders, folder)
+			}
+		}
+		h.folders = newFolders
+
+		return
+	}
+
 	newElements := make([]any, 0)
 
 	for _, element := range h.elements {
@@ -193,6 +224,17 @@ func (h *typedHandler[TEntity]) Delete(id string) {
 func (h *typedHandler[TEntity]) Upsert(element TEntity) {
 	id := h.identifier.GetID(element)
 
+	// If this is a folder, store in separate storage
+	if h.isFolderHandler() {
+		if folder, ok := any(element).(fabcore.Folder); ok {
+			// Delete existing first
+			h.Delete(id)
+			// Add new
+			h.folders = append(h.folders, folder)
+
+			return
+		}
+	}
 	// first, try to delete the element if it exists
 	h.Delete(id)
 
@@ -202,6 +244,15 @@ func (h *typedHandler[TEntity]) Upsert(element TEntity) {
 
 // Get gets an element by ID.
 func (h *typedHandler[TEntity]) Get(id string) TEntity {
+	// If this is a folder, get from separate storage
+	if h.isFolderHandler() {
+		for _, folder := range h.folders {
+			if h.identifier.GetID(any(folder).(TEntity)) == id {
+				return any(folder).(TEntity)
+			}
+		}
+		panic("Element not found") // lintignore:R009
+	}
 	// check if TEntity is FabricItem
 	if h.entityTypeIsFabricItem() {
 		for _, element := range h.elements {
@@ -240,6 +291,15 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 
 // Contains returns true if the element exists.
 func (h *typedHandler[TEntity]) Contains(id string) bool {
+	if h.isFolderHandler() {
+		for _, folder := range h.folders {
+			if h.identifier.GetID(any(folder).(TEntity)) == id {
+				return true
+			}
+		}
+
+		return false
+	}
 	found := h.getPointer(id) != nil
 
 	if found {
@@ -261,6 +321,20 @@ func (h *typedHandler[TEntity]) Contains(id string) bool {
 
 // getPointer gets a pointer to an element by ID.
 func (h *typedHandler[TEntity]) getPointer(id string) *TEntity {
+	if h.isFolderHandler() {
+		for _, folder := range h.folders {
+			folderID := h.identifier.GetID(any(folder).(TEntity))
+			if id == folderID ||
+				(!strings.Contains(folderID, "/") && strings.HasSuffix(id, folderID)) {
+				entity := any(folder).(TEntity)
+
+				return &entity
+			}
+		}
+
+		return nil
+	}
+
 	for _, element := range h.elements {
 		if typedElement, ok := element.(TEntity); ok {
 			typedElementID := h.identifier.GetID(typedElement)
