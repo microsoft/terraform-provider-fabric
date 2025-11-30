@@ -97,3 +97,56 @@ resource "fabric_report" "example_update" {
     }
   }
 }
+
+# Report with custom tokens delimiter
+resource "fabric_report" "example_custom_delimiter" {
+  display_name = "example with custom delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "PBIR-Legacy"
+  definition = {
+    "report.json" = {
+      source = "${local.path}/report.json"
+    }
+    "definition.pbir" = {
+      source           = "${local.path}/definition.pbir.tmpl"
+      tokens_delimiter = "##"
+      tokens = {
+        "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
+      }
+    }
+    "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
+      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"
+    }
+  }
+}
+
+# Report with parameters processing mode
+resource "fabric_report" "example_parameters" {
+  display_name = "example with parameters"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "PBIR-Legacy"
+  definition = {
+    "report.json" = {
+      source = "${local.path}/report.json"
+    }
+    "definition.pbir" = {
+      source          = "${local.path}/definition.pbir.tmpl"
+      processing_mode = "parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.datasetReference.byPath.path"
+          value = "MyWorkspace/MySemanticModel.SemanticModel"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldModelID"
+          value = "NewModelID"
+        }
+      ]
+    }
+    "StaticResources/SharedResources/BaseThemes/CY24SU10.json" = {
+      source = "${local.path}/StaticResources/SharedResources/BaseThemes/CY24SU10.json"
+    }
+  }
+}
