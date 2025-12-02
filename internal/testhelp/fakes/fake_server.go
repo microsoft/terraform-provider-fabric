@@ -20,8 +20,7 @@ type fakeServer struct {
 }
 
 // NewFakeServer creates a new fake server.
-func NewFakeServer() *fakeServer {
-	//revive:disable-line:unexported-return
+func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	server := &fakeServer{
 		ServerFactory: &fabfake.ServerFactory{},
 		elements:      make([]any, 0),

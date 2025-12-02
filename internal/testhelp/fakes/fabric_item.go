@@ -179,6 +179,7 @@ func (m *moveItemOperations) Update(base fabcore.Item, moveReq fabcore.MoveItemR
 	return base
 }
 
+// FakeMoveItem - move item is only a Core API method and it is not item specific, so no need to add it to EntityConfigureEntity.
 func FakeMoveItem(
 	handler *typedHandler[fabcore.Item],
 ) func(ctx context.Context, workspaceID, itemID string, moveItemRequest fabcore.MoveItemRequest, options *fabcore.ItemsClientMoveItemOptions) (resp azfake.Responder[fabcore.ItemsClientMoveItemResponse], errResp azfake.ErrorResponder) {
