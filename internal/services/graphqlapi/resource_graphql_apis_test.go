@@ -153,11 +153,6 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	folder1 := fakes.NewRandomFolderWithWorkspace(workspaceID)
-	folder2 := fakes.NewRandomFolderWithWorkspace(workspaceID)
-
-	fakes.FakeServer.Upsert(folder1)
-	fakes.FakeServer.Upsert(folder2)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -185,13 +180,13 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
-					"folder_id":    *folder1.ID,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", folder1.ID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Update, Move and Read
@@ -203,13 +198,30 @@ func TestUnit_GraphQLApiResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
-					"folder_id":    *folder2.ID,
+					"folder_id":    *entityAfter.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", folder2.ID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityAfter.FolderID),
+			),
+		},
+		// Move and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityAfter.DisplayName,
+					"description":  *entityAfter.Description,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -223,6 +235,7 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+
 	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
 	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 

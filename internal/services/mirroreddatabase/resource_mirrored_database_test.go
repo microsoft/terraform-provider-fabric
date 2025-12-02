@@ -270,7 +270,7 @@ func TestUnit_MirroredDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
 			),
 		},
-		// Update and Read
+		// Update, Move and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -281,7 +281,7 @@ func TestUnit_MirroredDatabaseResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
-						"folder_id":    *entityBefore.FolderID,
+						"folder_id":    *entityAfter.FolderID,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -289,7 +289,34 @@ func TestUnit_MirroredDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityAfter.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
+			),
+		},
+		// Move and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
@@ -309,6 +336,7 @@ func TestAcc_MirroredDatabaseResource_CRUD(t *testing.T) {
 	entityCreateDescription := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+
 	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
 	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 

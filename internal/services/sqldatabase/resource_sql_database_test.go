@@ -192,7 +192,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
-		// Update and Read
+		// Update, Move and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -201,13 +201,33 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"description":  *entityAfter.Description,
-					"folder_id":    *entityBefore.FolderID,
+					"folder_id":    *entityAfter.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityAfter.FolderID),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			),
+		},
+		// Move and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"description":  *entityAfter.Description,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
@@ -223,8 +243,10 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+
 	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
 	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{

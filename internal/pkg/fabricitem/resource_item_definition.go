@@ -245,12 +245,10 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	if fabricItemCheckMove(plan.FolderID, state.FolderID, &reqMovePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("moving %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
-		moveResp, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
+		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
-
-		plan.FolderID = customtypes.NewUUIDPointerValue(moveResp.MovedItems.Value[0].FolderID)
 	}
 
 	var reqUpdatePlan requestUpdateFabricItem
@@ -258,12 +256,10 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	if fabricItemCheckUpdate(plan.DisplayName, plan.Description, state.DisplayName, state.Description, &reqUpdatePlan) {
 		tflog.Trace(ctx, fmt.Sprintf("updating %s (WorkspaceID: %s ItemID: %s)", r.TypeInfo.Name, plan.WorkspaceID.ValueString(), plan.ID.ValueString()))
 
-		respUpdate, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest)
+		_, err := UpdateItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdatePlan.UpdateItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
-
-		plan.set(respUpdate.Item)
 	}
 
 	var reqUpdateDefinition requestUpdateFabricItemDefinition
@@ -289,6 +285,11 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			return
 		}
+	}
+
+	// r.get() updates the plan with current server state
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
