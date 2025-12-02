@@ -135,6 +135,7 @@ func (to *requestCreateWorkspace) set(from resourceWorkspaceModel) {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
 	to.CapacityID = from.CapacityID.ValueStringPointer()
+	to.DomainID = from.DomainID.ValueStringPointer()
 }
 
 type requestUpdateWorkspace struct {

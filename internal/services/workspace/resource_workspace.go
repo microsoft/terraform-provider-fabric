@@ -163,27 +163,6 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		})
 	}
 
-	if !plan.DomainID.IsNull() {
-		tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
-			"action": "start",
-			"id":     plan.ID.ValueString(),
-		})
-
-		var reqCreateDomain assignWorkspaceToDomainRequest
-
-		reqCreateDomain.set(plan)
-
-		_, err := r.client.AssignToDomain(ctx, plan.ID.ValueString(), reqCreateDomain.AssignWorkspaceToDomainRequest, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
-			"action": "end",
-			"id":     plan.ID.ValueString(),
-		})
-	}
-
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -242,7 +221,7 @@ func (r *resourceWorkspace) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 }
 
-func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //nolint:gocognit,gocyclo,nestif
+func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) { //nolint:maintidx,gocognit,gocyclo
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "start",
 	})
@@ -337,6 +316,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 
 	if !plan.DomainID.Equal(state.DomainID) {
 		var err error
+
 		if plan.DomainID.IsNull() {
 			tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
 				"action": "start",
@@ -379,7 +359,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 		}
 	}
 
-	if !plan.Identity.Equal(state.Identity) {
+	if !plan.Identity.Equal(state.Identity) { //nolint:nestif
 		identityPlan := &workspaceIdentityModel{}
 		identityState := &workspaceIdentityModel{}
 
