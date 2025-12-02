@@ -356,3 +356,437 @@ func TestAcc_EventstreamDefinitionResource_CRUD(t *testing.T) {
 	},
 	))
 }
+
+func TestAcc_EventstreamDefinitionResource_CRUD_Parameters(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	lakehouseResourceHCL, lakehouseResourceFQN := lakehouseResource(t, workspaceID)
+
+	testHelperDefinition := map[string]any{
+		`"eventstream.json"`: map[string]any{
+			"source":          "${local.path}/eventstream.json",
+			"processing_mode": "Parameters",
+			"parameters": []map[string]any{
+				{
+					"type":  "TextReplace",
+					"find":  "00000000-0000-0000-0000-000000000000",
+					"value": testhelp.RefByFQN(lakehouseResourceFQN, "workspace_id"),
+				},
+				{
+					"type":  "JsonPathReplace",
+					"find":  `$.destinations[?(@.name=='Lakehouse')].properties.itemId`,
+					"value": testhelp.RefByFQN(lakehouseResourceFQN, "id"),
+				},
+			},
+		},
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	},
+	))
+}
+
+func TestUnit_EventstreamDefinitionResource_DefinitionPartProcessing_Attributes(t *testing.T) { //nolint:maintidx
+	workspaceID := testhelp.RandomUUID()
+
+	testHelperDefinitionBase := map[string]any{
+		`"eventstream.json"`: map[string]any{
+			"source": "${local.path}/eventstream.json",
+		},
+	}
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - invalid processing_mode value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "InvalidMode",
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error - invalid tokens_delimiter value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":           "${local.path}/eventstream.json",
+								"tokens":           map[string]any{"TestToken": "value"},
+								"tokens_delimiter": "%%",
+								"processing_mode":  "GoTemplate",
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error - tokens_delimiter without tokens
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":           "${local.path}/eventstream.json",
+								"tokens_delimiter": "{{}}",
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttComboInvalid),
+		},
+		// error - tokens_delimiter conflicts with parameters
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":           "${local.path}/eventstream.json",
+								"processing_mode":  "Parameters",
+								"tokens_delimiter": "{{}}",
+								"parameters": []map[string]any{
+									{"type": "TextReplace", "find": "test", "value": "value"},
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttComboInvalid),
+		},
+		// error - tokens with processing_mode=Parameters (should use parameters instead)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "Parameters",
+								"tokens": map[string]any{
+									"TestToken": "value",
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute"),
+		},
+		// error - tokens with processing_mode=None
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "None",
+								"tokens": map[string]any{
+									"TestToken": "value",
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute"),
+		},
+		// error - parameters with processing_mode=GoTemplate (should use tokens instead)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "GoTemplate",
+								"parameters": []map[string]any{
+									{"type": "TextReplace", "find": "test", "value": "value"},
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute"),
+		},
+		// error - parameters with processing_mode=None
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "None",
+								"parameters": []map[string]any{
+									{"type": "TextReplace", "find": "test", "value": "value"},
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile("Invalid configuration for attribute"),
+		},
+		// error - parameters without processing_mode=Parameters
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source": "${local.path}/eventstream.json",
+								"parameters": []map[string]any{
+									{"type": "TextReplace", "find": "test", "value": "value"},
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttComboInvalid),
+		},
+		// error - invalid parameter type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "Parameters",
+								"parameters": []map[string]any{
+									{"type": "InvalidType", "find": "test", "value": "value"},
+								},
+							},
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// success - valid tokens with GoTemplate mode (default delimiter)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_tokens_default",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "GoTemplate",
+								"tokens": map[string]any{
+									"ValidToken":    "value1",
+									"Another_Token": "value2",
+								},
+							},
+						},
+					},
+				)),
+		},
+		// success - valid tokens with default processing_mode (default)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_tokens_default",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "GoTemplate",
+								"tokens": map[string]any{
+									"ValidToken":    "value1",
+									"Another_Token": "value2",
+								},
+							},
+						},
+					},
+				)),
+		},
+		// success - valid tokens with custom delimiter
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_tokens_custom_delim",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":           "${local.path}/eventstream.json",
+								"processing_mode":  "GoTemplate",
+								"tokens_delimiter": "<<>>",
+								"tokens": map[string]any{
+									"ValidToken": "value",
+								},
+							},
+						},
+					},
+				)),
+		},
+		// success - valid parameters with Parameters mode
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_parameters",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"eventstream.json"`: map[string]any{
+								"source":          "${local.path}/eventstream.json",
+								"processing_mode": "Parameters",
+								"parameters": []map[string]any{
+									{"type": "TextReplace", "find": "old", "value": "new"},
+									{"type": "JsonPathReplace", "find": "$.path", "value": "newvalue"},
+								},
+							},
+						},
+					},
+				)),
+		},
+		// success - None processing mode (no tokens or parameters)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_none_mode",
+						"format":       "Default",
+						"definition":   testHelperDefinitionBase,
+					},
+				)),
+		},
+	}))
+}
