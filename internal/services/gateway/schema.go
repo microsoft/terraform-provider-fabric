@@ -115,9 +115,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
 					Computed: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
 					Validators: []validator.String{
 						superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
 							[]attr.Value{

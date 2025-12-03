@@ -136,7 +136,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					Optional: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
-						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{

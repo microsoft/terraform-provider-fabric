@@ -572,9 +572,6 @@ func externalDataShareSchema() superschema.SuperSingleNestedAttributeOf[external
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
