@@ -54,3 +54,5 @@ resource "fabric_connection" "example_virtual_network_gateway" {
     }
   }
 }
+
+# OAuth2 credential_type is not supported in the provider
