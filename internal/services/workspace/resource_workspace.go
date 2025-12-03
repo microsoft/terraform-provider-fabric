@@ -317,17 +317,19 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 	if !plan.DomainID.Equal(state.DomainID) {
 		var err error
 
-		if plan.DomainID.IsNull() {
-			tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
-				"action": "start",
-				"id":     plan.ID.ValueString(),
-			})
-			_, err = r.client.UnassignFromDomain(ctx, plan.ID.ValueString(), nil)
+		if plan.DomainID.IsNull() || plan.DomainID.IsUnknown() {
+			if !state.DomainID.IsNull() {
+				tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
+					"action": "start",
+					"id":     plan.ID.ValueString(),
+				})
+				_, err = r.client.UnassignFromDomain(ctx, plan.ID.ValueString(), nil)
 
-			tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
-				"action": "end",
-				"id":     plan.ID.ValueString(),
-			})
+				tflog.Debug(ctx, "UNASSIGN DOMAIN", map[string]any{
+					"action": "end",
+					"id":     plan.ID.ValueString(),
+				})
+			}
 		} else {
 			tflog.Debug(ctx, "ASSIGN DOMAIN", map[string]any{
 				"action": "start",
