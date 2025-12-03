@@ -375,7 +375,7 @@ func (h *typedHandler[TEntity]) entityTypeCanBeConvertedToFabricItem() bool {
 		return false
 	}
 
-	requiredPropertyNames := []string{"ID", "WorkspaceID", "DisplayName", "Description", "Type", "FolderID"}
+	requiredPropertyNames := []string{"ID", "WorkspaceID", "DisplayName", "Description", "Type"}
 
 	for _, propertyName := range requiredPropertyNames {
 		// check if the property exists

@@ -203,7 +203,6 @@ func getResourceFabricItemBaseAttributes(
 		"folder_id": schema.StringAttribute{
 			MarkdownDescription: "The Folder ID.",
 			Optional:            true,
-			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.AttributesAll(ctx),
