@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `RealTimeDashboard.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The KQL Dashboard description.
+- `folder_id` (String) The KQL Dashboard Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 
