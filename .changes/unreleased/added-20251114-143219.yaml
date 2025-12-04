@@ -1,5 +1,0 @@
-kind: added
-body: Enhanced `fabric_item` resource by adding `folder_id` attribute
-time: 2025-11-14T14:32:19.469548566Z
-custom:
-  Issue: "584"

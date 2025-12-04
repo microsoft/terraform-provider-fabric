@@ -1,5 +1,0 @@
-kind: added
-body: Added new `fabric_connection_role_assignment` resource
-time: 2025-09-07T01:07:36.513281032Z
-custom:
-  Issue: "638"
