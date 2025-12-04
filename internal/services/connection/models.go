@@ -151,6 +151,6 @@ type credentialsServicePrincipalModel struct {
 }
 
 type credentialsSharedAccessSignatureModel struct {
-	TokenWO        types.String `tfsdk:"sas_wo"`
-	TokenWOVersion types.Int32  `tfsdk:"sas_wo_version"`
+	TokenWO        types.String `tfsdk:"token_wo"`
+	TokenWOVersion types.Int32  `tfsdk:"token_wo_version"`
 }
