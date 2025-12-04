@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Copy Job description.
 - `display_name` (String) The Copy Job display name.
+- `folder_id` (String) The Copy Job Folder ID.
 - `id` (String) The Copy Job ID.
 - `workspace_id` (String) The Workspace ID.

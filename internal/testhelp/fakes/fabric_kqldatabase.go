@@ -23,6 +23,7 @@ func (o *operationsKQLDatabase) ConvertItemToEntity(item fabcore.Item) fabkqldat
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties:  NewRandomKQLDatabase().Properties,
 	}
@@ -52,6 +53,7 @@ func (o *operationsKQLDatabase) CreateWithParentID(parentID string, data fabkqld
 	entity := NewRandomKQLDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -178,6 +180,7 @@ func NewRandomKQLDatabase() fabkqldatabase.KQLDatabase {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties: &fabkqldatabase.Properties{
 			DatabaseType:           to.Ptr(fabkqldatabase.TypeReadWrite),
