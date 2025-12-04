@@ -1,5 +1,5 @@
 kind: fixed
-body: Fix `fabric_spark_workspace_settings` update for default_pool
+body: Fixed `fabric_spark_workspace_settings` update for default_pool
 time: 2025-11-27T10:15:00.424868143Z
 custom:
-    Issue: "741"
+  Issue: "741"
