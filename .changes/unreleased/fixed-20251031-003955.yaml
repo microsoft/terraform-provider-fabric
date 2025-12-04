@@ -1,5 +1,5 @@
 kind: fixed
-body: Fix `fabric_variable_library` by improving documentation and correcting the required number of definition parts in the variable library.
+body: Fixed `fabric_variable_library` by improving documentation and correcting the required number of definition parts in the variable library.
 time: 2025-10-31T00:39:55.81777021Z
 custom:
   Issue: "690"

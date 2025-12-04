@@ -1,5 +1,5 @@
 kind: added
-body: Onboard new `fabric_item_job_scheduler` Data Source
+body: Added new `fabric_item_job_scheduler` data source
 time: 2025-08-21T08:39:54.656575108Z
 custom:
-    Issue: "606"
+  Issue: "606"

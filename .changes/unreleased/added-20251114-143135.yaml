@@ -1,4 +1,4 @@
-kind: changed
+kind: added
 body: Enhanced `fabric_item` data-source by adding `folder_id` attribute
 time: 2025-11-14T14:31:35.522925501Z
 custom:

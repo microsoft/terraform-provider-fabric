@@ -1,5 +1,5 @@
 kind: added
-body: Onboard new `fabric_connection_role_assignment` Data Source
+body: Added new `fabric_connection_role_assignment` data source
 time: 2025-09-07T01:07:13.918346136Z
 custom:
-    Issue: "637"
+  Issue: "637"
