@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `skip_test_connection` validation for `fabric_connection` resource
+time: 2025-12-03T14:54:38.570543725Z
+custom:
+    Issue: "758"

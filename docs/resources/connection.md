@@ -184,8 +184,8 @@ Required:
 
 Required:
 
-- `sas_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The sas (WO).
-- `sas_wo_version` (Number) The version of the `sas_wo`.
+- `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO).
+- `token_wo_version` (Number) The version of the `token_wo`.
 
 <a id="nestedatt--timeouts"></a>
 
