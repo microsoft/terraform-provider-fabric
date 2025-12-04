@@ -1,5 +1,0 @@
-kind: fixed
-body: Updated definition format to allow different file names under valueSets directory in `fabric_variable_library`
-time: 2025-09-25T09:53:58.136122437Z
-custom:
-  Issue: "665"
