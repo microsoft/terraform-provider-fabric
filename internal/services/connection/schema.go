@@ -452,16 +452,16 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 						},
 						Attributes: superschema.Attributes{
-							"sas_wo": superschema.StringAttribute{
+							"token_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The sas (WO).",
+									MarkdownDescription: "The token (WO).",
 									Required:            true,
 									WriteOnly:           true,
 								},
 							},
-							"sas_wo_version": superschema.Int32Attribute{
+							"token_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
-									MarkdownDescription: "The version of the `sas_wo`.",
+									MarkdownDescription: "The version of the `token_wo`.",
 									Required:            true,
 								},
 							},

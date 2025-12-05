@@ -806,6 +806,41 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway"),
 			),
 		},
+		// Creation with skip test connection false when test connection is allowed
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test-skip-test-false",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "Web",
+						"creation_method": "Web",
+						"parameters": []map[string]any{
+							{
+								"name":  "url",
+								"value": "microsoft.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"credential_type":       string(fabcore.CredentialTypeAnonymous),
+						"skip_test_connection":  false,
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-skip-test-false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connectivity_type", "ShareableCloud"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "privacy_level", "Organizational"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeAnonymous)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
+			),
+		},
 		// Creation method with empty parameters list
 		{
 			ResourceName: testResourceItemFQN,
@@ -956,7 +991,7 @@ func TestUnit_ConnectionResource_ModifyPlan_Validations(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Unsupported credential type`),
 		},
-		// Test 5: Unsupported skip test connection validation (false when should be true)
+		// Test 5: Unsupported skip test connection validation (true when should be false)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -966,19 +1001,19 @@ func TestUnit_ConnectionResource_ModifyPlan_Validations(t *testing.T) {
 					"connectivity_type": "ShareableCloud",
 					"privacy_level":     "Organizational",
 					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
+						"type":            "SharePoint",
+						"creation_method": "SharePointList",
 						"parameters": []map[string]any{
 							{
-								"name":  "server",
-								"value": "ftp.example.com",
+								"name":  "sharePointSiteUrl",
+								"value": "sharepoint.example.com",
 							},
 						},
 					},
 					"credential_details": map[string]any{
 						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
 						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  false,
+						"skip_test_connection":  true,
 						"credential_type":       string(fabcore.CredentialTypeAnonymous),
 					},
 				},

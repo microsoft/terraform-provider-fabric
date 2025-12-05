@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type resourceFabricItemModel struct {
@@ -35,6 +37,10 @@ func (to *requestCreateFabricItem) setDisplayName(v types.String) {
 
 func (to *requestCreateFabricItem) setDescription(v types.String) {
 	to.Description = v.ValueStringPointer()
+}
+
+func (to *requestCreateFabricItem) setFolderID(v customtypes.UUID) {
+	to.FolderID = v.ValueStringPointer()
 }
 
 func (to *requestCreateFabricItem) setType(v fabcore.ItemType) {
@@ -95,6 +101,14 @@ type requestUpdateFabricItem struct {
 	fabcore.UpdateItemRequest
 }
 
+type requestMoveFabricItem struct {
+	fabcore.MoveItemRequest
+}
+
+func (to *requestMoveFabricItem) setTargetFolderID(v customtypes.UUID) {
+	to.TargetFolderID = v.ValueStringPointer()
+}
+
 func (to *requestUpdateFabricItem) setDisplayName(v types.String) {
 	to.DisplayName = v.ValueStringPointer()
 }
@@ -113,6 +127,15 @@ func fabricItemCheckUpdate(planDisplayName, planDescription, stateDisplayName, s
 	reqUpdateState.setDescription(stateDescription)
 
 	return !reflect.DeepEqual(reqUpdatePlan.UpdateItemRequest, reqUpdateState.UpdateItemRequest)
+}
+
+func fabricItemCheckMove(planFolderID, stateFolderID customtypes.UUID, reqMovePlan *requestMoveFabricItem) bool {
+	var reqMoveState requestMoveFabricItem
+
+	reqMovePlan.setTargetFolderID(planFolderID)
+	reqMoveState.setTargetFolderID(stateFolderID)
+
+	return !reflect.DeepEqual(reqMovePlan.MoveItemRequest, reqMoveState.MoveItemRequest)
 }
 
 func fabricItemCheckUpdateDefinition(

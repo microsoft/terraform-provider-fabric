@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `RealTimeQueryset.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The KQL Queryset description.
+- `folder_id` (String) The KQL Queryset Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 
