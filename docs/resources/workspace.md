@@ -48,6 +48,7 @@ resource "fabric_workspace" "example2" {
 
 - `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `description` (String) The Workspace description. Value defaults to ``. String length must be at most 4000.
+- `domain_id` (String) The ID of the Domain to assign to the Workspace.
 - `identity` (Attributes) A workspace identity (see [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information). (see [below for nested schema](#nestedatt--identity))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
