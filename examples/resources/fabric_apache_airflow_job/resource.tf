@@ -30,3 +30,45 @@ resource "fabric_apache_airflow_job" "example_definition_update" {
     }
   }
 }
+
+# Example 4 - Item with custom tokens delimiter
+resource "fabric_apache_airflow_job" "example_custom_delimiter" {
+  display_name = "example"
+  description  = "example with custom tokens delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  definition = {
+    "apacheairflowjob-content.json" = {
+      source           = "${local.path}/apacheairflowjob-content.json.tmpl"
+      tokens_delimiter = "##"
+      tokens = {
+        "MyValue1" = "my value 1"
+        "MyValue2" = "my value 2"
+      }
+    }
+  }
+}
+
+# Example 5 - Item with parameters processing mode
+resource "fabric_apache_airflow_job" "example_parameters" {
+  display_name = "example"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  definition = {
+    "apacheairflowjob-content.json" = {
+      source          = "${local.path}/apacheairflowjob-content.json.tmpl"
+      processing_mode = "parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.properties.schedule"
+          value = "0 0 * * *"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldValue"
+          value = "NewValue"
+        }
+      ]
+    }
+  }
+}
