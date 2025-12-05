@@ -1938,11 +1938,8 @@ if ($results.Response.value.Count -gt 0) {
     Write-Log -Message "No catalogs found in response" -Level 'WARN'
 }
 
-
 $wellKnown['AzureDatabricks'] = @{
   id                              = $databricksWorkspace.Id
-  name                            = $databricksWorkspace.Name
-  workspaceUrl                    = $databricksWorkspace.Properties.workspaceUrl
   databricksWorkspaceConnectionId = $Env:FABRIC_TESTACC_WELLKNOWN_DATABRICKS_WS_CONNECTION_ID
   catalogName                     = $catalogName
 }
