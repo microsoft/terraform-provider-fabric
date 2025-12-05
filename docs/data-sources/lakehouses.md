@@ -52,6 +52,7 @@ Read-Only:
 
 - `description` (String) The Lakehouse description.
 - `display_name` (String) The Lakehouse display name.
+- `folder_id` (String) The Lakehouse Folder ID.
 - `id` (String) The Lakehouse ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

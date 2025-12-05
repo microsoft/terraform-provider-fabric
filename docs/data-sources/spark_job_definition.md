@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Spark Job Definition description.
+- `folder_id` (String) The Spark Job Definition Folder ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The Digital Twin Builder description.
 - `display_name` (String) The Digital Twin Builder display name.
+- `folder_id` (String) The Digital Twin Builder Folder ID.
 - `id` (String) The Digital Twin Builder ID.
 - `workspace_id` (String) The Workspace ID.

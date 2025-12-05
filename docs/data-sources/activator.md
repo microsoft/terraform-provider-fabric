@@ -81,6 +81,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `ReflexEntities.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Activator description.
+- `folder_id` (String) The Activator Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 
