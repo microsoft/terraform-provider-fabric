@@ -99,6 +99,14 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 	return nil
 }
 
+func (to *resourceShortcutModel) set(ctx context.Context, workspaceID, itemID string, shortcutConflictPolicy *string, from fabcore.Shortcut) diag.Diagnostics {
+	if shortcutConflictPolicy != nil {
+		to.ShortcutConflictPolicy = types.StringValue(*shortcutConflictPolicy)
+	}
+
+	return to.baseShortcutModel.set(ctx, workspaceID, itemID, from)
+}
+
 func (to *targetModel) set(ctx context.Context, from fabcore.Target) {
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.Onelake = supertypes.NewSingleNestedObjectValueOfNull[oneLakeModel](ctx)
@@ -232,11 +240,21 @@ func toShortcut(v fabcore.ShortcutTransformFlagged) fabcore.Shortcut {
 type resourceShortcutModel struct {
 	baseShortcutModel
 
+	ShortcutConflictPolicy types.String `tfsdk:"shortcut_conflict_policy"`
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateShortcut struct {
 	fabcore.CreateShortcutRequest
+}
+
+type requestCreateShortcutOptions struct {
+	fabcore.OneLakeShortcutsClientCreateShortcutOptions
+}
+
+func (to *requestCreateShortcutOptions) set(ctx context.Context, from resourceShortcutModel) {
+	to.ShortcutConflictPolicy = (*fabcore.ShortcutConflictPolicy)(from.ShortcutConflictPolicy.ValueStringPointer())
 }
 
 func (to *requestCreateShortcut) set(ctx context.Context, from resourceShortcutModel) diag.Diagnostics {

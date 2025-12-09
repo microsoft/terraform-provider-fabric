@@ -58,6 +58,10 @@ Required:
 - `item_id` (String) Item ID.
 - `workspace_id` (String) The Workspace ID.
 
+Optional:
+
+- `shortcut_conflict_policy` (String) When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'.
+
 Read-Only:
 
 - `id` (String) The Shortcut ID.

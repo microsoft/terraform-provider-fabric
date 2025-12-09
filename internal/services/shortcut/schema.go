@@ -12,10 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
@@ -77,6 +79,21 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: true,
+				},
+			},
+			"shortcut_conflict_policy": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleShortcutConflictPolicyValues(), true)...),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: false,
+					Optional: true,
 				},
 			},
 			"path": superschema.StringAttribute{

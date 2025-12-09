@@ -39,6 +39,7 @@ data "fabric_shortcut" "example_by_name_path_workspaceid_itemid" {
 
 ### Optional
 
+- `shortcut_conflict_policy` (String) When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
