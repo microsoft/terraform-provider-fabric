@@ -1375,7 +1375,7 @@ $wellKnown['DeploymentPipeline'] = @{
 
 Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
 
-$tenantSettings = Set-TenantSettings
+$tenantSettings = Get-TenantSettings
 
 $wellKnown['TenantSettings'] = @{
   settingName              = $tenantSettings.settingName
