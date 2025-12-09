@@ -394,7 +394,7 @@ function Set-DeploymentPipeline {
   return $result
 }
 
-function Set-TenantSettings {
+function Get-TenantSettings {
   $results = Invoke-FabricRest -Method 'GET' -Endpoint 'admin/tenantSettings'
   return $results.Response.value | Where-Object { $_.settingName -eq "FabricPromotionTenantSwitch" }
 }
