@@ -68,5 +68,5 @@ Read-Only:
 Read-Only:
 
 - `name` (String) The name of the property.
-- `type` (String) The value of the property.
+- `type` (String) The type of the property.
 - `value` (String) The value of the property.

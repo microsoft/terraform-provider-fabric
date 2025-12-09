@@ -49,7 +49,7 @@ func (d *dataSourceTenantSettings) Schema(ctx context.Context, _ datasource.Sche
 			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseTentantSettingsModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseTenantSettingsModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: s.Attributes,
 				},

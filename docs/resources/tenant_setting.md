@@ -63,7 +63,7 @@ Optional:
 Optional:
 
 - `name` (String) The name of the property.
-- `type` (String) The value of the property. Value must be one of : `Boolean`, `FreeText`, `Integer`, `MailEnabledSecurityGroup`, `Url`.
+- `type` (String) The type of the property. Value must be one of : `Boolean`, `FreeText`, `Integer`, `MailEnabledSecurityGroup`, `Url`.
 - `value` (String) The value of the property.
 
 <a id="nestedatt--timeouts"></a>
