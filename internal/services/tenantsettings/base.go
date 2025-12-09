@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package tenantsettings
 
 import "github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"

@@ -41,17 +41,19 @@ func TestUnit_TenantSettingDataSource(t *testing.T) {
 }
 
 func TestAcc_TenantSettingDataSource(t *testing.T) {
+	entity := testhelp.WellKnown()["TenantSettings"].(map[string]any)
+	settingName := entity["settingName"].(string)
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by setting_name
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"setting_name": "BlockProtectedLabelSharingToEntireOrg",
+					"setting_name": settingName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "setting_name", "BlockProtectedLabelSharingToEntireOrg"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "setting_name", settingName),
 			),
 		},
 	},

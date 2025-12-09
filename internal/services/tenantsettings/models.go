@@ -13,6 +13,7 @@ import (
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
@@ -20,7 +21,7 @@ import (
 BASE MODEL
 */
 
-type baseTentantSettingsModel struct {
+type baseTenantSettingsModel struct {
 	SettingName              types.String                                                   `tfsdk:"setting_name"`
 	TenantSettingGroup       types.String                                                   `tfsdk:"tenant_setting_group"`
 	Title                    types.String                                                   `tfsdk:"title"`
@@ -29,12 +30,13 @@ type baseTentantSettingsModel struct {
 	DelegateToCapacity       types.Bool                                                     `tfsdk:"delegate_to_capacity"`
 	DelegateToDomain         types.Bool                                                     `tfsdk:"delegate_to_domain"`
 	DelegateToWorkspace      types.Bool                                                     `tfsdk:"delegate_to_workspace"`
+	DeleteBehaviour          types.String                                                   `tfsdk:"delete_behaviour"`
 	EnabledSecurityGroups    supertypes.SetNestedObjectValueOf[tenantSettingsSecurityGroup] `tfsdk:"enabled_security_groups"`
 	ExcludedSecurityGroups   supertypes.SetNestedObjectValueOf[tenantSettingsSecurityGroup] `tfsdk:"excluded_security_groups"`
 	Properties               supertypes.SetNestedObjectValueOf[tenantSettingsProperty]      `tfsdk:"properties"`
 }
 
-func (to *baseTentantSettingsModel) set(ctx context.Context, from fabadmin.TenantSetting) diag.Diagnostics {
+func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.TenantSetting) diag.Diagnostics {
 	to.SettingName = types.StringPointerValue(from.SettingName)
 	to.TenantSettingGroup = types.StringPointerValue(from.TenantSettingGroup)
 	to.Title = types.StringPointerValue(from.Title)
@@ -100,7 +102,7 @@ DATA-SOURCE
 */
 
 type dataSourceTenantSettingModel struct {
-	baseTentantSettingsModel
+	baseTenantSettingsModel
 
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
@@ -110,15 +112,15 @@ DATA-SOURCE (LIST)
 */
 
 type dataSourceTenantSettingsModel struct {
-	Values supertypes.SetNestedObjectValueOf[baseTentantSettingsModel] `tfsdk:"values"`
+	Values supertypes.SetNestedObjectValueOf[baseTenantSettingsModel] `tfsdk:"values"`
 
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceTenantSettingsModel) set(ctx context.Context, from []fabadmin.TenantSetting) diag.Diagnostics {
-	slice := make([]*baseTentantSettingsModel, 0, len(from))
+	slice := make([]*baseTenantSettingsModel, 0, len(from))
 	for _, ts := range from {
-		tenantSetting := baseTentantSettingsModel{}
+		tenantSetting := baseTenantSettingsModel{}
 		tenantSetting.set(ctx, ts)
 		slice = append(slice, &tenantSetting)
 	}
@@ -134,7 +136,7 @@ RESOURCE
 */
 
 type resourceTenantSettingsModel struct {
-	baseTentantSettingsModel
+	baseTenantSettingsModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
@@ -165,16 +167,8 @@ func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTen
 		if diags.HasError() {
 			return diags
 		}
-		slice := make([]fabadmin.TenantSettingSecurityGroup, 0, len(sgs))
 
-		for _, sg := range sgs {
-			securityGroup := fabadmin.TenantSettingSecurityGroup{
-				GraphID: sg.GraphID.ValueStringPointer(),
-				Name:    sg.Name.ValueStringPointer(),
-			}
-			slice = append(slice, securityGroup)
-		}
-		to.EnabledSecurityGroups = slice
+		to.EnabledSecurityGroups = toTenantSettingSecurityGroups(sgs)
 	}
 
 	if !from.ExcludedSecurityGroups.IsNull() && !from.ExcludedSecurityGroups.IsUnknown() {
@@ -182,16 +176,8 @@ func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTen
 		if diags.HasError() {
 			return diags
 		}
-		slice := make([]fabadmin.TenantSettingSecurityGroup, 0, len(sgs))
 
-		for _, sg := range sgs {
-			securityGroup := fabadmin.TenantSettingSecurityGroup{
-				GraphID: sg.GraphID.ValueStringPointer(),
-				Name:    sg.Name.ValueStringPointer(),
-			}
-			slice = append(slice, securityGroup)
-		}
-		to.ExcludedSecurityGroups = slice
+		to.ExcludedSecurityGroups = toTenantSettingSecurityGroups(sgs)
 	}
 
 	if !from.Properties.IsNull() && !from.Properties.IsUnknown() {
@@ -199,20 +185,27 @@ func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTen
 		if diags.HasError() {
 			return diags
 		}
-		slice := make([]fabadmin.TenantSettingProperty, 0, len(props))
 
-		for _, prop := range props {
-			properties := fabadmin.TenantSettingProperty{
-				Name:  prop.Name.ValueStringPointer(),
-				Type:  (*fabadmin.TenantSettingPropertyType)(prop.Type.ValueStringPointer()),
-				Value: prop.Value.ValueStringPointer(),
-			}
-			slice = append(slice, properties)
-		}
-		to.Properties = slice
+		to.Properties = toTenantSettingProperties(props)
 	}
 
 	return nil
+}
+
+func (to *baseTenantSettingsModel) setUpdate(ctx context.Context, from []fabadmin.TenantSetting) diag.Diagnostics {
+	for _, entity := range from {
+		if entity.SettingName != nil && *entity.SettingName == to.SettingName.ValueString() {
+			return to.set(ctx, entity)
+		}
+	}
+	var diags diag.Diagnostics
+
+	diags.AddError(
+		common.ErrorReadHeader,
+		"Error during updating Tenant Settings.",
+	)
+
+	return diags
 }
 
 /*
@@ -239,4 +232,58 @@ func (to *tenantSettingsProperty) set(from fabadmin.TenantSettingProperty) {
 	to.Name = types.StringPointerValue(from.Name)
 	to.Type = types.StringPointerValue((*string)(from.Type))
 	to.Value = types.StringPointerValue(from.Value)
+}
+
+type DeleteBehaviour string
+
+const (
+	// NoChange - The setting is not changed during delete operation.
+	NoChange DeleteBehaviour = "NoChange"
+	// Disable - The setting is disabled during delete operation.
+	Disable DeleteBehaviour = "Disable"
+)
+
+// PossibleDeleteBehaviourValues returns the possible values for the DeleteBehaviour const type.
+func PossibleDeleteBehaviourValues() []DeleteBehaviour {
+	return []DeleteBehaviour{
+		NoChange,
+		Disable,
+	}
+}
+
+func toTenantSettingSecurityGroups(sgs []*tenantSettingsSecurityGroup) []fabadmin.TenantSettingSecurityGroup {
+	if len(sgs) == 0 {
+		return nil
+	}
+
+	slice := make([]fabadmin.TenantSettingSecurityGroup, 0, len(sgs))
+
+	for _, sg := range sgs {
+		securityGroup := fabadmin.TenantSettingSecurityGroup{
+			GraphID: sg.GraphID.ValueStringPointer(),
+			Name:    sg.Name.ValueStringPointer(),
+		}
+		slice = append(slice, securityGroup)
+	}
+
+	return slice
+}
+
+func toTenantSettingProperties(props []*tenantSettingsProperty) []fabadmin.TenantSettingProperty {
+	if len(props) == 0 {
+		return nil
+	}
+
+	slice := make([]fabadmin.TenantSettingProperty, 0, len(props))
+
+	for _, prop := range props {
+		properties := fabadmin.TenantSettingProperty{
+			Name:  prop.Name.ValueStringPointer(),
+			Type:  (*fabadmin.TenantSettingPropertyType)(prop.Type.ValueStringPointer()),
+			Value: prop.Value.ValueStringPointer(),
+		}
+		slice = append(slice, properties)
+	}
+
+	return slice
 }

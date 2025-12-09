@@ -99,7 +99,7 @@ func (r *resourceTenantSettings) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respCreate.TenantSettings[0])...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.setUpdate(ctx, respCreate.TenantSettings)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -187,7 +187,7 @@ func (r *resourceTenantSettings) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.TenantSettings[0])...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.setUpdate(ctx, respUpdate.TenantSettings)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -202,20 +202,33 @@ func (r *resourceTenantSettings) Update(ctx context.Context, req resource.Update
 	}
 }
 
-func (r *resourceTenantSettings) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
 
-	resp.Diagnostics.AddWarning(
-		"delete operation not supported",
-		fmt.Sprintf(
-			"Resource %s does not support deletion. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.",
-			r.TypeInfo.Name,
-		),
-	)
+	var state resourceTenantSettingsModel
 
-	resp.State.RemoveResource(ctx)
+	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !state.DeleteBehaviour.IsNull() && !state.DeleteBehaviour.IsUnknown() && state.DeleteBehaviour.ValueString() == string(Disable) {
+		var reqUpdate requestUpdateTenantSettings
+		disabled := false
+		reqUpdate.UpdateTenantSettingRequest.Enabled = &disabled
+
+		respUpdate, err := r.client.UpdateTenantSetting(ctx, state.SettingName.ValueString(), reqUpdate.UpdateTenantSettingRequest, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Diagnostics.Append(state.setUpdate(ctx, respUpdate.TenantSettings)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	}
 
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",

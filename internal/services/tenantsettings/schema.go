@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation
+// SPDX-License-Identifier: MPL-2.0
+
 package tenantsettings
 
 import (
@@ -58,6 +61,21 @@ func itemSchema(isList bool) superschema.Schema {
 				},
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"delete_behaviour": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. False - The tenant setting is not disabled when deleted. True - The tenant setting is disabled when deleted.",
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(PossibleDeleteBehaviourValues(), true)...),
+					},
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					Optional: true,
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -223,7 +241,7 @@ func itemSchema(isList bool) superschema.Schema {
 					},
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The value of the property.",
+							MarkdownDescription: "The type of the property.",
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
