@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `shortcut_conflict_policy` in `fabric_shortcut`
+time: 2025-12-09T21:53:21.029793074Z
+custom:
+    Issue: "765"
