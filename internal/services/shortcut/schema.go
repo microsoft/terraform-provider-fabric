@@ -82,18 +82,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 			},
 			"shortcut_conflict_policy": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
-				},
 				Resource: &schemaR.StringAttribute{
-					Optional: true,
+					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
+					Optional:            true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleShortcutConflictPolicyValues(), true)...),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: false,
-					Optional: true,
 				},
 			},
 			"path": superschema.StringAttribute{
