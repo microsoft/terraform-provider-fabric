@@ -98,6 +98,23 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					},
 				},
 			},
+			"options": superschema.SuperSingleNestedAttributeOf[optionsModel]{
+				Resource: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "The options for Git operations.",
+					Optional:            true,
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.RequiresReplace(),
+					},
+				},
+				Attributes: map[string]superschema.Attribute{
+					"allow_override_items": superschema.BoolAttribute{
+						Resource: &schemaR.BoolAttribute{
+							MarkdownDescription: "User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.",
+							Optional:            true,
+						},
+					},
+				},
+			},
 			"git_connection_state": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Git connection state",
