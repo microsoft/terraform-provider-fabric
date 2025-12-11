@@ -681,6 +681,9 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 					map[string]any{
 						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"initialization_strategy": "PreferWorkspace",
+						"options": map[string]any{
+							"allow_override_items": true,
+						},
 						"git_provider_details": map[string]any{
 							"git_provider_type": "GitHub",
 							"owner_name":        ghOwner,

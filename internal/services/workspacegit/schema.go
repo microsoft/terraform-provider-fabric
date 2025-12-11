@@ -12,7 +12,6 @@ import (
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -99,12 +98,20 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					},
 				},
 			},
-			"allow_override_items": superschema.BoolAttribute{
-				Resource: &schemaR.BoolAttribute{
-					MarkdownDescription: "User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.",
+			"options": superschema.SuperSingleNestedAttributeOf[optionsModel]{
+				Resource: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "The options for Git operations.",
 					Optional:            true,
-					PlanModifiers: []planmodifier.Bool{
-						boolplanmodifier.RequiresReplace(),
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.RequiresReplace(),
+					},
+				},
+				Attributes: map[string]superschema.Attribute{
+					"allow_override_items": superschema.BoolAttribute{
+						Resource: &schemaR.BoolAttribute{
+							MarkdownDescription: "User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.",
+							Optional:            true,
+						},
 					},
 				},
 			},
