@@ -47,5 +47,6 @@ Read-Only:
 - `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `description` (String) The Workspace description.
 - `display_name` (String) The Workspace display name.
+- `domain_id` (String) The ID of the Domain to assign to the Workspace.
 - `id` (String) The Workspace ID.
 - `type` (String) The Workspace type.
