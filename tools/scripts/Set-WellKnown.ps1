@@ -1386,6 +1386,13 @@ $wellKnown['TenantSettings'] = @{
   delegateToCapacity       = $tenantSettings.delegateToCapacity
   delegateToDomain         = $tenantSettings.delegateToDomain
   delegateToWorkspace      = $tenantSettings.delegateToWorkspace
+  securityGroupName        = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+  securityGroupId          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
+}
+
+$wellKnown['SecurityGroup'] = @{
+  name = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+  id   = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
 }
 
 # Create Eventstream if not exists
