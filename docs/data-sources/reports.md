@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Report description.
 - `display_name` (String) The Report display name.
+- `folder_id` (String) The Report Folder ID.
 - `id` (String) The Report ID.
 - `workspace_id` (String) The Workspace ID.

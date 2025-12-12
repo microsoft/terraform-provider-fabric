@@ -76,6 +76,11 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 			MarkdownDescription: fmt.Sprintf("The %s description.", itemName),
 			Computed:            true,
 		},
+		"folder_id": schema.StringAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s Folder ID.", itemName),
+			Computed:            true,
+			CustomType:          customtypes.UUIDType{},
+		},
 		"timeouts": timeouts.Attributes(ctx),
 	}
 
