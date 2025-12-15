@@ -4,7 +4,7 @@ page_title: "fabric_mirrored_azure_databricks_catalog Resource - terraform-provi
 subcategory: ""
 description: |-
   The Mirrored Azure Databricks Catalog resource allows you to manage a Fabric Mirrored Azure Databricks Catalog https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks.
-  -> This resource does not support Service Principal. Please use a User context authentication.
+  -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Mirrored Azure Databricks Catalog resource allows you to manage a Fabric [Mirrored Azure Databricks Catalog](https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks).
 
--> This resource does not support Service Principal. Please use a User context authentication.
+-> This resource supports Service Principal authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -86,6 +86,7 @@ Any changes to this configuration will result in recreation of the Mirrored Azur
 - `definition` (Attributes Map) Definition parts. Read more about [Mirrored Azure Databricks Catalog definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/mirrored-azuredatabricks-unitycatalog-definition). Accepted path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Azure Databricks Catalog description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Mirrored Azure Databricks Catalog format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -120,11 +121,24 @@ The source content may include placeholders for token substitution. Use the dot 
 
 Optional:
 
+- `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
+- `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
 - `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+- `tokens_delimiter` (String) The delimiter for the tokens in the source content. Possible values: `<<>>`, `@{}@`, `____`, `{{}}`. Default: `{{}}`
 
 Read-Only:
 
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
+
+<a id="nestedatt--definition--parameters"></a>
+
+### Nested Schema for `definition.parameters`
+
+Required:
+
+- `find` (String) The find value of the parameter.
+- `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
+- `value` (String) The value of the parameter.
 
 <a id="nestedatt--timeouts"></a>
 

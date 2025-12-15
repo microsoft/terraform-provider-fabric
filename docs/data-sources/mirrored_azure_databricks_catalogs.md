@@ -4,7 +4,7 @@ page_title: "fabric_mirrored_azure_databricks_catalogs Data Source - terraform-p
 subcategory: ""
 description: |-
   The Mirrored Azure Databricks Catalogs data-source allows you to retrieve a list of Fabric Mirrored Azure Databricks Catalogs https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Mirrored Azure Databricks Catalogs data-source allows you to retrieve a list of Fabric [Mirrored Azure Databricks Catalogs](https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -55,6 +55,7 @@ Read-Only:
 
 - `description` (String) The Mirrored Azure Databricks Catalog description.
 - `display_name` (String) The Mirrored Azure Databricks Catalog display name.
+- `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `id` (String) The Mirrored Azure Databricks Catalog ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

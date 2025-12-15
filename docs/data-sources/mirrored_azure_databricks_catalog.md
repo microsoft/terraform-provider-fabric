@@ -4,7 +4,7 @@ page_title: "fabric_mirrored_azure_databricks_catalog Data Source - terraform-pr
 subcategory: ""
 description: |-
   The Mirrored Azure Databricks Catalog data-source allows you to retrieve details about a Fabric Mirrored Azure Databricks Catalog https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
+  -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Mirrored Azure Databricks Catalog data-source allows you to retrieve details about a Fabric [Mirrored Azure Databricks Catalog](https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
+-> This data-source supports Service Principal authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Mirrored Azure Databricks Catalog description.
+- `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

@@ -24,7 +24,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Types:          "mirrored_azure_databricks_catalogs",
 	DocsURL:        "https://learn.microsoft.com/fabric/database/mirrored-database/azure-databricks",
 	IsPreview:      true,
-	IsSPNSupported: false,
+	IsSPNSupported: true,
 }
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
