@@ -24,7 +24,9 @@ func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEnti
 	setReflectedStringPropertyValue(&entity, "WorkspaceID", *item.WorkspaceID)
 	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
 	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
-	setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
+	if item.FolderID != nil {
+		setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
+	}
 	setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
 
 	return entity
