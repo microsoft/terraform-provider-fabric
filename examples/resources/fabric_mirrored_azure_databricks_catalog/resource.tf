@@ -12,8 +12,8 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_definition_bootstra
   format                    = "Default"
   definition_update_enabled = false # <-- Disable definition update
   definition = {
-    "mirroringAzureDatabricksCatalog.json" = {
-      source = "${local.path}/mirroringAzureDatabricksCatalog.json.tmpl"
+    "definition.json" = {
+      source = "${local.path}/definition.json.tmpl"
     }
   }
 }
@@ -25,11 +25,56 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_definition_update" 
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
   definition = {
-    "mirroringAzureDatabricksCatalog.json" = {
-      source = "${local.path}/mirroringAzureDatabricksCatalog.json.tmpl"
+    "definition.json" = {
+      source = "${local.path}/definition.json.tmpl"
       tokens = {
-        "MyKey" = "MyValue"
+        "CATALOG_NAME"                       = "MyCatalogName"
+        "DATABRICKS_WORKSPACE_CONNECTION_ID" = "00000000-0000-0000-0000-000000000000"
       }
+    }
+  }
+}
+
+# Example 3a - Item with custom tokens delimiter
+resource "fabric_mirrored_azure_databricks_catalog" "example_custom_delimiter" {
+  display_name = "example3a"
+  description  = "example with custom tokens delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "definition.json" = {
+      source           = "${local.path}/definition.json.tmpl"
+      tokens_delimiter = "##"
+      tokens = {
+        "CATALOG_NAME"                       = "MyCatalogName"
+        "DATABRICKS_WORKSPACE_CONNECTION_ID" = "00000000-0000-0000-0000-000000000000"
+      }
+    }
+  }
+}
+
+# Example 3b - Item with parameters processing mode
+resource "fabric_mirrored_azure_databricks_catalog" "example_parameters" {
+  display_name = "example3b"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "definition.json" = {
+      source          = "${local.path}/definition.json.tmpl"
+      processing_mode = "parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.catalogName"
+          value = "UpdatedName"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldValue"
+          value = "NewValue"
+        }
+      ]
     }
   }
 }

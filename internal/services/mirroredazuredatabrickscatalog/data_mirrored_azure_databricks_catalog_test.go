@@ -183,11 +183,12 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.storage_connection_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
@@ -220,11 +221,12 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.storage_connection_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
@@ -252,7 +254,8 @@ func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-
+		//nolint:godox,godoclint
+		// TODO: API issue - getDefinition returns 404 for item created without definition
 		// // read by id with definition
 		// {
 		// 	ResourceName: testDataSourceItemFQN,

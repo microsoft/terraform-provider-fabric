@@ -18,12 +18,12 @@ data "fabric_mirrored_azure_databricks_catalog" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_mirrored_azure_databricks_catalog.example_definition.definition["mirroringAzureDatabricksCatalog.json"].content, ".")
+  value = provider::fabric::content_decode(data.fabric_mirrored_azure_databricks_catalog.example_definition.definition["definition.json"].content, ".")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_mirrored_azure_databricks_catalog.example_definition.definition["mirroringAzureDatabricksCatalog.json"].content)
+  value = provider::fabric::content_decode(data.fabric_mirrored_azure_databricks_catalog.example_definition.definition["definition.json"].content)
 }
 
 # This is an invalid data source

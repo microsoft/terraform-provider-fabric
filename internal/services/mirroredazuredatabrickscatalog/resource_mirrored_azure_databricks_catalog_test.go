@@ -32,7 +32,7 @@ var (
 
 	testHelperDefinition = map[string]any{
 		`"definition.json"`: map[string]any{
-			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
+			"source": "${local.path}/definition.json.tmpl",
 			"tokens": map[string]any{
 				"CATALOG_NAME":                       catalogName,
 				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionID,
@@ -43,7 +43,7 @@ var (
 
 	testHelperDefinitionUpdated = map[string]any{
 		`"definition.json"`: map[string]any{
-			"source": "${local.path}/mirroredAzureDatabricksCatalog.json.tmpl",
+			"source": "${local.path}/definition.json.tmpl",
 			"tokens": map[string]any{
 				"CATALOG_NAME":                       catalogName,
 				"DATABRICKS_WORKSPACE_CONNECTION_ID": databricksWorkspaceConnectionID,
@@ -578,11 +578,12 @@ func TestAcc_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.storage_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
@@ -601,15 +602,48 @@ func TestAcc_MirroredAzureDatabricksCatalogResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.storage_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
 			),
 		},
+		//nolint:godox,godoclint
+		// TODO: API issue - updateDefinition returns 404 for item created without definition
+		// Update Definition and Read
+		// {
+		// 	ResourceName: testResourceItemFQN,
+		// 	Config: at.JoinConfigs(
+		// 		testHelperLocals,
+		// 		at.CompileConfig(
+		// 			testResourceItemHeader,
+		// 			map[string]any{
+		// 				"workspace_id": workspaceID,
+		// 				"display_name": entityUpdateDisplayName,
+		// 				"description":  entityUpdateDescription,
+		// 				"format":       "Default",
+		// 				"definition":   testHelperDefinition,
+		// 			},
+		// 		)),
+		// 	Check: resource.ComposeAggregateTestCheckFunc(
+		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
+		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "properties.sync_details.status", "Success"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+		// 		resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.error_info.error_code"),
+		// 		resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+		// 	),
+		// },
 	},
 	))
 }
@@ -642,6 +676,10 @@ func TestAcc_MirroredAzureDatabricksCatalogDefinitionResource_CRUD(t *testing.T)
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.sync_details.status", "Success"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.error_info.error_code"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirroring_mode"),
@@ -668,6 +706,10 @@ func TestAcc_MirroredAzureDatabricksCatalogDefinitionResource_CRUD(t *testing.T)
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.sync_details.status", "Success"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.error_info.error_code"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
@@ -713,6 +755,10 @@ func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.sync_details.status", "Success"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.error_info.error_code"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
@@ -743,6 +789,10 @@ func TestAcc_MirroredAzureDatabricksCatalogConfigurationResource_CRUD(t *testing
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.catalog_name"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.sync_details.status", "Success"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.last_sync_date_time"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "properties.sync_details.error_info.error_code"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.auto_sync"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.databricks_workspace_connection_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.mirror_status"),
