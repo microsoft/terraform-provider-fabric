@@ -21,19 +21,19 @@ BASE MODEL
 */
 
 type baseDomainModel struct {
-	ID                customtypes.UUID `tfsdk:"id"`
-	DisplayName       types.String     `tfsdk:"display_name"`
-	Description       types.String     `tfsdk:"description"`
-	ParentDomainID    customtypes.UUID `tfsdk:"parent_domain_id"`
-	ContributorsScope types.String     `tfsdk:"contributors_scope"`
+	ID             customtypes.UUID `tfsdk:"id"`
+	DisplayName    types.String     `tfsdk:"display_name"`
+	Description    types.String     `tfsdk:"description"`
+	ParentDomainID customtypes.UUID `tfsdk:"parent_domain_id"`
+	DefaultLabelID customtypes.UUID `tfsdk:"default_label_id"`
 }
 
-func (to *baseDomainModel) set(from fabadmin.DomainPreview) {
+func (to *baseDomainModel) set(from fabadmin.Domain) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.ParentDomainID = customtypes.NewUUIDPointerValue(from.ParentDomainID)
-	to.ContributorsScope = types.StringPointerValue((*string)(from.ContributorsScope))
+	to.DefaultLabelID = customtypes.NewUUIDPointerValue(from.DefaultLabelID)
 }
 
 /*
@@ -55,7 +55,7 @@ type dataSourceDomainsModel struct {
 	Timeouts timeoutsD.Value                                    `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.DomainPreview) diag.Diagnostics {
+func (to *dataSourceDomainsModel) setValues(ctx context.Context, from []fabadmin.Domain) diag.Diagnostics {
 	slice := make([]*baseDomainModel, 0, len(from))
 
 	for _, entity := range from {
@@ -88,11 +88,11 @@ func (to *requestCreateDomain) set(from resourceDomainModel) {
 }
 
 type requestUpdateDomain struct {
-	fabadmin.UpdateDomainRequestPreview
+	fabadmin.UpdateDomainRequest
 }
 
 func (to *requestUpdateDomain) set(from resourceDomainModel) {
 	to.DisplayName = from.DisplayName.ValueStringPointer()
 	to.Description = from.Description.ValueStringPointer()
-	to.ContributorsScope = (*fabadmin.ContributorsScopeType)(from.ContributorsScope.ValueStringPointer())
+	to.DefaultLabelID = from.DefaultLabelID.ValueStringPointer()
 }
