@@ -24,6 +24,7 @@ func (o *operationsMirroredAzureDatabricksCatalog) ConvertItemToEntity(item fabc
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
 		Properties:  NewRandomMirroredAzureDatabricksCatalog().Properties,
 	}
@@ -206,6 +207,7 @@ func NewRandomMirroredAzureDatabricksCatalog() fabmirroredazuredatabrickscatalog
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
 		Properties: &fabmirroredazuredatabrickscatalog.Properties{
 			AutoSync:                        to.Ptr(fabmirroredazuredatabrickscatalog.AutoSyncEnabled),
