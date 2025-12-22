@@ -38,6 +38,7 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/anomalydetector"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
@@ -435,6 +436,7 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		anomalydetector.NewResourceAnomalyDetector,
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
 		dataflow.NewResourceDataflow,
@@ -485,6 +487,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		anomalydetector.NewDataSourceAnomalyDetector,
+		anomalydetector.NewDataSourceAnomalyDetectors,
 		apacheairflowjob.NewDataSourceApacheAirflowJob,
 		apacheairflowjob.NewDataSourceApacheAirflowJobs,
 		capacity.NewDataSourceCapacity,
