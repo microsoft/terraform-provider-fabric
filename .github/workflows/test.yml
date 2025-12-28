@@ -131,19 +131,14 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
           FABRIC_CLIENT_SECRET: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_SECRET }}
 
-      - name: 🔎 Validate SPN secret against AAD (runner) - verbose diagnostics
+      - name: 🔎 Validate SPN secret against AAD (runner) - parse JSON
         if: matrix.method == 'secret'
         shell: bash
         run: |
           set -euo pipefail
-          echo "Tenant len: ${#FABRIC_TENANT_ID}"
-          echo "ClientID len: ${#FABRIC_CLIENT_ID}"
-          echo "Secret len: ${#FABRIC_CLIENT_SECRET}"
           out="$(mktemp)"
           hdr="$(mktemp)"
-          # NOTE: no -s. We want errors.
-          # --fail-with-body makes curl exit non-zero on 4xx/5xx but keeps body.
-          if ! curl --fail-with-body -S \
+          curl --fail-with-body -S \
             -D "$hdr" \
             -o "$out" \
             -X POST "https://login.microsoftonline.com/${FABRIC_TENANT_ID}/oauth2/v2.0/token" \
@@ -152,33 +147,20 @@ jobs:
             --data-urlencode "client_secret=${FABRIC_CLIENT_SECRET}" \
             --data-urlencode "grant_type=client_credentials" \
             --data-urlencode "scope=https://management.azure.com/.default"
-          then
-            echo "curl failed."
-            echo "---- headers (first 40 lines) ----"
-            sed -n '1,40p' "$hdr" || true
-            echo "---- body (first 400 chars) ----"
-            head -c 400 "$out" || true
-            echo
-            exit 1
-          fi
-          echo "curl succeeded."
-          echo "---- headers (first 20 lines) ----"
-          sed -n '1,20p' "$hdr" || true
-          echo "---- body length ----"
-          wc -c "$out" || true
-          python - << 'PY'
-          import json, pathlib
-          p=pathlib.Path(r"'"$out"'")
-          data=p.read_text(errors="replace")
-          print("body_prefix:", data[:160].replace("\n","\\n"))
-          j=json.loads(data)
+          python - "$out" << 'PY'
+          import json, sys, pathlib
+          path = pathlib.Path(sys.argv[1])
+          data = path.read_text(errors="replace")
+          j = json.loads(data)
           print("keys:", sorted(j.keys()))
           if "error" in j:
               print("error:", j.get("error"))
-              desc=(j.get("error_description") or "")
-              print("error_description(prefix):", desc[:200])
+              print("error_description(prefix):", (j.get("error_description") or "")[:220])
           else:
               print("token acquired: yes")
+              # Print safe metadata only
+              print("token_type:", j.get("token_type"))
+              print("expires_in:", j.get("expires_in"))
           PY
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
