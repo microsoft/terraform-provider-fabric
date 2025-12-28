@@ -119,13 +119,13 @@ jobs:
           echo "FABRIC_TENANT_ID length: ${#FABRIC_TENANT_ID}"
           echo "FABRIC_CLIENT_SECRET length: ${#FABRIC_CLIENT_SECRET}"
           python - << 'PY'
-            import os, hashlib
-            s=os.environ.get("FABRIC_CLIENT_SECRET","")
-            print("CLIENT_SECRET sha256 prefix:", hashlib.sha256(s.encode()).hexdigest()[:12] if s else "<empty>")
-            print("has_newline:", ("\n" in s) or ("\r" in s))
-            print("leading_ws:", len(s)-len(s.lstrip()))
-            print("trailing_ws:", len(s)-len(s.rstrip()))
-            PY
+          import os, hashlib
+          s=os.environ.get("FABRIC_CLIENT_SECRET","")
+          print("CLIENT_SECRET sha256 prefix:", hashlib.sha256(s.encode()).hexdigest()[:12] if s else "<empty>")
+          print("has_newline:", ("\n" in s) or ("\r" in s))
+          print("leading_ws:", len(s)-len(s.lstrip()))
+          print("trailing_ws:", len(s)-len(s.rstrip()))
+          PY
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
@@ -144,14 +144,14 @@ jobs:
             --data-urlencode "scope=https://management.azure.com/.default")
 
           python - << 'PY'
-            import json, sys
-            data=json.loads(sys.stdin.read())
-            if "error" in data:
-                print("AAD error:", data.get("error"))
-                print("AAD desc (prefix):", (data.get("error_description") or "")[:180])
-            else:
-                print("AAD token acquired: yes")
-            PY
+          import json, sys
+          data=json.loads(sys.stdin.read())
+          if "error" in data:
+              print("AAD error:", data.get("error"))
+              print("AAD desc (prefix):", (data.get("error_description") or "")[:180])
+          else:
+              print("AAD token acquired: yes")
+          PY
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
