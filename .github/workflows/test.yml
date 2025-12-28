@@ -131,61 +131,28 @@ jobs:
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
           FABRIC_CLIENT_SECRET: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_SECRET }}
 
-      - name: 🔎 Validate SPN secret against AAD (runner)
+      - name: 🔎 Validate SPN secret against AAD (runner) - corrected
         if: matrix.method == 'secret'
         shell: bash
         run: |
           set -euo pipefail
-      
-          echo "Tenant len: ${#FABRIC_TENANT_ID}, ClientID len: ${#FABRIC_CLIENT_ID}, Secret len: ${#FABRIC_CLIENT_SECRET}"
-      
-          # Use curl with explicit error handling and capture HTTP code + content-type
-          out_file="$(mktemp)"
-          headers_file="$(mktemp)"
-      
-          http_code=$(
-            curl -sS --fail-with-body \
-              -D "$headers_file" \
-              -o "$out_file" \
-              -X POST "https://login.microsoftonline.com/${FABRIC_TENANT_ID}/oauth2/v2.0/token" \
-              -H "Content-Type: application/x-www-form-urlencoded" \
-              --data-urlencode "client_id=${FABRIC_CLIENT_ID}" \
-              --data-urlencode "client_secret=${FABRIC_CLIENT_SECRET}" \
-              --data-urlencode "grant_type=client_credentials" \
-              --data-urlencode "scope=https://management.azure.com/.default" \
-              -w "%{http_code}"
-          ) || {
-            echo "curl failed (non-2xx or network error)."
-            echo "---- response headers ----"
-            sed -n '1,40p' "$headers_file" || true
-            echo "---- response body (first 300 chars) ----"
-            head -c 300 "$out_file" || true
-            echo
-            exit 1
-          }
-      
-          echo "HTTP code: $http_code"
-          echo "---- response headers (first 40 lines) ----"
-          sed -n '1,40p' "$headers_file" || true
-      
-          echo "---- response body type check ----"
-          python - << 'PY'
-          import json, sys, pathlib
-          p=pathlib.Path(sys.argv[1])
-          data=p.read_text(errors="replace")
-          print("body_length:", len(data))
-          print("body_prefix:", data[:120].replace("\n","\\n"))
-          try:
-              j=json.loads(data)
-              if "error" in j:
-                  print("AAD error:", j.get("error"))
-                  desc=(j.get("error_description") or "")
-                  print("AAD desc (prefix):", desc[:180])
-              else:
-                  print("AAD token acquired: yes")
-          except Exception as e:
-              print("Not JSON:", type(e).__name__, str(e)[:120])
-          PY "$out_file"
+          resp=$(curl -sS -X POST "https://login.microsoftonline.com/${FABRIC_TENANT_ID}/oauth2/v2.0/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "client_id=${FABRIC_CLIENT_ID}" \
+            --data-urlencode "client_secret=${FABRIC_CLIENT_SECRET}" \
+            --data-urlencode "grant_type=client_credentials" \
+            --data-urlencode "scope=https://management.azure.com/.default")
+          echo "$resp" | python - << 'PY'
+          import json, sys
+          data=json.loads(sys.stdin.read())
+          print("keys:", sorted(data.keys()))
+          if "error" in data:
+            print("error:", data.get("error"))
+            desc=(data.get("error_description") or "")
+            print("error_description(prefix):", desc[:200])
+          else:
+            print("token acquired: yes")
+          PY
         env:
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
           FABRIC_CLIENT_ID: ${{ secrets.TESTACC_SPN_SECRET_CLIENT_ID }}
