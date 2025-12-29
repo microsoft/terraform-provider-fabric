@@ -25,32 +25,32 @@ resource "fabric_spark_workspace_settings" "example" {
 
   automatic_log = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   high_concurrency = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   environment = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   job = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   pool = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 }
 
@@ -106,14 +106,15 @@ resource "fabric_spark_workspace_settings" "example2" {
 - `id` (String) The Spark Workspace Settings ID.
 
 <a id="nestedatt--automatic_log"></a>
+
 ### Nested Schema for `automatic_log`
 
 Optional:
 
 - `enabled` (Boolean) The status of the automatic log: `false` - Disabled, `true` - Enabled.
 
-
 <a id="nestedatt--environment"></a>
+
 ### Nested Schema for `environment`
 
 Optional:
@@ -121,8 +122,8 @@ Optional:
 - `name` (String) The name of the environment.
 - `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
 
-
 <a id="nestedatt--high_concurrency"></a>
+
 ### Nested Schema for `high_concurrency`
 
 Optional:
@@ -130,8 +131,8 @@ Optional:
 - `notebook_interactive_run_enabled` (Boolean) The status of the high concurrency for notebook interactive run: `false` - Disabled, `true` - Enabled.
 - `notebook_pipeline_run_enabled` (Boolean) The status of the high concurrency for notebook pipeline run: `false` - Disabled, `true` - Enabled.
 
-
 <a id="nestedatt--job"></a>
+
 ### Nested Schema for `job`
 
 Optional:
@@ -139,8 +140,8 @@ Optional:
 - `conservative_job_admission_enabled` (Boolean) Reserve maximum cores for active Spark jobs. When this setting is enabled, your Fabric capacity reserves the maximum number of cores needed for active Spark jobs, ensuring job reliability by making sure that cores are available if a job scales up. When this setting is disabled, jobs are started based on the minimum number of cores needed, letting more jobs run at the same time. `false` - Disabled, `true` - Enabled.
 - `session_timeout_in_minutes` (Number) Time to terminate inactive Spark sessions. The maximum is 14 days (20160 minutes). Value must be at most 20160.
 
-
 <a id="nestedatt--pool"></a>
+
 ### Nested Schema for `pool`
 
 Optional:
@@ -150,6 +151,7 @@ Optional:
 - `starter_pool` (Attributes) Starter pool for workspace. For more information about configuring starter pool, see [configuring starter pool](https://review.learn.microsoft.com/fabric/data-engineering/configure-starter-pools). (see [below for nested schema](#nestedatt--pool--starter_pool))
 
 <a id="nestedatt--pool--default_pool"></a>
+
 ### Nested Schema for `pool.default_pool`
 
 Optional:
@@ -158,8 +160,8 @@ Optional:
 - `name` (String) The Pool name. `Starter Pool` means use the starting pool. Ensure that if an attribute is set, also these are set: "[<.type]". Ensure that if an attribute is set, these are not set: "[<.id]".
 - `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`. Ensure that if an attribute is set, also these are set: "[<.name]". Ensure that if an attribute is set, these are not set: "[<.id]".
 
-
 <a id="nestedatt--pool--starter_pool"></a>
+
 ### Nested Schema for `pool.starter_pool`
 
 Optional:
@@ -167,9 +169,8 @@ Optional:
 - `max_executors` (Number) The maximum executors count.
 - `max_node_count` (Number) The maximum node count.
 
-
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

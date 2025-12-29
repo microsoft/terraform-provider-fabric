@@ -62,6 +62,7 @@ resource "fabric_spark_custom_pool" "example" {
 - `id` (String) The Spark Custom Pool ID.
 
 <a id="nestedatt--auto_scale"></a>
+
 ### Nested Schema for `auto_scale`
 
 Required:
@@ -70,8 +71,8 @@ Required:
 - `max_node_count` (Number) The maximum node count.
 - `min_node_count` (Number) The minimum node count.
 
-
 <a id="nestedatt--dynamic_executor_allocation"></a>
+
 ### Nested Schema for `dynamic_executor_allocation`
 
 Required:
@@ -83,8 +84,8 @@ Optional:
 - `max_executors` (Number) The maximum executors. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `false` this attribute is **NULL**. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `true` this attribute is **REQUIRED**.
 - `min_executors` (Number) The minimum executors. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `false` this attribute is **NULL**. If the value of [`dynamic_executor_allocation.enabled`](#dynamic_executor_allocation.enabled) attribute is `true` this attribute is **REQUIRED**.
 
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

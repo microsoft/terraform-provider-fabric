@@ -54,6 +54,7 @@ data "fabric_graphql_api" "example_by_name" {
 - `folder_id` (String) The GraphQL API Folder ID.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

@@ -169,6 +169,7 @@ resource "fabric_kql_database" "example9" {
 - `configuration` (Attributes) The KQL Database creation configuration.
 
 Any changes to this configuration will result in recreation of the KQL Database. (see [below for nested schema](#nestedatt--configuration))
+
 - `definition` (Attributes Map) Definition parts. Read more about [KQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-database-definition). Accepted path keys: **Default** format: `DatabaseProperties.json`, `DatabaseSchema.kql` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The KQL Database description.
@@ -182,6 +183,7 @@ Any changes to this configuration will result in recreation of the KQL Database.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--configuration"></a>
+
 ### Nested Schema for `configuration`
 
 Required:
@@ -191,18 +193,19 @@ Required:
 `ReadWrite` Allows read and write operations on the database.
 
 `Shortcut` A shortcut is an embedded reference allowing read only operations on a source database. The source can be in the same or different tenants, either in an Azure Data Explorer cluster or a Fabric Eventhouse.
+
 - `eventhouse_id` (String) Parent Eventhouse ID.
 
 Optional:
 
 - `invitation_token` (String, Sensitive, Deprecated) Invitation token to follow the source database. Only allowed when `database_type` is `Shortcut`.
-- `invitation_token_wo` (String) Invitation token (WO) to follow the source database. Only allowed when `database_type` is `Shortcut`.
+- `invitation_token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Invitation token (WO) to follow the source database. Only allowed when `database_type` is `Shortcut`.
 - `invitation_token_wo_version` (Number) The version of the `invitation_token_wo`
 - `source_cluster_uri` (String) The URI of the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 - `source_database_name` (String) The name of the database to follow in the source Eventhouse or Azure Data Explorer cluster. Only allowed when `database_type` is `Shortcut`.
 
-
 <a id="nestedatt--definition"></a>
+
 ### Nested Schema for `definition`
 
 Required:
@@ -223,6 +226,7 @@ Read-Only:
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--definition--parameters"></a>
+
 ### Nested Schema for `definition.parameters`
 
 Required:
@@ -231,9 +235,8 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -243,8 +246,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--properties"></a>
+
 ### Nested Schema for `properties`
 
 Read-Only:

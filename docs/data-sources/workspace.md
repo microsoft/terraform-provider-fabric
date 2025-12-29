@@ -52,14 +52,15 @@ data "fabric_workspace" "example_by_name" {
 - `type` (String) The Workspace type.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--identity"></a>
+
 ### Nested Schema for `identity`
 
 Read-Only:
@@ -68,8 +69,8 @@ Read-Only:
 - `service_principal_id` (String) The service principal ID.
 - `type` (String) The identity type. Value must be one of : `SystemAssigned`.
 
-
 <a id="nestedatt--onelake_endpoints"></a>
+
 ### Nested Schema for `onelake_endpoints`
 
 Read-Only:

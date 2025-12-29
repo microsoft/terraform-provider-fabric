@@ -37,14 +37,15 @@ data "fabric_workspace_role_assignments" "example" {
 - `values` (Attributes Set) The set of Workspace Role Assignments. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--values"></a>
+
 ### Nested Schema for `values`
 
 Read-Only:
@@ -55,6 +56,7 @@ Read-Only:
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--principal"></a>
+
 ### Nested Schema for `values.principal`
 
 Read-Only:

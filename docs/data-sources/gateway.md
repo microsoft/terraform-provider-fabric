@@ -55,14 +55,15 @@ data "fabric_gateway" "example_by_name" {
 - `virtual_network_azure_resource` (Attributes) The Azure virtual network resource. (see [below for nested schema](#nestedatt--virtual_network_azure_resource))
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--public_key"></a>
+
 ### Nested Schema for `public_key`
 
 Read-Only:
@@ -70,8 +71,8 @@ Read-Only:
 - `exponent` (String) The exponent.
 - `modulus` (String) The modulus.
 
-
 <a id="nestedatt--virtual_network_azure_resource"></a>
+
 ### Nested Schema for `virtual_network_azure_resource`
 
 Read-Only:

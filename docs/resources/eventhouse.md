@@ -119,6 +119,7 @@ resource "fabric_eventhouse" "example_configuration" {
 - `configuration` (Attributes) The Eventhouse creation configuration.
 
 Any changes to this configuration will result in recreation of the Eventhouse. (see [below for nested schema](#nestedatt--configuration))
+
 - `definition` (Attributes Map) Definition parts. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). Accepted path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventhouse description.
@@ -132,14 +133,15 @@ Any changes to this configuration will result in recreation of the Eventhouse. (
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--configuration"></a>
+
 ### Nested Schema for `configuration`
 
 Required:
 
 - `minimum_consumption_units` (Number) When activated, the eventhouse is always available at the selected minimum level and you pay at least the minimum compute selected. Accepted values: `0`, `13`, `18`, `2.25`, `26`, `34`, `4.25`, `50`, `8.5` or any number between `51` and `322`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)
 
-
 <a id="nestedatt--definition"></a>
+
 ### Nested Schema for `definition`
 
 Required:
@@ -160,6 +162,7 @@ Read-Only:
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--definition--parameters"></a>
+
 ### Nested Schema for `definition.parameters`
 
 Required:
@@ -168,9 +171,8 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -180,8 +182,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--properties"></a>
+
 ### Nested Schema for `properties`
 
 Read-Only:

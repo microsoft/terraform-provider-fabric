@@ -60,14 +60,15 @@ data "fabric_spark_custom_pool" "example_by_name" {
 - `type` (String) The Spark Custom Pool type. Value must be one of : `Capacity`, `Workspace`.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--auto_scale"></a>
+
 ### Nested Schema for `auto_scale`
 
 Read-Only:
@@ -76,8 +77,8 @@ Read-Only:
 - `max_node_count` (Number) The maximum node count.
 - `min_node_count` (Number) The minimum node count.
 
-
 <a id="nestedatt--dynamic_executor_allocation"></a>
+
 ### Nested Schema for `dynamic_executor_allocation`
 
 Read-Only:

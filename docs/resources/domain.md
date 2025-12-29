@@ -49,6 +49,7 @@ resource "fabric_domain" "child" {
 - `id` (String) The Domain ID.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

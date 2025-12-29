@@ -50,6 +50,7 @@ resource "fabric_workspace_managed_private_endpoint" "example" {
 - `provisioning_state` (String) Provisioning state of the endpoint. Value must be one of : `Deleting`, `Failed`, `Provisioning`, `Succeeded`, `Updating`.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -59,8 +60,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--connection_state"></a>
+
 ### Nested Schema for `connection_state`
 
 Read-Only:

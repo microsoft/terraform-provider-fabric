@@ -128,6 +128,7 @@ resource "fabric_dataflow" "example_parameters" {
 - `id` (String) The Dataflow ID.
 
 <a id="nestedatt--definition"></a>
+
 ### Nested Schema for `definition`
 
 Required:
@@ -148,6 +149,7 @@ Read-Only:
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--definition--parameters"></a>
+
 ### Nested Schema for `definition.parameters`
 
 Required:
@@ -156,9 +158,8 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

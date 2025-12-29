@@ -121,6 +121,7 @@ resource "fabric_spark_job_definition" "example_parameters" {
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--definition"></a>
+
 ### Nested Schema for `definition`
 
 Required:
@@ -141,6 +142,7 @@ Read-Only:
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
 
 <a id="nestedatt--definition--parameters"></a>
+
 ### Nested Schema for `definition.parameters`
 
 Required:
@@ -149,9 +151,8 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -161,8 +162,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--properties"></a>
+
 ### Nested Schema for `properties`
 
 Read-Only:

@@ -55,9 +55,9 @@ api://fabric_terraform_provider
 1. State: `Enabled`
 
 - You will finally need to pre-authorize Azure CLI/Azure PowerShell and Power BI to access your exposed API permissions by adding Azure CLI/Azure PowerShell and Power BI 1st party Microsoft applications. In the `Authorized client applications` section add:
-   - for Azure CLI: `04b07795-8ddb-461a-bbee-02f9e1bf7b46`
-   - for Azure PowerShell: `1950a258-227b-4e31-a9cf-717495945fc2`
-   - for Power BI: `00000009-0000-0000-c000-000000000000` and `871c010f-5e61-4fb1-83ac-98610a7e9110`
+  - for Azure CLI: `04b07795-8ddb-461a-bbee-02f9e1bf7b46`
+  - for Azure PowerShell: `1950a258-227b-4e31-a9cf-717495945fc2`
+  - for Power BI: `00000009-0000-0000-c000-000000000000` and `871c010f-5e61-4fb1-83ac-98610a7e9110`
 
 Read more about first-party Microsoft applications ine the [Application IDs of commonly used Microsoft applications](https://learn.microsoft.com/troubleshoot/azure/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications) article.
 

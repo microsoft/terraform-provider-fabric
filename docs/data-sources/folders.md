@@ -60,14 +60,15 @@ data "fabric_folders" "example_with_root_folder_non_recursively" {
 - `values` (Attributes Set) The set of Folders. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--values"></a>
+
 ### Nested Schema for `values`
 
 Required:
@@ -76,6 +77,6 @@ Required:
 
 Read-Only:
 
-- `display_name` (String) The Folder display name The name must meet Folder name requirements: https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements.
+- `display_name` (String) The Folder display name The name must meet Folder name requirements: <https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements>.
 - `id` (String) The Folder ID.
 - `parent_folder_id` (String) The parent folder ID. If not specified or null, the folder is created with the workspace as its parent folder.

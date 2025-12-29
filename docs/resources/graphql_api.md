@@ -41,6 +41,7 @@ resource "fabric_graphql_api" "example" {
 - `id` (String) The GraphQL API ID.
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

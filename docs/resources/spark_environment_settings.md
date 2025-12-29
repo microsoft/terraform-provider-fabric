@@ -34,20 +34,20 @@ resource "fabric_spark_environment_settings" "example" {
 
   dynamic_executor_allocation = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   pool = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 
   spark_properties = {
     /*
-			your settings here
-			*/
+   your settings here
+   */
   }
 }
 ```
@@ -81,6 +81,7 @@ resource "fabric_spark_environment_settings" "example" {
 - `id` (String) The Spark Environment Settings ID.
 
 <a id="nestedatt--dynamic_executor_allocation"></a>
+
 ### Nested Schema for `dynamic_executor_allocation`
 
 Optional:
@@ -89,8 +90,8 @@ Optional:
 - `max_executors` (Number) The maximum executors. Value must be at least 1. Ensure that if an attribute is set, also these are set: "[<.min_executors]".
 - `min_executors` (Number) The minimum executors. Value must be at least 1. Ensure that if an attribute is set, also these are set: "[<.max_executors]".
 
-
 <a id="nestedatt--pool"></a>
+
 ### Nested Schema for `pool`
 
 Optional:
@@ -102,8 +103,8 @@ Read-Only:
 
 - `id` (String) The Pool ID.
 
-
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:

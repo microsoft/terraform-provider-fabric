@@ -58,14 +58,15 @@ data "fabric_environment" "example_by_name" {
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
+
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-
 <a id="nestedatt--properties"></a>
+
 ### Nested Schema for `properties`
 
 Read-Only:
@@ -73,6 +74,7 @@ Read-Only:
 - `publish_details` (Attributes) Environment publish operation details. (see [below for nested schema](#nestedatt--properties--publish_details))
 
 <a id="nestedatt--properties--publish_details"></a>
+
 ### Nested Schema for `properties.publish_details`
 
 Read-Only:
@@ -84,6 +86,7 @@ Read-Only:
 - `target_version` (String) Target version to be published.
 
 <a id="nestedatt--properties--publish_details--component_publish_info"></a>
+
 ### Nested Schema for `properties.publish_details.component_publish_info`
 
 Read-Only:
@@ -92,14 +95,15 @@ Read-Only:
 - `spark_settings` (Attributes) Spark settings publish information. (see [below for nested schema](#nestedatt--properties--publish_details--component_publish_info--spark_settings))
 
 <a id="nestedatt--properties--publish_details--component_publish_info--spark_libraries"></a>
+
 ### Nested Schema for `properties.publish_details.component_publish_info.spark_libraries`
 
 Read-Only:
 
 - `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
 
-
 <a id="nestedatt--properties--publish_details--component_publish_info--spark_settings"></a>
+
 ### Nested Schema for `properties.publish_details.component_publish_info.spark_settings`
 
 Read-Only:
