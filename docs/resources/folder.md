@@ -43,7 +43,7 @@ resource "fabric_folder" "example_subfolder" {
 
 ### Required
 
-- `display_name` (String) The Folder display name The name must meet Folder name requirements: <https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements>. String length must be at most 255.
+- `display_name` (String) The Folder display name The name must meet Folder name requirements: https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements. String length must be at most 255.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The workspace ID.
 
 ### Optional
@@ -56,7 +56,6 @@ resource "fabric_folder" "example_subfolder" {
 - `id` (String) The Folder ID.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

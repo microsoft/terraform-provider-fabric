@@ -60,7 +60,6 @@ resource "fabric_workspace" "example2" {
 - `type` (String) The Workspace type.
 
 <a id="nestedatt--identity"></a>
-
 ### Nested Schema for `identity`
 
 Required:
@@ -72,8 +71,8 @@ Read-Only:
 - `application_id` (String) The application ID.
 - `service_principal_id` (String) The service principal ID.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -83,8 +82,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--onelake_endpoints"></a>
 
+<a id="nestedatt--onelake_endpoints"></a>
 ### Nested Schema for `onelake_endpoints`
 
 Read-Only:

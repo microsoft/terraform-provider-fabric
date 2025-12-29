@@ -46,15 +46,14 @@ data "fabric_connection" "example" {
 - `privacy_level` (String) The Connection privacy level. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--connection_details"></a>
 
+<a id="nestedatt--connection_details"></a>
 ### Nested Schema for `connection_details`
 
 Read-Only:
@@ -62,8 +61,8 @@ Read-Only:
 - `path` (String) The path of the connection.
 - `type` (String) The type of the connection.
 
-<a id="nestedatt--credential_details"></a>
 
+<a id="nestedatt--credential_details"></a>
 ### Nested Schema for `credential_details`
 
 Read-Only:

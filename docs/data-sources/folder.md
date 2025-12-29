@@ -39,11 +39,10 @@ data "fabric_folder" "example_by_id" {
 
 ### Read-Only
 
-- `display_name` (String) The Folder display name The name must meet Folder name requirements: <https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements>.
+- `display_name` (String) The Folder display name The name must meet Folder name requirements: https://learn.microsoft.com/fabric/fundamentals/workspaces-folders#folder-name-requirements.
 - `parent_folder_id` (String) The parent folder ID. If not specified or null, the folder is created with the workspace as its parent folder.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

@@ -52,15 +52,14 @@ data "fabric_spark_environment_settings" "example" {
 - `spark_properties` (Map of String) A map of key/value pairs of Spark properties.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--dynamic_executor_allocation"></a>
 
+<a id="nestedatt--dynamic_executor_allocation"></a>
 ### Nested Schema for `dynamic_executor_allocation`
 
 Read-Only:
@@ -69,8 +68,8 @@ Read-Only:
 - `max_executors` (Number) The maximum executors.
 - `min_executors` (Number) The minimum executors.
 
-<a id="nestedatt--pool"></a>
 
+<a id="nestedatt--pool"></a>
 ### Nested Schema for `pool`
 
 Read-Only:

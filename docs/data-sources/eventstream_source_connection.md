@@ -47,15 +47,14 @@ data "fabric_eventstream_source_connection" "example" {
 - `fully_qualified_namespace` (String) The fully qualified namespace of the event hub.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--access_keys"></a>
 
+<a id="nestedatt--access_keys"></a>
 ### Nested Schema for `access_keys`
 
 Read-Only:

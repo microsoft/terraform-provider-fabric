@@ -44,28 +44,27 @@ data "fabric_workspace_git" "example" {
 - `id` (String) The Workspace Git ID.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--git_credentials"></a>
 
+<a id="nestedatt--git_credentials"></a>
 ### Nested Schema for `git_credentials`
 
 Read-Only:
 
 - `connection_id` (String) The connection ID.
-- `source` (String) The Git credentials source.
+- `source` (String) The Git credentials source. 
 
--> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>.
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>. 
 
 -> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `AzureDevOps` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>- `"Automatic"` - Automatic<br>.
 
-<a id="nestedatt--git_provider_details"></a>
 
+<a id="nestedatt--git_provider_details"></a>
 ### Nested Schema for `git_provider_details`
 
 Read-Only:
@@ -78,8 +77,8 @@ Read-Only:
 - `project_name` (String) The Azure DevOps project name.
 - `repository_name` (String) The repository name.
 
-<a id="nestedatt--git_sync_details"></a>
 
+<a id="nestedatt--git_sync_details"></a>
 ### Nested Schema for `git_sync_details`
 
 Read-Only:

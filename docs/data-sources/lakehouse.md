@@ -55,15 +55,14 @@ data "fabric_lakehouse" "example_by_name" {
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--properties"></a>
 
+<a id="nestedatt--properties"></a>
 ### Nested Schema for `properties`
 
 Read-Only:
@@ -74,7 +73,6 @@ Read-Only:
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--properties--sql_endpoint_properties))
 
 <a id="nestedatt--properties--sql_endpoint_properties"></a>
-
 ### Nested Schema for `properties.sql_endpoint_properties`
 
 Read-Only:

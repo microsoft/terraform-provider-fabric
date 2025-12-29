@@ -119,7 +119,6 @@ resource "fabric_item_job_scheduler" "monthly_configuration_ordinal_weekday_exam
 - `owner` (Attributes) The user identity that created this schedule or last modified. (see [below for nested schema](#nestedatt--owner))
 
 <a id="nestedatt--configuration"></a>
-
 ### Nested Schema for `configuration`
 
 Required:
@@ -137,7 +136,6 @@ Optional:
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed. Set must contain at most 7 elements. Element value must satisfy all validations: value must be one of: ["Friday" "Monday" "Saturday" "Sunday" "Thursday" "Tuesday" "Wednesday"]. If the value of [`configuration.type`](#configuration.type) attribute is `Weekly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Cron`, `Daily` or `Monthly` this attribute is **NULL**.
 
 <a id="nestedatt--configuration--occurrence"></a>
-
 ### Nested Schema for `configuration.occurrence`
 
 Required:
@@ -150,8 +148,9 @@ Optional:
 - `week_index` (String) The week of the month. Value must be one of : `Fifth`, `First`, `Fourth`, `Second`, `Third`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
 - `weekday` (String) Week day for triggering jobs. Value must be one of : `Friday`, `Monday`, `Saturday`, `Sunday`, `Thursday`, `Tuesday`, `Wednesday`. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `OrdinalWeekday` this attribute is **REQUIRED**. If the value of [`<.occurrence_type`](#<.occurrence_type) attribute is `DayOfMonth` this attribute is **NULL**.
 
-<a id="nestedatt--timeouts"></a>
 
+
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -161,8 +160,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--owner"></a>
 
+<a id="nestedatt--owner"></a>
 ### Nested Schema for `owner`
 
 Read-Only:

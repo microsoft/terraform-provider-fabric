@@ -93,14 +93,13 @@ resource "fabric_workspace_git" "github" {
 - `id` (String) The Workspace Git ID.
 
 <a id="nestedatt--git_credentials"></a>
-
 ### Nested Schema for `git_credentials`
 
 Required:
 
-- `source` (String) The Git credentials source.
+- `source` (String) The Git credentials source. 
 
--> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>.
+-> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `GitHub` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>. 
 
 -> **If the value of the attribute [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) is `AzureDevOps` the value is one of** - `"ConfiguredConnection"` - ConfiguredConnection<br>- `"Automatic"` - Automatic<br>.
 
@@ -108,8 +107,8 @@ Optional:
 
 - `connection_id` (String) The connection ID. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `ConfiguredConnection` this attribute is **REQUIRED**. If the value of [`git_credentials.source`](#git_credentials.source) attribute is `Automatic` this attribute is **NULL**.
 
-<a id="nestedatt--git_provider_details"></a>
 
+<a id="nestedatt--git_provider_details"></a>
 ### Nested Schema for `git_provider_details`
 
 Required:
@@ -125,8 +124,8 @@ Optional:
 - `owner_name` (String) The GitHub owner name. String length must be at most 100. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**.
 - `project_name` (String) The Azure DevOps project name. String length must be at most 100. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **REQUIRED**.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -136,8 +135,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--git_sync_details"></a>
 
+<a id="nestedatt--git_sync_details"></a>
 ### Nested Schema for `git_sync_details`
 
 Read-Only:

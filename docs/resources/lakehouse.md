@@ -47,7 +47,6 @@ resource "fabric_lakehouse" "example2" {
 - `configuration` (Attributes) The Lakehouse creation configuration.
 
 Any changes to this configuration will result in recreation of the Lakehouse. (see [below for nested schema](#nestedatt--configuration))
-
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Folder ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -58,15 +57,14 @@ Any changes to this configuration will result in recreation of the Lakehouse. (s
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--configuration"></a>
-
 ### Nested Schema for `configuration`
 
 Required:
 
 - `enable_schemas` (Boolean) Schema enabled Lakehouse.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -76,8 +74,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--properties"></a>
 
+<a id="nestedatt--properties"></a>
 ### Nested Schema for `properties`
 
 Read-Only:
@@ -88,7 +86,6 @@ Read-Only:
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--properties--sql_endpoint_properties))
 
 <a id="nestedatt--properties--sql_endpoint_properties"></a>
-
 ### Nested Schema for `properties.sql_endpoint_properties`
 
 Read-Only:
