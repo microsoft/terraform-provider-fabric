@@ -402,10 +402,8 @@ func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsMod
 }
 
 func (r *resourceConnection) validateConnectionEncryption(model rsCredentialDetailsModel, elements []fabcore.ConnectionEncryption) diag.Diagnostics {
-	for _, v := range elements {
-		if v == fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString()) {
-			return nil
-		}
+	if slices.Contains(elements, fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString())) {
+		return nil
 	}
 
 	var diags diag.Diagnostics
@@ -444,7 +442,7 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 }
 
 func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
-	if model.SkipTestConnection.ValueBool() != supportsSkipTestConnection {
+	if model.SkipTestConnection.ValueBool() && !supportsSkipTestConnection {
 		var diags diag.Diagnostics
 
 		diags.AddAttributeError(

@@ -48,6 +48,7 @@ resource "fabric_warehouse" "example2" {
 Any changes to this configuration will result in recreation of the Warehouse. (see [below for nested schema](#nestedatt--configuration))
 
 - `description` (String) The Warehouse description.
+- `folder_id` (String) The Folder ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -2,9 +2,11 @@
 # Remove-WorkspaceRSItems.ps1
 #
 # This script deletes all items in the "WorkspaceRS" workspace except for:
-# 1. The "LakehouseRS" item (preserved by ID)
+# 1. Any lakehouse named "lh"
+# 2. All SQLEndpoint items
+# 3. All KQLDatabase items
 #
-# It reads the workspace and lakehouse IDs from the .wellknown.json file.
+# It reads the workspace ID from the .wellknown.json file.
 #
 # Usage:
 #   .\Remove-WorkspaceRSItems.ps1 [-WellKnownPath <path>] [-Force] [-DryRun]
@@ -189,6 +191,44 @@ function Invoke-FabricRest {
   }
 }
 
+function Get-FolderDepth {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$FolderId,
+
+    [Parameter(Mandatory = $true)]
+    [hashtable]$FolderMap
+  )
+
+  $depth = 0
+  $currentId = $FolderId
+  $visited = @{}
+
+  while ($FolderMap.ContainsKey($currentId)) {
+    if ($visited.ContainsKey($currentId)) {
+      Write-Log -Message "Circular reference detected in folder hierarchy at folder ID: $currentId" -Level 'WARN' -Stop $false
+      break
+    }
+
+    $visited[$currentId] = $true
+    $parentId = $FolderMap[$currentId].parentFolderId
+
+    if ($null -eq $parentId -or $parentId -eq '') {
+      break
+    }
+
+    $depth++
+    $currentId = $parentId
+
+    if ($depth -gt 10) {
+      Write-Log -Message "Maximum folder depth (10) exceeded for folder ID: $FolderId" -Level 'WARN' -Stop $false
+      break
+    }
+  }
+
+  return $depth
+}
+
 function Remove-WorkspaceRSItems {
   param (
     [Parameter(Mandatory = $true)]
@@ -216,22 +256,15 @@ function Remove-WorkspaceRSItems {
     return
   }
 
-  # Extract WorkspaceRS and LakehouseRS IDs
+  # Extract WorkspaceRS ID
   if (-not $wellKnownContent.WorkspaceRS -or -not $wellKnownContent.WorkspaceRS.id) {
     Write-Log -Message "WorkspaceRS ID not found in .wellknown.json" -Level 'ERROR'
     return
   }
 
-  if (-not $wellKnownContent.LakehouseRS -or -not $wellKnownContent.LakehouseRS.id) {
-    Write-Log -Message "LakehouseRS ID not found in .wellknown.json" -Level 'ERROR'
-    return
-  }
-
   $workspaceId = $wellKnownContent.WorkspaceRS.id
-  $lakehouseRSId = $wellKnownContent.LakehouseRS.id
 
   Write-Log -Message "WorkspaceRS ID: $workspaceId" -Level 'INFO'
-  Write-Log -Message "LakehouseRS ID to preserve: $lakehouseRSId" -Level 'INFO'
 
   # Get all items in the WorkspaceRS
   Write-Log -Message "Fetching all items in WorkspaceRS..." -Level 'INFO'
@@ -246,45 +279,123 @@ function Remove-WorkspaceRSItems {
 
   if (-not $items -or $items.Count -eq 0) {
     Write-Log -Message "No items found in WorkspaceRS" -Level 'INFO'
-    return
+  }
+  else {
+    Write-Log -Message "Found $($items.Count) items in WorkspaceRS" -Level 'INFO'
   }
 
-  Write-Log -Message "Found $($items.Count) items in WorkspaceRS" -Level 'INFO'
+  # Get all folders in the WorkspaceRS
+  Write-Log -Message "Fetching all folders in WorkspaceRS..." -Level 'INFO'
+  $allFolders = @()
+  try {
+    $foldersResponse = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$workspaceId/folders?recursive=true"
+    $allFolders = $foldersResponse.Response.value
+
+    if ($allFolders -and $allFolders.Count -gt 0) {
+      Write-Log -Message "Found $($allFolders.Count) folders in WorkspaceRS" -Level 'INFO'
+    }
+    else {
+      Write-Log -Message "No folders found in WorkspaceRS" -Level 'INFO'
+    }
+  }
+  catch {
+    Write-Log -Message "Failed to fetch folders from WorkspaceRS: $($_.Exception.Message)" -Level 'WARN' -Stop $false
+    $allFolders = @()
+  }
 
   # Filter out items to preserve:
-  # 1. The LakehouseRS item by ID (exact match)
+  # 1. Any lakehouse named "lh"
+  # 2. All SQLEndpoint items
+  # 3. All KQLDatabase items
   $itemsToDelete = $items | Where-Object {
-    $_.id -ne $lakehouseRSId -and
+    $_.type -ne 'KQLDatabase' -and
     $_.type -ne 'SQLEndpoint' -and
-    $_.type -ne 'KQLDatabase'
+    -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh')
   }
 
-  Write-Log -Message "Preserving the LakehouseRS ID: $($lakehouseRSId)" -Level 'INFO' -Stop $false
+  Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
 
-  if ($itemsToDelete.Count -eq 0) {
-    Write-Log -Message "No items to delete (only preserved items found)" -Level 'INFO'
+  # Build folder hierarchy map and calculate depths
+  $folderMap = @{}
+  $foldersWithDepth = @()
+
+  if ($allFolders -and $allFolders.Count -gt 0) {
+    foreach ($folder in $allFolders) {
+      $folderMap[$folder.id] = $folder
+    }
+
+    # Calculate depth for each folder
+    foreach ($folder in $allFolders) {
+      $depth = Get-FolderDepth -FolderId $folder.id -FolderMap $folderMap
+
+      $foldersWithDepth += [PSCustomObject]@{
+        Id             = $folder.id
+        DisplayName    = $folder.displayName
+        ParentFolderId = $folder.parentFolderId
+        Depth          = $depth
+      }
+    }
+
+    # Sort folders by depth (deepest first) to ensure child folders are deleted before parents
+    $foldersToDelete = $foldersWithDepth | Sort-Object -Property Depth -Descending
+  }
+  else {
+    $foldersToDelete = @()
+  }
+
+  $totalItemsToDelete = $itemsToDelete.Count
+  $totalFoldersToDelete = $foldersToDelete.Count
+  $totalToDelete = $totalItemsToDelete + $totalFoldersToDelete
+
+  if ($totalToDelete -eq 0) {
+    Write-Log -Message "No items or folders to delete (only preserved items found)" -Level 'INFO'
     return
   }
 
-  Write-Log -Message "Items to delete: $($itemsToDelete.Count)" -Level 'INFO'
+  Write-Log -Message "Items to delete: $totalItemsToDelete" -Level 'INFO'
+  Write-Log -Message "Folders to delete: $totalFoldersToDelete" -Level 'INFO'
 
   if ($DryRun) {
-    Write-Log -Message "DRY RUN MODE - No items will actually be deleted" -Level 'WARN' -Stop $false
-    Write-Log -Message "Items that would be deleted:" -Level 'INFO' -Stop $false
-    foreach ($item in $itemsToDelete) {
-      Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+    Write-Log -Message "DRY RUN MODE - No items or folders will actually be deleted" -Level 'WARN' -Stop $false
+
+    if ($totalItemsToDelete -gt 0) {
+      Write-Log -Message "Items that would be deleted:" -Level 'INFO' -Stop $false
+      foreach ($item in $itemsToDelete) {
+        Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+      }
     }
+
+    if ($totalFoldersToDelete -gt 0) {
+      Write-Log -Message "Folders that would be deleted (in order, deepest first):" -Level 'INFO' -Stop $false
+      foreach ($folder in $foldersToDelete) {
+        $parentInfo = if ($folder.ParentFolderId) { "Parent: $($folder.ParentFolderId)" } else { "Root level" }
+        Write-Log -Message "  - $($folder.DisplayName) (Depth: $($folder.Depth), ID: $($folder.Id), $parentInfo)" -Level 'INFO' -Stop $false
+      }
+    }
+
     Write-Log -Message "=== DRY RUN SUMMARY ===" -Level 'INFO'
-    Write-Log -Message "Total items that would be deleted: $($itemsToDelete.Count)" -Level 'INFO'
+    Write-Log -Message "Total items that would be deleted: $totalItemsToDelete" -Level 'INFO'
+    Write-Log -Message "Total folders that would be deleted: $totalFoldersToDelete" -Level 'INFO'
     Write-Log -Message "DRY RUN completed - no actual deletions performed" -Level 'INFO'
     return
   }
 
   # Confirm deletion with user (unless Force is specified)
   if (-not $Force) {
-    Write-Log -Message "About to delete $($itemsToDelete.Count) items from WorkspaceRS:" -Level 'WARN' -Stop $false
-    foreach ($item in $itemsToDelete) {
-      Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+    Write-Log -Message "About to delete $totalItemsToDelete items and $totalFoldersToDelete folders from WorkspaceRS:" -Level 'WARN' -Stop $false
+
+    if ($totalItemsToDelete -gt 0) {
+      Write-Log -Message "Items:" -Level 'INFO' -Stop $false
+      foreach ($item in $itemsToDelete) {
+        Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+      }
+    }
+
+    if ($totalFoldersToDelete -gt 0) {
+      Write-Log -Message "Folders (in deletion order):" -Level 'INFO' -Stop $false
+      foreach ($folder in $foldersToDelete) {
+        Write-Log -Message "  - $($folder.DisplayName) (Depth: $($folder.Depth), ID: $($folder.Id))" -Level 'INFO' -Stop $false
+      }
     }
 
     $confirmation = Read-Host "Do you want to proceed with deletion? (y/N)"
@@ -294,51 +405,99 @@ function Remove-WorkspaceRSItems {
     }
   }
   else {
-    Write-Log -Message "Force mode enabled - proceeding with deletion of $($itemsToDelete.Count) items" -Level 'WARN' -Stop $false
+    Write-Log -Message "Force mode enabled - proceeding with deletion of $totalItemsToDelete items and $totalFoldersToDelete folders" -Level 'WARN' -Stop $false
   }
 
-  # Delete items one by one
-  $totalToDelete = $itemsToDelete.Count
-  $deletedCount = 0
-  $failedCount = 0
+  # Delete items first
+  $deletedItemsCount = 0
+  $failedItemsCount = 0
 
-  Write-Log -Message "Starting deletion of $totalToDelete items..." -Level 'INFO'
+  if ($totalItemsToDelete -gt 0) {
+    Write-Log -Message "Starting deletion of $totalItemsToDelete items..." -Level 'INFO'
 
-  foreach ($item in $itemsToDelete) {
-    Write-Log -Message "Deleting item: $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO'
+    foreach ($item in $itemsToDelete) {
+      Write-Log -Message "Deleting item: $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO'
 
-    try {
-      $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)"
+      try {
+        $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)"
 
-      if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204) {
-        Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
-        $deletedCount++
+        if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
+          if ($deleteResponse.StatusCode -eq 404) {
+            Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          }
+          else {
+            Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
+          }
+          $deletedCount++
+        }
+        else {
+          Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
+          $failedCount++
+        }
       }
-      else {
-        Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
-        $failedCount++
+      catch {
+        # Check if the exception is a 404
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        if ($statusCode -eq 404) {
+          Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          $deletedCount++
+        }
+        else {
+          Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+          $failedCount++
+        }
       }
-    }
-    catch {
-      Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-      $failedCount++
-    }
 
-    # Add a small delay between deletions to avoid rate limiting
-    Start-Sleep -Milliseconds 500
+      # Add a small delay between deletions to avoid rate limiting
+      Start-Sleep -Milliseconds 500
+    }
+  }
+
+  # Delete folders (deepest first)
+  $deletedFoldersCount = 0
+  $failedFoldersCount = 0
+
+  if ($totalFoldersToDelete -gt 0) {
+    Write-Log -Message "Starting deletion of $totalFoldersToDelete folders (deepest first)..." -Level 'INFO'
+
+    foreach ($folder in $foldersToDelete) {
+      Write-Log -Message "Deleting folder: $($folder.DisplayName) (Depth: $($folder.Depth), ID: $($folder.Id))" -Level 'INFO'
+
+      try {
+        $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/folders/$($folder.Id)"
+
+        if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204) {
+          Write-Log -Message "Successfully deleted folder: $($folder.DisplayName)" -Level 'INFO'
+          $deletedFoldersCount++
+        }
+        else {
+          Write-Log -Message "Failed to delete folder: $($folder.DisplayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
+          $failedFoldersCount++
+        }
+      }
+      catch {
+        Write-Log -Message "Error deleting folder: $($folder.DisplayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+        $failedFoldersCount++
+      }
+
+      # Add a small delay between deletions to avoid rate limiting
+      Start-Sleep -Milliseconds 500
+    }
   }
 
   # Summary
   Write-Log -Message "=== DELETION SUMMARY ===" -Level 'INFO'
-  Write-Log -Message "Total items to delete: $totalToDelete" -Level 'INFO'
-  Write-Log -Message "Successfully deleted: $deletedCount" -Level 'INFO'
-  Write-Log -Message "Failed to delete: $failedCount" -Level 'INFO'
+  Write-Log -Message "Items - Total to delete: $totalItemsToDelete, Successfully deleted: $deletedItemsCount, Failed: $failedItemsCount" -Level 'INFO'
+  Write-Log -Message "Folders - Total to delete: $totalFoldersToDelete, Successfully deleted: $deletedFoldersCount, Failed: $failedFoldersCount" -Level 'INFO'
 
-  if ($failedCount -eq 0) {
-    Write-Log -Message "All items deleted successfully!" -Level 'INFO'
+  $totalFailed = $failedItemsCount + $failedFoldersCount
+  $totalDeleted = $deletedItemsCount + $deletedFoldersCount
+
+  if ($totalFailed -eq 0) {
+    Write-Log -Message "All items and folders deleted successfully!" -Level 'INFO'
   }
-  elseif ($deletedCount -eq 0) {
-    Write-Log -Message "No items were deleted due to errors." -Level 'ERROR' -Stop $false
+  elseif ($totalDeleted -eq 0) {
+    Write-Log -Message "No items or folders were deleted due to errors." -Level 'ERROR' -Stop $false
   }
   else {
     Write-Log -Message "Deletion completed with some failures." -Level 'WARN' -Stop $false

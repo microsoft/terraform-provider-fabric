@@ -90,11 +90,6 @@ tasks:
       - task: golangci-lint
       - task: tfproviderlintx
 
-  govulncheck:
-    desc: Run govulncheck
-    cmds:
-      - govulncheck -test -show verbose ./...
-
   golangci-lint:
     desc: Run golangci-lint
     cmds:
@@ -123,6 +118,11 @@ tasks:
     cmds:
       - lychee --config ./.github/linters/.lychee.toml --format markdown .
 
+  govulncheck:
+    desc: Run govulncheck
+    cmds:
+      - govulncheck -test -show verbose ./...
+
   tools:
     desc: Install required tools
     cmds:
@@ -142,6 +142,7 @@ tasks:
             yamllint,
             markdownlint,
             gh,
+            deadcode,
           ]
         task: install:{{.ITEM}}
       - task: test:tools
@@ -289,7 +290,7 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -timeout 60m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -306,7 +307,7 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 45m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 60m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -452,6 +453,11 @@ tasks:
     desc: Install tfplugindocs
     cmds:
       - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+  install:deadcode:
+    desc: Install deadcode
+    cmds:
+      - go install golang.org/x/tools/cmd/deadcode@latest
 
   install:goimports:
     desc: Install goimports

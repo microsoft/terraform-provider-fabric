@@ -323,7 +323,7 @@ func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabc
 
 	for i, tag := range tags {
 		// set the value as a pointer
-		ptr := reflect.New(reflect.TypeOf(tag))
+		ptr := reflect.New(reflect.TypeFor[fabcore.ItemTag]())
 		ptr.Elem().Set(reflect.ValueOf(tag))
 		slice.Index(i).Set(ptr)
 	}
@@ -336,6 +336,11 @@ func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabc
 func getReflectedStringPropertyValue(element any, propertyName string) *string {
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// Check if the property value is nil or invalid
+	if !propertyValue.IsValid() || propertyValue.IsNil() {
+		return nil
+	}
 
 	str := propertyValue.Elem().String()
 
@@ -358,7 +363,7 @@ func setReflectedStringPropertyValue[TEntity any](entity *TEntity, propertyName,
 func (h *typedHandler[TEntity]) entityTypeIsFabricItem() bool {
 	var entity TEntity
 
-	return reflect.TypeOf(entity) == reflect.TypeOf(fabcore.Item{})
+	return reflect.TypeOf(entity) == reflect.TypeFor[fabcore.Item]()
 }
 
 func (h *typedHandler[TEntity]) entityTypeCanBeConvertedToFabricItem() bool {

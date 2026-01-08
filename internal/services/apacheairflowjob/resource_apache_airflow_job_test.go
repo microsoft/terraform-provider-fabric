@@ -220,11 +220,13 @@ func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
+						"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Update and Read
@@ -238,11 +240,13 @@ func TestUnit_ApacheAirflowJobResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 	}))
@@ -307,6 +311,7 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -314,11 +319,13 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -327,6 +334,7 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 			),
 		},
 		// Update and Read
@@ -334,12 +342,14 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
+				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -348,6 +358,7 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 			),
 		},
 	},

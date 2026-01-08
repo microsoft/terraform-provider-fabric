@@ -23,6 +23,7 @@ func (o *operationsVariableLibrary) ConvertItemToEntity(item fabcore.Item) fabva
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties:  NewRandomVariableLibrary().Properties,
 	}
@@ -52,6 +53,7 @@ func (o *operationsVariableLibrary) CreateWithParentID(parentID string, data fab
 	entity := NewRandomVariableLibraryWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -175,6 +177,7 @@ func NewRandomVariableLibrary() fabvariablelibrary.VariableLibrary {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties: &fabvariablelibrary.Properties{
 			ActiveValueSetName: to.Ptr(testhelp.RandomName()),

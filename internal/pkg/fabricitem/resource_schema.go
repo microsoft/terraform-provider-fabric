@@ -6,13 +6,16 @@ package fabricitem
 import (
 	"context"
 	"fmt"
+	"maps"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -23,10 +26,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	supermapvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/mapvalidator"
+	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/planmodifiers"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/params"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
@@ -42,9 +49,7 @@ func getResourceFabricItemSchema(ctx context.Context, r ResourceFabricItem) sche
 func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabricItemDefinition) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -66,9 +71,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -106,9 +109,7 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	attributes["configuration"] = attrConfiguration
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
-	for key, value := range getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true) {
-		attributes[key] = value
-	}
+	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true))
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -199,6 +200,11 @@ func getResourceFabricItemBaseAttributes(
 				stringvalidator.LengthAtMost(descriptionMaxLength),
 			},
 		},
+		"folder_id": schema.StringAttribute{
+			MarkdownDescription: "The Folder ID.",
+			Optional:            true,
+			CustomType:          customtypes.UUIDType{},
+		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}
 
@@ -276,13 +282,64 @@ func getResourceFabricItemDefinitionAttributes(
 }
 
 // Helper function to get Fabric Item data-source definition part attributes.
-func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedAttributeObject {
+func getResourceFabricItemDefinitionPartSchema(ctx context.Context) schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: map[string]schema.Attribute{
 			"source": schema.StringAttribute{
 				MarkdownDescription: "Path to the file with source of the definition part.\n\n" +
 					"The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.",
 				Required: true,
+			},
+			"processing_mode": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf(
+					"Processing mode of the tokens/parameters. Possible values: %s. Default `%s`",
+					utils.ConvertStringSlicesToString(transforms.PossibleProcessingModeValues(), true, true),
+					transforms.ProcessingModeGoTemplate,
+				),
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(transforms.ProcessingModeGoTemplate),
+				Validators: []validator.String{
+					stringvalidator.OneOf(transforms.PossibleProcessingModeValues()...),
+				},
+			},
+			"parameters": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of parameters to be passed and processed in the source content.",
+				Optional:            true,
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[params.ParametersModel](ctx),
+				Validators: []validator.Set{
+					setvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("processing_mode")),
+					supersetvalidator.RequireIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeParameters)},
+					),
+					supersetvalidator.NullIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeGoTemplate), types.StringValue(transforms.ProcessingModeNone)},
+					),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: fmt.Sprintf(
+								"Processing type of the parameters. Possible values: %s.",
+								utils.ConvertStringSlicesToString(transforms.PossibleParameterTypeValues(), true, true),
+							),
+							Required: true,
+							Validators: []validator.String{
+								stringvalidator.OneOf(transforms.PossibleParameterTypeValues()...),
+							},
+						},
+						"find": schema.StringAttribute{
+							MarkdownDescription: "The find value of the parameter.",
+							Required:            true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the parameter.",
+							Required:            true,
+						},
+					},
+				},
 			},
 			"tokens": schema.MapAttribute{
 				MarkdownDescription: "A map of key/value pairs of tokens substitutes in the source.",
@@ -297,13 +354,41 @@ func getResourceFabricItemDefinitionPartSchema(_ context.Context) schema.NestedA
 							"- cannot contains any white spaces\n"+
 							"- underscore '_' is allowed but not at the start or end of the token key",
 					)),
+					supermapvalidator.RequireIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeGoTemplate)},
+					),
+					supermapvalidator.NullIfAttributeIsOneOf(
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						[]attr.Value{types.StringValue(transforms.ProcessingModeParameters), types.StringValue(transforms.ProcessingModeNone)},
+					),
+				},
+			},
+			"tokens_delimiter": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf("The delimiter for the tokens in the source content. Possible values: %s. Default: `%s`",
+					utils.ConvertStringSlicesToString(transforms.PossibleTokensDelimiterValues(), true, true),
+					transforms.TokensDelimiterCurlyBraces,
+				),
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(transforms.TokensDelimiterCurlyBraces),
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("tokens")),
+					stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("parameters")),
+					stringvalidator.OneOf(transforms.PossibleTokensDelimiterValues()...),
 				},
 			},
 			"source_content_sha256": schema.StringAttribute{
 				MarkdownDescription: "SHA256 of source's content of definition part.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
-					planmodifiers.DefinitionContentSha256(path.MatchRelative().AtParent().AtName("source"), path.MatchRelative().AtParent().AtName("tokens")),
+					planmodifiers.DefinitionContentSha256(
+						path.MatchRelative().AtParent().AtName("source"),
+						path.MatchRelative().AtParent().AtName("processing_mode"),
+						path.MatchRelative().AtParent().AtName("tokens"),
+						path.MatchRelative().AtParent().AtName("parameters"),
+						path.MatchRelative().AtParent().AtName("tokens_delimiter"),
+					),
 				},
 			},
 		},

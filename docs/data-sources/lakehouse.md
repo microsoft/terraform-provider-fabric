@@ -51,6 +51,7 @@ data "fabric_lakehouse" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The Lakehouse description.
+- `folder_id` (String) The Lakehouse Folder ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

@@ -40,6 +40,7 @@ func (o *operationsReport) CreateWithParentID(parentID string, data fabreport.Cr
 	result := NewRandomReportWithWorkspace(parentID)
 	result.DisplayName = data.DisplayName
 	result.Description = data.Description
+	result.FolderID = data.FolderID
 
 	return result
 }
@@ -164,6 +165,7 @@ func NewRandomReport() fabreport.Report {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabreport.ItemTypeReport),
 	}
 }

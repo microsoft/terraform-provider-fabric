@@ -98,3 +98,7 @@ func GetEnvVarsPartnerID() []string {
 func GetEnvVarsDisableTerraformPartnerID() []string {
 	return []string{"FABRIC_DISABLE_TERRAFORM_PARTNER_ID", "ARM_DISABLE_TERRAFORM_PARTNER_ID"}
 }
+
+func GetEnvVarsUseWorkspacePrivateLinkEndpoint() []string {
+	return []string{"FABRIC_USE_WORKSPACE_PRIVATE_LINK_ENDPOINT"}
+}
