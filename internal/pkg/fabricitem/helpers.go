@@ -221,3 +221,7 @@ func CreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID st
 		return client.CreateItem(ctx, workspaceID, request, nil)
 	})
 }
+
+func MoveItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.MoveItemRequest) (fabcore.ItemsClientMoveItemResponse, error) {
+	return client.MoveItem(ctx, workspaceID, itemID, request, nil)
+}

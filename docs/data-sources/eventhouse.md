@@ -75,6 +75,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Eventhouse description.
+- `folder_id` (String) The Eventhouse Folder ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

@@ -55,6 +55,7 @@ Read-Only:
 
 - `description` (String) The SQL Database description.
 - `display_name` (String) The SQL Database display name.
+- `folder_id` (String) The SQL Database Folder ID.
 - `id` (String) The SQL Database ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
 - `workspace_id` (String) The Workspace ID.

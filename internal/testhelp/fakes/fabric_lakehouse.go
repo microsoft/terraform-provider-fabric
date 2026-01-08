@@ -23,6 +23,7 @@ func (o *operationsLakehouse) ConvertItemToEntity(item fabcore.Item) fablakehous
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
 		Properties:  NewRandomLakehouse().Properties,
 	}
@@ -33,6 +34,7 @@ func (o *operationsLakehouse) CreateWithParentID(parentID string, data fablakeho
 	entity := NewRandomLakehouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -141,6 +143,7 @@ func NewRandomLakehouse() fablakehouse.Lakehouse {
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Properties: &fablakehouse.Properties{
 			OneLakeFilesPath:  to.Ptr(testhelp.RandomName()),
 			OneLakeTablesPath: to.Ptr(testhelp.RandomName()),
