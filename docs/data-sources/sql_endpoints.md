@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The SQL Endpoint description.
 - `display_name` (String) The SQL Endpoint display name.
+- `folder_id` (String) The SQL Endpoint Folder ID.
 - `id` (String) The SQL Endpoint ID.
 - `workspace_id` (String) The Workspace ID.

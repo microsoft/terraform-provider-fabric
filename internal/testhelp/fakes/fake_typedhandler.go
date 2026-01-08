@@ -337,6 +337,11 @@ func getReflectedStringPropertyValue(element any, propertyName string) *string {
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)
 
+	// Check if the property value is nil or invalid
+	if !propertyValue.IsValid() || propertyValue.IsNil() {
+		return nil
+	}
+
 	str := propertyValue.Elem().String()
 
 	return &str
