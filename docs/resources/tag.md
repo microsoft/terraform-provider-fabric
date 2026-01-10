@@ -35,6 +35,9 @@ resource "fabric_tag" "example" {
 resource "fabric_tag" "example_update" {
   id           = "00000000-0000-0000-0000-000000000000"
   display_name = "example_updated"
+  scope = {
+    type = "Tenant"
+  }
 }
 ```
 
@@ -46,7 +49,7 @@ resource "fabric_tag" "example_update" {
 - `display_name` (String) The Tag display name. String length must be at most 40.
 - `id` (String) The Tag ID.
 - `scope` (Attributes) Represents a tag scope. (see [below for nested schema](#nestedatt--scope))
-- `tags` (Attributes Set) List of tags associated with the resource. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Attributes List) List of tags associated with the resource. (see [below for nested schema](#nestedatt--tags))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--scope"></a>
