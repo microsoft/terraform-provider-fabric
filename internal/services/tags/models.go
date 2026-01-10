@@ -90,7 +90,7 @@ RESOURCE
 type resourceTagsModel struct {
 	baseTagModel
 
-	Tags supertypes.SetNestedObjectValueOf[baseTagModel] `tfsdk:"tags"`
+	Tags supertypes.ListNestedObjectValueOf[baseTagModel] `tfsdk:"tags"`
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
@@ -100,7 +100,7 @@ type requestCreateTags struct {
 }
 
 func (to *resourceTagsModel) set(ctx context.Context, from []fabadmin.Tag) diag.Diagnostics {
-	to.Tags = supertypes.NewSetNestedObjectValueOfNull[baseTagModel](ctx)
+	to.Tags = supertypes.NewListNestedObjectValueOfNull[baseTagModel](ctx)
 	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
 
 	slice := make([]*baseTagModel, 0, len(from))

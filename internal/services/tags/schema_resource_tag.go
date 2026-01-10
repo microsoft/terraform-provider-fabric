@@ -48,11 +48,11 @@ func resourceItemSchema() superschema.Schema { //revive:disable-line:flag-parame
 					},
 				},
 			},
-			"tags": superschema.SuperSetNestedAttributeOf[baseTagModel]{
-				Common: &schemaR.SetNestedAttribute{
+			"tags": superschema.SuperListNestedAttributeOf[baseTagModel]{
+				Common: &schemaR.ListNestedAttribute{
 					MarkdownDescription: "List of tags associated with the resource.",
 				},
-				Resource: &schemaR.SetNestedAttribute{
+				Resource: &schemaR.ListNestedAttribute{
 					Optional: true,
 				},
 				Attributes: map[string]superschema.Attribute{
