@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The Domain resource allows you to manage a Fabric Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This resource supports Service Principal authentication.
+  -> Fabric Domains require a delegated Fabric Admin user context. Domain operations cannot be executed using a Service Principal.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -13,6 +14,7 @@ description: |-
 The Domain resource allows you to manage a Fabric [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This resource supports Service Principal authentication.
+-> Fabric Domains require a delegated Fabric Admin user context. Domain operations cannot be executed using a Service Principal.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
