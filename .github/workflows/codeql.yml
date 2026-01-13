@@ -72,7 +72,7 @@ jobs:
 
       - name: 🚧 Setup Go
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           cache: false
@@ -85,7 +85,7 @@ jobs:
 
       - name: 💫 Initialize CodeQL
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v3.29.5
+        uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.29.5
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
@@ -100,7 +100,7 @@ jobs:
 
       - name: 🩺 Perform CodeQL Analysis
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v3.29.5
+        uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.29.5
         with:
           category: "/language:${{matrix.language}}"
           upload: never
@@ -108,7 +108,7 @@ jobs:
 
       - name: 📤 Upload CodeQL result
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v3.29.5
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.29.5
         with:
           sarif_file: codeql-results
           wait-for-processing: true
