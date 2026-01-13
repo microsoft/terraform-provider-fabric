@@ -222,6 +222,9 @@ function Set-FabricItem {
     'DigitalTwinBuilder' {
       $itemEndpoint = 'digitalTwinBuilders'
     }
+    'DigitalTwinBuilderFlow' {
+      $itemEndpoint = 'digitalTwinBuilderFlows'
+    }
     'Environment' {
       $itemEndpoint = 'environments'
     }
@@ -1110,6 +1113,7 @@ $itemNaming = @{
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
   'DigitalTwinBuilder'              = 'dtb'
+  'DigitalTwinBuilderFlow'          = 'dtbOnDemand'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
@@ -1250,6 +1254,22 @@ foreach ($itemType in $itemTypes) {
     displayName = $item.displayName
     description = $item.description
   }
+}
+
+# Create DigitalTwinBuilderFlow if not exists
+
+$displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
+$creationPayload = @{
+  workspaceID   = $wellKnown['WorkspaceDS'].id
+  referenceType = 'ById'
+  itemID        = $wellKnown['DigitalTwinBuilder'].id
+}
+
+$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
+$wellKnown['DigitalTwinBuilderFlow'] = @{
+  id          = $item.id
+  displayName = $item.displayName
+  description = $item.description
 }
 
 # Create KQLDatabase if not exists
