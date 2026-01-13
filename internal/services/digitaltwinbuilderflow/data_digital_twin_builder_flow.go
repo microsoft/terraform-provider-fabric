@@ -17,7 +17,7 @@ import (
 )
 
 func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabdigitaltwinbuilderflow.Properties, to *fabricitem.DataSourceFabricItemPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabdigitaltwinbuilderflow.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[digitalTwinBuilderFlowConfigPropertiesModel](ctx)
 
 		if from != nil {
@@ -36,7 +36,7 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties], fabricItem *fabricitem.FabricItemProperties[fabdigitaltwinbuilderflow.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties], fabricItem *fabricitem.FabricItemProperties[fabdigitaltwinbuilderflow.Properties]) error {
 		client := fabdigitaltwinbuilderflow.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetDigitalTwinBuilderFlow(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -49,7 +49,7 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabdigitaltwinbuilderflow.Properties]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabdigitaltwinbuilderflow.Properties]) error {
 		client := fabdigitaltwinbuilderflow.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		pager := client.NewListDigitalTwinBuilderFlowsPager(model.WorkspaceID.ValueString(), nil)
@@ -71,11 +71,12 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemProperties[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]{
+		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceDigitalTwinBuilderFlowPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
@@ -83,5 +84,5 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 		ItemListGetter:       itemListGetter,
 	}
 
-	return fabricitem.NewDataSourceFabricItemProperties(config)
+	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)
 }

@@ -50,7 +50,7 @@ resource "fabric_digital_twin_builder_flow" "example_definition_update" {
     "definition.json" = {
       source = "${local.path}/definition.json.tmpl"
       tokens = {
-        "DIGITAL_TWIN_BUILDER_ID" = "Item ID of the parent lakehouse that exists in the workspace"
+        "DIGITAL_TWIN_BUILDER_ID" = "11111111-1111-1111-1111-111111111111"
       }
     }
   }
@@ -67,15 +67,39 @@ resource "fabric_digital_twin_builder_flow" "example_definition_update" {
 
 ### Optional
 
+- `configuration` (Attributes) The Digital Twin Builder Flow creation configuration.
+
+Any changes to this configuration will result in recreation of the Digital Twin Builder Flow. (see [below for nested schema](#nestedatt--configuration))
+
 - `definition` (Attributes Map) Definition parts. Read more about [Digital Twin Builder Flow definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/digital-twin-builder-flow-definition). Accepted path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Digital Twin Builder Flow description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Digital Twin Builder Flow format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `id` (String) The Digital Twin Builder Flow ID.
+- `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--configuration"></a>
+
+### Nested Schema for `configuration`
+
+Optional:
+
+- `digital_twin_builder_item_reference` (Attributes) An object containing the properties of the Digital Twin Builder item reference. (see [below for nested schema](#nestedatt--configuration--digital_twin_builder_item_reference))
+
+<a id="nestedatt--configuration--digital_twin_builder_item_reference"></a>
+
+### Nested Schema for `configuration.digital_twin_builder_item_reference`
+
+Required:
+
+- `item_id` (String) The DigitalTwinBuilderFlow item ID.
+- `reference_type` (String) The DigitalTwinBuilderFlow reference type. Must be 'ById'.
+- `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.
 
 <a id="nestedatt--definition"></a>
 
@@ -89,11 +113,24 @@ The source content may include placeholders for token substitution. Use the dot 
 
 Optional:
 
+- `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
+- `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
 - `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+- `tokens_delimiter` (String) The delimiter for the tokens in the source content. Possible values: `<<>>`, `@{}@`, `____`, `{{}}`. Default: `{{}}`
 
 Read-Only:
 
 - `source_content_sha256` (String) SHA256 of source's content of definition part.
+
+<a id="nestedatt--definition--parameters"></a>
+
+### Nested Schema for `definition.parameters`
+
+Required:
+
+- `find` (String) The find value of the parameter.
+- `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
+- `value` (String) The value of the parameter.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -105,6 +142,24 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Optional:
+
+- `digital_twin_builder_item_reference` (Attributes) An object containing the properties of the Digital Twin Builder item reference. (see [below for nested schema](#nestedatt--properties--digital_twin_builder_item_reference))
+
+<a id="nestedatt--properties--digital_twin_builder_item_reference"></a>
+
+### Nested Schema for `properties.digital_twin_builder_item_reference`
+
+Required:
+
+- `item_id` (String) The DigitalTwinBuilderFlow item ID.
+- `reference_type` (String) The DigitalTwinBuilderFlow reference type. Must be 'ById'.
+- `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.
 
 ## Import
 

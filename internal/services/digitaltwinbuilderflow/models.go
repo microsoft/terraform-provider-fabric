@@ -20,7 +20,7 @@ type digitalTwinBuilderItemReferenceModel struct {
 }
 
 type digitalTwinBuilderFlowConfigPropertiesModel struct {
-	digitalTwinBuilderItemReference supertypes.SingleNestedObjectValueOf[digitalTwinBuilderItemReferenceModel] `tfsdk:"digital_twin_builder_item_reference"`
+	DigitalTwinBuilderItemReference supertypes.SingleNestedObjectValueOf[digitalTwinBuilderItemReferenceModel] `tfsdk:"digital_twin_builder_item_reference"`
 }
 
 func (to *digitalTwinBuilderFlowConfigPropertiesModel) set(ctx context.Context, from fabdigitaltwinbuilderflow.Properties) diag.Diagnostics {
@@ -29,7 +29,18 @@ func (to *digitalTwinBuilderFlowConfigPropertiesModel) set(ctx context.Context, 
 	switch *reference.ReferenceType {
 	case fabdigitaltwinbuilderflow.ItemReferenceTypeByID:
 		digitalTwinBuilderItemReference := supertypes.NewSingleNestedObjectValueOfNull[digitalTwinBuilderItemReferenceModel](ctx)
-		refByID := from.DigitalTwinBuilderItemReference.(*fabdigitaltwinbuilderflow.ItemReferenceByID)
+
+		refByID, ok := from.DigitalTwinBuilderItemReference.(*fabdigitaltwinbuilderflow.ItemReferenceByID)
+		if !ok {
+			var diags diag.Diagnostics
+			diags.AddError(
+				"Type Assertion Failed",
+				"Failed to convert DigitalTwinBuilderItemReference to ItemReferenceByID",
+			)
+
+			return diags
+		}
+
 		refType := string(*refByID.ReferenceType)
 
 		digitalTwinBuilderItemReferenceModel := &digitalTwinBuilderItemReferenceModel{
@@ -41,6 +52,8 @@ func (to *digitalTwinBuilderFlowConfigPropertiesModel) set(ctx context.Context, 
 		if diags := digitalTwinBuilderItemReference.Set(ctx, digitalTwinBuilderItemReferenceModel); diags.HasError() {
 			return diags
 		}
+
+		to.DigitalTwinBuilderItemReference = digitalTwinBuilderItemReference
 	default:
 		var diags diag.Diagnostics
 		diags.AddError(
@@ -50,5 +63,6 @@ func (to *digitalTwinBuilderFlowConfigPropertiesModel) set(ctx context.Context, 
 
 		return diags
 	}
+
 	return nil
 }

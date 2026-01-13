@@ -23,6 +23,7 @@ func (o *operationsDigitalTwinBuilderFlow) ConvertItemToEntity(item fabcore.Item
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties:  NewRandomDigitalTwinBuilderFlow().Properties,
 	}
@@ -180,6 +181,7 @@ func NewRandomDigitalTwinBuilderFlow() fabdigitaltwinbuilderflow.DigitalTwinBuil
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties: &fabdigitaltwinbuilderflow.Properties{
 			DigitalTwinBuilderItemReference: &fabdigitaltwinbuilderflow.ItemReferenceByID{

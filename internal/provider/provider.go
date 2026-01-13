@@ -441,7 +441,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
-		digitaltwinbuilderflow.NewResourceDigitalTwinBuilderFlow,
+		func() resource.Resource { return digitaltwinbuilderflow.NewResourceDigitalTwinBuilderFlow(ctx) },
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,

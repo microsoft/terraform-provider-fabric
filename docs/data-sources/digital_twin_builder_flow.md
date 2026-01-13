@@ -81,6 +81,8 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Digital Twin Builder Flow description.
+- `folder_id` (String) The Digital Twin Builder Flow Folder ID.
+- `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -98,3 +100,21 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--properties"></a>
+
+### Nested Schema for `properties`
+
+Read-Only:
+
+- `digital_twin_builder_item_reference` (Attributes) An object containing the properties of the Digital Twin Builder item reference. (see [below for nested schema](#nestedatt--properties--digital_twin_builder_item_reference))
+
+<a id="nestedatt--properties--digital_twin_builder_item_reference"></a>
+
+### Nested Schema for `properties.digital_twin_builder_item_reference`
+
+Read-Only:
+
+- `item_id` (String) The DigitalTwinBuilderFlow item ID.
+- `reference_type` (String) The DigitalTwinBuilderFlow reference type.
+- `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.

@@ -142,7 +142,7 @@ func TestUnit_DigitalTwinBuilderFlowResource_ImportState(t *testing.T) {
 		),
 	)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -195,14 +195,16 @@ func TestUnit_DigitalTwinBuilderFlowResource_ImportState(t *testing.T) {
 
 func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
-	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	digitalTwinBuilderID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
+	entityBefore := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
+	entityAfter := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	entityCreationPayload := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
-	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -220,23 +222,6 @@ func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 					},
 				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
-		},
-		// Create and Read - without definition
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": *entityBefore.WorkspaceID,
-						"display_name": *entityBefore.DisplayName,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-			),
 		},
 		// Create and Read - with definition
 		{
@@ -256,6 +241,36 @@ func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
+			),
+		},
+		// Create and Read - with creation payload
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityCreationPayload.WorkspaceID,
+						"display_name": *entityCreationPayload.DisplayName,
+						"configuration": map[string]any{
+							"digital_twin_builder_item_reference": map[string]any{
+								"item_id":        digitalTwinBuilderID,
+								"reference_type": string(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
+								"workspace_id":   workspaceID,
+							},
+						},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityCreationPayload.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// Update and Read
@@ -277,6 +292,9 @@ func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 	}))
@@ -313,6 +331,9 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// Create and Read - with creation payload
@@ -326,18 +347,20 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateCreationPayload,
 						"configuration": map[string]any{
-							"item_id":        digitalTwinbuilderID,
-							"reference_type": string(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
-							"workspace_id":   workspaceID,
+							"digital_twin_builder_item_reference": map[string]any{
+								"item_id":        digitalTwinbuilderID,
+								"reference_type": string(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
+								"workspace_id":   workspaceID,
+							},
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateCreationPayload),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.item_id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.workspace_id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.reference_type"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// Update and Read
@@ -359,6 +382,9 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 	},

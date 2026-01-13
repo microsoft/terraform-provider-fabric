@@ -6,5 +6,3 @@ package digitaltwinbuilderflow_test
 import "github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilderflow"
 
 var itemTypeInfo = digitaltwinbuilderflow.ItemTypeInfo
-
-const fabricItemType = digitaltwinbuilderflow.FabricItemType
