@@ -12,6 +12,7 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabdigitaltwinbuilderflow "github.com/microsoft/fabric-sdk-go/fabric/digitaltwinbuilderflow"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -122,32 +123,32 @@ func TestUnit_DigitalTwinBuilderFlowResource_Attributes(t *testing.T) {
 
 func TestUnit_DigitalTwinBuilderFlowResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entity := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 
 	testCase := at.JoinConfigs(
 		testHelperLocals,
 		at.CompileConfig(
 			testResourceItemHeader,
 			map[string]any{
-				"workspace_id":              *entity.WorkspaceID,
-				"display_name":              *entity.DisplayName,
-				"format":                    "Default",
-				"definition":                testHelperDefinition,
-				"definition_update_enabled": true,
+				"workspace_id": *entity.WorkspaceID,
+				"display_name": *entity.DisplayName,
+				"format":       "Default",
+				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(fabricItemType)))),
+			ExpectError:   regexp.MustCompile(`Expected identifier must be in the format:\s+WorkspaceID/DigitalTwinBuilderFlowID`),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
@@ -282,11 +283,14 @@ func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
+	digitalTwinBuilder := testhelp.WellKnown()["DigitalTwinBuilder"].(map[string]any)
+	digitalTwinbuilderID := digitalTwinBuilder["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
-	entityCreateDisplayNameNoDefinition := testhelp.RandomName()
+	entityCreateCreationPayload := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
@@ -311,7 +315,7 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
-		// Create and Read - without definition
+		// Create and Read - with creation payload
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -320,29 +324,20 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayNameNoDefinition,
+						"display_name": entityCreateCreationPayload,
+						"configuration": map[string]any{
+							"item_id":        digitalTwinbuilderID,
+							"reference_type": string(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
+							"workspace_id":   workspaceID,
+						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayNameNoDefinition),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateCreationPayload),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-			),
-		},
-		// Create and Read - without definition
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.reference_type"),
 			),
 		},
 		// Update and Read

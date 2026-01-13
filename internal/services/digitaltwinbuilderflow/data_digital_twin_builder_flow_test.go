@@ -23,11 +23,11 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entity := fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -105,6 +105,9 @@ func TestUnit_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// read by id - not found
@@ -133,6 +136,9 @@ func TestUnit_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// read by name - not found

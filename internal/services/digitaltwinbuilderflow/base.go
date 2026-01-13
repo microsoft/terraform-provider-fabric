@@ -26,11 +26,3 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	IsPreview:      true,
 	IsSPNSupported: true,
 }
-
-var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
-	{
-		Type:  fabricitem.DefinitionFormatDefault,
-		API:   "",
-		Paths: []string{"definition.json"},
-	},
-}

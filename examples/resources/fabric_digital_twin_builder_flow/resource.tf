@@ -29,7 +29,7 @@ resource "fabric_digital_twin_builder_flow" "example_definition_update" {
     "definition.json" = {
       source = "${local.path}/definition.json.tmpl"
       tokens = {
-        "DIGITAL_TWIN_BUILDER_ID" = "Item ID of the parent lakehouse that exists in the workspace"
+        "DIGITAL_TWIN_BUILDER_ID" = "11111111-1111-1111-1111-111111111111"
       }
     }
   }
