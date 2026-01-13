@@ -3,14 +3,14 @@
 page_title: "fabric_maps Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Maps data-source allows you to retrieve a list of Fabric Maps https://learn.microsoft.com/azure/azure-maps/.
+  The Maps data-source allows you to retrieve a list of Fabric Maps https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_maps (Data Source)
 
-The Maps data-source allows you to retrieve a list of Fabric [Maps](https://learn.microsoft.com/azure/azure-maps/).
+The Maps data-source allows you to retrieve a list of Fabric [Maps](https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map).
 
 -> This data-source supports Service Principal authentication.
 

@@ -3,14 +3,14 @@
 page_title: "fabric_map Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Map resource allows you to manage a Fabric Map https://learn.microsoft.com/azure/azure-maps/.
+  The Map resource allows you to manage a Fabric Map https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_map (Resource)
 
-The Map resource allows you to manage a Fabric [Map](https://learn.microsoft.com/azure/azure-maps/).
+The Map resource allows you to manage a Fabric [Map](https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map).
 
 -> This resource supports Service Principal authentication.
 

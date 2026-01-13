@@ -3,14 +3,14 @@
 page_title: "fabric_map Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Map data-source allows you to retrieve details about a Fabric Map https://learn.microsoft.com/azure/azure-maps/.
+  The Map data-source allows you to retrieve details about a Fabric Map https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_map (Data Source)
 
-The Map data-source allows you to retrieve details about a Fabric [Map](https://learn.microsoft.com/azure/azure-maps/).
+The Map data-source allows you to retrieve details about a Fabric [Map](https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map).
 
 -> This data-source supports Service Principal authentication.
 
@@ -41,12 +41,12 @@ data "fabric_map" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["content.json"].content, ".payload")
+  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content, ".payload")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["content.json"].content).payload
+  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content).payload
 }
 
 # This is an invalid data source

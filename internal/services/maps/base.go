@@ -22,7 +22,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "map",
 	Names:          "Maps",
 	Types:          "maps",
-	DocsURL:        "https://learn.microsoft.com/azure/azure-maps/",
+	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/map/create-map",
 	IsPreview:      true,
 	IsSPNSupported: true,
 }
