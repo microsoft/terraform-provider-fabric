@@ -1258,18 +1258,25 @@ foreach ($itemType in $itemTypes) {
 
 # Create DigitalTwinBuilderFlow if not exists
 
-$displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
-$creationPayload = @{
-  workspaceID   = $wellKnown['WorkspaceDS'].id
-  referenceType = 'ById'
-  itemID        = $wellKnown['DigitalTwinBuilder'].id
+if (-not $wellKnown.ContainsKey('DigitalTwinBuilder') -or
+    -not $wellKnown['DigitalTwinBuilder'] -or
+    -not $wellKnown['DigitalTwinBuilder'].id) {
+  Write-Log -Message "DigitalTwinBuilder was not created successfully. Cannot create DigitalTwinBuilderFlow without a valid DigitalTwinBuilder id." -Level 'ERROR'
 }
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
+  $creationPayload = @{
+    workspaceID   = $wellKnown['WorkspaceDS'].id
+    referenceType = 'ById'
+    itemID        = $wellKnown['DigitalTwinBuilder'].id
+  }
 
-$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
-$wellKnown['DigitalTwinBuilderFlow'] = @{
-  id          = $item.id
-  displayName = $item.displayName
-  description = $item.description
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
+  $wellKnown['DigitalTwinBuilderFlow'] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
 }
 
 # Create KQLDatabase if not exists
