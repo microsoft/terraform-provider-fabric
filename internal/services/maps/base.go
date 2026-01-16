@@ -27,7 +27,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	IsSPNSupported: true,
 }
 
-var itemDefinitionFormats = []fabricitem.DefinitionFormat{
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",

@@ -148,10 +148,6 @@ func TestUnit_MapDataSource(t *testing.T) {
 }
 
 func TestAcc_MapDataSource(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

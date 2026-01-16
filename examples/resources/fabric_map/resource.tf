@@ -13,7 +13,7 @@ resource "fabric_map" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "map.json" = {
-      source = "${local.path}/map.json"
+      source = "${local.path}/map.json.tmpl"
     }
   }
 }
