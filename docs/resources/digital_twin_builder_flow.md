@@ -19,14 +19,7 @@ The Digital Twin Builder Flow resource allows you to manage a Fabric [Digital Tw
 ## Example Usage
 
 ```terraform
-# Example 1 - Item without definition
-resource "fabric_digital_twin_builder_flow" "example_definition" {
-  display_name = "example"
-  description  = "example without definition"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-}
-
-# Example 2 - Item with definition bootstrapping only
+# Example 1 - Item with definition bootstrapping only
 resource "fabric_digital_twin_builder_flow" "example_definition_bootstrap" {
   display_name              = "example"
   description               = "example with definition bootstrapping"
@@ -40,7 +33,7 @@ resource "fabric_digital_twin_builder_flow" "example_definition_bootstrap" {
   }
 }
 
-# Example 3 - Item with definition update when source or tokens changed
+# Example 2 - Item with definition update when source or tokens changed
 resource "fabric_digital_twin_builder_flow" "example_definition_update" {
   display_name = "example"
   description  = "example with definition update when source or tokens changed"
@@ -52,6 +45,20 @@ resource "fabric_digital_twin_builder_flow" "example_definition_update" {
       tokens = {
         "DIGITAL_TWIN_BUILDER_ID" = "11111111-1111-1111-1111-111111111111"
       }
+    }
+  }
+}
+
+#Example 3 - Item with creation payload
+resource "fabric_digital_twin_builder_flow" "example_creation_payload" {
+  display_name = "example"
+  description  = "example with creation payload"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  configuration = {
+    digital_twin_builder_item_reference = {
+      workspace_id   = "00000000-0000-0000-0000-000000000000",
+      reference_type = "ById",
+      item_id        = "11111111-1111-1111-1111-111111111111",
     }
   }
 }

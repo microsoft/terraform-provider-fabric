@@ -304,11 +304,7 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	digitalTwinBuilder := testhelp.WellKnown()["DigitalTwinBuilder"].(map[string]any)
-	digitalTwinbuilderID := digitalTwinBuilder["id"].(string)
-
 	entityCreateDisplayName := testhelp.RandomName()
-	entityCreateCreationPayload := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
@@ -336,6 +332,47 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"format":       "Default",
+						"description":  entityUpdateDescription,
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_DigitalTwinBuilderFlowCreationPayloadResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	digitalTwinBuilder := testhelp.WellKnown()["DigitalTwinBuilder"].(map[string]any)
+	digitalTwinbuilderID := digitalTwinBuilder["id"].(string)
+
+	entityCreateCreationPayload := testhelp.RandomName()
+
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - with creation payload
 		{
 			ResourceName: testResourceItemFQN,
@@ -373,20 +410,23 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
-						"format":       "Default",
 						"description":  entityUpdateDescription,
-						"definition":   testHelperDefinition,
+						"configuration": map[string]any{
+							"digital_twin_builder_item_reference": map[string]any{
+								"item_id":        digitalTwinbuilderID,
+								"reference_type": string(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
+								"workspace_id":   workspaceID,
+							},
+						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
-	},
-	))
+	}))
 }
