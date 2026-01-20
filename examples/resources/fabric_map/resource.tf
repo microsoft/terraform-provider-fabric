@@ -43,7 +43,7 @@ resource "fabric_map" "example_custom_delimiter" {
   definition = {
     "map.json" = {
       source           = "${local.path}/map.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "{{}}"
       tokens = {
         "LAKEHOUSES" = "{\"workspaceId\": \"00000000-0000-0000-0000-000000000000\", \"artifactId\": \"11111111-1111-1111-1111-111111111111\"}"
       }
@@ -60,7 +60,7 @@ resource "fabric_map" "example_parameters" {
   definition = {
     "map.json" = {
       source          = "${local.path}/map.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

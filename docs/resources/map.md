@@ -34,7 +34,7 @@ resource "fabric_map" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "map.json" = {
-      source = "${local.path}/map.json"
+      source = "${local.path}/map.json.tmpl"
     }
   }
 }
@@ -64,7 +64,7 @@ resource "fabric_map" "example_custom_delimiter" {
   definition = {
     "map.json" = {
       source           = "${local.path}/map.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "{{}}"
       tokens = {
         "LAKEHOUSES" = "{\"workspaceId\": \"00000000-0000-0000-0000-000000000000\", \"artifactId\": \"11111111-1111-1111-1111-111111111111\"}"
       }
@@ -81,7 +81,7 @@ resource "fabric_map" "example_parameters" {
   definition = {
     "map.json" = {
       source          = "${local.path}/map.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
@@ -169,6 +169,6 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
-# terraform import fabric_map.example "<WorkspaceID>/MapID"
+# terraform import fabric_map.example "<WorkspaceID>/<MapID>"
 terraform import fabric_map.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
 ```

@@ -41,12 +41,12 @@ data "fabric_map" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content, ".payload")
+  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content, "")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content).payload
+  value = provider::fabric::content_decode(data.fabric_map.example_definition.definition["map.json"].content)
 }
 
 # This is an invalid data source

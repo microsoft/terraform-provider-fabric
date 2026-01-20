@@ -11,5 +11,5 @@ terraform {
 provider "fabric" {}
 
 locals {
-  path = abspath(join("/", [path.root, "..", "..", "..", "internal", "testhelp", "fixtures", "maps"]))
+  path = abspath(join("/", [path.root, "..", "..", "..", "internal", "testhelp", "fixtures", "map"]))
 }
