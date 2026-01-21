@@ -4,6 +4,7 @@
 package tenantsettings_test
 
 import (
+	"strconv"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -35,6 +36,10 @@ func TestUnit_TenantSettingDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "setting_name", randomEntity.SettingName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "title", randomEntity.Title),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(*randomEntity.Enabled)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "tenant_setting_group", randomEntity.TenantSettingGroup),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "enabled_security_groups.0.graph_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "enabled_security_groups.0.name"),
 			),
 		},
 	}))
@@ -43,6 +48,11 @@ func TestUnit_TenantSettingDataSource(t *testing.T) {
 func TestAcc_TenantSettingDataSource(t *testing.T) {
 	entity := testhelp.WellKnown()["TenantSettings"].(map[string]any)
 	settingName := entity["settingName"].(string)
+	tenantSettingGroup := entity["tenantSettingGroup"].(string)
+	enabled := entity["enabled"].(bool)
+	title := entity["title"].(string)
+	canSpecifySecurityGroups := entity["canSpecifySecurityGroups"].(bool)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by setting_name
 		{
@@ -54,6 +64,13 @@ func TestAcc_TenantSettingDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "setting_name", settingName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tenant_setting_group", tenantSettingGroup),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(enabled)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "title", title),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "can_specify_security_groups", strconv.FormatBool(canSpecifySecurityGroups)),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "delegate_to_capacity"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "delegate_to_workspace"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "delegate_to_domain"),
 			),
 		},
 	},

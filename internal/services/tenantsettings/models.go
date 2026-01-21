@@ -13,7 +13,6 @@ import (
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
@@ -195,17 +194,12 @@ func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTen
 func (to *baseTenantSettingsModel) setUpdate(ctx context.Context, from []fabadmin.TenantSetting) diag.Diagnostics {
 	for _, entity := range from {
 		if entity.SettingName != nil && *entity.SettingName == to.SettingName.ValueString() {
-			return to.set(ctx, entity)
+			if diags := to.set(ctx, entity); diags.HasError() {
+				return diags
+			}
 		}
 	}
-	var diags diag.Diagnostics
-
-	diags.AddError(
-		common.ErrorReadHeader,
-		"Error during updating Tenant Settings.",
-	)
-
-	return diags
+	return nil
 }
 
 /*

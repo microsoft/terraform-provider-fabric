@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -213,10 +214,17 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
+	timeout, diags := state.Timeouts.Delete(ctx, r.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	if !state.DeleteBehaviour.IsNull() && !state.DeleteBehaviour.IsUnknown() && state.DeleteBehaviour.ValueString() == string(Disable) {
 		var reqUpdate requestUpdateTenantSettings
-		disabled := false
-		reqUpdate.UpdateTenantSettingRequest.Enabled = &disabled
+		reqUpdate.UpdateTenantSettingRequest.Enabled = to.Ptr(false)
 
 		respUpdate, err := r.client.UpdateTenantSetting(ctx, state.SettingName.ValueString(), reqUpdate.UpdateTenantSettingRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
@@ -235,14 +243,14 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 	})
 }
 
-func (d *resourceTenantSettings) get(ctx context.Context, model *resourceTenantSettingsModel) diag.Diagnostics {
+func (r *resourceTenantSettings) get(ctx context.Context, model *resourceTenantSettingsModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET BY SETTING_NAME", map[string]any{
 		"setting_name": model.SettingName.ValueString(),
 	})
 
 	var diags diag.Diagnostics
 
-	pager := d.client.NewListTenantSettingsPager(nil)
+	pager := r.client.NewListTenantSettingsPager(nil)
 	for pager.More() {
 		page, err := pager.NextPage(ctx)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {

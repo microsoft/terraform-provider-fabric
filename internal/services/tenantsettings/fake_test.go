@@ -98,22 +98,32 @@ func fakeTestUpsert(entity fabadmin.TenantSetting) {
 	fakeTenantSettingsStore[*entity.SettingName] = entity
 }
 
-func fakeUpdateTenantSettings(
-	exampleResp fabadmin.TenantSetting,
-) func(ctx context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, options *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _ string, _ fabadmin.UpdateTenantSettingRequest, _ *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
+func fakeUpdateTenantSettings() func(ctx context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, options *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, _ *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse]{}
 
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
 
-		if _, ok := fakeTenantSettingsStore[*exampleResp.SettingName]; !ok {
+		if _, ok := fakeTenantSettingsStore[tenantSettingName]; !ok {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Tenant Setting not found"))
 			resp.SetResponse(http.StatusNotFound, fabadmin.TenantsClientUpdateTenantSettingResponse{}, nil)
 
 			return resp, errResp
 		}
 
-		fakeTenantSettingsStore[*exampleResp.SettingName] = exampleResp
+		fakeTenantSettingsStore[tenantSettingName] = fabadmin.TenantSetting{
+			SettingName:              to.Ptr(tenantSettingName),
+			Title:                    fakeTenantSettingsStore[tenantSettingName].Title,
+			TenantSettingGroup:       fakeTenantSettingsStore[tenantSettingName].TenantSettingGroup,
+			Enabled:                  updateTenantSettingRequest.Enabled,
+			CanSpecifySecurityGroups: fakeTenantSettingsStore[tenantSettingName].CanSpecifySecurityGroups,
+			DelegateToCapacity:       updateTenantSettingRequest.DelegateToCapacity,
+			DelegateToDomain:         updateTenantSettingRequest.DelegateToDomain,
+			DelegateToWorkspace:      updateTenantSettingRequest.DelegateToWorkspace,
+			EnabledSecurityGroups:    updateTenantSettingRequest.EnabledSecurityGroups,
+			ExcludedSecurityGroups:   updateTenantSettingRequest.ExcludedSecurityGroups,
+			Properties:               updateTenantSettingRequest.Properties,
+		}
 
 		resp.SetResponse(
 			http.StatusOK,

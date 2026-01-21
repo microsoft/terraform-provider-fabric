@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
@@ -68,7 +69,7 @@ func itemSchema(isList bool) superschema.Schema {
 			},
 			"delete_behaviour": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. False - The tenant setting is not disabled when deleted. True - The tenant setting is disabled when deleted.",
+					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. NoChange - The tenant setting is not disabled when deleted. Disable - The tenant setting is disabled when deleted.",
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(PossibleDeleteBehaviourValues(), true)...),
 					},
@@ -76,6 +77,7 @@ func itemSchema(isList bool) superschema.Schema {
 				Resource: &schemaR.StringAttribute{
 					Computed: true,
 					Optional: true,
+					Default:  stringdefault.StaticString(string(NoChange)),
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

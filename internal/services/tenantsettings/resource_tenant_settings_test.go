@@ -75,7 +75,7 @@ func TestUnit_TenantSettingsResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
 	entityUpdate := entity
 	entityUpdate.Enabled = to.Ptr(!*entity.Enabled)
-	fakes.FakeServer.ServerFactory.Admin.TenantsServer.UpdateTenantSetting = fakeUpdateTenantSettings(entityUpdate)
+	fakes.FakeServer.ServerFactory.Admin.TenantsServer.UpdateTenantSetting = fakeUpdateTenantSettings()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// success
@@ -110,10 +110,8 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 	entity := testhelp.WellKnown()["TenantSettings"].(map[string]any)
 	settingName := entity["settingName"].(string)
 	enabled := entity["enabled"].(bool)
-
-	securityGroupEntity := testhelp.WellKnown()["SecurityGroup"].(map[string]any)
-	securityGroupID := securityGroupEntity["id"].(string)
-	securityGroupName := securityGroupEntity["name"].(string)
+	securityGroupID := entity["securityGroupId"].(string)
+	securityGroupName := entity["securityGroupName"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Update
