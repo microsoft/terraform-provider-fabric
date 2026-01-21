@@ -395,8 +395,12 @@ function Set-DeploymentPipeline {
 }
 
 function Get-TenantSettings {
+  param(
+    [Parameter(Mandatory = $false)]
+    [string]$TenantSettingName = "DiscoverDatasetsSettingsPromoted"
+  )
   $results = Invoke-FabricRest -Method 'GET' -Endpoint 'admin/tenantSettings'
-  return $results.Response.value | Where-Object { $_.settingName -eq "DiscoverDatasetsSettingsPromoted" }
+  return $results.Response.value | Where-Object { $_.settingName -eq $TenantSettingName }
 }
 
 function Set-DeploymentPipelineRoleAssignment {
@@ -1388,11 +1392,6 @@ $wellKnown['TenantSettings'] = @{
   delegateToWorkspace      = $tenantSettings.delegateToWorkspace
   securityGroupName        = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
   securityGroupId          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
-}
-
-$wellKnown['SecurityGroup'] = @{
-  name = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
-  id   = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
 }
 
 # Create Eventstream if not exists
