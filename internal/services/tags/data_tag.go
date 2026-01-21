@@ -171,7 +171,7 @@ func (d *dataSourceTag) getByDisplayName(ctx context.Context, model *dataSourceT
 			if *entity.DisplayName == model.DisplayName.ValueString() {
 				model.ID = customtypes.NewUUIDPointerValue(entity.ID)
 
-				return d.getByID(ctx, model)
+				return model.set(ctx, entity)
 			}
 		}
 	}

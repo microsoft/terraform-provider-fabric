@@ -26,19 +26,8 @@ func TestUnit_TagResource_CRUD(t *testing.T) {
 
 	updateTag := NewRandomTag()
 
-	body := fabadmin.CreateTagsRequest{
-		CreateTagsRequest: []fabadmin.CreateTagRequest{
-			{
-				DisplayName: &entity1DisplayName,
-			},
-			{
-				DisplayName: &entity2DisplayName,
-			},
-		},
-	}
-
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.NewListTagsPager = fakeTagsFunc()
-	fakes.FakeServer.ServerFactory.Admin.TagsServer.BulkCreateTags = fakeBulkCreateTagsFunc(body)
+	fakes.FakeServer.ServerFactory.Admin.TagsServer.BulkCreateTags = fakeBulkCreateTagsFunc()
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.DeleteTag = fakeDeleteTagFunc()
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.UpdateTag = fakeUpdateTagFunc(updateTag)
 

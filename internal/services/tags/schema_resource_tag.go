@@ -24,75 +24,61 @@ func resourceItemSchema() superschema.Schema { //revive:disable-line:flag-parame
 		},
 		Attributes: map[string]superschema.Attribute{
 			"id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
+				Resource: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
 					CustomType:          customtypes.UUIDType{},
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-					Optional: true,
+					Computed:            true,
+					Optional:            true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 			},
 			"display_name": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
-				},
 				Resource: &schemaR.StringAttribute{
-					Computed: true,
-					Optional: true,
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
 					Validators: []validator.String{
 						stringvalidator.LengthAtMost(40),
 					},
 				},
 			},
 			"tags": superschema.SuperListNestedAttributeOf[baseTagModel]{
-				Common: &schemaR.ListNestedAttribute{
-					MarkdownDescription: "List of tags associated with the resource.",
-				},
 				Resource: &schemaR.ListNestedAttribute{
-					Optional: true,
+					MarkdownDescription: "List of tags associated with the resource.",
+					Optional:            true,
 				},
 				Attributes: map[string]superschema.Attribute{
 					"id": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
-						},
 						Resource: &schemaR.StringAttribute{
-							Computed: true,
-							Optional: true,
+							MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
+							Computed:            true,
+							Optional:            true,
 						},
 					},
 					"display_name": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
-						},
 						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
+							MarkdownDescription: "The " + ItemTypeInfo.Name + " display name.",
+							Optional:            true,
+							Computed:            true,
 						},
 					},
 					"scope": superschema.SuperSingleNestedAttributeOf[scopeModel]{
-						Common: &schemaR.SingleNestedAttribute{
-							MarkdownDescription: "Represents a tag scope.",
-						},
 						Resource: &schemaR.SingleNestedAttribute{
-							Optional: true,
-							Computed: true,
+							Optional:            true,
+							Computed:            true,
+							MarkdownDescription: "Represents a tag scope.",
 						},
 						Attributes: map[string]superschema.Attribute{
 							"type": superschema.StringAttribute{
-								Common: &schemaR.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									Optional:            true,
+									Computed:            true,
 									MarkdownDescription: "Scope Type.",
 									Validators: []validator.String{
 										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTagScopeTypeValues(), true)...),
 									},
-								},
-								Resource: &schemaR.StringAttribute{
-									Optional: true,
-									Computed: true,
 								},
 							},
 						},
@@ -100,24 +86,20 @@ func resourceItemSchema() superschema.Schema { //revive:disable-line:flag-parame
 				},
 			},
 			"scope": superschema.SuperSingleNestedAttributeOf[scopeModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "Represents a tag scope.",
-				},
 				Resource: &schemaR.SingleNestedAttribute{
-					Optional: true,
-					Computed: true,
+					MarkdownDescription: "Represents a tag scope.",
+					Optional:            true,
+					Computed:            true,
 				},
 				Attributes: map[string]superschema.Attribute{
 					"type": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
+						Resource: &schemaR.StringAttribute{
+							Optional:            true,
+							Computed:            true,
 							MarkdownDescription: "Scope Type.",
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTagScopeTypeValues(), true)...),
 							},
-						},
-						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
 						},
 					},
 				},

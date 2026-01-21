@@ -19,8 +19,8 @@ import (
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_TagDataSource(t *testing.T) {
-	randomEntity := NewRandomTag()
-	fakeTestUpsert(randomEntity)
+	entity := NewRandomTag()
+	fakeTestUpsert(entity)
 	fakeTestUpsert(NewRandomTag())
 
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.NewListTagsPager = fakeTagsFunc()
@@ -39,8 +39,8 @@ func TestUnit_TagDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"id":           *randomEntity.ID,
-					"display_name": *randomEntity.DisplayName,
+					"id":           *entity.ID,
+					"display_name": *entity.DisplayName,
 				},
 			),
 			ExpectError: regexp.MustCompile(`These attributes cannot be configured together: \[id,display_name\]`),
@@ -60,7 +60,7 @@ func TestUnit_TagDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"id":              *randomEntity.ID,
+					"id":              *entity.ID,
 					"unexpected_attr": "test",
 				},
 			),
@@ -71,13 +71,13 @@ func TestUnit_TagDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"id": *randomEntity.ID,
+					"id": *entity.ID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", randomEntity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", randomEntity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "scope.type", (*string)(randomEntity.Scope.GetTagScope().Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "scope.type", (*string)(entity.Scope.GetTagScope().Type)),
 			),
 		},
 		// read by display name
@@ -85,13 +85,13 @@ func TestUnit_TagDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"display_name": *randomEntity.DisplayName,
+					"display_name": *entity.DisplayName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", randomEntity.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", randomEntity.DisplayName),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "scope.type", (*string)(randomEntity.Scope.GetTagScope().Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "scope.type", (*string)(entity.Scope.GetTagScope().Type)),
 			),
 		},
 	}))
