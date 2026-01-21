@@ -77,6 +77,7 @@ output "example_definition_content_object" {
 
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Mounted Data Factory description.
+- `folder_id` (String) The Mounted Data Factory Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -1003,6 +1003,33 @@ function Set-FabricFolder {
   return $result
 }
 
+function Set-ItemJobScheduler {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+    [Parameter(Mandatory = $true)]
+    [string]$JobType,
+    [Parameter(Mandatory = $true)]
+    [object]$Payload
+  )
+
+  # Attempt to get an existing item schedule - will get the first occurrence of our payload type and item id
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/jobs/$JobType/schedules"
+  $result = $results.Response.value | Where-Object { $_.configuration.type -eq $Payload.configuration.type } | Select-Object -First 1
+
+  if (!$result) {
+    # Item Schedule does not exist, so create it
+    Write-Log -Message "Creating $($Payload.configuration.type) Item Schedule" -Level 'INFO'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/jobs/$JobType/schedules" -Payload $Payload).Response
+  }
+  Write-Log -Message "Item Schedule - Id: $($result.id)"
+
+  return $result
+}
+
 
 # Define an array of modules to install
 $modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
@@ -1082,6 +1109,7 @@ $itemNaming = @{
   'Datamart'                        = 'dm'
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
+  'DigitalTwinBuilder'              = 'dtb'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
@@ -1803,6 +1831,70 @@ else {
     id          = $warehouseSnapshot.id
     displayName = $warehouseSnapshot.displayName
     description = $warehouseSnapshot.description
+  }
+}
+
+# Create Item Schedule if not exists
+if (-not $wellKnown.ContainsKey('Dataflow') -or -not $wellKnown['Dataflow'] -or -not $wellKnown['Dataflow'].id) {
+  Write-Log -Message "Dataflow not found or missing 'id'. Cannot create Item Job Schedule." -Level 'WARN'
+}
+else {
+  $itemJobSchedulerPayload = @{
+    enabled       = $false
+    configuration = @{
+      endDateTime     = (Get-Date).AddDays(7)
+      startDateTime   = Get-Date
+      localTimeZoneId = "Central Standard Time"
+      type            = "Weekly"
+      times           = @("10:00")
+      weekdays        = @("Monday")
+    }
+  }
+
+  $JOB_TYPE = "ApplyChanges"
+  $itemJobScheduler = Set-ItemJobScheduler `
+    -WorkspaceId $wellKnown['WorkspaceDS'].id `
+    -ItemId $wellKnown['Dataflow'].id `
+    -Jobtype $JOB_TYPE `
+    -Payload $itemJobSchedulerPayload
+
+  $wellKnown['ItemJobScheduler'] = @{
+    id                = $itemJobScheduler.id
+    ownerType         = $itemJobScheduler.owner.type
+    ownerId           = $itemJobScheduler.owner.id
+    itemId            = $wellKnown['Dataflow'].id
+    enabled           = $itemJobScheduler.enabled
+    configurationType = $itemJobScheduler.configuration.type
+    createdDateTime   = $itemJobScheduler.createdDateTime
+    jobType           = $JOB_TYPE
+  }
+}
+
+# Create Dataflow with folder_id if not exists
+if (-not $wellKnown.ContainsKey('Folder') -or -not $wellKnown['Folder'] -or -not $wellKnown['Folder'].id) {
+  Write-Log -Message "Folder not found or missing 'id'. Cannot create Dataflow with folder_id." -Level 'WARN'
+}
+else {
+  $displayNameTemp = "${displayName}_fld_$($itemNaming["Dataflow"])"
+
+  $dataflows = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dataflows"
+  $dataflow = $dataflows.Response.value | Where-Object { $_.displayName -eq $displayNameTemp }
+
+  if (!$dataflow) {
+    Write-Log -Message "Creating Dataflow with folder_id: $displayNameTemp" -Level 'WARN'
+    $payload = @{
+      displayName = $displayNameTemp
+      description = $displayNameTemp
+      folderId    = $wellKnown['Folder'].id
+    }
+    $dataflow = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/dataflows" -Payload $payload).Response
+  }
+  Write-Log -Message "Dataflow with folder_id - Name: $($dataflow.displayName) / ID: $($dataflow.id)"
+
+  $wellKnown['DataflowFolder'] = @{
+    id          = $dataflow.id
+    displayName = $dataflow.displayName
+    folderId    = $dataflow.folderId
   }
 }
 

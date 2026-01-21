@@ -21,6 +21,31 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("variable_library"),
+})
+
+var testHelperDefinition = map[string]any{
+	`"settings.json"`: map[string]any{
+		"source": "${local.path}/settings.json.tmpl",
+	},
+	`"variables.json"`: map[string]any{
+		"source": "${local.path}/variables.json.tmpl",
+	},
+	`"valueSets/valueSet1.json"`: map[string]any{
+		"source": "${local.path}/valueSets/valueSet1.json.tmpl",
+	},
+}
+
+var testHelperDefinitionNoValueSets = map[string]any{
+	`"settings.json"`: map[string]any{
+		"source": "${local.path}/settings_empty.json.tmpl",
+	},
+	`"variables.json"`: map[string]any{
+		"source": "${local.path}/variables.json.tmpl",
+	},
+}
+
 func TestUnit_VariableLibraryResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -180,12 +205,14 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Update and Read
@@ -197,57 +224,123 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
 	}))
 }
 
-func TestAcc_VariableLibraryResource_CRUD(t *testing.T) {
+func TestAcc_VariableLibraryResource_CRUD_NoDefinition(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
+	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - no definition
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityCreateDisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 			),
 		},
 		// Update and Read - no definition
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-				},
-			),
+			Config: at.JoinConfigs(
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+			),
+		},
+	}))
+}
+
+func TestAcc_VariableLibraryResource_CRUD_WithDefinition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityCreateNoValueSetsName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read - definition with definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
+			),
+		},
+		// Create and Read - definition with definition - no valueSets
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateNoValueSetsName,
+						"format":       "Default",
+						"definition":   testHelperDefinitionNoValueSets,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateNoValueSetsName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.active_value_set_name"),
 			),
 		},

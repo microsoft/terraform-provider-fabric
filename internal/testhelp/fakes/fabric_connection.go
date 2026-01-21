@@ -301,6 +301,55 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						},
 						SupportsSkipTestConnection: to.Ptr(true),
 					},
+					{
+						Type: to.Ptr("Web"),
+						CreationMethods: []fabcore.ConnectionCreationMethod{
+							{
+								Name: to.Ptr("Web"),
+								Parameters: []fabcore.ConnectionCreationParameter{
+									{
+										Name:     to.Ptr("url"),
+										DataType: to.Ptr(fabcore.DataTypeText),
+										Required: to.Ptr(true),
+									},
+								},
+							},
+						},
+						SupportedCredentialTypes: []fabcore.CredentialType{
+							fabcore.CredentialTypeAnonymous,
+							fabcore.CredentialTypeBasic,
+							fabcore.CredentialTypeServicePrincipal,
+							fabcore.CredentialTypeWorkspaceIdentity,
+						},
+						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+							fabcore.ConnectionEncryptionNotEncrypted,
+						},
+						SupportsSkipTestConnection: to.Ptr(true),
+					},
+					{
+						Type: to.Ptr("SharePoint"),
+						CreationMethods: []fabcore.ConnectionCreationMethod{
+							{
+								Name: to.Ptr("SharePointList"),
+								Parameters: []fabcore.ConnectionCreationParameter{
+									{
+										Name:     to.Ptr("sharePointSiteUrl"),
+										DataType: to.Ptr(fabcore.DataTypeText),
+										Required: to.Ptr(true),
+									},
+								},
+							},
+						},
+						SupportedCredentialTypes: []fabcore.CredentialType{
+							fabcore.CredentialTypeAnonymous,
+							fabcore.CredentialTypeServicePrincipal,
+							fabcore.CredentialTypeWorkspaceIdentity,
+						},
+						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+							fabcore.ConnectionEncryptionNotEncrypted,
+						},
+						SupportsSkipTestConnection: to.Ptr(false),
+					},
 				},
 			},
 		}

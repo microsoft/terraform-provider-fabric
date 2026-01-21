@@ -54,6 +54,7 @@ data "fabric_sql_database" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The SQL Database description.
+- `folder_id` (String) The SQL Database Folder ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--timeouts"></a>

@@ -402,10 +402,8 @@ func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsMod
 }
 
 func (r *resourceConnection) validateConnectionEncryption(model rsCredentialDetailsModel, elements []fabcore.ConnectionEncryption) diag.Diagnostics {
-	for _, v := range elements {
-		if v == fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString()) {
-			return nil
-		}
+	if slices.Contains(elements, fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString())) {
+		return nil
 	}
 
 	var diags diag.Diagnostics
@@ -444,7 +442,7 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 }
 
 func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
-	if model.SkipTestConnection.ValueBool() != supportsSkipTestConnection {
+	if model.SkipTestConnection.ValueBool() && !supportsSkipTestConnection {
 		var diags diag.Diagnostics
 
 		diags.AddAttributeError(
@@ -514,14 +512,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 					path.Root("connection_details").AtName("parameters"),
 					"Missing connection parameter key",
 					fmt.Sprintf("The required connection parameter '%s' is missing.", *v.Name),
-				)
-			}
-
-			if connectionDetailsParams[*v.Name] == "" {
-				diags.AddAttributeError(
-					path.Root("connection_details").AtName("parameters"),
-					"Missing connection parameter value",
-					fmt.Sprintf("The required connection parameter '%s' value is missing.", *v.Name),
 				)
 			}
 		}
@@ -609,13 +599,6 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 			}
 		case fabcore.DataTypeText:
 			// Use text as the parameter input value.
-			if v == "" {
-				diags.AddAttributeError(
-					path.Root("connection_details").AtName("parameters"),
-					"Invalid connection parameter value",
-					fmt.Sprintf("The connection parameter '%s' value is invalid. It must not be empty.", k),
-				)
-			}
 		case fabcore.DataTypeTime:
 			// Use time as the parameter input value, using HH:mm:ss.FFFZ format.
 			//nolint:noinlineerr

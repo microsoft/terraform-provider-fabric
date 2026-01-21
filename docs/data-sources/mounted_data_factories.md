@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Mounted Data Factory description.
 - `display_name` (String) The Mounted Data Factory display name.
+- `folder_id` (String) The Mounted Data Factory Folder ID.
 - `id` (String) The Mounted Data Factory ID.
 - `workspace_id` (String) The Workspace ID.

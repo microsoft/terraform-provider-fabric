@@ -24,6 +24,7 @@ func (o *operationsEnvironment) ConvertItemToEntity(item fabcore.Item) fabenviro
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
 		Properties:  NewRandomEnvironment().Properties,
 	}
@@ -34,6 +35,7 @@ func (o *operationsEnvironment) CreateWithParentID(parentID string, data fabenvi
 	entity := NewRandomEnvironmentWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -140,7 +142,8 @@ func NewRandomEnvironment() fabenvironment.Environment {
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
-		Properties: &fabenvironment.PublishInfo{
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		Properties: &fabenvironment.Properties{
 			PublishDetails: &fabenvironment.PublishDetails{
 				State:         to.Ptr(fabenvironment.PublishStateSuccess),
 				TargetVersion: to.Ptr(testhelp.RandomUUID()),
