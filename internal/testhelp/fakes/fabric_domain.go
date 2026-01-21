@@ -67,7 +67,17 @@ func (o *operationsDomain) TransformUpdate(entity fabadmin.Domain) fabadmin.Doma
 func (o *operationsDomain) Update(base fabadmin.Domain, data fabadmin.UpdateDomainRequest) fabadmin.Domain {
 	base.Description = data.Description
 	base.DisplayName = data.DisplayName
-	base.DefaultLabelID = data.DefaultLabelID
+
+	// Handle default_label_id clearing logic (mimics real API behavior):
+	// - If empty GUID is sent AND base had a label set, clear it
+	// - If a real UUID is sent, set it
+	if data.DefaultLabelID != nil && *data.DefaultLabelID == "00000000-0000-0000-0000-000000000000" {
+		if base.DefaultLabelID != nil {
+			base.DefaultLabelID = nil
+		}
+	} else if data.DefaultLabelID != nil {
+		base.DefaultLabelID = data.DefaultLabelID
+	}
 
 	return base
 }
@@ -134,11 +144,17 @@ func configureDomain(server *fakeServer) fabadmin.Domain {
 
 func NewRandomDomain() fabadmin.Domain {
 	return fabadmin.Domain{
-		ID:             to.Ptr(testhelp.RandomUUID()),
-		DisplayName:    to.Ptr(testhelp.RandomName()),
-		Description:    to.Ptr(testhelp.RandomName()),
-		DefaultLabelID: to.Ptr(testhelp.RandomUUID()),
+		ID:          to.Ptr(testhelp.RandomUUID()),
+		DisplayName: to.Ptr(testhelp.RandomName()),
+		Description: to.Ptr(testhelp.RandomName()),
 	}
+}
+
+func NewRandomDomainWithDefaultLabelID() fabadmin.Domain {
+	entity := NewRandomDomain()
+	entity.DefaultLabelID = to.Ptr(testhelp.RandomUUID())
+
+	return entity
 }
 
 func NewRandomDomainWithParentDomain(parentDomainID string) fabadmin.Domain {

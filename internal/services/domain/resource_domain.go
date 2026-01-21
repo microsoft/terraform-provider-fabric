@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -103,6 +104,19 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	state.set(respCreate.Domain)
 
+	// The Create API doesn't support default_label_id, we need to call Update to set it
+	if !plan.DefaultLabelID.IsNull() && !plan.DefaultLabelID.IsUnknown() {
+		var reqUpdate requestUpdateDomain
+		reqUpdate.set(plan)
+
+		respUpdate, err := r.client.UpdateDomain(ctx, state.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		state.set(respUpdate.Domain)
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
@@ -162,9 +176,13 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 		"action": "start",
 	})
 
-	var plan resourceDomainModel
+	var plan, state resourceDomainModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -179,6 +197,13 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 	var reqUpdate requestUpdateDomain
 
 	reqUpdate.set(plan)
+
+	// Special handling for clearing defaultLabelID:
+	// - API requires empty GUID to clear the label
+	// - API returns null when cleared
+	if plan.DefaultLabelID.IsNull() && !state.DefaultLabelID.IsNull() {
+		reqUpdate.DefaultLabelID = to.Ptr("00000000-0000-0000-0000-000000000000")
+	}
 
 	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {

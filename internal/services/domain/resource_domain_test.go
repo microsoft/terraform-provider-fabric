@@ -66,17 +66,17 @@ func TestUnit_DomainResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// // error - invalid contributors_scope
+		// // error - invalid uuid - default_label_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":       "test",
-					"contributors_scope": "invalid value",
+					"display_name":     "test",
+					"default_label_id": "invalid uuid",
 				},
 			),
-			ExpectError: regexp.MustCompile(`Attribute contributors_scope value must be one of`),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 	}))
 }
@@ -126,10 +126,6 @@ func TestUnit_DomainResource_ImportState(t *testing.T) {
 
 				if is[0].Attributes["description"] != *entity.Description {
 					return errors.New(testResourceItemFQN + ": unexpected description")
-				}
-
-				if is[0].Attributes["default_label_id"] != *entity.DefaultLabelID {
-					return errors.New(testResourceItemFQN + ": unexpected default_label_id")
 				}
 
 				return nil
@@ -187,6 +183,59 @@ func TestUnit_DomainResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
+			),
+		},
+	}))
+}
+
+func TestUnit_DomainResource_DefaultLabelID(t *testing.T) {
+	entityDisplayName := testhelp.RandomName()
+	defaultLabelID := testhelp.RandomUUID()
+	defaultLabelIDUpdated := testhelp.RandomUUID()
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":     entityDisplayName,
+					"default_label_id": defaultLabelID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "default_label_id", defaultLabelID),
+			),
+		},
+		// Update
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":     entityDisplayName,
+					"default_label_id": defaultLabelIDUpdated,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "default_label_id", defaultLabelIDUpdated),
+			),
+		},
+		// Update: remove default_label_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entityDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "default_label_id"),
 			),
 		},
