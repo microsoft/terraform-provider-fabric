@@ -42,12 +42,12 @@ data "fabric_digital_twin_builder_flow" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_digital_twin_builder_flow.example_definition.definition["definition.json"].content, ".payload.tabs[0]")
+  value = provider::fabric::content_decode(data.fabric_digital_twin_builder_flow.example_definition.definition["definition.json"].content, ".")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_digital_twin_builder_flow.example_definition.definition["definition.json"].content).payload.tabs[0]
+  value = provider::fabric::content_decode(data.fabric_digital_twin_builder_flow.example_definition.definition["definition.json"].content)
 }
 
 # This is an invalid data source

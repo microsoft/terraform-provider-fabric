@@ -11,12 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabdigitaltwinbuilderflow "github.com/microsoft/fabric-sdk-go/fabric/digitaltwinbuilderflow"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
 type digitalTwinBuilderItemReferenceModel struct {
-	ItemID        types.String `tfsdk:"item_id"`
-	ReferenceType types.String `tfsdk:"reference_type"`
-	WorkspaceID   types.String `tfsdk:"workspace_id"`
+	ItemID        customtypes.UUID `tfsdk:"item_id"`
+	ReferenceType types.String     `tfsdk:"reference_type"`
+	WorkspaceID   customtypes.UUID `tfsdk:"workspace_id"`
 }
 
 type digitalTwinBuilderFlowConfigPropertiesModel struct {
@@ -44,9 +46,9 @@ func (to *digitalTwinBuilderFlowConfigPropertiesModel) set(ctx context.Context, 
 		refType := string(*refByID.ReferenceType)
 
 		digitalTwinBuilderItemReferenceModel := &digitalTwinBuilderItemReferenceModel{
-			ItemID:        types.StringPointerValue(refByID.ItemID),
+			ItemID:        customtypes.NewUUIDPointerValue(refByID.ItemID),
 			ReferenceType: types.StringPointerValue(&refType),
-			WorkspaceID:   types.StringPointerValue(refByID.WorkspaceID),
+			WorkspaceID:   customtypes.NewUUIDPointerValue(refByID.WorkspaceID),
 		}
 
 		if diags := digitalTwinBuilderItemReference.Set(ctx, digitalTwinBuilderItemReferenceModel); diags.HasError() {

@@ -90,6 +90,11 @@ func TestAcc_DigitalTwinBuilderFlowsDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
+	entity := testhelp.WellKnown()["DigitalTwinBuilderFlow"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityDescription := entity["description"].(string)
+
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{
@@ -103,6 +108,19 @@ func TestAcc_DigitalTwinBuilderFlowsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id":           knownvalue.StringExact(entityID),
+							"display_name": knownvalue.StringExact(entityDisplayName),
+							"description":  knownvalue.StringExact(entityDescription),
+						}),
+					}),
+				),
+			},
 		},
 	},
 	))

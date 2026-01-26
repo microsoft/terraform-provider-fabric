@@ -201,19 +201,15 @@ func NewRandomDigitalTwinBuilderFlowWithWorkspace(workspaceID string) fabdigital
 }
 
 func NewRandomDigitalTwinBuilderFlowDefinition() fabdigitaltwinbuilderflow.PublicDefinition {
-	defPart := fabdigitaltwinbuilderflow.PublicDefinitionPart{
-		PayloadType: to.Ptr(fabdigitaltwinbuilderflow.PayloadTypeInlineBase64),
-		Path:        to.Ptr("definition.json"),
-		Payload: to.Ptr(
-			"eyAKICAiRGlnaXRhbFR3aW5CdWlsZGVySWQiOiAiNTZhMGU2Y2EtMTAxZS1iYzA1LTQ2NDktNjAzOTMzYWUxMjcwIiwgCiAgIk9wZXJhdGlvbklkcyI6IFsgCiAgICAiY2U5ZDBlZjktZDhmNi00MzkxLTllMzctOGJkYjkxYjFmYzE2IiAKICBdLCAKICAiSXNPbkRlbWFuZCI6IGZhbHNlIAp9IA==",
-		),
-	}
-
-	var defParts []fabdigitaltwinbuilderflow.PublicDefinitionPart
-
-	defParts = append(defParts, defPart)
-
 	return fabdigitaltwinbuilderflow.PublicDefinition{
-		Parts: defParts,
+		Parts: []fabdigitaltwinbuilderflow.PublicDefinitionPart{
+			{
+				PayloadType: to.Ptr(fabdigitaltwinbuilderflow.PayloadTypeInlineBase64),
+				Path:        to.Ptr("definition.json"),
+				Payload: to.Ptr(
+					"eyAKICAiRGlnaXRhbFR3aW5CdWlsZGVySWQiOiAiNTZhMGU2Y2EtMTAxZS1iYzA1LTQ2NDktNjAzOTMzYWUxMjcwIiwgCiAgIk9wZXJhdGlvbklkcyI6IFsgCiAgICAiY2U5ZDBlZjktZDhmNi00MzkxLTllMzctOGJkYjkxYjFmYzE2IiAKICBdLCAKICAiSXNPbkRlbWFuZCI6IGZhbHNlIAp9IA==",
+				),
+			},
+		},
 	}
 }
