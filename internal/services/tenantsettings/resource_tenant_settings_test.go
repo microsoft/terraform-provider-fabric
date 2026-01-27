@@ -114,6 +114,33 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 	securityGroupName := entity["securityGroupName"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"setting_name": settingName,
+					"enabled":      !enabled,
+					"enabled_security_groups": []map[string]any{
+						{
+							"graph_id": securityGroupID,
+							"name":     securityGroupName,
+						},
+					},
+					"delete_behaviour": string(tenantsettings.NoChange),
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "setting_name", &settingName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tenant_setting_group"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "title"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(!enabled)),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "can_specify_security_groups"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled_security_groups.0.graph_id", securityGroupID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled_security_groups.0.name", securityGroupName),
+			),
+		},
 		// Update
 		{
 			ResourceName: testResourceItemFQN,
