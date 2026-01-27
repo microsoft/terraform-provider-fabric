@@ -358,7 +358,7 @@ jobs:
           terraform -version
 
       - name: 🚧 Setup OpenTofu
-        uses: opentofu/setup-opentofu@000eeb8522f0572907c393e8151076c205fdba1b # v1.0.6
+        uses: opentofu/setup-opentofu@e95ccdd20623115bfd7d47df14a3250d6066a9d0 # v1.0.7
         if: matrix.cli == 'tofu'
         with:
           tofu_version: ${{ matrix.version }}
@@ -425,7 +425,7 @@ jobs:
 
       - name: 📤 Upload test results
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
           path: testresults.json
@@ -434,7 +434,7 @@ jobs:
 
       - name: 📤 Upload coverage results
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -468,7 +468,7 @@ jobs:
 
       - name: 📤 Upload Coverage summary
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -491,13 +491,13 @@ jobs:
       id-token: write
     steps:
       - name: 📥 Download test results
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: terraform-1_13-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: terraform-1_13-test-coverage*
           merge-multiple: true
@@ -513,7 +513,7 @@ jobs:
       #     files: ./testresults.xml
 
       - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
