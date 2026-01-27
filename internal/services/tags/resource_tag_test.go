@@ -4,6 +4,7 @@
 package tags_test
 
 import (
+	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
@@ -16,6 +17,69 @@ import (
 )
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
+func TestUnit_TagResource_Attributes(t *testing.T) {
+	fakes.FakeServer.ServerFactory.Admin.TagsServer.NewListTagsPager = fakeTagsFunc()
+	fakes.FakeServer.ServerFactory.Admin.TagsServer.BulkCreateTags = fakeBulkCreateTagsFunc()
+	fakes.FakeServer.ServerFactory.Admin.TagsServer.DeleteTag = fakeDeleteTagFunc()
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - display_name, scope without id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"scope": map[string]any{
+						"type": string(fabadmin.TagScopeTypeTenant),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute "id" must be specified when "scope" is specified`),
+		},
+		// error - id, display_name without scope
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"id":           "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute "scope" must be specified when "id" is specified`),
+		},
+		// error - id, display_name without scope
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"id":           "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute "scope" must be specified when "id" is specified`),
+		},
+		// error - "tags" without required field
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"tags": []map[string]any{
+						{
+							"display_name": "example",
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute "tags" cannot be specified when "display_name" is specified`),
+		},
+	}))
+}
 
 func TestUnit_TagResource_CRUD(t *testing.T) {
 	entity1DisplayName := testhelp.RandomName()
@@ -101,10 +165,14 @@ func TestAcc_TagResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.0.display_name", entity1DisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.1.display_name", entity2DisplayName),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.0.id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.1.id"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "tags.*", map[string]string{
+					"display_name": entity1DisplayName,
+				}),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "tags.*", map[string]string{
+					"display_name": entity2DisplayName,
+				}),
 			),
 		},
 		// Update and Read

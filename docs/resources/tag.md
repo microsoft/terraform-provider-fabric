@@ -46,10 +46,10 @@ resource "fabric_tag" "example_update" {
 
 ### Optional
 
-- `display_name` (String) The Tag display name. String length must be at most 40.
-- `id` (String) The Tag ID.
-- `scope` (Attributes) Represents a tag scope. (see [below for nested schema](#nestedatt--scope))
-- `tags` (Attributes List) List of tags associated with the resource. (see [below for nested schema](#nestedatt--tags))
+- `display_name` (String) The Tag display name. String length must be at most 40. Ensure that if an attribute is set, these are not set: "[tags]". Ensure that if an attribute is set, also these are set: "[id,scope]".
+- `id` (String) The Tag ID. Ensure that if an attribute is set, these are not set: "[tags]". Ensure that if an attribute is set, also these are set: "[display_name,scope]".
+- `scope` (Attributes) Represents a tag scope. Ensure that if an attribute is set, these are not set: "[tags]". Ensure that if an attribute is set, also these are set: "[id,display_name]". (see [below for nested schema](#nestedatt--scope))
+- `tags` (Attributes List) List of tags associated with the resource. Ensure that if an attribute is set, these are not set: "[id,display_name,scope]". (see [below for nested schema](#nestedatt--tags))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--scope"></a>
@@ -64,17 +64,20 @@ Optional:
 
 ### Nested Schema for `tags`
 
-Optional:
+Required:
 
-- `display_name` (String) The Tag display name.
-- `id` (String) The Tag ID.
+- `display_name` (String) The Tag display name. Ensure that if an attribute is set, also these are set: "[<.id,<.scope]".
+
+Read-Only:
+
+- `id` (String) The Tag ID. Ensure that if an attribute is set, also these are set: "[<.display_name,<.scope]".
 - `scope` (Attributes) Represents a tag scope. (see [below for nested schema](#nestedatt--tags--scope))
 
 <a id="nestedatt--tags--scope"></a>
 
 ### Nested Schema for `tags.scope`
 
-Optional:
+Required:
 
 - `type` (String) Scope Type. Value must be one of : `Domain`, `Tenant`.
 
