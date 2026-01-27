@@ -72,6 +72,7 @@ func TestUnit_TenantSettingsResource_CRUD(t *testing.T) {
 	entity := NewRandomTenantSettingsWithoutProperties()
 
 	fakeTestUpsert(entity)
+
 	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
 	entityUpdate := entity
 	entityUpdate.Enabled = to.Ptr(!*entity.Enabled)

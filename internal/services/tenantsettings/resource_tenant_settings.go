@@ -224,7 +224,7 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 
 	if !state.DeleteBehaviour.IsNull() && !state.DeleteBehaviour.IsUnknown() && state.DeleteBehaviour.ValueString() == string(Disable) {
 		var reqUpdate requestUpdateTenantSettings
-		reqUpdate.UpdateTenantSettingRequest.Enabled = to.Ptr(false)
+		reqUpdate.Enabled = to.Ptr(false)
 
 		respUpdate, err := r.client.UpdateTenantSetting(ctx, state.SettingName.ValueString(), reqUpdate.UpdateTenantSettingRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {

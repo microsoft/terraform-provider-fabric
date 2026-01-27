@@ -26,7 +26,7 @@ The Tenant Setting resource allows you to manage a Fabric [Tenant Setting](https
 - `delegate_to_capacity` (Boolean) Indicates whether the tenant setting can be delegated to a capacity admin. False - Capacity admin cannot override the tenant setting. True - Capacity admin can override the tenant setting.
 - `delegate_to_domain` (Boolean) Indicates whether the tenant setting can be delegated to a domain admin. False - Domain admin cannot override the tenant setting. True - Domain admin can override the tenant setting.
 - `delegate_to_workspace` (Boolean) Indicates whether the tenant setting can be delegated to a workspace admin. False - Workspace admin cannot override the tenant setting. True - Workspace admin can override the tenant setting.
-- `delete_behaviour` (String) Indicates whether the tenant setting is disabled when deleted. False - The tenant setting is not disabled when deleted. True - The tenant setting is disabled when deleted. Value must be one of : `Disable`, `NoChange`.
+- `delete_behaviour` (String) Indicates whether the tenant setting is disabled when deleted. NoChange - The tenant setting is not disabled when deleted. Disable - The tenant setting is disabled when deleted. Value defaults to `NoChange`. Value must be one of : `Disable`, `NoChange`.
 - `enabled_security_groups` (Attributes Set) A list of enabled security groups. (see [below for nested schema](#nestedatt--enabled_security_groups))
 - `excluded_security_groups` (Attributes Set) A list of excluded security groups. (see [below for nested schema](#nestedatt--excluded_security_groups))
 - `properties` (Attributes Set) Tenant setting properties. (see [below for nested schema](#nestedatt--properties))

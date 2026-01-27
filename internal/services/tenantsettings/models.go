@@ -6,8 +6,8 @@ package tenantsettings
 import (
 	"context"
 
-	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
@@ -52,6 +52,7 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 			sg.set(securityGroup)
 			slice = append(slice, &sg)
 		}
+
 		if diags := to.EnabledSecurityGroups.Set(ctx, slice); diags.HasError() {
 			return diags
 		}
@@ -68,6 +69,7 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 			sg.set(securityGroup)
 			slice = append(slice, &sg)
 		}
+
 		if diags := to.ExcludedSecurityGroups.Set(ctx, slice); diags.HasError() {
 			return diags
 		}
@@ -84,6 +86,7 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 			prop.set(property)
 			slice = append(slice, &prop)
 		}
+
 		if diags := to.Properties.Set(ctx, slice); diags.HasError() {
 			return diags
 		}
@@ -123,6 +126,7 @@ func (to *dataSourceTenantSettingsModel) set(ctx context.Context, from []fabadmi
 		tenantSetting.set(ctx, ts)
 		slice = append(slice, &tenantSetting)
 	}
+
 	if diags := to.Values.Set(ctx, slice); diags.HasError() {
 		return diags
 	}
@@ -199,6 +203,7 @@ func (to *baseTenantSettingsModel) setUpdate(ctx context.Context, from []fabadmi
 			}
 		}
 	}
+
 	return nil
 }
 
