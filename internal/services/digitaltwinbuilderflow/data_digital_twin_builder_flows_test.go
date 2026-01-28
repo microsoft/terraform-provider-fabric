@@ -68,6 +68,10 @@ func TestUnit_DigitalTwinBuilderFlowsDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testDataSourceItemsFQN, "workspace_id", entity.WorkspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.reference_type"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(
@@ -107,6 +111,9 @@ func TestAcc_DigitalTwinBuilderFlowsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.digital_twin_builder_item_reference.reference_type"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(

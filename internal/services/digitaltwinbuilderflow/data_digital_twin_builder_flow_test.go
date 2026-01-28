@@ -180,6 +180,9 @@ func TestAcc_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// read by id - not found
@@ -208,6 +211,9 @@ func TestAcc_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 		},
 		// read by name - not found
@@ -249,6 +255,9 @@ func TestAcc_DigitalTwinBuilderFlowDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.item_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.workspace_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.digital_twin_builder_item_reference.reference_type"),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("definition.json").AtMapKey("content"), knownvalue.NotNull()),
