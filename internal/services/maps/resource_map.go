@@ -5,7 +5,6 @@ package maps
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -21,8 +20,8 @@ func NewResourceMap() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
-			mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
-			mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
+			mapvalidator.SizeAtMost(1),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
 		DefinitionRequired: false,
 		DefinitionEmpty:    ItemDefinitionEmpty,
