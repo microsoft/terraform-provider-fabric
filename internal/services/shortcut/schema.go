@@ -114,7 +114,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Name of the shortcut.",
+					MarkdownDescription: "The requested name of the shortcut. This is the name specified in the configuration. When `shortcut_conflict_policy` is set to `GenerateUniqueName` and a conflict occurs, the actual name may differ - see the `actual_name` attribute for the name that was actually assigned by the API.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -131,6 +131,20 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
 					Computed: isList,
+				},
+			},
+			"actual_name": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The actual name of the shortcut as returned by the API. This may differ from `name` when `shortcut_conflict_policy` is set to `GenerateUniqueName` and a naming conflict occurred during creation.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
 				},
 			},
 			"target": superschema.SuperSingleNestedAttributeOf[targetModel]{

@@ -132,7 +132,7 @@ resource "fabric_shortcut" "azure_blob_storage" {
 ### Required
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut. Name must contain at least one non-whitespace character.
+- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The requested name of the shortcut. This is the name specified in the configuration. When `shortcut_conflict_policy` is set to `GenerateUniqueName` and a conflict occurs, the actual name may differ - see the `actual_name` attribute for the name that was actually assigned by the API. Name must contain at least one non-whitespace character.
 - `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Shortcut path can't start with forward slash '/'.
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
@@ -144,6 +144,7 @@ resource "fabric_shortcut" "azure_blob_storage" {
 
 ### Read-Only
 
+- `actual_name` (String) The actual name of the shortcut as returned by the API. This may differ from `name` when `shortcut_conflict_policy` is set to `GenerateUniqueName` and a naming conflict occurred during creation.
 - `id` (String) The Shortcut ID.
 
 <a id="nestedatt--target"></a>

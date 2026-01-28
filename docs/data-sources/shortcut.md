@@ -33,7 +33,7 @@ data "fabric_shortcut" "example_by_name_path_workspaceid_itemid" {
 ### Required
 
 - `item_id` (String) Item ID.
-- `name` (String) Name of the shortcut.
+- `name` (String) The requested name of the shortcut. This is the name specified in the configuration. When `shortcut_conflict_policy` is set to `GenerateUniqueName` and a conflict occurs, the actual name may differ - see the `actual_name` attribute for the name that was actually assigned by the API.
 - `path` (String) A string representing the full path where the shortcut is created, including either "Files" or "Tables".
 - `workspace_id` (String) The Workspace ID.
 
@@ -43,6 +43,7 @@ data "fabric_shortcut" "example_by_name_path_workspaceid_itemid" {
 
 ### Read-Only
 
+- `actual_name` (String) The actual name of the shortcut as returned by the API. This may differ from `name` when `shortcut_conflict_policy` is set to `GenerateUniqueName` and a naming conflict occurred during creation.
 - `id` (String) The Shortcut ID.
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
 
