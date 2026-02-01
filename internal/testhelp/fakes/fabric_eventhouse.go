@@ -205,7 +205,7 @@ func NewRandomEventhouseDefinition() fabeventhouse.Definition {
 		Payload:     to.Ptr("e30="),
 	}
 
-	var defParts []fabeventhouse.DefinitionPart
+	defParts := make([]fabeventhouse.DefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 

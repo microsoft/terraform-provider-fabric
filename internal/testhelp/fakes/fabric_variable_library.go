@@ -225,7 +225,7 @@ func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 		),
 	}
 
-	var defParts []fabvariablelibrary.PublicDefinitionPart
+	defParts := make([]fabvariablelibrary.PublicDefinitionPart, 0, 4)
 
 	defParts = append(defParts, defPart1)
 	defParts = append(defParts, defPart2)

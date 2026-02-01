@@ -215,7 +215,7 @@ func NewRandomKQLDatabaseDefinition() fabkqldatabase.Definition {
 		),
 	}
 
-	var defParts []fabkqldatabase.DefinitionPart
+	defParts := make([]fabkqldatabase.DefinitionPart, 0, 2)
 
 	defParts = append(defParts, defPart1)
 	defParts = append(defParts, defPart2)

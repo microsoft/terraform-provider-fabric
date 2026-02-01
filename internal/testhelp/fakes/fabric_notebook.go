@@ -186,7 +186,7 @@ func NewRandomNotebookDefinition() fabnotebook.Definition {
 		),
 	}
 
-	var defParts []fabnotebook.DefinitionPart
+	defParts := make([]fabnotebook.DefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 

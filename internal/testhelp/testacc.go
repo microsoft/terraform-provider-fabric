@@ -150,7 +150,7 @@ func GetFixturesDirPath(fixtureDir ...string) string {
 	_, filename, _, _ := runtime.Caller(0) //nolint:dogsled
 	testHelpDir := filepath.Dir(filename)
 
-	var tempPath []string
+	tempPath := make([]string, 0, 2+len(fixtureDir))
 
 	tempPath = append(tempPath, testHelpDir)
 	tempPath = append(tempPath, "fixtures")

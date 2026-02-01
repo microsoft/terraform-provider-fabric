@@ -205,7 +205,7 @@ func NewRandomSparkJobDefinitionDefinition() fabsparkjobdefinition.PublicDefinit
 		),
 	}
 
-	var defParts []fabsparkjobdefinition.PublicDefinitionPart
+	defParts := make([]fabsparkjobdefinition.PublicDefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 
