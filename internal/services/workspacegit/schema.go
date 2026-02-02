@@ -112,6 +112,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						Resource: &schemaR.BoolAttribute{
 							MarkdownDescription: "User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.",
 							Optional:            true,
+							Computed:            true,
 							Default:             booldefault.StaticBool(false),
 						},
 					},

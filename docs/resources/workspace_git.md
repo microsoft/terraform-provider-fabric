@@ -132,7 +132,7 @@ Optional:
 
 Optional:
 
-- `allow_override_items` (Boolean) User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false.
+- `allow_override_items` (Boolean) User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false. Value defaults to `false`.
 
 <a id="nestedatt--timeouts"></a>
 
