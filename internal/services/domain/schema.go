@@ -100,11 +100,14 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"default_label_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The domain default sensitivity label. To remove the defaultLabelId from a domain, set its value to an empty UUID in your request: '00000000-0000-0000-0000-000000000000'.",
+					MarkdownDescription: "The domain default sensitivity label.",
 					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
+					Validators: []validator.String{
+						stringvalidator.NoneOf("00000000-0000-0000-0000-000000000000"),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

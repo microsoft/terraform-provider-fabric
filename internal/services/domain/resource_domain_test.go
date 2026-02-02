@@ -43,7 +43,7 @@ func TestUnit_DomainResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
-		// // error - no required attributes
+		// error - no required attributes
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -54,7 +54,7 @@ func TestUnit_DomainResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
-		// // error - invalid uuid - capacity_id
+		// error - invalid uuid - capacity_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -66,7 +66,7 @@ func TestUnit_DomainResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// // error - invalid uuid - default_label_id
+		// error - invalid uuid - default_label_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -77,6 +77,18 @@ func TestUnit_DomainResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - empty uuid - default_label_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":     "test",
+					"default_label_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile("Attribute default_label_id value must be none of:"),
 		},
 	}))
 }

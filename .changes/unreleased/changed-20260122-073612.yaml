@@ -1,5 +1,5 @@
 kind: changed
-body: add support for `fabric_domain` GA APIs, remove preview
+body: add support for `fabric_domain` GA APIs, set preview to false
 time: 2026-01-22T07:36:12.648446897Z
 custom:
-    Issue: "801"
+  Issue: "801"

@@ -43,7 +43,7 @@ resource "fabric_domain" "child" {
 
 ### Optional
 
-- `default_label_id` (String) The domain default sensitivity label. To remove the defaultLabelId from a domain, set its value to an empty UUID in your request: '00000000-0000-0000-0000-000000000000'.
+- `default_label_id` (String) The domain default sensitivity label. Value must not be one of : `00000000-0000-0000-0000-000000000000`.
 - `description` (String) The Domain description. Value defaults to ``. String length must be at most 256.
 - `parent_domain_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Domain parent ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))

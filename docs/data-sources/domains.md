@@ -44,7 +44,7 @@ Optional:
 
 Read-Only:
 
-- `default_label_id` (String) The domain default sensitivity label. To remove the defaultLabelId from a domain, set its value to an empty UUID in your request: '00000000-0000-0000-0000-000000000000'.
+- `default_label_id` (String) The domain default sensitivity label.
 - `description` (String) The Domain description.
 - `display_name` (String) The Domain display name.
 - `id` (String) The Domain ID.
