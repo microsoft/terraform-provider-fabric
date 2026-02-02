@@ -104,28 +104,37 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	state.set(respCreate.Domain)
 
+	// Save state immediately after resource creation
+	// This ensures Terraform can track the resource even if subsequent operations fail
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// The Create API doesn't support default_label_id, we need to call Update to set it
 	if !plan.DefaultLabelID.IsNull() && !plan.DefaultLabelID.IsUnknown() {
+		tflog.Debug(ctx, "CREATE", map[string]any{
+			"action":           "setting default_label_id via Update API",
+			"default_label_id": plan.DefaultLabelID.ValueString(),
+		})
+
 		var reqUpdate requestUpdateDomain
 		reqUpdate.set(plan)
 
 		respUpdate, err := r.client.UpdateDomain(ctx, state.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			// State already saved — resource exists, Terraform knows about it
+			// Next apply will show drift and retry the Update
 			return
 		}
 
 		state.set(respUpdate.Domain)
+		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
 	})
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -217,10 +226,6 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "end",
 	})
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *resourceDomain) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
