@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -225,7 +225,7 @@ func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 		),
 	}
 
-	var defParts []fabvariablelibrary.PublicDefinitionPart
+	defParts := make([]fabvariablelibrary.PublicDefinitionPart, 0, 4)
 
 	defParts = append(defParts, defPart1)
 	defParts = append(defParts, defPart2)
