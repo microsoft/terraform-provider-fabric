@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package provider
@@ -183,7 +183,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 		})
 	}
 
-	perCallPolicies := make([]policy.Policy, 0)
+	perCallPolicies := make([]policy.Policy, 0, 1)
 	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
 	fabricClientOpt.PerCallPolicies = perCallPolicies
 
