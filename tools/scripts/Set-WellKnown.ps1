@@ -222,6 +222,9 @@ function Set-FabricItem {
     'DigitalTwinBuilder' {
       $itemEndpoint = 'digitalTwinBuilders'
     }
+    'DigitalTwinBuilderFlow' {
+      $itemEndpoint = 'digitalTwinBuilderFlows'
+    }
     'Environment' {
       $itemEndpoint = 'environments'
     }
@@ -1113,6 +1116,7 @@ $itemNaming = @{
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
   'DigitalTwinBuilder'              = 'dtb'
+  'DigitalTwinBuilderFlow'          = 'dtbf'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
@@ -1250,6 +1254,31 @@ foreach ($itemType in $itemTypes) {
   $displayNameTemp = "${displayName}_$($itemNaming[$itemType])"
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType
   $wellKnown[$itemType] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+# Create DigitalTwinBuilderFlow if not exists
+
+if (-not $wellKnown.ContainsKey('DigitalTwinBuilder') -or
+  -not $wellKnown['DigitalTwinBuilder'] -or
+  -not $wellKnown['DigitalTwinBuilder'].id) {
+  Write-Log -Message "DigitalTwinBuilder was not created successfully. Cannot create DigitalTwinBuilderFlow without a valid DigitalTwinBuilder id." -Level 'ERROR'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
+  $creationPayload = @{
+    digitalTwinBuilderItemReference = @{
+      workspaceID   = $wellKnown['WorkspaceDS'].id
+      referenceType = 'ById'
+      itemID        = $wellKnown['DigitalTwinBuilder'].id
+    }
+  }
+
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
+  $wellKnown['DigitalTwinBuilderFlow'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description
