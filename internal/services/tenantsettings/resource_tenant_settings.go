@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright (c) 2026 Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
 package tenantsettings
@@ -219,10 +219,10 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
 	if !state.DeleteBehaviour.IsNull() && !state.DeleteBehaviour.IsUnknown() && state.DeleteBehaviour.ValueString() == string(Disable) {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
 		var reqUpdate requestUpdateTenantSettings
 		reqUpdate.Enabled = to.Ptr(false)
 

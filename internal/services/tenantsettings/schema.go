@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright (c) 2026 Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
 package tenantsettings
@@ -12,6 +12,7 @@ import (
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
@@ -68,19 +69,14 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 			},
 			"delete_behaviour": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
+				Resource: &schemaR.StringAttribute{
 					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. NoChange - The tenant setting is not disabled when deleted. Disable - The tenant setting is disabled when deleted.",
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(PossibleDeleteBehaviourValues(), true)...),
 					},
-				},
-				Resource: &schemaR.StringAttribute{
 					Computed: true,
 					Optional: true,
 					Default:  stringdefault.StaticString(string(NoChange)),
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
 				},
 			},
 			"can_specify_security_groups": superschema.BoolAttribute{
@@ -156,6 +152,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"graph_id": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The graph ID of the security group.",
+							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
@@ -194,6 +191,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"graph_id": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The graph ID of the security group.",
+							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,

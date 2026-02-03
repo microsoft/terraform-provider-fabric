@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright (c) 2026 Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
 package tenantsettings_test

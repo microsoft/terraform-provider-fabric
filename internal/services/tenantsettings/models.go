@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright (c) 2026 Microsoft Corporation
 // SPDX-License-Identifier: MPL-2.0
 
 package tenantsettings
@@ -29,7 +29,6 @@ type baseTenantSettingsModel struct {
 	DelegateToCapacity       types.Bool                                                     `tfsdk:"delegate_to_capacity"`
 	DelegateToDomain         types.Bool                                                     `tfsdk:"delegate_to_domain"`
 	DelegateToWorkspace      types.Bool                                                     `tfsdk:"delegate_to_workspace"`
-	DeleteBehaviour          types.String                                                   `tfsdk:"delete_behaviour"`
 	EnabledSecurityGroups    supertypes.SetNestedObjectValueOf[tenantSettingsSecurityGroup] `tfsdk:"enabled_security_groups"`
 	ExcludedSecurityGroups   supertypes.SetNestedObjectValueOf[tenantSettingsSecurityGroup] `tfsdk:"excluded_security_groups"`
 	Properties               supertypes.SetNestedObjectValueOf[tenantSettingsProperty]      `tfsdk:"properties"`
@@ -140,6 +139,8 @@ RESOURCE
 
 type resourceTenantSettingsModel struct {
 	baseTenantSettingsModel
+
+	DeleteBehaviour types.String `tfsdk:"delete_behaviour"`
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
