@@ -248,6 +248,9 @@ function Set-FabricItem {
     'DigitalTwinBuilder' {
       $itemEndpoint = 'digitalTwinBuilders'
     }
+    'DigitalTwinBuilderFlow' {
+      $itemEndpoint = 'digitalTwinBuilderFlows'
+    }
     'Environment' {
       $itemEndpoint = 'environments'
     }
@@ -271,6 +274,9 @@ function Set-FabricItem {
     }
     'Lakehouse' {
       $itemEndpoint = 'lakehouses'
+    }
+    'Map' {
+      $itemEndpoint = 'maps'
     }
     'MirroredDatabase' {
       $itemEndpoint = 'mirroredDatabases'
@@ -418,6 +424,15 @@ function Set-DeploymentPipeline {
   Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
 
   return $result
+}
+
+function Get-TenantSettings {
+  param(
+    [Parameter(Mandatory = $false)]
+    [string]$TenantSettingName = "DiscoverDatasetsSettingsPromoted"
+  )
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint 'admin/tenantSettings'
+  return $results.Response.value | Where-Object { $_.settingName -eq $TenantSettingName }
 }
 
 function Set-DeploymentPipelineRoleAssignment {
@@ -1136,6 +1151,7 @@ $itemNaming = @{
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
   'DigitalTwinBuilder'              = 'dtb'
+  'DigitalTwinBuilderFlow'          = 'dtbf'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
@@ -1145,6 +1161,7 @@ $itemNaming = @{
   'KQLDatabase'                     = 'kqldb'
   'KQLQueryset'                     = 'kqlqs'
   'Lakehouse'                       = 'lh'
+  'Map'                             = 'map'
   'MirroredDatabase'                = 'mdb'
   'MirroredWarehouse'               = 'mwh'
   'MLExperiment'                    = 'mle'
@@ -1264,7 +1281,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1272,6 +1289,31 @@ foreach ($itemType in $itemTypes) {
   $displayNameTemp = "${displayName}_$($itemNaming[$itemType])"
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType
   $wellKnown[$itemType] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+# Create DigitalTwinBuilderFlow if not exists
+
+if (-not $wellKnown.ContainsKey('DigitalTwinBuilder') -or
+  -not $wellKnown['DigitalTwinBuilder'] -or
+  -not $wellKnown['DigitalTwinBuilder'].id) {
+  Write-Log -Message "DigitalTwinBuilder was not created successfully. Cannot create DigitalTwinBuilderFlow without a valid DigitalTwinBuilder id." -Level 'ERROR'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
+  $creationPayload = @{
+    digitalTwinBuilderItemReference = @{
+      workspaceID   = $wellKnown['WorkspaceDS'].id
+      referenceType = 'ById'
+      itemID        = $wellKnown['DigitalTwinBuilder'].id
+    }
+  }
+
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
+  $wellKnown['DigitalTwinBuilderFlow'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description
@@ -1395,6 +1437,21 @@ $wellKnown['DeploymentPipeline'] = @{
 }
 
 Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
+
+$tenantSettings = Get-TenantSettings
+
+$wellKnown['TenantSettings'] = @{
+  settingName              = $tenantSettings.settingName
+  title                    = $tenantSettings.title
+  enabled                  = $tenantSettings.enabled
+  canSpecifySecurityGroups = $tenantSettings.canSpecifySecurityGroups
+  tenantSettingGroup       = $tenantSettings.tenantSettingGroup
+  delegateToCapacity       = $tenantSettings.delegateToCapacity
+  delegateToDomain         = $tenantSettings.delegateToDomain
+  delegateToWorkspace      = $tenantSettings.delegateToWorkspace
+  securityGroupName        = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+  securityGroupId          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
+}
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
