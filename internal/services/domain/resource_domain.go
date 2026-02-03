@@ -107,6 +107,7 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 	// Save state immediately after resource creation
 	// This ensures Terraform can track the resource even if subsequent operations fail
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}

@@ -19,7 +19,7 @@ import (
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_DomainDataSource(t *testing.T) {
-	entity := fakes.NewRandomDomain()
+	entity := fakes.NewRandomDomainWithDefaultLabelID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomDomain())
 	fakes.FakeServer.Upsert(entity)
