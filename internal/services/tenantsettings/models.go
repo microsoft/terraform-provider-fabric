@@ -176,7 +176,7 @@ func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTen
 	}
 
 	if !from.ExcludedSecurityGroups.IsNull() && !from.ExcludedSecurityGroups.IsUnknown() {
-		sgs, diags := from.EnabledSecurityGroups.Get(ctx)
+		sgs, diags := from.ExcludedSecurityGroups.Get(ctx)
 		if diags.HasError() {
 			return diags
 		}
