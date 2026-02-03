@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -205,7 +205,7 @@ func NewRandomSparkJobDefinitionDefinition() fabsparkjobdefinition.PublicDefinit
 		),
 	}
 
-	var defParts []fabsparkjobdefinition.PublicDefinitionPart
+	defParts := make([]fabsparkjobdefinition.PublicDefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 
