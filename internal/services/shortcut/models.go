@@ -25,6 +25,7 @@ BASE MODEL
 type baseShortcutModel struct {
 	ID          types.String                                      `tfsdk:"id"`
 	Name        types.String                                      `tfsdk:"name"`
+	ActualName  types.String                                      `tfsdk:"actual_name"`
 	Path        types.String                                      `tfsdk:"path"`
 	Target      supertypes.SingleNestedObjectValueOf[targetModel] `tfsdk:"target"`
 	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
@@ -73,12 +74,22 @@ type externalDataShare struct {
 }
 
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
+	// Set both Name and ActualName from the API response.
+	// For resources, Name will be overridden with the configured value after this call.
+	// For data sources, both will have the same value from the API.
 	to.Name = types.StringPointerValue(from.Name)
+	to.ActualName = types.StringPointerValue(from.Name)
 	to.Path = types.StringPointerValue(from.Path)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 
-	shortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, strings.TrimPrefix(to.Path.ValueString(), "/"), to.Name.ValueString())
+	// Use the actual name from API for computing the ID (since that's what the shortcut is actually called)
+	actualName := ""
+	if from.Name != nil {
+		actualName = *from.Name
+	}
+
+	shortcutComputedID := fmt.Sprintf("%s%s%s%s", workspaceID, itemID, strings.TrimPrefix(to.Path.ValueString(), "/"), actualName)
 
 	to.ID = types.StringValue(shortcutComputedID)
 
@@ -97,6 +108,14 @@ func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string
 	to.Target = target
 
 	return nil
+}
+
+func (to *resourceShortcutModel) set(ctx context.Context, workspaceID, itemID string, shortcutConflictPolicy *string, from fabcore.Shortcut) diag.Diagnostics {
+	if shortcutConflictPolicy != nil {
+		to.ShortcutConflictPolicy = types.StringValue(*shortcutConflictPolicy)
+	}
+
+	return to.baseShortcutModel.set(ctx, workspaceID, itemID, from)
 }
 
 func (to *targetModel) set(ctx context.Context, from fabcore.Target) {
@@ -232,11 +251,21 @@ func toShortcut(v fabcore.ShortcutTransformFlagged) fabcore.Shortcut {
 type resourceShortcutModel struct {
 	baseShortcutModel
 
+	ShortcutConflictPolicy types.String `tfsdk:"shortcut_conflict_policy"`
+
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateShortcut struct {
 	fabcore.CreateShortcutRequest
+}
+
+type requestCreateShortcutOptions struct {
+	fabcore.OneLakeShortcutsClientCreateShortcutOptions
+}
+
+func (to *requestCreateShortcutOptions) set(ctx context.Context, from resourceShortcutModel) {
+	to.ShortcutConflictPolicy = (*fabcore.ShortcutConflictPolicy)(from.ShortcutConflictPolicy.ValueStringPointer())
 }
 
 func (to *requestCreateShortcut) set(ctx context.Context, from resourceShortcutModel) diag.Diagnostics {

@@ -1,9 +1,10 @@
 # Example of using the fabric_shortcut resource
 resource "fabric_shortcut" "onelake" {
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
-  name         = "MyShortcutName"
-  find         = "MyShortcutPath"
+  workspace_id             = "00000000-0000-0000-0000-000000000000"
+  item_id                  = "00000000-0000-0000-0000-000000000000"
+  shortcut_conflict_policy = "GenerateUniqueName"
+  name                     = "MyShortcutName"
+  find                     = "MyShortcutPath"
   target = {
     onelake = {
       workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -100,3 +101,5 @@ resource "fabric_shortcut" "azure_blob_storage" {
     }
   }
 }
+
+#Note: if shortcut_conflict_policy is not specified, it defaults to "Abort"

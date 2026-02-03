@@ -12,10 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
@@ -79,6 +81,15 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 				},
 			},
+			"shortcut_conflict_policy": superschema.StringAttribute{
+				Resource: &schemaR.StringAttribute{
+					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
+					Optional:            true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleShortcutConflictPolicyValues(), true)...),
+					},
+				},
+			},
 			"path": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: `A string representing the full path where the shortcut is created, including either "Files" or "Tables".`,
@@ -103,7 +114,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Name of the shortcut.",
+					MarkdownDescription: "The requested name of the shortcut. This is the name specified in the configuration. When `shortcut_conflict_policy` is set to `GenerateUniqueName` and a conflict occurs, the actual name may differ - see the `actual_name` attribute for the name that was actually assigned by the API.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -120,6 +131,20 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
 					Computed: isList,
+				},
+			},
+			"actual_name": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The actual name of the shortcut as returned by the API. This may differ from `name` when `shortcut_conflict_policy` is set to `GenerateUniqueName` and a naming conflict occurred during creation.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
 				},
 			},
 			"target": superschema.SuperSingleNestedAttributeOf[targetModel]{
