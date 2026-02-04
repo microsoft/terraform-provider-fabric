@@ -99,12 +99,12 @@ func (d *dataSourceDomain) Read(ctx context.Context, req datasource.ReadRequest,
 }
 
 func (d *dataSourceDomain) get(ctx context.Context, model *dataSourceDomainModel) diag.Diagnostics {
-	respGet, err := d.client.GetDomainPreview(ctx, model.ID.ValueString(), true, nil)
+	respGet, err := d.client.GetDomain(ctx, model.ID.ValueString(), ItemTypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	model.set(respGet.DomainPreview)
+	model.set(respGet.Domain)
 
 	return nil
 }
