@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package digitaltwinbuilderflow
@@ -12,7 +12,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-func getDataSourceDigitalTwinBuilderFlowPropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
+func getDataSourceDigitalTwinBuilderFlowProperties(ctx context.Context) map[string]schema.Attribute {
 	result := map[string]schema.Attribute{
 		"digital_twin_builder_item_reference": schema.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the Digital Twin Builder item reference.",

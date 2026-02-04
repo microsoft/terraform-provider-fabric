@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package digitaltwinbuilderflow
@@ -85,9 +85,9 @@ func NewResourceDigitalTwinBuilderFlow(ctx context.Context) resource.Resource {
 		},
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: true,
-		ConfigAttributes:           getResourceDigitalTwinBuilderFlowConfigPropertiesAttributes(ctx),
+		ConfigAttributes:           getResourceDigitalTwinBuilderFlowConfigurationProperties(ctx),
 		CreationPayloadSetter:      creationPayloadSetter,
-		PropertiesAttributes:       getResourceDigitalTwinBuilderFlowConfigPropertiesAttributes(ctx),
+		PropertiesAttributes:       getResourceDigitalTwinBuilderFlowProperties(ctx),
 		PropertiesSetter:           propertiesSetter,
 		ItemGetter:                 itemGetter,
 	}

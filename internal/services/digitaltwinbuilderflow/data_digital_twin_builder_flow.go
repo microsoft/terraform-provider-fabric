@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package digitaltwinbuilderflow
@@ -78,7 +78,7 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 			IsDisplayNameUnique: true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
-		PropertiesAttributes: getDataSourceDigitalTwinBuilderFlowPropertiesAttributes(ctx),
+		PropertiesAttributes: getDataSourceDigitalTwinBuilderFlowProperties(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,
 		ItemListGetter:       itemListGetter,
