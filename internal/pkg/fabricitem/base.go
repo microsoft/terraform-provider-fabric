@@ -14,4 +14,5 @@ const (
 	PreviewDataSource                = "\n\n~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
 	PreviewResource                  = "\n\n~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
 	PreviewEphemeralResource         = "\n\n~> This ephemeral resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
+	TenantPermissionBlocksAPINote    = "\n\n~> Fabric Domain operations require admin API access and may fail if the Service Principal has the Tenant.ReadWrite.All permission assigned."
 )
