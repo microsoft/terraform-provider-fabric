@@ -18,7 +18,6 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 
 ### Required
 
-- `external_data_share_id` (String) The External Data Share ID.
 - `item_id` (String) The item ID.
 - `workspace_id` (String) The Workspace ID.
 

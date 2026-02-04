@@ -47,21 +47,31 @@ func fakeListExternalDataSharesProvider() func(workspaceID, itemID string, optio
 	}
 }
 
-func fakeCreateExternalDataShareProvider(
-	exampleResp fabcore.ExternalDataShare,
-) func(ctx context.Context, workspaceID, itemID string, createExternalDataShareRequest fabcore.CreateExternalDataShareRequest, options *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _, _ string, _ fabcore.CreateExternalDataShareRequest, _ *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
+func fakeCreateExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID string, createExternalDataShareRequest fabcore.CreateExternalDataShareRequest, options *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, itemID string, createExternalDataShareRequest fabcore.CreateExternalDataShareRequest, _ *fabcore.ExternalDataSharesProviderClientCreateExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse]{}
-		resp.SetResponse(http.StatusCreated, fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse{ExternalDataShare: exampleResp}, nil)
+
+		entity := NewRandomExternalDataShare(workspaceID)
+		entity.Paths = createExternalDataShareRequest.Paths
+		entity.Recipient = createExternalDataShareRequest.Recipient
+		entity.ItemID = to.Ptr(itemID)
+
+		fakeTestUpsert(entity)
+		resp.SetResponse(http.StatusCreated, fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse{ExternalDataShare: entity}, nil)
 
 		return resp, errResp
 	}
 }
 
 func fakeDeleteExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, externalDataShareID string, options *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _, _, _ string, _ *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
-		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse{}, nil)
+	return func(_ context.Context, _, _, externalDataShareID string, _ *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
+		if _, ok := fakeExternalDataShareStore[externalDataShareID]; ok {
+			delete(fakeExternalDataShareStore, externalDataShareID)
+			resp.SetResponse(http.StatusOK, struct{}{}, nil)
+		} else {
+			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, "ItemNotFound", "Item not found"))
+			resp.SetResponse(http.StatusNotFound, struct{}{}, nil)
+		}
 
 		return resp, errResp
 	}

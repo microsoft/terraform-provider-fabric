@@ -25,6 +25,7 @@ The External Data Share resource allows you to manage a Fabric [External Data Sh
 
 ### Optional
 
+- `id` (String) The name of the Data access role.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -32,7 +33,6 @@ The External Data Share resource allows you to manage a Fabric [External Data Sh
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
 - `creator_principal` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--creator_principal))
 - `expiration_time_utc` (String) The expiration time of the external data share in UTC.
-- `id` (String) The name of the Data access role.
 - `invitation_url` (String) The invitation URL for the external data share.
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 

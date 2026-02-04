@@ -126,7 +126,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	fakeTestUpsert(entity)
 	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
 
-	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.CreateExternalDataShare = fakeCreateExternalDataShareProvider(entity)
+	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.CreateExternalDataShare = fakeCreateExternalDataShareProvider()
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider()
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.DeleteExternalDataShare = fakeDeleteExternalDataShareProvider()
 
@@ -159,31 +159,31 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ExternalDataShareResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	lakehouse := testhelp.WellKnown()["Lakehouse"].(map[string]any)
-	lakehouseID := lakehouse["id"].(string)
-
+	lakehouseResourceHCL, lakehouseResourceFQN := lakehouseResource(t, workspaceID)
 	userPrincipalName := "test@example.com"
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"item_id":      lakehouseID,
-					"paths":        []string{"Tables/publicholidays"},
-					"recipient": map[string]any{
-						"user_principal_name": userPrincipalName,
+			Config: at.JoinConfigs(
+				lakehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      testhelp.RefByFQN(lakehouseResourceFQN, "id"),
+						"paths":        []string{"Tables/publicholidays"},
+						"recipient": map[string]any{
+							"user_principal_name": userPrincipalName,
+						},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", lakehouseID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", testhelp.RefByFQN(lakehouseResourceFQN, "id")),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "recipient.user_principal_name", userPrincipalName),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),

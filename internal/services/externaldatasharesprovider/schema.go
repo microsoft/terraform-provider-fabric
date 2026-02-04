@@ -72,7 +72,7 @@ func itemSchema(isList bool) superschema.Schema {
 					Computed: true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: false,
+					Optional: true,
 					Computed: true,
 				},
 			},
@@ -195,6 +195,7 @@ func itemSchema(isList bool) superschema.Schema {
 					"tenant_id": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The tenant ID of the recipient.",
+							CustomType:          customtypes.UUIDType{},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,

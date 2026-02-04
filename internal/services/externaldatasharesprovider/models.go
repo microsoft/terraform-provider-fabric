@@ -57,8 +57,7 @@ DATA-SOURCE
 type dataSourceExternalDataShareProviderModel struct {
 	externalDataSharesModel
 
-	ExternalDataShareID customtypes.UUID `tfsdk:"external_data_share_id"`
-	Timeouts            timeoutsD.Value  `tfsdk:"timeouts"`
+	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
 /*
@@ -129,16 +128,6 @@ func (to *externalDataSharesModel) set(ctx context.Context, from *fabcore.Extern
 			return diags
 		}
 	}
-
-	return nil
-}
-
-func (to *dataSourceExternalDataShareProviderModel) set(ctx context.Context, from *fabcore.ExternalDataShare) diag.Diagnostics {
-	if diags := to.externalDataSharesModel.set(ctx, from); diags.HasError() {
-		return diags
-	}
-
-	to.ExternalDataShareID = customtypes.NewUUIDPointerValue(from.ID)
 
 	return nil
 }
