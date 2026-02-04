@@ -322,8 +322,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							MarkdownDescription: "The credential type.",
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
-									utils.RemoveSliceByValue(fabcore.PossibleCredentialTypeValues(), fabcore.CredentialTypeOAuth2),
-									true)...),
+									utils.RemoveSlicesByValues(
+										fabcore.PossibleCredentialTypeValues(),
+										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2, fabcore.CredentialTypeKeyPair},
+									),
+									true,
+								)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{

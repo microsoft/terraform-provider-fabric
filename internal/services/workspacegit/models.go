@@ -102,8 +102,13 @@ RESOURCE
 type resourceWorkspaceGitModel struct {
 	baseWorkspaceGitModel
 
-	InitializationStrategy types.String    `tfsdk:"initialization_strategy"`
-	Timeouts               timeoutsR.Value `tfsdk:"timeouts"`
+	InitializationStrategy types.String                                       `tfsdk:"initialization_strategy"`
+	Options                supertypes.SingleNestedObjectValueOf[optionsModel] `tfsdk:"options"`
+	Timeouts               timeoutsR.Value                                    `tfsdk:"timeouts"`
+}
+
+type optionsModel struct {
+	AllowOverrideItems types.Bool `tfsdk:"allow_override_items"`
 }
 
 type requestGitConnect struct {
@@ -211,18 +216,35 @@ type requestGitUpdateFrom struct {
 	fabcore.UpdateFromGitRequest
 }
 
-func (to *requestGitUpdateFrom) set(remoteCommitHash, conflictResolutionPolicy *string) {
+func (to *requestGitUpdateFrom) set(ctx context.Context, from resourceWorkspaceGitModel, remoteCommitHash, conflictResolutionPolicy *string) diag.Diagnostics {
 	policy := fabcore.ConflictResolutionPolicyPreferWorkspace
 	if *conflictResolutionPolicy != "None" {
 		policy = fabcore.ConflictResolutionPolicy(*conflictResolutionPolicy)
 	}
+	var allowOverrideItems *bool
+
+	if !from.Options.IsNull() && !from.Options.IsUnknown() {
+		options, diags := from.Options.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if !options.AllowOverrideItems.IsNull() && !options.AllowOverrideItems.IsUnknown() {
+			allowOverrideItems = options.AllowOverrideItems.ValueBoolPointer()
+		}
+	}
 
 	to.RemoteCommitHash = remoteCommitHash
-	to.Options = &fabcore.UpdateOptions{}
+	to.Options = &fabcore.UpdateOptions{
+		AllowOverrideItems: allowOverrideItems,
+	}
+
 	to.ConflictResolution = &fabcore.WorkspaceConflictResolution{
 		ConflictResolutionPolicy: azto.Ptr(policy),
 		ConflictResolutionType:   azto.Ptr(fabcore.ConflictResolutionTypeWorkspace),
 	}
+
+	return nil
 }
 
 type requestGitInitialize struct {
