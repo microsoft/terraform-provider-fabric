@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -22,6 +22,14 @@ import (
 func itemSchema(isList bool) superschema.Schema {
 	markdownDescriptionR := fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false)
 	markdownDescriptionD := fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList)
+
+	var dsTimeout *superschema.DatasourceTimeoutAttribute
+
+	if !isList {
+		dsTimeout = &superschema.DatasourceTimeoutAttribute{
+			Read: true,
+		}
+	}
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
@@ -256,6 +264,7 @@ func itemSchema(isList bool) superschema.Schema {
 					Update: true,
 					Delete: true,
 				},
+				DataSource: dsTimeout,
 			},
 		},
 	}

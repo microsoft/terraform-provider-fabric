@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -58,6 +58,7 @@ type dataSourceExternalDataShareProviderModel struct {
 	externalDataSharesModel
 
 	ExternalDataShareID customtypes.UUID `tfsdk:"external_data_share_id"`
+	Timeouts            timeoutsD.Value  `tfsdk:"timeouts"`
 }
 
 /*
@@ -67,7 +68,7 @@ DATA-SOURCE (list)
 type dataSourceExternalDataSharesProviderModel struct {
 	WorkspaceID customtypes.UUID                                           `tfsdk:"workspace_id"`
 	ItemID      customtypes.UUID                                           `tfsdk:"item_id"`
-	Value       supertypes.SetNestedObjectValueOf[externalDataSharesModel] `tfsdk:"value"`
+	Values      supertypes.SetNestedObjectValueOf[externalDataSharesModel] `tfsdk:"values"`
 	Timeouts    timeoutsD.Value                                            `tfsdk:"timeouts"`
 }
 
@@ -116,13 +117,17 @@ func (to *externalDataSharesModel) set(ctx context.Context, from *fabcore.Extern
 	if from.Recipient != nil {
 		recipient := &recipientModel{}
 		recipient.set(*from.Recipient)
-		to.Recipient.Set(ctx, recipient)
+		if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
+			return diags
+		}
 	}
 
 	if from.CreatorPrincipal != nil {
 		creatorPrincipal := &creatorPrincipalModel{}
 		creatorPrincipal.set(ctx, *from.CreatorPrincipal)
-		to.CreatorPrincipal.Set(ctx, creatorPrincipal)
+		if diags := to.CreatorPrincipal.Set(ctx, creatorPrincipal); diags.HasError() {
+			return diags
+		}
 	}
 
 	return nil
@@ -152,14 +157,14 @@ func (to *dataSourceExternalDataSharesProviderModel) set(ctx context.Context, fr
 		slice = append(slice, externalDataShare)
 	}
 
-	if diags := to.Value.Set(ctx, slice); diags.HasError() {
+	if diags := to.Values.Set(ctx, slice); diags.HasError() {
 		return diags
 	}
 
 	return nil
 }
 
-func (to *creatorPrincipalModel) set(ctx context.Context, from fabcore.Principal) {
+func (to *creatorPrincipalModel) set(ctx context.Context, from fabcore.Principal) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Type = types.StringPointerValue((*string)(from.Type))
@@ -168,8 +173,12 @@ func (to *creatorPrincipalModel) set(ctx context.Context, from fabcore.Principal
 	if from.UserDetails != nil {
 		userDetails := &userDetailsModel{}
 		userDetails.set(*from.UserDetails)
-		to.UserDetails.Set(ctx, userDetails)
+		if diags := to.UserDetails.Set(ctx, userDetails); diags.HasError() {
+			return diags
+		}
 	}
+
+	return nil
 }
 
 func (to *userDetailsModel) set(from fabcore.PrincipalUserDetails) {

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider_test
@@ -123,8 +123,11 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomExternalDataShare(workspaceID)
 
+	fakeTestUpsert(entity)
+	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
+
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.CreateExternalDataShare = fakeCreateExternalDataShareProvider(entity)
-	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider(entity)
+	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider()
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.DeleteExternalDataShare = fakeDeleteExternalDataShareProvider()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{

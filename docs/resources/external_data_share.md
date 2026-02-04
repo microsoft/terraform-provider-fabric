@@ -3,13 +3,13 @@
 page_title: "fabric_external_data_share Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The External Data Share resource allows you to manage a Fabric External Data Share https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares.
+  The External Data Share resource allows you to manage a Fabric External Data Share https://learn.microsoft.com/fabric/governance/external-data-sharing-create.
   -> This resource supports Service Principal authentication.
 ---
 
 # fabric_external_data_share (Resource)
 
-The External Data Share resource allows you to manage a Fabric [External Data Share](https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares).
+The External Data Share resource allows you to manage a Fabric [External Data Share](https://learn.microsoft.com/fabric/governance/external-data-sharing-create).
 
 -> This resource supports Service Principal authentication.
 

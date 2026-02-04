@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -57,7 +57,7 @@ func (d *dataSourceExternalDataSharesProvider) Schema(ctx context.Context, _ dat
 				Required:            true,
 				CustomType:          customtypes.UUIDType{},
 			},
-			"value": schema.SetNestedAttribute{
+			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
 				CustomType:          supertypes.NewSetNestedObjectTypeOf[externalDataSharesModel](ctx),
@@ -131,11 +131,6 @@ func (d *dataSourceExternalDataSharesProvider) Read(ctx context.Context, req dat
 func (d *dataSourceExternalDataSharesProvider) list(ctx context.Context, model *dataSourceExternalDataSharesProviderModel) diag.Diagnostics {
 	respList, err := d.client.ListExternalDataSharesInItem(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		diags.AddError(
-			common.ErrorReadHeader,
-			"Unable to find any items.",
-		)
-
 		return diags
 	}
 

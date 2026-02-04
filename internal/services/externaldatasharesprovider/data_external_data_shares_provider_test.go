@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider_test
@@ -19,9 +19,13 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_ExternalDataSharesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := NewRandomExternalDataShares(workspaceID)
+	entity := NewRandomExternalDataShare(workspaceID)
 
-	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.NewListExternalDataSharesInItemPager = fakeListExternalDataSharesProvider(entity.Value)
+	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
+	fakeTestUpsert(entity)
+	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
+
+	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.NewListExternalDataSharesInItemPager = fakeListExternalDataSharesProvider()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no required attributes
@@ -39,7 +43,7 @@ func TestUnit_ExternalDataSharesDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"item_id": *entity.Value[0].ItemID,
+					"item_id": *entity.ItemID,
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
@@ -50,11 +54,15 @@ func TestUnit_ExternalDataSharesDataSource(t *testing.T) {
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      *entity.Value[0].ItemID,
+					"item_id":      *entity.ItemID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.invitation_url"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.recipient.user_principal_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.paths.0"),
 			),
 		},
 	}))
@@ -78,7 +86,11 @@ func TestAcc_ExternalDataSharesDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "value.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.invitation_url"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.recipient.user_principal_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.paths.0"),
 			),
 		},
 	},

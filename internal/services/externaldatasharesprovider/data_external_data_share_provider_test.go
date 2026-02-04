@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider_test
@@ -22,7 +22,11 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomExternalDataShare(workspaceID)
 
-	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider(entity)
+	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
+	fakeTestUpsert(entity)
+	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
+
+	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - workspace id - invalid UUID
@@ -151,7 +155,14 @@ func TestAcc_ExternalDataShareDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", externalDataShareID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", lakehouseID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "external_data_share_id", externalDataShareID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "invitation_url"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "recipient.user_principal_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "paths.0"),
 			),
 		},
 	},

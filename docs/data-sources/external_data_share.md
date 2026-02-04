@@ -3,13 +3,13 @@
 page_title: "fabric_external_data_share Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The External Data Share data-source allows you to retrieve details about a Fabric External Data Share https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares.
+  The External Data Share data-source allows you to retrieve details about a Fabric External Data Share https://learn.microsoft.com/fabric/governance/external-data-sharing-create.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_external_data_share (Data Source)
 
-The External Data Share data-source allows you to retrieve details about a Fabric [External Data Share](https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares).
+The External Data Share data-source allows you to retrieve details about a Fabric [External Data Share](https://learn.microsoft.com/fabric/governance/external-data-sharing-create).
 
 -> This data-source supports Service Principal authentication.
 
@@ -22,6 +22,10 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 - `item_id` (String) The item ID.
 - `workspace_id` (String) The Workspace ID.
 
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
 ### Read-Only
 
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
@@ -32,6 +36,14 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 - `paths` (Set of String) Allowed values for this attribute.
 - `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
+
+<a id="nestedatt--timeouts"></a>
+
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 <a id="nestedatt--creator_principal"></a>
 

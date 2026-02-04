@@ -4,7 +4,6 @@
 package testhelp
 
 import (
-	crand "crypto/rand"
 	"crypto/sha1" //nolint:gosec
 	"crypto/x509"
 	"encoding/base64"
@@ -12,10 +11,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"math/big"
 	"math/rand/v2"
 	"strings"
-	"time"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/go-uuid"
@@ -32,26 +29,6 @@ func RandomName(length ...int) string {
 	}
 
 	return acctest.RandStringFromCharSet(size, acctest.CharSetAlpha+strings.ToUpper(acctest.CharSetAlpha))
-}
-
-func RandomTime(start, end time.Time) time.Time {
-	if !start.Before(end) {
-		panic("start must be before end") // lintignore:R009
-	}
-
-	delta := end.Sub(start)
-
-	n, err := crand.Int(crand.Reader, big.NewInt(delta.Nanoseconds()))
-	if err != nil {
-		panic(err) // lintignore:R009
-	}
-
-	return start.Add(time.Duration(n.Int64()))
-}
-
-// RandomTimeDefault returns a random time between Unix epoch and now.
-func RandomTimeDefault() time.Time {
-	return RandomTime(time.Unix(0, 0), time.Now())
 }
 
 // RandomIntRange returns a random integer between minInt (inclusive) and maxInt (exclusive).

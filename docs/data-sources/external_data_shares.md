@@ -3,13 +3,13 @@
 page_title: "fabric_external_data_shares Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The External Data Shares data-source allows you to retrieve a list of Fabric External Data Shares https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares.
+  The External Data Shares data-source allows you to retrieve a list of Fabric External Data Shares https://learn.microsoft.com/fabric/governance/external-data-sharing-create.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_external_data_shares (Data Source)
 
-The External Data Shares data-source allows you to retrieve a list of Fabric [External Data Shares](https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares).
+The External Data Shares data-source allows you to retrieve a list of Fabric [External Data Shares](https://learn.microsoft.com/fabric/governance/external-data-sharing-create).
 
 -> This data-source supports Service Principal authentication.
 
@@ -27,7 +27,7 @@ The External Data Shares data-source allows you to retrieve a list of Fabric [Ex
 
 ### Read-Only
 
-- `value` (Attributes Set) The set of External Data Shares. (see [below for nested schema](#nestedatt--value))
+- `values` (Attributes Set) The set of External Data Shares. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -37,9 +37,9 @@ Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--value"></a>
+<a id="nestedatt--values"></a>
 
-### Nested Schema for `value`
+### Nested Schema for `values`
 
 Required:
 
@@ -49,36 +49,36 @@ Required:
 Read-Only:
 
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
-- `creator_principal` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--value--creator_principal))
+- `creator_principal` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--values--creator_principal))
 - `expiration_time_utc` (String) The expiration time of the external data share in UTC.
 - `id` (String) The name of the Data access role.
 - `invitation_url` (String) The invitation URL for the external data share.
 - `paths` (Set of String) Allowed values for this attribute.
-- `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--value--recipient))
+- `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--values--recipient))
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 
-<a id="nestedatt--value--creator_principal"></a>
+<a id="nestedatt--values--creator_principal"></a>
 
-### Nested Schema for `value.creator_principal`
+### Nested Schema for `values.creator_principal`
 
 Read-Only:
 
 - `display_name` (String) The display name of the creator principal.
 - `id` (String) The ID of the Data access role.
 - `type` (String) The type of the creator principal.
-- `user_details` (Attributes) The user details of the creator principal. (see [below for nested schema](#nestedatt--value--creator_principal--user_details))
+- `user_details` (Attributes) The user details of the creator principal. (see [below for nested schema](#nestedatt--values--creator_principal--user_details))
 
-<a id="nestedatt--value--creator_principal--user_details"></a>
+<a id="nestedatt--values--creator_principal--user_details"></a>
 
-### Nested Schema for `value.creator_principal.user_details`
+### Nested Schema for `values.creator_principal.user_details`
 
 Read-Only:
 
 - `user_principal_name` (String) The user principal name of the creator principal.
 
-<a id="nestedatt--value--recipient"></a>
+<a id="nestedatt--values--recipient"></a>
 
-### Nested Schema for `value.recipient`
+### Nested Schema for `values.recipient`
 
 Read-Only:
 

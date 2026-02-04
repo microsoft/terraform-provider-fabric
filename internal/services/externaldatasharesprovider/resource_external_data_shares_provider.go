@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -69,6 +69,10 @@ func (r *resourceExternalDataSharesProvider) Configure(_ context.Context, req re
 }
 
 func (r *resourceExternalDataSharesProvider) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	tflog.Debug(ctx, "CREATE", map[string]any{
+		"action": "start",
+	})
+
 	var plan, state resourceExternalDataSharesProviderModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
@@ -102,19 +106,35 @@ func (r *resourceExternalDataSharesProvider) Create(ctx context.Context, req res
 		"action": "end",
 	})
 
+	tflog.Debug(ctx, "CREATE", map[string]any{
+		"action": "end",
+	})
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 }
 
 func (r *resourceExternalDataSharesProvider) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	tflog.Debug(ctx, "READ", map[string]any{
+		"action": "start",
+	})
+
 	var state resourceExternalDataSharesProviderModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	diags := r.getByID(ctx, &state)
+	timeout, diags := state.Timeouts.Read(ctx, r.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	diags = r.getByID(ctx, &state)
 	if utils.IsErrNotFound(state.ItemID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -182,11 +202,6 @@ func (r *resourceExternalDataSharesProvider) Delete(ctx context.Context, req res
 func (r *resourceExternalDataSharesProvider) getByID(ctx context.Context, model *resourceExternalDataSharesProviderModel) diag.Diagnostics {
 	respList, err := r.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		diags.AddError(
-			common.ErrorReadHeader,
-			"Unable to find any items.",
-		)
-
 		return diags
 	}
 

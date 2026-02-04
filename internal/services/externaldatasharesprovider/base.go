@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -12,7 +12,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "external_data_share",
 	Names:          "External Data Shares",
 	Types:          "external_data_shares",
-	DocsURL:        "https://learn.microsoft.com/rest/api/fabric/admin/external-data-shares-provider/list-external-data-shares",
+	DocsURL:        "https://learn.microsoft.com/fabric/governance/external-data-sharing-create",
 	IsPreview:      false,
 	IsSPNSupported: true,
 }

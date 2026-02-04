@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package externaldatasharesprovider
@@ -97,6 +97,14 @@ func (d *dataSourceExternalDataShareProvider) Read(ctx context.Context, req data
 		return
 	}
 
+	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	if resp.Diagnostics.Append(d.getByID(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -113,17 +121,12 @@ func (d *dataSourceExternalDataShareProvider) Read(ctx context.Context, req data
 }
 
 func (d *dataSourceExternalDataShareProvider) getByID(ctx context.Context, model *dataSourceExternalDataShareProviderModel) diag.Diagnostics {
-	respList, err := d.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ExternalDataShareID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		diags.AddError(
-			common.ErrorReadHeader,
-			"Unable to find any items.",
-		)
-
+	respGet, err := d.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ExternalDataShareID.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	model.set(ctx, &respList.ExternalDataShare)
+	model.set(ctx, &respGet.ExternalDataShare)
 
 	return nil
 }
