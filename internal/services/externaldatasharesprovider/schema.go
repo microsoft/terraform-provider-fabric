@@ -19,7 +19,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func itemSchema(isList bool) superschema.Schema {
+func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	markdownDescriptionR := fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false)
 	markdownDescriptionD := fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList)
 
