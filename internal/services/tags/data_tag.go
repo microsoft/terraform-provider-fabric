@@ -15,7 +15,6 @@ import (
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -125,11 +124,20 @@ func (d *dataSourceTag) Read(ctx context.Context, req datasource.ReadRequest, re
 }
 
 func (d *dataSourceTag) getByID(ctx context.Context, model *dataSourceTagModel) diag.Diagnostics {
+	return d.get(ctx, true, model)
+}
+
+func (d *dataSourceTag) getByDisplayName(ctx context.Context, model *dataSourceTagModel) diag.Diagnostics {
+	return d.get(ctx, false, model)
+}
+
+func (d *dataSourceTag) get(ctx context.Context, byID bool, model *dataSourceTagModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET BY ID", map[string]any{
 		"id": model.ID.ValueString(),
 	})
 
 	var diags diag.Diagnostics
+	var notFound string
 
 	pager := d.client.NewListTagsPager(nil)
 	for pager.More() {
@@ -139,46 +147,30 @@ func (d *dataSourceTag) getByID(ctx context.Context, model *dataSourceTagModel) 
 		}
 
 		for _, entity := range page.Value {
-			if *entity.ID == model.ID.ValueString() {
-				return model.set(ctx, entity)
+			switch byID {
+			case true:
+				if *entity.ID == model.ID.ValueString() {
+					model.set(ctx, entity)
+
+					return nil
+				}
+
+				notFound = "Unable to find Tag with 'id': " + model.ID.ValueString()
+			default:
+				if *entity.DisplayName == model.DisplayName.ValueString() {
+					model.set(ctx, entity)
+
+					return nil
+				}
+
+				notFound = "Unable to find Tag with 'display_name': " + model.DisplayName.ValueString()
 			}
 		}
 	}
 
 	diags.AddError(
 		common.ErrorReadHeader,
-		"Unable to find Tag with 'display_name': "+model.DisplayName.ValueString(),
-	)
-
-	return diags
-}
-
-func (d *dataSourceTag) getByDisplayName(ctx context.Context, model *dataSourceTagModel) diag.Diagnostics {
-	tflog.Trace(ctx, "GET BY DISPLAY NAME", map[string]any{
-		"display_name": model.DisplayName.ValueString(),
-	})
-
-	var diags diag.Diagnostics
-
-	pager := d.client.NewListTagsPager(nil)
-	for pager.More() {
-		page, err := pager.NextPage(ctx)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-			return diags
-		}
-
-		for _, entity := range page.Value {
-			if *entity.DisplayName == model.DisplayName.ValueString() {
-				model.ID = customtypes.NewUUIDPointerValue(entity.ID)
-
-				return model.set(ctx, entity)
-			}
-		}
-	}
-
-	diags.AddError(
-		common.ErrorReadHeader,
-		"Unable to find Tag with 'display_name': "+model.DisplayName.ValueString(),
+		notFound,
 	)
 
 	return diags

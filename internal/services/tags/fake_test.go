@@ -82,7 +82,7 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 	return func(_ context.Context, body fabadmin.CreateTagsRequest, _ *fabadmin.TagsClientBulkCreateTagsOptions) (resp azfake.Responder[fabadmin.TagsClientBulkCreateTagsResponse], err azfake.ErrorResponder) {
 		resp = azfake.Responder[fabadmin.TagsClientBulkCreateTagsResponse]{}
 
-		var outputTags []fabadmin.Tag
+		outputTags := make([]fabadmin.Tag, 0, len(body.CreateTagsRequest))
 
 		for _, item := range body.CreateTagsRequest {
 			newTag := NewRandomTag()
