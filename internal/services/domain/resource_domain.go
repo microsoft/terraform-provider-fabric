@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -96,38 +97,45 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	reqCreate.set(plan)
 
-	respCreate, err := r.client.CreateDomainPreview(ctx, true, reqCreate.CreateDomainRequest, nil)
+	respCreate, err := r.client.CreateDomain(ctx, ItemTypeInfo.IsPreview, reqCreate.CreateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	state.set(respCreate.DomainPreview)
+	state.set(respCreate.Domain)
 
-	if (!plan.ContributorsScope.IsNull() && !plan.ContributorsScope.IsUnknown()) && plan.ContributorsScope.ValueString() != string(fabadmin.ContributorsScopeTypeAllTenant) &&
-		plan.ParentDomainID.IsNull() {
-		tflog.Trace(ctx, "setting "+r.TypeInfo.Name+" contributors scope")
-
-		var reqUpdate requestUpdateDomain
-
-		reqUpdate.set(plan)
-
-		respUpdate, err := r.client.UpdateDomainPreview(ctx, state.ID.ValueString(), true, reqUpdate.UpdateDomainRequestPreview, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		state.set(respUpdate.DomainPreview)
-	}
-
+	// Save state immediately after resource creation
+	// This ensures Terraform can track the resource even if subsequent operations fail
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-
-	tflog.Debug(ctx, "CREATE", map[string]any{
-		"action": "end",
-	})
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// The Create API doesn't support default_label_id, we need to call Update to set it
+	if !plan.DefaultLabelID.IsNull() && !plan.DefaultLabelID.IsUnknown() {
+		tflog.Debug(ctx, "CREATE", map[string]any{
+			"action":           "setting default_label_id via Update API",
+			"default_label_id": plan.DefaultLabelID.ValueString(),
+		})
+
+		var reqUpdate requestUpdateDomain
+		reqUpdate.set(plan)
+
+		respUpdate, err := r.client.UpdateDomain(ctx, state.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			// State already saved — resource exists, Terraform knows about it
+			// Next apply will show drift and retry the Update
+			return
+		}
+
+		state.set(respUpdate.Domain)
+		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	}
+
+	tflog.Debug(ctx, "CREATE", map[string]any{
+		"action": "end",
+	})
 }
 
 func (r *resourceDomain) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -178,9 +186,13 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 		"action": "start",
 	})
 
-	var plan resourceDomainModel
+	var plan, state resourceDomainModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -196,22 +208,25 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 
 	reqUpdate.set(plan)
 
-	respUpdate, err := r.client.UpdateDomainPreview(ctx, plan.ID.ValueString(), true, reqUpdate.UpdateDomainRequestPreview, nil)
+	// Special handling for clearing defaultLabelID:
+	// - API requires empty GUID to clear the label
+	// - API returns null when cleared
+	if plan.DefaultLabelID.IsNull() && !state.DefaultLabelID.IsNull() {
+		reqUpdate.DefaultLabelID = to.Ptr("00000000-0000-0000-0000-000000000000")
+	}
+
+	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	plan.set(respUpdate.DomainPreview)
+	plan.set(respUpdate.Domain)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "end",
 	})
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *resourceDomain) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -268,12 +283,12 @@ func (r *resourceDomain) ImportState(ctx context.Context, req resource.ImportSta
 }
 
 func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) diag.Diagnostics {
-	respGet, err := r.client.GetDomainPreview(ctx, model.ID.ValueString(), true, nil)
+	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), ItemTypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
-	model.set(respGet.DomainPreview)
+	model.set(respGet.Domain)
 
 	return nil
 }

@@ -1,0 +1,5 @@
+kind: changed
+body: add support for `fabric_domain` GA APIs, removed preview for `fabric_domain`
+time: 2026-01-22T07:36:12.648446897Z
+custom:
+  Issue: "801"
