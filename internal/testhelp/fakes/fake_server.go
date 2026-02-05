@@ -55,6 +55,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureWarehouseSnapshot)
 	handleEntity(server, configureWorkspace)
 	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
+	handleEntity(server, configureMirroredAzureDatabricksCatalog)
 
 	return server
 }
