@@ -22,7 +22,6 @@ BASE MODEL
 */
 
 type externalDataSharesModel struct {
-	ID                 customtypes.UUID                                            `tfsdk:"id"`
 	Paths              supertypes.SetValueOf[types.String]                         `tfsdk:"paths"`
 	Status             types.String                                                `tfsdk:"status"`
 	Recipient          supertypes.SingleNestedObjectValueOf[recipientModel]        `tfsdk:"recipient"`
@@ -30,6 +29,7 @@ type externalDataSharesModel struct {
 	CreatorPrincipal   supertypes.SingleNestedObjectValueOf[creatorPrincipalModel] `tfsdk:"creator_principal"`
 	WorkspaceID        customtypes.UUID                                            `tfsdk:"workspace_id"`
 	ItemID             customtypes.UUID                                            `tfsdk:"item_id"`
+	ID                 customtypes.UUID                                            `tfsdk:"id"`
 	InvitationURL      types.String                                                `tfsdk:"invitation_url"`
 	AcceptedByTenantID customtypes.UUID                                            `tfsdk:"accepted_by_tenant_id"`
 }

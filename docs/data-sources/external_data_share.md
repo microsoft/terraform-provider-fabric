@@ -18,6 +18,7 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 
 ### Required
 
+- `id` (String) The name of the Data access role.
 - `item_id` (String) The item ID.
 - `workspace_id` (String) The Workspace ID.
 
@@ -30,7 +31,6 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
 - `creator_principal` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--creator_principal))
 - `expiration_time_utc` (String) The expiration time of the external data share in UTC.
-- `id` (String) The name of the Data access role.
 - `invitation_url` (String) The invitation URL for the external data share.
 - `paths` (Set of String) Allowed values for this attribute.
 - `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))

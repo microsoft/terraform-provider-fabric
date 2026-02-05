@@ -18,12 +18,12 @@ import (
 
 var fakeExternalDataShareStore = map[string]fabcore.ExternalDataShare{}
 
-func fakeGetExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, externalDataShareID string, options *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _, _, externalDataShareID string, _ *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
+func fakeGetExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, id string, options *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _, id string, _ *fabcore.ExternalDataSharesProviderClientGetExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse]{}
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
 
-		if externalDataShare, ok := fakeExternalDataShareStore[externalDataShareID]; ok {
+		if externalDataShare, ok := fakeExternalDataShareStore[id]; ok {
 			resp.SetResponse(http.StatusOK, fabcore.ExternalDataSharesProviderClientGetExternalDataShareResponse{ExternalDataShare: externalDataShare}, nil)
 		} else {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Item not found"))
@@ -63,10 +63,10 @@ func fakeCreateExternalDataShareProvider() func(ctx context.Context, workspaceID
 	}
 }
 
-func fakeDeleteExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, externalDataShareID string, options *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, _, _, externalDataShareID string, _ *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
-		if _, ok := fakeExternalDataShareStore[externalDataShareID]; ok {
-			delete(fakeExternalDataShareStore, externalDataShareID)
+func fakeDeleteExternalDataShareProvider() func(ctx context.Context, workspaceID, itemID, id string, options *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, _, id string, _ *fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareOptions) (resp azfake.Responder[fabcore.ExternalDataSharesProviderClientDeleteExternalDataShareResponse], errResp azfake.ErrorResponder) {
+		if _, ok := fakeExternalDataShareStore[id]; ok {
+			delete(fakeExternalDataShareStore, id)
 			resp.SetResponse(http.StatusOK, struct{}{}, nil)
 		} else {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, "ItemNotFound", "Item not found"))

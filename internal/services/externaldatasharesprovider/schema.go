@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -69,11 +71,14 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					CustomType:          customtypes.UUIDType{},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Required: !isList,
+					Computed: isList,
 				},
 				Resource: &schemaR.StringAttribute{
-					Optional: true,
 					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 			},
 			"paths": superschema.SuperSetAttribute{

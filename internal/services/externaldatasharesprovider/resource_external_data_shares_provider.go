@@ -201,7 +201,7 @@ func (r *resourceExternalDataSharesProvider) Delete(ctx context.Context, req res
 
 func (r *resourceExternalDataSharesProvider) getByID(ctx context.Context, model *resourceExternalDataSharesProviderModel) diag.Diagnostics {
 	respList, err := r.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 

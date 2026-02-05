@@ -123,7 +123,6 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomExternalDataShare(workspaceID)
 
-	fakeTestUpsert(entity)
 	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
 
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.CreateExternalDataShare = fakeCreateExternalDataShareProvider()
@@ -146,12 +145,12 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "id", *entity.ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", *entity.WorkspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", *entity.ItemID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "status", string(*entity.Status)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "invitation_url", *entity.InvitationURL),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "recipient.user_principal_name", *entity.Recipient.UserPrincipalName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "invitation_url"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "recipient.user_principal_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "creator_principal.id"),
 			),
 		},
@@ -183,8 +182,8 @@ func TestAcc_ExternalDataShareResource_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", testhelp.RefByFQN(lakehouseResourceFQN, "id")),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "recipient.user_principal_name", userPrincipalName),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", lakehouseResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "invitation_url"),

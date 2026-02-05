@@ -34,9 +34,9 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           "invalid uuid",
-					"item_id":                *entity.ItemID,
-					"external_data_share_id": *entity.ID,
+					"workspace_id": "invalid uuid",
+					"item_id":      *entity.ItemID,
+					"id":           *entity.ID,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -46,9 +46,9 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           *entity.WorkspaceID,
-					"item_id":                "invalid uuid",
-					"external_data_share_id": *entity.ID,
+					"workspace_id": *entity.WorkspaceID,
+					"item_id":      "invalid uuid",
+					"id":           *entity.ID,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -58,9 +58,9 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           *entity.WorkspaceID,
-					"item_id":                *entity.ItemID,
-					"external_data_share_id": "invalid uuid",
+					"workspace_id": *entity.WorkspaceID,
+					"item_id":      *entity.ItemID,
+					"id":           "invalid uuid",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -70,8 +70,8 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"item_id":                *entity.ItemID,
-					"external_data_share_id": *entity.ID,
+					"item_id": *entity.ItemID,
+					"id":      *entity.ID,
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
@@ -92,8 +92,8 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           *entity.WorkspaceID,
-					"external_data_share_id": *entity.ID,
+					"workspace_id": *entity.WorkspaceID,
+					"id":           *entity.ID,
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
@@ -103,10 +103,10 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           *entity.WorkspaceID,
-					"item_id":                *entity.ItemID,
-					"external_data_share_id": *entity.ID,
-					"unexpected_attr":        "test",
+					"workspace_id":    *entity.WorkspaceID,
+					"item_id":         *entity.ItemID,
+					"id":              *entity.ID,
+					"unexpected_attr": "test",
 				},
 			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
@@ -116,15 +116,14 @@ func TestUnit_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           *entity.WorkspaceID,
-					"item_id":                *entity.ItemID,
-					"external_data_share_id": *entity.ID,
+					"workspace_id": *entity.WorkspaceID,
+					"item_id":      *entity.ItemID,
+					"id":           *entity.ID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "workspace_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "item_id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "external_data_share_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "status"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "invitation_url"),
@@ -149,15 +148,15 @@ func TestAcc_ExternalDataShareDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id":           workspaceID,
-					"item_id":                lakehouseID,
-					"external_data_share_id": externalDataShareID,
+					"workspace_id": workspaceID,
+					"item_id":      lakehouseID,
+					"id":           externalDataShareID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", lakehouseID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "external_data_share_id", externalDataShareID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", externalDataShareID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "status"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "invitation_url"),
