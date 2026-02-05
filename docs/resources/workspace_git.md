@@ -84,6 +84,7 @@ resource "fabric_workspace_git" "github" {
 
 ### Optional
 
+- `options` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> The options for Git operations. (see [below for nested schema](#nestedatt--options))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -124,6 +125,14 @@ Optional:
 - `organization_name` (String) The Azure DevOps organization name. String length must be at most 100. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **REQUIRED**.
 - `owner_name` (String) The GitHub owner name. String length must be at most 100. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **REQUIRED**.
 - `project_name` (String) The Azure DevOps project name. String length must be at most 100. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `GitHub` this attribute is **NULL**. If the value of [`git_provider_details.git_provider_type`](#git_provider_details.git_provider_type) attribute is `AzureDevOps` this attribute is **REQUIRED**.
+
+<a id="nestedatt--options"></a>
+
+### Nested Schema for `options`
+
+Optional:
+
+- `allow_override_items` (Boolean) User consent to override incoming items during the update from Git process. When incoming items are present and the allow override items is not specified or is provided as false, the update operation will not start. Default value is false. Value defaults to `false`.
 
 <a id="nestedatt--timeouts"></a>
 

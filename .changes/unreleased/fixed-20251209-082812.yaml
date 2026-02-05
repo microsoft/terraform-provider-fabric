@@ -1,0 +1,5 @@
+kind: fixed
+body: Fix resource `fabric_spark_environment_setting` update pool not working
+time: 2025-12-09T08:28:12.034139275Z
+custom:
+    Issue: "767"
