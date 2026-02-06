@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package domain_test
@@ -19,7 +19,7 @@ import (
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_DomainDataSource(t *testing.T) {
-	entity := fakes.NewRandomDomain()
+	entity := fakes.NewRandomDomainWithDefaultLabelID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomDomain())
 	fakes.FakeServer.Upsert(entity)
@@ -67,7 +67,7 @@ func TestUnit_DomainDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "contributors_scope", (*string)(entity.ContributorsScope)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "default_label_id", entity.DefaultLabelID),
 			),
 		},
 		// read by id - not found

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package domain
@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Domains",
 	Types:          "domains",
 	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
