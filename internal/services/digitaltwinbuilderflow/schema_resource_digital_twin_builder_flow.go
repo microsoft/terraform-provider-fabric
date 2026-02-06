@@ -48,7 +48,7 @@ func getResourceDigitalTwinBuilderFlowProperties(ctx context.Context) map[string
 	return result
 }
 
-func getResourceDigitalTwinBuilderFlowConfigurationProperties(ctx context.Context) map[string]schema.Attribute {
+func getResourceDigitalTwinBuilderFlowConfigurationAttributes(ctx context.Context) map[string]schema.Attribute {
 	result := map[string]schema.Attribute{
 		"digital_twin_builder_item_reference": schema.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the Digital Twin Builder item reference.",

@@ -85,7 +85,7 @@ func NewResourceDigitalTwinBuilderFlow(ctx context.Context) resource.Resource {
 		},
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: true,
-		ConfigAttributes:           getResourceDigitalTwinBuilderFlowConfigurationProperties(ctx),
+		ConfigAttributes:           getResourceDigitalTwinBuilderFlowConfigurationAttributes(ctx),
 		CreationPayloadSetter:      creationPayloadSetter,
 		PropertiesAttributes:       getResourceDigitalTwinBuilderFlowProperties(ctx),
 		PropertiesSetter:           propertiesSetter,
