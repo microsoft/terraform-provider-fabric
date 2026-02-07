@@ -1800,6 +1800,30 @@ $definition = @{
   )
 }
 
+function Set-Tags {
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
+  $result = $results.Response.value[0]
+  if (-not $result) {
+    $payload = @{
+      createTagsRequest = @(
+        @{ displayName = "Test Tag" }
+      )
+    }
+    Write-Log -Message "Creating Tag: $($payload.createTagsRequest[0].displayName)" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/tags/bulkCreateTags" -Payload $payload).Response.tags[0]
+  }
+  Write-Log -Message "Tag - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
+$tags = Set-Tags
+$wellKnown['Tags'] = @{
+  id          = $tags.id
+  displayName = $tags.displayName
+  scopeType   = $tags.scope.type
+}
+
 $mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'MountedDataFactory' -Definition $definition
 
 $wellKnown['MountedDataFactory'] = @{
