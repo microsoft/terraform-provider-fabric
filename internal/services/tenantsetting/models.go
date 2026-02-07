@@ -1,10 +1,11 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings
+package tenantsetting
 
 import (
 	"context"
+	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -13,6 +14,7 @@ import (
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
@@ -44,6 +46,10 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 	to.DelegateToDomain = types.BoolPointerValue(from.DelegateToDomain)
 	to.DelegateToWorkspace = types.BoolPointerValue(from.DelegateToWorkspace)
 
+	to.EnabledSecurityGroups = supertypes.NewSetNestedObjectValueOfNull[tenantSettingsSecurityGroup](ctx)
+	to.ExcludedSecurityGroups = supertypes.NewSetNestedObjectValueOfNull[tenantSettingsSecurityGroup](ctx)
+	to.Properties = supertypes.NewSetNestedObjectValueOfNull[tenantSettingsProperty](ctx)
+
 	if from.EnabledSecurityGroups != nil {
 		slice := make([]*tenantSettingsSecurityGroup, 0, len(from.EnabledSecurityGroups))
 		for _, securityGroup := range from.EnabledSecurityGroups {
@@ -53,10 +59,6 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 		}
 
 		if diags := to.EnabledSecurityGroups.Set(ctx, slice); diags.HasError() {
-			return diags
-		}
-	} else {
-		if diags := to.EnabledSecurityGroups.Set(ctx, []*tenantSettingsSecurityGroup{}); diags.HasError() {
 			return diags
 		}
 	}
@@ -72,10 +74,6 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 		if diags := to.ExcludedSecurityGroups.Set(ctx, slice); diags.HasError() {
 			return diags
 		}
-	} else {
-		if diags := to.ExcludedSecurityGroups.Set(ctx, []*tenantSettingsSecurityGroup{}); diags.HasError() {
-			return diags
-		}
 	}
 
 	if from.Properties != nil {
@@ -87,10 +85,6 @@ func (to *baseTenantSettingsModel) set(ctx context.Context, from fabadmin.Tenant
 		}
 
 		if diags := to.Properties.Set(ctx, slice); diags.HasError() {
-			return diags
-		}
-	} else {
-		if diags := to.Properties.Set(ctx, []*tenantSettingsProperty{}); diags.HasError() {
 			return diags
 		}
 	}
@@ -118,26 +112,24 @@ type dataSourceTenantSettingsModel struct {
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
-func (to *dataSourceTenantSettingsModel) set(ctx context.Context, from []fabadmin.TenantSetting) diag.Diagnostics {
+func (to *dataSourceTenantSettingsModel) setValues(ctx context.Context, from []fabadmin.TenantSetting) diag.Diagnostics {
 	slice := make([]*baseTenantSettingsModel, 0, len(from))
-	for _, ts := range from {
-		tenantSetting := baseTenantSettingsModel{}
-		tenantSetting.set(ctx, ts)
-		slice = append(slice, &tenantSetting)
+	for _, entity := range from {
+		var entityModel baseTenantSettingsModel
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
+		slice = append(slice, &entityModel)
 	}
 
-	if diags := to.Values.Set(ctx, slice); diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return to.Values.Set(ctx, slice)
 }
 
 /*
 RESOURCE
 */
 
-type resourceTenantSettingsModel struct {
+type resourceTenantSettingModel struct {
 	baseTenantSettingsModel
 
 	DeleteBehaviour types.String `tfsdk:"delete_behaviour"`
@@ -145,11 +137,11 @@ type resourceTenantSettingsModel struct {
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
-type requestUpdateTenantSettings struct {
+type requestUpdateTenantSetting struct {
 	fabadmin.UpdateTenantSettingRequest
 }
 
-func (to *requestUpdateTenantSettings) set(ctx context.Context, from resourceTenantSettingsModel) diag.Diagnostics {
+func (to *requestUpdateTenantSetting) set(ctx context.Context, from resourceTenantSettingModel) diag.Diagnostics {
 	if !from.Enabled.IsNull() && !from.Enabled.IsUnknown() {
 		to.Enabled = from.Enabled.ValueBoolPointer()
 	}
@@ -202,10 +194,19 @@ func (to *baseTenantSettingsModel) setUpdate(ctx context.Context, from []fabadmi
 			if diags := to.set(ctx, entity); diags.HasError() {
 				return diags
 			}
+
+			return nil
 		}
 	}
 
-	return nil
+	var diags diag.Diagnostics
+
+	diags.AddError(
+		common.ErrorReadHeader,
+		fmt.Sprintf("Unable to find tenant setting with 'settingName' %s", to.SettingName.ValueString()),
+	)
+
+	return diags
 }
 
 /*

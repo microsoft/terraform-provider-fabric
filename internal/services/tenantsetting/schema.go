@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings
+package tenantsetting
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -42,35 +42,25 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 				},
 				DataSource: &schemaD.StringAttribute{
-					Optional: true,
+					Optional: !isList,
 					Computed: true,
 				},
 			},
 			"tenant_setting_group": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Tenant setting group name.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 			},
 			"title": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The title of the tenant setting.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 			},
 			"delete_behaviour": superschema.StringAttribute{
 				Resource: &schemaR.StringAttribute{
-					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. NoChange - The tenant setting is not disabled when deleted. Disable - The tenant setting is disabled when deleted.",
+					MarkdownDescription: "Indicates whether the tenant setting is disabled when deleted. NoChange - Keeps the current setting unchanged on resource deletion. If the setting is enabled it remains enabled; if disabled it remains disabled. Disable - Disables the tenant setting when the resource is deleted.",
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(PossibleDeleteBehaviourValues(), true)...),
 					},
@@ -82,12 +72,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			"can_specify_security_groups": superschema.BoolAttribute{
 				Common: &schemaR.BoolAttribute{
 					MarkdownDescription: "Indicates if the tenant setting is enabled for a security group. False - The tenant setting is enabled for the entire organization. True - The tenant setting is enabled for security groups.",
-				},
-				Resource: &schemaR.BoolAttribute{
-					Computed: true,
-				},
-				DataSource: &schemaD.BoolAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 			},
 			"enabled": superschema.BoolAttribute{
@@ -104,49 +89,37 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			"delegate_to_capacity": superschema.BoolAttribute{
 				Common: &schemaR.BoolAttribute{
 					MarkdownDescription: "Indicates whether the tenant setting can be delegated to a capacity admin. False - Capacity admin cannot override the tenant setting. True - Capacity admin can override the tenant setting.",
+					Computed:            true,
 				},
 				Resource: &schemaR.BoolAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.BoolAttribute{
-					Computed: true,
 				},
 			},
 			"delegate_to_domain": superschema.BoolAttribute{
 				Common: &schemaR.BoolAttribute{
 					MarkdownDescription: "Indicates whether the tenant setting can be delegated to a domain admin. False - Domain admin cannot override the tenant setting. True - Domain admin can override the tenant setting.",
+					Computed:            true,
 				},
 				Resource: &schemaR.BoolAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.BoolAttribute{
-					Computed: true,
 				},
 			},
 			"delegate_to_workspace": superschema.BoolAttribute{
 				Common: &schemaR.BoolAttribute{
 					MarkdownDescription: "Indicates whether the tenant setting can be delegated to a workspace admin. False - Workspace admin cannot override the tenant setting. True - Workspace admin can override the tenant setting.",
+					Computed:            true,
 				},
 				Resource: &schemaR.BoolAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.BoolAttribute{
-					Computed: true,
 				},
 			},
 			"enabled_security_groups": superschema.SuperSetNestedAttributeOf[tenantSettingsSecurityGroup]{
 				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "A list of enabled security groups.",
+					Computed:            true,
 				},
 				Resource: &schemaR.SetNestedAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.SetNestedAttribute{
-					Computed: true,
 				},
 				Attributes: superschema.Attributes{
 					"graph_id": superschema.StringAttribute{
@@ -155,8 +128,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -165,13 +137,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"name": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The name of the security group.",
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 						},
 					},
 				},
@@ -179,13 +148,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			"excluded_security_groups": superschema.SuperSetNestedAttributeOf[tenantSettingsSecurityGroup]{
 				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "A list of excluded security groups.",
+					Computed:            true,
 				},
 				Resource: &schemaR.SetNestedAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.SetNestedAttribute{
-					Computed: true,
 				},
 				Attributes: superschema.Attributes{
 					"graph_id": superschema.StringAttribute{
@@ -194,8 +160,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							CustomType:          customtypes.UUIDType{},
 						},
 						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -204,13 +169,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"name": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The name of the security group.",
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 						},
 					},
 				},
@@ -218,52 +180,40 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			"properties": superschema.SuperSetNestedAttributeOf[tenantSettingsProperty]{
 				Common: &schemaR.SetNestedAttribute{
 					MarkdownDescription: "Tenant setting properties.",
+					Computed:            true,
 				},
 				Resource: &schemaR.SetNestedAttribute{
 					Optional: true,
-					Computed: true,
-				},
-				DataSource: &schemaD.SetNestedAttribute{
-					Computed: true,
 				},
 				Attributes: superschema.Attributes{
 					"name": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The name of the property.",
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 						},
 					},
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The type of the property.",
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTenantSettingPropertyTypeValues(), true)...),
 							},
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 						},
 					},
 					"value": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The value of the property.",
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
-							Computed: true,
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
 						},
 					},
 				},

@@ -83,7 +83,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsettings"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
@@ -464,7 +464,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
-		tenantsettings.NewResourceTenantSettings,
+		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
@@ -566,8 +566,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
-		tenantsettings.NewDataSourceTenantSetting,
-		tenantsettings.NewDataSourceTenantSettings,
+		tenantsetting.NewDataSourceTenantSetting,
+		tenantsetting.NewDataSourceTenantSettings,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,

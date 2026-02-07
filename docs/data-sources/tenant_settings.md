@@ -36,10 +36,6 @@ Optional:
 
 ### Nested Schema for `values`
 
-Optional:
-
-- `setting_name` (String) The name of the tenant setting.
-
 Read-Only:
 
 - `can_specify_security_groups` (Boolean) Indicates if the tenant setting is enabled for a security group. False - The tenant setting is enabled for the entire organization. True - The tenant setting is enabled for security groups.
@@ -50,6 +46,7 @@ Read-Only:
 - `enabled_security_groups` (Attributes Set) A list of enabled security groups. (see [below for nested schema](#nestedatt--values--enabled_security_groups))
 - `excluded_security_groups` (Attributes Set) A list of excluded security groups. (see [below for nested schema](#nestedatt--values--excluded_security_groups))
 - `properties` (Attributes Set) Tenant setting properties. (see [below for nested schema](#nestedatt--values--properties))
+- `setting_name` (String) The name of the tenant setting.
 - `tenant_setting_group` (String) Tenant setting group name.
 - `title` (String) The title of the tenant setting.
 

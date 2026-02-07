@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings
+package tenantsetting
 
 import (
 	"context"
@@ -75,7 +75,7 @@ func (r *resourceTenantSettings) Create(ctx context.Context, req resource.Create
 		"action": "start",
 	})
 
-	var plan resourceTenantSettingsModel
+	var plan resourceTenantSettingModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -89,7 +89,7 @@ func (r *resourceTenantSettings) Create(ctx context.Context, req resource.Create
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqCreate requestUpdateTenantSettings
+	var reqCreate requestUpdateTenantSetting
 
 	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
 		return
@@ -120,7 +120,7 @@ func (r *resourceTenantSettings) Read(ctx context.Context, req resource.ReadRequ
 		"action": "start",
 	})
 
-	var state resourceTenantSettingsModel
+	var state resourceTenantSettingModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -163,7 +163,7 @@ func (r *resourceTenantSettings) Update(ctx context.Context, req resource.Update
 		"action": "start",
 	})
 
-	var plan resourceTenantSettingsModel
+	var plan resourceTenantSettingModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -177,7 +177,7 @@ func (r *resourceTenantSettings) Update(ctx context.Context, req resource.Update
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var reqUpdate requestUpdateTenantSettings
+	var reqUpdate requestUpdateTenantSetting
 
 	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan)...); resp.Diagnostics.HasError() {
 		return
@@ -208,7 +208,7 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		"action": "start",
 	})
 
-	var state resourceTenantSettingsModel
+	var state resourceTenantSettingModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -223,7 +223,7 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var reqUpdate requestUpdateTenantSettings
+		var reqUpdate requestUpdateTenantSetting
 		reqUpdate.Enabled = to.Ptr(false)
 
 		respUpdate, err := r.client.UpdateTenantSetting(ctx, state.SettingName.ValueString(), reqUpdate.UpdateTenantSettingRequest, nil)
@@ -234,8 +234,6 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		if resp.Diagnostics.Append(state.setUpdate(ctx, respUpdate.TenantSettings)...); resp.Diagnostics.HasError() {
 			return
 		}
-
-		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	}
 
 	tflog.Debug(ctx, "DELETE", map[string]any{
@@ -243,7 +241,7 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 	})
 }
 
-func (r *resourceTenantSettings) get(ctx context.Context, model *resourceTenantSettingsModel) diag.Diagnostics {
+func (r *resourceTenantSettings) get(ctx context.Context, model *resourceTenantSettingModel) diag.Diagnostics {
 	tflog.Trace(ctx, "GET BY SETTING_NAME", map[string]any{
 		"setting_name": model.SettingName.ValueString(),
 	})

@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings_test
+package tenantsetting_test
 
 import (
 	"strconv"

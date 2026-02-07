@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings_test
+package tenantsetting_test
 
 import (
 	"regexp"
@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsettings"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -90,7 +90,7 @@ func TestUnit_TenantSettingsResource_CRUD(t *testing.T) {
 					"delegate_to_domain":    *entity.DelegateToDomain,
 					"delegate_to_capacity":  *entity.DelegateToCapacity,
 					"delegate_to_workspace": *entity.DelegateToWorkspace,
-					"delete_behaviour":      string(tenantsettings.NoChange),
+					"delete_behaviour":      string(tenantsetting.NoChange),
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -129,7 +129,7 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 							"name":     securityGroupName,
 						},
 					},
-					"delete_behaviour": string(tenantsettings.NoChange),
+					"delete_behaviour": string(tenantsetting.NoChange),
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -156,7 +156,7 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 							"name":     securityGroupName,
 						},
 					},
-					"delete_behaviour": string(tenantsettings.Disable),
+					"delete_behaviour": string(tenantsetting.Disable),
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package tenantsettings
+package tenantsetting
 
 import (
 	"context"
@@ -132,5 +132,5 @@ func (d *dataSourceTenantSettings) list(ctx context.Context, model *dataSourceTe
 		"action": "end",
 	})
 
-	return model.set(ctx, respList)
+	return model.setValues(ctx, respList)
 }
