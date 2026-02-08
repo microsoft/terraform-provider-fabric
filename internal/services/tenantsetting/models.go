@@ -5,7 +5,6 @@ package tenantsetting
 
 import (
 	"context"
-	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -119,6 +118,7 @@ func (to *dataSourceTenantSettingsModel) setValues(ctx context.Context, from []f
 		if diags := entityModel.set(ctx, entity); diags.HasError() {
 			return diags
 		}
+
 		slice = append(slice, &entityModel)
 	}
 
@@ -203,7 +203,7 @@ func (to *baseTenantSettingsModel) setUpdate(ctx context.Context, from []fabadmi
 
 	diags.AddError(
 		common.ErrorReadHeader,
-		fmt.Sprintf("Unable to find tenant setting with 'settingName' %s", to.SettingName.ValueString()),
+		"Unable to find tenant setting with 'settingName' "+to.SettingName.ValueString(),
 	)
 
 	return diags
