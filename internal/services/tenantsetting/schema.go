@@ -139,9 +139,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							MarkdownDescription: "The name of the security group.",
 							Computed:            true,
 						},
-						Resource: &schemaR.StringAttribute{
-							Optional: true,
-						},
 					},
 				},
 			},
@@ -170,9 +167,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The name of the security group.",
 							Computed:            true,
-						},
-						Resource: &schemaR.StringAttribute{
-							Optional: true,
 						},
 					},
 				},

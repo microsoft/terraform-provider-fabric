@@ -126,7 +126,6 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 					"enabled_security_groups": []map[string]any{
 						{
 							"graph_id": securityGroupID,
-							"name":     securityGroupName,
 						},
 					},
 					"delete_behaviour": string(tenantsetting.NoChange),
@@ -153,7 +152,6 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 					"enabled_security_groups": []map[string]any{
 						{
 							"graph_id": securityGroupID,
-							"name":     securityGroupName,
 						},
 					},
 					"delete_behaviour": string(tenantsetting.Disable),

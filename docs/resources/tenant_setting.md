@@ -46,7 +46,7 @@ Required:
 
 - `graph_id` (String) The graph ID of the security group.
 
-Optional:
+Read-Only:
 
 - `name` (String) The name of the security group.
 
@@ -58,7 +58,7 @@ Required:
 
 - `graph_id` (String) The graph ID of the security group.
 
-Optional:
+Read-Only:
 
 - `name` (String) The name of the security group.
 
