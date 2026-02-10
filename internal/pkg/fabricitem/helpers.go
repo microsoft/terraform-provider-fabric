@@ -49,6 +49,10 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 		md += PreviewResource
 	}
 
+	if typeInfo.TenantPermissionBlocksAPI {
+		md += TenantPermissionBlocksAPINote
+	}
+
 	return md
 }
 
