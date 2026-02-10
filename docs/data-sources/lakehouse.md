@@ -26,6 +26,24 @@ data "fabric_lakehouse" "example_by_name" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
+# Get item details with definition
+# Examples uses `id` but `display_name` can be used as well
+data "fabric_lakehouse" "example_definition" {
+  id                = "11111111-1111-1111-1111-111111111111"
+  workspace_id      = "00000000-0000-0000-0000-000000000000"
+  output_definition = true
+}
+
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content, ".")
+}
+
+# Access the content of the definition as JSON object
+output "example_definition_content_object" {
+  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content)
+}
+
 # This is an invalid data source
 # Do not specify id and name in the same data source block
 # data "fabric_lakehouse" "varied" {
@@ -45,11 +63,17 @@ data "fabric_lakehouse" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The Lakehouse display name.
+- `format` (String) The Lakehouse format. Possible values: `Default`
 - `id` (String) The Lakehouse ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `alm.settings.json`, `data-access-roles.json`, `lakehouse.metadata.json`, `shortcuts.metadata.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Lakehouse Folder ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
@@ -61,6 +85,15 @@ data "fabric_lakehouse" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
 
 <a id="nestedatt--properties"></a>
 

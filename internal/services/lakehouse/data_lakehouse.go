@@ -17,7 +17,7 @@ import (
 )
 
 func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.DataSourceFabricItemPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[lakehousePropertiesModel](ctx)
 
 		if from != nil {
@@ -37,7 +37,7 @@ func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties], fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties], fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
 		client := fablakehouse.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetLakehouse(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -50,7 +50,7 @@ func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
 		client := fablakehouse.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		pager := client.NewListLakehousesPager(model.WorkspaceID.ValueString(), nil)
@@ -72,11 +72,12 @@ func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemProperties[lakehousePropertiesModel, fablakehouse.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[lakehousePropertiesModel, fablakehouse.Properties]{
+		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceLakehousePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
@@ -84,5 +85,5 @@ func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
 		ItemListGetter:       itemListGetter,
 	}
 
-	return fabricitem.NewDataSourceFabricItemProperties(config)
+	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)
 }

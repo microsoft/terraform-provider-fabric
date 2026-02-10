@@ -6,7 +6,15 @@ package lakehouse
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
+)
+
+const (
+	FabricItemType            = fabcore.ItemTypeLakehouse
+	ItemFormatTypeDefault     = fabricitem.DefinitionFormatDefault
+	ItemDefinitionEmpty       = `{}`
+	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/lakehouse-definition"
 )
 
 var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
@@ -19,4 +27,10 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	IsSPNSupported: true,
 }
 
-const FabricItemType = fabcore.ItemTypeLakehouse
+var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
+	{
+		Type:  fabricitem.DefinitionFormatDefault,
+		API:   "",
+		Paths: []string{"lakehouse.metadata.json", "shortcuts.metadata.json", "data-access-roles.json", "alm.settings.json"},
+	},
+}

@@ -9,8 +9,10 @@ import (
 	"time"
 
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -33,7 +35,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 		return nil, nil
 	}
 
-	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.ResourceFabricItemConfigPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[lakehousePropertiesModel](ctx)
 
 		if from != nil {
@@ -53,7 +55,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload], fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.ResourceFabricItemConfigDefinitionPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload], fabricItem *fabricitem.FabricItemProperties[fablakehouse.Properties]) error {
 		client := fablakehouse.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		for {
@@ -91,13 +93,21 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 		}
 	}
 
-	config := fabricitem.ResourceFabricItemConfigProperties[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]{
-		ResourceFabricItem: fabricitem.ResourceFabricItem{
-			TypeInfo:             ItemTypeInfo,
-			FabricItemType:       FabricItemType,
-			NameRenameAllowed:    true,
-			DisplayNameMaxLength: 123,
-			DescriptionMaxLength: 256,
+	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]{
+		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
+			TypeInfo:              ItemTypeInfo,
+			FabricItemType:        FabricItemType,
+			NameRenameAllowed:     true,
+			DisplayNameMaxLength:  123,
+			DescriptionMaxLength:  256,
+			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+			DefinitionPathKeysValidator: []validator.Map{
+				mapvalidator.SizeAtMost(1),
+				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
+			},
+			DefinitionRequired: false,
+			DefinitionEmpty:    ItemDefinitionEmpty,
+			DefinitionFormats:  itemDefinitionFormats,
 		},
 		ConfigRequired:        false,
 		ConfigAttributes:      getResourceLakehouseConfigurationAttributes(),
@@ -107,5 +117,5 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 		ItemGetter:            itemGetter,
 	}
 
-	return fabricitem.NewResourceFabricItemConfigProperties(config)
+	return fabricitem.NewResourceFabricItemConfigDefinitionProperties(config)
 }
