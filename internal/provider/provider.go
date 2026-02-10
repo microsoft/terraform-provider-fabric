@@ -50,6 +50,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilderflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -67,6 +68,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/maps"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
@@ -83,6 +85,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
@@ -440,6 +443,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
+		func() resource.Resource { return digitaltwinbuilderflow.NewResourceDigitalTwinBuilderFlow(ctx) },
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
@@ -459,10 +463,12 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		maps.NewResourceMap,
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
@@ -503,6 +509,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlow(ctx) },
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlows(ctx) },
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
@@ -536,6 +544,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
+		maps.NewDataSourceMap,
+		maps.NewDataSourceMaps,
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
@@ -564,6 +574,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
+		tenantsetting.NewDataSourceTenantSetting,
+		tenantsetting.NewDataSourceTenantSettings,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,

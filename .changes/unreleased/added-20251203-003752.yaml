@@ -1,0 +1,5 @@
+kind: added
+body: Onboard `fabric_tenant_settings` and `fabric_tenant_setting` datasource
+time: 2025-12-03T00:37:52.466064622Z
+custom:
+    Issue: "708"
