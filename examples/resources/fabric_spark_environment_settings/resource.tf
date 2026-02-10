@@ -23,9 +23,11 @@ resource "fabric_spark_environment_settings" "example" {
 			*/
   }
 
-  spark_properties = {
-    /*
+  spark_properties = [
+    {
+      /*
 			your settings here
 			*/
-  }
+    }
+  ]
 }

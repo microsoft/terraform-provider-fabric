@@ -76,15 +76,19 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 						"environment_id":     testhelp.RefByFQN(environmentResourceFQN, "id"),
 						"publication_status": "Published",
 						"driver_cores":       8,
-						"spark_properties": map[string]any{
-							`"spark.acls.enable"`: "true",
+						"spark_properties": []map[string]any{
+							{
+								"key":   "spark.acls.enable",
+								"value": "true",
+							},
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.spark.acls.enable"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.key", "spark.acls.enable"),
 			),
 		},
 	},
