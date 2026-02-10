@@ -1,0 +1,5 @@
+kind: changed
+body: migrate `fabric_spark_environment_settings` resource/data-source to use GA APIs
+time: 2026-02-10T08:24:44.10205937Z
+custom:
+    Issue: "809"
