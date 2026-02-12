@@ -102,7 +102,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 			DescriptionMaxLength:  256,
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(1),
+				mapvalidator.SizeAtMost(4),
 				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 			},
 			DefinitionRequired: false,
