@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tags
@@ -27,7 +27,8 @@ type baseTagModel struct {
 }
 
 type scopeModel struct {
-	Type types.String `tfsdk:"type"`
+	DomainID customtypes.UUID `tfsdk:"domain_id"`
+	Type     types.String     `tfsdk:"type"`
 }
 
 type dataSourceTagsModel struct {
@@ -79,8 +80,16 @@ func (to *baseTagModel) set(ctx context.Context, from fabadmin.TagInfo) diag.Dia
 }
 
 func (to *scopeModel) set(from fabadmin.TagScopeClassification) {
-	scope := from.GetTagScope()
-	to.Type = types.StringPointerValue((*string)(scope.Type))
+	switch s := from.(type) {
+	case *fabadmin.DomainTagScope:
+		to.Type = types.StringPointerValue((*string)(s.Type))
+		to.DomainID = customtypes.NewUUIDPointerValue(s.DomainID)
+	case *fabadmin.TenantTagScope:
+		to.Type = types.StringPointerValue((*string)(s.Type))
+	default:
+		scope := from.GetTagScope()
+		to.Type = types.StringPointerValue((*string)(scope.Type))
+	}
 }
 
 /*
@@ -90,8 +99,6 @@ RESOURCE
 type resourceTagsModel struct {
 	baseTagModel
 
-	Tags supertypes.ListNestedObjectValueOf[baseTagModel] `tfsdk:"tags"`
-
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
 }
 
@@ -99,33 +106,78 @@ type requestCreateTags struct {
 	fabadmin.CreateTagsRequest
 }
 
-func (to *resourceTagsModel) set(ctx context.Context, from []fabadmin.Tag) diag.Diagnostics {
-	to.Tags = supertypes.NewListNestedObjectValueOfNull[baseTagModel](ctx)
+func (to *resourceTagsModel) setValue(ctx context.Context, from []fabadmin.Tag) diag.Diagnostics {
 	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
+	entity := from[0]
 
-	slice := make([]*baseTagModel, 0, len(from))
+	to.ID = customtypes.NewUUIDPointerValue(entity.ID)
+	to.DisplayName = types.StringPointerValue(entity.DisplayName)
 
-	for _, entity := range from {
-		item := &baseTagModel{}
-		if diags := item.setValue(ctx, entity); diags.HasError() {
-			return diags
-		}
+	scope := &scopeModel{}
+	scope.set(entity.Scope)
 
-		slice = append(slice, item)
+	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
+		return diags
 	}
 
-	return to.Tags.Set(ctx, slice)
+	return nil
 }
 
-func (to *baseTagModel) setValue(ctx context.Context, from fabadmin.Tag) diag.Diagnostics {
+func (to *baseTagModel) setTag(ctx context.Context, from fabadmin.Tag) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 
 	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
 
-	scope := &scopeModel{
-		Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
+	var scope *scopeModel
+
+	switch s := from.Scope.(type) {
+	case *fabadmin.DomainTagScope:
+		scope = &scopeModel{
+			Type:     types.StringPointerValue((*string)(s.Type)),
+			DomainID: customtypes.NewUUIDPointerValue(s.DomainID),
+		}
+	case *fabadmin.TenantTagScope:
+		scope = &scopeModel{
+			Type: types.StringPointerValue((*string)(s.Type)),
+		}
+	default:
+		scope = &scopeModel{
+			Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
+		}
 	}
+
+	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
+		return diags
+	}
+
+	return nil
+}
+
+func (to *baseTagModel) setTagInfo(ctx context.Context, from fabadmin.TagInfo) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+
+	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
+
+	var scope *scopeModel
+
+	switch s := from.Scope.(type) {
+	case *fabadmin.DomainTagScope:
+		scope = &scopeModel{
+			Type:     types.StringPointerValue((*string)(s.Type)),
+			DomainID: customtypes.NewUUIDPointerValue(s.DomainID),
+		}
+	case *fabadmin.TenantTagScope:
+		scope = &scopeModel{
+			Type: types.StringPointerValue((*string)(s.Type)),
+		}
+	default:
+		scope = &scopeModel{
+			Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
+		}
+	}
+
 	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
 		return diags
 	}
@@ -134,15 +186,26 @@ func (to *baseTagModel) setValue(ctx context.Context, from fabadmin.Tag) diag.Di
 }
 
 func (to *requestCreateTags) set(ctx context.Context, from resourceTagsModel) diag.Diagnostics {
-	tags, diags := from.Tags.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
+	to.CreateTagsRequest.CreateTagsRequest = append(to.CreateTagsRequest.CreateTagsRequest, fabadmin.CreateTagRequest{
+		DisplayName: from.DisplayName.ValueStringPointer(),
+	})
 
-	for _, tag := range tags {
-		to.CreateTagsRequest.CreateTagsRequest = append(to.CreateTagsRequest.CreateTagsRequest, fabadmin.CreateTagRequest{
-			DisplayName: tag.DisplayName.ValueStringPointer(),
-		})
+	if from.Scope.IsKnown() {
+		scope, diags := from.Scope.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if scope.Type.ValueString() == string(fabadmin.TagScopeTypeTenant) {
+			to.Scope = &fabadmin.TenantTagScope{
+				Type: (*fabadmin.TagScopeType)(scope.Type.ValueStringPointer()),
+			}
+		} else if scope.Type.ValueString() == string(fabadmin.TagScopeTypeDomain) {
+			to.Scope = &fabadmin.DomainTagScope{
+				Type:     (*fabadmin.TagScopeType)(scope.Type.ValueStringPointer()),
+				DomainID: scope.DomainID.ValueStringPointer(),
+			}
+		}
 	}
 
 	return nil

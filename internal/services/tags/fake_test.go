@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tags_test
@@ -41,14 +41,13 @@ func fakeDeleteTagFunc() func(ctx context.Context, tagID string, options *fabadm
 	}
 }
 
-func fakeUpdateTagFunc(
-	tag fabadmin.TagInfo,
-) func(ctx context.Context, tagID string, request fabadmin.UpdateTagRequest, options *fabadmin.TagsClientUpdateTagOptions) (resp azfake.Responder[fabadmin.TagsClientUpdateTagResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, tagID string, _ fabadmin.UpdateTagRequest, _ *fabadmin.TagsClientUpdateTagOptions) (resp azfake.Responder[fabadmin.TagsClientUpdateTagResponse], errResp azfake.ErrorResponder) {
+func fakeUpdateTagFunc() func(ctx context.Context, tagID string, request fabadmin.UpdateTagRequest, options *fabadmin.TagsClientUpdateTagOptions) (resp azfake.Responder[fabadmin.TagsClientUpdateTagResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, tagID string, request fabadmin.UpdateTagRequest, _ *fabadmin.TagsClientUpdateTagOptions) (resp azfake.Responder[fabadmin.TagsClientUpdateTagResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabadmin.TagsClientUpdateTagResponse]{}
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
 
-		if _, ok := fakeTagStore[tagID]; !ok {
+		storedTag, ok := fakeTagStore[tagID]
+		if !ok {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Item not found"))
 			resp.SetResponse(http.StatusNotFound, fabadmin.TagsClientUpdateTagResponse{}, nil)
 
@@ -57,18 +56,14 @@ func fakeUpdateTagFunc(
 
 		tag := fabadmin.TagInfo{
 			ID:          to.Ptr(tagID),
-			DisplayName: to.Ptr(*tag.DisplayName),
-			Scope: &fabadmin.TagScope{
-				Type: to.Ptr(fabadmin.TagScopeTypeTenant),
-			},
+			DisplayName: request.DisplayName,
+			Scope:       storedTag.Scope,
 		}
 
 		returnTag := fabadmin.Tag{
 			ID:          to.Ptr(tagID),
-			DisplayName: to.Ptr(*tag.DisplayName),
-			Scope: &fabadmin.TagScope{
-				Type: to.Ptr(fabadmin.TagScopeTypeTenant),
-			},
+			DisplayName: request.DisplayName,
+			Scope:       storedTag.Scope,
 		}
 
 		fakeTestUpsert(tag)
@@ -85,12 +80,46 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 		outputTags := make([]fabadmin.Tag, 0, len(body.CreateTagsRequest))
 
 		for _, item := range body.CreateTagsRequest {
-			newTag := NewRandomTag()
-			newTag.DisplayName = item.DisplayName
+			tagID := testhelp.RandomUUID()
+			var scope fabadmin.TagScopeClassification
+
+			if body.Scope != nil {
+				switch s := body.Scope.(type) {
+				case *fabadmin.DomainTagScope:
+					scope = &fabadmin.DomainTagScope{
+						Type:     s.Type,
+						DomainID: s.DomainID,
+					}
+				case *fabadmin.TenantTagScope:
+					scope = &fabadmin.TenantTagScope{
+						Type: s.Type,
+					}
+				default:
+					scope = &fabadmin.TenantTagScope{
+						Type: body.Scope.GetTagScope().Type,
+					}
+				}
+			} else {
+				scope = &fabadmin.TenantTagScope{
+					Type: to.Ptr(fabadmin.TagScopeTypeTenant),
+				}
+			}
+
+			newTag := fabadmin.TagInfo{
+				DisplayName: item.DisplayName,
+				ID:          to.Ptr(tagID),
+				Scope:       scope,
+			}
 
 			fakeTestUpsert(newTag)
 
-			outputTags = append(outputTags, fabadmin.Tag(newTag))
+			outputTag := fabadmin.Tag{
+				DisplayName: item.DisplayName,
+				ID:          to.Ptr(tagID),
+				Scope:       scope,
+			}
+
+			outputTags = append(outputTags, outputTag)
 		}
 
 		resp.SetResponse(http.StatusCreated, fabadmin.TagsClientBulkCreateTagsResponse{CreateTagsResponse: fabadmin.CreateTagsResponse{Tags: outputTags}}, nil)

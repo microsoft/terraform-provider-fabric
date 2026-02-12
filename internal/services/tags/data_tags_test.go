@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tags_test
@@ -45,7 +45,9 @@ func TestAcc_TagsDataSource(t *testing.T) {
 				map[string]any{},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.display_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.scope.type"),
 			),
 		},
 	},

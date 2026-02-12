@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tags_test
@@ -23,60 +23,40 @@ func TestUnit_TagResource_Attributes(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.BulkCreateTags = fakeBulkCreateTagsFunc()
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.DeleteTag = fakeDeleteTagFunc()
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - display_name, scope without id
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - no attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{},
+			),
+			ExpectError: regexp.MustCompile(`Missing required argument`),
+		},
+		// error - unexpected attribute
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name": "test",
+					"id":              testhelp.RandomUUID(),
+					"unexpected_attr": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
 					"scope": map[string]any{
 						"type": string(fabadmin.TagScopeTypeTenant),
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Attribute "id" must be specified when "scope" is specified`),
-		},
-		// error - id, display_name without scope
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"id":           "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-				},
-			),
-			ExpectError: regexp.MustCompile(`Attribute "scope" must be specified when "id" is specified`),
-		},
-		// error - id, display_name without scope
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"id":           "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-				},
-			),
-			ExpectError: regexp.MustCompile(`Attribute "scope" must be specified when "id" is specified`),
-		},
-		// error - "tags" without required field
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": "test",
-					"tags": []map[string]any{
-						{
-							"display_name": "example",
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Attribute "tags" cannot be specified when "display_name" is specified`),
+			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
 }
@@ -84,16 +64,14 @@ func TestUnit_TagResource_Attributes(t *testing.T) {
 func TestUnit_TagResource_CRUD(t *testing.T) {
 	entity1DisplayName := testhelp.RandomName()
 	entity2DisplayName := testhelp.RandomName()
-
-	tag := NewRandomTag()
-	fakeTestUpsert(tag)
-
-	updateTag := NewRandomTag()
+	entity3DisplayName := testhelp.RandomName()
+	entity4DisplayName := testhelp.RandomName()
+	domainID := testhelp.RandomUUID()
 
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.NewListTagsPager = fakeTagsFunc()
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.BulkCreateTags = fakeBulkCreateTagsFunc()
 	fakes.FakeServer.ServerFactory.Admin.TagsServer.DeleteTag = fakeDeleteTagFunc()
-	fakes.FakeServer.ServerFactory.Admin.TagsServer.UpdateTag = fakeUpdateTagFunc(updateTag)
+	fakes.FakeServer.ServerFactory.Admin.TagsServer.UpdateTag = fakeUpdateTagFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
@@ -102,37 +80,69 @@ func TestUnit_TagResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"tags": []map[string]any{
-						{
-							"display_name": entity1DisplayName,
-						},
-						{
-							"display_name": entity2DisplayName,
-						},
-					},
+					"display_name": entity1DisplayName,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.0.display_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.1.display_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity1DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeTenant)),
 			),
 		},
-		// Update and Read
+		// Create with Scope
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"id":           *tag.ID,
-					"display_name": *updateTag.DisplayName,
+					"display_name": entity2DisplayName,
 					"scope": map[string]any{
 						"type": string(fabadmin.TagScopeTypeTenant),
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "id", tag.ID),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", updateTag.DisplayName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity2DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeTenant)),
+			),
+		},
+		// Update display_name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entity3DisplayName,
+					"scope": map[string]any{
+						"type": string(fabadmin.TagScopeTypeTenant),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity3DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeTenant)),
+			),
+		},
+		// Create with Domain Scope
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": entity4DisplayName,
+					"scope": map[string]any{
+						"type":      string(fabadmin.TagScopeTypeDomain),
+						"domain_id": domainID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity4DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeDomain)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.domain_id", domainID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -140,12 +150,11 @@ func TestUnit_TagResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_TagResource_CRUD(t *testing.T) {
-	entity := testhelp.WellKnown()["Tags"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityScope := entity["scopeType"].(string)
-	entityUpdateDisplayName := testhelp.RandomName()
 	entity1DisplayName := testhelp.RandomName()
 	entity2DisplayName := testhelp.RandomName()
+
+	domain := testhelp.WellKnown()["DomainParent"].(map[string]any)
+	domainID := domain["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -154,43 +163,38 @@ func TestAcc_TagResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"tags": []map[string]any{
-						{
-							"display_name": entity1DisplayName,
-						},
-						{
-							"display_name": entity2DisplayName,
-						},
+					"display_name": entity1DisplayName,
+					"scope": map[string]any{
+						"domain_id": domainID,
+						"type":      string(fabadmin.TagScopeTypeDomain),
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.0.id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "tags.1.id"),
-				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "tags.*", map[string]string{
-					"display_name": entity1DisplayName,
-				}),
-				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "tags.*", map[string]string{
-					"display_name": entity2DisplayName,
-				}),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity1DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeDomain)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.domain_id", domainID),
 			),
 		},
-		// Update and Read
+		// Update display_name
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"id":           entityID,
-					"display_name": entityUpdateDisplayName,
+					"display_name": entity2DisplayName,
 					"scope": map[string]any{
-						"type": entityScope,
+						"domain_id": domainID,
+						"type":      string(fabadmin.TagScopeTypeDomain),
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity2DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeDomain)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.domain_id", domainID),
 			),
 		},
 	}))

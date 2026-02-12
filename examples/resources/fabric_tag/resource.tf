@@ -1,13 +1,14 @@
-# Create example
+# Create example with default scope
 resource "fabric_tag" "example" {
-  tags = [
-    {
-      display_name = "example"
-    },
-    {
-      display_name = "example2"
-    }
-  ]
+  display_name = "example"
+}
+
+# Create example with explicit scope
+resource "fabric_tag" "example_scope" {
+  display_name = "example_scope"
+  scope = {
+    type = "Tenant"
+  }
 }
 
 #Update

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tags
@@ -42,7 +42,7 @@ func (r *resourceTag) Metadata(_ context.Context, _ resource.MetadataRequest, re
 }
 
 func (r *resourceTag) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resourceItemSchema().GetResource(ctx)
+	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
 func (r *resourceTag) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -92,7 +92,8 @@ func (r *resourceTag) Create(ctx context.Context, req resource.CreateRequest, re
 
 	var reqCreate requestCreateTags
 
-	if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() {
+	diags = reqCreate.set(ctx, plan)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -102,7 +103,7 @@ func (r *resourceTag) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, respCreate.Tags)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(state.setValue(ctx, respCreate.Tags)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -184,7 +185,7 @@ func (r *resourceTag) Update(ctx context.Context, req resource.UpdateRequest, re
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.setValue(ctx, respUpdate.Tag)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.setTag(ctx, respUpdate.Tag)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -218,23 +219,9 @@ func (r *resourceTag) Delete(ctx context.Context, req resource.DeleteRequest, re
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if state.ID.IsNull() {
-		tags, diags := state.Tags.Get(ctx)
-		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		for _, tag := range tags {
-			_, err := r.client.DeleteTag(ctx, tag.ID.ValueString(), nil)
-			if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
-				return
-			}
-		}
-	} else {
-		_, err := r.client.DeleteTag(ctx, state.ID.ValueString(), nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
+	_, err := r.client.DeleteTag(ctx, state.ID.ValueString(), nil)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	resp.State.RemoveResource(ctx)
@@ -245,13 +232,6 @@ func (r *resourceTag) Delete(ctx context.Context, req resource.DeleteRequest, re
 }
 
 func (r *resourceTag) get(ctx context.Context, model *resourceTagsModel) diag.Diagnostics {
-	tagsRequested, diags := model.Tags.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	var found []*baseTagModel
-
 	pager := r.client.NewListTagsPager(nil)
 	for pager.More() {
 		page, err := pager.NextPage(ctx)
@@ -260,19 +240,12 @@ func (r *resourceTag) get(ctx context.Context, model *resourceTagsModel) diag.Di
 		}
 
 		for _, entity := range page.Value {
-			for _, requestedTag := range tagsRequested {
-				if *entity.DisplayName == requestedTag.DisplayName.ValueString() {
-					item := &baseTagModel{}
-					item.set(ctx, entity)
-
-					found = append(found, item)
+			if *entity.DisplayName == model.DisplayName.ValueString() {
+				if diags := model.setTagInfo(ctx, entity); diags.HasError() {
+					return diags
 				}
 			}
 		}
-	}
-
-	if diags := model.Tags.Set(ctx, found); diags.HasError() {
-		return diags
 	}
 
 	return nil
