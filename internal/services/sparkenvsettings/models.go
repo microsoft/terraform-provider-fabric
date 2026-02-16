@@ -262,8 +262,8 @@ func diffSparkProperties(planned, current []fabenvironment.SparkProperty) []fabe
 		}
 	}
 
-	result := make([]fabenvironment.SparkProperty, len(planned))
-	copy(result, planned)
+	result := make([]fabenvironment.SparkProperty, 0, len(planned)+len(current))
+	result = append(result, planned...)
 
 	for _, c := range current {
 		if c.Key != nil {

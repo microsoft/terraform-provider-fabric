@@ -63,38 +63,6 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
 			),
 		},
-		// Update and Read (Spark properties)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				environmentResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":       testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"environment_id":     testhelp.RefByFQN(environmentResourceFQN, "id"),
-						"publication_status": "Published",
-						"driver_cores":       8,
-						"spark_properties": []map[string]any{
-							{
-								"key":   "spark.acls.enable",
-								"value": "true",
-							},
-							{
-								"key":   "spark.admin.acls.groups",
-								"value": "test",
-							},
-						},
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.1.value"),
-			),
-		},
 	},
 	))
 }
@@ -139,6 +107,7 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.1.value"),
 			),
 		},
+		// Update and Read (test Spark properties sync)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -166,6 +135,7 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.key", "spark.cores.max"),
 			),
 		},
+		// Update and Read (remove Spark properties)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
