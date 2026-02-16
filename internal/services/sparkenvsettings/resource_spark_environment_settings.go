@@ -128,7 +128,7 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		}
 	}
 
-	_, err := r.stagingClient.UpdateSparkCompute(
+	respCreate, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
@@ -242,7 +242,7 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 		}
 	}
 
-	_, err := r.stagingClient.UpdateSparkCompute(
+	respUpdate, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
