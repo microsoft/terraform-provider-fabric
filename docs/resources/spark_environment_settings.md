@@ -103,7 +103,7 @@ Read-Only:
 
 ### Nested Schema for `spark_properties`
 
-Optional:
+Required:
 
 - `key` (String) The Spark property key. Spark property key:
 - must start with 'spark.'
