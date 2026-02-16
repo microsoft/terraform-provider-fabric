@@ -82,7 +82,7 @@ function Set-ExternalDataShare {
   )
 
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
-  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName }
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName } | Select-Object -First 1
   if (!$result) {
     Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
     $TABLES_PATH = "Tables"
