@@ -117,7 +117,18 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		return
 	}
 
-	respCreate, err := r.stagingClient.UpdateSparkCompute(
+	{
+		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if reqCreate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
+			reqCreate.SparkProperties = diffSparkProperties(reqCreate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+		}
+	}
+
+	_, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
@@ -220,7 +231,18 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 		return
 	}
 
-	respUpdate, err := r.stagingClient.UpdateSparkCompute(
+	{
+		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if reqUpdate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
+			reqUpdate.SparkProperties = diffSparkProperties(reqUpdate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+		}
+	}
+
+	_, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),

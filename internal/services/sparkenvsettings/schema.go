@@ -13,7 +13,6 @@ import (
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -193,10 +192,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				},
 				Resource: &schemaR.ListNestedAttribute{
 					Optional: true,
-					Computed: true,
-					PlanModifiers: []planmodifier.List{
-						listplanmodifier.UseStateForUnknown(),
-					},
 				},
 				DataSource: &schemaD.ListNestedAttribute{
 					Computed: true,
@@ -227,8 +222,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							MarkdownDescription: "The Spark property value.",
 						},
 						Resource: &schemaR.StringAttribute{
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,

@@ -249,3 +249,32 @@ func (to *sparkPropertyModel) set(from fabenvironment.SparkProperty) {
 	to.Key = types.StringPointerValue(from.Key)
 	to.Value = types.StringPointerValue(from.Value)
 }
+
+// diffSparkProperties merges planned spark properties with current ones,
+// adding null-value entries for any current keys not present in the plan.
+// This ensures the API deletes properties that were removed from config.
+func diffSparkProperties(planned, current []fabenvironment.SparkProperty) []fabenvironment.SparkProperty {
+	plannedKeys := make(map[string]struct{})
+
+	for _, p := range planned {
+		if p.Key != nil {
+			plannedKeys[*p.Key] = struct{}{}
+		}
+	}
+
+	result := make([]fabenvironment.SparkProperty, len(planned))
+	copy(result, planned)
+
+	for _, c := range current {
+		if c.Key != nil {
+			if _, exists := plannedKeys[*c.Key]; !exists {
+				result = append(result, fabenvironment.SparkProperty{
+					Key:   c.Key,
+					Value: nil,
+				})
+			}
+		}
+	}
+
+	return result
+}
