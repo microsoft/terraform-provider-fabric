@@ -1553,11 +1553,11 @@ if (-not $wellKnown.ContainsKey('Lakehouse') -or -not $wellKnown['Lakehouse'].id
   Write-Log -Message "Lakehouse not found or missing 'id'. Cannot create External Data Share." -Level 'WARN'
 }
 else {
-  $externalDataShares = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
+  $externalDataShare = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
   $wellKnown['ExternalDataShare'] = @{
-    id          = $externalDataShares[0].id
-    workspaceId = $externalDataShares[0].workspaceId
-    itemId      = $externalDataShares[0].itemId
+    id          = $externalDataShare.id
+    workspaceId = $externalDataShare.workspaceId
+    itemId      = $externalDataShare.itemId
   }
 }
 
