@@ -66,6 +66,18 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - invalid uuid - domain_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": "test",
+					"domain_id":    "invalid uuid",
+				},
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
 		// error - missing capacity_id if identity enabled is true
 		{
 			ResourceName: testResourceItemFQN,
@@ -365,6 +377,9 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
+	domain := testhelp.WellKnown()["DomainParent"].(map[string]any)
+	domainID := domain["id"].(string)
+
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
@@ -378,6 +393,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				map[string]any{
 					"display_name": entityCreateDisplayName,
 					"capacity_id":  capacityID,
+					"domain_id":    domainID,
 					"identity": map[string]any{
 						"type": "SystemAssigned",
 					},
@@ -387,6 +403,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "domain_id", domainID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
 			),
 		},
@@ -405,6 +422,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "domain_id"),
 			),
 		},
 		// Update - unassign capacity
@@ -421,6 +439,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "domain_id"),
 			),
 		},
 		// Update - assign capacity
@@ -432,12 +451,14 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 					"display_name": entityUpdateDisplayName,
 					"description":  entityUpdateDescription,
 					"capacity_id":  capacityID,
+					"domain_id":    domainID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "domain_id", domainID),
 			),
 		},
 		// Update - unassign identity
