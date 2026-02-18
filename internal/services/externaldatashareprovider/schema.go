@@ -1,9 +1,11 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider
+package externaldatashareprovider
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
@@ -16,6 +18,7 @@ import (
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -96,9 +99,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.SetAttribute{
 					Required: true,
+					Validators: []validator.Set{
+						setvalidator.SizeAtMost(100),
+					},
 				},
 			},
-			"creator_principal": superschema.SuperSingleNestedAttributeOf[creatorPrincipalModel]{
+			"principal_model": superschema.SuperSingleNestedAttributeOf[common.PrincipalModel]{
 				Common: &schemaR.SingleNestedAttribute{
 					MarkdownDescription: "The creator principal of the external data share.",
 				},
@@ -123,18 +129,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							Computed: true,
 						},
 					},
-					"display_name": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The display name of the creator principal.",
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
-						},
-						Resource: &schemaR.StringAttribute{
-							Required: false,
-							Computed: true,
-						},
-					},
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The type of the creator principal.",
@@ -145,32 +139,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						Resource: &schemaR.StringAttribute{
 							Required: false,
 							Computed: true,
-						},
-					},
-					"user_details": superschema.SuperSingleNestedAttributeOf[userDetailsModel]{
-						Common: &schemaR.SingleNestedAttribute{
-							MarkdownDescription: "The user details of the creator principal.",
-						},
-						DataSource: &schemaD.SingleNestedAttribute{
-							Computed: true,
-						},
-						Resource: &schemaR.SingleNestedAttribute{
-							Required: false,
-							Computed: true,
-						},
-						Attributes: superschema.Attributes{
-							"user_principal_name": superschema.StringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The user principal name of the creator principal.",
-								},
-								DataSource: &schemaD.StringAttribute{
-									Computed: true,
-								},
-								Resource: &schemaR.StringAttribute{
-									Required: false,
-									Computed: true,
-								},
-							},
 						},
 					},
 				},
@@ -195,6 +163,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
+							Validators: []validator.String{
+								stringvalidator.LengthAtMost(256),
+							},
 						},
 					},
 					"tenant_id": superschema.SuperStringAttribute{
@@ -226,9 +197,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Computed: true,
 				},
 			},
-			"expiration_time_utc": superschema.StringAttribute{
+			"expiration_time": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The expiration time of the external data share in UTC.",
+					CustomType:          timetypes.RFC3339Type{},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -238,9 +210,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Computed: true,
 				},
 			},
-			"invitation_url": superschema.StringAttribute{
+			"invitation_url": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The invitation URL for the external data share.",
+					CustomType:          customtypes.URLType{},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,

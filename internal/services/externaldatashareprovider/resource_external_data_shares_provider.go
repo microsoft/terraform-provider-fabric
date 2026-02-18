@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider
+package externaldatashareprovider
 
 import (
 	"context"
@@ -98,7 +98,7 @@ func (r *resourceExternalDataSharesProvider) Create(ctx context.Context, req res
 		return
 	}
 
-	state.set(ctx, &respCreate.ExternalDataShare)
+	state.set(ctx, plan.WorkspaceID.ValueStringPointer(), plan.ItemID.ValueStringPointer(), &respCreate.ExternalDataShare)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -205,7 +205,7 @@ func (r *resourceExternalDataSharesProvider) getByID(ctx context.Context, model 
 		return diags
 	}
 
-	model.set(ctx, &respList.ExternalDataShare)
+	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), &respList.ExternalDataShare)
 
 	return nil
 }

@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider
+package externaldatashareprovider
 
 import (
 	"context"
@@ -60,7 +60,7 @@ func (d *dataSourceExternalDataSharesProvider) Schema(ctx context.Context, _ dat
 			"values": schema.SetNestedAttribute{
 				MarkdownDescription: "The set of " + d.TypeInfo.Names + ".",
 				Computed:            true,
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[externalDataSharesModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[baseExternalDataShareModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: s.Attributes,
 				},
@@ -134,7 +134,7 @@ func (d *dataSourceExternalDataSharesProvider) list(ctx context.Context, model *
 		return diags
 	}
 
-	model.set(ctx, respList)
+	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), respList)
 
 	return nil
 }

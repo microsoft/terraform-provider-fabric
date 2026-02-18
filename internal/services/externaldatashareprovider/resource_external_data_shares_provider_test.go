@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider_test
+package externaldatashareprovider_test
 
 import (
 	"regexp"
@@ -151,7 +151,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "invitation_url"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "recipient.user_principal_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "creator_principal.id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "principal_model.id"),
 			),
 		},
 	}))

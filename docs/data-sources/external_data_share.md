@@ -3,13 +3,13 @@
 page_title: "fabric_external_data_share Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The External Data Share data-source allows you to retrieve details about a Fabric External Data Share https://learn.microsoft.com/fabric/governance/external-data-sharing-create.
+  The External Data Share data-source allows you to retrieve details about a Fabric External Data Share https://learn.microsoft.com/fabric/governance/external-data-sharing-overview.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_external_data_share (Data Source)
 
-The External Data Share data-source allows you to retrieve details about a Fabric [External Data Share](https://learn.microsoft.com/fabric/governance/external-data-sharing-create).
+The External Data Share data-source allows you to retrieve details about a Fabric [External Data Share](https://learn.microsoft.com/fabric/governance/external-data-sharing-overview).
 
 -> This data-source supports Service Principal authentication.
 
@@ -29,10 +29,10 @@ The External Data Share data-source allows you to retrieve details about a Fabri
 ### Read-Only
 
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
-- `creator_principal` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--creator_principal))
-- `expiration_time_utc` (String) The expiration time of the external data share in UTC.
+- `expiration_time` (String) The expiration time of the external data share in UTC.
 - `invitation_url` (String) The invitation URL for the external data share.
 - `paths` (Set of String) Allowed values for this attribute.
+- `principal_model` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--principal_model))
 - `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 
@@ -44,24 +44,14 @@ Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--creator_principal"></a>
+<a id="nestedatt--principal_model"></a>
 
-### Nested Schema for `creator_principal`
+### Nested Schema for `principal_model`
 
 Read-Only:
 
-- `display_name` (String) The display name of the creator principal.
 - `id` (String) The ID of the Data access role.
 - `type` (String) The type of the creator principal.
-- `user_details` (Attributes) The user details of the creator principal. (see [below for nested schema](#nestedatt--creator_principal--user_details))
-
-<a id="nestedatt--creator_principal--user_details"></a>
-
-### Nested Schema for `creator_principal.user_details`
-
-Read-Only:
-
-- `user_principal_name` (String) The user principal name of the creator principal.
 
 <a id="nestedatt--recipient"></a>
 

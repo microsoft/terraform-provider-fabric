@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider_test
+package externaldatashareprovider_test
 
 import (
 	"context"
@@ -109,7 +109,7 @@ func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 		Status:             to.Ptr(fabcore.ExternalDataShareStatusPending),
 		ExpirationTimeUTC:  to.Ptr(time.Now()),
 		ItemID:             to.Ptr(testhelp.RandomUUID()),
-		InvitationURL:      to.Ptr(testhelp.RandomName()),
+		InvitationURL:      to.Ptr(testhelp.RandomURI()),
 		AcceptedByTenantID: to.Ptr(testhelp.RandomUUID()),
 	}
 }

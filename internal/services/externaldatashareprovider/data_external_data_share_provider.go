@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatasharesprovider
+package externaldatashareprovider
 
 import (
 	"context"
@@ -105,7 +105,7 @@ func (d *dataSourceExternalDataShareProvider) getByID(ctx context.Context, model
 		return diags
 	}
 
-	model.set(ctx, &respGet.ExternalDataShare)
+	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), &respGet.ExternalDataShare)
 
 	return nil
 }
