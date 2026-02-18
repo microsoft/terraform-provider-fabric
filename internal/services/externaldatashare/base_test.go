@@ -1,18 +1,18 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatashareprovider_test
+package externaldatashare_test
 
 import (
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashareprovider"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-var itemTypeInfo = externaldatashareprovider.ItemTypeInfo
+var itemTypeInfo = externaldatashare.ItemTypeInfo
 
 func lakehouseResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

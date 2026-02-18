@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatashareprovider
+package externaldatashare
 
 import (
 	"context"
@@ -21,30 +21,30 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure = (*resourceExternalDataSharesProvider)(nil)
+	_ resource.ResourceWithConfigure = (*resourceExternalDataShares)(nil)
 )
 
-type resourceExternalDataSharesProvider struct {
+type resourceExternalDataShares struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ExternalDataSharesProviderClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewResourceExternalDataSharesProvider() resource.Resource {
-	return &resourceExternalDataSharesProvider{
+func NewResourceExternalDataShares() resource.Resource {
+	return &resourceExternalDataShares{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (r *resourceExternalDataSharesProvider) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *resourceExternalDataShares) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = r.TypeInfo.FullTypeName(false)
 }
 
-func (r *resourceExternalDataSharesProvider) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *resourceExternalDataShares) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetResource(ctx)
 }
 
-func (r *resourceExternalDataSharesProvider) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *resourceExternalDataShares) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -68,12 +68,12 @@ func (r *resourceExternalDataSharesProvider) Configure(_ context.Context, req re
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewExternalDataSharesProviderClient()
 }
 
-func (r *resourceExternalDataSharesProvider) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *resourceExternalDataShares) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
 	})
 
-	var plan, state resourceExternalDataSharesProviderModel
+	var plan, state resourceExternalDataSharesModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -115,12 +115,12 @@ func (r *resourceExternalDataSharesProvider) Create(ctx context.Context, req res
 	}
 }
 
-func (r *resourceExternalDataSharesProvider) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *resourceExternalDataShares) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var state resourceExternalDataSharesProviderModel
+	var state resourceExternalDataSharesModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -158,7 +158,7 @@ func (r *resourceExternalDataSharesProvider) Read(ctx context.Context, req resou
 	}
 }
 
-func (r *resourceExternalDataSharesProvider) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceExternalDataShares) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddWarning(
 		"update operation not supported",
 		fmt.Sprintf(
@@ -170,12 +170,12 @@ func (r *resourceExternalDataSharesProvider) Update(ctx context.Context, _ resou
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *resourceExternalDataSharesProvider) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *resourceExternalDataShares) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "start",
 	})
 
-	var state resourceExternalDataSharesProviderModel
+	var state resourceExternalDataSharesModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -199,7 +199,7 @@ func (r *resourceExternalDataSharesProvider) Delete(ctx context.Context, req res
 	})
 }
 
-func (r *resourceExternalDataSharesProvider) getByID(ctx context.Context, model *resourceExternalDataSharesProviderModel) diag.Diagnostics {
+func (r *resourceExternalDataShares) getByID(ctx context.Context, model *resourceExternalDataSharesModel) diag.Diagnostics {
 	respList, err := r.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags

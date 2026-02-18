@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatashareprovider_test
+package externaldatashare_test
 
 import (
 	"context"

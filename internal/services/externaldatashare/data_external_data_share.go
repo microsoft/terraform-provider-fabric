@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatashareprovider
+package externaldatashare
 
 import (
 	"context"
@@ -19,29 +19,29 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceExternalDataShareProvider)(nil)
+var _ datasource.DataSourceWithConfigure = (*dataSourceExternalDataShare)(nil)
 
-type dataSourceExternalDataShareProvider struct {
+type dataSourceExternalDataShare struct {
 	pConfigData *pconfig.ProviderData
 	client      *fabcore.ExternalDataSharesProviderClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
-func NewDataSourceExternalDataShareProvider() datasource.DataSource {
-	return &dataSourceExternalDataShareProvider{
+func NewDataSourceExternalDataShare() datasource.DataSource {
+	return &dataSourceExternalDataShare{
 		TypeInfo: ItemTypeInfo,
 	}
 }
 
-func (d *dataSourceExternalDataShareProvider) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *dataSourceExternalDataShare) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
-func (d *dataSourceExternalDataShareProvider) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *dataSourceExternalDataShare) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
-func (d *dataSourceExternalDataShareProvider) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *dataSourceExternalDataShare) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -65,12 +65,12 @@ func (d *dataSourceExternalDataShareProvider) Configure(_ context.Context, req d
 	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewExternalDataSharesProviderClient()
 }
 
-func (d *dataSourceExternalDataShareProvider) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *dataSourceExternalDataShare) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "start",
 	})
 
-	var data dataSourceExternalDataShareProviderModel
+	var data dataSourceExternalDataShareModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
@@ -99,7 +99,7 @@ func (d *dataSourceExternalDataShareProvider) Read(ctx context.Context, req data
 	}
 }
 
-func (d *dataSourceExternalDataShareProvider) getByID(ctx context.Context, model *dataSourceExternalDataShareProviderModel) diag.Diagnostics {
+func (d *dataSourceExternalDataShare) getByID(ctx context.Context, model *dataSourceExternalDataShareModel) diag.Diagnostics {
 	respGet, err := d.client.GetExternalDataShare(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags

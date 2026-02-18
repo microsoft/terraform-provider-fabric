@@ -1,4 +1,4 @@
-resource "fabric_external_data_share_provider" "example" {
+resource "fabric_external_data_share" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
   paths        = ["Files/Sales/Contoso_Sales_2023"]
@@ -7,7 +7,7 @@ resource "fabric_external_data_share_provider" "example" {
   }
 }
 
-resource "fabric_external_data_share_provider" "example_with_tenant" {
+resource "fabric_external_data_share" "example_with_tenant" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
   paths        = ["Files/Sales/Contoso_Sales_2023"]

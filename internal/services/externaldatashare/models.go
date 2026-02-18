@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package externaldatashareprovider
+package externaldatashare
 
 import (
 	"context"
@@ -44,7 +44,7 @@ type recipientModel struct {
 DATA-SOURCE
 */
 
-type dataSourceExternalDataShareProviderModel struct {
+type dataSourceExternalDataShareModel struct {
 	baseExternalDataShareModel
 
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
@@ -54,7 +54,7 @@ type dataSourceExternalDataShareProviderModel struct {
 DATA-SOURCE (list)
 */
 
-type dataSourceExternalDataSharesProviderModel struct {
+type dataSourceExternalDataSharesModel struct {
 	WorkspaceID customtypes.UUID                                              `tfsdk:"workspace_id"`
 	ItemID      customtypes.UUID                                              `tfsdk:"item_id"`
 	Values      supertypes.SetNestedObjectValueOf[baseExternalDataShareModel] `tfsdk:"values"`
@@ -65,7 +65,7 @@ type dataSourceExternalDataSharesProviderModel struct {
 RESOURCE
 */
 
-type resourceExternalDataSharesProviderModel struct {
+type resourceExternalDataSharesModel struct {
 	baseExternalDataShareModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
@@ -117,7 +117,7 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	return nil
 }
 
-func (to *dataSourceExternalDataSharesProviderModel) set(ctx context.Context, workspaceID, itemID *string, from []fabcore.ExternalDataShare) diag.Diagnostics {
+func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceID, itemID *string, from []fabcore.ExternalDataShare) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDPointerValue(itemID)
 
@@ -139,7 +139,7 @@ func (to *recipientModel) set(from fabcore.ExternalDataShareRecipient) {
 	to.TenantID = customtypes.NewUUIDPointerValue(from.TenantID)
 }
 
-func (to *requestCreateExternalDataShare) set(ctx context.Context, from resourceExternalDataSharesProviderModel) diag.Diagnostics {
+func (to *requestCreateExternalDataShare) set(ctx context.Context, from resourceExternalDataSharesModel) diag.Diagnostics {
 	paths, diags := from.Paths.Get(ctx)
 
 	if diags.HasError() {
