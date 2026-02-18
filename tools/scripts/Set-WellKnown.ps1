@@ -69,6 +69,36 @@ function Import-ModuleIfNotImported {
   }
 }
 
+function Set-ExternalDataShare {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$RecipientUserPrincipalName
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName } | Select-Object -First 1
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
+    $TABLES_PATH = "Tables"
+    $payload = @{
+      paths     = @(
+        $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      )
+      recipient = @{
+        userPrincipalName = $RecipientUserPrincipalName
+      }
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares" -Payload $payload).Response
+  }
+  return $result
+}
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -1519,6 +1549,18 @@ $wellKnown['Datamart'] = @{
   description = if ($result) { $result.description } else { '' }
 }
 
+if (-not $wellKnown.ContainsKey('Lakehouse') -or -not $wellKnown['Lakehouse'].id) {
+  Write-Log -Message "Lakehouse not found or missing 'id'. Cannot create External Data Share." -Level 'WARN'
+}
+else {
+  $externalDataShare = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
+  $wellKnown['ExternalDataShare'] = @{
+    id          = $externalDataShare.id
+    workspaceId = $externalDataShare.workspaceId
+    itemId      = $externalDataShare.itemId
+  }
+}
+
 # Create Resource Group if not exists
 $displayNameTemp = "$($itemNaming['ResourceGroup'])-${displayName}"
 $resourceGroup = Get-AzResourceGroup -Name $displayNameTemp
@@ -1798,6 +1840,30 @@ $definition = @{
       payloadType = 'InlineBase64'
     }
   )
+}
+
+function Set-Tags {
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
+  $result = $results.Response.value[0]
+  if (-not $result) {
+    $payload = @{
+      createTagsRequest = @(
+        @{ displayName = "Test Tag" }
+      )
+    }
+    Write-Log -Message "Creating Tag: $($payload.createTagsRequest[0].displayName)" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/tags/bulkCreateTags" -Payload $payload).Response.tags[0]
+  }
+  Write-Log -Message "Tag - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
+$tags = Set-Tags
+$wellKnown['Tags'] = @{
+  id          = $tags.id
+  displayName = $tags.displayName
+  scopeType   = $tags.scope.type
 }
 
 $mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'MountedDataFactory' -Definition $definition

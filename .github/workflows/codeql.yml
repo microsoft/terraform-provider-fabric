@@ -85,7 +85,7 @@ jobs:
 
       - name: 💫 Initialize CodeQL
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/init@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v3.29.5
+        uses: github/codeql-action/init@9e907b5e64f6b83e7804b09294d44122997950d6 # v3.29.5
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
@@ -100,7 +100,7 @@ jobs:
 
       - name: 🩺 Perform CodeQL Analysis
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/analyze@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v3.29.5
+        uses: github/codeql-action/analyze@9e907b5e64f6b83e7804b09294d44122997950d6 # v3.29.5
         with:
           category: "/language:${{matrix.language}}"
           upload: never
@@ -108,7 +108,7 @@ jobs:
 
       - name: 📤 Upload CodeQL result
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && steps.filter.outputs.src == 'true' || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
-        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v3.29.5
+        uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6 # v3.29.5
         with:
           sarif_file: codeql-results
           wait-for-processing: true
