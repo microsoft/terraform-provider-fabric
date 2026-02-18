@@ -1,0 +1,5 @@
+kind: fixed
+body: Added information about Service Principal permissions for `fabric_domain`
+time: 2026-02-02T01:41:33.912870971Z
+custom:
+    Issue: "742"

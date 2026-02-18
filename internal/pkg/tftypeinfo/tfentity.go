@@ -10,14 +10,15 @@ import (
 )
 
 type TFTypeInfo struct {
-	ProviderTypeName string
-	Name             string
-	Type             string
-	Names            string
-	Types            string
-	DocsURL          string
-	IsPreview        bool
-	IsSPNSupported   bool
+	ProviderTypeName          string
+	Name                      string
+	Type                      string
+	Names                     string
+	Types                     string
+	DocsURL                   string
+	IsPreview                 bool
+	IsSPNSupported            bool
+	TenantPermissionBlocksAPI bool
 }
 
 func (t TFTypeInfo) FullTypeName(plural bool) string { //revive:disable-line:flag-parameter
