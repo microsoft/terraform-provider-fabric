@@ -69,6 +69,36 @@ function Import-ModuleIfNotImported {
   }
 }
 
+function Set-ExternalDataShare {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$RecipientUserPrincipalName
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName } | Select-Object -First 1
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
+    $TABLES_PATH = "Tables"
+    $payload = @{
+      paths     = @(
+        $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      )
+      recipient = @{
+        userPrincipalName = $RecipientUserPrincipalName
+      }
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares" -Payload $payload).Response
+  }
+  return $result
+}
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -1517,6 +1547,18 @@ $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
   displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
+}
+
+if (-not $wellKnown.ContainsKey('Lakehouse') -or -not $wellKnown['Lakehouse'].id) {
+  Write-Log -Message "Lakehouse not found or missing 'id'. Cannot create External Data Share." -Level 'WARN'
+}
+else {
+  $externalDataShare = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
+  $wellKnown['ExternalDataShare'] = @{
+    id          = $externalDataShare.id
+    workspaceId = $externalDataShare.workspaceId
+    itemId      = $externalDataShare.itemId
+  }
 }
 
 # Create Resource Group if not exists
