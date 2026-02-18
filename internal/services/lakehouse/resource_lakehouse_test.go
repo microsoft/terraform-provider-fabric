@@ -38,6 +38,12 @@ var testHelperDefinitionUpdate = map[string]any{
 	`"shortcuts.metadata.json"`: map[string]any{
 		"source": "${local.path}/shortcuts.metadata.json.tmpl",
 	},
+	`"alm.settings.json"`: map[string]any{
+		"source": "${local.path}/alm.settings.json.tmpl",
+	},
+	`"data-access-roles.json"`: map[string]any{
+		"source": "${local.path}/data-access-roles.json.tmpl",
+	},
 }
 
 func TestUnit_LakehouseResource_Attributes(t *testing.T) {
