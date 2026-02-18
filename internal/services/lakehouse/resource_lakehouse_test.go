@@ -31,6 +31,15 @@ var testHelperDefinition = map[string]any{
 	},
 }
 
+var testHelperDefinitionUpdate = map[string]any{
+	`"lakehouse.metadata.json"`: map[string]any{
+		"source": "${local.path}/lakehouse.metadata.json.tmpl",
+	},
+	`"shortcuts.metadata.json"`: map[string]any{
+		"source": "${local.path}/shortcuts.metadata.json.tmpl",
+	},
+}
+
 func TestUnit_LakehouseResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -422,6 +431,26 @@ func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinitionUpdate,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
