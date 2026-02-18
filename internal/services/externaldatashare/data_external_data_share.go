@@ -105,7 +105,7 @@ func (d *dataSourceExternalDataShare) getByID(ctx context.Context, model *dataSo
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), &respGet.ExternalDataShare)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), &respGet.ExternalDataShare)
 
 	return nil
 }

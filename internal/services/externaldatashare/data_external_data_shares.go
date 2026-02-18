@@ -134,7 +134,7 @@ func (d *dataSourceExternalDataShares) list(ctx context.Context, model *dataSour
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), respList)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respList)
 
 	return nil
 }

@@ -75,11 +75,11 @@ type requestCreateExternalDataShare struct {
 	fabcore.CreateExternalDataShareRequest
 }
 
-func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, itemID *string, from *fabcore.ExternalDataShare) diag.Diagnostics {
+func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, itemID string, from *fabcore.ExternalDataShare) diag.Diagnostics {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Status = types.StringPointerValue((*string)(from.Status))
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(workspaceID)
-	to.ItemID = customtypes.NewUUIDPointerValue(itemID)
+	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
+	to.ItemID = customtypes.NewUUIDValue(itemID)
 	to.InvitationURL = customtypes.NewURLPointerValue(from.InvitationURL)
 	to.AcceptedByTenantID = customtypes.NewUUIDPointerValue(from.AcceptedByTenantID)
 	to.ExpirationTime = timetypes.NewRFC3339TimePointerValue(from.ExpirationTimeUTC)
@@ -117,9 +117,9 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	return nil
 }
 
-func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceID, itemID *string, from []fabcore.ExternalDataShare) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(workspaceID)
-	to.ItemID = customtypes.NewUUIDPointerValue(itemID)
+func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceID, itemID string, from []fabcore.ExternalDataShare) diag.Diagnostics {
+	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
+	to.ItemID = customtypes.NewUUIDValue(itemID)
 
 	slice := make([]*baseExternalDataShareModel, 0, len(from))
 	for _, entity := range from {

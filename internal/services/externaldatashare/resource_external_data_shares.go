@@ -98,7 +98,7 @@ func (r *resourceExternalDataShares) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	state.set(ctx, plan.WorkspaceID.ValueStringPointer(), plan.ItemID.ValueStringPointer(), &respCreate.ExternalDataShare)
+	state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), &respCreate.ExternalDataShare)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -205,7 +205,7 @@ func (r *resourceExternalDataShares) getByID(ctx context.Context, model *resourc
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueStringPointer(), model.ItemID.ValueStringPointer(), &respList.ExternalDataShare)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), &respList.ExternalDataShare)
 
 	return nil
 }
