@@ -21,6 +21,7 @@ func fakeSetNetworkCommunicationPolicy(
 		} else {
 			entity.Inbound.PublicAccessRules.DefaultAction = azto.Ptr(fabcore.NetworkAccessRuleAllow)
 		}
+
 		if setWorkspaceNetworkingCommunicationPolicy.Outbound != nil && setWorkspaceNetworkingCommunicationPolicy.Outbound.PublicAccessRules != nil {
 			entity.Outbound.PublicAccessRules.DefaultAction = setWorkspaceNetworkingCommunicationPolicy.Outbound.PublicAccessRules.DefaultAction
 		} else {

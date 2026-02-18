@@ -1,3 +1,6 @@
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
+
 package workspacencp
 
 import (
@@ -69,6 +72,7 @@ func (to *rulesModel) set(ctx context.Context, from fabcore.NetworkRules) diag.D
 	publicAccessRules := supertypes.NewSingleNestedObjectValueOfNull[networkRulesModel](ctx)
 
 	publicAccessRulesModel := &networkRulesModel{}
+
 	publicAccessRulesModel.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
 	if diags := publicAccessRules.Set(ctx, publicAccessRulesModel); diags.HasError() {
 		return diags

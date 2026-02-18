@@ -1,3 +1,6 @@
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
+
 package workspacencp
 
 import (
@@ -233,6 +236,7 @@ func (r *resourceWorkspaceNetworkCommunicationPolicy) Delete(ctx context.Context
 			r.TypeInfo.Name,
 		),
 	)
+
 	_, err := r.client.SetNetworkCommunicationPolicy(ctx, state.WorkspaceID.ValueString(), fabcore.WorkspaceNetworkingCommunicationPolicy{}, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
