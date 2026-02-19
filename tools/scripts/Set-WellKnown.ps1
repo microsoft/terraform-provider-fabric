@@ -636,10 +636,11 @@ function Set-OutboundNetworkPolicy {
         }
       }
     }
+
     $outboundNetworkTenantSettings = Get-TenantSettings -TenantSettingName 'WorkspaceBlockOutboundAccess'
 
     if ($outboundNetworkTenantSettings.enabled -eq $false) {
-      Write-Log -Message "Configure workspace-level outbound network rules tenant setting is disabled. Please enable the 'Configure workspace-level outbound network rules' tenant setting manually in the Fabric Admin Portal." -Level 'WARN' -Stop $false
+      Write-Log -Message "Configure workspace-level outbound network rules tenant setting is disabled. Please enable the 'Configure workspace-level outbound network rules' tenant setting manually in the Fabric Admin Portal." -Level 'WARN'
     }
     else {
       $result = (Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy" -Payload $payload).Response
