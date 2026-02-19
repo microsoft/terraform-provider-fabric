@@ -7,8 +7,7 @@ import (
 	"context"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
-	//revive:disable-line:import-alias-naming
-	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -61,8 +60,9 @@ type dataSourceWorkspaceOutboundGatewayRulesModel struct {
 	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
 }
 
-/*RESOURCE
- */
+/*
+RESOURCE
+*/
 
 type resourceWorkspaceOutboundGatewayRulesModel struct {
 	baseWorkspaceOutboundGatewayRulesModel

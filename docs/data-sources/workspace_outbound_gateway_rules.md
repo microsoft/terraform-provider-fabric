@@ -3,14 +3,14 @@
 page_title: "fabric_workspace_outbound_gateway_rules Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Workspace Outbound Gateway Rules data-source allows you to retrieve details about a Fabric Workspace Outbound Gateway Rules https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview.
+  The Workspace Outbound Gateway Rules data-source allows you to retrieve details about a Fabric Workspace Outbound Gateway Rules https://learn.microsoft.com/fabric/security/workspace-outbound-access-protection-overview.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_outbound_gateway_rules (Data Source)
 
-The Workspace Outbound Gateway Rules data-source allows you to retrieve details about a Fabric [Workspace Outbound Gateway Rules](https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview).
+The Workspace Outbound Gateway Rules data-source allows you to retrieve details about a Fabric [Workspace Outbound Gateway Rules](https://learn.microsoft.com/fabric/security/workspace-outbound-access-protection-overview).
 
 -> This data-source supports Service Principal authentication.
 
