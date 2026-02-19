@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -48,24 +50,24 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
 					CustomType:          customtypes.UUIDType{},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
 				},
 			},
 			"item_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The item ID.",
 					CustomType:          customtypes.UUIDType{},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
 				},
 			},
 			"id": superschema.SuperStringAttribute{
@@ -102,43 +104,37 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(100),
 					},
+					PlanModifiers: []planmodifier.Set{
+						setplanmodifier.RequiresReplace(),
+					},
 				},
 			},
 			"principal_model": superschema.SuperSingleNestedAttributeOf[common.PrincipalModel]{
 				Common: &schemaR.SingleNestedAttribute{
 					MarkdownDescription: "The creator principal of the external data share.",
-				},
-				DataSource: &schemaD.SingleNestedAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 				Resource: &schemaR.SingleNestedAttribute{
 					Required: false,
-					Computed: true,
 				},
 				Attributes: superschema.Attributes{
 					"id": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The ID of the Data access role.",
 							CustomType:          customtypes.UUIDType{},
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: false,
-							Computed: true,
 						},
 					},
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The type of the creator principal.",
-						},
-						DataSource: &schemaD.StringAttribute{
-							Computed: true,
+							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: false,
-							Computed: true,
 						},
 					},
 				},
@@ -152,6 +148,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				Resource: &schemaR.SingleNestedAttribute{
 					Required: true,
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.RequiresReplace(),
+					},
 				},
 				Attributes: superschema.Attributes{
 					"user_principal_name": superschema.SuperStringAttribute{
@@ -166,6 +165,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							Validators: []validator.String{
 								stringvalidator.LengthAtMost(256),
 							},
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.RequiresReplace(),
+							},
 						},
 					},
 					"tenant_id": superschema.SuperStringAttribute{
@@ -178,6 +180,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.RequiresReplace(),
+							},
 						},
 					},
 				},
@@ -188,52 +193,40 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleExternalDataShareStatusValues(), true)...),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
 					Computed: true,
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: false,
-					Computed: true,
 				},
 			},
 			"expiration_time": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The expiration time of the external data share in UTC.",
 					CustomType:          timetypes.RFC3339Type{},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: false,
-					Computed: true,
 				},
 			},
 			"invitation_url": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The invitation URL for the external data share.",
 					CustomType:          customtypes.URLType{},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: false,
-					Computed: true,
 				},
 			},
 			"accepted_by_tenant_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The tenant ID that accepted the external data share.",
 					CustomType:          customtypes.UUIDType{},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: false,
-					Computed: true,
 				},
 			},
 			"timeouts": superschema.TimeoutAttribute{

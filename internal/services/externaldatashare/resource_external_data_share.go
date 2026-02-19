@@ -106,10 +106,6 @@ func (r *resourceExternalDataShares) Create(ctx context.Context, req resource.Cr
 		"action": "end",
 	})
 
-	tflog.Debug(ctx, "CREATE", map[string]any{
-		"action": "end",
-	})
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -159,15 +155,11 @@ func (r *resourceExternalDataShares) Read(ctx context.Context, req resource.Read
 }
 
 func (r *resourceExternalDataShares) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning(
-		"update operation not supported",
-		fmt.Sprintf(
-			"Resource %s does not support update. It will be removed from Terraform state, but no action will be taken in the Fabric. All current settings will remain.",
-			r.TypeInfo.Names,
-		),
+	resp.Diagnostics.AddError(
+		"Update not supported",
+		"This resource cannot be updated in-place because the Fabric API does not support updates. "+
+			"Any change must replace the resource (delete + create).",
 	)
-
-	resp.State.RemoveResource(ctx)
 }
 
 func (r *resourceExternalDataShares) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

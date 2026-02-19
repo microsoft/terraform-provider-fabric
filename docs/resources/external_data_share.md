@@ -41,10 +41,10 @@ resource "fabric_external_data_share" "example_with_tenant" {
 
 ### Required
 
-- `item_id` (String) The item ID.
-- `paths` (Set of String) Allowed values for this attribute. Set must contain at most 100 elements.
-- `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
-- `workspace_id` (String) The Workspace ID.
+- `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
+- `paths` (Set of String) <i style="color:red;font-weight: bold">(ForceNew)</i> Allowed values for this attribute. Set must contain at most 100 elements.
+- `recipient` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
@@ -65,11 +65,11 @@ resource "fabric_external_data_share" "example_with_tenant" {
 
 Required:
 
-- `user_principal_name` (String) The user principal name of the recipient. String length must be at most 256.
+- `user_principal_name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The user principal name of the recipient. String length must be at most 256.
 
 Optional:
 
-- `tenant_id` (String) The tenant ID of the recipient.
+- `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID of the recipient.
 
 <a id="nestedatt--timeouts"></a>
 
