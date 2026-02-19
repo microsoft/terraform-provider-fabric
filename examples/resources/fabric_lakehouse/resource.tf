@@ -68,3 +68,35 @@ resource "fabric_lakehouse" "example_custom_delimiter" {
     }
   }
 }
+
+# Example - Item with parameters processing mode
+resource "fabric_lakehouse" "example_parameters" {
+  display_name = "example3a"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "lakehouse.metadata.json" = {
+      source          = "${local.path}/lakehouse.metadata.json.tmpl"
+      processing_mode = "Parameters"
+      parameters = [
+        {
+          type  = "TextReplace"
+          find  = "DefaultSchema"
+          value = "dbo"
+        }
+      ]
+    },
+    "shortcuts.metadata.json" = {
+      source          = "${local.path}/shortcuts.metadata.json.tmpl"
+      processing_mode = "Parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.target.oneLake.itemID"
+          value = "11111111-1111-1111-1111-111111111111"
+        }
+      ]
+    }
+  }
+}
