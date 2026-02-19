@@ -620,6 +620,34 @@ function Set-FabricWorkspaceRoleAssignment {
   }
 }
 
+function Set-OutboundNetworkPolicy {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId
+  )
+
+  $result = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy"
+  if ($result.Response.outbound.publicAccessRules.defaultAction -eq 'Allow') {
+    Write-Log -Message "Setting Outbound Network Policy to Deny for Workspace ID: $WorkspaceId" -Level 'WARN'
+    $payload = @{
+      outbound = @{
+        publicAccessRules = @{
+          defaultAction = 'Deny'
+        }
+      }
+    }
+
+    $outboundNetworkTenantSettings = Get-TenantSettings -TenantSettingName 'WorkspaceBlockOutboundAccess'
+
+    if ($outboundNetworkTenantSettings.enabled -eq $false) {
+      Write-Log -Message "Configure workspace-level outbound network rules tenant setting is disabled. Please enable the 'Configure workspace-level outbound network rules' tenant setting manually in the Fabric Admin Portal." -Level 'WARN'
+    }
+    else {
+      $result = (Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy" -Payload $payload).Response
+    }
+  }
+}
+
 function Set-FabricGatewayVirtualNetwork {
   [CmdletBinding()]
   param(
@@ -1183,6 +1211,7 @@ $itemNaming = @{
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
+  'WorkspaceOAP'                    = 'wsoap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'DomainParent'                    = 'parent'
@@ -1249,6 +1278,24 @@ $wellKnown['WorkspaceMPE'] = @{
 }
 # Assign SPN to WorkspaceMPE if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create WorkspaceOAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceOAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceOAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceOAP if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+# Set Outbound Network Policy to Deny
+Set-OutboundNetworkPolicy -WorkspaceId $workspace.id
 
 # Create WorkspaceRS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
