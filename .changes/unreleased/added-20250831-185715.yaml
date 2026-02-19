@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_external_data_share` resource
+time: 2025-08-31T18:57:15.550449936Z
+custom:
+    Issue: "562"

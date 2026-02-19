@@ -13,6 +13,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
@@ -21,10 +22,10 @@ BASE MODEL
 */
 
 type baseWorkspaceRoleAssignmentModel struct {
-	ID          customtypes.UUID                                     `tfsdk:"id"`
-	WorkspaceID customtypes.UUID                                     `tfsdk:"workspace_id"`
-	Role        types.String                                         `tfsdk:"role"`
-	Principal   supertypes.SingleNestedObjectValueOf[principalModel] `tfsdk:"principal"`
+	ID          customtypes.UUID                                            `tfsdk:"id"`
+	WorkspaceID customtypes.UUID                                            `tfsdk:"workspace_id"`
+	Role        types.String                                                `tfsdk:"role"`
+	Principal   supertypes.SingleNestedObjectValueOf[common.PrincipalModel] `tfsdk:"principal"`
 }
 
 func (to *baseWorkspaceRoleAssignmentModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceRoleAssignment) diag.Diagnostics {
@@ -32,12 +33,12 @@ func (to *baseWorkspaceRoleAssignmentModel) set(ctx context.Context, workspaceID
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.Role = types.StringPointerValue((*string)(from.Role))
 
-	principal := supertypes.NewSingleNestedObjectValueOfNull[principalModel](ctx)
+	principal := supertypes.NewSingleNestedObjectValueOfNull[common.PrincipalModel](ctx)
 
 	if from.Principal != nil {
-		principalModel := &principalModel{}
+		principalModel := &common.PrincipalModel{}
 
-		principalModel.set(*from.Principal)
+		principalModel.Set(*from.Principal)
 
 		if diags := principal.Set(ctx, principalModel); diags.HasError() {
 			return diags
@@ -120,18 +121,4 @@ type requestUpdateWorkspaceRoleAssignment struct {
 
 func (to *requestUpdateWorkspaceRoleAssignment) set(from resourceWorkspaceRoleAssignmentModel) {
 	to.Role = (*fabcore.WorkspaceRole)(from.Role.ValueStringPointer())
-}
-
-/*
-HELPER MODELS
-*/
-
-type principalModel struct {
-	ID   customtypes.UUID `tfsdk:"id"`
-	Type types.String     `tfsdk:"type"`
-}
-
-func (to *principalModel) set(from fabcore.Principal) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.Type = types.StringPointerValue((*string)(from.Type))
 }
