@@ -71,7 +71,7 @@ Read-Only:
 
 Read-Only:
 
-- `public_access_rules` (Attributes) The policy for inbound communications to a workspace from public networks. (see [below for nested schema](#nestedatt--outbound--public_access_rules))
+- `public_access_rules` (Attributes) The policy for outbound communications to public networks from a workspace. (see [below for nested schema](#nestedatt--outbound--public_access_rules))
 
 <a id="nestedatt--outbound--public_access_rules"></a>
 

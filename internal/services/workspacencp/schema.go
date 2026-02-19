@@ -66,7 +66,7 @@ func itemSchema() superschema.Schema {
 				Resource: &schemaR.SingleNestedAttribute{
 					Optional: true,
 				},
-				Attributes: networkRulesAttributes(),
+				Attributes: networkRulesAttributes("The policy for inbound communications to a workspace from public networks."),
 			},
 			"outbound": superschema.SuperSingleNestedAttributeOf[rulesModel]{
 				Common: &schemaR.SingleNestedAttribute{
@@ -76,7 +76,7 @@ func itemSchema() superschema.Schema {
 				Resource: &schemaR.SingleNestedAttribute{
 					Optional: true,
 				},
-				Attributes: networkRulesAttributes(),
+				Attributes: networkRulesAttributes("The policy for outbound communications to public networks from a workspace."),
 			},
 			"timeouts": superschema.TimeoutAttribute{
 				Resource: &superschema.ResourceTimeoutAttribute{
@@ -93,11 +93,11 @@ func itemSchema() superschema.Schema {
 	}
 }
 
-func networkRulesAttributes() superschema.Attributes {
+func networkRulesAttributes(publicAccessRulesMarkdown string) superschema.Attributes {
 	return superschema.Attributes{
 		"public_access_rules": superschema.SuperSingleNestedAttributeOf[networkRulesModel]{
 			Common: &schemaR.SingleNestedAttribute{
-				MarkdownDescription: "The policy for inbound communications to a workspace from public networks.",
+				MarkdownDescription: publicAccessRulesMarkdown,
 				Computed:            true,
 			},
 			Resource: &schemaR.SingleNestedAttribute{

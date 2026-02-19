@@ -145,7 +145,7 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 	}))
 }
 
-func TestAcc_WorkspaceSetNetworkCommunicationPolicy_CRUD(t *testing.T) {
+func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 
