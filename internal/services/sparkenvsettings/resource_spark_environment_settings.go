@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -118,19 +117,30 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		return
 	}
 
-	respCreate, err := r.stagingClient.UpdateSparkComputePreview(
+	{
+		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if reqCreate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
+			reqCreate.SparkProperties = diffSparkProperties(reqCreate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+		}
+	}
+
+	respCreate, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
-		true,
-		reqCreate.UpdateEnvironmentSparkComputeRequestPreview,
+		false,
+		reqCreate.UpdateEnvironmentSparkComputeRequest,
 		nil,
 	)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respCreate.SparkComputePreview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.SparkCompute)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -221,19 +231,30 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 		return
 	}
 
-	respUpdate, err := r.stagingClient.UpdateSparkComputePreview(
+	{
+		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
+		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if reqUpdate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
+			reqUpdate.SparkProperties = diffSparkProperties(reqUpdate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+		}
+	}
+
+	respUpdate, err := r.stagingClient.UpdateSparkCompute(
 		ctx,
 		plan.WorkspaceID.ValueString(),
 		plan.EnvironmentID.ValueString(),
-		true,
-		reqUpdate.UpdateEnvironmentSparkComputeRequestPreview,
+		false,
+		reqUpdate.UpdateEnvironmentSparkComputeRequest,
 		nil,
 	)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.SparkComputePreview)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(plan.set(ctx, respUpdate.SparkCompute)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -277,22 +298,22 @@ func (r *resourceSparkEnvironmentSettings) Delete(ctx context.Context, _ resourc
 func (r *resourceSparkEnvironmentSettings) get(ctx context.Context, model *resourceSparkEnvironmentSettingsModel) diag.Diagnostics {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s for Workspace ID: %s", r.TypeInfo.Name, model.WorkspaceID.ValueString()))
 
-	var respEntity fabenvironment.SparkComputePreview
+	var respEntity fabenvironment.SparkCompute
 
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
-		respGet, err := r.publishedClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := r.publishedClient.GetSparkCompute(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkComputePreview
+		respEntity = respGet.SparkCompute
 	} else {
-		respGet, err := r.stagingClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := r.stagingClient.GetSparkCompute(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkComputePreview
+		respEntity = respGet.SparkCompute
 	}
 
 	return model.set(ctx, respEntity)
@@ -300,44 +321,32 @@ func (r *resourceSparkEnvironmentSettings) get(ctx context.Context, model *resou
 
 func (r *resourceSparkEnvironmentSettings) publish(ctx context.Context, model resourceSparkEnvironmentSettingsModel) diag.Diagnostics {
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
-		for {
-			respPublish, err := r.itemsClient.PublishEnvironmentPreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
-			if diags := utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil); diags.HasError() {
-				return diags
-			}
+		respPublish, err := r.itemsClient.PublishEnvironment(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil); diags.HasError() {
+			return diags
+		}
 
-			if respPublish.PublishDetails == nil || respPublish.PublishDetails.State == nil {
-				tflog.Info(ctx, "Environment publishing not done, waiting 30 seconds before retrying")
-				time.Sleep(30 * time.Second) // lintignore:R018
+		if respPublish.Properties.PublishDetails != nil && respPublish.Properties.PublishDetails.State != nil {
+			state := string(*respPublish.Properties.PublishDetails.State)
 
-				continue
-			}
-
-			switch strings.ToLower((string)(*respPublish.PublishDetails.State)) {
-			case strings.ToLower((string)(fabenvironment.PublishStateFailed)):
+			if strings.EqualFold(state, string(fabenvironment.PublishStateFailed)) {
 				var diags diag.Diagnostics
-
 				diags.AddError(
 					"publishing failed",
-					"Environment publishing failed")
+					fmt.Sprintf("Environment publishing failed for Environment ID: %s in Workspace ID: %s", model.EnvironmentID.ValueString(), model.WorkspaceID.ValueString()),
+				)
 
 				return diags
+			}
 
-			case strings.ToLower((string)(fabenvironment.PublishStateCancelled)):
+			if strings.EqualFold(state, string(fabenvironment.PublishStateCancelled)) {
 				var diags diag.Diagnostics
-
 				diags.AddError(
 					"publishing cancelled",
-					"Environment publishing cancelled")
+					fmt.Sprintf("Environment publishing cancelled for Environment ID: %s in Workspace ID: %s", model.EnvironmentID.ValueString(), model.WorkspaceID.ValueString()),
+				)
 
 				return diags
-
-			case strings.ToLower((string)(fabenvironment.PublishStateSuccess)):
-				return nil
-
-			default:
-				tflog.Info(ctx, "Environment provisioning in progress, waiting 30 seconds before retrying")
-				time.Sleep(30 * time.Second) // lintignore:R018
 			}
 		}
 	}

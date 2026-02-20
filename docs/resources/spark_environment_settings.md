@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Environment Settings resource allows you to manage a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Spark Environment Settings resource allows you to manage a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -44,11 +41,13 @@ resource "fabric_spark_environment_settings" "example" {
    */
   }
 
-  spark_properties = {
-    /*
+  spark_properties = [
+    {
+      /*
    your settings here
    */
-  }
+    }
+  ]
 }
 ```
 
@@ -70,10 +69,7 @@ resource "fabric_spark_environment_settings" "example" {
 - `executor_memory` (String) Spark executor memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
 - `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
-- `spark_properties` (Map of String) A map of key/value pairs of Spark properties. Key must satisfy all validations: Spark properties:
-- must starts with 'spark.'
-- cannot contains any white spaces
-- dot '.' is allowed but not at the start or end of the property key.
+- `spark_properties` (Attributes List) A list of Spark properties. (see [below for nested schema](#nestedatt--spark_properties))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -102,6 +98,18 @@ Optional:
 Read-Only:
 
 - `id` (String) The Pool ID.
+
+<a id="nestedatt--spark_properties"></a>
+
+### Nested Schema for `spark_properties`
+
+Required:
+
+- `key` (String) The Spark property key. Spark property key:
+- must start with 'spark.'
+- cannot contain any white spaces
+- dot '.' is allowed but not at the start or end of the property key.
+- `value` (String) The Spark property value.
 
 <a id="nestedatt--timeouts"></a>
 

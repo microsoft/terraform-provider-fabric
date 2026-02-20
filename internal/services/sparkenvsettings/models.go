@@ -5,7 +5,6 @@ package sparkenvsettings
 
 import (
 	"context"
-	"encoding/json"
 
 	timeoutsd "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	timeoutsr "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
@@ -33,56 +32,33 @@ type baseSparkEnvironmentSettingsModel struct {
 	ExecutorMemory            types.String                                                                   `tfsdk:"executor_memory"`
 	Pool                      supertypes.SingleNestedObjectValueOf[instancePoolPropertiesModel]              `tfsdk:"pool"`
 	RuntimeVersion            types.String                                                                   `tfsdk:"runtime_version"`
-	SparkProperties           supertypes.MapValueOf[types.String]                                            `tfsdk:"spark_properties"`
+	SparkProperties           supertypes.ListNestedObjectValueOf[sparkPropertyModel]                         `tfsdk:"spark_properties"`
 }
 
-func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkComputePreview) diag.Diagnostics {
-	var diags diag.Diagnostics
-
+func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
 	to.DriverCores = types.Int32PointerValue(from.DriverCores)
-	to.DriverMemory = types.StringPointerValue(from.DriverMemory)
+	to.DriverMemory = types.StringPointerValue((*string)(from.DriverMemory))
 	to.ExecutorCores = types.Int32PointerValue(from.ExecutorCores)
-	to.ExecutorMemory = types.StringPointerValue(from.ExecutorMemory)
+	to.ExecutorMemory = types.StringPointerValue((*string)(from.ExecutorMemory))
 	to.RuntimeVersion = types.StringPointerValue(from.RuntimeVersion)
 
-	var sparkProperties map[string]string
+	sparkPropertiesList := supertypes.NewListNestedObjectValueOfNull[sparkPropertyModel](ctx)
 
-	sparkPropertiesBytes, err := json.Marshal(from.SparkProperties)
-	if err != nil {
-		diags.AddError(
-			"failed to marshal Spark properties",
-			err.Error(),
-		)
+	if len(from.SparkProperties) > 0 {
+		slice := make([]*sparkPropertyModel, 0, len(from.SparkProperties))
 
-		return diags
-	}
-
-	err = json.Unmarshal(sparkPropertiesBytes, &sparkProperties)
-	if err != nil {
-		diags.AddError(
-			"failed to unmarshal Spark properties",
-			err.Error(),
-		)
-
-		return diags
-	}
-
-	sparkPropertiesMap := supertypes.NewMapValueOfNull[types.String](ctx)
-
-	if len(sparkProperties) > 0 {
-		sparkPropertiesTF := make(map[string]types.String)
-
-		for k, v := range sparkProperties {
-			sparkPropertiesTF[k] = types.StringValue(v)
+		for _, prop := range from.SparkProperties {
+			sparkPropModel := &sparkPropertyModel{}
+			sparkPropModel.set(prop)
+			slice = append(slice, sparkPropModel)
 		}
 
-		sparkPropertiesMap, diags = supertypes.NewMapValueOfMap(ctx, sparkPropertiesTF)
-		if diags.HasError() {
+		if diags := sparkPropertiesList.Set(ctx, slice); diags.HasError() {
 			return diags
 		}
 	}
 
-	to.SparkProperties = sparkPropertiesMap
+	to.SparkProperties = sparkPropertiesList
 
 	dynamicExecutorAllocation := supertypes.NewSingleNestedObjectValueOfNull[dynamicExecutorAllocationPropertiesModel](ctx)
 
@@ -134,7 +110,7 @@ type resourceSparkEnvironmentSettingsModel struct {
 }
 
 type requestUpdateSparkEnvironmentSettings struct {
-	fabenvironment.UpdateEnvironmentSparkComputeRequestPreview
+	fabenvironment.UpdateEnvironmentSparkComputeRequest
 }
 
 func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from resourceSparkEnvironmentSettingsModel) diag.Diagnostics { //nolint:gocognit, gocyclo
@@ -143,7 +119,7 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 	}
 
 	if !from.DriverMemory.IsNull() && !from.DriverMemory.IsUnknown() {
-		to.DriverMemory = from.DriverMemory.ValueStringPointer()
+		to.DriverMemory = (*fabenvironment.CustomPoolMemory)(from.DriverMemory.ValueStringPointer())
 	}
 
 	if !from.ExecutorCores.IsNull() && !from.ExecutorCores.IsUnknown() {
@@ -151,7 +127,7 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 	}
 
 	if !from.ExecutorMemory.IsNull() && !from.ExecutorMemory.IsUnknown() {
-		to.ExecutorMemory = from.ExecutorMemory.ValueStringPointer()
+		to.ExecutorMemory = (*fabenvironment.CustomPoolMemory)(from.ExecutorMemory.ValueStringPointer())
 	}
 
 	if !from.RuntimeVersion.IsNull() && !from.RuntimeVersion.IsUnknown() {
@@ -214,15 +190,18 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 			return diags
 		}
 
-		sparkPropertiesMap := make(map[string]string)
+		sparkPropertiesSlice := make([]fabenvironment.SparkProperty, 0, len(sparkProperties))
 
-		for k, v := range sparkProperties {
-			if !v.IsNull() && !v.IsUnknown() {
-				sparkPropertiesMap[k] = v.ValueString()
-			}
+		for _, prop := range sparkProperties {
+			var reqProp fabenvironment.SparkProperty
+
+			reqProp.Key = prop.Key.ValueStringPointer()
+			reqProp.Value = prop.Value.ValueStringPointer()
+
+			sparkPropertiesSlice = append(sparkPropertiesSlice, reqProp)
 		}
 
-		to.SparkProperties = sparkPropertiesMap
+		to.SparkProperties = sparkPropertiesSlice
 	}
 
 	return nil
@@ -254,4 +233,43 @@ func (to *instancePoolPropertiesModel) set(from fabenvironment.InstancePool) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Name = types.StringPointerValue(from.Name)
 	to.Type = types.StringPointerValue((*string)(from.Type))
+}
+
+type sparkPropertyModel struct {
+	Key   types.String `tfsdk:"key"`
+	Value types.String `tfsdk:"value"`
+}
+
+func (to *sparkPropertyModel) set(from fabenvironment.SparkProperty) {
+	to.Key = types.StringPointerValue(from.Key)
+	to.Value = types.StringPointerValue(from.Value)
+}
+
+// diffSparkProperties merges planned spark properties with current ones,
+// adding null-value entries for any current keys not present in the plan.
+// This ensures the API deletes properties that were removed from config.
+func diffSparkProperties(planned, current []fabenvironment.SparkProperty) []fabenvironment.SparkProperty {
+	plannedKeys := make(map[string]struct{})
+
+	for _, p := range planned {
+		if p.Key != nil {
+			plannedKeys[*p.Key] = struct{}{}
+		}
+	}
+
+	result := make([]fabenvironment.SparkProperty, 0, len(planned)+len(current))
+	result = append(result, planned...)
+
+	for _, c := range current {
+		if c.Key != nil {
+			if _, exists := plannedKeys[*c.Key]; !exists {
+				result = append(result, fabenvironment.SparkProperty{
+					Key:   c.Key,
+					Value: nil,
+				})
+			}
+		}
+	}
+
+	return result
 }

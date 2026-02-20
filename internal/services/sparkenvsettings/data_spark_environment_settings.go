@@ -104,22 +104,22 @@ func (d *dataSourceSparkEnvironmentSettings) Read(ctx context.Context, req datas
 }
 
 func (d *dataSourceSparkEnvironmentSettings) get(ctx context.Context, model *dataSourceSparkEnvironmentSettingsModel) diag.Diagnostics {
-	var respEntity fabenvironment.SparkComputePreview
+	var respEntity fabenvironment.SparkCompute
 
 	if model.PublicationStatus.ValueString() == SparkEnvironmentPublicationStatusPublished {
-		respGet, err := d.publishedClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := d.publishedClient.GetSparkCompute(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkComputePreview
+		respEntity = respGet.SparkCompute
 	} else {
-		respGet, err := d.stagingClient.GetSparkComputePreview(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), true, nil)
+		respGet, err := d.stagingClient.GetSparkCompute(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 			return diags
 		}
 
-		respEntity = respGet.SparkComputePreview
+		respEntity = respGet.SparkCompute
 	}
 
 	return model.set(ctx, respEntity)

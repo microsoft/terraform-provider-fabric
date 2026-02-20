@@ -22,6 +22,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Spark Environment Settings",
 	Type:           "spark_environment_settings",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

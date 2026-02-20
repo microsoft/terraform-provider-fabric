@@ -7,7 +7,6 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,10 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabenvironment "github.com/microsoft/fabric-sdk-go/fabric/environment"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -189,27 +186,48 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 					Computed: true,
 				},
 			},
-			"spark_properties": superschema.SuperMapAttribute{
-				Common: &schemaR.MapAttribute{
-					MarkdownDescription: "A map of key/value pairs of Spark properties.",
-					CustomType:          supertypes.MapTypeOf[types.String]{MapType: types.MapType{ElemType: types.StringType}},
-					ElementType:         types.StringType,
+			"spark_properties": superschema.SuperListNestedAttributeOf[sparkPropertyModel]{
+				Common: &schemaR.ListNestedAttribute{
+					MarkdownDescription: "A list of Spark properties.",
 				},
-				Resource: &schemaR.MapAttribute{
+				Resource: &schemaR.ListNestedAttribute{
 					Optional: true,
-					Computed: true,
-					Validators: []validator.Map{
-						mapvalidator.KeysAre(stringvalidator.RegexMatches(
-							regexp.MustCompile(`^spark\.[a-zA-Z0-9]+([\.]?[a-zA-Z0-9]+)*$`),
-							"Spark properties:\n"+
-								"- must starts with 'spark.'\n"+
-								"- cannot contains any white spaces\n"+
-								"- dot '.' is allowed but not at the start or end of the property key",
-						)),
-					},
 				},
-				DataSource: &schemaD.MapAttribute{
+				DataSource: &schemaD.ListNestedAttribute{
 					Computed: true,
+				},
+				Attributes: superschema.Attributes{
+					"key": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The Spark property key.",
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^spark\.[a-zA-Z0-9]+([\.]?[a-zA-Z0-9]+)*$`),
+									"Spark property key:\n"+
+										"- must start with 'spark.'\n"+
+										"- cannot contain any white spaces\n"+
+										"- dot '.' is allowed but not at the start or end of the property key",
+								),
+							},
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
+						},
+					},
+					"value": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The Spark property value.",
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
+						},
+					},
 				},
 			},
 			"dynamic_executor_allocation": superschema.SuperSingleNestedAttributeOf[dynamicExecutorAllocationPropertiesModel]{
