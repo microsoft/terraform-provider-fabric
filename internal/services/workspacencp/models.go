@@ -24,6 +24,7 @@ type baseWorkspaceNetworkCommunicationPolicyModel struct {
 }
 
 func (to *baseWorkspaceNetworkCommunicationPolicyModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceNetworkingCommunicationPolicy) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDValue(workspaceID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 
 	inbound := supertypes.NewSingleNestedObjectValueOfNull[rulesModel](ctx)
@@ -106,49 +107,51 @@ type requestSetWorkspaceNetworkCommunicationPolicy struct {
 	fabcore.WorkspaceNetworkingCommunicationPolicy
 }
 
-func (to *requestSetWorkspaceNetworkCommunicationPolicy) set(ctx context.Context, from resourceWorkspaceNetworkCommunicationPolicyModel) diag.Diagnostics {
-	if !from.Inbound.IsNull() && !from.Inbound.IsUnknown() {
-		inboundModel, diags := from.Inbound.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		to.Inbound = &fabcore.InboundRules{}
-
-		if !inboundModel.PublicAccessRules.IsNull() && !inboundModel.PublicAccessRules.IsUnknown() {
-			publicAccessRulesModel, diags := inboundModel.PublicAccessRules.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
-
-			to.Inbound.PublicAccessRules = &fabcore.NetworkRules{}
-
-			if !publicAccessRulesModel.DefaultAction.IsNull() && !publicAccessRulesModel.DefaultAction.IsUnknown() {
-				to.Inbound.PublicAccessRules.DefaultAction = (*fabcore.NetworkAccessRule)(publicAccessRulesModel.DefaultAction.ValueStringPointer())
-			}
-		}
+func setNetworkRules(ctx context.Context, rules supertypes.SingleNestedObjectValueOf[rulesModel]) (*fabcore.NetworkRules, diag.Diagnostics) {
+	if rules.IsNull() || rules.IsUnknown() {
+		return nil, nil
 	}
 
-	if !from.Outbound.IsNull() && !from.Outbound.IsUnknown() {
-		outboundModel, diags := from.Outbound.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
+	rulesVal, diags := rules.Get(ctx)
+	if diags.HasError() {
+		return nil, diags
+	}
 
-		to.Outbound = &fabcore.OutboundRules{}
+	if rulesVal.PublicAccessRules.IsNull() || rulesVal.PublicAccessRules.IsUnknown() {
+		return nil, nil
+	}
 
-		if !outboundModel.PublicAccessRules.IsNull() && !outboundModel.PublicAccessRules.IsUnknown() {
-			publicAccessRulesModel, diags := outboundModel.PublicAccessRules.Get(ctx)
-			if diags.HasError() {
-				return diags
-			}
+	publicAccessRulesModel, diags := rulesVal.PublicAccessRules.Get(ctx)
+	if diags.HasError() {
+		return nil, diags
+	}
 
-			to.Outbound.PublicAccessRules = &fabcore.NetworkRules{}
+	networkRules := &fabcore.NetworkRules{}
 
-			if !publicAccessRulesModel.DefaultAction.IsNull() && !publicAccessRulesModel.DefaultAction.IsUnknown() {
-				to.Outbound.PublicAccessRules.DefaultAction = (*fabcore.NetworkAccessRule)(publicAccessRulesModel.DefaultAction.ValueStringPointer())
-			}
-		}
+	if !publicAccessRulesModel.DefaultAction.IsNull() && !publicAccessRulesModel.DefaultAction.IsUnknown() {
+		networkRules.DefaultAction = (*fabcore.NetworkAccessRule)(publicAccessRulesModel.DefaultAction.ValueStringPointer())
+	}
+
+	return networkRules, nil
+}
+
+func (to *requestSetWorkspaceNetworkCommunicationPolicy) set(ctx context.Context, from resourceWorkspaceNetworkCommunicationPolicyModel) diag.Diagnostics {
+	inboundRules, diags := setNetworkRules(ctx, from.Inbound)
+	if diags.HasError() {
+		return diags
+	}
+
+	if inboundRules != nil {
+		to.Inbound = &fabcore.InboundRules{PublicAccessRules: inboundRules}
+	}
+
+	outboundRules, diags := setNetworkRules(ctx, from.Outbound)
+	if diags.HasError() {
+		return diags
+	}
+
+	if outboundRules != nil {
+		to.Outbound = &fabcore.OutboundRules{PublicAccessRules: outboundRules}
 	}
 
 	return nil

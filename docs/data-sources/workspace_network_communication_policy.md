@@ -3,14 +3,14 @@
 page_title: "fabric_workspace_network_communication_policy Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Workspace Network Communication Policy data-source allows you to retrieve details about a Fabric Workspace Network Communication Policy https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview.
+  The Workspace Network Communication Policy data-source allows you to retrieve details about a Fabric Workspace Network Communication Policy https://learn.microsoft.com/fabric/security/.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_network_communication_policy (Data Source)
 
-The Workspace Network Communication Policy data-source allows you to retrieve details about a Fabric [Workspace Network Communication Policy](https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview).
+The Workspace Network Communication Policy data-source allows you to retrieve details about a Fabric [Workspace Network Communication Policy](https://learn.microsoft.com/fabric/security/).
 
 -> This data-source supports Service Principal authentication.
 

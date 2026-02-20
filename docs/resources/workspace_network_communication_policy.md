@@ -3,14 +3,14 @@
 page_title: "fabric_workspace_network_communication_policy Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Workspace Network Communication Policy resource allows you to manage a Fabric Workspace Network Communication Policy https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview.
+  The Workspace Network Communication Policy resource allows you to manage a Fabric Workspace Network Communication Policy https://learn.microsoft.com/fabric/security/.
   -> This resource supports Service Principal authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_network_communication_policy (Resource)
 
-The Workspace Network Communication Policy resource allows you to manage a Fabric [Workspace Network Communication Policy](https://learn.microsoft.com/en-us/fabric/security/workspace-outbound-access-protection-overview).
+The Workspace Network Communication Policy resource allows you to manage a Fabric [Workspace Network Communication Policy](https://learn.microsoft.com/fabric/security/).
 
 -> This resource supports Service Principal authentication.
 

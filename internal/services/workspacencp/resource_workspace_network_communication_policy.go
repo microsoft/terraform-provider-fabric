@@ -103,8 +103,6 @@ func (r *resourceWorkspaceNetworkCommunicationPolicy) Create(ctx context.Context
 		return
 	}
 
-	plan.ID = plan.WorkspaceID
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
@@ -148,7 +146,7 @@ func (r *resourceWorkspaceNetworkCommunicationPolicy) Read(ctx context.Context, 
 		return
 	}
 
-	state.ID = state.WorkspaceID
+	// state.ID = state.WorkspaceID
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -196,7 +194,7 @@ func (r *resourceWorkspaceNetworkCommunicationPolicy) Update(ctx context.Context
 		return
 	}
 
-	plan.ID = plan.WorkspaceID
+	// plan.ID = plan.WorkspaceID
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 

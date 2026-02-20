@@ -88,8 +88,6 @@ func (d *dataSourceWorkspaceNetworkCommunicationPolicy) Read(ctx context.Context
 		return
 	}
 
-	data.ID = data.WorkspaceID
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{

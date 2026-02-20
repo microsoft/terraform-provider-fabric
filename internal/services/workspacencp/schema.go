@@ -4,9 +4,8 @@
 package workspacencp
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator" //revive:disable-line:import-alias-naming
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"    //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -32,30 +31,24 @@ func itemSchema() superschema.Schema {
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
 					CustomType:          customtypes.UUIDType{},
+					Computed:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Computed: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
 				},
 			},
 			"workspace_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"inbound": superschema.SuperSingleNestedAttributeOf[rulesModel]{
