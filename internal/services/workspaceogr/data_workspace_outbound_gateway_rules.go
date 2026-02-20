@@ -88,8 +88,6 @@ func (d *dataSourceWorkspaceOutboundGatewayRules) Read(ctx context.Context, req 
 		return
 	}
 
-	data.ID = data.WorkspaceID
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{

@@ -10,6 +10,8 @@ import (
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
 func fakeSetOutboundGatewayRules(
@@ -48,7 +50,7 @@ func fakeGetOutboundGatewayRules(
 
 func NewRandomWorkspaceOutboundGateways() fabcore.WorkspaceOutboundGateways {
 	return fabcore.WorkspaceOutboundGateways{
-		DefaultAction:   azto.Ptr(fabcore.GatewayAccessActionTypeAllow),
+		DefaultAction:   azto.Ptr(testhelp.RandomElement(fabcore.PossibleGatewayAccessActionTypeValues())),
 		AllowedGateways: []fabcore.GatewayAccessRuleMetadata{},
 	}
 }

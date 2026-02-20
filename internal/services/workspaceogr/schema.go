@@ -35,30 +35,24 @@ func itemSchema() superschema.Schema {
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
 					CustomType:          customtypes.UUIDType{},
+					Computed:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Computed: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
 				},
 			},
 			"workspace_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"default_action": superschema.StringAttribute{

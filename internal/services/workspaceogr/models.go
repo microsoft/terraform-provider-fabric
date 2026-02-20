@@ -28,6 +28,7 @@ type gatewayAccessRuleMetadataModel struct {
 }
 
 func (to *baseWorkspaceOutboundGatewayRulesModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceOutboundGateways) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDValue(workspaceID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
 

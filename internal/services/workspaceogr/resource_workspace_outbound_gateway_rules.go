@@ -103,8 +103,6 @@ func (r *resourceWorkspaceOutboundGatewayRules) Create(ctx context.Context, req 
 		return
 	}
 
-	plan.ID = plan.WorkspaceID
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
@@ -147,8 +145,6 @@ func (r *resourceWorkspaceOutboundGatewayRules) Read(ctx context.Context, req re
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	state.ID = state.WorkspaceID
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -195,8 +191,6 @@ func (r *resourceWorkspaceOutboundGatewayRules) Update(ctx context.Context, req 
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	plan.ID = plan.WorkspaceID
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
