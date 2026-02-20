@@ -195,13 +195,8 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 		for _, prop := range sparkProperties {
 			var reqProp fabenvironment.SparkProperty
 
-			if !prop.Key.IsNull() && !prop.Key.IsUnknown() {
-				reqProp.Key = prop.Key.ValueStringPointer()
-			}
-
-			if !prop.Value.IsNull() && !prop.Value.IsUnknown() {
-				reqProp.Value = prop.Value.ValueStringPointer()
-			}
+			reqProp.Key = prop.Key.ValueStringPointer()
+			reqProp.Value = prop.Value.ValueStringPointer()
 
 			sparkPropertiesSlice = append(sparkPropertiesSlice, reqProp)
 		}

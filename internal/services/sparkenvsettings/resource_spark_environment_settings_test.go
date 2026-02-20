@@ -23,7 +23,7 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 	environmentResourceHCL, environmentResourceFQN := environmentResource(t, testhelp.RefByFQN(workspaceResourceFQN, "id"))
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// // Create and Read
+		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -105,6 +105,7 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.1.value"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.#", "2"),
 			),
 		},
 		// Update and Read (test Spark properties sync)
@@ -133,6 +134,7 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.key", "spark.cores.max"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.#", "1"),
 			),
 		},
 		// Update and Read (remove Spark properties)
@@ -153,6 +155,7 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "spark_properties"),
 			),
 		},
 	},
