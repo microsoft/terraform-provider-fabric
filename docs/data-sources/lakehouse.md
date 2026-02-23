@@ -37,12 +37,12 @@ data "fabric_lakehouse" "example_definition" {
 
 # Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content, ".")
+  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content, ".defaultSchema")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content)
+  value = provider::fabric::content_decode(data.fabric_lakehouse.example_definition.definition["lakehouse.metadata.json"].content).defaultSchema
 }
 
 # This is an invalid data source

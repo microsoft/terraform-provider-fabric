@@ -72,7 +72,7 @@ resource "fabric_lakehouse" "example_definition_update" {
 
 # Item with custom tokens delimiter
 resource "fabric_lakehouse" "example_custom_delimiter" {
-  display_name = "example3a"
+  display_name = "example4"
   description  = "example with custom tokens delimiter"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
@@ -87,9 +87,9 @@ resource "fabric_lakehouse" "example_custom_delimiter" {
   }
 }
 
-# Example - Item with parameters processing mode
+# Item with parameters processing mode
 resource "fabric_lakehouse" "example_parameters" {
-  display_name = "example3a"
+  display_name = "example5"
   description  = "example with parameters processing mode"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
