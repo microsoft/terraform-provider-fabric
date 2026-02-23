@@ -42,7 +42,7 @@ resource "fabric_external_data_share" "example_with_tenant" {
 ### Required
 
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
-- `paths` (Set of String) <i style="color:red;font-weight: bold">(ForceNew)</i> Allowed values for this attribute. Set must contain at most 100 elements.
+- `paths` (Set of String) <i style="color:red;font-weight: bold">(ForceNew)</i> The paths to share. Each path must start with `Files/` or `Tables/` followed by a subpath. You cannot share the root folder itself. Set must contain at most 100 elements. Element value must satisfy all validations: A valid path must start with 'Files/' or 'Tables/'. You can't share the root folder itself.
 - `recipient` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 

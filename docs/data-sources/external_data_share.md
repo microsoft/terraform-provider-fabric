@@ -41,7 +41,7 @@ data "fabric_external_data_share" "example" {
 - `accepted_by_tenant_id` (String) The tenant ID that accepted the external data share.
 - `expiration_time` (String) The expiration time of the external data share in UTC.
 - `invitation_url` (String) The invitation URL for the external data share.
-- `paths` (Set of String) Allowed values for this attribute.
+- `paths` (Set of String) The paths to share. Each path must start with `Files/` or `Tables/` followed by a subpath. You cannot share the root folder itself.
 - `principal_model` (Attributes) The creator principal of the external data share. (see [below for nested schema](#nestedatt--principal_model))
 - `recipient` (Attributes) The recipient of the external data share. (see [below for nested schema](#nestedatt--recipient))
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.

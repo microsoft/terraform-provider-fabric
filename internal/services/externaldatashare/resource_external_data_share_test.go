@@ -116,6 +116,23 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 				)),
 			ExpectError: regexp.MustCompile(`The argument "paths" is required, but no definition was found.`),
 		},
+		// error - invalid path
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"InvalidPath"},
+						"recipient": map[string]any{
+							"user_principal_name": "test@example.com",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`A valid path must start with 'Files/'\s+or 'Tables/'`),
+		},
 	}))
 }
 

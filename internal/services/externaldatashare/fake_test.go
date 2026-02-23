@@ -93,7 +93,7 @@ func fakeTestUpsert(entity fabcore.ExternalDataShare) {
 func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 	return fabcore.ExternalDataShare{
 		ID:          to.Ptr(testhelp.RandomUUID()),
-		Paths:       []string{testhelp.RandomName()},
+		Paths:       []string{"Files/MyFile1"},
 		WorkspaceID: to.Ptr(workspaceID),
 		Recipient: &fabcore.ExternalDataShareRecipient{
 			UserPrincipalName: to.Ptr(testhelp.RandomName()),

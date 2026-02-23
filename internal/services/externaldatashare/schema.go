@@ -4,6 +4,8 @@
 package externaldatashare
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -88,7 +90,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"paths": superschema.SuperSetAttribute{
 				Common: &schemaR.SetAttribute{
-					MarkdownDescription: "Allowed values for this attribute.",
+					MarkdownDescription: "The paths to share. Each path must start with `Files/` or `Tables/` followed by a subpath. You cannot share the root folder itself.",
 					CustomType: supertypes.SetTypeOf[types.String]{
 						SetType: basetypes.SetType{
 							ElemType: types.StringType,
@@ -103,6 +105,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(100),
+						setvalidator.ValueStringsAre(
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^(Files|Tables)/.+$`),
+								"A valid path must start with 'Files/' or 'Tables/'. You can't share the root folder itself",
+							),
+						),
 					},
 					PlanModifiers: []planmodifier.Set{
 						setplanmodifier.RequiresReplace(),
