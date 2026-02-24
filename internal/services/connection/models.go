@@ -65,6 +65,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
 			}
+		default:
 		}
 
 		if diags := connectionDetails.Set(ctx, connectionDetailsModelPtr); diags.HasError() {
@@ -106,6 +107,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue
 			}
+		default:
 		}
 
 		if diags := credentialDetails.Set(ctx, credentialDetailsModelPtr); diags.HasError() {
@@ -127,6 +129,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
 		// keep it here due to default being "false"
 		to.AllowConnectionUsageInGateway = types.BoolNull()
+	default:
 	}
 
 	return nil

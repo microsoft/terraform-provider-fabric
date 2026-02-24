@@ -1,20 +1,20 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package maps_test
+package azuremap_test
 
 import (
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/services/maps"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/azuremap"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-var itemTypeInfo = maps.ItemTypeInfo
+var itemTypeInfo = azuremap.ItemTypeInfo
 
-const fabricItemType = maps.FabricItemType
+const fabricItemType = azuremap.FabricItemType
 
 func lakehouseResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

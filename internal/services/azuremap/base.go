@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package maps
+package azuremap
 
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"

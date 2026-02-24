@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package maps_test
+package azuremap_test
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
-	"path": testhelp.GetFixturesDirPath("map"),
+	"path": testhelp.GetFixturesDirPath("azuremap"),
 })
 
 func TestUnit_MapResource_Attributes(t *testing.T) {
