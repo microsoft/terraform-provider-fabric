@@ -69,6 +69,36 @@ function Import-ModuleIfNotImported {
   }
 }
 
+function Set-ExternalDataShare {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$RecipientUserPrincipalName
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName } | Select-Object -First 1
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
+    $TABLES_PATH = "Tables"
+    $payload = @{
+      paths     = @(
+        $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      )
+      recipient = @{
+        userPrincipalName = $RecipientUserPrincipalName
+      }
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares" -Payload $payload).Response
+  }
+  return $result
+}
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -587,6 +617,34 @@ function Set-FabricWorkspaceRoleAssignment {
       role      = 'Admin'
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/roleAssignments" -Payload $payload).Response
+  }
+}
+
+function Set-OutboundNetworkPolicy {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId
+  )
+
+  $result = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy"
+  if ($result.Response.outbound.publicAccessRules.defaultAction -eq 'Allow') {
+    Write-Log -Message "Setting Outbound Network Policy to Deny for Workspace ID: $WorkspaceId" -Level 'WARN'
+    $payload = @{
+      outbound = @{
+        publicAccessRules = @{
+          defaultAction = 'Deny'
+        }
+      }
+    }
+
+    $outboundNetworkTenantSettings = Get-TenantSettings -TenantSettingName 'WorkspaceBlockOutboundAccess'
+
+    if ($outboundNetworkTenantSettings.enabled -eq $false) {
+      Write-Log -Message "Configure workspace-level outbound network rules tenant setting is disabled. Please enable the 'Configure workspace-level outbound network rules' tenant setting manually in the Fabric Admin Portal." -Level 'WARN'
+    }
+    else {
+      $result = (Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy" -Payload $payload).Response
+    }
   }
 }
 
@@ -1153,6 +1211,7 @@ $itemNaming = @{
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
+  'WorkspaceOAP'                    = 'wsoap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'DomainParent'                    = 'parent'
@@ -1219,6 +1278,24 @@ $wellKnown['WorkspaceMPE'] = @{
 }
 # Assign SPN to WorkspaceMPE if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create WorkspaceOAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceOAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceOAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceOAP if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+# Set Outbound Network Policy to Deny
+Set-OutboundNetworkPolicy -WorkspaceId $workspace.id
 
 # Create WorkspaceRS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
@@ -1517,6 +1594,18 @@ $wellKnown['Datamart'] = @{
   id          = if ($result) { $result.id } else { '00000000-0000-0000-0000-000000000000' }
   displayName = if ($result) { $result.displayName } else { $displayNameTemp }
   description = if ($result) { $result.description } else { '' }
+}
+
+if (-not $wellKnown.ContainsKey('Lakehouse') -or -not $wellKnown['Lakehouse'].id) {
+  Write-Log -Message "Lakehouse not found or missing 'id'. Cannot create External Data Share." -Level 'WARN'
+}
+else {
+  $externalDataShare = Set-ExternalDataShare -WorkspaceId $workspace.id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
+  $wellKnown['ExternalDataShare'] = @{
+    id          = $externalDataShare.id
+    workspaceId = $externalDataShare.workspaceId
+    itemId      = $externalDataShare.itemId
+  }
 }
 
 # Create Resource Group if not exists
