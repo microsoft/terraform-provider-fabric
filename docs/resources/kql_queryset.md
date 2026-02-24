@@ -111,6 +111,7 @@ resource "fabric_kql_queryset" "example_parameters" {
 - `definition` (Attributes Map) Definition parts. Read more about [KQL Queryset definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/kql-queryset-definition). Accepted path keys: **Default** format: `RealTimeQueryset.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The KQL Queryset description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Queryset format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

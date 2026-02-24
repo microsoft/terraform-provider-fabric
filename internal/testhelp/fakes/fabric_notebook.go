@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -40,6 +40,7 @@ func (o *operationsNotebook) CreateWithParentID(parentID string, data fabnoteboo
 	entity := NewRandomNotebookWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -164,6 +165,7 @@ func NewRandomNotebook() fabnotebook.Notebook {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabnotebook.ItemTypeNotebook),
 	}
 }
@@ -184,7 +186,7 @@ func NewRandomNotebookDefinition() fabnotebook.Definition {
 		),
 	}
 
-	var defParts []fabnotebook.DefinitionPart
+	defParts := make([]fabnotebook.DefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 

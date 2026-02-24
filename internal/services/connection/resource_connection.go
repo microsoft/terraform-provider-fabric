@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connection
@@ -442,7 +442,7 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 }
 
 func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
-	if model.SkipTestConnection.ValueBool() != supportsSkipTestConnection {
+	if model.SkipTestConnection.ValueBool() && !supportsSkipTestConnection {
 		var diags diag.Diagnostics
 
 		diags.AddAttributeError(

@@ -1,0 +1,5 @@
+kind: added
+body: Onboard `fabric_tenant_setting` resource
+time: 2025-12-03T00:38:12.634380097Z
+custom:
+    Issue: "709"

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -46,7 +46,7 @@ func (o *operationsWorkspaceManagedPrivateEndpoint) CreateWithParentID(_ string,
 
 // Filter implements concreteOperations.
 func (o *operationsWorkspaceManagedPrivateEndpoint) Filter(entities []fabcore.ManagedPrivateEndpoint, _ string) []fabcore.ManagedPrivateEndpoint {
-	ret := make([]fabcore.ManagedPrivateEndpoint, 0)
+	ret := make([]fabcore.ManagedPrivateEndpoint, 0, len(entities))
 
 	ret = append(ret, entities...)
 

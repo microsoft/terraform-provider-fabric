@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package kqldatabase_test
@@ -102,6 +102,7 @@ func TestUnit_KQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.eventhouse_id"),
@@ -134,6 +135,7 @@ func TestUnit_KQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.eventhouse_id"),

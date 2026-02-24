@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -170,7 +170,7 @@ func (o *operationsFolder) getChildren(parentID string, folders []fabcore.Folder
 }
 
 func (o *operationsFolder) getDescendants(parentID string, folders []fabcore.Folder) []fabcore.Folder {
-	result := make([]fabcore.Folder, 0)
+	result := make([]fabcore.Folder, 0, len(folders))
 	children := o.getChildren(parentID, folders)
 
 	result = append(result, children...)

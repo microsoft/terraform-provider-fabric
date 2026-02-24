@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package warehouse_test
@@ -102,6 +102,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
@@ -135,6 +136,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),

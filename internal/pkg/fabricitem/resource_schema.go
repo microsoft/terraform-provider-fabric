@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -199,6 +199,11 @@ func getResourceFabricItemBaseAttributes(
 			Validators: []validator.String{
 				stringvalidator.LengthAtMost(descriptionMaxLength),
 			},
+		},
+		"folder_id": schema.StringAttribute{
+			MarkdownDescription: "The Folder ID.",
+			Optional:            true,
+			CustomType:          customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}

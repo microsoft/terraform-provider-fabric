@@ -52,5 +52,6 @@ Read-Only:
 
 - `description` (String) The Apache Airflow Job description.
 - `display_name` (String) The Apache Airflow Job display name.
+- `folder_id` (String) The Apache Airflow Job Folder ID.
 - `id` (String) The Apache Airflow Job ID.
 - `workspace_id` (String) The Workspace ID.

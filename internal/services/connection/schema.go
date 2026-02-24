@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connection
@@ -322,8 +322,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							MarkdownDescription: "The credential type.",
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
-									utils.RemoveSliceByValue(fabcore.PossibleCredentialTypeValues(), fabcore.CredentialTypeOAuth2),
-									true)...),
+									utils.RemoveSlicesByValues(
+										fabcore.PossibleCredentialTypeValues(),
+										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2, fabcore.CredentialTypeKeyPair},
+									),
+									true,
+								)...),
 							},
 						},
 						Resource: &schemaR.StringAttribute{
@@ -452,16 +456,16 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 						},
 						Attributes: superschema.Attributes{
-							"sas_wo": superschema.StringAttribute{
+							"token_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The sas (WO).",
+									MarkdownDescription: "The token (WO).",
 									Required:            true,
 									WriteOnly:           true,
 								},
 							},
-							"sas_wo_version": superschema.Int32Attribute{
+							"token_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
-									MarkdownDescription: "The version of the `sas_wo`.",
+									MarkdownDescription: "The version of the `token_wo`.",
 									Required:            true,
 								},
 							},

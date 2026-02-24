@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -220,4 +220,8 @@ func CreateItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID st
 	return RetryOperationWithResult(ctx, DefaultCreateRetryConfig(), func() (fabcore.ItemsClientCreateItemResponse, error) {
 		return client.CreateItem(ctx, workspaceID, request, nil)
 	})
+}
+
+func MoveItem(ctx context.Context, client *fabcore.ItemsClient, workspaceID, itemID string, request fabcore.MoveItemRequest) (fabcore.ItemsClientMoveItemResponse, error) {
+	return client.MoveItem(ctx, workspaceID, itemID, request, nil)
 }

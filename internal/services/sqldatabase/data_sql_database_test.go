@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sqldatabase_test
@@ -102,6 +102,7 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
@@ -133,6 +134,7 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),

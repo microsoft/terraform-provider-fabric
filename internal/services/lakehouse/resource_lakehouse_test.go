@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package lakehouse_test
@@ -193,11 +193,13 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),

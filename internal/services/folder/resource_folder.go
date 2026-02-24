@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package folder
@@ -252,6 +252,7 @@ func (r *resourceFolder) Delete(ctx context.Context, req resource.DeleteRequest,
 	defer cancel()
 
 	_, err := r.client.DeleteFolder(ctx, state.WorkspaceID.ValueString(), state.ID.ValueString(), nil)
+
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}

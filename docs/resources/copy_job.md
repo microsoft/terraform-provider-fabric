@@ -116,6 +116,7 @@ resource "fabric_copy_job" "example_parameters" {
 - `definition` (Attributes Map) Definition parts. Read more about [Copy Job definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/copyjob-definition). Accepted path keys: **Default** format: `copyjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Copy Job description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Copy Job format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

@@ -1,5 +1,0 @@
-kind: added
-body: "Added provider configuration `use_workspace_private_link_endpoint` to allow routing workspace-scoped API requests through Workspace-level Private Link endpoints."
-time: 2025-11-17T08:46:28.372897948Z
-custom:
-  Issue: "629"

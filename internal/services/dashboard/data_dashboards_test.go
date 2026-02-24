@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package dashboard_test
@@ -79,6 +79,7 @@ func TestUnit_DashboardsDataSource(t *testing.T) {
 							"id":           knownvalue.StringExact(*entity.ID),
 							"display_name": knownvalue.StringExact(*entity.DisplayName),
 							"description":  knownvalue.StringExact(*entity.Description),
+							"folder_id":    knownvalue.StringExact(*entity.FolderID),
 						}),
 					}),
 				),

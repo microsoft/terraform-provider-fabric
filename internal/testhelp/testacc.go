@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package testhelp
@@ -150,11 +150,29 @@ func GetFixturesDirPath(fixtureDir ...string) string {
 	_, filename, _, _ := runtime.Caller(0) //nolint:dogsled
 	testHelpDir := filepath.Dir(filename)
 
-	var tempPath []string
+	tempPath := make([]string, 0, 2+len(fixtureDir))
 
 	tempPath = append(tempPath, testHelpDir)
 	tempPath = append(tempPath, "fixtures")
 	tempPath = append(tempPath, fixtureDir...)
 
 	return filepath.ToSlash(filepath.Join(tempPath...))
+}
+
+func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+	t.Helper()
+
+	resourceName := RandomName()
+
+	resourceHCL = at.CompileConfig(
+		at.ResourceHeader(TypeName("fabric", "folder"), resourceName),
+		map[string]any{
+			"display_name": RandomName(),
+			"workspace_id": workspaceID,
+		},
+	)
+
+	resourceFQN = ResourceFQN("fabric", "folder", resourceName)
+
+	return resourceHCL, resourceFQN
 }

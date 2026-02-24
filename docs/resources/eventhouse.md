@@ -123,6 +123,7 @@ Any changes to this configuration will result in recreation of the Eventhouse. (
 - `definition` (Attributes Map) Definition parts. Read more about [Eventhouse definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/eventhouse-definition). Accepted path keys: **Default** format: `EventhouseProperties.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Eventhouse description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Eventhouse format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

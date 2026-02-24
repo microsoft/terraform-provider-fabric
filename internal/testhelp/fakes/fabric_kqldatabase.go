@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -23,6 +23,7 @@ func (o *operationsKQLDatabase) ConvertItemToEntity(item fabcore.Item) fabkqldat
 		DisplayName: item.DisplayName,
 		Description: item.Description,
 		WorkspaceID: item.WorkspaceID,
+		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties:  NewRandomKQLDatabase().Properties,
 	}
@@ -52,6 +53,7 @@ func (o *operationsKQLDatabase) CreateWithParentID(parentID string, data fabkqld
 	entity := NewRandomKQLDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	entity.FolderID = data.FolderID
 
 	return entity
 }
@@ -178,6 +180,7 @@ func NewRandomKQLDatabase() fabkqldatabase.KQLDatabase {
 		DisplayName: to.Ptr(testhelp.RandomName()),
 		Description: to.Ptr(testhelp.RandomName()),
 		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		FolderID:    to.Ptr(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties: &fabkqldatabase.Properties{
 			DatabaseType:           to.Ptr(fabkqldatabase.TypeReadWrite),
@@ -212,7 +215,7 @@ func NewRandomKQLDatabaseDefinition() fabkqldatabase.Definition {
 		),
 	}
 
-	var defParts []fabkqldatabase.DefinitionPart
+	defParts := make([]fabkqldatabase.DefinitionPart, 0, 2)
 
 	defParts = append(defParts, defPart1)
 	defParts = append(defParts, defPart2)

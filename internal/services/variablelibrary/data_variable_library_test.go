@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package variablelibrary_test
@@ -103,6 +103,7 @@ func TestUnit_VariableLibraryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 			),
 		},
 		// read by id - not found
@@ -131,6 +132,7 @@ func TestUnit_VariableLibraryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.active_value_set_name"),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
 			),
 		},
 		// read by name - not found

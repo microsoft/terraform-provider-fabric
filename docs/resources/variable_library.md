@@ -116,6 +116,7 @@ resource "fabric_variable_library" "example_parameters" {
 - `definition` (Attributes Map) Definition parts. Read more about [Variable Library definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/variable-library-definition). Accepted path keys: **Default** format: `settings.json`, `valueSets/*.json`, `variables.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Variable Library description.
+- `folder_id` (String) The Folder ID.
 - `format` (String) The Variable Library format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

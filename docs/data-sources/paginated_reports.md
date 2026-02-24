@@ -55,5 +55,6 @@ Read-Only:
 
 - `description` (String) The Paginated Report description.
 - `display_name` (String) The Paginated Report display name.
+- `folder_id` (String) The Paginated Report Folder ID.
 - `id` (String) The Paginated Report ID.
 - `workspace_id` (String) The Workspace ID.

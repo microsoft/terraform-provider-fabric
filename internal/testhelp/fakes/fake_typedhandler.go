@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -336,6 +336,11 @@ func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabc
 func getReflectedStringPropertyValue(element any, propertyName string) *string {
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	// Check if the property value is nil or invalid
+	if !propertyValue.IsValid() || propertyValue.IsNil() {
+		return nil
+	}
 
 	str := propertyValue.Elem().String()
 

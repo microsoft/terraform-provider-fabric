@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Domain data-source allows you to retrieve details about a Fabric Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Domain data-source allows you to retrieve details about a Fabric [Domain](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -37,7 +34,7 @@ data "fabric_domain" "example" {
 
 ### Read-Only
 
-- `contributors_scope` (String) The Domain contributors scope. Value must be one of : `AdminsOnly`, `AllTenant`, `SpecificUsersAndGroups`.
+- `default_label_id` (String) The domain default sensitivity label.
 - `description` (String) The Domain description.
 - `display_name` (String) The Domain display name.
 - `parent_domain_id` (String) The Domain parent ID.

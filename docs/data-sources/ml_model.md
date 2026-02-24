@@ -54,6 +54,7 @@ data "fabric_ml_model" "example_by_name" {
 ### Read-Only
 
 - `description` (String) The ML Model description.
+- `folder_id` (String) The ML Model Folder ID.
 
 <a id="nestedatt--timeouts"></a>
 

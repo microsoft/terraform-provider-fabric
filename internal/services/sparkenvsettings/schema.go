@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkenvsettings
@@ -304,9 +304,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -319,9 +316,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 							Validators: []validator.String{
 								stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("type")),
 							},
@@ -340,9 +334,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 							Validators: []validator.String{
 								stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("name")),
 							},
