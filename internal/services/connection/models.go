@@ -66,6 +66,9 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 				connectionDetailsModelPtr = &convertedValue
 			}
 		default:
+			diags.AddError("unexpected connection details type", "unsupported connection details model type")
+
+			return diags
 		}
 
 		if diags := connectionDetails.Set(ctx, connectionDetailsModelPtr); diags.HasError() {
@@ -108,6 +111,9 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 				credentialDetailsModelPtr = &convertedValue
 			}
 		default:
+			diags.AddError("unexpected credential details type", "unsupported credential details model type")
+
+			return diags
 		}
 
 		if diags := credentialDetails.Set(ctx, credentialDetailsModelPtr); diags.HasError() {
@@ -130,6 +136,9 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		// keep it here due to default being "false"
 		to.AllowConnectionUsageInGateway = types.BoolNull()
 	default:
+		diags.AddError("unexpected connectivity type", "unsupported connection classification type")
+
+		return diags
 	}
 
 	return nil
