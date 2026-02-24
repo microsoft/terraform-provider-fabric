@@ -248,28 +248,34 @@ func (to *sparkPropertyModel) set(from fabenvironment.SparkProperty) {
 // diffSparkProperties merges planned spark properties with current ones,
 // adding null-value entries for any current keys not present in the plan.
 // This ensures the API deletes properties that were removed from config.
-func diffSparkProperties(planned, current []fabenvironment.SparkProperty) []fabenvironment.SparkProperty {
-	plannedKeys := make(map[string]struct{})
+func diffSparkProperties(planned, apiCurrentProperties []fabenvironment.SparkProperty) []fabenvironment.SparkProperty {
+	mergedProperties := make([]fabenvironment.SparkProperty, 0)
+	mergedProperties = append(mergedProperties, planned...)
 
-	for _, p := range planned {
-		if p.Key != nil {
-			plannedKeys[*p.Key] = struct{}{}
+	for _, apiCurrentProperty := range apiCurrentProperties {
+		if apiCurrentProperty.Key == nil {
+			continue
+		}
+
+		if containsSparkPropertyKey(planned, *apiCurrentProperty.Key) {
+			continue
+		}
+
+		mergedProperties = append(mergedProperties, fabenvironment.SparkProperty{
+			Key:   apiCurrentProperty.Key,
+			Value: nil,
+		})
+	}
+
+	return mergedProperties
+}
+
+func containsSparkPropertyKey(properties []fabenvironment.SparkProperty, key string) bool {
+	for _, property := range properties {
+		if property.Key != nil && *property.Key == key {
+			return true
 		}
 	}
 
-	result := make([]fabenvironment.SparkProperty, 0, len(planned)+len(current))
-	result = append(result, planned...)
-
-	for _, c := range current {
-		if c.Key != nil {
-			if _, exists := plannedKeys[*c.Key]; !exists {
-				result = append(result, fabenvironment.SparkProperty{
-					Key:   c.Key,
-					Value: nil,
-				})
-			}
-		}
-	}
-
-	return result
+	return false
 }
