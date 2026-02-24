@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -96,14 +97,14 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"outbound": map[string]any{
 						"public_access_rules": map[string]any{
-							"default_action": "Deny",
+							"default_action": string(fabcore.NetworkAccessRuleDeny),
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Deny"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(*entity.Inbound.PublicAccessRules.DefaultAction)),
 			),
 		},
@@ -116,15 +117,15 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 					"workspace_id": workspaceID,
 					"inbound": map[string]any{
 						"public_access_rules": map[string]any{
-							"default_action": "Deny",
+							"default_action": string(fabcore.NetworkAccessRuleDeny),
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Allow"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Deny"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
 			),
 		},
 		// update and read - set to default values
@@ -138,8 +139,8 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Allow"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Allow"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),
 		},
 	}))
@@ -163,20 +164,20 @@ func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"outbound": map[string]any{
 							"public_access_rules": map[string]any{
-								"default_action": "Deny",
+								"default_action": string(fabcore.NetworkAccessRuleDeny),
 							},
 						},
 						"inbound": map[string]any{
 							"public_access_rules": map[string]any{
-								"default_action": "Deny",
+								"default_action": string(fabcore.NetworkAccessRuleDeny),
 							},
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Deny"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Deny"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
 			),
 		},
 		// update and read
@@ -190,15 +191,15 @@ func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"inbound": map[string]any{
 							"public_access_rules": map[string]any{
-								"default_action": "Deny",
+								"default_action": string(fabcore.NetworkAccessRuleDeny),
 							},
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Allow"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Deny"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
 			),
 		},
 		// update and read
@@ -212,15 +213,15 @@ func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"inbound": map[string]any{
 							"public_access_rules": map[string]any{
-								"default_action": "Allow",
+								"default_action": string(fabcore.NetworkAccessRuleAllow),
 							},
 						},
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Allow"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Allow"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),
 		},
 		// update and read - set to default values
@@ -236,8 +237,8 @@ func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", "Allow"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", "Allow"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),
 		},
 	}))

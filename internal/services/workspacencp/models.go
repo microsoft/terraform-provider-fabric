@@ -28,6 +28,10 @@ func (to *baseWorkspaceNetworkCommunicationPolicyModel) set(ctx context.Context,
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 
 	inbound := supertypes.NewSingleNestedObjectValueOfNull[rulesModel](ctx)
+	outbound := supertypes.NewSingleNestedObjectValueOfNull[rulesModel](ctx)
+
+	to.Inbound = inbound
+	to.Outbound = outbound
 
 	if from.Inbound != nil && from.Inbound.PublicAccessRules != nil {
 		inboundModel := &rulesModel{}
@@ -41,8 +45,6 @@ func (to *baseWorkspaceNetworkCommunicationPolicyModel) set(ctx context.Context,
 	}
 
 	to.Inbound = inbound
-
-	outbound := supertypes.NewSingleNestedObjectValueOfNull[rulesModel](ctx)
 
 	if from.Outbound != nil && from.Outbound.PublicAccessRules != nil {
 		outboundModel := &rulesModel{}
@@ -68,12 +70,17 @@ type networkRulesModel struct {
 	DefaultAction types.String `tfsdk:"default_action"`
 }
 
+func (to *networkRulesModel) set(from fabcore.NetworkRules) {
+	to.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
+}
+
 func (to *rulesModel) set(ctx context.Context, from fabcore.NetworkRules) diag.Diagnostics {
 	publicAccessRules := supertypes.NewSingleNestedObjectValueOfNull[networkRulesModel](ctx)
+	to.PublicAccessRules = publicAccessRules
 
 	publicAccessRulesModel := &networkRulesModel{}
+	publicAccessRulesModel.set(from)
 
-	publicAccessRulesModel.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
 	if diags := publicAccessRules.Set(ctx, publicAccessRulesModel); diags.HasError() {
 		return diags
 	}
