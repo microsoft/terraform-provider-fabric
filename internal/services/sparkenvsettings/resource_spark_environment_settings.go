@@ -117,15 +117,8 @@ func (r *resourceSparkEnvironmentSettings) Create(ctx context.Context, req resou
 		return
 	}
 
-	{
-		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		if reqCreate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
-			reqCreate.SparkProperties = diffSparkProperties(reqCreate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
-		}
+	if resp.Diagnostics.Append(r.resolveSparkProperties(ctx, plan, &reqCreate)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	respCreate, err := r.stagingClient.UpdateSparkCompute(
@@ -231,15 +224,8 @@ func (r *resourceSparkEnvironmentSettings) Update(ctx context.Context, req resou
 		return
 	}
 
-	{
-		respCurrent, err := r.stagingClient.GetSparkCompute(ctx, plan.WorkspaceID.ValueString(), plan.EnvironmentID.ValueString(), false, nil)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		if reqUpdate.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
-			reqUpdate.SparkProperties = diffSparkProperties(reqUpdate.SparkProperties, respCurrent.SparkCompute.SparkProperties)
-		}
+	if resp.Diagnostics.Append(r.resolveSparkProperties(ctx, plan, &reqUpdate)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	respUpdate, err := r.stagingClient.UpdateSparkCompute(
@@ -293,6 +279,19 @@ func (r *resourceSparkEnvironmentSettings) Delete(ctx context.Context, _ resourc
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",
 	})
+}
+
+func (r *resourceSparkEnvironmentSettings) resolveSparkProperties(ctx context.Context, model resourceSparkEnvironmentSettingsModel, req *requestUpdateSparkEnvironmentSettings) diag.Diagnostics {
+	respCurrent, err := r.stagingClient.GetSparkCompute(ctx, model.WorkspaceID.ValueString(), model.EnvironmentID.ValueString(), false, nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
+	}
+
+	if req.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
+		req.SparkProperties = diffSparkProperties(req.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+	}
+
+	return nil
 }
 
 func (r *resourceSparkEnvironmentSettings) get(ctx context.Context, model *resourceSparkEnvironmentSettingsModel) diag.Diagnostics {
