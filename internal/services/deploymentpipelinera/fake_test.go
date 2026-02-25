@@ -61,10 +61,10 @@ func NewRandomDeploymentPipelineRoleAssignments() fabcore.DeploymentPipelineRole
 	return fabcore.DeploymentPipelineRoleAssignments{
 		Value: []fabcore.DeploymentPipelineRoleAssignment{
 			{
-				ID:   azto.Ptr(entityID),
+				ID:   new(entityID),
 				Role: azto.Ptr(fabcore.DeploymentPipelineRoleAdmin),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(entityID),
+					ID:   new(entityID),
 					Type: azto.Ptr(fabcore.PrincipalTypeGroup),
 				},
 			},

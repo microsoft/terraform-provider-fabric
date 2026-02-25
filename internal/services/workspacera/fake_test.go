@@ -27,13 +27,13 @@ func fakeWorkspaceRoleAssignment(
 
 func NewRandomWorkspaceRoleAssignment() fabcore.WorkspaceRoleAssignment {
 	return fabcore.WorkspaceRoleAssignment{
-		ID: azto.Ptr(testhelp.RandomUUID()),
+		ID: new(testhelp.RandomUUID()),
 		Principal: &fabcore.Principal{
-			ID:          azto.Ptr(testhelp.RandomUUID()),
+			ID:          new(testhelp.RandomUUID()),
 			Type:        azto.Ptr(fabcore.PrincipalTypeUser),
-			DisplayName: azto.Ptr(testhelp.RandomName()),
+			DisplayName: new(testhelp.RandomName()),
 			UserDetails: &fabcore.PrincipalUserDetails{
-				UserPrincipalName: azto.Ptr(testhelp.RandomName()),
+				UserPrincipalName: new(testhelp.RandomName()),
 			},
 		},
 		Role: azto.Ptr(fabcore.WorkspaceRoleAdmin),
@@ -60,55 +60,55 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 	return fabcore.WorkspaceRoleAssignments{
 		Value: []fabcore.WorkspaceRoleAssignment{
 			{
-				ID:   azto.Ptr(principal0ID),
+				ID:   new(principal0ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleAdmin),
 				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal0ID),
+					ID:          new(principal0ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeGroup),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
+					DisplayName: new(testhelp.RandomName()),
 					GroupDetails: &fabcore.PrincipalGroupDetails{
 						GroupType: azto.Ptr(fabcore.GroupTypeSecurityGroup),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal1ID),
+				ID:   new(principal1ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
 				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal1ID),
+					ID:          new(principal1ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeUser),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
+					DisplayName: new(testhelp.RandomName()),
 					UserDetails: &fabcore.PrincipalUserDetails{
-						UserPrincipalName: azto.Ptr(testhelp.RandomName()),
+						UserPrincipalName: new(testhelp.RandomName()),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal2ID),
+				ID:   new(principal2ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
 				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal2ID),
+					ID:          new(principal2ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
+					DisplayName: new(testhelp.RandomName()),
 					ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
-						AADAppID: azto.Ptr(testhelp.RandomUUID()),
+						AADAppID: new(testhelp.RandomUUID()),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal3ID),
+				ID:   new(principal3ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleViewer),
 				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal3ID),
+					ID:          new(principal3ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
+					DisplayName: new(testhelp.RandomName()),
 					ServicePrincipalProfileDetails: &fabcore.PrincipalServicePrincipalProfileDetails{
 						ParentPrincipal: &fabcore.Principal{
-							ID:          azto.Ptr(principal2ID),
+							ID:          new(principal2ID),
 							Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
-							DisplayName: azto.Ptr(testhelp.RandomName()),
+							DisplayName: new(testhelp.RandomName()),
 							ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
-								AADAppID: azto.Ptr(testhelp.RandomUUID()),
+								AADAppID: new(testhelp.RandomUUID()),
 							},
 						},
 					},

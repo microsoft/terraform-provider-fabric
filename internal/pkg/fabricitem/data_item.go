@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -146,7 +145,7 @@ func (d *DataSourceFabricItem) getByDisplayName(ctx context.Context, model *data
 	var diags diag.Diagnostics
 
 	opts := &fabcore.ItemsClientListItemsOptions{
-		Type: azto.Ptr(string(d.FabricItemType)),
+		Type: new(string(d.FabricItemType)),
 	}
 
 	pager := d.client.NewListItemsPager(model.WorkspaceID.ValueString(), opts)

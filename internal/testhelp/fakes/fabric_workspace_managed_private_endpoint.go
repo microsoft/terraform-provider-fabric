@@ -128,14 +128,14 @@ func configureWorkspaceManagedPrivateEndpoint(server *fakeServer) fabcore.Manage
 
 func NewRandomWorkspaceManagedPrivateEndpoint() fabcore.ManagedPrivateEndpoint {
 	return fabcore.ManagedPrivateEndpoint{
-		ID:                          to.Ptr(testhelp.RandomUUID()),
-		Name:                        to.Ptr(testhelp.RandomName()),
+		ID:                          new(testhelp.RandomUUID()),
+		Name:                        new(testhelp.RandomName()),
 		ProvisioningState:           to.Ptr(fabcore.PrivateEndpointProvisioningStateSucceeded),
-		TargetPrivateLinkResourceID: to.Ptr(testhelp.RandomUUID()),
-		TargetSubresourceType:       to.Ptr(testhelp.RandomName()),
+		TargetPrivateLinkResourceID: new(testhelp.RandomUUID()),
+		TargetSubresourceType:       new(testhelp.RandomName()),
 		ConnectionState: &fabcore.PrivateEndpointConnectionState{
-			ActionsRequired: to.Ptr("None"),
-			Description:     to.Ptr(testhelp.RandomName()),
+			ActionsRequired: new("None"),
+			Description:     new(testhelp.RandomName()),
 			Status:          to.Ptr(fabcore.ConnectionStatusApproved),
 		},
 	}
