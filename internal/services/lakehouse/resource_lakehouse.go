@@ -78,7 +78,7 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 					StatusCode: http.StatusBadRequest,
 					ErrorResponse: &fabcore.ErrorResponse{
 						ErrorCode: azto.Ptr((string)(fablakehouse.SQLEndpointProvisioningStatusFailed)),
-						Message:   azto.Ptr("Lakehouse SQL endpoint provisioning failed"),
+						Message:   new("Lakehouse SQL endpoint provisioning failed"),
 					},
 				}
 

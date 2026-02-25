@@ -116,16 +116,16 @@ func configureWorkspace(server *fakeServer) fabcore.WorkspaceInfo {
 
 func NewRandomWorkspaceInfo(capacityID *string) fabcore.WorkspaceInfo {
 	return fabcore.WorkspaceInfo{
-		ID:                         to.Ptr(testhelp.RandomUUID()),
-		DisplayName:                to.Ptr(testhelp.RandomName()),
-		Description:                to.Ptr(testhelp.RandomName()),
+		ID:                         new(testhelp.RandomUUID()),
+		DisplayName:                new(testhelp.RandomName()),
+		Description:                new(testhelp.RandomName()),
 		Type:                       to.Ptr(fabcore.WorkspaceTypeWorkspace),
 		CapacityID:                 capacityID,
 		CapacityRegion:             to.Ptr(fabcore.CapacityRegionWestUS2),
 		CapacityAssignmentProgress: to.Ptr(fabcore.CapacityAssignmentProgressCompleted),
 		OneLakeEndpoints: &fabcore.OneLakeEndpoints{
-			BlobEndpoint: to.Ptr(testhelp.RandomURI()),
-			DfsEndpoint:  to.Ptr(testhelp.RandomURI()),
+			BlobEndpoint: new(testhelp.RandomURI()),
+			DfsEndpoint:  new(testhelp.RandomURI()),
 		},
 	}
 }
@@ -140,8 +140,8 @@ func NewRandomWorkspaceInfoWithType(entityType fabcore.WorkspaceType, capacityID
 func NewRandomWorkspaceInfoWithIdentity(capacityID *string) fabcore.WorkspaceInfo {
 	entity := NewRandomWorkspaceInfo(capacityID)
 	entity.WorkspaceIdentity = &fabcore.WorkspaceIdentity{
-		ApplicationID:      to.Ptr(testhelp.RandomUUID()),
-		ServicePrincipalID: to.Ptr(testhelp.RandomUUID()),
+		ApplicationID:      new(testhelp.RandomUUID()),
+		ServicePrincipalID: new(testhelp.RandomUUID()),
 	}
 
 	return entity

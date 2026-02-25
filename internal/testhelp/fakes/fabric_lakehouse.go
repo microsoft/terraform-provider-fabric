@@ -173,20 +173,20 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 
 func NewRandomLakehouse() fablakehouse.Lakehouse {
 	return fablakehouse.Lakehouse{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Properties: &fablakehouse.Properties{
-			OneLakeFilesPath:  to.Ptr(testhelp.RandomName()),
-			OneLakeTablesPath: to.Ptr(testhelp.RandomName()),
-			DefaultSchema:     to.Ptr("dbo"),
+			OneLakeFilesPath:  new(testhelp.RandomName()),
+			OneLakeTablesPath: new(testhelp.RandomName()),
+			DefaultSchema:     new("dbo"),
 			SQLEndpointProperties: &fablakehouse.SQLEndpointProperties{
-				ID:                 to.Ptr(testhelp.RandomUUID()),
+				ID:                 new(testhelp.RandomUUID()),
 				ProvisioningStatus: to.Ptr(fablakehouse.SQLEndpointProvisioningStatusSuccess),
-				ConnectionString:   to.Ptr(testhelp.RandomURI()),
+				ConnectionString:   new(testhelp.RandomURI()),
 			},
 		},
 	}

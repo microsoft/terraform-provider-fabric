@@ -50,7 +50,7 @@ func fakeGetFabricItem(
 ) func(ctx context.Context, workspaceID, itemID string, options *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _, _ string, _ *fabcore.ItemsClientGetItemOptions) (resp azfake.Responder[fabcore.ItemsClientGetItemResponse], errResp azfake.ErrorResponder) {
 		item := fabcore.Item{
-			Type: to.Ptr(fabcore.ItemType(itemType)),
+			Type: new(fabcore.ItemType(itemType)),
 		}
 		resp.SetResponse(http.StatusOK, fabcore.ItemsClientGetItemResponse{Item: item}, nil)
 
@@ -64,12 +64,12 @@ func fakeCreateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 		itemScheduleID := testhelp.RandomUUID()
 
 		itemSchedule := fabcore.ItemSchedule{
-			ID:              to.Ptr(itemScheduleID),
+			ID:              new(itemScheduleID),
 			Enabled:         createScheduleRequest.Enabled,
-			CreatedDateTime: to.Ptr(time.Now()),
+			CreatedDateTime: new(time.Now()),
 			Configuration:   createScheduleRequest.Configuration,
 			Owner: &fabcore.Principal{
-				ID:   to.Ptr(testhelp.RandomUUID()),
+				ID:   new(testhelp.RandomUUID()),
 				Type: to.Ptr(fabcore.PrincipalTypeUser),
 			},
 		}
@@ -95,12 +95,12 @@ func fakeUpdateItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 		}
 
 		itemSchedule := fabcore.ItemSchedule{
-			ID:              to.Ptr(scheduleID),
+			ID:              new(scheduleID),
 			Enabled:         updateScheduleRequest.Enabled,
-			CreatedDateTime: to.Ptr(time.Now()),
+			CreatedDateTime: new(time.Now()),
 			Configuration:   updateScheduleRequest.Configuration,
 			Owner: &fabcore.Principal{
-				ID:   to.Ptr(testhelp.RandomUUID()),
+				ID:   new(testhelp.RandomUUID()),
 				Type: to.Ptr(fabcore.PrincipalTypeUser),
 			},
 		}
@@ -134,9 +134,9 @@ func fakeDeleteItemScheduleFunc() func(ctx context.Context, workspaceID, itemID,
 
 func NewRandomItemSchedule(scheduleType fabcore.ScheduleType) fabcore.ItemSchedule {
 	return fabcore.ItemSchedule{
-		ID:              to.Ptr(testhelp.RandomUUID()),
-		Enabled:         to.Ptr(testhelp.RandomBool()),
-		CreatedDateTime: to.Ptr(time.Now()),
+		ID:              new(testhelp.RandomUUID()),
+		Enabled:         new(testhelp.RandomBool()),
+		CreatedDateTime: new(time.Now()),
 		Configuration:   NewRandomScheduleConfig(scheduleType),
 		Owner:           NewRandomOwner(),
 	}
@@ -159,11 +159,11 @@ func NewRandomScheduleConfig(scheduleType fabcore.ScheduleType) fabcore.Schedule
 
 func NewRandomCronScheduleConfig() *fabcore.CronScheduleConfig {
 	return &fabcore.CronScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now().UTC()),
-		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
-		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
+		StartDateTime:   new(time.Now().UTC()),
+		EndDateTime:     new(time.Now().UTC().Add(24 * time.Hour)),
+		LocalTimeZoneID: new(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeCron),
-		Interval:        to.Ptr(testhelp.RandomIntRange(int32(1), int32(60))),
+		Interval:        new(testhelp.RandomIntRange(int32(1), int32(60))),
 	}
 }
 
@@ -171,9 +171,9 @@ func NewRandomDailyScheduleConfig() *fabcore.DailyScheduleConfig {
 	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
 
 	return &fabcore.DailyScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now().UTC()),
-		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
-		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
+		StartDateTime:   new(time.Now().UTC()),
+		EndDateTime:     new(time.Now().UTC().Add(24 * time.Hour)),
+		LocalTimeZoneID: new(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeDaily),
 		Times: []string{
 			timeStr,
@@ -185,9 +185,9 @@ func NewRandomWeeklyScheduleConfig() *fabcore.WeeklyScheduleConfig {
 	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
 
 	return &fabcore.WeeklyScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now().UTC()),
-		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
-		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
+		StartDateTime:   new(time.Now().UTC()),
+		EndDateTime:     new(time.Now().UTC().Add(24 * time.Hour)),
+		LocalTimeZoneID: new(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeWeekly),
 		Times: []string{
 			timeStr,
@@ -202,24 +202,24 @@ func NewRandomMonthlyScheduleConfig() *fabcore.MonthlyScheduleConfig {
 	timeStr := fmt.Sprintf("%02d:%02d", time.Now().Hour(), time.Now().Minute())
 
 	return &fabcore.MonthlyScheduleConfig{
-		StartDateTime:   to.Ptr(time.Now().UTC()),
-		EndDateTime:     to.Ptr(time.Now().UTC().Add(24 * time.Hour)),
-		LocalTimeZoneID: to.Ptr(testhelp.RandomName()),
+		StartDateTime:   new(time.Now().UTC()),
+		EndDateTime:     new(time.Now().UTC().Add(24 * time.Hour)),
+		LocalTimeZoneID: new(testhelp.RandomName()),
 		Type:            to.Ptr(fabcore.ScheduleTypeMonthly),
 		Times: []string{
 			timeStr,
 		},
-		Recurrence: to.Ptr(testhelp.RandomIntRange(int32(1), int32(12))),
+		Recurrence: new(testhelp.RandomIntRange(int32(1), int32(12))),
 		Occurrence: &fabcore.DayOfMonth{
 			OccurrenceType: to.Ptr(fabcore.OccurrenceTypeDayOfMonth),
-			DayOfMonth:     to.Ptr(testhelp.RandomIntRange(int32(1), int32(31))),
+			DayOfMonth:     new(testhelp.RandomIntRange(int32(1), int32(31))),
 		},
 	}
 }
 
 func NewRandomOwner() *fabcore.Principal {
 	return &fabcore.Principal{
-		ID:   to.Ptr(testhelp.RandomUUID()),
+		ID:   new(testhelp.RandomUUID()),
 		Type: to.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
 	}
 }

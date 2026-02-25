@@ -67,7 +67,7 @@ func NewResourceMirroredDatabase(ctx context.Context) resource.Resource {
 					StatusCode: http.StatusBadRequest,
 					ErrorResponse: &fabcore.ErrorResponse{
 						ErrorCode: azto.Ptr((string)(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed)),
-						Message:   azto.Ptr("Mirrored Database SQL endpoint provisioning failed"),
+						Message:   new("Mirrored Database SQL endpoint provisioning failed"),
 					},
 				}
 
