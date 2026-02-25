@@ -20,7 +20,7 @@ type Config struct {
 	AuxiliaryTenantIDs   []string
 	TenantID             string
 	ClientID             string
-	ClientSecret         string
+	ClientSecret         string //nolint:gosec
 	ClientCertificate    []*x509.Certificate
 	ClientCertificateKey crypto.PrivateKey
 	OIDC                 OIDCConfig

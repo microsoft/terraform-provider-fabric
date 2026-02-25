@@ -477,7 +477,7 @@ func allowedJobTypesMarkdownDescription() string {
 	for i, k := range keys {
 		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
 		sort.Strings(vals)
-		_, _ = b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+		_, _ = fmt.Fprintf(&b, "%s: {%s}", k, strings.Join(vals, ", "))
 
 		if i < len(keys)-1 {
 			_, _ = b.WriteString("; ")

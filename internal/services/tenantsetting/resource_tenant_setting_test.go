@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
@@ -75,7 +74,7 @@ func TestUnit_TenantSettingsResource_CRUD(t *testing.T) {
 
 	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
 	entityUpdate := entity
-	entityUpdate.Enabled = to.Ptr(!*entity.Enabled)
+	entityUpdate.Enabled = new(!*entity.Enabled)
 	fakes.FakeServer.ServerFactory.Admin.TenantsServer.UpdateTenantSetting = fakeUpdateTenantSettings()
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
