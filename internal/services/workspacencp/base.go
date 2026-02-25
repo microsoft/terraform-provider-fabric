@@ -9,6 +9,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Workspace Network Communication Policy",
 	Type:           "workspace_network_communication_policy",
 	DocsURL:        "https://learn.microsoft.com/fabric/security/",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
