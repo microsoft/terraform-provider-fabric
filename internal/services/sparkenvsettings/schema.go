@@ -118,7 +118,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Spark driver memory.",
 					Validators: []validator.String{
-						stringvalidator.OneOf(SparkEnvironmentDriverMemoryValues...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolMemoryValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -154,7 +154,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Spark executor memory.",
 					Validators: []validator.String{
-						stringvalidator.OneOf(SparkEnvironmentExecutorMemoryValues...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolMemoryValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{

@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The Spark Environment Settings data-source allows you to retrieve details about a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
   -> This data-source supports Service Principal authentication.
+  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Data Source)
@@ -12,6 +13,8 @@ description: |-
 The Spark Environment Settings data-source allows you to retrieve details about a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
 -> This data-source supports Service Principal authentication.
+
+~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -39,10 +42,10 @@ data "fabric_spark_environment_settings" "example" {
 ### Read-Only
 
 - `driver_cores` (Number) Publication status. Value must be one of : `4`, `8`, `16`, `32`, `64`.
-- `driver_memory` (String) Spark driver memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `driver_memory` (String) Spark driver memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
 - `executor_cores` (Number) Spark executor core. Value must be one of : `4`, `8`, `16`, `32`, `64`.
-- `executor_memory` (String) Spark executor memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `executor_memory` (String) Spark executor memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `id` (String) The Spark Environment Settings ID.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
 - `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
