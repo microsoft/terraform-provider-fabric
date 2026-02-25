@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Outbound Gateway Rules resource allows you to manage a Fabric Workspace Outbound Gateway Rules https://learn.microsoft.com/fabric/security/workspace-outbound-access-protection-overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_outbound_gateway_rules (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Outbound Gateway Rules resource allows you to manage a Fabric [Workspace Outbound Gateway Rules](https://learn.microsoft.com/fabric/security/workspace-outbound-access-protection-overview).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
