@@ -570,7 +570,7 @@ func createAuthFailedError(t *testing.T) *azidentity.AuthenticationFailedError {
 	}))
 
 	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, server.URL, nil)
-	resp, _ := http.DefaultClient.Do(req) //nolint:bodyclose
+	resp, _ := http.DefaultClient.Do(req) //nolint:bodyclose,gosec
 	err := &azidentity.AuthenticationFailedError{
 		RawResponse: resp,
 	}

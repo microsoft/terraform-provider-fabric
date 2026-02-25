@@ -93,6 +93,7 @@ func Sha256[T string | []byte](content T) string {
 		hash = sha256.Sum256([]byte(v))
 	case []byte:
 		hash = sha256.Sum256(v)
+	default:
 	}
 
 	return hex.EncodeToString(hash[:])

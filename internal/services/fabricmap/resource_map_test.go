@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package maps_test
+package fabricmap_test
 
 import (
 	"errors"
