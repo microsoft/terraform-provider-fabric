@@ -253,18 +253,12 @@ func diffSparkProperties(planned, apiCurrentProperties []fabenvironment.SparkPro
 	mergedProperties = append(mergedProperties, planned...)
 
 	for _, apiCurrentProperty := range apiCurrentProperties {
-		if apiCurrentProperty.Key == nil {
-			continue
+		if apiCurrentProperty.Key != nil && !containsSparkPropertyKey(planned, *apiCurrentProperty.Key) {
+			mergedProperties = append(mergedProperties, fabenvironment.SparkProperty{
+				Key:   apiCurrentProperty.Key,
+				Value: nil,
+			})
 		}
-
-		if containsSparkPropertyKey(planned, *apiCurrentProperty.Key) {
-			continue
-		}
-
-		mergedProperties = append(mergedProperties, fabenvironment.SparkProperty{
-			Key:   apiCurrentProperty.Key,
-			Value: nil,
-		})
 	}
 
 	return mergedProperties
