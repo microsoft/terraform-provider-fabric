@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -140,7 +139,7 @@ func (d *dataSourceFolders) list(ctx context.Context, model *dataSourceFoldersMo
 	}
 
 	options := &fabcore.FoldersClientListFoldersOptions{
-		Recursive: to.Ptr(recursive),
+		Recursive: new(recursive),
 	}
 
 	if !model.RootFolderID.IsNull() && !model.RootFolderID.IsUnknown() {

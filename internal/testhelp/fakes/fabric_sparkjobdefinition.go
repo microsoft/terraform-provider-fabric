@@ -177,14 +177,14 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 
 func NewRandomSparkJobDefinition() fabsparkjobdefinition.SparkJobDefinition {
 	return fabsparkjobdefinition.SparkJobDefinition{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties: &fabsparkjobdefinition.Properties{
-			OneLakeRootPath: to.Ptr(testhelp.RandomURI()),
+			OneLakeRootPath: new(testhelp.RandomURI()),
 		},
 	}
 }
@@ -199,8 +199,8 @@ func NewRandomSparkJobDefinitionWithWorkspace(workspaceID string) fabsparkjobdef
 func NewRandomSparkJobDefinitionDefinition() fabsparkjobdefinition.PublicDefinition {
 	defPart := fabsparkjobdefinition.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabsparkjobdefinition.PayloadTypeInlineBase64),
-		Path:        to.Ptr("SparkJobDefinitionV1.json"),
-		Payload: to.Ptr(
+		Path:        new("SparkJobDefinitionV1.json"),
+		Payload: new(
 			"ew0KICAiZXhlY3V0YWJsZUZpbGUiOiBudWxsLA0KICAiZGVmYXVsdExha2Vob3VzZUFydGlmYWN0SWQiOiBudWxsLA0KICAibWFpbkNsYXNzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMYWtlaG91c2VJZHMiOiBbXSwNCiAgInJldHJ5UG9saWN5IjogbnVsbCwNCiAgImNvbW1hbmRMaW5lQXJndW1lbnRzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMaWJyYXJ5VXJpcyI6IG51bGwsDQogICJsYW5ndWFnZSI6IG51bGwsDQogICJlbnZpcm9ubWVudEFydGlmYWN0SWQiOiBudWxsDQp9",
 		),
 	}

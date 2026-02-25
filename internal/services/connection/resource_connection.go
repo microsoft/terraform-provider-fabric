@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -342,7 +341,7 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 
 func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
 	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
-		ShowAllCreationMethods: azto.Ptr(true),
+		ShowAllCreationMethods: new(true),
 	})
 
 	var allConnections []fabcore.ConnectionCreationMetadata

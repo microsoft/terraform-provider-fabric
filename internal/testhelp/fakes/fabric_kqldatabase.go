@@ -176,17 +176,17 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 
 func NewRandomKQLDatabase() fabkqldatabase.KQLDatabase {
 	return fabkqldatabase.KQLDatabase{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties: &fabkqldatabase.Properties{
 			DatabaseType:           to.Ptr(fabkqldatabase.TypeReadWrite),
-			ParentEventhouseItemID: to.Ptr(testhelp.RandomUUID()),
-			IngestionServiceURI:    to.Ptr(testhelp.RandomURI()),
-			QueryServiceURI:        to.Ptr(testhelp.RandomURI()),
+			ParentEventhouseItemID: new(testhelp.RandomUUID()),
+			IngestionServiceURI:    new(testhelp.RandomURI()),
+			QueryServiceURI:        new(testhelp.RandomURI()),
 		},
 	}
 }
@@ -201,16 +201,16 @@ func NewRandomKQLDatabaseWithWorkspace(workspaceID string) fabkqldatabase.KQLDat
 func NewRandomKQLDatabaseDefinition() fabkqldatabase.Definition {
 	defPart1 := fabkqldatabase.DefinitionPart{
 		PayloadType: to.Ptr(fabkqldatabase.PayloadTypeInlineBase64),
-		Path:        to.Ptr("DatabaseProperties.json"),
-		Payload: to.Ptr(
+		Path:        new("DatabaseProperties.json"),
+		Payload: new(
 			"ew0KICAiZGF0YWJhc2VUeXBlIjogIlJlYWRXcml0ZSIsDQogICJwYXJlbnRFdmVudGhvdXNlSXRlbUlkIjogIjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsIA0KICAib25lTGFrZUNhY2hpbmdQZXJpb2QiOiAiUDM2NTAwRCIsIA0KICAib25lTGFrZVN0YW5kYXJkU3RvcmFnZVBlcmlvZCI6ICJQMzY1MDAwRCIgDQp9",
 		),
 	}
 
 	defPart2 := fabkqldatabase.DefinitionPart{
 		PayloadType: to.Ptr(fabkqldatabase.PayloadTypeInlineBase64),
-		Path:        to.Ptr("DatabaseSchema.kql"),
-		Payload: to.Ptr(
+		Path:        new("DatabaseSchema.kql"),
+		Payload: new(
 			"LmNyZWF0ZS1tZXJnZSB0YWJsZSBNeUxvZ3MyIChMZXZlbDpzdHJpbmcsIFRpbWVzdGFtcDpkYXRldGltZSwgVXNlcklkOnN0cmluZywgVHJhY2VJZDpzdHJpbmcsIE1lc3NhZ2U6c3RyaW5nLCBQcm9jZXNzSWQ6aW50KSANCi5jcmVhdGUtbWVyZ2UgdGFibGUgTXlMb2dzMyAoTGV2ZWw6c3RyaW5nLCBUaW1lc3RhbXA6ZGF0ZXRpbWUsIFVzZXJJZDpzdHJpbmcsIFRyYWNlSWQ6c3RyaW5nLCBNZXNzYWdlOnN0cmluZywgUHJvY2Vzc0lkOmludCkgDQouY3JlYXRlLW1lcmdlIHRhYmxlIE15TG9nczcgKExldmVsOnN0cmluZywgVGltZXN0YW1wOmRhdGV0aW1lLCBVc2VySWQ6c3RyaW5nLCBUcmFjZUlkOnN0cmluZywgTWVzc2FnZTpzdHJpbmcsIFByb2Nlc3NJZDppbnQp",
 		),
 	}
