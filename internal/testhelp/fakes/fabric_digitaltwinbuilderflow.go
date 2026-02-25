@@ -177,17 +177,17 @@ func configureDigitalTwinBuilderFlow(server *fakeServer) fabdigitaltwinbuilderfl
 
 func NewRandomDigitalTwinBuilderFlow() fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow {
 	return fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties: &fabdigitaltwinbuilderflow.Properties{
 			DigitalTwinBuilderItemReference: &fabdigitaltwinbuilderflow.ItemReferenceByID{
-				ItemID:        to.Ptr(testhelp.RandomUUID()),
+				ItemID:        new(testhelp.RandomUUID()),
 				ReferenceType: to.Ptr(fabdigitaltwinbuilderflow.ItemReferenceTypeByID),
-				WorkspaceID:   to.Ptr(testhelp.RandomUUID()),
+				WorkspaceID:   new(testhelp.RandomUUID()),
 			},
 		},
 	}
@@ -205,8 +205,8 @@ func NewRandomDigitalTwinBuilderFlowDefinition() fabdigitaltwinbuilderflow.Publi
 		Parts: []fabdigitaltwinbuilderflow.PublicDefinitionPart{
 			{
 				PayloadType: to.Ptr(fabdigitaltwinbuilderflow.PayloadTypeInlineBase64),
-				Path:        to.Ptr("definition.json"),
-				Payload: to.Ptr(
+				Path:        new("definition.json"),
+				Payload: new(
 					"eyAKICAiRGlnaXRhbFR3aW5CdWlsZGVySWQiOiAiNTZhMGU2Y2EtMTAxZS1iYzA1LTQ2NDktNjAzOTMzYWUxMjcwIiwgCiAgIk9wZXJhdGlvbklkcyI6IFsgCiAgICAiY2U5ZDBlZjktZDhmNi00MzkxLTllMzctOGJkYjkxYjFmYzE2IiAKICBdLCAKICAiSXNPbkRlbWFuZCI6IGZhbHNlIAp9IA==",
 				),
 			},

@@ -36,13 +36,13 @@ func (o *operationsConnection) Create(data fabcore.CreateConnectionRequestClassi
 	switch req := data.(type) {
 	case *fabcore.CreateCloudConnectionRequest:
 		entity := &fabcore.ShareableCloudConnection{
-			ID:                            to.Ptr(testhelp.RandomUUID()),
+			ID:                            new(testhelp.RandomUUID()),
 			DisplayName:                   d.DisplayName,
 			PrivacyLevel:                  d.PrivacyLevel,
 			ConnectivityType:              d.ConnectivityType,
 			AllowConnectionUsageInGateway: req.AllowConnectionUsageInGateway,
 			ConnectionDetails: &fabcore.ListConnectionDetails{
-				Path: to.Ptr(testhelp.RandomURI()),
+				Path: new(testhelp.RandomURI()),
 				Type: d.ConnectionDetails.Type,
 			},
 		}
@@ -60,13 +60,13 @@ func (o *operationsConnection) Create(data fabcore.CreateConnectionRequestClassi
 
 	case *fabcore.CreateVirtualNetworkGatewayConnectionRequest:
 		entity := &fabcore.VirtualNetworkGatewayConnection{
-			ID:               to.Ptr(testhelp.RandomUUID()),
+			ID:               new(testhelp.RandomUUID()),
 			DisplayName:      d.DisplayName,
 			PrivacyLevel:     d.PrivacyLevel,
 			ConnectivityType: d.ConnectivityType,
 			GatewayID:        req.GatewayID,
 			ConnectionDetails: &fabcore.ListConnectionDetails{
-				Path: to.Ptr(testhelp.RandomURI()),
+				Path: new(testhelp.RandomURI()),
 				Type: d.ConnectionDetails.Type,
 			},
 		}
@@ -220,55 +220,55 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 			ListSupportedConnectionTypesResponse: fabcore.ListSupportedConnectionTypesResponse{
 				Value: []fabcore.ConnectionCreationMetadata{
 					{
-						Type: to.Ptr("FTP"),
+						Type: new("FTP"),
 						CreationMethods: []fabcore.ConnectionCreationMethod{
 							{
-								Name: to.Ptr("FTP.Contents"),
+								Name: new("FTP.Contents"),
 								Parameters: []fabcore.ConnectionCreationParameter{
 									{
-										Name:     to.Ptr("server"),
+										Name:     new("server"),
 										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: to.Ptr(true),
+										Required: new(true),
 									},
 									{
-										Name:     to.Ptr("database"),
+										Name:     new("database"),
 										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("enable_ssl"),
+										Name:     new("enable_ssl"),
 										DataType: to.Ptr(fabcore.DataTypeBoolean),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("start_date"),
+										Name:     new("start_date"),
 										DataType: to.Ptr(fabcore.DataTypeDate),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("created_at"),
+										Name:     new("created_at"),
 										DataType: to.Ptr(fabcore.DataTypeDateTime),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("backup_time"),
+										Name:     new("backup_time"),
 										DataType: to.Ptr(fabcore.DataTypeTime),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("port"),
+										Name:     new("port"),
 										DataType: to.Ptr(fabcore.DataTypeNumber),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:     to.Ptr("timeout"),
+										Name:     new("timeout"),
 										DataType: to.Ptr(fabcore.DataTypeDuration),
-										Required: to.Ptr(false),
+										Required: new(false),
 									},
 									{
-										Name:          to.Ptr("ssl_mode"),
+										Name:          new("ssl_mode"),
 										DataType:      to.Ptr(fabcore.DataTypeText),
-										Required:      to.Ptr(false),
+										Required:      new(false),
 										AllowedValues: []string{"required", "optional", "disabled"},
 									},
 								},
@@ -283,13 +283,13 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,
 						},
-						SupportsSkipTestConnection: to.Ptr(true),
+						SupportsSkipTestConnection: new(true),
 					},
 					{
-						Type: to.Ptr("ConnectionWithEmptyParametersList"),
+						Type: new("ConnectionWithEmptyParametersList"),
 						CreationMethods: []fabcore.ConnectionCreationMethod{
 							{
-								Name:       to.Ptr("ConnectionWithEmptyParametersList.Actions"),
+								Name:       new("ConnectionWithEmptyParametersList.Actions"),
 								Parameters: []fabcore.ConnectionCreationParameter{},
 							},
 						},
@@ -299,18 +299,18 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,
 						},
-						SupportsSkipTestConnection: to.Ptr(true),
+						SupportsSkipTestConnection: new(true),
 					},
 					{
-						Type: to.Ptr("Web"),
+						Type: new("Web"),
 						CreationMethods: []fabcore.ConnectionCreationMethod{
 							{
-								Name: to.Ptr("Web"),
+								Name: new("Web"),
 								Parameters: []fabcore.ConnectionCreationParameter{
 									{
-										Name:     to.Ptr("url"),
+										Name:     new("url"),
 										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: to.Ptr(true),
+										Required: new(true),
 									},
 								},
 							},
@@ -324,18 +324,18 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,
 						},
-						SupportsSkipTestConnection: to.Ptr(true),
+						SupportsSkipTestConnection: new(true),
 					},
 					{
-						Type: to.Ptr("SharePoint"),
+						Type: new("SharePoint"),
 						CreationMethods: []fabcore.ConnectionCreationMethod{
 							{
-								Name: to.Ptr("SharePointList"),
+								Name: new("SharePointList"),
 								Parameters: []fabcore.ConnectionCreationParameter{
 									{
-										Name:     to.Ptr("sharePointSiteUrl"),
+										Name:     new("sharePointSiteUrl"),
 										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: to.Ptr(true),
+										Required: new(true),
 									},
 								},
 							},
@@ -348,7 +348,7 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,
 						},
-						SupportsSkipTestConnection: to.Ptr(false),
+						SupportsSkipTestConnection: new(false),
 					},
 				},
 			},
@@ -405,40 +405,40 @@ func NewRandomConnection() fabcore.ConnectionClassification {
 // NewRandomShareableCloudConnection creates a new random ShareableCloudConnection.
 func NewRandomShareableCloudConnection() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            to.Ptr(testhelp.RandomUUID()),
-		DisplayName:                   to.Ptr(testhelp.RandomName()),
+		ID:                            new(testhelp.RandomUUID()),
+		DisplayName:                   new(testhelp.RandomName()),
 		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: to.Ptr(testhelp.RandomBool()),
+		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeKey),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
 
 func NewRandomVirtualNetworkGatewayConnection() *fabcore.VirtualNetworkGatewayConnection {
 	return &fabcore.VirtualNetworkGatewayConnection{
-		ID:               to.Ptr(testhelp.RandomUUID()),
-		DisplayName:      to.Ptr(testhelp.RandomName()),
-		GatewayID:        to.Ptr(testhelp.RandomUUID()),
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		GatewayID:        new(testhelp.RandomUUID()),
 		PrivacyLevel:     to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType: to.Ptr(fabcore.ConnectivityTypeVirtualNetworkGateway),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeKey),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -448,20 +448,20 @@ func NewRandomVirtualNetworkGatewayConnection() *fabcore.VirtualNetworkGatewayCo
 // NewRandomConnectionWithBasicCredentials creates a connection with Basic credentials.
 func NewRandomConnectionWithBasicCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            to.Ptr(testhelp.RandomUUID()),
-		DisplayName:                   to.Ptr(testhelp.RandomName()),
+		ID:                            new(testhelp.RandomUUID()),
+		DisplayName:                   new(testhelp.RandomName()),
 		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: to.Ptr(testhelp.RandomBool()),
+		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeBasic),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -469,20 +469,20 @@ func NewRandomConnectionWithBasicCredentials() *fabcore.ShareableCloudConnection
 // NewRandomConnectionWithKeyCredentials creates a connection with Key credentials.
 func NewRandomConnectionWithKeyCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            to.Ptr(testhelp.RandomUUID()),
-		DisplayName:                   to.Ptr(testhelp.RandomName()),
+		ID:                            new(testhelp.RandomUUID()),
+		DisplayName:                   new(testhelp.RandomName()),
 		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: to.Ptr(testhelp.RandomBool()),
+		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeKey),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -490,20 +490,20 @@ func NewRandomConnectionWithKeyCredentials() *fabcore.ShareableCloudConnection {
 // NewRandomConnectionWithServicePrincipalCredentials creates a connection with ServicePrincipal credentials.
 func NewRandomConnectionWithServicePrincipalCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            to.Ptr(testhelp.RandomUUID()),
-		DisplayName:                   to.Ptr(testhelp.RandomName()),
+		ID:                            new(testhelp.RandomUUID()),
+		DisplayName:                   new(testhelp.RandomName()),
 		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: to.Ptr(testhelp.RandomBool()),
+		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeServicePrincipal),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -511,19 +511,19 @@ func NewRandomConnectionWithServicePrincipalCredentials() *fabcore.ShareableClou
 // NewRandomConnectionWithAnonymousCredentials creates a connection with Anonymous credentials.
 func NewRandomConnectionWithAnonymousCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:               to.Ptr(testhelp.RandomUUID()),
-		DisplayName:      to.Ptr(testhelp.RandomName()),
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
 		PrivacyLevel:     to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType: to.Ptr(fabcore.ConnectivityTypeShareableCloud),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeAnonymous),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -531,19 +531,19 @@ func NewRandomConnectionWithAnonymousCredentials() *fabcore.ShareableCloudConnec
 // NewRandomConnectionWithWorkspaceIdentityCredentials creates a connection with WorkspaceIdentity credentials.
 func NewRandomConnectionWithWorkspaceIdentityCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:               to.Ptr(testhelp.RandomUUID()),
-		DisplayName:      to.Ptr(testhelp.RandomName()),
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
 		PrivacyLevel:     to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType: to.Ptr(fabcore.ConnectivityTypeShareableCloud),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeWorkspaceIdentity),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }
@@ -551,19 +551,19 @@ func NewRandomConnectionWithWorkspaceIdentityCredentials() *fabcore.ShareableClo
 // NewRandomConnectionWithSharedAccessSignatureCredentials creates a connection with SharedAccessSignature credentials.
 func NewRandomConnectionWithSharedAccessSignatureCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:               to.Ptr(testhelp.RandomUUID()),
-		DisplayName:      to.Ptr(testhelp.RandomName()),
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
 		PrivacyLevel:     to.Ptr(fabcore.PrivacyLevelPrivate),
 		ConnectivityType: to.Ptr(fabcore.ConnectivityTypeShareableCloud),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
-			Path: to.Ptr(testhelp.RandomURI()),
-			Type: to.Ptr("GitHubSourceControl"),
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
 		},
 		CredentialDetails: &fabcore.ListCredentialDetails{
 			CredentialType:       to.Ptr(fabcore.CredentialTypeSharedAccessSignature),
 			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
 			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
-			SkipTestConnection:   to.Ptr(testhelp.RandomBool()),
+			SkipTestConnection:   new(testhelp.RandomBool()),
 		},
 	}
 }

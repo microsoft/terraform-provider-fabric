@@ -29,57 +29,57 @@ func fakeTenantSettingFunc() func(options *fabadmin.TenantsClientListTenantSetti
 
 func NewRandomTenantSettingsWithoutProperties() fabadmin.TenantSetting {
 	return fabadmin.TenantSetting{
-		SettingName:              to.Ptr(testhelp.RandomName()),
-		TenantSettingGroup:       to.Ptr(testhelp.RandomName()),
-		Title:                    to.Ptr(testhelp.RandomName()),
-		CanSpecifySecurityGroups: to.Ptr(testhelp.RandomBool()),
-		Enabled:                  to.Ptr(testhelp.RandomBool()),
-		DelegateToCapacity:       to.Ptr(testhelp.RandomBool()),
-		DelegateToDomain:         to.Ptr(testhelp.RandomBool()),
-		DelegateToWorkspace:      to.Ptr(testhelp.RandomBool()),
+		SettingName:              new(testhelp.RandomName()),
+		TenantSettingGroup:       new(testhelp.RandomName()),
+		Title:                    new(testhelp.RandomName()),
+		CanSpecifySecurityGroups: new(testhelp.RandomBool()),
+		Enabled:                  new(testhelp.RandomBool()),
+		DelegateToCapacity:       new(testhelp.RandomBool()),
+		DelegateToDomain:         new(testhelp.RandomBool()),
+		DelegateToWorkspace:      new(testhelp.RandomBool()),
 	}
 }
 
 func NewRandomTenantSetting() fabadmin.TenantSetting {
 	return fabadmin.TenantSetting{
-		SettingName:              to.Ptr(testhelp.RandomName()),
-		TenantSettingGroup:       to.Ptr(testhelp.RandomName()),
-		Title:                    to.Ptr(testhelp.RandomName()),
-		CanSpecifySecurityGroups: to.Ptr(testhelp.RandomBool()),
-		Enabled:                  to.Ptr(testhelp.RandomBool()),
-		DelegateToCapacity:       to.Ptr(testhelp.RandomBool()),
-		DelegateToDomain:         to.Ptr(testhelp.RandomBool()),
-		DelegateToWorkspace:      to.Ptr(testhelp.RandomBool()),
+		SettingName:              new(testhelp.RandomName()),
+		TenantSettingGroup:       new(testhelp.RandomName()),
+		Title:                    new(testhelp.RandomName()),
+		CanSpecifySecurityGroups: new(testhelp.RandomBool()),
+		Enabled:                  new(testhelp.RandomBool()),
+		DelegateToCapacity:       new(testhelp.RandomBool()),
+		DelegateToDomain:         new(testhelp.RandomBool()),
+		DelegateToWorkspace:      new(testhelp.RandomBool()),
 		EnabledSecurityGroups: []fabadmin.TenantSettingSecurityGroup{
 			{
-				GraphID: to.Ptr(testhelp.RandomUUID()),
-				Name:    to.Ptr(testhelp.RandomName()),
+				GraphID: new(testhelp.RandomUUID()),
+				Name:    new(testhelp.RandomName()),
 			},
 			{
-				GraphID: to.Ptr(testhelp.RandomUUID()),
-				Name:    to.Ptr(testhelp.RandomName()),
+				GraphID: new(testhelp.RandomUUID()),
+				Name:    new(testhelp.RandomName()),
 			},
 		},
 		ExcludedSecurityGroups: []fabadmin.TenantSettingSecurityGroup{
 			{
-				GraphID: to.Ptr(testhelp.RandomUUID()),
-				Name:    to.Ptr(testhelp.RandomName()),
+				GraphID: new(testhelp.RandomUUID()),
+				Name:    new(testhelp.RandomName()),
 			},
 			{
-				GraphID: to.Ptr(testhelp.RandomUUID()),
-				Name:    to.Ptr(testhelp.RandomName()),
+				GraphID: new(testhelp.RandomUUID()),
+				Name:    new(testhelp.RandomName()),
 			},
 		},
 		Properties: []fabadmin.TenantSettingProperty{
 			{
-				Name:  to.Ptr(testhelp.RandomName()),
+				Name:  new(testhelp.RandomName()),
 				Type:  to.Ptr(fabadmin.TenantSettingPropertyTypeBoolean),
-				Value: to.Ptr(testhelp.RandomName()),
+				Value: new(testhelp.RandomName()),
 			},
 			{
-				Name:  to.Ptr(testhelp.RandomName()),
+				Name:  new(testhelp.RandomName()),
 				Type:  to.Ptr(fabadmin.TenantSettingPropertyTypeFreeText),
-				Value: to.Ptr(testhelp.RandomName()),
+				Value: new(testhelp.RandomName()),
 			},
 		},
 	}
@@ -112,7 +112,7 @@ func fakeUpdateTenantSettings() func(ctx context.Context, tenantSettingName stri
 		}
 
 		fakeTenantSettingsStore[tenantSettingName] = fabadmin.TenantSetting{
-			SettingName:              to.Ptr(tenantSettingName),
+			SettingName:              new(tenantSettingName),
 			Title:                    fakeTenantSettingsStore[tenantSettingName].Title,
 			TenantSettingGroup:       fakeTenantSettingsStore[tenantSettingName].TenantSettingGroup,
 			Enabled:                  updateTenantSettingRequest.Enabled,
