@@ -68,7 +68,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/azuremap"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
@@ -439,7 +439,6 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		apacheairflowjob.NewResourceApacheAirflowJob,
-		azuremap.NewResourceMap,
 		copyjob.NewResourceCopyJob,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
@@ -455,6 +454,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		fabricmap.NewResourceMap,
 		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
@@ -493,8 +493,6 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 	return []func() datasource.DataSource{
 		apacheairflowjob.NewDataSourceApacheAirflowJob,
 		apacheairflowjob.NewDataSourceApacheAirflowJobs,
-		azuremap.NewDataSourceMap,
-		azuremap.NewDataSourceMaps,
 		capacity.NewDataSourceCapacity,
 		capacity.NewDataSourceCapacities,
 		connection.NewDataSourceConnection,
@@ -526,6 +524,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		fabricmap.NewDataSourceMap,
+		fabricmap.NewDataSourceMaps,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
