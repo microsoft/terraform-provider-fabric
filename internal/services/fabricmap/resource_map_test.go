@@ -22,7 +22,7 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
-	"path": testhelp.GetFixturesDirPath("map"),
+	"path": testhelp.GetFixturesDirPath("fabricmap"),
 })
 
 func TestUnit_MapResource_Attributes(t *testing.T) {
