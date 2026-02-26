@@ -138,17 +138,17 @@ func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 
 func NewRandomWarehouse() fabwarehouse.Warehouse {
 	return fabwarehouse.Warehouse{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties: &fabwarehouse.Properties{
 			CollationType:    to.Ptr(fabwarehouse.CollationTypeLatin1General100BIN2UTF8),
-			ConnectionString: to.Ptr(testhelp.RandomURI()),
-			CreatedDate:      to.Ptr(time.Now()),
-			LastUpdatedTime:  to.Ptr(time.Now()),
+			ConnectionString: new(testhelp.RandomURI()),
+			CreatedDate:      new(time.Now()),
+			LastUpdatedTime:  new(time.Now()),
 		},
 	}
 }

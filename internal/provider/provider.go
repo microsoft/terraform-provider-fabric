@@ -59,6 +59,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
@@ -69,7 +70,6 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/maps"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
@@ -456,6 +456,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
 		externaldatashare.NewResourceExternalDataShares,
+		fabricmap.NewResourceMap,
 		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
@@ -465,7 +466,6 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
-		maps.NewResourceMap,
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
@@ -528,6 +528,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		externaldatashare.NewDataSourceExternalDataShare,
 		externaldatashare.NewDataSourceExternalDataShares,
+		fabricmap.NewDataSourceMap,
+		fabricmap.NewDataSourceMaps,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
@@ -548,8 +550,6 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
-		maps.NewDataSourceMap,
-		maps.NewDataSourceMaps,
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
