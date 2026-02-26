@@ -70,7 +70,7 @@ resource "fabric_spark_environment_settings" "example" {
 - `executor_cores` (Number) Spark executor core. Value must be one of : `4`, `8`, `16`, `32`, `64`.
 - `executor_memory` (String) Spark executor memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.2`, `1.3`, `2.0`.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version.
 - `spark_properties` (Map of String) A map of key/value pairs of Spark properties. Key must satisfy all validations: Spark properties:
 - must starts with 'spark.'
 - cannot contains any white spaces

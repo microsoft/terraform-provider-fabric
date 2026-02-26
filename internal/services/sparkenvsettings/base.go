@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	SparkRuntimeVersionValues               = []string{"1.2", "1.3", "2.0"}    //nolint:gochecknoglobals
 	SparkEnvironmentPublicationStatusValues = []string{"Published", "Staging"} //nolint:gochecknoglobals
 	SparkEnvironmentDriverCoresValues       = []int32{4, 8, 16, 32, 64}        //nolint:gochecknoglobals
 	SparkEnvironmentExecutorCoresValues     = []int32{4, 8, 16, 32, 64}        //nolint:gochecknoglobals

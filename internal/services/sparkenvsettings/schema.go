@@ -174,9 +174,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 			"runtime_version": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version.",
-					Validators: []validator.String{
-						stringvalidator.OneOf(SparkRuntimeVersionValues...),
-					},
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
