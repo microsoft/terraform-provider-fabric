@@ -101,6 +101,7 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	if from.Recipient != nil {
 		recipient := &recipientModel{}
 		recipient.set(*from.Recipient)
+
 		if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
 			return diags
 		}
@@ -109,6 +110,7 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	if from.CreatorPrincipal != nil {
 		creatorPrincipalModel := &common.PrincipalModel{}
 		creatorPrincipalModel.Set(*from.CreatorPrincipal)
+
 		if diags := to.PrincipalModel.Set(ctx, creatorPrincipalModel); diags.HasError() {
 			return diags
 		}

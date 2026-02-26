@@ -54,7 +54,7 @@ func fakeCreateExternalDataShareProvider() func(ctx context.Context, workspaceID
 		entity := NewRandomExternalDataShare(workspaceID)
 		entity.Paths = createExternalDataShareRequest.Paths
 		entity.Recipient = createExternalDataShareRequest.Recipient
-		entity.ItemID = to.Ptr(itemID)
+		entity.ItemID = new(itemID)
 
 		fakeTestUpsert(entity)
 		resp.SetResponse(http.StatusCreated, fabcore.ExternalDataSharesProviderClientCreateExternalDataShareResponse{ExternalDataShare: entity}, nil)
@@ -92,24 +92,24 @@ func fakeTestUpsert(entity fabcore.ExternalDataShare) {
 
 func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 	return fabcore.ExternalDataShare{
-		ID:          to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
 		Paths:       []string{"Files/MyFile1"},
-		WorkspaceID: to.Ptr(workspaceID),
+		WorkspaceID: new(workspaceID),
 		Recipient: &fabcore.ExternalDataShareRecipient{
-			UserPrincipalName: to.Ptr(testhelp.RandomName()),
+			UserPrincipalName: new(testhelp.RandomName()),
 		},
 		CreatorPrincipal: &fabcore.Principal{
-			ID:          to.Ptr(testhelp.RandomUUID()),
-			DisplayName: to.Ptr(testhelp.RandomName()),
+			ID:          new(testhelp.RandomUUID()),
+			DisplayName: new(testhelp.RandomName()),
 			Type:        to.Ptr(fabcore.PrincipalTypeUser),
 			UserDetails: &fabcore.PrincipalUserDetails{
-				UserPrincipalName: to.Ptr(testhelp.RandomName()),
+				UserPrincipalName: new(testhelp.RandomName()),
 			},
 		},
 		Status:             to.Ptr(fabcore.ExternalDataShareStatusPending),
-		ExpirationTimeUTC:  to.Ptr(time.Now()),
-		ItemID:             to.Ptr(testhelp.RandomUUID()),
-		InvitationURL:      to.Ptr(testhelp.RandomURI()),
-		AcceptedByTenantID: to.Ptr(testhelp.RandomUUID()),
+		ExpirationTimeUTC:  new(time.Now()),
+		ItemID:             new(testhelp.RandomUUID()),
+		InvitationURL:      new(testhelp.RandomURI()),
+		AcceptedByTenantID: new(testhelp.RandomUUID()),
 	}
 }

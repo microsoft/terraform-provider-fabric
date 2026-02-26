@@ -154,7 +154,7 @@ func (r *resourceExternalDataShares) Read(ctx context.Context, req resource.Read
 	}
 }
 
-func (r *resourceExternalDataShares) Update(ctx context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *resourceExternalDataShares) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
 		"This resource cannot be updated in-place because the Fabric API does not support updates. "+
