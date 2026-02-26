@@ -105,7 +105,7 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "outbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(*entity.Inbound.PublicAccessRules.DefaultAction)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "inbound.public_access_rules.default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),
 		},
 		// update and read
