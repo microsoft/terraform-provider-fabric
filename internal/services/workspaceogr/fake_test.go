@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -19,10 +20,14 @@ func fakeSetOutboundGatewayRules(
 	return func(_ context.Context, _ string, workspaceOutboundGateways fabcore.WorkspaceOutboundGateways, _ *fabcore.WorkspacesClientSetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
 		if workspaceOutboundGateways.DefaultAction != nil {
 			entity.DefaultAction = workspaceOutboundGateways.DefaultAction
+		} else {
+			entity.DefaultAction = azto.Ptr(fabcore.GatewayAccessActionTypeAllow)
 		}
 
 		if workspaceOutboundGateways.AllowedGateways != nil {
 			entity.AllowedGateways = workspaceOutboundGateways.AllowedGateways
+		} else {
+			entity.AllowedGateways = []fabcore.GatewayAccessRuleMetadata{}
 		}
 
 		resp = azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse]{}
