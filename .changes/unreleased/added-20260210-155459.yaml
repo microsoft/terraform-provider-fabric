@@ -1,0 +1,5 @@
+kind: added
+body: Onboard definition for `fabric_lakehouse` Data Source and Resource
+time: 2026-02-10T15:54:59.241682525Z
+custom:
+    Issue: "538"
