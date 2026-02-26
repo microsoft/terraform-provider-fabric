@@ -32,7 +32,7 @@ func fakeSetNetworkCommunicationPolicy(
 
 		resp = azfake.Responder[fabcore.WorkspacesClientSetNetworkCommunicationPolicyResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientSetNetworkCommunicationPolicyResponse{
-			ETag: azto.Ptr("fake-etag"),
+			ETag: new("fake-etag"),
 		}, nil)
 
 		return resp, errResp
@@ -46,7 +46,7 @@ func fakeGetNetworkCommunicationPolicy(
 		resp = azfake.Responder[fabcore.WorkspacesClientGetNetworkCommunicationPolicyResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetNetworkCommunicationPolicyResponse{
 			WorkspaceNetworkingCommunicationPolicy: *entity,
-			ETag:                                   azto.Ptr("fake-etag"),
+			ETag:                                   new("fake-etag"),
 		}, nil)
 
 		return resp, errResp
@@ -57,12 +57,12 @@ func NewRandomWorkspaceNetworkingCommunicationPolicy() fabcore.WorkspaceNetworki
 	return fabcore.WorkspaceNetworkingCommunicationPolicy{
 		Inbound: &fabcore.InboundRules{
 			PublicAccessRules: &fabcore.NetworkRules{
-				DefaultAction: azto.Ptr(testhelp.RandomElement(fabcore.PossibleNetworkAccessRuleValues())),
+				DefaultAction: new(testhelp.RandomElement(fabcore.PossibleNetworkAccessRuleValues())),
 			},
 		},
 		Outbound: &fabcore.OutboundRules{
 			PublicAccessRules: &fabcore.NetworkRules{
-				DefaultAction: azto.Ptr(testhelp.RandomElement(fabcore.PossibleNetworkAccessRuleValues())),
+				DefaultAction: new(testhelp.RandomElement(fabcore.PossibleNetworkAccessRuleValues())),
 			},
 		},
 	}
