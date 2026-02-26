@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -21,13 +20,14 @@ func fakeSetOutboundGatewayRules(
 		if workspaceOutboundGateways.DefaultAction != nil {
 			entity.DefaultAction = workspaceOutboundGateways.DefaultAction
 		}
+
 		if workspaceOutboundGateways.AllowedGateways != nil {
 			entity.AllowedGateways = workspaceOutboundGateways.AllowedGateways
 		}
 
 		resp = azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientSetOutboundGatewayRulesResponse{
-			ETag: azto.Ptr("fake-etag"),
+			ETag: new("fake-etag"),
 		}, nil)
 
 		return resp, errResp
@@ -41,7 +41,7 @@ func fakeGetOutboundGatewayRules(
 		resp = azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetOutboundGatewayRulesResponse{
 			WorkspaceOutboundGateways: *entity,
-			ETag:                      azto.Ptr("fake-etag"),
+			ETag:                      new("fake-etag"),
 		}, nil)
 
 		return resp, errResp
@@ -50,7 +50,7 @@ func fakeGetOutboundGatewayRules(
 
 func NewRandomWorkspaceOutboundGateways() fabcore.WorkspaceOutboundGateways {
 	return fabcore.WorkspaceOutboundGateways{
-		DefaultAction:   azto.Ptr(testhelp.RandomElement(fabcore.PossibleGatewayAccessActionTypeValues())),
+		DefaultAction:   new(testhelp.RandomElement(fabcore.PossibleGatewayAccessActionTypeValues())),
 		AllowedGateways: []fabcore.GatewayAccessRuleMetadata{},
 	}
 }
