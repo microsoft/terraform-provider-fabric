@@ -202,32 +202,32 @@ func NewRandomLakehouseWithWorkspace(workspaceID string) fablakehouse.Lakehouse 
 func NewRandomLakehouseDefinition() fablakehouse.Definition {
 	defPart1 := fablakehouse.DefinitionPart{
 		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
-		Path:        to.Ptr("lakehouse.metadata.json"),
-		Payload: to.Ptr(
+		Path:        new("lakehouse.metadata.json"),
+		Payload: new(
 			"eyJkZWZhdWx0U2NoZW1hIjoiZGJvIn0==",
 		),
 	}
 
 	defPart2 := fablakehouse.DefinitionPart{
 		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
-		Path:        to.Ptr("shortcuts.metadata.json"),
-		Payload: to.Ptr(
+		Path:        new("shortcuts.metadata.json"),
+		Payload: new(
 			"WwogIHsKICAgICJuYW1lIjogIk55Y1RheGkiLAogICAgInBhdGgiOiAiL1RhYmxlcyIsCiAgICAidGFyZ2V0IjogewogICAgICAi",
 		),
 	}
 
 	defPart3 := fablakehouse.DefinitionPart{
 		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
-		Path:        to.Ptr("data-access-roles.json"),
-		Payload: to.Ptr(
+		Path:        new("data-access-roles.json"),
+		Payload: new(
 			"Ww0KICAgICAgICAgICAgICB7DQogICAgICAgICAgICAgICAgIm5hbWUiOiAiZGltZW5zaW9ucnVsZXJlbmFtZSIsDQogICAgICA==",
 		),
 	}
 
 	defPart4 := fablakehouse.DefinitionPart{
 		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
-		Path:        to.Ptr("alm.settings.json"),
-		Payload: to.Ptr(
+		Path:        new("alm.settings.json"),
+		Payload: new(
 			"ew0KICAgICAgICAgICJ2ZXJzaW9uIjogIjEuMC4xIiwNCiAgICAgICAgICAib2JqZWN0VHlwZXMiOiBbDQogICAgICAgICAgICB7",
 		),
 	}
@@ -240,7 +240,7 @@ func NewRandomLakehouseDefinition() fablakehouse.Definition {
 	defParts = append(defParts, defPart4)
 
 	return fablakehouse.Definition{
-		Format: to.Ptr("LakehouseDefinitionV1"),
+		Format: new("LakehouseDefinitionV1"),
 		Parts:  defParts,
 	}
 }
