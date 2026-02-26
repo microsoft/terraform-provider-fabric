@@ -287,8 +287,8 @@ func (r *resourceSparkEnvironmentSettings) resolveSparkProperties(ctx context.Co
 		return diags
 	}
 
-	if req.SparkProperties != nil || len(respCurrent.SparkCompute.SparkProperties) > 0 {
-		req.SparkProperties = diffSparkProperties(req.SparkProperties, respCurrent.SparkCompute.SparkProperties)
+	if req.SparkProperties != nil || len(respCurrent.SparkProperties) > 0 {
+		req.SparkProperties = diffSparkProperties(req.SparkProperties, respCurrent.SparkProperties)
 	}
 
 	return nil
@@ -325,8 +325,8 @@ func (r *resourceSparkEnvironmentSettings) publish(ctx context.Context, model re
 			return diags
 		}
 
-		if respPublish.Properties.PublishDetails != nil && respPublish.Properties.PublishDetails.State != nil {
-			state := string(*respPublish.Properties.PublishDetails.State)
+		if respPublish.PublishDetails != nil && respPublish.PublishDetails.State != nil {
+			state := string(*respPublish.PublishDetails.State)
 
 			if strings.EqualFold(state, string(fabenvironment.PublishStateFailed)) {
 				var diags diag.Diagnostics

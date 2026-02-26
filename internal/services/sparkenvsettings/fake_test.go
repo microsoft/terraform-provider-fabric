@@ -18,8 +18,8 @@ import (
 
 var fakeSparkComputeStagingStore = map[string]fabenvironment.SparkCompute{}
 
-func fakeGetStagingSparkComputeFunc() func(ctx context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.StagingClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.StagingClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
+func fakeGetStagingSparkComputeFunc() func(ctx context.Context, _, environmentID string, _ bool, _ *fabenvironment.StagingClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, environmentID string, _ bool, _ *fabenvironment.StagingClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabenvironment.StagingClientGetSparkComputeResponse]{}
 
 		if sparkCompute, ok := fakeSparkComputeStagingStore[environmentID]; ok {
@@ -35,8 +35,8 @@ func fakeGetStagingSparkComputeFunc() func(ctx context.Context, workspaceID, env
 	}
 }
 
-func fakeGetPublishedSparkComputeFunc() func(ctx context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.PublishedClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.PublishedClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.PublishedClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.PublishedClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
+func fakeGetPublishedSparkComputeFunc() func(ctx context.Context, _, environmentID string, _ bool, _ *fabenvironment.PublishedClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.PublishedClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, environmentID string, _ bool, _ *fabenvironment.PublishedClientGetSparkComputeOptions) (resp azfake.Responder[fabenvironment.PublishedClientGetSparkComputeResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabenvironment.PublishedClientGetSparkComputeResponse]{}
 
 		if sparkCompute, ok := fakeSparkComputeStagingStore[environmentID]; ok {
@@ -52,8 +52,8 @@ func fakeGetPublishedSparkComputeFunc() func(ctx context.Context, workspaceID, e
 	}
 }
 
-func fakeUpdateStagingSparkComputeFunc() func(ctx context.Context, workspaceID, environmentID string, _ bool, req fabenvironment.UpdateEnvironmentSparkComputeRequest, _ *fabenvironment.StagingClientUpdateSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientUpdateSparkComputeResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, environmentID string, _ bool, req fabenvironment.UpdateEnvironmentSparkComputeRequest, _ *fabenvironment.StagingClientUpdateSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientUpdateSparkComputeResponse], errResp azfake.ErrorResponder) {
+func fakeUpdateStagingSparkComputeFunc() func(ctx context.Context, _, environmentID string, _ bool, req fabenvironment.UpdateEnvironmentSparkComputeRequest, _ *fabenvironment.StagingClientUpdateSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientUpdateSparkComputeResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, environmentID string, _ bool, req fabenvironment.UpdateEnvironmentSparkComputeRequest, _ *fabenvironment.StagingClientUpdateSparkComputeOptions) (resp azfake.Responder[fabenvironment.StagingClientUpdateSparkComputeResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabenvironment.StagingClientUpdateSparkComputeResponse]{}
 
 		current, ok := fakeSparkComputeStagingStore[environmentID]
@@ -103,8 +103,8 @@ func fakeUpdateStagingSparkComputeFunc() func(ctx context.Context, workspaceID, 
 	}
 }
 
-func fakeBeginPublishEnvironmentFunc() func(ctx context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.ItemsClientBeginPublishEnvironmentOptions) (resp azfake.PollerResponder[fabenvironment.ItemsClientPublishEnvironmentResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, environmentID string, _ bool, _ *fabenvironment.ItemsClientBeginPublishEnvironmentOptions) (resp azfake.PollerResponder[fabenvironment.ItemsClientPublishEnvironmentResponse], errResp azfake.ErrorResponder) {
+func fakeBeginPublishEnvironmentFunc() func(ctx context.Context, _, environmentID string, _ bool, _ *fabenvironment.ItemsClientBeginPublishEnvironmentOptions) (resp azfake.PollerResponder[fabenvironment.ItemsClientPublishEnvironmentResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _, environmentID string, _ bool, _ *fabenvironment.ItemsClientBeginPublishEnvironmentOptions) (resp azfake.PollerResponder[fabenvironment.ItemsClientPublishEnvironmentResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.PollerResponder[fabenvironment.ItemsClientPublishEnvironmentResponse]{}
 
 		if _, ok := fakeSparkComputeStagingStore[environmentID]; ok {
@@ -128,15 +128,15 @@ func fakeBeginPublishEnvironmentFunc() func(ctx context.Context, workspaceID, en
 
 func NewRandomSparkCompute() fabenvironment.SparkCompute {
 	return fabenvironment.SparkCompute{
-		DriverCores:    to.Ptr(int32(4)),
+		DriverCores:    new(int32(4)),
 		DriverMemory:   to.Ptr(fabenvironment.CustomPoolMemoryTwentyEightG),
-		ExecutorCores:  to.Ptr(int32(4)),
+		ExecutorCores:  new(int32(4)),
 		ExecutorMemory: to.Ptr(fabenvironment.CustomPoolMemoryTwentyEightG),
-		RuntimeVersion: to.Ptr("1.3"),
+		RuntimeVersion: new("1.3"),
 		InstancePool: &fabenvironment.InstancePool{
-			Name: to.Ptr("Starter Pool"),
+			Name: new("Starter Pool"),
 			Type: to.Ptr(fabenvironment.CustomPoolTypeWorkspace),
-			ID:   to.Ptr(testhelp.RandomUUID()),
+			ID:   new(testhelp.RandomUUID()),
 		},
 	}
 }

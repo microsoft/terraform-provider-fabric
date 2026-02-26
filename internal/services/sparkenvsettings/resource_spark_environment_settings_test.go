@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	fabenvironment "github.com/microsoft/fabric-sdk-go/fabric/environment"
@@ -149,12 +148,12 @@ func TestUnit_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 	stagingSparkCompute := NewRandomSparkCompute()
 	stagingSparkCompute.SparkProperties = []fabenvironment.SparkProperty{
 		{
-			Key:   to.Ptr("spark.acls.enable"),
-			Value: to.Ptr("false"),
+			Key:   new("spark.acls.enable"),
+			Value: new("false"),
 		},
 		{
-			Key:   to.Ptr("spark.acls.groups"),
-			Value: to.Ptr("test"),
+			Key:   new("spark.acls.groups"),
+			Value: new("test"),
 		},
 	}
 

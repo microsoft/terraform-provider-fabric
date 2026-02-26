@@ -42,6 +42,12 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 	to.ExecutorMemory = types.StringPointerValue((*string)(from.ExecutorMemory))
 	to.RuntimeVersion = types.StringPointerValue(from.RuntimeVersion)
 
+	if !to.SparkProperties.IsNull() {
+		to.SparkProperties, _ = supertypes.NewMapValueOfMap(ctx, map[string]types.String{})
+	} else {
+		to.SparkProperties = supertypes.NewMapValueOfNull[types.String](ctx)
+	}
+
 	if len(from.SparkProperties) > 0 {
 		sparkPropertiesTF := make(map[string]types.String)
 
@@ -55,10 +61,6 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 		}
 
 		to.SparkProperties = sparkPropertiesMap
-	} else if !to.SparkProperties.IsNull() {
-		to.SparkProperties, _ = supertypes.NewMapValueOfMap(ctx, map[string]types.String{})
-	} else {
-		to.SparkProperties = supertypes.NewMapValueOfNull[types.String](ctx)
 	}
 
 	dynamicExecutorAllocation := supertypes.NewSingleNestedObjectValueOfNull[dynamicExecutorAllocationPropertiesModel](ctx)
