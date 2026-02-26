@@ -17,7 +17,6 @@ import (
 )
 
 type baseWorkspaceOutboundGatewayRulesModel struct {
-	ID              customtypes.UUID                                                   `tfsdk:"id"`
 	WorkspaceID     customtypes.UUID                                                   `tfsdk:"workspace_id"`
 	AllowedGateways supertypes.ListNestedObjectValueOf[gatewayAccessRuleMetadataModel] `tfsdk:"allowed_gateways"`
 	DefaultAction   types.String                                                       `tfsdk:"default_action"`
@@ -28,7 +27,6 @@ type gatewayAccessRuleMetadataModel struct {
 }
 
 func (to *baseWorkspaceOutboundGatewayRulesModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceOutboundGateways) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDValue(workspaceID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
 

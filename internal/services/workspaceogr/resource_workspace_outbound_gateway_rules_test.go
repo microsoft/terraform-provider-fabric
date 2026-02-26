@@ -34,13 +34,25 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
+		// error - missing required attribute
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "default_action" is required, but no definition was found.`),
+		},
 		// error - invalid workspace_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "invalid-uuid",
+					"workspace_id":   "invalid-uuid",
+					"default_action": string(fabcore.GatewayAccessActionTypeAllow),
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -115,7 +127,8 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": workspaceID,
+					"workspace_id":   workspaceID,
+					"default_action": string(fabcore.GatewayAccessActionTypeAllow),
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -178,20 +191,6 @@ func TestAcc_WorkspaceSetOutboundGatewayRules_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id":   entityID,
 					"default_action": string(fabcore.GatewayAccessActionTypeAllow),
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeAllow)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "0"),
-			),
-		},
-		// Update and Read - set all rules to default
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

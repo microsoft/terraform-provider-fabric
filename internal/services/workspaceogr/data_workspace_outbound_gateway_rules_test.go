@@ -64,7 +64,6 @@ func TestUnit_WorkspaceOutboundGatewayRulesDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "default_action", string(*entity.DefaultAction)),
 			),
@@ -86,7 +85,6 @@ func TestAcc_WorkspaceOutboundGatewayRulesDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "default_action", "Allow"),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "allowed_gateways.#", "0"),
 			),

@@ -10,7 +10,6 @@ import (
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -31,18 +30,6 @@ func itemSchema() superschema.Schema {
 			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		Attributes: map[string]superschema.Attribute{
-			"id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
-					CustomType:          customtypes.UUIDType{},
-					Computed:            true,
-				},
-				Resource: &schemaR.StringAttribute{
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-			},
 			"workspace_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
@@ -58,14 +45,15 @@ func itemSchema() superschema.Schema {
 			"default_action": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Defines the default behavior for all gateways that are not explicitly listed in the allowed list array. If set to \"Allow\", all unspecified gateways are permitted by default. If set to \"Deny\", all unspecified gateways are blocked.",
-					Computed:            true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleGatewayAccessActionTypeValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
-					Optional: true,
-					Default:  stringdefault.StaticString(string(fabcore.GatewayAccessActionTypeAllow)),
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
 				},
 			},
 			"allowed_gateways": superschema.SuperListNestedAttributeOf[gatewayAccessRuleMetadataModel]{

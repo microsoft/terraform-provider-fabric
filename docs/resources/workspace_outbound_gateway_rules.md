@@ -18,7 +18,7 @@ The Workspace Outbound Gateway Rules resource allows you to manage a Fabric [Wor
 ```terraform
 resource "fabric_workspace_outbound_gateway_rules" "example" {
   workspace_id   = "00000000-0000-0000-0000-000000000000"
-  default_action = "Allow"
+  default_action = "Deny"
   allowed_gateways = [
     {
       id = "11111111-1111-1111-1111-111111111111"
@@ -32,17 +32,13 @@ resource "fabric_workspace_outbound_gateway_rules" "example" {
 
 ### Required
 
+- `default_action` (String) Defines the default behavior for all gateways that are not explicitly listed in the allowed list array. If set to "Allow", all unspecified gateways are permitted by default. If set to "Deny", all unspecified gateways are blocked. Value must be one of : `Allow`, `Deny`.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
 - `allowed_gateways` (Attributes List) A list of rules that define outbound access behavior for gateways. Value defaults to `[]`. (see [below for nested schema](#nestedatt--allowed_gateways))
-- `default_action` (String) Defines the default behavior for all gateways that are not explicitly listed in the allowed list array. If set to "Allow", all unspecified gateways are permitted by default. If set to "Deny", all unspecified gateways are blocked. Value defaults to `Allow`. Value must be one of : `Allow`, `Deny`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-
-### Read-Only
-
-- `id` (String) The Workspace Outbound Gateway Rules ID.
 
 <a id="nestedatt--allowed_gateways"></a>
 
