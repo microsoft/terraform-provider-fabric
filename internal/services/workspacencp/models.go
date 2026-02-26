@@ -17,14 +17,12 @@ import (
 )
 
 type baseWorkspaceNetworkCommunicationPolicyModel struct {
-	ID          customtypes.UUID                                 `tfsdk:"id"`
 	WorkspaceID customtypes.UUID                                 `tfsdk:"workspace_id"`
 	Inbound     supertypes.SingleNestedObjectValueOf[rulesModel] `tfsdk:"inbound"`
 	Outbound    supertypes.SingleNestedObjectValueOf[rulesModel] `tfsdk:"outbound"`
 }
 
 func (to *baseWorkspaceNetworkCommunicationPolicyModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceNetworkingCommunicationPolicy) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDValue(workspaceID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 
 	inbound := supertypes.NewSingleNestedObjectValueOfNull[rulesModel](ctx)

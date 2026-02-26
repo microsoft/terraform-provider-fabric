@@ -27,18 +27,6 @@ func itemSchema() superschema.Schema {
 			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		Attributes: map[string]superschema.Attribute{
-			"id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The " + ItemTypeInfo.Name + " ID.",
-					CustomType:          customtypes.UUIDType{},
-					Computed:            true,
-				},
-				Resource: &schemaR.StringAttribute{
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-			},
 			"workspace_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",

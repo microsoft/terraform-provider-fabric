@@ -65,7 +65,6 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "inbound.public_access_rules.default_action", string(*entity.Inbound.PublicAccessRules.DefaultAction)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "outbound.public_access_rules.default_action", string(*entity.Outbound.PublicAccessRules.DefaultAction)),
@@ -88,7 +87,6 @@ func TestAcc_WorkspaceNetworkCommunicationPolicyDataSource(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "inbound.public_access_rules.default_action"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "outbound.public_access_rules.default_action"),
 			),

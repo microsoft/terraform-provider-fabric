@@ -34,7 +34,6 @@ data "fabric_workspace_network_communication_policy" "example" {
 
 ### Read-Only
 
-- `id` (String) The Workspace Network Communication Policy ID.
 - `inbound` (Attributes) The policy for all inbound communications to a workspace. (see [below for nested schema](#nestedatt--inbound))
 - `outbound` (Attributes) The policy for all outbound communications from a workspace. (see [below for nested schema](#nestedatt--outbound))
 

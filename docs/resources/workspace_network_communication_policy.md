@@ -44,10 +44,6 @@ resource "fabric_workspace_network_communication_policy" "example" {
 - `outbound` (Attributes) The policy for all outbound communications from a workspace. (see [below for nested schema](#nestedatt--outbound))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
-### Read-Only
-
-- `id` (String) The Workspace Network Communication Policy ID.
-
 <a id="nestedatt--inbound"></a>
 
 ### Nested Schema for `inbound`
