@@ -23,11 +23,10 @@ resource "fabric_spark_environment_settings" "example" {
 			*/
   }
 
-  spark_properties = [
-    {
-      /*
+  spark_properties = {
+    "spark.acls.enable" = "true"
+    /*
 			your settings here
 			*/
-    }
-  ]
+  }
 }

@@ -32,7 +32,7 @@ type baseSparkEnvironmentSettingsModel struct {
 	ExecutorMemory            types.String                                                                   `tfsdk:"executor_memory"`
 	Pool                      supertypes.SingleNestedObjectValueOf[instancePoolPropertiesModel]              `tfsdk:"pool"`
 	RuntimeVersion            types.String                                                                   `tfsdk:"runtime_version"`
-	SparkProperties           supertypes.ListNestedObjectValueOf[sparkPropertyModel]                         `tfsdk:"spark_properties"`
+	SparkProperties           supertypes.MapValueOf[types.String]                                            `tfsdk:"spark_properties"`
 }
 
 func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from fabenvironment.SparkCompute) diag.Diagnostics {
@@ -42,23 +42,24 @@ func (to *baseSparkEnvironmentSettingsModel) set(ctx context.Context, from faben
 	to.ExecutorMemory = types.StringPointerValue((*string)(from.ExecutorMemory))
 	to.RuntimeVersion = types.StringPointerValue(from.RuntimeVersion)
 
-	sparkPropertiesList := supertypes.NewListNestedObjectValueOfNull[sparkPropertyModel](ctx)
-
 	if len(from.SparkProperties) > 0 {
-		slice := make([]*sparkPropertyModel, 0, len(from.SparkProperties))
+		sparkPropertiesTF := make(map[string]types.String)
 
 		for _, prop := range from.SparkProperties {
-			sparkPropModel := &sparkPropertyModel{}
-			sparkPropModel.set(prop)
-			slice = append(slice, sparkPropModel)
+			sparkPropertiesTF[*prop.Key] = types.StringValue(*prop.Value)
 		}
 
-		if diags := sparkPropertiesList.Set(ctx, slice); diags.HasError() {
+		sparkPropertiesMap, diags := supertypes.NewMapValueOfMap(ctx, sparkPropertiesTF)
+		if diags.HasError() {
 			return diags
 		}
-	}
 
-	to.SparkProperties = sparkPropertiesList
+		to.SparkProperties = sparkPropertiesMap
+	} else if !to.SparkProperties.IsNull() {
+		to.SparkProperties, _ = supertypes.NewMapValueOfMap(ctx, map[string]types.String{})
+	} else {
+		to.SparkProperties = supertypes.NewMapValueOfNull[types.String](ctx)
+	}
 
 	dynamicExecutorAllocation := supertypes.NewSingleNestedObjectValueOfNull[dynamicExecutorAllocationPropertiesModel](ctx)
 
@@ -192,11 +193,11 @@ func (to *requestUpdateSparkEnvironmentSettings) set(ctx context.Context, from r
 
 		sparkPropertiesSlice := make([]fabenvironment.SparkProperty, 0, len(sparkProperties))
 
-		for _, prop := range sparkProperties {
-			var reqProp fabenvironment.SparkProperty
-
-			reqProp.Key = prop.Key.ValueStringPointer()
-			reqProp.Value = prop.Value.ValueStringPointer()
+		for k, v := range sparkProperties {
+			reqProp := fabenvironment.SparkProperty{
+				Key:   &k,
+				Value: v.ValueStringPointer(),
+			}
 
 			sparkPropertiesSlice = append(sparkPropertiesSlice, reqProp)
 		}
@@ -233,16 +234,6 @@ func (to *instancePoolPropertiesModel) set(from fabenvironment.InstancePool) {
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.Name = types.StringPointerValue(from.Name)
 	to.Type = types.StringPointerValue((*string)(from.Type))
-}
-
-type sparkPropertyModel struct {
-	Key   types.String `tfsdk:"key"`
-	Value types.String `tfsdk:"value"`
-}
-
-func (to *sparkPropertyModel) set(from fabenvironment.SparkProperty) {
-	to.Key = types.StringPointerValue(from.Key)
-	to.Value = types.StringPointerValue(from.Value)
 }
 
 // diffSparkProperties merges planned spark properties with current ones,

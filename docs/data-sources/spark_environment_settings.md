@@ -48,8 +48,8 @@ data "fabric_spark_environment_settings" "example" {
 - `executor_memory` (String) Spark executor memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `id` (String) The Spark Environment Settings ID.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
-- `spark_properties` (Attributes List) A list of Spark properties. (see [below for nested schema](#nestedatt--spark_properties))
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.2`, `1.3`, `2.0`.
+- `spark_properties` (Map of String) A map of key/value pairs of Spark properties.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -78,15 +78,3 @@ Read-Only:
 - `id` (String) The Pool ID.
 - `name` (String) The Pool name. `Starter Pool` means using the starting pool.
 - `type` (String) The Pool type. Value must be one of : `Capacity`, `Workspace`.
-
-<a id="nestedatt--spark_properties"></a>
-
-### Nested Schema for `spark_properties`
-
-Read-Only:
-
-- `key` (String) The Spark property key. Spark property key:
-- must start with 'spark.'
-- cannot contain any white spaces
-- dot '.' is allowed but not at the start or end of the property key.
-- `value` (String) The Spark property value.

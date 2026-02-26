@@ -116,15 +116,28 @@ func TestUnit_SparkEnvSettingsResource_Attributes(t *testing.T) {
 					"workspace_id":       testhelp.RandomUUID(),
 					"environment_id":     testhelp.RandomUUID(),
 					"publication_status": "Published",
-					"spark_properties": []map[string]any{
-						{
-							"key":   "spark test",
-							"value": "12",
-						},
+					"spark_properties": map[string]any{
+						`"spark test"`: "12",
 					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
+		},
+		// error - invalid nil value for key
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":       testhelp.RandomUUID(),
+					"environment_id":     testhelp.RandomUUID(),
+					"publication_status": "Published",
+					"spark_properties": map[string]any{
+						`"spark.acls.enable"`: nil,
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Error: Null Map Value`),
 		},
 	}))
 }
@@ -181,11 +194,8 @@ func TestUnit_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 					"environment_id":     environmentID,
 					"publication_status": "Published",
 					"driver_cores":       8,
-					"spark_properties": []map[string]any{
-						{
-							"key":   "spark.acls.enable",
-							"value": "true",
-						},
+					"spark_properties": map[string]any{
+						`"spark.acls.enable"`: "true",
 					},
 				},
 			),
@@ -193,9 +203,8 @@ func TestUnit_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "id", environmentID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.key", "spark.acls.enable"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.value", "true"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "spark_properties.1.key"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.spark.acls.enable", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.%", "1"),
 			),
 		},
 		// Update and Read - remove spark properties
@@ -293,24 +302,18 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 						"environment_id":     testhelp.RefByFQN(environmentResourceFQN, "id"),
 						"publication_status": "Staging",
 						"driver_cores":       8,
-						"spark_properties": []map[string]any{
-							{
-								"key":   "spark.acls.enable",
-								"value": "true",
-							},
-							{
-								"key":   "spark.admin.acls.groups",
-								"value": "test",
-							},
+						"spark_properties": map[string]any{
+							`"spark.acls.enable"`:       "true",
+							`"spark.admin.acls.groups"`: "test",
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.1.value"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.#", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.spark.acls.enable", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.spark.admin.acls.groups", "test"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.%", "2"),
 			),
 		},
 		// Update and Read (test Spark properties sync)
@@ -326,20 +329,16 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 						"environment_id":     testhelp.RefByFQN(environmentResourceFQN, "id"),
 						"publication_status": "Staging",
 						"driver_cores":       8,
-						"spark_properties": []map[string]any{
-							{
-								"key":   "spark.cores.max",
-								"value": "12",
-							},
+						"spark_properties": map[string]any{
+							`"spark.cores.max"`: "12",
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "spark_properties.0.value"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.0.key", "spark.cores.max"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.#", "1"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.spark.cores.max", "12"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "spark_properties.%", "1"),
 			),
 		},
 		// Create and Read (remove Spark properties)
