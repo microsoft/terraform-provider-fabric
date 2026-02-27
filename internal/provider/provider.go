@@ -92,8 +92,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
-	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
