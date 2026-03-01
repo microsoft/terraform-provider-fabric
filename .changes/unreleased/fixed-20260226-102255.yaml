@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_spark_environment_settings` state drift when spark property is removed or omitted from configuration
+time: 2026-02-26T10:22:55.961002337Z
+custom:
+    Issue: "834"
