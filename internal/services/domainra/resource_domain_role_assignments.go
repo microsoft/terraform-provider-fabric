@@ -264,10 +264,10 @@ func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, 
 		return diags
 	}
 
-	if respGet.ParentDomainID != nil {
+	if respGet.ParentDomainID != nil && model.Role.ValueString() == string(DomainRoleAdmins) {
 		diags.AddError(
-			"Subdomains are not supported",
-			"Role Assignment is not supported for subdomains. Please use the root-level domain.",
+			"Admins not supported for subdomains",
+			"Admins Role Assignment is not supported for subdomains. Only adding Contributors to subdomains is currently allowed.",
 		)
 
 		return diags

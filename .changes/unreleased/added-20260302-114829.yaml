@@ -1,0 +1,5 @@
+kind: added
+body: Added support for fabric_domain_role_assignment on subdomains
+time: 2026-03-02T11:48:29.011708227Z
+custom:
+    Issue: "828"
