@@ -1,0 +1,5 @@
+kind: changed
+body: Removed preview for `fabric_domain_role_assignments`
+time: 2026-03-02T10:25:21.295463104Z
+custom:
+  Issue: "801"
