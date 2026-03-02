@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Domain Role Assignments resource allows you to manage a Fabric Domain Role Assignments https://learn.microsoft.com/fabric/governance/domains.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_domain_role_assignments (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Domain Role Assignments resource allows you to manage a Fabric [Domain Role Assignments](https://learn.microsoft.com/fabric/governance/domains).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
