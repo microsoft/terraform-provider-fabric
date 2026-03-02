@@ -259,7 +259,7 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, model resourceDomainRoleAssignmentsModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	respGet, err := r.client.GetDomain(ctx, model.DomainID.ValueString(), false, nil)
+	respGet, err := r.client.GetDomain(ctx, model.DomainID.ValueString(), r.TypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
