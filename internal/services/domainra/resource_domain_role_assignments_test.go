@@ -143,8 +143,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 	domainResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "domain"), "test"),
 		map[string]any{
-			"display_name":       testhelp.RandomName(),
-			"contributors_scope": string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
+			"display_name": testhelp.RandomName(),
 		},
 	)
 

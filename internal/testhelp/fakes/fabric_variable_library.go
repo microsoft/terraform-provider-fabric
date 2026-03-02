@@ -173,14 +173,14 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 
 func NewRandomVariableLibrary() fabvariablelibrary.VariableLibrary {
 	return fabvariablelibrary.VariableLibrary{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties: &fabvariablelibrary.Properties{
-			ActiveValueSetName: to.Ptr(testhelp.RandomName()),
+			ActiveValueSetName: new(testhelp.RandomName()),
 		},
 	}
 }
@@ -195,32 +195,32 @@ func NewRandomVariableLibraryWithWorkspace(workspaceID string) fabvariablelibrar
 func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 	defPart1 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("variables.json"),
-		Payload: to.Ptr(
+		Path:        new("variables.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart2 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("valueSet/valueSet1.json"),
-		Payload: to.Ptr(
+		Path:        new("valueSet/valueSet1.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart3 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("valueSet/valueSet2.json"),
-		Payload: to.Ptr(
+		Path:        new("valueSet/valueSet2.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart4 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("settings.json"),
-		Payload: to.Ptr(
+		Path:        new("settings.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
@@ -233,7 +233,7 @@ func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 	defParts = append(defParts, defPart4)
 
 	return fabvariablelibrary.PublicDefinition{
-		Format: to.Ptr("json"),
+		Format: new("json"),
 		Parts:  defParts,
 	}
 }

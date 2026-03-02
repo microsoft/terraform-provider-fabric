@@ -1,0 +1,5 @@
+kind: added
+body: Added new `fabric_workspace_network_communication_policy` data source and resource
+time: 2026-02-19T10:09:17.867665282Z
+custom:
+    Issue: "815"

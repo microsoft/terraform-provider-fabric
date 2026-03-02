@@ -117,7 +117,7 @@ func (d *dataSourceDomains) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 func (d *dataSourceDomains) list(ctx context.Context, model *dataSourceDomainsModel) diag.Diagnostics {
-	respList, err := d.client.ListDomainsPreview(ctx, true, nil)
+	respList, err := d.client.ListDomains(ctx, ItemTypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}

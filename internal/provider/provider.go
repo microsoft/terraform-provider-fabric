@@ -51,6 +51,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilderflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
@@ -58,6 +59,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
@@ -84,12 +86,15 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
@@ -442,6 +447,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
+		func() resource.Resource { return digitaltwinbuilderflow.NewResourceDigitalTwinBuilderFlow(ctx) },
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
@@ -452,6 +458,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		fabricmap.NewResourceMap,
 		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
@@ -465,6 +472,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		activator.NewResourceActivator,
@@ -479,6 +487,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
 		workspace.NewResourceWorkspace,
+		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
+		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
 		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
@@ -507,6 +517,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlow(ctx) },
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlows(ctx) },
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
@@ -520,6 +532,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		fabricmap.NewDataSourceMap,
+		fabricmap.NewDataSourceMaps,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
@@ -568,6 +582,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
+		tenantsetting.NewDataSourceTenantSetting,
+		tenantsetting.NewDataSourceTenantSettings,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
@@ -576,6 +592,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
+		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,

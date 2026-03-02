@@ -1,0 +1,5 @@
+kind: added
+body: Added new `fabric_workspace_outbound_gateway_rules` data source and resource
+time: 2026-02-19T09:56:27.928134738Z
+custom:
+    Issue: "816"
