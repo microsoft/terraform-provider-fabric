@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_tag` Resource
+time: 2025-10-12T22:54:16.492640044Z
+custom:
+    Issue: "679"
