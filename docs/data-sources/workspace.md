@@ -47,6 +47,7 @@ data "fabric_workspace" "example_by_name" {
 - `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `capacity_region` (String) The region of the capacity associated with this workspace. Value must be one of : .
 - `description` (String) The Workspace description.
+- `domain_id` (String) The ID of the Domain to assign to the Workspace.
 - `identity` (Attributes) A workspace identity (see [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information). (see [below for nested schema](#nestedatt--identity))
 - `onelake_endpoints` (Attributes) The OneLake API endpoints associated with this workspace. (see [below for nested schema](#nestedatt--onelake_endpoints))
 - `type` (String) The Workspace type.
