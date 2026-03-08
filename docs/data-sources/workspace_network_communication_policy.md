@@ -38,15 +38,14 @@ data "fabric_workspace_network_communication_policy" "example" {
 - `outbound` (Attributes) The policy for all outbound communications from a workspace. (see [below for nested schema](#nestedatt--outbound))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--inbound"></a>
 
+<a id="nestedatt--inbound"></a>
 ### Nested Schema for `inbound`
 
 Read-Only:
@@ -54,15 +53,15 @@ Read-Only:
 - `public_access_rules` (Attributes) The policy for inbound communications to a workspace from public networks. (see [below for nested schema](#nestedatt--inbound--public_access_rules))
 
 <a id="nestedatt--inbound--public_access_rules"></a>
-
 ### Nested Schema for `inbound.public_access_rules`
 
 Read-Only:
 
 - `default_action` (String) Default policy for workspace access from public networks. Value must be one of : `Allow`, `Deny`.
 
-<a id="nestedatt--outbound"></a>
 
+
+<a id="nestedatt--outbound"></a>
 ### Nested Schema for `outbound`
 
 Read-Only:
@@ -70,7 +69,6 @@ Read-Only:
 - `public_access_rules` (Attributes) The policy for outbound communications to public networks from a workspace. (see [below for nested schema](#nestedatt--outbound--public_access_rules))
 
 <a id="nestedatt--outbound--public_access_rules"></a>
-
 ### Nested Schema for `outbound.public_access_rules`
 
 Read-Only:

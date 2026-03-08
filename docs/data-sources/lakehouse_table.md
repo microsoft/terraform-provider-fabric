@@ -46,7 +46,6 @@ data "fabric_lakehouse_table" "example" {
 - `type` (String) The Type of the table. Value must be one of : `External`, `Managed`.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

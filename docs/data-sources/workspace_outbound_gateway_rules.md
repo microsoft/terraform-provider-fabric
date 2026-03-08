@@ -38,15 +38,14 @@ data "fabric_workspace_outbound_gateway_rules" "example" {
 - `default_action` (String) Defines the default behavior for all gateways that are not explicitly listed in the allowed list array. If set to "Allow", all unspecified gateways are permitted by default. If set to "Deny", all unspecified gateways are blocked. Value must be one of : `Allow`, `Deny`.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--allowed_gateways"></a>
 
+<a id="nestedatt--allowed_gateways"></a>
 ### Nested Schema for `allowed_gateways`
 
 Read-Only:

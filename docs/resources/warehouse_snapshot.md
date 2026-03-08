@@ -37,7 +37,6 @@ resource "fabric_warehouse_snapshot" "example" {
 - `configuration` (Attributes) The Warehouse Snapshot creation configuration.
 
 Any changes to this configuration will result in recreation of the Warehouse Snapshot. (see [below for nested schema](#nestedatt--configuration))
-
 - `display_name` (String) The Warehouse Snapshot display name.
 - `workspace_id` (String) The Workspace ID.
 
@@ -53,7 +52,6 @@ Any changes to this configuration will result in recreation of the Warehouse Sna
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--configuration"></a>
-
 ### Nested Schema for `configuration`
 
 Required:
@@ -64,8 +62,8 @@ Optional:
 
 - `snapshot_date_time` (String) The date and time used for the Warehouse snapshot, if not provided the current date and time will be taken. If given it should be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -75,8 +73,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--properties"></a>
 
+<a id="nestedatt--properties"></a>
 ### Nested Schema for `properties`
 
 Read-Only:

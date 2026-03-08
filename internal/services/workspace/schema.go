@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -226,6 +227,19 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 			},
+			"skip_capacity_state_validation": superschema.BoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Whether to skip the capacity state validation. When set to `true`, the provider will not call the [List Capacities API](https://learn.microsoft.com/rest/api/fabric/core/capacities/list-capacities) to validate that the Fabric Capacity is active. This is useful when the caller does not have the necessary permissions to list capacities. `true` - Skip the capacity state validation, `false` - Do not skip the capacity state validation.",
+				},
+				Resource: &schemaR.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
+				},
+				DataSource: &schemaD.BoolAttribute{
+					Optional: true,
+				},
+			},
 			"timeouts": superschema.TimeoutAttribute{
 				Resource: &superschema.ResourceTimeoutAttribute{
 					Create: true,
@@ -243,6 +257,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		delete(r.Attributes, "capacity_region")
 		delete(r.Attributes, "onelake_endpoints")
 		delete(r.Attributes, "identity")
+		delete(r.Attributes, "skip_capacity_state_validation")
 	}
 
 	return r

@@ -45,7 +45,6 @@ resource "fabric_workspace_network_communication_policy" "example" {
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--inbound"></a>
-
 ### Nested Schema for `inbound`
 
 Optional:
@@ -53,15 +52,15 @@ Optional:
 - `public_access_rules` (Attributes) The policy for inbound communications to a workspace from public networks. (see [below for nested schema](#nestedatt--inbound--public_access_rules))
 
 <a id="nestedatt--inbound--public_access_rules"></a>
-
 ### Nested Schema for `inbound.public_access_rules`
 
 Optional:
 
 - `default_action` (String) Default policy for workspace access from public networks. Value defaults to `Allow`. Value must be one of : `Allow`, `Deny`.
 
-<a id="nestedatt--outbound"></a>
 
+
+<a id="nestedatt--outbound"></a>
 ### Nested Schema for `outbound`
 
 Optional:
@@ -69,15 +68,15 @@ Optional:
 - `public_access_rules` (Attributes) The policy for outbound communications to public networks from a workspace. (see [below for nested schema](#nestedatt--outbound--public_access_rules))
 
 <a id="nestedatt--outbound--public_access_rules"></a>
-
 ### Nested Schema for `outbound.public_access_rules`
 
 Optional:
 
 - `default_action` (String) Default policy for workspace access from public networks. Value defaults to `Allow`. Value must be one of : `Allow`, `Deny`.
 
-<a id="nestedatt--timeouts"></a>
 
+
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
