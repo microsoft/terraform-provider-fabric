@@ -50,7 +50,6 @@ resource "fabric_domain_workspace_assignments" "example" {
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

@@ -116,6 +116,7 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	defer cancel()
 
 	state.Timeouts = plan.Timeouts
+	state.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	var reqCreate requestCreateWorkspace
 
@@ -243,6 +244,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	intermediary.Timeouts = plan.Timeouts
+	intermediary.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -489,6 +491,10 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			diags = model.set(ctx, respGet.WorkspaceInfo)
 			if diags.HasError() {
 				return diags
+			}
+
+			if model.SkipCapacityStateValidation.ValueBool() {
+				return nil
 			}
 
 			return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())

@@ -56,7 +56,6 @@ resource "fabric_deployment_pipeline" "example" {
 - `id` (String) The Deployment Pipeline ID.
 
 <a id="nestedatt--stages"></a>
-
 ### Nested Schema for `stages`
 
 Required:
@@ -73,8 +72,8 @@ Read-Only:
 
 - `id` (String) The ID of the stage.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

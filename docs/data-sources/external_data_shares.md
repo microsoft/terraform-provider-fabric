@@ -39,15 +39,14 @@ data "fabric_external_data_shares" "example" {
 - `values` (Attributes Set) The set of External Data Shares. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--values"></a>
 
+<a id="nestedatt--values"></a>
 ### Nested Schema for `values`
 
 Required:
@@ -67,7 +66,6 @@ Read-Only:
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 
 <a id="nestedatt--values--principal_model"></a>
-
 ### Nested Schema for `values.principal_model`
 
 Read-Only:
@@ -75,8 +73,8 @@ Read-Only:
 - `id` (String) The ID of the Data access role.
 - `type` (String) The type of the creator principal.
 
-<a id="nestedatt--values--recipient"></a>
 
+<a id="nestedatt--values--recipient"></a>
 ### Nested Schema for `values.recipient`
 
 Read-Only:

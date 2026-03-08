@@ -40,7 +40,6 @@ data "fabric_domain_workspace_assignments" "example" {
 - `workspace_ids` (Set of String) The set of Workspace IDs.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

@@ -41,15 +41,14 @@ resource "fabric_workspace_outbound_gateway_rules" "example" {
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--allowed_gateways"></a>
-
 ### Nested Schema for `allowed_gateways`
 
 Required:
 
 - `id` (String) Gateway Id to be allowed.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

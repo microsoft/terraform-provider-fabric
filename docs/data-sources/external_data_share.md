@@ -47,15 +47,14 @@ data "fabric_external_data_share" "example" {
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--principal_model"></a>
 
+<a id="nestedatt--principal_model"></a>
 ### Nested Schema for `principal_model`
 
 Read-Only:
@@ -63,8 +62,8 @@ Read-Only:
 - `id` (String) The ID of the Data access role.
 - `type` (String) The type of the creator principal.
 
-<a id="nestedatt--recipient"></a>
 
+<a id="nestedatt--recipient"></a>
 ### Nested Schema for `recipient`
 
 Read-Only:
