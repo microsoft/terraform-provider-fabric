@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_workspace_outbound_cloud_connection_rules` resource
+time: 2026-03-09T10:50:49.754811914Z
+custom:
+    Issue: "844"
