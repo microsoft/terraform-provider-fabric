@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
           cache: true
@@ -86,7 +86,7 @@ jobs:
           PROVIDERNAME: microsoft/fabric
 
       - name: 🚧 Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_wrapper: false
 
@@ -144,7 +144,7 @@ jobs:
   #             - 'go.sum'
 
   #     - name: 🚧 Setup Go
-  #       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+  #       uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
   #       with:
   #         go-version-file: go.mod
   #         cache: true
@@ -160,7 +160,7 @@ jobs:
   #         PROVIDERNAME: microsoft/fabric
 
   #     - name: 🚧 Setup Terraform
-  #       uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+  #       uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
   #       with:
   #         terraform_wrapper: false
 
@@ -196,7 +196,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
           cache: true
@@ -229,7 +229,7 @@ jobs:
           problem-matchers: true
 
       - name: 🚧 Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_wrapper: false
 
@@ -250,13 +250,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
@@ -271,7 +271,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
           cache: true
@@ -340,14 +340,14 @@ jobs:
           fetch-depth: 0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Terraform
         if: matrix.cli == 'terraform'
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_version: ${{ matrix.version }}
           terraform_wrapper: false
@@ -425,7 +425,7 @@ jobs:
 
       - name: 📤 Upload test results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
           path: testresults.json
@@ -434,7 +434,7 @@ jobs:
 
       - name: 📤 Upload coverage results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -446,7 +446,7 @@ jobs:
 
       - name: 📢 Publish test results
         if: always()
-        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        uses: dorny/test-reporter@3d76b34a4535afbd0600d347b09a6ee5deb3ed7f # v2.6.0
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
           reporter: golang-json
@@ -468,7 +468,7 @@ jobs:
 
       - name: 📤 Upload Coverage summary
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
           path: |
@@ -491,13 +491,13 @@ jobs:
       id-token: write
     steps:
       - name: 📥 Download test results
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           pattern: terraform-1_13-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           pattern: terraform-1_13-test-coverage*
           merge-multiple: true

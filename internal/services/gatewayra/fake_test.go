@@ -27,9 +27,9 @@ func fakeGatewayRoleAssignment(
 
 func NewRandomGatewayRoleAssignment() fabcore.GatewayRoleAssignment {
 	return fabcore.GatewayRoleAssignment{
-		ID: azto.Ptr(testhelp.RandomUUID()),
+		ID: new(testhelp.RandomUUID()),
 		Principal: &fabcore.Principal{
-			ID:   azto.Ptr(testhelp.RandomUUID()),
+			ID:   new(testhelp.RandomUUID()),
 			Type: azto.Ptr(fabcore.PrincipalTypeUser),
 		},
 		Role: azto.Ptr(fabcore.GatewayRoleAdmin),
@@ -55,26 +55,26 @@ func NewRandomGatewayRoleAssignments() fabcore.GatewayRoleAssignments {
 	return fabcore.GatewayRoleAssignments{
 		Value: []fabcore.GatewayRoleAssignment{
 			{
-				ID:   azto.Ptr(principal0ID),
+				ID:   new(principal0ID),
 				Role: azto.Ptr(fabcore.GatewayRoleAdmin),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal0ID),
+					ID:   new(principal0ID),
 					Type: azto.Ptr(fabcore.PrincipalTypeGroup),
 				},
 			},
 			{
-				ID:   azto.Ptr(principal1ID),
+				ID:   new(principal1ID),
 				Role: azto.Ptr(fabcore.GatewayRoleConnectionCreator),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal1ID),
+					ID:   new(principal1ID),
 					Type: azto.Ptr(fabcore.PrincipalTypeUser),
 				},
 			},
 			{
-				ID:   azto.Ptr(principal2ID),
+				ID:   new(principal2ID),
 				Role: azto.Ptr(fabcore.GatewayRoleConnectionCreatorWithResharing),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal2ID),
+					ID:   new(principal2ID),
 					Type: azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
 				},
 			},

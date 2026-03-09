@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabadmin "github.com/microsoft/fabric-sdk-go/fabric/admin"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
@@ -144,22 +143,22 @@ func configureDomain(server *fakeServer) fabadmin.Domain {
 
 func NewRandomDomain() fabadmin.Domain {
 	return fabadmin.Domain{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
 	}
 }
 
 func NewRandomDomainWithDefaultLabelID() fabadmin.Domain {
 	entity := NewRandomDomain()
-	entity.DefaultLabelID = to.Ptr(testhelp.RandomUUID())
+	entity.DefaultLabelID = new(testhelp.RandomUUID())
 
 	return entity
 }
 
 func NewRandomDomainWithParentDomain(parentDomainID string) fabadmin.Domain {
 	entity := NewRandomDomain()
-	entity.ParentDomainID = to.Ptr(parentDomainID)
+	entity.ParentDomainID = new(parentDomainID)
 
 	return entity
 }

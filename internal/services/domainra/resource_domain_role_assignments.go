@@ -259,15 +259,15 @@ func (r *resourceDomainRoleAssignments) Delete(ctx context.Context, req resource
 func (r *resourceDomainRoleAssignments) checkDomainSupport(ctx context.Context, model resourceDomainRoleAssignmentsModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	respGet, err := r.client.GetDomainPreview(ctx, model.DomainID.ValueString(), true, nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil); diags.HasError() {
+	respGet, err := r.client.GetDomain(ctx, model.DomainID.ValueString(), r.TypeInfo.IsPreview, nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	if respGet.ParentDomainID != nil {
+	if respGet.ParentDomainID != nil && model.Role.ValueString() == string(DomainRoleAdmins) {
 		diags.AddError(
-			"Subdomains are not supported",
-			"Role Assignment is not supported for subdomains. Please use the root-level domain.",
+			"Admins not supported for subdomains",
+			"Admins Role Assignment is not supported for subdomains. Only adding Contributors to subdomains is currently allowed.",
 		)
 
 		return diags

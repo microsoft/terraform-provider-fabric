@@ -11,7 +11,7 @@ archives:
   - files:
       - src: LICENSE
         dst: LICENSE.txt
-    formats: [ 'zip' ]
+    formats: ["zip"]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 builds:
@@ -35,6 +35,8 @@ builds:
     ignore:
       - goos: darwin
         goarch: "386"
+      - goos: windows
+        goarch: arm
     binary: "{{ .ProjectName }}_v{{ .Version }}"
 
 checksum:
