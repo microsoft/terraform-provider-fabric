@@ -240,7 +240,7 @@ func (to *requestGitUpdateFrom) set(ctx context.Context, from resourceWorkspaceG
 	}
 
 	to.ConflictResolution = &fabcore.WorkspaceConflictResolution{
-		ConflictResolutionPolicy: azto.Ptr(policy),
+		ConflictResolutionPolicy: new(policy),
 		ConflictResolutionType:   azto.Ptr(fabcore.ConflictResolutionTypeWorkspace),
 	}
 

@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -216,8 +215,8 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 
 func NewRandomFolder() fabcore.Folder {
 	return fabcore.Folder{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
 		// no parent folder id, only for subfolders
 	}
 }

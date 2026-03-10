@@ -1,0 +1,61 @@
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package workspaceogr_test
+
+import (
+	"context"
+	"net/http"
+
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
+	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+)
+
+func fakeSetOutboundGatewayRules(
+	entity *fabcore.WorkspaceOutboundGateways,
+) func(ctx context.Context, workspaceID string, workspaceOutboundGateways fabcore.WorkspaceOutboundGateways, options *fabcore.WorkspacesClientSetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _ string, workspaceOutboundGateways fabcore.WorkspaceOutboundGateways, _ *fabcore.WorkspacesClientSetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
+		if workspaceOutboundGateways.DefaultAction != nil {
+			entity.DefaultAction = workspaceOutboundGateways.DefaultAction
+		} else {
+			entity.DefaultAction = azto.Ptr(fabcore.GatewayAccessActionTypeAllow)
+		}
+
+		if workspaceOutboundGateways.AllowedGateways != nil {
+			entity.AllowedGateways = workspaceOutboundGateways.AllowedGateways
+		} else {
+			entity.AllowedGateways = []fabcore.GatewayAccessRuleMetadata{}
+		}
+
+		resp = azfake.Responder[fabcore.WorkspacesClientSetOutboundGatewayRulesResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientSetOutboundGatewayRulesResponse{
+			ETag: new("fake-etag"),
+		}, nil)
+
+		return resp, errResp
+	}
+}
+
+func fakeGetOutboundGatewayRules(
+	entity *fabcore.WorkspaceOutboundGateways,
+) func(ctx context.Context, workspaceID string, options *fabcore.WorkspacesClientGetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, _ string, _ *fabcore.WorkspacesClientGetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse]{}
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetOutboundGatewayRulesResponse{
+			WorkspaceOutboundGateways: *entity,
+			ETag:                      new("fake-etag"),
+		}, nil)
+
+		return resp, errResp
+	}
+}
+
+func NewRandomWorkspaceOutboundGateways() fabcore.WorkspaceOutboundGateways {
+	return fabcore.WorkspaceOutboundGateways{
+		DefaultAction:   new(testhelp.RandomElement(fabcore.PossibleGatewayAccessActionTypeValues())),
+		AllowedGateways: []fabcore.GatewayAccessRuleMetadata{},
+	}
+}

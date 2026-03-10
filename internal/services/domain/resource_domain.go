@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -212,7 +211,7 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 	// - API requires empty GUID to clear the label
 	// - API returns null when cleared
 	if plan.DefaultLabelID.IsNull() && !state.DefaultLabelID.IsNull() {
-		reqUpdate.DefaultLabelID = to.Ptr("00000000-0000-0000-0000-000000000000")
+		reqUpdate.DefaultLabelID = new("00000000-0000-0000-0000-000000000000")
 	}
 
 	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)

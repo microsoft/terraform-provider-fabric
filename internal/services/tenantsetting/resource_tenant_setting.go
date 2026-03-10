@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -224,7 +223,7 @@ func (r *resourceTenantSettings) Delete(ctx context.Context, req resource.Delete
 		defer cancel()
 
 		var reqUpdate requestUpdateTenantSetting
-		reqUpdate.Enabled = to.Ptr(false)
+		reqUpdate.Enabled = new(false)
 
 		respUpdate, err := r.client.UpdateTenantSetting(ctx, state.SettingName.ValueString(), reqUpdate.UpdateTenantSettingRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {

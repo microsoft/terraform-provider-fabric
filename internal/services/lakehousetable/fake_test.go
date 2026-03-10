@@ -32,22 +32,22 @@ func NewRandomLakehouseTables(lakehouseID string) fablakehouse.Tables {
 	return fablakehouse.Tables{
 		Data: []fablakehouse.Table{
 			{
-				Name:     azto.Ptr(table0Name),
+				Name:     new(table0Name),
 				Type:     azto.Ptr(fablakehouse.TableTypeExternal),
-				Format:   azto.Ptr("Delta"),
-				Location: azto.Ptr("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table0Name),
+				Format:   new("Delta"),
+				Location: new("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table0Name),
 			},
 			{
-				Name:     azto.Ptr(table1Name),
+				Name:     new(table1Name),
 				Type:     azto.Ptr(fablakehouse.TableTypeManaged),
-				Format:   azto.Ptr("Delta"),
-				Location: azto.Ptr("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table1Name),
+				Format:   new("Delta"),
+				Location: new("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table1Name),
 			},
 			{
-				Name:     azto.Ptr(table2Name),
+				Name:     new(table2Name),
 				Type:     azto.Ptr(fablakehouse.TableTypeManaged),
-				Format:   azto.Ptr("Delta"),
-				Location: azto.Ptr("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table2Name),
+				Format:   new("Delta"),
+				Location: new("abfss://" + testhelp.RandomUUID() + "@onelake.dfs.fabric.microsoft.com/" + lakehouseID + "/Tables/" + table2Name),
 			},
 		},
 	}
