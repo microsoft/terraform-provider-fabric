@@ -76,13 +76,15 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Resource: &schemaR.SingleNestedAttribute{
 					Optional: true,
 					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
 						objectplanmodifier.RequiresReplace(),
 					},
 				},
 				Attributes: map[string]superschema.Attribute{
-					"domain_id": superschema.StringAttribute{
+					"domain_id": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "Domain object ID.",
+							CustomType:          customtypes.UUIDType{},
 							Computed:            true,
 						},
 						Resource: &schemaR.StringAttribute{
