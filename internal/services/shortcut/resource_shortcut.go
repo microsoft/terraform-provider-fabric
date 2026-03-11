@@ -118,7 +118,7 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 
 	var reqCreateOptions requestCreateShortcutOptions
 
-	reqCreateOptions.set(ctx, plan)
+	reqCreateOptions.set(plan)
 
 	respCreate, err := r.client.CreateShortcut(
 		ctx,
@@ -131,13 +131,10 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Preserve the configured name from the plan (the user-specified name)
-	// ActualName is already set by state.set() to the API-returned name
-	state.Name = plan.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -153,12 +150,8 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, "UPDATE", map[string]any{"action": "start"})
 
-	var plan, state, priorState resourceShortcutModel
+	var plan, state resourceShortcutModel
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	if resp.Diagnostics.Append(req.State.Get(ctx, &priorState)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -178,18 +171,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	// Use the actual name from prior state for the update request.
-	// This is important when shortcut_conflict_policy was GenerateUniqueName during creation.
-	actualName := priorState.ActualName.ValueString()
-	if actualName == "" {
-		actualName = plan.Name.ValueString()
-	}
-
-	reqCreate.Name = &actualName
-
-	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyOverwriteOnly
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
-		ShortcutConflictPolicy: &overwriteOnlyPolicy,
+		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
 	}
 
 	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
@@ -197,12 +180,10 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Preserve the configured name from the plan
-	state.Name = plan.Name
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -228,9 +209,6 @@ func (r *resourceShortcut) Read(ctx context.Context, req resource.ReadRequest, r
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Preserve the configured name before calling get()
-	configuredName := state.Name
-
 	diags = r.get(ctx, &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
@@ -243,9 +221,6 @@ func (r *resourceShortcut) Read(ctx context.Context, req resource.ReadRequest, r
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Restore the configured name (get() sets Name from API, but we want to preserve the configured value)
-	state.Name = configuredName
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -277,14 +252,7 @@ func (r *resourceShortcut) Delete(ctx context.Context, req resource.DeleteReques
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Use ActualName for the API call since that's the name the shortcut was created with.
-	// This is important when shortcut_conflict_policy is GenerateUniqueName.
-	nameToUse := state.ActualName.ValueString()
-	if nameToUse == "" {
-		nameToUse = state.Name.ValueString()
-	}
-
-	_, err := r.client.DeleteShortcut(ctx, state.WorkspaceID.ValueString(), state.ItemID.ValueString(), state.Path.ValueString(), nameToUse, nil)
+	_, err := r.client.DeleteShortcut(ctx, state.WorkspaceID.ValueString(), state.ItemID.ValueString(), state.Path.ValueString(), state.Name.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -336,7 +304,6 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 			ItemID:      uuitemID,
 			WorkspaceID: uuidWorkspaceID,
 			Name:        types.StringValue(name),
-			ActualName:  types.StringValue(name), // During import, the provided name is the actual name
 			Path:        types.StringValue(shortcutPath),
 		},
 		Timeouts: timeout,
@@ -358,16 +325,7 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 }
 
 func (r *resourceShortcut) get(ctx context.Context, model *resourceShortcutModel) diag.Diagnostics {
-	// Use ActualName for the API call since that's the name the shortcut was created with.
-	// This is important when shortcut_conflict_policy is GenerateUniqueName, as the API
-	// may have generated a different name than what was originally configured.
-	nameToUse := model.ActualName.ValueString()
-	if nameToUse == "" {
-		// Fallback to Name if ActualName is not set (e.g., during import)
-		nameToUse = model.Name.ValueString()
-	}
-
-	respGet, err := r.client.GetShortcut(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Path.ValueString(), nameToUse, nil)
+	respGet, err := r.client.GetShortcut(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Path.ValueString(), model.Name.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}

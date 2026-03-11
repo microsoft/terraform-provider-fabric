@@ -92,7 +92,6 @@ func TestUnit_ShortcutDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", *entity.Name),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "actual_name", *entity.Name),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", *entity.Path),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),
@@ -144,7 +143,6 @@ func TestAcc_ShortcutDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", shortcutName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "actual_name", shortcutName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "path", shortcutPath),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.path"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "target.onelake.workspace_id"),

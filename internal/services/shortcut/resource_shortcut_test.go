@@ -433,7 +433,6 @@ func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 
 func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 	existingTableName := "bigintpropertyvalue"
-	uniqueName := "bigintpropertyvalue_1"
 	entityCreateDisplayName := testhelp.RandomName()
 	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
 	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
@@ -449,7 +448,7 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 					"item_id":                  lakehouseID,
 					"workspace_id":             workspaceID,
 					"name":                     existingTableName,
-					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyGenerateUniqueName),
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyOverwriteOnly),
 					"path":                     "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
@@ -462,7 +461,6 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", existingTableName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "actual_name", uniqueName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
@@ -478,7 +476,7 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 					"item_id":                  lakehouseID,
 					"workspace_id":             workspaceID,
 					"name":                     entityCreateDisplayName,
-					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyGenerateUniqueName),
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyCreateOrOverwrite),
 					"path":                     "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
@@ -491,7 +489,6 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "actual_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
@@ -519,7 +516,6 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "actual_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityUpdatedTargetPath),

@@ -5,6 +5,7 @@ package shortcut
 
 import (
 	"regexp"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
@@ -86,7 +87,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
 					Optional:            true,
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleShortcutConflictPolicyValues(), true)...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(slices.DeleteFunc(fabcore.PossibleShortcutConflictPolicyValues(), func(v fabcore.ShortcutConflictPolicy) bool {
+							return v == fabcore.ShortcutConflictPolicyGenerateUniqueName
+						}), true)...),
 					},
 				},
 			},
@@ -114,7 +117,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The requested name of the shortcut. This is the name specified in the configuration. When `shortcut_conflict_policy` is set to `GenerateUniqueName` and a conflict occurs, the actual name may differ - see the `actual_name` attribute for the name that was actually assigned by the API.",
+					MarkdownDescription: "The requested name of the shortcut. This is the name specified in the configuration.",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -131,20 +134,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				DataSource: &schemaD.StringAttribute{
 					Required: !isList,
 					Computed: isList,
-				},
-			},
-			"actual_name": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The actual name of the shortcut as returned by the API. This may differ from `name` when `shortcut_conflict_policy` is set to `GenerateUniqueName` and a naming conflict occurred during creation.",
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
 				},
 			},
 			"target": superschema.SuperSingleNestedAttributeOf[targetModel]{
