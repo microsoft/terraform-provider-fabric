@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkenvsettings
@@ -8,12 +8,9 @@ import (
 )
 
 var (
-	SparkRuntimeVersionValues               = []string{"1.1", "1.2", "1.3"}                  //nolint:gochecknoglobals
-	SparkEnvironmentPublicationStatusValues = []string{"Published", "Staging"}               //nolint:gochecknoglobals
-	SparkEnvironmentDriverCoresValues       = []int32{4, 8, 16, 32, 64}                      //nolint:gochecknoglobals
-	SparkEnvironmentDriverMemoryValues      = []string{"28g", "56g", "112g", "224g", "400g"} //nolint:gochecknoglobals
-	SparkEnvironmentExecutorCoresValues     = []int32{4, 8, 16, 32, 64}                      //nolint:gochecknoglobals
-	SparkEnvironmentExecutorMemoryValues    = []string{"28g", "56g", "112g", "224g", "400g"} //nolint:gochecknoglobals
+	SparkEnvironmentPublicationStatusValues = []string{"Published", "Staging"} //nolint:gochecknoglobals
+	SparkEnvironmentDriverCoresValues       = []int32{4, 8, 16, 32, 64}        //nolint:gochecknoglobals
+	SparkEnvironmentExecutorCoresValues     = []int32{4, 8, 16, 32, 64}        //nolint:gochecknoglobals
 )
 
 const SparkEnvironmentPublicationStatusPublished = "Published"

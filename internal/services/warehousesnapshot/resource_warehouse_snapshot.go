@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package warehousesnapshot
@@ -7,7 +7,6 @@ import (
 	"context"
 	"time"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/microsoft/fabric-sdk-go/fabric"
@@ -28,7 +27,7 @@ func NewResourceWarehouseSnapshot() resource.Resource {
 					return nil
 				}
 
-				return azto.Ptr(t)
+				return new(t)
 			}(),
 		}
 

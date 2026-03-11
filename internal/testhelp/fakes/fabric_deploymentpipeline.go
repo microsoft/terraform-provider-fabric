@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -6,7 +6,6 @@ package fakes
 import (
 	"net/http"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -23,7 +22,7 @@ func (o *operationsDeploymentPipeline) Create(data fabcore.CreateDeploymentPipel
 	entity.Stages = make([]fabcore.DeploymentPipelineStage, len(data.Stages))
 
 	for i := range data.Stages {
-		entity.Stages[i].ID = to.Ptr(testhelp.RandomUUID())
+		entity.Stages[i].ID = new(testhelp.RandomUUID())
 		entity.Stages[i].DisplayName = data.Stages[i].DisplayName
 		entity.Stages[i].Description = data.Stages[i].Description
 		entity.Stages[i].IsPublic = data.Stages[i].IsPublic
@@ -122,9 +121,9 @@ func configureDeploymentPipeline(server *fakeServer) fabcore.DeploymentPipelineE
 
 func NewRandomDeploymentPipeline() fabcore.DeploymentPipelineExtendedInfo {
 	return fabcore.DeploymentPipelineExtendedInfo{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
 	}
 }
 
@@ -132,16 +131,16 @@ func NewRandomDeploymentPipelineWithStages() fabcore.DeploymentPipelineExtendedI
 	entity := NewRandomDeploymentPipeline()
 	entity.Stages = []fabcore.DeploymentPipelineStage{
 		{
-			ID:          to.Ptr(testhelp.RandomUUID()),
-			DisplayName: to.Ptr(testhelp.RandomName()),
-			Description: to.Ptr(testhelp.RandomName()),
-			IsPublic:    to.Ptr(testhelp.RandomBool()),
+			ID:          new(testhelp.RandomUUID()),
+			DisplayName: new(testhelp.RandomName()),
+			Description: new(testhelp.RandomName()),
+			IsPublic:    new(testhelp.RandomBool()),
 		},
 		{
-			ID:          to.Ptr(testhelp.RandomUUID()),
-			DisplayName: to.Ptr(testhelp.RandomName()),
-			Description: to.Ptr(testhelp.RandomName()),
-			IsPublic:    to.Ptr(testhelp.RandomBool()),
+			ID:          new(testhelp.RandomUUID()),
+			DisplayName: new(testhelp.RandomName()),
+			Description: new(testhelp.RandomName()),
+			IsPublic:    new(testhelp.RandomBool()),
 		},
 	}
 

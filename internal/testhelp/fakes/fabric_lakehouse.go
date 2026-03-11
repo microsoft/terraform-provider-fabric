@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -27,6 +27,25 @@ func (o *operationsLakehouse) ConvertItemToEntity(item fabcore.Item) fablakehous
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
 		Properties:  NewRandomLakehouse().Properties,
 	}
+}
+
+// CreateDefinition implements concreteDefinitionOperations.
+func (o *operationsLakehouse) CreateDefinition(data fablakehouse.CreateLakehouseRequest) *fablakehouse.Definition {
+	return data.Definition
+}
+
+// TransformDefinition implements concreteDefinitionOperations.
+func (o *operationsLakehouse) TransformDefinition(entity *fablakehouse.Definition) fablakehouse.ItemsClientGetLakehouseDefinitionResponse {
+	return fablakehouse.ItemsClientGetLakehouseDefinitionResponse{
+		DefinitionResponse: fablakehouse.DefinitionResponse{
+			Definition: entity,
+		},
+	}
+}
+
+// UpdateDefinition implements concreteDefinitionOperations.
+func (o *operationsLakehouse) UpdateDefinition(_ *fablakehouse.Definition, data fablakehouse.UpdateLakehouseDefinitionRequest) *fablakehouse.Definition {
+	return data.Definition
 }
 
 // CreateWithParentID implements concreteOperations.
@@ -117,8 +136,17 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 			fablakehouse.CreateLakehouseRequest,
 			fablakehouse.UpdateLakehouseRequest]
 	}
+	type concreteDefinitionOperations interface {
+		definitionOperations[
+			fablakehouse.Definition,
+			fablakehouse.CreateLakehouseRequest,
+			fablakehouse.UpdateLakehouseDefinitionRequest,
+			fablakehouse.ItemsClientGetLakehouseDefinitionResponse,
+			fablakehouse.ItemsClientUpdateLakehouseDefinitionResponse]
+	}
 
 	var entityOperations concreteEntityOperations = &operationsLakehouse{}
+	var definitionOperations concreteDefinitionOperations = &operationsLakehouse{}
 
 	var converter itemConverter[fablakehouse.Lakehouse] = &operationsLakehouse{}
 
@@ -132,26 +160,33 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.NewListLakehousesPager,
 		&server.ServerFactory.Lakehouse.ItemsServer.DeleteLakehouse)
+	configureDefinitions(
+		handler,
+		entityOperations,
+		definitionOperations,
+		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
+		&server.ServerFactory.Lakehouse.ItemsServer.BeginGetLakehouseDefinition,
+		&server.ServerFactory.Lakehouse.ItemsServer.BeginUpdateLakehouseDefinition)
 
 	return fablakehouse.Lakehouse{}
 }
 
 func NewRandomLakehouse() fablakehouse.Lakehouse {
 	return fablakehouse.Lakehouse{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Properties: &fablakehouse.Properties{
-			OneLakeFilesPath:  to.Ptr(testhelp.RandomName()),
-			OneLakeTablesPath: to.Ptr(testhelp.RandomName()),
-			DefaultSchema:     to.Ptr("dbo"),
+			OneLakeFilesPath:  new(testhelp.RandomName()),
+			OneLakeTablesPath: new(testhelp.RandomName()),
+			DefaultSchema:     new("dbo"),
 			SQLEndpointProperties: &fablakehouse.SQLEndpointProperties{
-				ID:                 to.Ptr(testhelp.RandomUUID()),
+				ID:                 new(testhelp.RandomUUID()),
 				ProvisioningStatus: to.Ptr(fablakehouse.SQLEndpointProvisioningStatusSuccess),
-				ConnectionString:   to.Ptr(testhelp.RandomURI()),
+				ConnectionString:   new(testhelp.RandomURI()),
 			},
 		},
 	}
@@ -162,4 +197,50 @@ func NewRandomLakehouseWithWorkspace(workspaceID string) fablakehouse.Lakehouse 
 	result.WorkspaceID = &workspaceID
 
 	return result
+}
+
+func NewRandomLakehouseDefinition() fablakehouse.Definition {
+	defPart1 := fablakehouse.DefinitionPart{
+		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
+		Path:        new("lakehouse.metadata.json"),
+		Payload: new(
+			"eyJkZWZhdWx0U2NoZW1hIjoiZGJvIn0==",
+		),
+	}
+
+	defPart2 := fablakehouse.DefinitionPart{
+		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
+		Path:        new("shortcuts.metadata.json"),
+		Payload: new(
+			"WwogIHsKICAgICJuYW1lIjogIk55Y1RheGkiLAogICAgInBhdGgiOiAiL1RhYmxlcyIsCiAgICAidGFyZ2V0IjogewogICAgICAi",
+		),
+	}
+
+	defPart3 := fablakehouse.DefinitionPart{
+		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
+		Path:        new("data-access-roles.json"),
+		Payload: new(
+			"Ww0KICAgICAgICAgICAgICB7DQogICAgICAgICAgICAgICAgIm5hbWUiOiAiZGltZW5zaW9ucnVsZXJlbmFtZSIsDQogICAgICA==",
+		),
+	}
+
+	defPart4 := fablakehouse.DefinitionPart{
+		PayloadType: to.Ptr(fablakehouse.PayloadTypeInlineBase64),
+		Path:        new("alm.settings.json"),
+		Payload: new(
+			"ew0KICAgICAgICAgICJ2ZXJzaW9uIjogIjEuMC4xIiwNCiAgICAgICAgICAib2JqZWN0VHlwZXMiOiBbDQogICAgICAgICAgICB7",
+		),
+	}
+
+	defParts := make([]fablakehouse.DefinitionPart, 0, 4)
+
+	defParts = append(defParts, defPart1)
+	defParts = append(defParts, defPart2)
+	defParts = append(defParts, defPart3)
+	defParts = append(defParts, defPart4)
+
+	return fablakehouse.Definition{
+		Format: new("LakehouseDefinitionV1"),
+		Parts:  defParts,
+	}
 }

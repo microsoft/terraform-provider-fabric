@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkenvsettings
@@ -121,7 +121,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Spark driver memory.",
 					Validators: []validator.String{
-						stringvalidator.OneOf(SparkEnvironmentDriverMemoryValues...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolMemoryValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -157,7 +157,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "Spark executor memory.",
 					Validators: []validator.String{
-						stringvalidator.OneOf(SparkEnvironmentExecutorMemoryValues...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabenvironment.PossibleCustomPoolMemoryValues(), true)...),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -174,9 +174,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 			"runtime_version": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "[Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version.",
-					Validators: []validator.String{
-						stringvalidator.OneOf(SparkRuntimeVersionValues...),
-					},
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
@@ -197,7 +194,6 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 				},
 				Resource: &schemaR.MapAttribute{
 					Optional: true,
-					Computed: true,
 					Validators: []validator.Map{
 						mapvalidator.KeysAre(stringvalidator.RegexMatches(
 							regexp.MustCompile(`^spark\.[a-zA-Z0-9]+([\.]?[a-zA-Z0-9]+)*$`),
@@ -206,6 +202,7 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 								"- cannot contains any white spaces\n"+
 								"- dot '.' is allowed but not at the start or end of the property key",
 						)),
+						mapvalidator.NoNullValues(),
 					},
 				},
 				DataSource: &schemaD.MapAttribute{

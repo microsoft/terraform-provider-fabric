@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connection
@@ -65,6 +65,10 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
 			}
+		default:
+			diags.AddError("unexpected connection details type", "unsupported connection details model type")
+
+			return diags
 		}
 
 		if diags := connectionDetails.Set(ctx, connectionDetailsModelPtr); diags.HasError() {
@@ -106,6 +110,10 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue
 			}
+		default:
+			diags.AddError("unexpected credential details type", "unsupported credential details model type")
+
+			return diags
 		}
 
 		if diags := credentialDetails.Set(ctx, credentialDetailsModelPtr); diags.HasError() {
@@ -127,6 +135,10 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
 		// keep it here due to default being "false"
 		to.AllowConnectionUsageInGateway = types.BoolNull()
+	default:
+		diags.AddError("unexpected connectivity type", "unsupported connection classification type")
+
+		return diags
 	}
 
 	return nil

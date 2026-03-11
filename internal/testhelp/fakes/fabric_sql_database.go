@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -135,16 +135,16 @@ func configureSQLDatabase(server *fakeServer) fabsqldatabase.SQLDatabase {
 
 func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 	return fabsqldatabase.SQLDatabase{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties: &fabsqldatabase.Properties{
-			ConnectionString: to.Ptr(testhelp.RandomName()),
-			DatabaseName:     to.Ptr(testhelp.RandomName()),
-			ServerFqdn:       to.Ptr(testhelp.RandomName()),
+			ConnectionString: new(testhelp.RandomName()),
+			DatabaseName:     new(testhelp.RandomName()),
+			ServerFqdn:       new(testhelp.RandomName()),
 		},
 	}
 }

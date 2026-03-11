@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -35,6 +35,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureVirtualNetworkGatewayConnection)
 	handleEntity(server, configureDataPipeline)
 	handleEntity(server, configureDeploymentPipeline)
+	handleEntity(server, configureDigitalTwinBuilderFlow)
 	handleEntity(server, configureDomain)
 	handleEntity(server, configureEventhouse)
 	handleEntity(server, configureEnvironment)

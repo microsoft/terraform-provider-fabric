@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacegit_test
@@ -53,9 +53,9 @@ func fakeGitInitializeGitConnection(
 
 func NewRandomGitInitializeGitConnection() fabcore.InitializeGitConnectionResponse {
 	return fabcore.InitializeGitConnectionResponse{
-		RemoteCommitHash: azto.Ptr(testhelp.RandomSHA1()),
+		RemoteCommitHash: new(testhelp.RandomSHA1()),
 		RequiredAction:   azto.Ptr(fabcore.RequiredActionUpdateFromGit),
-		WorkspaceHead:    azto.Ptr(testhelp.RandomSHA1()),
+		WorkspaceHead:    new(testhelp.RandomSHA1()),
 	}
 }
 
@@ -130,20 +130,20 @@ func NewRandomGitConnection(t fabcore.GitProviderType) fabcore.GitConnection {
 	case fabcore.GitProviderTypeAzureDevOps:
 		gitProviderDetails = &fabcore.AzureDevOpsDetails{
 			GitProviderType:  azto.Ptr(fabcore.GitProviderTypeAzureDevOps),
-			OrganizationName: azto.Ptr("TestOrganization"),
-			ProjectName:      azto.Ptr("TestProject"),
-			RepositoryName:   azto.Ptr("TestRepo"),
-			BranchName:       azto.Ptr("TestBranch"),
-			DirectoryName:    azto.Ptr("/TestDirectory"),
+			OrganizationName: new("TestOrganization"),
+			ProjectName:      new("TestProject"),
+			RepositoryName:   new("TestRepo"),
+			BranchName:       new("TestBranch"),
+			DirectoryName:    new("/TestDirectory"),
 		}
 
 	case fabcore.GitProviderTypeGitHub:
 		gitProviderDetails = &fabcore.GitHubDetails{
 			GitProviderType: azto.Ptr(fabcore.GitProviderTypeGitHub),
-			OwnerName:       azto.Ptr("TestOwner"),
-			RepositoryName:  azto.Ptr("TestRepo"),
-			BranchName:      azto.Ptr("TestBranch"),
-			DirectoryName:   azto.Ptr("/TestDirectory"),
+			OwnerName:       new("TestOwner"),
+			RepositoryName:  new("TestRepo"),
+			BranchName:      new("TestBranch"),
+			DirectoryName:   new("/TestDirectory"),
 		}
 	}
 
@@ -151,8 +151,8 @@ func NewRandomGitConnection(t fabcore.GitProviderType) fabcore.GitConnection {
 		GitConnectionState: azto.Ptr(fabcore.GitConnectionStateConnectedAndInitialized),
 		GitProviderDetails: gitProviderDetails,
 		GitSyncDetails: &fabcore.GitSyncDetails{
-			Head:         azto.Ptr(testhelp.RandomSHA1()),
-			LastSyncTime: azto.Ptr(time.Now()),
+			Head:         new(testhelp.RandomSHA1()),
+			LastSyncTime: new(time.Now()),
 		},
 	}
 }
@@ -168,7 +168,7 @@ func NewRandomGitCredentials(s fabcore.GitCredentialsSource) fabcore.GitCredenti
 	case fabcore.GitCredentialsSourceConfiguredConnection:
 		r = &fabcore.ConfiguredConnectionGitCredentials{
 			Source:       azto.Ptr(fabcore.GitCredentialsSourceConfiguredConnection),
-			ConnectionID: azto.Ptr(testhelp.RandomUUID()),
+			ConnectionID: new(testhelp.RandomUUID()),
 		}
 	case fabcore.GitCredentialsSourceNone:
 		r = &fabcore.GitCredentials{
@@ -190,7 +190,7 @@ func NewRandomGitCredentialsResponse(s fabcore.GitCredentialsSource) fabcore.Git
 	case fabcore.GitCredentialsSourceConfiguredConnection:
 		r = &fabcore.ConfiguredConnectionGitCredentialsResponse{
 			Source:       azto.Ptr(fabcore.GitCredentialsSourceConfiguredConnection),
-			ConnectionID: azto.Ptr(testhelp.RandomUUID()),
+			ConnectionID: new(testhelp.RandomUUID()),
 		}
 	case fabcore.GitCredentialsSourceNone:
 		r = &fabcore.NoneGitCredentialsResponse{

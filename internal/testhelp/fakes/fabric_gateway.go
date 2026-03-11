@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -160,51 +160,51 @@ func NewRandomGateway() fabcore.GatewayClassification {
 
 func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 	return &fabcore.OnPremisesGateway{
-		ID:                          to.Ptr(testhelp.RandomUUID()),
+		ID:                          new(testhelp.RandomUUID()),
 		Type:                        to.Ptr(fabcore.GatewayTypeOnPremises),
-		DisplayName:                 to.Ptr(testhelp.RandomName()),
-		AllowCloudConnectionRefresh: to.Ptr(testhelp.RandomBool()),
-		AllowCustomConnectors:       to.Ptr(testhelp.RandomBool()),
-		NumberOfMemberGateways:      to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
-		LoadBalancingSetting:        to.Ptr(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
-		Version:                     to.Ptr(testhelp.RandomName()),
+		DisplayName:                 new(testhelp.RandomName()),
+		AllowCloudConnectionRefresh: new(testhelp.RandomBool()),
+		AllowCustomConnectors:       new(testhelp.RandomBool()),
+		NumberOfMemberGateways:      new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
+		LoadBalancingSetting:        new(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
+		Version:                     new(testhelp.RandomName()),
 		PublicKey:                   NewRadomPublicKey(),
 	}
 }
 
 func NewRandomOnPremisesGatewayPersonal() *fabcore.OnPremisesGatewayPersonal {
 	return &fabcore.OnPremisesGatewayPersonal{
-		ID:        to.Ptr(testhelp.RandomUUID()),
+		ID:        new(testhelp.RandomUUID()),
 		Type:      to.Ptr(fabcore.GatewayTypeOnPremisesPersonal),
-		Version:   to.Ptr(testhelp.RandomName()),
+		Version:   new(testhelp.RandomName()),
 		PublicKey: NewRadomPublicKey(),
 	}
 }
 
 func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 	return &fabcore.VirtualNetworkGateway{
-		ID:                           to.Ptr(testhelp.RandomUUID()),
+		ID:                           new(testhelp.RandomUUID()),
 		Type:                         to.Ptr(fabcore.GatewayTypeVirtualNetwork),
-		DisplayName:                  to.Ptr(testhelp.RandomName()),
-		CapacityID:                   to.Ptr(testhelp.RandomUUID()),
-		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
-		NumberOfMemberGateways:       to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
+		DisplayName:                  new(testhelp.RandomName()),
+		CapacityID:                   new(testhelp.RandomUUID()),
+		InactivityMinutesBeforeSleep: new(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
+		NumberOfMemberGateways:       new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
 	}
 }
 
 func NewRadomPublicKey() *fabcore.PublicKey {
 	return &fabcore.PublicKey{
-		Exponent: to.Ptr(testhelp.RandomName()),
-		Modulus:  to.Ptr(testhelp.RandomName()),
+		Exponent: new(testhelp.RandomName()),
+		Modulus:  new(testhelp.RandomName()),
 	}
 }
 
 func NewRandomVirtualNetworkAzureResource() *fabcore.VirtualNetworkAzureResource {
 	return &fabcore.VirtualNetworkAzureResource{
-		ResourceGroupName:  to.Ptr(testhelp.RandomName()),
-		SubnetName:         to.Ptr(testhelp.RandomName()),
-		SubscriptionID:     to.Ptr(testhelp.RandomUUID()),
-		VirtualNetworkName: to.Ptr(testhelp.RandomName()),
+		ResourceGroupName:  new(testhelp.RandomName()),
+		SubnetName:         new(testhelp.RandomName()),
+		SubscriptionID:     new(testhelp.RandomUUID()),
+		VirtualNetworkName: new(testhelp.RandomName()),
 	}
 }

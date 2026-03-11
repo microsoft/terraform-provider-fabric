@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -138,16 +138,16 @@ func configureWarehouseSnapshot(server *fakeServer) fabwarehousesnapshot.Warehou
 
 func NewRandomWarehouseSnapshot() fabwarehousesnapshot.WarehouseSnapshot {
 	return fabwarehousesnapshot.WarehouseSnapshot{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties: &fabwarehousesnapshot.Properties{
-			ConnectionString:  to.Ptr(testhelp.RandomURI()),
-			ParentWarehouseID: to.Ptr(testhelp.RandomUUID()),
-			SnapshotDateTime:  to.Ptr(time.Now()),
+			ConnectionString:  new(testhelp.RandomURI()),
+			ParentWarehouseID: new(testhelp.RandomUUID()),
+			SnapshotDateTime:  new(time.Now()),
 		},
 	}
 }

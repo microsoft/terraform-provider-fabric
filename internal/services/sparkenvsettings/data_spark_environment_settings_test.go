@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkenvsettings_test
@@ -11,9 +11,58 @@ import (
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
+func TestUnit_SparkEnvironmentSettingsDataSource(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	environmentID := testhelp.RandomUUID()
+
+	stagingSparkCompute := NewRandomSparkCompute()
+	fakeTestUpsertSparkComputeStaging(environmentID, stagingSparkCompute)
+
+	fakes.FakeServer.ServerFactory.Environment.StagingServer.GetSparkCompute = fakeGetStagingSparkComputeFunc()
+	fakes.FakeServer.ServerFactory.Environment.PublishedServer.GetSparkCompute = fakeGetPublishedSparkComputeFunc()
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// read - Published
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":       workspaceID,
+					"environment_id":     environmentID,
+					"publication_status": "Published",
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", environmentID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "pool.name", *stagingSparkCompute.InstancePool.Name),
+			),
+		},
+		// read - Staging
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":       workspaceID,
+					"environment_id":     environmentID,
+					"publication_status": "Staging",
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", environmentID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "pool.name", *stagingSparkCompute.InstancePool.Name),
+			),
+		},
+	}))
+}
 
 func TestAcc_SparkEnvironmentSettingsDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)

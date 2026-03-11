@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -46,10 +46,10 @@ func configureCapacity(server *fakeServer) fabcore.Capacity {
 
 func NewRandomCapacity() fabcore.Capacity {
 	return fabcore.Capacity{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Region:      to.Ptr(testhelp.RandomName()),
-		SKU:         to.Ptr(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Region:      new(testhelp.RandomName()),
+		SKU:         new(testhelp.RandomName()),
 		State:       to.Ptr(fabcore.CapacityStateActive),
 	}
 }

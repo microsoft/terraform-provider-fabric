@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connectionra_test
@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -60,12 +59,12 @@ func NewRandomConnectionRoleAssignment() fabcore.ConnectionRoleAssignment {
 	itemID := testhelp.RandomUUID()
 
 	return fabcore.ConnectionRoleAssignment{
-		ID: azto.Ptr(itemID),
+		ID: new(itemID),
 		Principal: &fabcore.Principal{
-			ID:   azto.Ptr(itemID),
-			Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
+			ID:   new(itemID),
+			Type: new(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 		},
-		Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
+		Role: new(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 	}
 }
 
@@ -112,27 +111,27 @@ func NewRandomConnectionRoleAssignments() fabcore.ConnectionRoleAssignments {
 	return fabcore.ConnectionRoleAssignments{
 		Value: []fabcore.ConnectionRoleAssignment{
 			{
-				ID:   azto.Ptr(principal0ID),
-				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
+				ID:   new(principal0ID),
+				Role: new(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal0ID),
-					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
+					ID:   new(principal0ID),
+					Type: new(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 			{
-				ID:   azto.Ptr(principal1ID),
-				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
+				ID:   new(principal1ID),
+				Role: new(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal1ID),
-					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
+					ID:   new(principal1ID),
+					Type: new(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 			{
-				ID:   azto.Ptr(principal2ID),
-				Role: azto.Ptr(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
+				ID:   new(principal2ID),
+				Role: new(testhelp.RandomElement(fabcore.PossibleConnectionRoleValues())),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(principal2ID),
-					Type: azto.Ptr(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
+					ID:   new(principal2ID),
+					Type: new(testhelp.RandomElement(fabcore.PossiblePrincipalTypeValues())),
 				},
 			},
 		},

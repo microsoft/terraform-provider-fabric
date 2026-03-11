@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -46,7 +46,7 @@ func (o *operationsWorkspaceManagedPrivateEndpoint) CreateWithParentID(_ string,
 
 // Filter implements concreteOperations.
 func (o *operationsWorkspaceManagedPrivateEndpoint) Filter(entities []fabcore.ManagedPrivateEndpoint, _ string) []fabcore.ManagedPrivateEndpoint {
-	ret := make([]fabcore.ManagedPrivateEndpoint, 0)
+	ret := make([]fabcore.ManagedPrivateEndpoint, 0, len(entities))
 
 	ret = append(ret, entities...)
 
@@ -128,14 +128,14 @@ func configureWorkspaceManagedPrivateEndpoint(server *fakeServer) fabcore.Manage
 
 func NewRandomWorkspaceManagedPrivateEndpoint() fabcore.ManagedPrivateEndpoint {
 	return fabcore.ManagedPrivateEndpoint{
-		ID:                          to.Ptr(testhelp.RandomUUID()),
-		Name:                        to.Ptr(testhelp.RandomName()),
+		ID:                          new(testhelp.RandomUUID()),
+		Name:                        new(testhelp.RandomName()),
 		ProvisioningState:           to.Ptr(fabcore.PrivateEndpointProvisioningStateSucceeded),
-		TargetPrivateLinkResourceID: to.Ptr(testhelp.RandomUUID()),
-		TargetSubresourceType:       to.Ptr(testhelp.RandomName()),
+		TargetPrivateLinkResourceID: new(testhelp.RandomUUID()),
+		TargetSubresourceType:       new(testhelp.RandomName()),
 		ConnectionState: &fabcore.PrivateEndpointConnectionState{
-			ActionsRequired: to.Ptr("None"),
-			Description:     to.Ptr(testhelp.RandomName()),
+			ActionsRequired: new("None"),
+			Description:     new(testhelp.RandomName()),
 			Status:          to.Ptr(fabcore.ConnectionStatusApproved),
 		},
 	}

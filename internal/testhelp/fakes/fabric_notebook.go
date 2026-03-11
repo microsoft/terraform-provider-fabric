@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -161,11 +161,11 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 
 func NewRandomNotebook() fabnotebook.Notebook {
 	return fabnotebook.Notebook{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabnotebook.ItemTypeNotebook),
 	}
 }
@@ -180,18 +180,18 @@ func NewRandomNotebookWithWorkspace(workspaceID string) fabnotebook.Notebook {
 func NewRandomNotebookDefinition() fabnotebook.Definition {
 	defPart := fabnotebook.DefinitionPart{
 		PayloadType: to.Ptr(fabnotebook.PayloadTypeInlineBase64),
-		Path:        to.Ptr("notebook-content.ipynb"),
-		Payload: to.Ptr(
+		Path:        new("notebook-content.ipynb"),
+		Payload: new(
 			"eyJjZWxscyI6W3siY2VsbF90eXBlIjoiY29kZSIsIm1ldGFkYXRhIjoge30sInNvdXJjZSI6WyIjIFdlbGNvbWUgdG8geW91ciBub3RlYm9vayJdfV0sIm1ldGFkYXRhIjp7Imxhbmd1YWdlX2luZm8iOnsibmFtZSI6InB5dGhvbiJ9fSwibmJmb3JtYXQiOjQsIm5iZm9ybWF0X21pbm9yIjo1fQ==",
 		),
 	}
 
-	var defParts []fabnotebook.DefinitionPart
+	defParts := make([]fabnotebook.DefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 
 	return fabnotebook.Definition{
-		Format: to.Ptr("ipynb"),
+		Format: new("ipynb"),
 		Parts:  defParts,
 	}
 }

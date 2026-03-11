@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package domainra_test
@@ -143,8 +143,7 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 	domainResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "domain"), "test"),
 		map[string]any{
-			"display_name":       testhelp.RandomName(),
-			"contributors_scope": string(fabadmin.ContributorsScopeTypeSpecificUsersAndGroups),
+			"display_name": testhelp.RandomName(),
 		},
 	)
 
@@ -203,6 +202,82 @@ func TestAcc_DomainRoleAssignmentsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.id", entityID),
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.type", entityType),
 				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(domainra.DomainRoleAdmins)),
+			),
+		},
+	}))
+}
+
+func TestAcc_DomainRoleAssignmentsResource_Subdomain_CRUD(t *testing.T) {
+	domainResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "domain"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+		},
+	)
+
+	domainResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "domain", "test")
+
+	childDomainResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "domain"), "test_child"),
+		map[string]any{
+			"display_name":     testhelp.RandomName(),
+			"parent_domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+		},
+	)
+
+	childDomainResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "domain", "test_child")
+
+	entity := testhelp.WellKnown()["Group"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityType := entity["type"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// Error - Admins not supported for subdomains
+		{
+			ResourceName: testResourceItemsFQN,
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				childDomainResourceHCL,
+				at.CompileConfig(
+					testResourceItemsHeader,
+					map[string]any{
+						"domain_id": testhelp.RefByFQN(childDomainResourceFQN, "id"),
+						"role":      string(domainra.DomainRoleAdmins),
+						"principals": []map[string]any{
+							{
+								"id":   entityID,
+								"type": entityType,
+							},
+						},
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile("Role Assignment is not supported for subdomains."),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemsFQN,
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				childDomainResourceHCL,
+				at.CompileConfig(
+					testResourceItemsHeader,
+					map[string]any{
+						"domain_id": testhelp.RefByFQN(childDomainResourceFQN, "id"),
+						"role":      string(domainra.DomainRoleContributors),
+						"principals": []map[string]any{
+							{
+								"id":   entityID,
+								"type": entityType,
+							},
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.id", entityID),
+				resource.TestCheckResourceAttr(testResourceItemsFQN, "principals.0.type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemsFQN, "role", string(domainra.DomainRoleContributors)),
 			),
 		},
 	}))

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package auth
@@ -37,7 +37,7 @@ func (o *OIDCConfig) getAssertion(ctx context.Context) (string, error) {
 	req.Header.Set("Authorization", "Bearer "+o.RequestToken)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req) //nolint:gosec
 	if err != nil {
 		return "", fmt.Errorf("getAssertion: cannot request token: %w", err)
 	}

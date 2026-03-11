@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package domain
@@ -117,7 +117,7 @@ func (d *dataSourceDomains) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 func (d *dataSourceDomains) list(ctx context.Context, model *dataSourceDomainsModel) diag.Diagnostics {
-	respList, err := d.client.ListDomainsPreview(ctx, true, nil)
+	respList, err := d.client.ListDomains(ctx, ItemTypeInfo.IsPreview, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		return diags
 	}

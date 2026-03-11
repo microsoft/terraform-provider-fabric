@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -137,18 +137,18 @@ func configureEnvironment(server *fakeServer) fabenvironment.Environment {
 
 func NewRandomEnvironment() fabenvironment.Environment {
 	return fabenvironment.Environment{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Properties: &fabenvironment.Properties{
 			PublishDetails: &fabenvironment.PublishDetails{
 				State:         to.Ptr(fabenvironment.PublishStateSuccess),
-				TargetVersion: to.Ptr(testhelp.RandomUUID()),
-				StartTime:     to.Ptr(time.Now()),
-				EndTime:       to.Ptr(time.Now()),
+				TargetVersion: new(testhelp.RandomUUID()),
+				StartTime:     new(time.Now()),
+				EndTime:       new(time.Now()),
 				ComponentPublishInfo: &fabenvironment.ComponentPublishInfo{
 					SparkLibraries: &fabenvironment.SparkLibraries{
 						State: to.Ptr(fabenvironment.PublishStateSuccess),

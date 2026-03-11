@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -176,17 +176,17 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 
 func NewRandomEventhouse() fabeventhouse.Eventhouse {
 	return fabeventhouse.Eventhouse{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties: &fabeventhouse.Properties{
-			IngestionServiceURI:     to.Ptr(testhelp.RandomURI()),
-			QueryServiceURI:         to.Ptr(testhelp.RandomURI()),
+			IngestionServiceURI:     new(testhelp.RandomURI()),
+			QueryServiceURI:         new(testhelp.RandomURI()),
 			DatabasesItemIDs:        []string{testhelp.RandomUUID()},
-			MinimumConsumptionUnits: to.Ptr(0.0),
+			MinimumConsumptionUnits: new(0.0),
 		},
 	}
 }
@@ -201,11 +201,11 @@ func NewRandomEventhouseWithWorkspace(workspaceID string) fabeventhouse.Eventhou
 func NewRandomEventhouseDefinition() fabeventhouse.Definition {
 	defPart := fabeventhouse.DefinitionPart{
 		PayloadType: to.Ptr(fabeventhouse.PayloadTypeInlineBase64),
-		Path:        to.Ptr("EventhouseProperties.json"),
-		Payload:     to.Ptr("e30="),
+		Path:        new("EventhouseProperties.json"),
+		Payload:     new("e30="),
 	}
 
-	var defParts []fabeventhouse.DefinitionPart
+	defParts := make([]fabeventhouse.DefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 
