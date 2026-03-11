@@ -241,7 +241,7 @@ func (r *resourceTag) get(ctx context.Context, model *resourceTagsModel) diag.Di
 
 		for _, entity := range page.Value {
 			if *entity.DisplayName == model.DisplayName.ValueString() {
-				if diags := model.setTagInfo(ctx, entity); diags.HasError() {
+				if diags := model.set(ctx, entity); diags.HasError() {
 					return diags
 				}
 			}

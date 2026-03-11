@@ -13,7 +13,6 @@ resource "fabric_tag" "example_scope" {
 
 #Update
 resource "fabric_tag" "example_update" {
-  id           = "00000000-0000-0000-0000-000000000000"
   display_name = "example_updated"
   scope = {
     type = "Tenant"

@@ -47,7 +47,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Optional: !isList,
 				},
 				Resource: &schemaR.StringAttribute{
-					Optional: true,
+					Computed: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -98,10 +98,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "Scope Type.",
-							Computed:            true,
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
 						},
 						Resource: &schemaR.StringAttribute{
-							Optional: true,
+							Required: true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabadmin.PossibleTagScopeTypeValues(), true)...),
 							},

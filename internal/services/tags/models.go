@@ -129,57 +129,13 @@ func (to *baseTagModel) setTag(ctx context.Context, from fabadmin.Tag) diag.Diag
 
 	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
 
-	var scope *scopeModel
+	if from.Scope != nil {
+		scope := &scopeModel{}
+		scope.set(from.Scope)
 
-	switch s := from.Scope.(type) {
-	case *fabadmin.DomainTagScope:
-		scope = &scopeModel{
-			Type:     types.StringPointerValue((*string)(s.Type)),
-			DomainID: customtypes.NewUUIDPointerValue(s.DomainID),
+		if diags := to.Scope.Set(ctx, scope); diags.HasError() {
+			return diags
 		}
-	case *fabadmin.TenantTagScope:
-		scope = &scopeModel{
-			Type: types.StringPointerValue((*string)(s.Type)),
-		}
-	default:
-		scope = &scopeModel{
-			Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
-		}
-	}
-
-	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
-func (to *baseTagModel) setTagInfo(ctx context.Context, from fabadmin.TagInfo) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-
-	to.Scope = supertypes.NewSingleNestedObjectValueOfNull[scopeModel](ctx)
-
-	var scope *scopeModel
-
-	switch s := from.Scope.(type) {
-	case *fabadmin.DomainTagScope:
-		scope = &scopeModel{
-			Type:     types.StringPointerValue((*string)(s.Type)),
-			DomainID: customtypes.NewUUIDPointerValue(s.DomainID),
-		}
-	case *fabadmin.TenantTagScope:
-		scope = &scopeModel{
-			Type: types.StringPointerValue((*string)(s.Type)),
-		}
-	default:
-		scope = &scopeModel{
-			Type: types.StringPointerValue((*string)(from.Scope.GetTagScope().Type)),
-		}
-	}
-
-	if diags := to.Scope.Set(ctx, scope); diags.HasError() {
-		return diags
 	}
 
 	return nil

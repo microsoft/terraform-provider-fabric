@@ -26,7 +26,6 @@ resource "fabric_tag" "example_scope" {
 
 #Update
 resource "fabric_tag" "example_update" {
-  id           = "00000000-0000-0000-0000-000000000000"
   display_name = "example_updated"
   scope = {
     type = "Tenant"
@@ -43,18 +42,24 @@ resource "fabric_tag" "example_update" {
 
 ### Optional
 
-- `id` (String) The Tag ID.
 - `scope` (Attributes) <i style="color:red;font-weight: bold">(ForceNew)</i> Represents a tag scope. (see [below for nested schema](#nestedatt--scope))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
+### Read-Only
+
+- `id` (String) The Tag ID.
 
 <a id="nestedatt--scope"></a>
 
 ### Nested Schema for `scope`
 
+Required:
+
+- `type` (String) Scope Type. Value must be one of : `Domain`, `Tenant`.
+
 Optional:
 
 - `domain_id` (String) Domain object ID. If the value of [`<.type`](#<.type) attribute is `Domain` this attribute is **REQUIRED**.
-- `type` (String) Scope Type. Value must be one of : `Domain`, `Tenant`.
 
 <a id="nestedatt--timeouts"></a>
 
