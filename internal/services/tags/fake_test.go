@@ -55,13 +55,13 @@ func fakeUpdateTagFunc() func(ctx context.Context, tagID string, request fabadmi
 		}
 
 		tag := fabadmin.TagInfo{
-			ID:          to.Ptr(tagID),
+			ID:          new(tagID),
 			DisplayName: request.DisplayName,
 			Scope:       storedTag.Scope,
 		}
 
 		returnTag := fabadmin.Tag{
-			ID:          to.Ptr(tagID),
+			ID:          new(tagID),
 			DisplayName: request.DisplayName,
 			Scope:       storedTag.Scope,
 		}
@@ -107,7 +107,7 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 
 			newTag := fabadmin.TagInfo{
 				DisplayName: item.DisplayName,
-				ID:          to.Ptr(tagID),
+				ID:          new(tagID),
 				Scope:       scope,
 			}
 
@@ -115,7 +115,7 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 
 			outputTag := fabadmin.Tag{
 				DisplayName: item.DisplayName,
-				ID:          to.Ptr(tagID),
+				ID:          new(tagID),
 				Scope:       scope,
 			}
 
@@ -130,8 +130,8 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 
 func NewRandomTag() fabadmin.TagInfo {
 	return fabadmin.TagInfo{
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		ID:          to.Ptr(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
 		Scope: &fabadmin.TagScope{
 			Type: to.Ptr(fabadmin.TagScopeTypeTenant),
 		},
