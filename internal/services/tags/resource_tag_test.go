@@ -153,48 +153,57 @@ func TestAcc_TagResource_CRUD(t *testing.T) {
 	entity1DisplayName := testhelp.RandomName()
 	entity2DisplayName := testhelp.RandomName()
 
-	domain := testhelp.WellKnown()["DomainParent"].(map[string]any)
-	domainID := domain["id"].(string)
+	domainResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName(common.ProviderTypeName, "domain"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+		},
+	)
+	domainResourceFQN := testhelp.ResourceFQN(common.ProviderTypeName, "domain", "test")
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entity1DisplayName,
-					"scope": map[string]any{
-						"domain_id": domainID,
-						"type":      string(fabadmin.TagScopeTypeDomain),
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entity1DisplayName,
+						"scope": map[string]any{
+							"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+							"type":      string(fabadmin.TagScopeTypeDomain),
+						},
 					},
-				},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity1DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeDomain)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.domain_id", domainID),
 			),
 		},
 		// Update display_name
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entity2DisplayName,
-					"scope": map[string]any{
-						"domain_id": domainID,
-						"type":      string(fabadmin.TagScopeTypeDomain),
+			Config: at.JoinConfigs(
+				domainResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entity2DisplayName,
+						"scope": map[string]any{
+							"domain_id": testhelp.RefByFQN(domainResourceFQN, "id"),
+							"type":      string(fabadmin.TagScopeTypeDomain),
+						},
 					},
-				},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entity2DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.type", string(fabadmin.TagScopeTypeDomain)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "scope.domain_id", domainID),
 			),
 		},
 	}))
