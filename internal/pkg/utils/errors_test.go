@@ -15,7 +15,6 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -129,8 +128,8 @@ func TestUnit_GetDiagsFromError(t *testing.T) {
 			ErrorCode:  "ErrorCode",
 			StatusCode: http.StatusNotFound,
 			ErrorResponse: &fabcore.ErrorResponse{
-				ErrorCode: azto.Ptr("ErrorCode"),
-				Message:   azto.Ptr("Message"),
+				ErrorCode: new("ErrorCode"),
+				Message:   new("Message"),
 				RequestID: &requestID,
 			},
 		}
@@ -452,8 +451,8 @@ func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
 			fabricErr: &fabcore.ResponseError{
 				StatusCode: 400,
 				ErrorResponse: &fabcore.ErrorResponse{
-					ErrorCode: azto.Ptr("InvalidParameter"),
-					Message:   azto.Ptr("The parameter is invalid"),
+					ErrorCode: new("InvalidParameter"),
+					Message:   new("The parameter is invalid"),
 				},
 			},
 			wantContains: []string{

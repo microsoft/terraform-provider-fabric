@@ -6,7 +6,7 @@ package itemjobscheduler
 import (
 	"fmt"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -472,12 +472,12 @@ func allowedJobTypesMarkdownDescription() string {
 		keys = append(keys, k)
 	}
 
-	sort.Strings(keys)
+	slices.Sort(keys)
 
 	for i, k := range keys {
 		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
-		sort.Strings(vals)
-		_, _ = b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+		slices.Sort(vals)
+		_, _ = fmt.Fprintf(&b, "%s: {%s}", k, strings.Join(vals, ", "))
 
 		if i < len(keys)-1 {
 			_, _ = b.WriteString("; ")

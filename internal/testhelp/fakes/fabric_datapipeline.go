@@ -123,11 +123,11 @@ func configureDataPipeline(server *fakeServer) fabdatapipeline.DataPipeline {
 
 func NewRandomDataPipeline() fabdatapipeline.DataPipeline {
 	return fabdatapipeline.DataPipeline{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabdatapipeline.ItemTypeDataPipeline),
 	}
 }
