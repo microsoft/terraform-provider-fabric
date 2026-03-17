@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package utils //revive:disable-line:var-naming
+package utils //revive:disable-line:package-naming
 
 import (
 	"os"
