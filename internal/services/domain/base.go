@@ -8,12 +8,12 @@ import (
 )
 
 var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
-	Name:                      "Domain",
-	Type:                      "domain",
-	Names:                     "Domains",
-	Types:                     "domains",
-	DocsURL:                   "https://learn.microsoft.com/fabric/governance/domains",
-	IsPreview:                 false,
-	IsSPNSupported:            true,
-	TenantPermissionBlocksAPI: true,
+	Name:           "Domain",
+	Type:           "domain",
+	Names:          "Domains",
+	Types:          "domains",
+	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
+	IsPreview:      false,
+	IsAdmin:        true,
+	IsSPNSupported: true,
 }
