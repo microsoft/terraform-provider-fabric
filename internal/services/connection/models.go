@@ -171,6 +171,14 @@ type credentialsSharedAccessSignatureModel struct {
 	TokenReference supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel] `tfsdk:"token_reference"`
 }
 
+type credentialsKeyPairModel struct {
+	Identifier      types.String `tfsdk:"identifier"`
+	PrivateKeyWO    types.String `tfsdk:"private_key_wo"`
+	PrivateKeyWOVer types.Int32  `tfsdk:"private_key_wo_version"`
+	PassphraseWO    types.String `tfsdk:"passphrase_wo"`
+	PassphraseWOVer types.Int32  `tfsdk:"passphrase_wo_version"`
+}
+
 type credentialsKeyVaultReferenceModel struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
 	SecretName   types.String     `tfsdk:"secret_name"`

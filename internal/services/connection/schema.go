@@ -324,7 +324,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
 									utils.RemoveSlicesByValues(
 										fabcore.PossibleCredentialTypeValues(),
-										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2, fabcore.CredentialTypeKeyPair},
+										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2},
 									),
 									true,
 								)...),
@@ -463,6 +463,54 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							"service_principal_secret_reference": kvReferenceSchemaBlock(
 								"The reference to a service principal secret stored in Azure Key Vault. Use servicePrincipalSecret or servicePrincipalSecretReference. You can't use both at the same time.",
 							),
+						},
+					},
+					"key_pair_credentials": superschema.SuperSingleNestedAttributeOf[credentialsKeyPairModel]{
+						Resource: &schemaR.SingleNestedAttribute{
+							MarkdownDescription: "The key pair credentials.",
+							Optional:            true,
+							Validators: []validator.Object{
+								superobjectvalidator.RequireIfAttributeIsOneOf(
+									path.MatchRelative().AtParent().AtName("credential_type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.CredentialTypeKeyPair)),
+									},
+								),
+							},
+						},
+						Attributes: superschema.Attributes{
+							"identifier": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The identifier for the key.",
+									Required:            true,
+								},
+							},
+							"private_key_wo": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The private key based on PKCS #8 standard (WO).",
+									Required:            true,
+									WriteOnly:           true,
+								},
+							},
+							"private_key_wo_version": superschema.Int32Attribute{
+								Resource: &schemaR.Int32Attribute{
+									MarkdownDescription: "The version of the `private_key_wo`.",
+									Optional:            true,
+								},
+							},
+							"passphrase_wo": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The passphrase for the private key if the private key is encrypted (WO).",
+									Optional:            true,
+									WriteOnly:           true,
+								},
+							},
+							"passphrase_wo_version": superschema.Int32Attribute{
+								Resource: &schemaR.Int32Attribute{
+									MarkdownDescription: "The version of the `passphrase_wo`.",
+									Optional:            true,
+								},
+							},
 						},
 					},
 					"shared_access_signature_credentials": superschema.SuperSingleNestedAttributeOf[credentialsSharedAccessSignatureModel]{

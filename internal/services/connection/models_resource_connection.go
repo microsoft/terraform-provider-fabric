@@ -82,6 +82,7 @@ type rsCredentialDetailsModel struct {
 
 	BasicCredentials                 supertypes.SingleNestedObjectValueOf[credentialsBasicModel]                 `tfsdk:"basic_credentials"`
 	KeyCredentials                   supertypes.SingleNestedObjectValueOf[credentialsKeyModel]                   `tfsdk:"key_credentials"`
+	KeyPairCredentials               supertypes.SingleNestedObjectValueOf[credentialsKeyPairModel]               `tfsdk:"key_pair_credentials"`
 	ServicePrincipalCredentials      supertypes.SingleNestedObjectValueOf[credentialsServicePrincipalModel]      `tfsdk:"service_principal_credentials"`
 	SharedAccessSignatureCredentials supertypes.SingleNestedObjectValueOf[credentialsSharedAccessSignatureModel] `tfsdk:"shared_access_signature_credentials"`
 }
@@ -380,6 +381,19 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			KeyReference:   kvRef,
 		}
 
+	case fabcore.CredentialTypeKeyPair:
+		cred, diags := credentialDetails.KeyPairCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestCreateCredential = &fabcore.KeyPairCredentials{
+			CredentialType: &credentialType,
+			Identifier:     cred.Identifier.ValueStringPointer(),
+			PrivateKey:     cred.PrivateKeyWO.ValueStringPointer(),
+			Passphrase:     cred.PassphraseWO.ValueStringPointer(),
+		}
+
 	case fabcore.CredentialTypeServicePrincipal:
 		cred, diags := credentialDetails.ServicePrincipalCredentials.Get(ctx)
 		if diags.HasError() {
@@ -492,6 +506,19 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			CredentialType: &credentialType,
 			Key:            cred.KeyWO.ValueStringPointer(),
 			KeyReference:   kvRef,
+		}
+
+	case fabcore.CredentialTypeKeyPair:
+		cred, diags := credentialDetails.KeyPairCredentials.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestUpdateCredential = &fabcore.KeyPairCredentials{
+			CredentialType: &credentialType,
+			Identifier:     cred.Identifier.ValueStringPointer(),
+			PrivateKey:     cred.PrivateKeyWO.ValueStringPointer(),
+			Passphrase:     cred.PassphraseWO.ValueStringPointer(),
 		}
 
 	case fabcore.CredentialTypeServicePrincipal:

@@ -1710,7 +1710,7 @@ func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_credentials.key_reference.secret_name", "my-storage-key"),
 			),
 		},
-		// Update - change secret name
+		// Update - change to KeyPair credential type
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -1733,13 +1733,13 @@ func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
 						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
 						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
 						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-						"key_credentials": map[string]any{
-							"key_reference": map[string]any{
-								"connection_id": testhelp.RandomUUID(),
-								"secret_name":   "my-updated-storage-key",
-								"version":       "v2",
-							},
+						"credential_type":       string(fabcore.CredentialTypeKeyPair),
+						"key_pair_credentials": map[string]any{
+							"identifier":             "user",
+							"private_key_wo":         "my-private-key",
+							"private_key_wo_version": 1,
+							"passphrase_wo":          "my-passphrase",
+							"passphrase_wo_version":  1,
 						},
 					},
 				},
@@ -1747,10 +1747,8 @@ func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-kvref-create"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKey)),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "credential_details.key_credentials.key_reference.connection_id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_credentials.key_reference.secret_name", "my-updated-storage-key"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_credentials.key_reference.version", "v2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKeyPair)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_pair_credentials.identifier", "user"),
 			),
 		},
 	}))
