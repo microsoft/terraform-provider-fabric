@@ -358,7 +358,7 @@ jobs:
           terraform -version
 
       - name: 🚧 Setup OpenTofu
-        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
+        uses: opentofu/setup-opentofu@fc711fa910b93cba0f3fbecaafc9f42fd0c411cb # v2.0.0
         if: matrix.cli == 'tofu'
         with:
           tofu_version: ${{ matrix.version }}
@@ -513,7 +513,7 @@ jobs:
       #     files: ./testresults.xml
 
       - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
