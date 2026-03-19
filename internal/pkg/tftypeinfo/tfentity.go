@@ -18,6 +18,7 @@ type TFTypeInfo struct {
 	DocsURL          string
 	IsPreview        bool
 	IsSPNSupported   bool
+	IsAdmin          bool
 }
 
 func (t TFTypeInfo) FullTypeName(plural bool) string { //revive:disable-line:flag-parameter
