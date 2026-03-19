@@ -145,24 +145,34 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 }
 
 type credentialsBasicModel struct {
-	Username          types.String `tfsdk:"username"`
-	PasswordWO        types.String `tfsdk:"password_wo"`
-	PasswordWOVersion types.Int32  `tfsdk:"password_wo_version"`
+	Username          types.String                                                            `tfsdk:"username"`
+	PasswordWO        types.String                                                            `tfsdk:"password_wo"`
+	PasswordWOVersion types.Int32                                                             `tfsdk:"password_wo_version"`
+	PasswordReference supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel] `tfsdk:"password_reference"`
 }
 
 type credentialsKeyModel struct {
-	KeyWO        types.String `tfsdk:"key_wo"`
-	KeyWOVersion types.Int32  `tfsdk:"key_wo_version"`
+	KeyWO        types.String                                                            `tfsdk:"key_wo"`
+	KeyWOVersion types.Int32                                                             `tfsdk:"key_wo_version"`
+	KeyReference supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel] `tfsdk:"key_reference"`
 }
 
 type credentialsServicePrincipalModel struct {
-	TenantID              types.String `tfsdk:"tenant_id"`
-	ClientID              types.String `tfsdk:"client_id"`
-	ClientSecretWO        types.String `tfsdk:"client_secret_wo"`
-	ClientSecretWOVersion types.Int32  `tfsdk:"client_secret_wo_version"`
+	TenantID                        types.String                                                            `tfsdk:"tenant_id"`
+	ClientID                        types.String                                                            `tfsdk:"client_id"`
+	ClientSecretWO                  types.String                                                            `tfsdk:"client_secret_wo"`
+	ClientSecretWOVersion           types.Int32                                                             `tfsdk:"client_secret_wo_version"`
+	ServicePrincipalSecretReference supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel] `tfsdk:"service_principal_secret_reference"`
 }
 
 type credentialsSharedAccessSignatureModel struct {
-	TokenWO        types.String `tfsdk:"token_wo"`
-	TokenWOVersion types.Int32  `tfsdk:"token_wo_version"`
+	TokenWO        types.String                                                            `tfsdk:"token_wo"`
+	TokenWOVersion types.Int32                                                             `tfsdk:"token_wo_version"`
+	TokenReference supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel] `tfsdk:"token_reference"`
+}
+
+type credentialsKeyVaultReferenceModel struct {
+	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+	SecretName   types.String     `tfsdk:"secret_name"`
+	Version      types.String     `tfsdk:"version"`
 }

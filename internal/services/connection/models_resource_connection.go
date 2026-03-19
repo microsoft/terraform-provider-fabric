@@ -93,6 +93,23 @@ func setRSCredentialDetails(from fabcore.ListCredentialDetails, to *rsCredential
 	to.CredentialType = types.StringPointerValue((*string)(from.CredentialType))
 }
 
+func getKeyVaultSecretReference(ctx context.Context, kvRef supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel]) (*fabcore.KeyVaultSecretReference, diag.Diagnostics) {
+	if kvRef.IsNull() || kvRef.IsUnknown() {
+		return nil, nil
+	}
+
+	kv, diags := kvRef.Get(ctx)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return &fabcore.KeyVaultSecretReference{
+		ConnectionID: kv.ConnectionID.ValueStringPointer(),
+		SecretName:   kv.SecretName.ValueStringPointer(),
+		Version:      kv.Version.ValueStringPointer(),
+	}, nil
+}
+
 type requestCreateConnection struct {
 	fabcore.CreateConnectionRequestClassification
 }
@@ -334,10 +351,16 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.PasswordReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestCreateCredential = &fabcore.BasicCredentials{
-			CredentialType: &credentialType,
-			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.PasswordWO.ValueStringPointer(),
+			CredentialType:    &credentialType,
+			Username:          cred.Username.ValueStringPointer(),
+			Password:          cred.PasswordWO.ValueStringPointer(),
+			PasswordReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeKey:
@@ -346,9 +369,15 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.KeyReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestCreateCredential = &fabcore.KeyCredentials{
 			CredentialType: &credentialType,
 			Key:            cred.KeyWO.ValueStringPointer(),
+			KeyReference:   kvRef,
 		}
 
 	case fabcore.CredentialTypeServicePrincipal:
@@ -357,11 +386,17 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.ServicePrincipalSecretReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestCreateCredential = &fabcore.ServicePrincipalCredentials{
-			CredentialType:           &credentialType,
-			TenantID:                 cred.TenantID.ValueStringPointer(),
-			ServicePrincipalClientID: cred.ClientID.ValueStringPointer(),
-			ServicePrincipalSecret:   cred.ClientSecretWO.ValueStringPointer(),
+			CredentialType:                  &credentialType,
+			TenantID:                        cred.TenantID.ValueStringPointer(),
+			ServicePrincipalClientID:        cred.ClientID.ValueStringPointer(),
+			ServicePrincipalSecret:          cred.ClientSecretWO.ValueStringPointer(),
+			ServicePrincipalSecretReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeSharedAccessSignature:
@@ -370,9 +405,15 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.TokenReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestCreateCredential = &fabcore.SharedAccessSignatureCredentials{
 			CredentialType: &credentialType,
 			Token:          cred.TokenWO.ValueStringPointer(),
+			TokenReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeWorkspaceIdentity:
@@ -424,10 +465,16 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.PasswordReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestUpdateCredential = &fabcore.BasicCredentials{
-			CredentialType: &credentialType,
-			Username:       cred.Username.ValueStringPointer(),
-			Password:       cred.PasswordWO.ValueStringPointer(),
+			CredentialType:    &credentialType,
+			Username:          cred.Username.ValueStringPointer(),
+			Password:          cred.PasswordWO.ValueStringPointer(),
+			PasswordReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeKey:
@@ -436,9 +483,15 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.KeyReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestUpdateCredential = &fabcore.KeyCredentials{
 			CredentialType: &credentialType,
 			Key:            cred.KeyWO.ValueStringPointer(),
+			KeyReference:   kvRef,
 		}
 
 	case fabcore.CredentialTypeServicePrincipal:
@@ -447,11 +500,17 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.ServicePrincipalSecretReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestUpdateCredential = &fabcore.ServicePrincipalCredentials{
-			CredentialType:           &credentialType,
-			TenantID:                 cred.TenantID.ValueStringPointer(),
-			ServicePrincipalClientID: cred.ClientID.ValueStringPointer(),
-			ServicePrincipalSecret:   cred.ClientSecretWO.ValueStringPointer(),
+			CredentialType:                  &credentialType,
+			TenantID:                        cred.TenantID.ValueStringPointer(),
+			ServicePrincipalClientID:        cred.ClientID.ValueStringPointer(),
+			ServicePrincipalSecret:          cred.ClientSecretWO.ValueStringPointer(),
+			ServicePrincipalSecretReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeSharedAccessSignature:
@@ -460,9 +519,15 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 			return diags
 		}
 
+		kvRef, diags := getKeyVaultSecretReference(ctx, cred.TokenReference)
+		if diags.HasError() {
+			return diags
+		}
+
 		requestUpdateCredential = &fabcore.SharedAccessSignatureCredentials{
 			CredentialType: &credentialType,
 			Token:          cred.TokenWO.ValueStringPointer(),
+			TokenReference: kvRef,
 		}
 
 	case fabcore.CredentialTypeWorkspaceIdentity:
