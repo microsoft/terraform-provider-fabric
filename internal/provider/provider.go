@@ -86,6 +86,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tags"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
@@ -484,6 +485,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
 		sqldatabase.NewResourceSQLDatabase,
+		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
@@ -570,6 +572,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
+		tags.NewDataSourceTags,
+		tags.NewDataSourceTag,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,
 		report.NewDataSourceReport,

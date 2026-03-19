@@ -1,0 +1,20 @@
+# Create example with default scope
+resource "fabric_tag" "example" {
+  display_name = "example"
+}
+
+# Create example with explicit scope
+resource "fabric_tag" "example_scope" {
+  display_name = "example_scope"
+  scope = {
+    type = "Tenant"
+  }
+}
+
+#Update
+resource "fabric_tag" "example_update" {
+  display_name = "example_updated"
+  scope = {
+    type = "Tenant"
+  }
+}
