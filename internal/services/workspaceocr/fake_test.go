@@ -64,13 +64,13 @@ func NewRandomWorkspaceOutboundConnections() fabcore.WorkspaceOutboundConnection
 				DefaultAction:  new(fabcore.ConnectionAccessActionTypeDeny),
 				AllowedEndpoints: []fabcore.ConnectionRuleEndpointMetadata{
 					{
-						HostNamePattern: new("*.microsoft.com"),
+						HostnamePattern: new("*.microsoft.com"),
 					},
 				},
 				AllowedWorkspaces: []fabcore.ConnectionRuleWorkspaceMetadata{},
 			},
 			{
-				ConnectionType:   new("Lakehouse"),
+				ConnectionType:   new("LAKEHOUSE"),
 				DefaultAction:    new(fabcore.ConnectionAccessActionTypeDeny),
 				AllowedEndpoints: []fabcore.ConnectionRuleEndpointMetadata{},
 				AllowedWorkspaces: []fabcore.ConnectionRuleWorkspaceMetadata{

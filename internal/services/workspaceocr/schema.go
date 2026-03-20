@@ -66,12 +66,12 @@ func itemSchema() superschema.Schema {
 					Default: listdefault.StaticValue(types.ListValueMust(
 						types.ObjectType{
 							AttrTypes: map[string]attr.Type{
-								"connection_type": types.StringType,
+								"connection_type": customtypes.CaseInsensitiveStringType{},
 								"default_action":  types.StringType,
 								"allowed_endpoints": types.ListType{
 									ElemType: types.ObjectType{
 										AttrTypes: map[string]attr.Type{
-											"host_name_pattern": types.StringType,
+											"hostname_pattern": types.StringType,
 										},
 									},
 								},
@@ -91,6 +91,7 @@ func itemSchema() superschema.Schema {
 					"connection_type": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "Specifies the cloud connection type to which the rule applies. The behavior and applicability of other rule properties (such as allowedEndpoints or allowedWorkspaces) may vary depending on the capabilities of connection type.",
+							CustomType:          customtypes.CaseInsensitiveStringType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
@@ -123,14 +124,14 @@ func itemSchema() superschema.Schema {
 							Default: listdefault.StaticValue(types.ListValueMust(
 								types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-										"host_name_pattern": types.StringType,
+										"hostname_pattern": types.StringType,
 									},
 								},
 								[]attr.Value{},
 							)),
 						},
 						Attributes: superschema.Attributes{
-							"host_name_pattern": superschema.SuperStringAttribute{
+							"hostname_pattern": superschema.SuperStringAttribute{
 								Common: &schemaR.StringAttribute{
 									MarkdownDescription: "A wildcard-supported pattern that defines the allowed external endpoint. Examples include *.microsoft.com, api.contoso.com, or data.partner.org.",
 								},

@@ -54,7 +54,7 @@ Read-Only:
 
 Read-Only:
 
-- `host_name_pattern` (String) A wildcard-supported pattern that defines the allowed external endpoint. Examples include *.microsoft.com, api.contoso.com, or data.partner.org.
+- `hostname_pattern` (String) A wildcard-supported pattern that defines the allowed external endpoint. Examples include *.microsoft.com, api.contoso.com, or data.partner.org.
 
 <a id="nestedatt--rules--allowed_workspaces"></a>
 

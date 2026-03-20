@@ -23,7 +23,7 @@ type baseWorkspaceOutboundCloudConnectionRulesModel struct {
 }
 
 type rulesModel struct {
-	ConnectionType    types.String                                       `tfsdk:"connection_type"`
+	ConnectionType    customtypes.CaseInsensitiveString                  `tfsdk:"connection_type"`
 	DefaultAction     types.String                                       `tfsdk:"default_action"`
 	AllowedEndpoints  supertypes.ListNestedObjectValueOf[endpointModel]  `tfsdk:"allowed_endpoints"`
 	AllowedWorkspaces supertypes.ListNestedObjectValueOf[workspaceModel] `tfsdk:"allowed_workspaces"`
@@ -34,7 +34,7 @@ type workspaceModel struct {
 }
 
 type endpointModel struct {
-	HostNamePattern types.String `tfsdk:"host_name_pattern"`
+	HostnamePattern types.String `tfsdk:"hostname_pattern"`
 }
 
 func (to *baseWorkspaceOutboundCloudConnectionRulesModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceOutboundConnections) diag.Diagnostics {
@@ -61,7 +61,7 @@ func (to *baseWorkspaceOutboundCloudConnectionRulesModel) set(ctx context.Contex
 }
 
 func (to *rulesModel) set(ctx context.Context, from fabcore.OutboundConnectionRule) diag.Diagnostics {
-	to.ConnectionType = types.StringPointerValue(from.ConnectionType)
+	to.ConnectionType = customtypes.NewCaseInsensitiveStringPointerValue(from.ConnectionType)
 	to.DefaultAction = types.StringPointerValue((*string)(from.DefaultAction))
 
 	allowedEndpoints := make([]*endpointModel, 0, len(from.AllowedEndpoints))
@@ -90,7 +90,7 @@ func (to *rulesModel) set(ctx context.Context, from fabcore.OutboundConnectionRu
 }
 
 func (to *endpointModel) set(from fabcore.ConnectionRuleEndpointMetadata) {
-	to.HostNamePattern = types.StringPointerValue(from.HostNamePattern)
+	to.HostnamePattern = types.StringPointerValue(from.HostnamePattern)
 }
 
 func (to *workspaceModel) set(from fabcore.ConnectionRuleWorkspaceMetadata) {
@@ -144,7 +144,7 @@ func (to *requestSetWorkspaceOutboundCloudConnectionRules) set(ctx context.Conte
 		endpointsSlice := make([]fabcore.ConnectionRuleEndpointMetadata, 0, len(endpoints))
 		for _, endpoint := range endpoints {
 			endpointM := fabcore.ConnectionRuleEndpointMetadata{
-				HostNamePattern: endpoint.HostNamePattern.ValueStringPointer(),
+				HostnamePattern: endpoint.HostnamePattern.ValueStringPointer(),
 			}
 			endpointsSlice = append(endpointsSlice, endpointM)
 		}

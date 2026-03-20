@@ -7,7 +7,7 @@ resource "fabric_workspace_outbound_cloud_connection_rules" "example" {
       default_action : "Deny",
       allowed_endpoints = [
         {
-          host_name_pattern = "*.microsoft.com"
+          hostname_pattern = "*.microsoft.com"
         }
       ]
     },
