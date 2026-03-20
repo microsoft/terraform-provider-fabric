@@ -98,11 +98,11 @@ func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 		Recipient: &fabcore.ExternalDataShareRecipient{
 			UserPrincipalName: new(testhelp.RandomName()),
 		},
-		CreatorPrincipal: &fabcore.Principal{
+		CreatorPrincipal: &fabcore.UserPrincipal{
 			ID:          new(testhelp.RandomUUID()),
 			DisplayName: new(testhelp.RandomName()),
 			Type:        to.Ptr(fabcore.PrincipalTypeUser),
-			UserDetails: &fabcore.PrincipalUserDetails{
+			UserDetails: &fabcore.UserPrincipalUserDetails{
 				UserPrincipalName: new(testhelp.RandomName()),
 			},
 		},

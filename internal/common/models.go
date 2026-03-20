@@ -1,7 +1,7 @@
 // Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package common //revive:disable-line:var-naming
+package common //revive:disable-line:package-naming
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

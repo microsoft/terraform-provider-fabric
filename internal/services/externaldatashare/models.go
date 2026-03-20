@@ -109,7 +109,7 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 
 	if from.CreatorPrincipal != nil {
 		creatorPrincipalModel := &common.PrincipalModel{}
-		creatorPrincipalModel.Set(*from.CreatorPrincipal)
+		creatorPrincipalModel.Set(*from.CreatorPrincipal.GetPrincipal())
 
 		if diags := to.PrincipalModel.Set(ctx, creatorPrincipalModel); diags.HasError() {
 			return diags
