@@ -92,6 +92,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
@@ -489,6 +490,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		warehousesnapshot.NewResourceWarehouseSnapshot,
 		workspace.NewResourceWorkspace,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
+		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
 		workspacera.NewResourceWorkspaceRoleAssignment,
@@ -595,6 +597,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
 		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
+		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,

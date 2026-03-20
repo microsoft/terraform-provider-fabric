@@ -108,8 +108,8 @@ func TestUnit_ItemJobSchedulerDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(*entity.Enabled)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity.CreatedDateTime.Format(time.RFC3339)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.ID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.Type)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.GetPrincipal().ID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.GetPrincipal().Type)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", string(*entity.Configuration.GetScheduleConfig().Type)),
