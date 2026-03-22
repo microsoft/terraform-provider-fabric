@@ -43,6 +43,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connectionra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/cosmosdb"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
@@ -444,6 +445,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
+		cosmosdb.NewResourceCosmosDB,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
@@ -509,6 +511,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		connectionra.NewDataSourceConnectionRoleAssignments,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
+		cosmosdb.NewDataSourceCosmosDB,
+		cosmosdb.NewDataSourceCosmosDBs,
 		dashboard.NewDataSourceDashboards,
 		dataflow.NewDataSourceDataflow,
 		dataflow.NewDataSourceDataflows,
