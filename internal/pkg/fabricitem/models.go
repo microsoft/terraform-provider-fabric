@@ -4,14 +4,41 @@
 package fabricitem
 
 import (
+	"context"
 	"reflect"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
+
+type sensitivityLabelSettingsModel struct {
+	LabelID                       customtypes.UUID `tfsdk:"label_id"`
+	SensitivityLabelApplyStrategy types.String     `tfsdk:"sensitivity_label_apply_strategy"`
+}
+
+type sensitivityLabelModel struct {
+	LabelID customtypes.UUID `tfsdk:"label_id"`
+}
+
+func newSensitivityLabelFromAPI(ctx context.Context, sl *fabcore.SensitivityLabel) (supertypes.SingleNestedObjectValueOf[sensitivityLabelModel], diag.Diagnostics) {
+	result := supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
+
+	if sl != nil && sl.ID != nil {
+		slSettingsModel := &sensitivityLabelModel{
+			LabelID: customtypes.NewUUIDPointerValue(sl.ID),
+		}
+
+		if diags := result.Set(ctx, slSettingsModel); diags.HasError() {
+			return result, diags
+		}
+	}
+
+	return result, nil
+}
 
 type fabricItemModel struct {
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
@@ -27,6 +54,31 @@ func (to *fabricItemModel) set(from fabcore.Item) {
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
+}
+
+type dataSourceFabricItemBaseModel struct {
+	fabricItemModel
+
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+}
+
+func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
+	to.fabricItemModel.set(from)
+
+	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.SensitivityLabel = sl
+
+	return nil
+}
+
+type resourceFabricItemBaseModel struct {
+	fabricItemModel
+
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
 }
 
 type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
@@ -46,6 +98,31 @@ func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProp
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 }
 
+type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+}
+
+func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
+	to.FabricItemPropertiesModel.set(from)
+
+	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.SensitivityLabel = sl
+
+	return nil
+}
+
+type ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
+}
+
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported
 	fabcore.Item
 
@@ -63,6 +140,7 @@ func (to *FabricItemProperties[Titemprop]) Set(from any) {
 	to.DisplayName = getFieldStringValue(fromValue, "DisplayName")
 	to.Description = getFieldStringValue(fromValue, "Description")
 	to.FolderID = getFieldStringValue(fromValue, "FolderID")
+	to.SensitivityLabel = getFieldStructValue[fabcore.SensitivityLabel](fromValue, "SensitivityLabel")
 	to.Properties = getFieldStructValue[Titemprop](fromValue, "Properties")
 }
 

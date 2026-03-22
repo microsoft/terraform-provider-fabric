@@ -64,6 +64,7 @@ output "example_definition_bim_object" {
 - `description` (String) The Semantic Model description.
 - `display_name` (String) The Semantic Model display name.
 - `folder_id` (String) The Semantic Model Folder ID.
+- `sensitivity_label` (Attributes) The Semantic Model sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -81,3 +82,11 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

@@ -153,6 +153,10 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -163,6 +167,10 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	}
 
 	plan.set(respCreate.Item)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -379,9 +387,11 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 	}
 
 	state := resourceFabricItemDefinitionModel{
-		fabricItemModel: fabricItemModel{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
+		resourceFabricItemBaseModel: resourceFabricItemBaseModel{
+			fabricItemModel: fabricItemModel{
+				ID:          uuidFabricItemID,
+				WorkspaceID: uuidWorkspaceID,
+			},
 		},
 		DefinitionUpdateEnabled: definitionUpdateEnabled,
 		Definition:              definition,

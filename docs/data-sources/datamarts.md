@@ -57,4 +57,13 @@ Read-Only:
 - `display_name` (String) The Datamart display name.
 - `folder_id` (String) The Datamart Folder ID.
 - `id` (String) The Datamart ID.
+- `sensitivity_label` (Attributes) The Datamart sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
