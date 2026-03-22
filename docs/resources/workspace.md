@@ -49,6 +49,7 @@ resource "fabric_workspace" "example2" {
 - `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `description` (String) The Workspace description. Value defaults to ``. String length must be at most 4000.
 - `identity` (Attributes) A workspace identity (see [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information). (see [below for nested schema](#nestedatt--identity))
+- `skip_capacity_state_validation` (Boolean) Whether to skip the capacity state validation. When set to `true`, the provider will not call the [List Capacities API](https://learn.microsoft.com/rest/api/fabric/core/capacities/list-capacities) to validate that the Fabric Capacity is active. This is useful when the caller does not have the necessary permissions to list capacities. `true` - Skip the capacity state validation, `false` - Do not skip the capacity state validation. Value defaults to `false`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -60,7 +61,6 @@ resource "fabric_workspace" "example2" {
 - `type` (String) The Workspace type.
 
 <a id="nestedatt--identity"></a>
-
 ### Nested Schema for `identity`
 
 Required:
@@ -72,8 +72,8 @@ Read-Only:
 - `application_id` (String) The application ID.
 - `service_principal_id` (String) The service principal ID.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -83,8 +83,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--onelake_endpoints"></a>
 
+<a id="nestedatt--onelake_endpoints"></a>
 ### Nested Schema for `onelake_endpoints`
 
 Read-Only:

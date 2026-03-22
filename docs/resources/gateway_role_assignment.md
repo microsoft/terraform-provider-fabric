@@ -44,7 +44,6 @@ resource "fabric_gateway_role_assignment" "example" {
 - `id` (String) The Gateway Role Assignment ID.
 
 <a id="nestedatt--principal"></a>
-
 ### Nested Schema for `principal`
 
 Required:
@@ -52,8 +51,8 @@ Required:
 - `id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The principal ID.
 - `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the principal. Value must be one of : `Group`, `ServicePrincipal`, `ServicePrincipalProfile`, `User`.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

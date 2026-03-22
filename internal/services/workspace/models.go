@@ -90,7 +90,8 @@ DATA-SOURCE
 type dataSourceWorkspaceModel struct {
 	baseWorkspaceInfoModel
 
-	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
+	SkipCapacityStateValidation types.Bool      `tfsdk:"skip_capacity_state_validation"`
+	Timeouts                    timeoutsD.Value `tfsdk:"timeouts"`
 }
 
 /*
@@ -121,7 +122,8 @@ RESOURCE
 type resourceWorkspaceModel struct {
 	baseWorkspaceInfoModel
 
-	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+	SkipCapacityStateValidation types.Bool      `tfsdk:"skip_capacity_state_validation"`
+	Timeouts                    timeoutsR.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateWorkspace struct {

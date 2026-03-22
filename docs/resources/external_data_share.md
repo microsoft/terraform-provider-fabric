@@ -60,7 +60,6 @@ resource "fabric_external_data_share" "example_with_tenant" {
 - `status` (String) The status of the external data share. Value must be one of : `Active`, `InvitationExpired`, `Pending`, `Revoked`.
 
 <a id="nestedatt--recipient"></a>
-
 ### Nested Schema for `recipient`
 
 Required:
@@ -71,8 +70,8 @@ Optional:
 
 - `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID of the recipient.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -82,8 +81,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--principal_model"></a>
 
+<a id="nestedatt--principal_model"></a>
 ### Nested Schema for `principal_model`
 
 Read-Only:

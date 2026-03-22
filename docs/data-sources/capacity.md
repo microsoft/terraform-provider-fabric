@@ -62,7 +62,6 @@ data "fabric_capacity" "example" {
 - `state` (String) The Capacity state. Value must be one of : `Active`, `Inactive`.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:

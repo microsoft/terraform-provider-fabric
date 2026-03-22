@@ -245,6 +245,33 @@ func TestUnit_WorkspaceResource_NoCapacity_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_WorkspaceResource_SkipCapacityStateValidation_CRUD(t *testing.T) {
+	// Create a capacity but don't register it to simulate the user not having
+	// permission to list capacities
+	unregisteredCapacity := fakes.NewRandomCapacity()
+
+	entityBefore := fakes.NewRandomWorkspaceInfo(unregisteredCapacity.ID)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read - with skip_capacity_state_validation
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                    *entityBefore.DisplayName,
+					"skip_capacity_state_validation": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "skip_capacity_state_validation", "true"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)

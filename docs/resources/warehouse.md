@@ -46,7 +46,6 @@ resource "fabric_warehouse" "example2" {
 - `configuration` (Attributes) The Warehouse creation configuration.
 
 Any changes to this configuration will result in recreation of the Warehouse. (see [below for nested schema](#nestedatt--configuration))
-
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Folder ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -57,15 +56,14 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--configuration"></a>
-
 ### Nested Schema for `configuration`
 
 Required:
 
 - `collation_type` (String) The collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 
-<a id="nestedatt--timeouts"></a>
 
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -75,8 +73,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--properties"></a>
 
+<a id="nestedatt--properties"></a>
 ### Nested Schema for `properties`
 
 Read-Only:
