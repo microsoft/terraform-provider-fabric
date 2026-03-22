@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Lakehouse Folder ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label_settings` (Attributes) The Lakehouse sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -116,3 +117,12 @@ Read-Only:
 - `connection_string` (String) SQL endpoint connection string.
 - `id` (String) SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--sensitivity_label_settings"></a>
+
+### Nested Schema for `sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

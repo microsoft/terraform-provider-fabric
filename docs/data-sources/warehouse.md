@@ -53,6 +53,7 @@ data "fabric_warehouse" "example_by_name" {
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Warehouse Folder ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label_settings` (Attributes) The Warehouse sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -72,3 +73,12 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.
+
+<a id="nestedatt--sensitivity_label_settings"></a>
+
+### Nested Schema for `sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

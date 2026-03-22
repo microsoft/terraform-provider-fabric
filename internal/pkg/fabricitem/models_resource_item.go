@@ -43,6 +43,28 @@ func (to *requestCreateFabricItem) setFolderID(v customtypes.UUID) {
 	to.FolderID = v.ValueStringPointer()
 }
 
+func (to *requestCreateFabricItem) setSensitivityLabelSettings(ctx context.Context, v supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel]) diag.Diagnostics {
+	if !v.IsNull() && !v.IsUnknown() {
+		slModel, diags := v.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		settings := &fabcore.SensitivityLabelSettings{
+			LabelID: slModel.LabelID.ValueStringPointer(),
+		}
+
+		if !slModel.SensitivityLabelApplyStrategy.IsNull() && !slModel.SensitivityLabelApplyStrategy.IsUnknown() {
+			strategy := fabcore.SensitivityLabelApplyStrategy(slModel.SensitivityLabelApplyStrategy.ValueString())
+			settings.SensitivityLabelApplyStrategy = &strategy
+		}
+
+		to.SensitivityLabelSettings = settings
+	}
+
+	return nil
+}
+
 func (to *requestCreateFabricItem) setType(v fabcore.ItemType) {
 	to.Type = &v
 }

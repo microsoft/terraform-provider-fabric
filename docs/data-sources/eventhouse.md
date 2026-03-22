@@ -77,6 +77,7 @@ output "example_definition_content_object" {
 - `description` (String) The Eventhouse description.
 - `folder_id` (String) The Eventhouse Folder ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label_settings` (Attributes) The Eventhouse sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -105,3 +106,12 @@ Read-Only:
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `minimum_consumption_units` (Number) Use Minimum consumption for highly time-sensitive systems to keep the service always available at a selected minimum level. You pay for the minimum consumption level or actual consumption if above the minimum. Supported values include`0`, `13`, `18`, `2.25`, `26`, `34`, `4.25`, `50`, `8.5` or any number between `51` and `322`. For more information, see [minimum consumption](https://learn.microsoft.com/fabric/real-time-intelligence/eventhouse#minimum-consumption)
 - `query_service_uri` (String) Query service URI.
+
+<a id="nestedatt--sensitivity_label_settings"></a>
+
+### Nested Schema for `sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

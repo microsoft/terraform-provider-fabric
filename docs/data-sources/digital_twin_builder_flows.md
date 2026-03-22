@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Digital Twin Builder Flow Folder ID.
 - `id` (String) The Digital Twin Builder Flow ID.
 - `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label_settings` (Attributes) The Digital Twin Builder Flow sensitivity label settings. (see [below for nested schema](#nestedatt--values--sensitivity_label_settings))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -77,3 +78,12 @@ Read-Only:
 - `item_id` (String) The DigitalTwinBuilderFlow item ID.
 - `reference_type` (String) The DigitalTwinBuilderFlow reference type.
 - `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.
+
+<a id="nestedatt--values--sensitivity_label_settings"></a>
+
+### Nested Schema for `values.sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

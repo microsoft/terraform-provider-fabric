@@ -57,4 +57,14 @@ Read-Only:
 - `display_name` (String) The Activator display name.
 - `folder_id` (String) The Activator Folder ID.
 - `id` (String) The Activator ID.
+- `sensitivity_label_settings` (Attributes) The Activator sensitivity label settings. (see [below for nested schema](#nestedatt--values--sensitivity_label_settings))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label_settings"></a>
+
+### Nested Schema for `values.sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.
