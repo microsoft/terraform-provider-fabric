@@ -16,26 +16,12 @@ import (
 )
 
 type dataSourceFabricItemDefinitionModel struct {
-	fabricItemModel
+	dataSourceFabricItemBaseModel
 
-	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel]                `tfsdk:"sensitivity_label"`
 	Format           types.String                                                               `tfsdk:"format"`
 	OutputDefinition types.Bool                                                                 `tfsdk:"output_definition"`
 	Definition       supertypes.MapNestedObjectValueOf[dataSourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
 	Timeouts         timeouts.Value                                                             `tfsdk:"timeouts"`
-}
-
-func (to *dataSourceFabricItemDefinitionModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
-	to.fabricItemModel.set(from)
-
-	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
-	if diags.HasError() {
-		return diags
-	}
-
-	to.SensitivityLabel = sl
-
-	return nil
 }
 
 func (to *dataSourceFabricItemDefinitionModel) setDefinition(v supertypes.MapNestedObjectValueOf[dataSourceFabricItemDefinitionPartModel]) {

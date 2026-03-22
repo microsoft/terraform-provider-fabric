@@ -56,6 +56,31 @@ func (to *fabricItemModel) set(from fabcore.Item) {
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 }
 
+type dataSourceFabricItemBaseModel struct {
+	fabricItemModel
+
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+}
+
+func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
+	to.fabricItemModel.set(from)
+
+	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.SensitivityLabel = sl
+
+	return nil
+}
+
+type resourceFabricItemBaseModel struct {
+	fabricItemModel
+
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
+}
+
 type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
 	WorkspaceID customtypes.UUID                              `tfsdk:"workspace_id"`
 	ID          customtypes.UUID                              `tfsdk:"id"`
@@ -71,6 +96,31 @@ func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProp
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
+}
+
+type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+}
+
+func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
+	to.FabricItemPropertiesModel.set(from)
+
+	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.SensitivityLabel = sl
+
+	return nil
+}
+
+type ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
+
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
 }
 
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported

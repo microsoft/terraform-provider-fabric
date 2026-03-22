@@ -9,9 +9,8 @@ import (
 )
 
 type ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
-	FabricItemPropertiesModel[Ttfprop, Titemprop]
+	ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
 
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
-	Configuration            supertypes.SingleNestedObjectValueOf[Ttfconfig]                     `tfsdk:"configuration"`
-	Timeouts                 timeouts.Value                                                      `tfsdk:"timeouts"`
+	Configuration supertypes.SingleNestedObjectValueOf[Ttfconfig] `tfsdk:"configuration"`
+	Timeouts      timeouts.Value                                  `tfsdk:"timeouts"`
 }

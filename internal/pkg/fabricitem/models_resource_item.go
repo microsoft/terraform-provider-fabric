@@ -17,10 +17,9 @@ import (
 )
 
 type resourceFabricItemModel struct {
-	fabricItemModel
+	resourceFabricItemBaseModel
 
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
-	Timeouts                 timeouts.Value                                                      `tfsdk:"timeouts"`
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 type requestCreateFabricItem struct {

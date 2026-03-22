@@ -5,12 +5,10 @@ package fabricitem
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 type ResourceFabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
-	FabricItemPropertiesModel[Ttfprop, Titemprop]
+	ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
 
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
-	Timeouts                 timeouts.Value                                                      `tfsdk:"timeouts"`
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
