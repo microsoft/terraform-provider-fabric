@@ -243,6 +243,9 @@ function Set-FabricItem {
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
     }
+    'CosmosDB' {
+      $itemEndpoint = 'cosmosDbDatabases'
+    }
     'Dataflow' {
       $itemEndpoint = 'dataflows'
     }
@@ -1177,6 +1180,7 @@ $itemNaming = @{
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
   'CopyJob'                         = 'cj'
+  'CosmosDB'                        = 'cdb'
   'Dashboard'                       = 'dash'
   'Dataflow'                        = 'df'
   'Datamart'                        = 'dm'
@@ -1332,7 +1336,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
