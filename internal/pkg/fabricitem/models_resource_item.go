@@ -19,7 +19,8 @@ import (
 type resourceFabricItemModel struct {
 	fabricItemModel
 
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
+	Timeouts                 timeouts.Value                                                      `tfsdk:"timeouts"`
 }
 
 type requestCreateFabricItem struct {
@@ -50,16 +51,12 @@ func (to *requestCreateFabricItem) setSensitivityLabelSettings(ctx context.Conte
 			return diags
 		}
 
-		settings := &fabcore.SensitivityLabelSettings{
-			LabelID: slModel.LabelID.ValueStringPointer(),
-		}
+		strategy := fabcore.SensitivityLabelApplyStrategy(slModel.SensitivityLabelApplyStrategy.ValueString())
 
-		if !slModel.SensitivityLabelApplyStrategy.IsNull() && !slModel.SensitivityLabelApplyStrategy.IsUnknown() {
-			strategy := fabcore.SensitivityLabelApplyStrategy(slModel.SensitivityLabelApplyStrategy.ValueString())
-			settings.SensitivityLabelApplyStrategy = &strategy
+		to.SensitivityLabelSettings = &fabcore.SensitivityLabelSettings{
+			LabelID:                       slModel.LabelID.ValueStringPointer(),
+			SensitivityLabelApplyStrategy: &strategy,
 		}
-
-		to.SensitivityLabelSettings = settings
 	}
 
 	return nil

@@ -166,7 +166,9 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Item)...); resp.Diagnostics.HasError() {
+	plan.set(respCreate.Item)
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -417,5 +419,7 @@ func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceF
 		return diags
 	}
 
-	return model.set(ctx, respGet.Item)
+	model.set(respGet.Item)
+
+	return nil
 }

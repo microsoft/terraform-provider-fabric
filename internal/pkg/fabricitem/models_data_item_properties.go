@@ -4,11 +4,29 @@
 package fabricitem
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 )
 
 type DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
 	FabricItemPropertiesModel[Ttfprop, Titemprop]
 
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+	Timeouts         timeouts.Value                                              `tfsdk:"timeouts"`
+}
+
+func (to *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
+	to.FabricItemPropertiesModel.set(from)
+
+	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
+	if diags.HasError() {
+		return diags
+	}
+
+	to.SensitivityLabel = sl
+
+	return nil
 }

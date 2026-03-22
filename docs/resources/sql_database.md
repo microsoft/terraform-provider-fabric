@@ -86,12 +86,7 @@ Any changes to this configuration will result in recreation of the SQL Database.
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The SQL Database format. Possible values: `dacpac`, `sqlproj`
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. Once set, changing this value will force recreation of the resource. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
-
-
-
-
-
+- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -99,7 +94,6 @@ Any changes to this configuration will result in recreation of the SQL Database.
 - `id` (String) The SQL Database ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
 
-<<<<<<< HEAD
 <a id="nestedatt--configuration"></a>
 
 ### Nested Schema for `configuration`
@@ -155,7 +149,7 @@ Required:
 - `find` (String) The find value of the parameter.
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
-=======
+
 <a id="nestedatt--sensitivity_label_settings"></a>
 
 ### Nested Schema for `sensitivity_label_settings`
@@ -166,8 +160,7 @@ Required:
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`.
->>>>>>> 9d1f099b (feat(fabric_item): added sensitivity label to fabric item)
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
 
 <a id="nestedatt--timeouts"></a>
 

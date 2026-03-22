@@ -125,7 +125,7 @@ Any changes to this configuration will result in recreation of the Eventhouse. (
 - `description` (String) The Eventhouse description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Eventhouse format. Possible values: `Default`
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. Once set, changing this value will force recreation of the resource. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -182,7 +182,7 @@ Required:
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -79,7 +79,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `RealTimeDashboard.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The KQL Dashboard description.
 - `folder_id` (String) The KQL Dashboard Folder ID.
-- `sensitivity_label_settings` (Attributes) The KQL Dashboard sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The KQL Dashboard sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -98,11 +98,10 @@ Read-Only:
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
+### Nested Schema for `sensitivity_label`
 
 Read-Only:
 
 - `label_id` (String) The sensitivity label ID.
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.
