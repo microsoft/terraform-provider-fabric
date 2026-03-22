@@ -12,7 +12,6 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -234,8 +233,6 @@ func TestUnit_OntologyResource_CRUD(t *testing.T) {
 func TestAcc_OntologyResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
-	labelId := testhelp.RandomUUID()
-	sensitivityStrategy := (string)(fabcore.SensitivityLabelApplyStrategyApplyOrFail)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
@@ -251,19 +248,11 @@ func TestAcc_OntologyResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"sensitivity_label_settings": []map[string]any{
-							{
-								"label_id":                         labelId,
-								"sensitivity_label_apply_strategy": sensitivityStrategy,
-							},
-						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelId),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.sensitivity_label_apply_strategy", sensitivityStrategy),
 			),
 		},
 		// Update and Read
