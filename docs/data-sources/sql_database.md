@@ -56,7 +56,7 @@ data "fabric_sql_database" "example_by_name" {
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The SQL Database Folder ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
-- `sensitivity_label_settings` (Attributes) The SQL Database sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The SQL Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -76,11 +76,10 @@ Read-Only:
 - `database_name` (String) The database name.
 - `server_fqdn` (String) The server fully qualified domain name (FQDN).
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
+### Nested Schema for `sensitivity_label`
 
 Read-Only:
 
 - `label_id` (String) The sensitivity label ID.
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

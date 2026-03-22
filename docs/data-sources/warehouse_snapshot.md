@@ -56,7 +56,7 @@ data "fabric_warehouse_snapshot" "example_by_name" {
 - `description` (String) The Warehouse Snapshot description.
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--properties))
-- `sensitivity_label_settings` (Attributes) The Warehouse Snapshot sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The Warehouse Snapshot sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -76,11 +76,10 @@ Read-Only:
 - `parent_warehouse_id` (String) The parent Warehouse ID.
 - `snapshot_date_time` (String) The current warehouse snapshot date and time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
+### Nested Schema for `sensitivity_label`
 
 Read-Only:
 
 - `label_id` (String) The sensitivity label ID.
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

@@ -55,7 +55,7 @@ data "fabric_ml_model" "example_by_name" {
 
 - `description` (String) The ML Model description.
 - `folder_id` (String) The ML Model Folder ID.
-- `sensitivity_label_settings` (Attributes) The ML Model sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The ML Model sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -65,11 +65,10 @@ Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
+### Nested Schema for `sensitivity_label`
 
 Read-Only:
 
 - `label_id` (String) The sensitivity label ID.
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

@@ -8,29 +8,47 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
+type dataSourceFabricItemListModel struct {
+	WorkspaceID      customtypes.UUID                                            `tfsdk:"workspace_id"`
+	ID               customtypes.UUID                                            `tfsdk:"id"`
+	DisplayName      types.String                                                `tfsdk:"display_name"`
+	Description      types.String                                                `tfsdk:"description"`
+	FolderID         customtypes.UUID                                            `tfsdk:"folder_id"`
+	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
+}
+
 type dataSourceFabricItemsModel struct {
-	WorkspaceID customtypes.UUID                                   `tfsdk:"workspace_id"`
-	Values      supertypes.SetNestedObjectValueOf[fabricItemModel] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                     `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                                 `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[dataSourceFabricItemListModel] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                                   `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabcore.Item) diag.Diagnostics {
-	slice := make([]*fabricItemModel, 0, len(from))
+	slice := make([]*dataSourceFabricItemListModel, 0, len(from))
 
 	for _, entity := range from {
-		var entityModel fabricItemModel
-
-		if diags := entityModel.set(ctx, entity); diags.HasError() {
+		sl, diags := newSensitivityLabelFromAPI(ctx, entity.SensitivityLabel)
+		if diags.HasError() {
 			return diags
 		}
 
-		slice = append(slice, &entityModel)
+		entityModel := &dataSourceFabricItemListModel{
+			WorkspaceID:      customtypes.NewUUIDPointerValue(entity.WorkspaceID),
+			ID:               customtypes.NewUUIDPointerValue(entity.ID),
+			DisplayName:      types.StringPointerValue(entity.DisplayName),
+			Description:      types.StringPointerValue(entity.Description),
+			FolderID:         customtypes.NewUUIDPointerValue(entity.FolderID),
+			SensitivityLabel: sl,
+		}
+
+		slice = append(slice, entityModel)
 	}
 
 	return to.Values.Set(ctx, slice)

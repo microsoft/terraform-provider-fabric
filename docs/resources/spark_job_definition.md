@@ -113,7 +113,7 @@ resource "fabric_spark_job_definition" "example_parameters" {
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. Once set, changing this value will force recreation of the resource. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -162,7 +162,7 @@ Required:
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
 
 <a id="nestedatt--timeouts"></a>
 

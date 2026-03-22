@@ -384,9 +384,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 		return diags
 	}
 
-	if diags := model.set(ctx, fabricItem); diags.HasError() {
-		return diags
-	}
+	model.set(fabricItem)
 
 	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

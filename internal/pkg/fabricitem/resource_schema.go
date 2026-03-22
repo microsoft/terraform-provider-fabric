@@ -207,7 +207,7 @@ func getResourceFabricItemBaseAttributes(
 			CustomType:          customtypes.UUIDType{},
 		},
 		"sensitivity_label_settings": schema.SingleNestedAttribute{
-			MarkdownDescription: "The sensitivity label settings. Once set, changing this value will force recreation of the resource.",
+			MarkdownDescription: "The sensitivity label settings.",
 			Optional:            true,
 			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelSettingsModel](ctx),
 			PlanModifiers: []planmodifier.Object{
@@ -221,10 +221,13 @@ func getResourceFabricItemBaseAttributes(
 				},
 				"sensitivity_label_apply_strategy": schema.StringAttribute{
 					MarkdownDescription: fmt.Sprintf(
-						"The strategy for applying the sensitivity label. Possible values: %s.",
+						"The strategy for applying the sensitivity label. Possible values: %s. Default: `%s`.",
 						utils.ConvertStringSlicesToString(fabcore.PossibleSensitivityLabelApplyStrategyValues(), true, true),
+						fabcore.SensitivityLabelApplyStrategyApplyOrFail,
 					),
 					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString(string(fabcore.SensitivityLabelApplyStrategyApplyOrFail)),
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleSensitivityLabelApplyStrategyValues(), true)...),
 					},

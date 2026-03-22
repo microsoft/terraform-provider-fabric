@@ -21,10 +21,11 @@ import (
 type resourceFabricItemDefinitionModel struct {
 	fabricItemModel
 
-	Format                  types.String                                                             `tfsdk:"format"`
-	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
-	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
-	Timeouts                timeouts.Value                                                           `tfsdk:"timeouts"`
+	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel]      `tfsdk:"sensitivity_label_settings"`
+	Format                   types.String                                                             `tfsdk:"format"`
+	DefinitionUpdateEnabled  types.Bool                                                               `tfsdk:"definition_update_enabled"`
+	Definition               supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
+	Timeouts                 timeouts.Value                                                           `tfsdk:"timeouts"`
 }
 
 type resourceFabricItemDefinitionPartModel struct {

@@ -57,14 +57,13 @@ Read-Only:
 - `display_name` (String) The ML Experiment display name.
 - `folder_id` (String) The ML Experiment Folder ID.
 - `id` (String) The ML Experiment ID.
-- `sensitivity_label_settings` (Attributes) The ML Experiment sensitivity label settings. (see [below for nested schema](#nestedatt--values--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The ML Experiment sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
 
-<a id="nestedatt--values--sensitivity_label_settings"></a>
+<a id="nestedatt--values--sensitivity_label"></a>
 
-### Nested Schema for `values.sensitivity_label_settings`
+### Nested Schema for `values.sensitivity_label`
 
 Read-Only:
 
 - `label_id` (String) The sensitivity label ID.
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.
