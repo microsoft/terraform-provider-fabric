@@ -10,12 +10,11 @@ import (
 )
 
 type ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
-	FabricItemPropertiesModel[Ttfprop, Titemprop]
+	ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
 
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel]      `tfsdk:"sensitivity_label_settings"`
-	Configuration            supertypes.SingleNestedObjectValueOf[Ttfconfig]                          `tfsdk:"configuration"`
-	Format                   types.String                                                             `tfsdk:"format"`
-	DefinitionUpdateEnabled  types.Bool                                                               `tfsdk:"definition_update_enabled"`
-	Definition               supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
-	Timeouts                 timeouts.Value                                                           `tfsdk:"timeouts"`
+	Configuration           supertypes.SingleNestedObjectValueOf[Ttfconfig]                          `tfsdk:"configuration"`
+	Format                  types.String                                                             `tfsdk:"format"`
+	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
+	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
+	Timeouts                timeouts.Value                                                           `tfsdk:"timeouts"`
 }

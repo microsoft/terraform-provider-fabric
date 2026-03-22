@@ -19,13 +19,12 @@ import (
 )
 
 type resourceFabricItemDefinitionModel struct {
-	fabricItemModel
+	resourceFabricItemBaseModel
 
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel]      `tfsdk:"sensitivity_label_settings"`
-	Format                   types.String                                                             `tfsdk:"format"`
-	DefinitionUpdateEnabled  types.Bool                                                               `tfsdk:"definition_update_enabled"`
-	Definition               supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
-	Timeouts                 timeouts.Value                                                           `tfsdk:"timeouts"`
+	Format                  types.String                                                             `tfsdk:"format"`
+	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
+	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
+	Timeouts                timeouts.Value                                                           `tfsdk:"timeouts"`
 }
 
 type resourceFabricItemDefinitionPartModel struct {
