@@ -154,6 +154,10 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -427,7 +431,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

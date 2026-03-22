@@ -153,6 +153,10 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -162,7 +166,9 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	plan.set(respCreate.Item)
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Item)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -411,7 +417,5 @@ func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceF
 		return diags
 	}
 
-	model.set(respGet.Item)
-
-	return nil
+	return model.set(ctx, respGet.Item)
 }

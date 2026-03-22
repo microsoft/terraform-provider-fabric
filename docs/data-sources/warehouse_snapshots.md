@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `id` (String) The Warehouse Snapshot ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label_settings` (Attributes) The Warehouse Snapshot sensitivity label settings. (see [below for nested schema](#nestedatt--values--sensitivity_label_settings))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -69,3 +70,12 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `parent_warehouse_id` (String) The parent Warehouse ID.
 - `snapshot_date_time` (String) The current warehouse snapshot date and time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+
+<a id="nestedatt--values--sensitivity_label_settings"></a>
+
+### Nested Schema for `values.sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.

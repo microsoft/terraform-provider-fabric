@@ -34,11 +34,24 @@ resource "fabric_graphql_api" "example" {
 
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label_settings` (Attributes) The sensitivity label settings. Once set, changing this value will force recreation of the resource. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `id` (String) The GraphQL API ID.
+
+<a id="nestedatt--sensitivity_label_settings"></a>
+
+### Nested Schema for `sensitivity_label_settings`
+
+Required:
+
+- `label_id` (String) The sensitivity label ID.
+
+Optional:
+
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`.
 
 <a id="nestedatt--timeouts"></a>
 

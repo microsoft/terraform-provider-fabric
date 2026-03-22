@@ -56,6 +56,7 @@ data "fabric_environment" "example_by_name" {
 - `description` (String) The Environment description.
 - `folder_id` (String) The Environment Folder ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label_settings` (Attributes) The Environment sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -109,3 +110,12 @@ Read-Only:
 Read-Only:
 
 - `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
+
+<a id="nestedatt--sensitivity_label_settings"></a>
+
+### Nested Schema for `sensitivity_label_settings`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
+- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label.
