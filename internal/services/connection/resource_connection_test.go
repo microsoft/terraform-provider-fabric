@@ -787,7 +787,7 @@ func TestUnit_ConnectionResource_WriteOnly_Credentials(t *testing.T) {
 	}))
 }
 
-func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
+func TestUnit_ConnectionResource_KeyVaultReference_WriteOnly_CRUD(t *testing.T) {
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create with Key credential type using key_reference
 		{
