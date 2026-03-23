@@ -25,6 +25,7 @@ func NewResourceOntology() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
 			mapvalidator.KeysAre(
 				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
