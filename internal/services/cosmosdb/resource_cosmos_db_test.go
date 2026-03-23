@@ -303,6 +303,15 @@ func TestAcc_CosmosDBDefinitionResource_CRUD(t *testing.T) {
 		},
 	}
 
+	testHelperUpdateDefinition := map[string]any{
+		`"definition.json"`: map[string]any{
+			"source": "${local.path}/definition.json.tmpl",
+			"tokens": map[string]any{
+				"ID": "TestData",
+			},
+		},
+	}
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
@@ -336,7 +345,7 @@ func TestAcc_CosmosDBDefinitionResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"description":  entityUpdateDescription,
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperUpdateDefinition,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
