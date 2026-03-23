@@ -457,6 +457,175 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 	}))
 }
 
+func TestUnit_ConnectionResource_CredentialsAttributes(t *testing.T) {
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - required credential block - KeyPair type without key_pair_credentials
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKeyPair),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
+		},
+		// error - exactly one of - neither key_wo nor key_reference provided
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKey),
+						"key_credentials":       map[string]any{},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
+		// error - exactly one of - both key_wo and key_reference provided
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKey),
+						"key_credentials": map[string]any{
+							"key_wo":         "my-key-value",
+							"key_wo_version": 1,
+							"key_reference": map[string]any{
+								"connection_id": testhelp.RandomUUID(),
+								"secret_name":   "my-secret",
+							},
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
+		// error - key_wo without key_wo_version
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKey),
+						"key_credentials": map[string]any{
+							"key_wo": "my-key-value",
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
+		// error - key_wo_version and key_reference provided
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKey),
+						"key_credentials": map[string]any{
+							"key_wo_version": 1,
+							"key_reference": map[string]any{
+								"connection_id": testhelp.RandomUUID(),
+								"secret_name":   "my-secret",
+							},
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
+	}))
+}
+
 func TestUnit_ConnectionResource_WriteOnly_Credentials(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Step 1: Test with basic_credentials and another credential type that will fail
@@ -613,6 +782,100 @@ func TestUnit_ConnectionResource_WriteOnly_Credentials(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.basic_credentials.username", "testuser"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.basic_credentials.password_wo_version", "2"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "true"),
+			),
+		},
+	}))
+}
+
+func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create with Key credential type using key_reference
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test-kvref-create",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKey),
+						"key_credentials": map[string]any{
+							"key_reference": map[string]any{
+								"connection_id": testhelp.RandomUUID(),
+								"secret_name":   "my-storage-key",
+							},
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-kvref-create"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connectivity_type", "ShareableCloud"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "privacy_level", "Organizational"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "connection_details.path"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.type", "FTP"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.connection_encryption", string(fabcore.ConnectionEncryptionNotEncrypted)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKey)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", string(fabcore.SingleSignOnTypeNone)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "credential_details.key_credentials.key_reference.connection_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_credentials.key_reference.secret_name", "my-storage-key"),
+			),
+		},
+		// Update - change to KeyPair credential type
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":      "test-kvref-create",
+					"connectivity_type": "ShareableCloud",
+					"privacy_level":     "Organizational",
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  true,
+						"credential_type":       string(fabcore.CredentialTypeKeyPair),
+						"key_pair_credentials": map[string]any{
+							"identifier":             "user",
+							"private_key_wo":         "my-private-key",
+							"private_key_wo_version": 1,
+							"passphrase_wo":          "my-passphrase",
+							"passphrase_wo_version":  1,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-kvref-create"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKeyPair)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_pair_credentials.identifier", "user"),
 			),
 		},
 	}))
@@ -1490,266 +1753,4 @@ func TestAcc_ConnectionResource_VirtualNetworkGateway(t *testing.T) {
 		},
 	},
 	))
-}
-
-func TestUnit_ConnectionResource_CredentialsAttributes(t *testing.T) {
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - required credential block - Key type without key_credentials
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
-		},
-		// error - required credential block - Basic type without basic_credentials
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeBasic),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
-		},
-		// error - exactly one of - neither key_wo nor key_reference provided
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-						"key_credentials":       map[string]any{},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
-		},
-		// error - exactly one of - both key_wo and key_reference provided
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-						"key_credentials": map[string]any{
-							"key_wo":         "my-key-value",
-							"key_wo_version": 1,
-							"key_reference": map[string]any{
-								"connection_id": testhelp.RandomUUID(),
-								"secret_name":   "my-secret",
-							},
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
-		},
-		// error - conflicting credential blocks
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-						"key_credentials": map[string]any{
-							"key_wo":         "my-key-value",
-							"key_wo_version": 1,
-						},
-						"basic_credentials": map[string]any{
-							"username":            "testuser",
-							"password_wo":         "testpass",
-							"password_wo_version": 1,
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`These attributes cannot be configured together`),
-		},
-	}))
-}
-
-func TestUnit_ConnectionResource_KeyVaultReference_CRUD(t *testing.T) {
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// Create with Key credential type using key_reference
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test-kvref-create",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKey),
-						"key_credentials": map[string]any{
-							"key_reference": map[string]any{
-								"connection_id": testhelp.RandomUUID(),
-								"secret_name":   "my-storage-key",
-							},
-						},
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-kvref-create"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "connectivity_type", "ShareableCloud"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "privacy_level", "Organizational"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "connection_details.path"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.type", "FTP"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.connection_encryption", string(fabcore.ConnectionEncryptionNotEncrypted)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKey)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", string(fabcore.SingleSignOnTypeNone)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "credential_details.key_credentials.key_reference.connection_id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_credentials.key_reference.secret_name", "my-storage-key"),
-			),
-		},
-		// Update - change to KeyPair credential type
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name":      "test-kvref-create",
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
-					"connection_details": map[string]any{
-						"type":            "FTP",
-						"creation_method": "FTP.Contents",
-						"parameters": []map[string]any{
-							{
-								"name":  "server",
-								"value": "ftp.example.com",
-							},
-						},
-					},
-					"credential_details": map[string]any{
-						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
-						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
-						"skip_test_connection":  true,
-						"credential_type":       string(fabcore.CredentialTypeKeyPair),
-						"key_pair_credentials": map[string]any{
-							"identifier":             "user",
-							"private_key_wo":         "my-private-key",
-							"private_key_wo_version": 1,
-							"passphrase_wo":          "my-passphrase",
-							"passphrase_wo_version":  1,
-						},
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", "test-kvref-create"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeKeyPair)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.key_pair_credentials.identifier", "user"),
-			),
-		},
-	}))
 }

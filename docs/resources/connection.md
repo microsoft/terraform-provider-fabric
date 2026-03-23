@@ -136,13 +136,14 @@ Read-Only:
 
 Required:
 
-- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
+- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `KeyPair`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
 
 Optional:
 
 - `basic_credentials` (Attributes) The basic credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `Basic` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--basic_credentials))
 - `connection_encryption` (String) The connection encryption type. Value defaults to `NotEncrypted`. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
 - `key_credentials` (Attributes) The key credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `Key` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_credentials))
+- `key_pair_credentials` (Attributes) The key pair credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `KeyPair` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--key_pair_credentials))
 - `service_principal_credentials` (Attributes) The service principal credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `ServicePrincipal` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials))
 - `shared_access_signature_credentials` (Attributes) The shared access signature credentials. If the value of [`<.credential_type`](#<.credential_type) attribute is `SharedAccessSignature` this attribute is **REQUIRED**. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials))
 - `single_sign_on_type` (String) The single sign-on type. Value defaults to `None`. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
@@ -154,18 +155,64 @@ Optional:
 
 Required:
 
-- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO).
-- `password_wo_version` (Number) The version of the `password_wo`.
 - `username` (String) The username.
+
+Optional:
+
+- `password_reference` (Attributes) The Key Vault reference for the password secret. (see [below for nested schema](#nestedatt--credential_details--basic_credentials--password_reference))
+- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO). Use password or password_reference. You can't use both at the same time. Ensure that one and only one attribute from this collection is set : `password_wo`, `password_reference`. Ensure that if an attribute is set, also these are set: "[<.password_wo_version]".
+- `password_wo_version` (Number) The version of the `password_wo`. Ensure that if an attribute is set, also these are set: "[<.password_wo]".
+
+<a id="nestedatt--credential_details--basic_credentials--password_reference"></a>
+
+### Nested Schema for `credential_details.basic_credentials.password_reference`
+
+Required:
+
+- `connection_id` (String) The connection ID of the Key Vault connection.
+- `secret_name` (String) The name of the secret in Key Vault.
+
+Optional:
+
+- `version` (String) The version of the secret in Key Vault.
 
 <a id="nestedatt--credential_details--key_credentials"></a>
 
 ### Nested Schema for `credential_details.key_credentials`
 
+Optional:
+
+- `key_reference` (Attributes) The Key Vault reference for the key secret. (see [below for nested schema](#nestedatt--credential_details--key_credentials--key_reference))
+- `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO). Ensure that one and only one attribute from this collection is set : `key_wo`, `key_reference`. Ensure that if an attribute is set, also these are set: "[<.key_wo_version]".
+- `key_wo_version` (Number) The version of the `key_wo`. Use key or key_reference. You can't use both at the same time. Ensure that if an attribute is set, also these are set: "[<.key_wo]".
+
+<a id="nestedatt--credential_details--key_credentials--key_reference"></a>
+
+### Nested Schema for `credential_details.key_credentials.key_reference`
+
 Required:
 
-- `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
-- `key_wo_version` (Number) The version of the `key_wo`.
+- `connection_id` (String) The connection ID of the Key Vault connection.
+- `secret_name` (String) The name of the secret in Key Vault.
+
+Optional:
+
+- `version` (String) The version of the secret in Key Vault.
+
+<a id="nestedatt--credential_details--key_pair_credentials"></a>
+
+### Nested Schema for `credential_details.key_pair_credentials`
+
+Required:
+
+- `identifier` (String) The identifier for the key.
+- `private_key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The private key based on PKCS #8 standard (WO). Ensure that if an attribute is set, also these are set: "[<.private_key_wo_version]".
+
+Optional:
+
+- `passphrase_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The passphrase for the private key if the private key is encrypted (WO). Ensure that if an attribute is set, also these are set: "[<.passphrase_wo_version]".
+- `passphrase_wo_version` (Number) The version of the `passphrase_wo`. Ensure that if an attribute is set, also these are set: "[<.passphrase_wo]".
+- `private_key_wo_version` (Number) The version of the `private_key_wo`. Ensure that if an attribute is set, also these are set: "[<.private_key_wo]".
 
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
@@ -174,18 +221,49 @@ Required:
 Required:
 
 - `client_id` (String) The client ID.
-- `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO).
-- `client_secret_wo_version` (Number) The version of the `client_secret_wo`.
 - `tenant_id` (String) The tenant ID.
+
+Optional:
+
+- `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO). Use client_secret or client_secret_reference. You can't use both at the same time. Ensure that one and only one attribute from this collection is set : `client_secret_wo`, `service_principal_secret_reference`. Ensure that if an attribute is set, also these are set: "[<.client_secret_wo_version]".
+- `client_secret_wo_version` (Number) The version of the `client_secret_wo`. Ensure that if an attribute is set, also these are set: "[<.client_secret_wo]".
+- `service_principal_secret_reference` (Attributes) The reference to a service principal secret stored in Azure Key Vault. Use servicePrincipalSecret or servicePrincipalSecretReference. You can't use both at the same time. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials--service_principal_secret_reference))
+
+<a id="nestedatt--credential_details--service_principal_credentials--service_principal_secret_reference"></a>
+
+### Nested Schema for `credential_details.service_principal_credentials.service_principal_secret_reference`
+
+Required:
+
+- `connection_id` (String) The connection ID of the Key Vault connection.
+- `secret_name` (String) The name of the secret in Key Vault.
+
+Optional:
+
+- `version` (String) The version of the secret in Key Vault.
 
 <a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
 
 ### Nested Schema for `credential_details.shared_access_signature_credentials`
 
+Optional:
+
+- `token_reference` (Attributes) The Key Vault reference for the SAS token secret. Use token or token_reference. You can't use both at the same time. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials--token_reference))
+- `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO). Ensure that one and only one attribute from this collection is set : `token_wo`, `token_reference`. Ensure that if an attribute is set, also these are set: "[<.token_wo_version]".
+- `token_wo_version` (Number) The version of the `token_wo`. Ensure that if an attribute is set, also these are set: "[<.token_wo]".
+
+<a id="nestedatt--credential_details--shared_access_signature_credentials--token_reference"></a>
+
+### Nested Schema for `credential_details.shared_access_signature_credentials.token_reference`
+
 Required:
 
-- `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO).
-- `token_wo_version` (Number) The version of the `token_wo`.
+- `connection_id` (String) The connection ID of the Key Vault connection.
+- `secret_name` (String) The name of the secret in Key Vault.
+
+Optional:
+
+- `version` (String) The version of the secret in Key Vault.
 
 <a id="nestedatt--timeouts"></a>
 

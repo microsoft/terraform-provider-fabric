@@ -7,6 +7,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
@@ -359,7 +360,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"password_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The password (WO). Use password or passwordReference. You can't use both at the same time.",
+									MarkdownDescription: "The password (WO). Use password or password_reference. You can't use both at the same time.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
@@ -367,6 +368,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											path.MatchRelative().AtParent().AtName("password_wo"),
 											path.MatchRelative().AtParent().AtName("password_reference"),
 										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo_version")),
 									},
 								},
 							},
@@ -374,6 +376,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `password_wo`.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo")),
+									},
 								},
 							},
 							"password_reference": kvReferenceSchemaBlock("The Key Vault reference for the password secret."),
@@ -403,13 +408,17 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											path.MatchRelative().AtParent().AtName("key_wo"),
 											path.MatchRelative().AtParent().AtName("key_reference"),
 										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key_wo_version")),
 									},
 								},
 							},
 							"key_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
-									MarkdownDescription: "The version of the `key_wo`. Use key or keyReference. You can't use both at the same time.",
+									MarkdownDescription: "The version of the `key_wo`. Use key or key_reference. You can't use both at the same time.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("key_wo")),
+									},
 								},
 							},
 							"key_reference": kvReferenceSchemaBlock("The Key Vault reference for the key secret."),
@@ -443,7 +452,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"client_secret_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The client secret (WO). Use clientSecret or clientSecretReference. You can't use both at the same time.",
+									MarkdownDescription: "The client secret (WO). Use client_secret or client_secret_reference. You can't use both at the same time.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
@@ -451,6 +460,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											path.MatchRelative().AtParent().AtName("client_secret_wo"),
 											path.MatchRelative().AtParent().AtName("service_principal_secret_reference"),
 										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("client_secret_wo_version")),
 									},
 								},
 							},
@@ -458,6 +468,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `client_secret_wo`.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("client_secret_wo")),
+									},
 								},
 							},
 							"service_principal_secret_reference": kvReferenceSchemaBlock(
@@ -490,12 +503,18 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									MarkdownDescription: "The private key based on PKCS #8 standard (WO).",
 									Required:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo_version")),
+									},
 								},
 							},
 							"private_key_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `private_key_wo`.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo")),
+									},
 								},
 							},
 							"passphrase_wo": superschema.StringAttribute{
@@ -503,12 +522,18 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									MarkdownDescription: "The passphrase for the private key if the private key is encrypted (WO).",
 									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("passphrase_wo_version")),
+									},
 								},
 							},
 							"passphrase_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `passphrase_wo`.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("passphrase_wo")),
+									},
 								},
 							},
 						},
@@ -537,6 +562,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											path.MatchRelative().AtParent().AtName("token_wo"),
 											path.MatchRelative().AtParent().AtName("token_reference"),
 										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("token_wo_version")),
 									},
 								},
 							},
@@ -544,9 +570,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `token_wo`.",
 									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("token_wo")),
+									},
 								},
 							},
-							"token_reference": kvReferenceSchemaBlock("The Key Vault reference for the SAS token secret. Use token or tokenReference. You can't use both at the same time."),
+							"token_reference": kvReferenceSchemaBlock("The Key Vault reference for the SAS token secret. Use token or token_reference. You can't use both at the same time."),
 						},
 					},
 				},

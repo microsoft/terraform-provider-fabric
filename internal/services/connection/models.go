@@ -172,11 +172,11 @@ type credentialsSharedAccessSignatureModel struct {
 }
 
 type credentialsKeyPairModel struct {
-	Identifier      types.String `tfsdk:"identifier"`
-	PrivateKeyWO    types.String `tfsdk:"private_key_wo"`
-	PrivateKeyWOVer types.Int32  `tfsdk:"private_key_wo_version"`
-	PassphraseWO    types.String `tfsdk:"passphrase_wo"`
-	PassphraseWOVer types.Int32  `tfsdk:"passphrase_wo_version"`
+	Identifier          types.String `tfsdk:"identifier"`
+	PrivateKeyWO        types.String `tfsdk:"private_key_wo"`
+	PrivateKeyWOVersion types.Int32  `tfsdk:"private_key_wo_version"`
+	PassphraseWO        types.String `tfsdk:"passphrase_wo"`
+	PassphraseWOVersion types.Int32  `tfsdk:"passphrase_wo_version"`
 }
 
 type credentialsKeyVaultReferenceModel struct {
