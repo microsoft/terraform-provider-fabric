@@ -169,6 +169,6 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
-# terraform import fabric_cosmos_db.example "<WorkspaceID>/<CosmosDBID>"
-terraform import fabric_cosmos_db.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
+# terraform import fabric_map.example "<WorkspaceID>/<MapID>"
+terraform import fabric_map.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
 ```
