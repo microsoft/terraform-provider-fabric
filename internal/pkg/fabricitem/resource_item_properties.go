@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -305,6 +306,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 				ID:          uuidFabricItemID,
 				WorkspaceID: uuidWorkspaceID,
 			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		Timeouts: timeout,
 	}

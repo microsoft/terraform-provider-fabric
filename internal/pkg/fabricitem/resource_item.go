@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -297,6 +298,7 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 	state := resourceFabricItemModel{}
 	state.ID = uuidFabricItemID
 	state.WorkspaceID = uuidWorkspaceID
+	state.SensitivityLabelSettings = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx)
 	state.Timeouts = timeout
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
