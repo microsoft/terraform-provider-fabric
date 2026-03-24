@@ -353,6 +353,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 				ID:          uuidFabricItemID,
 				WorkspaceID: uuidWorkspaceID,
 			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		Configuration: configuration,
 		Timeouts:      timeout,

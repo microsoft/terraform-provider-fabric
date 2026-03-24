@@ -466,6 +466,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 				ID:          uuidFabricItemID,
 				WorkspaceID: uuidWorkspaceID,
 			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		Configuration:           configuration,
 		DefinitionUpdateEnabled: definitionUpdateEnabled,

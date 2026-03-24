@@ -392,6 +392,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 				ID:          uuidFabricItemID,
 				WorkspaceID: uuidWorkspaceID,
 			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		DefinitionUpdateEnabled: definitionUpdateEnabled,
 		Definition:              definition,
