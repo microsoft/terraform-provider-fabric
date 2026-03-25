@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The SQL Databases data-source allows you to retrieve a list of Fabric SQL Databases https://learn.microsoft.com/fabric/database/sql/overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_databases (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The SQL Databases data-source allows you to retrieve a list of Fabric [SQL Databases](https://learn.microsoft.com/fabric/database/sql/overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -66,6 +63,10 @@ Read-Only:
 
 Read-Only:
 
+- `backup_retention_days` (Number) The backup retention period in days.
+- `collation` (String) The collation of the SQL database.
 - `connection_string` (String) The connection string of the database.
 - `database_name` (String) The database name.
+- `earliest_restore_point` (String) The earliest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+- `latest_restore_point` (String) The latest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `server_fqdn` (String) The server fully qualified domain name (FQDN).

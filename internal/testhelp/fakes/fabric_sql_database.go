@@ -5,6 +5,7 @@ package fakes
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -142,9 +143,13 @@ func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties: &fabsqldatabase.Properties{
-			ConnectionString: new(testhelp.RandomName()),
-			DatabaseName:     new(testhelp.RandomName()),
-			ServerFqdn:       new(testhelp.RandomName()),
+			ConnectionString:     new(testhelp.RandomName()),
+			DatabaseName:         new(testhelp.RandomName()),
+			ServerFqdn:           new(testhelp.RandomName()),
+			BackupRetentionDays:  to.Ptr(int32(testhelp.RandomIntRange(1, 35))),
+			Collation:            to.Ptr("SQL_Latin1_General_CP1_CI_AS"),
+			EarliestRestorePoint: to.Ptr(time.Now().Add(-24 * time.Hour).UTC().Truncate(time.Second)),
+			LatestRestorePoint:   to.Ptr(time.Now().UTC().Truncate(time.Second)),
 		},
 	}
 }
