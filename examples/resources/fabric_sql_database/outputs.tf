@@ -14,10 +14,6 @@ output "example_restore_by_variable" {
   value = fabric_sql_database.example_restore_by_variable
 }
 
-output "example_dacpac" {
-  value = fabric_sql_database.example_dacpac
-}
-
 output "example_sqlproj" {
   value = fabric_sql_database.example_sqlproj
 }

@@ -839,6 +839,7 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.backup_retention_days"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.dbo/Tables/TestTable.sql.source_content_sha256"),
 			),
 		},
 	}))

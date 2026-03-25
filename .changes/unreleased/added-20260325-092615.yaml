@@ -1,5 +1,5 @@
 kind: added
-body: Enhanced `fabric_sql_database` data source by adding properties, definition and creation payload support
+body: Enhanced `fabric_sql_database` data source by adding properties and definition output
 time: 2026-03-25T09:26:15.758634883Z
 custom:
-    Issue: "873"
+  Issue: "873"

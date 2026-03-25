@@ -47,34 +47,18 @@ resource "fabric_sql_database" "example_restore_by_variable" {
   }
 }
 
-# Example 5 - Item with definition only - deploy a DACPAC
-resource "fabric_sql_database" "example_dacpac" {
-  display_name = "example_dacpac"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "dacpac"
-
-  definition = {
-    "sqldb.dacpac" = {
-      source = "${local.path}/sqldb.dacpac"
-    }
-  }
-}
-
-# Example 6 - Item with definition only - deploy a SQL project
+# Example 5 - Item with definition only - deploy a SQL project
 resource "fabric_sql_database" "example_sqlproj" {
   display_name = "example_sqlproj"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "sqlproj"
 
   definition = {
-    "sqldb.sqlproj" = {
-      source = "${local.path}/sqldb.sqlproj.tmpl"
+    "definition.sqlproj" = {
+      source = "${local.path}/definition.sqlproj.tmpl"
     }
-    "dbo/Tables/Table1.sql" = {
-      source = "${local.path}/dbo/Tables/Table1.sql.tmpl"
-    }
-    ".sharedqueries/query.sql" = {
-      source = "${local.path}/.sharedqueries/query.sql.tmpl"
+    "dbo/Tables/TestTable.sql" = {
+      source = "${local.path}/dbo/Tables/TestTable.sql.tmpl"
     }
   }
 }
