@@ -101,10 +101,6 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 
 Read-Only:
 
-- `backup_retention_days` (Number) The backup retention period in days.
-- `collation` (String) The collation of the SQL database.
 - `connection_string` (String) The connection string of the database.
 - `database_name` (String) The database name.
-- `earliest_restore_point` (String) The earliest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
-- `latest_restore_point` (String) The latest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `server_fqdn` (String) The server fully qualified domain name (FQDN).

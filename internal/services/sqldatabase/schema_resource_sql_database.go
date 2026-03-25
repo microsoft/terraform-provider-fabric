@@ -42,24 +42,6 @@ func getResourceSQLDatabasePropertiesAttributes() map[string]schema.Attribute {
 			MarkdownDescription: "The server fully qualified domain name (FQDN).",
 			Computed:            true,
 		},
-		"backup_retention_days": schema.Int32Attribute{
-			MarkdownDescription: "The backup retention period in days.",
-			Computed:            true,
-		},
-		"collation": schema.StringAttribute{
-			MarkdownDescription: "The collation of the SQL database.",
-			Computed:            true,
-		},
-		"earliest_restore_point": schema.StringAttribute{
-			MarkdownDescription: "The earliest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
-			Computed:            true,
-			CustomType:          timetypes.RFC3339Type{},
-		},
-		"latest_restore_point": schema.StringAttribute{
-			MarkdownDescription: "The latest restore point of the database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
-			Computed:            true,
-			CustomType:          timetypes.RFC3339Type{},
-		},
 	}
 }
 

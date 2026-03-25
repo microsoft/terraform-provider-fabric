@@ -109,10 +109,6 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.backup_retention_days"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.earliest_restore_point"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.latest_restore_point"),
 			),
 		},
 		// read by id - not found
@@ -145,10 +141,6 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.backup_retention_days"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.earliest_restore_point"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.latest_restore_point"),
 			),
 		},
 		// read by name - not found
@@ -192,10 +184,6 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.backup_retention_days"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.earliest_restore_point"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.latest_restore_point"),
 			),
 		},
 		// read by id - not found
@@ -226,10 +214,6 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.backup_retention_days"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.earliest_restore_point"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.latest_restore_point"),
 			),
 		},
 		// read by name - not found
