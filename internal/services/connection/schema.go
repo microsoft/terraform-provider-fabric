@@ -503,18 +503,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									MarkdownDescription: "The private key based on PKCS #8 standard (WO).",
 									Required:            true,
 									WriteOnly:           true,
-									Validators: []validator.String{
-										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo_version")),
-									},
 								},
 							},
 							"private_key_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `private_key_wo`.",
-									Optional:            true,
-									Validators: []validator.Int32{
-										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo")),
-									},
+									Required:            true,
 								},
 							},
 							"passphrase_wo": superschema.StringAttribute{

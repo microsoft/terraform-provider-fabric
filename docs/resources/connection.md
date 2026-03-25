@@ -206,13 +206,13 @@ Optional:
 Required:
 
 - `identifier` (String) The identifier for the key.
-- `private_key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The private key based on PKCS #8 standard (WO). Ensure that if an attribute is set, also these are set: "[<.private_key_wo_version]".
+- `private_key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The private key based on PKCS #8 standard (WO).
+- `private_key_wo_version` (Number) The version of the `private_key_wo`.
 
 Optional:
 
 - `passphrase_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The passphrase for the private key if the private key is encrypted (WO). Ensure that if an attribute is set, also these are set: "[<.passphrase_wo_version]".
 - `passphrase_wo_version` (Number) The version of the `passphrase_wo`. Ensure that if an attribute is set, also these are set: "[<.passphrase_wo]".
-- `private_key_wo_version` (Number) The version of the `private_key_wo`. Ensure that if an attribute is set, also these are set: "[<.private_key_wo]".
 
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
