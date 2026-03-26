@@ -14,6 +14,6 @@ const (
 	PreviewDataSource                = "\n\n~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
 	PreviewResource                  = "\n\n~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
 	PreviewEphemeralResource         = "\n\n~> This ephemeral resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration."
-	TenantPermissionBlocksAPINote    = "\n\n~> Fabric operations may fail if the Service Principal has the Tenant.ReadWrite.All permission assigned."
+	TenantPermissionBlocksAPINote    = "\n\n~> When using Service Principal authentication, the Azure application must not have any Fabric permissions that require admin consent configured in the Azure portal."
 	IsAdminNote                      = "\n\n~> The caller must be a Fabric administrator."
 )

@@ -6,7 +6,7 @@ description: |-
   The Domain resource allows you to manage a Fabric Domain https://learn.microsoft.com/fabric/governance/domains.
   -> This resource supports Service Principal authentication.
   ~> The caller must be a Fabric administrator.
-  ~> Fabric operations may fail if the Service Principal has the Tenant.ReadWrite.All permission assigned.
+  ~> When using Service Principal authentication, the Azure application must not have any Fabric permissions that require admin consent configured in the Azure portal.
 ---
 
 # fabric_domain (Resource)
@@ -17,7 +17,7 @@ The Domain resource allows you to manage a Fabric [Domain](https://learn.microso
 
 ~> The caller must be a Fabric administrator.
 
-~> Fabric operations may fail if the Service Principal has the Tenant.ReadWrite.All permission assigned.
+~> When using Service Principal authentication, the Azure application must not have any Fabric permissions that require admin consent configured in the Azure portal.
 
 ## Example Usage
 
