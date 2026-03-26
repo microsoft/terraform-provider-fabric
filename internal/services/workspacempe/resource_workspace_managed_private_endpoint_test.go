@@ -70,7 +70,7 @@ func TestAcc_WorkspaceManagedPrivateEndpointResource_CRUD(t *testing.T) {
 
 	entityName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		{
 			// ExternalProviders: map[string]resource.ExternalProvider{
 			// 	"azurerm": {

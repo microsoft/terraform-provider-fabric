@@ -122,7 +122,7 @@ func TestUnit_VariableLibraryResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -184,7 +184,7 @@ func TestUnit_VariableLibraryResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomVariableLibraryWithWorkspace(workspaceID))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -247,7 +247,7 @@ func TestAcc_VariableLibraryResource_CRUD_NoDefinition(t *testing.T) {
 	entityUpdateDescription := testhelp.RandomName()
 	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - no definition
 		{
 			ResourceName: testResourceItemFQN,
@@ -299,7 +299,7 @@ func TestAcc_VariableLibraryResource_CRUD_WithDefinition(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityCreateNoValueSetsName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read - definition with definition
 		{
 			ResourceName: testResourceItemFQN,

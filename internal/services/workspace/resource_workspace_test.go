@@ -116,7 +116,7 @@ func TestUnit_WorkspaceResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -157,7 +157,7 @@ func TestUnit_WorkspaceResource_Capacity_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(capacity.ID))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -211,7 +211,7 @@ func TestUnit_WorkspaceResource_NoCapacity_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomWorkspaceInfo(nil))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -253,7 +253,7 @@ func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -369,7 +369,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

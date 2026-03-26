@@ -111,7 +111,7 @@ func TestUnit_WarehouseResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -173,7 +173,7 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomWarehouseWithWorkspace(workspaceID))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -270,7 +270,7 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
 	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -367,7 +367,7 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
 	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
 		{
 			ResourceName: testResourceItemFQN,

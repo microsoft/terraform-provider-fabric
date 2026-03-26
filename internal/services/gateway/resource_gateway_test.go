@@ -266,7 +266,7 @@ func TestUnit_GatewayResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -305,7 +305,7 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomVirtualNetworkGateway())
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -449,7 +449,7 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 	vNET02SubnetName := virtualNetworkAzureResource02["subnetName"].(string)
 	vNET02SubscriptionID := virtualNetworkAzureResource02["subscriptionId"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

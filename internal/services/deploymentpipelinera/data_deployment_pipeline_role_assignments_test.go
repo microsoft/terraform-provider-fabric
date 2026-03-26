@@ -28,7 +28,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentsDataSource(t *testing.T) {
 
 	entity := deploymentPipelineRoleAssignments.Value[0]
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
 		{
 			Config: at.CompileConfig(

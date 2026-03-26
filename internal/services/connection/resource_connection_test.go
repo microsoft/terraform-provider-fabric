@@ -627,7 +627,7 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomShareableCloudConnection())
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -1222,7 +1222,7 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 	displayName := testhelp.RandomName()
 	displayNameUpdated := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -1342,7 +1342,7 @@ func TestAcc_ConnectionResource_ShareableCloud_SQLServer_WriteOnly(t *testing.T)
 
 	displayName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create SQL connection with basic credentials using environment variables
 		{
 			ResourceName: testResourceItemFQN,
@@ -1401,7 +1401,7 @@ func TestAcc_ConnectionResource_VirtualNetworkGateway(t *testing.T) {
 	displayName := testhelp.RandomName()
 	displayNameUpdated := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

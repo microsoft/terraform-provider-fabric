@@ -197,7 +197,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	groupEntityID := groupEntity["id"].(string)
 	groupEntityType := groupEntity["type"].(string)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -278,7 +278,7 @@ func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 	groupEntityID := groupEntity["id"].(string)
 	groupEntityType := groupEntity["type"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

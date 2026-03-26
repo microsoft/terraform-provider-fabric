@@ -135,7 +135,7 @@ func TestUnit_LakehouseResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -197,7 +197,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -261,7 +261,7 @@ func TestAcc_LakehouseResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -331,7 +331,7 @@ func TestAcc_LakehouseResource_CRUD_Configuration(t *testing.T) {
 	entityUpdateDisplayName2 := testhelp.RandomName()
 	entityUpdateDescription2 := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read (configuration)
 		{
 			ResourceName: testResourceItemFQN,
@@ -424,7 +424,7 @@ func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
 
 	entityCreateDisplayName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

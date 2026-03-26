@@ -26,7 +26,7 @@ func TestUnit_LakehouseTableDataSource(t *testing.T) {
 
 	entity := lakehouseTables.Data[1]
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(

@@ -117,7 +117,7 @@ func TestAcc_WorkspaceSetGitOutboundPolicy_CRUD(t *testing.T) {
 	entity := testhelp.WellKnown()["WorkspaceOAP"].(map[string]any)
 	entityID := entity["id"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

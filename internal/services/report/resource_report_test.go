@@ -158,7 +158,7 @@ func TestUnit_ReportResource_ImportState(t *testing.T) {
 			},
 		))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -225,7 +225,7 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 
 	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = *semanticModel.ID
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -302,7 +302,7 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 
 	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = semanticModelID
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

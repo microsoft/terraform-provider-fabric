@@ -243,7 +243,7 @@ func TestAcc_ActivatorResource_CRUD(t *testing.T) {
 	entityUpdateDescription := testhelp.RandomName()
 	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -303,7 +303,7 @@ func TestAcc_ActivatorDefinitionResource_CRUD(t *testing.T) {
 		},
 	}
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

@@ -105,7 +105,7 @@ func TestUnit_FolderResource_ImportState_Folder(t *testing.T) {
 			},
 		))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCaseFolder,
@@ -175,7 +175,7 @@ func TestUnit_FolderResource_ImportState_SubFolder(t *testing.T) {
 			},
 		))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Import state testing - subfolder
 		{
 			ResourceName:       testResourceItemFQN,
@@ -209,7 +209,7 @@ func TestUnit_FolderResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomFolderWithWorkspace(workspaceID))
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -304,7 +304,7 @@ func TestAcc_FolderResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	folderResourceHCL, folderResourceFQN := folderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

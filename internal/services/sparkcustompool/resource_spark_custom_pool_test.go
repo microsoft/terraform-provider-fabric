@@ -23,7 +23,7 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 	entityCreateName := testhelp.RandomName()
 	entityUpdateName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

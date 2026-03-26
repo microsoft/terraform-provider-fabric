@@ -264,7 +264,7 @@ func TestAcc_ApacheAirflowJobResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -313,7 +313,7 @@ func TestAcc_ApacheAirflowJobDefinitionResource_CRUD(t *testing.T) {
 	entityUpdateDescription := testhelp.RandomName()
 	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

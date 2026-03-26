@@ -64,7 +64,7 @@ func TestAcc_WorkspaceRoleAssignmentDataSource(t *testing.T) {
 	principalID := principal["id"].(string)
 	principalType := principal["type"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
 		{
 			Config: at.JoinConfigs(

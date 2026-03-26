@@ -297,7 +297,7 @@ func TestUnit_OneLakeResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -356,7 +356,7 @@ func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.CreateShortcut = fakeCreateShortcutFunc()
 	fakes.FakeServer.ServerFactory.Core.OneLakeShortcutsServer.DeleteShortcut = fakeDeleteShortcutFunc()
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -436,7 +436,7 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
 	workspaceID := testhelp.WellKnown()["Shortcut"].(map[string]any)["workspaceId"].(string)
 	lakehouseID := testhelp.WellKnown()["Shortcut"].(map[string]any)["lakehouseId"].(string)
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

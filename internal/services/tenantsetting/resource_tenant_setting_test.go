@@ -113,7 +113,7 @@ func TestAcc_TenantSettingsResource_CRUD(t *testing.T) {
 	securityGroupID := entity["securityGroupId"].(string)
 	securityGroupName := entity["securityGroupName"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create
 		{
 			ResourceName: testResourceItemFQN,

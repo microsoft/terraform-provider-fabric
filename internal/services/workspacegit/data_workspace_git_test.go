@@ -28,7 +28,7 @@ func TestUnit_WorkspaceGitDataSource_AzDO(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.GitServer.GetConnection = fakeGitGetConnection(entity)
 	fakes.FakeServer.ServerFactory.Core.GitServer.GetMyGitCredentials = fakeGitGetMyGitCredentials(entityCredentials)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
@@ -94,7 +94,7 @@ func TestUnit_WorkspaceGitDataSource_GitHub(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.GitServer.GetConnection = fakeGitGetConnection(entity)
 	fakes.FakeServer.ServerFactory.Core.GitServer.GetMyGitCredentials = fakeGitGetMyGitCredentials(entityCredentials)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(

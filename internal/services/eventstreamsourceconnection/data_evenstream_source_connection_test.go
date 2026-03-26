@@ -30,7 +30,7 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 		fakeSourceID,
 		entity)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(

@@ -28,7 +28,7 @@ var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.Pro
 func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("test")
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			ResourceName: testResourceItemFQN,
@@ -221,7 +221,7 @@ func TestUnit_ItemJobSchedulerResource_Attributes(t *testing.T) {
 func TestUnit_ItemJobSchedulerResource_ConfigurationMissingAttributes(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("dataflow")
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// invalid job type for allowed item type
 		{
 			ResourceName: testResourceItemFQN,
@@ -516,7 +516,7 @@ func TestUnit_ItemJobSchedulerResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -597,7 +597,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.UpdateItemSchedule = fakeUpdateItemScheduleFunc()
 	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.CreateItemSchedule = fakeCreateItemScheduleFunc()
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
@@ -670,7 +670,7 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeMonthly)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{ // Create and Read
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{ // Create and Read
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

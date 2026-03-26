@@ -102,7 +102,7 @@ func TestAcc_DomainWorkspaceAssignmentsResource_CRUD(t *testing.T) {
 	// entity2 := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	// entity2ID := entity2["id"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemsFQN,

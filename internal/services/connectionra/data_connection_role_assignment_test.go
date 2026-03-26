@@ -23,7 +23,7 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 	entity := NewRandomConnectionRoleAssignment()
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.GetConnectionRoleAssignment = fakeGetConnectionRoleAssignment(entity)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - unexpected_attr
 		{
 			Config: at.CompileConfig(

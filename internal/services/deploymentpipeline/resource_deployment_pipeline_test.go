@@ -128,7 +128,7 @@ func TestUnit_DeploymentPipelineResource_ImportState(t *testing.T) {
 		},
 	)
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
@@ -175,7 +175,7 @@ func TestUnit_DeploymentPipelineResource_CRUD(t *testing.T) {
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(fakes.NewRandomDeploymentPipelineWithStages())
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - stages should be between 2 and 10
 		{
 			ResourceName: testResourceItemFQN,
@@ -343,7 +343,7 @@ func TestUnit_DeploymentPipelineResource_CRUD_Stage_WorkspaceAssignment(t *testi
 
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.GetDeploymentPipeline = fakeGetDeploymentPipeline(entityWithWorkspaceAssigned)
 
-	resource.Test(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCaseWithState(t, nil, fakes.FakeServer.ServerFactory, testState, nil, []resource.TestStep{
 		// Update and Read - assign stage
 		{
 			ResourceName: testResourceItemFQN,
@@ -415,7 +415,7 @@ func TestAcc_DeploymentPipelineResource_CRUD(t *testing.T) {
 	entityStage2Name := testhelp.RandomName()
 	entityStage2IsPublicRandom := testhelp.RandomBool()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
@@ -542,7 +542,7 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 
 	entityStage1UpdateName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

@@ -164,7 +164,7 @@ func TestAcc_WorkspaceRoleAssignmentResource_CRUD(t *testing.T) {
 	entityID := entity["id"].(string)
 	entityType := entity["type"].(string)
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,

@@ -146,7 +146,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.GetExternalDataShare = fakeGetExternalDataShareProvider()
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.DeleteExternalDataShare = fakeDeleteExternalDataShareProvider()
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
