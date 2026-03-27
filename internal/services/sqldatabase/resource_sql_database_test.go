@@ -23,7 +23,7 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
-var testHelperLocals = at.CompileLocalsConfig(map[string]any{ //nolint:gochecknoglobals
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("sql_database"),
 })
 
