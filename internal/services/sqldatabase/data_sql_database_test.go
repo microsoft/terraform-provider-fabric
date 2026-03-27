@@ -9,6 +9,9 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -223,6 +226,61 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+	}))
+}
+
+func TestAcc_SQLDatabaseDataSource_Definition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["SQLDatabase"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityDescription := entity["description"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read by id - get dacpac definition
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "dacpac",
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey(entityDisplayName+".dacpac").AtMapKey("content"), knownvalue.NotNull()),
+			},
+		},
+		// read by id - get sqlproj definition
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "sqlproj",
+					"output_definition": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey(entityDisplayName+".sqlproj").AtMapKey("content"), knownvalue.NotNull()),
+			},
 		},
 	}))
 }
