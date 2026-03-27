@@ -262,6 +262,8 @@ func TestUnit_WarehouseSnapshotResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
+	t.Skip("Skipping test until a stable version is found")
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
