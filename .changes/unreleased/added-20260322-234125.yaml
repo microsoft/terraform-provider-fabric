@@ -1,0 +1,5 @@
+kind: added
+body: Onboard new `fabric_cosmos_db` data source
+time: 2026-03-22T23:41:25.157923869Z
+custom:
+  Issue: "868"
