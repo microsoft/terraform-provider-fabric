@@ -43,6 +43,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connectionra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/cosmosdb"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
@@ -76,6 +77,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -445,6 +447,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
+		cosmosdb.NewResourceCosmosDB,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
@@ -474,6 +477,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		ontology.NewResourceOntology,
 		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
@@ -511,6 +515,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		connectionra.NewDataSourceConnectionRoleAssignments,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
+		cosmosdb.NewDataSourceCosmosDB,
+		cosmosdb.NewDataSourceCosmosDBs,
 		dashboard.NewDataSourceDashboards,
 		dataflow.NewDataSourceDataflow,
 		dataflow.NewDataSourceDataflows,
@@ -569,6 +575,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		ontology.NewDataSourceOntology,
+		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		paginatedreport.NewDataSourcePaginatedReports,
