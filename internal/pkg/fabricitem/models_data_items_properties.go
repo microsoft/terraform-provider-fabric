@@ -38,9 +38,15 @@ func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(
 	slice := make([]*DataSourceFabricItemListPropertiesModel[Ttfprop, Titemprop], 0, len(from))
 
 	for _, entity := range from {
-		sl, diags := newSensitivityLabelFromAPI(ctx, entity.SensitivityLabel)
-		if diags.HasError() {
-			return diags
+		sensitivityLabel := supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
+
+		if entity.SensitivityLabel != nil && entity.SensitivityLabel.ID != nil {
+			sensitivityLabelModel := &sensitivityLabelModel{}
+			sensitivityLabelModel.set(*entity.SensitivityLabel)
+
+			if diags := sensitivityLabel.Set(ctx, sensitivityLabelModel); diags.HasError() {
+				return diags
+			}
 		}
 
 		entityModel := &DataSourceFabricItemListPropertiesModel[Ttfprop, Titemprop]{
@@ -49,12 +55,12 @@ func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(
 			DisplayName:      types.StringPointerValue(entity.DisplayName),
 			Description:      types.StringPointerValue(entity.Description),
 			FolderID:         customtypes.NewUUIDPointerValue(entity.FolderID),
-			SensitivityLabel: sl,
+			SensitivityLabel: sensitivityLabel,
 		}
 
 		var propsModel FabricItemPropertiesModel[Ttfprop, Titemprop]
 
-		diags = propertiesSetter(ctx, entity.Properties, &propsModel)
+		diags := propertiesSetter(ctx, entity.Properties, &propsModel)
 		if diags.HasError() {
 			return diags
 		}

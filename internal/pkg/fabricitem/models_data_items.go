@@ -34,9 +34,15 @@ func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabc
 	slice := make([]*dataSourceFabricItemListModel, 0, len(from))
 
 	for _, entity := range from {
-		sl, diags := newSensitivityLabelFromAPI(ctx, entity.SensitivityLabel)
-		if diags.HasError() {
-			return diags
+		sensitivityLabel := supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
+
+		if entity.SensitivityLabel != nil && entity.SensitivityLabel.ID != nil {
+			sensitivityLabelModel := &sensitivityLabelModel{}
+			sensitivityLabelModel.set(*entity.SensitivityLabel)
+
+			if diags := sensitivityLabel.Set(ctx, sensitivityLabelModel); diags.HasError() {
+				return diags
+			}
 		}
 
 		entityModel := &dataSourceFabricItemListModel{
@@ -45,7 +51,7 @@ func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabc
 			DisplayName:      types.StringPointerValue(entity.DisplayName),
 			Description:      types.StringPointerValue(entity.Description),
 			FolderID:         customtypes.NewUUIDPointerValue(entity.FolderID),
-			SensitivityLabel: sl,
+			SensitivityLabel: sensitivityLabel,
 		}
 
 		slice = append(slice, entityModel)
