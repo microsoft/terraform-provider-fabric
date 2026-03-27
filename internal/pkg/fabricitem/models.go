@@ -24,20 +24,8 @@ type sensitivityLabelModel struct {
 	LabelID customtypes.UUID `tfsdk:"label_id"`
 }
 
-func newSensitivityLabelFromAPI(ctx context.Context, sl *fabcore.SensitivityLabel) (supertypes.SingleNestedObjectValueOf[sensitivityLabelModel], diag.Diagnostics) {
-	result := supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
-
-	if sl != nil && sl.ID != nil {
-		slSettingsModel := &sensitivityLabelModel{
-			LabelID: customtypes.NewUUIDPointerValue(sl.ID),
-		}
-
-		if diags := result.Set(ctx, slSettingsModel); diags.HasError() {
-			return result, diags
-		}
-	}
-
-	return result, nil
+func (to *sensitivityLabelModel) set(from fabcore.SensitivityLabel) {
+	to.LabelID = customtypes.NewUUIDPointerValue(from.ID)
 }
 
 type fabricItemModel struct {
@@ -65,12 +53,16 @@ type dataSourceFabricItemBaseModel struct {
 func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
 	to.fabricItemModel.set(from)
 
-	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
-	if diags.HasError() {
-		return diags
-	}
+	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
-	to.SensitivityLabel = sl
+	if from.SensitivityLabel != nil && from.SensitivityLabel.ID != nil {
+		sensitivityLabelModel := &sensitivityLabelModel{}
+		sensitivityLabelModel.set(*from.SensitivityLabel)
+
+		if diags := to.SensitivityLabel.Set(ctx, sensitivityLabelModel); diags.HasError() {
+			return diags
+		}
+	}
 
 	return nil
 }
@@ -107,12 +99,16 @@ type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //
 func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
 	to.FabricItemPropertiesModel.set(from)
 
-	sl, diags := newSensitivityLabelFromAPI(ctx, from.SensitivityLabel)
-	if diags.HasError() {
-		return diags
-	}
+	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
-	to.SensitivityLabel = sl
+	if from.SensitivityLabel != nil && from.SensitivityLabel.ID != nil {
+		sensitivityLabelModel := &sensitivityLabelModel{}
+		sensitivityLabelModel.set(*from.SensitivityLabel)
+
+		if diags := to.SensitivityLabel.Set(ctx, sensitivityLabelModel); diags.HasError() {
+			return diags
+		}
+	}
 
 	return nil
 }
