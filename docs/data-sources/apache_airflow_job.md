@@ -70,7 +70,6 @@ output "example_definition_content_object" {
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
 !> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
-
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -80,15 +79,14 @@ output "example_definition_content_object" {
 - `folder_id` (String) The Apache Airflow Job Folder ID.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--definition"></a>
 
+<a id="nestedatt--definition"></a>
 ### Nested Schema for `definition`
 
 Read-Only:

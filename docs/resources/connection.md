@@ -101,7 +101,6 @@ resource "fabric_connection" "example_virtual_network_gateway" {
 - `id` (String) The Connection ID.
 
 <a id="nestedatt--connection_details"></a>
-
 ### Nested Schema for `connection_details`
 
 Required:
@@ -118,7 +117,6 @@ Read-Only:
 - `path` (String) The path of the connection.
 
 <a id="nestedatt--connection_details--parameters"></a>
-
 ### Nested Schema for `connection_details.parameters`
 
 Required:
@@ -130,8 +128,9 @@ Read-Only:
 
 - `data_type` (String) The data type of the parameter.
 
-<a id="nestedatt--credential_details"></a>
 
+
+<a id="nestedatt--credential_details"></a>
 ### Nested Schema for `credential_details`
 
 Required:
@@ -149,7 +148,6 @@ Optional:
 - `skip_test_connection` (Boolean) Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection. Value defaults to `false`.
 
 <a id="nestedatt--credential_details--basic_credentials"></a>
-
 ### Nested Schema for `credential_details.basic_credentials`
 
 Required:
@@ -158,8 +156,8 @@ Required:
 - `password_wo_version` (Number) The version of the `password_wo`.
 - `username` (String) The username.
 
-<a id="nestedatt--credential_details--key_credentials"></a>
 
+<a id="nestedatt--credential_details--key_credentials"></a>
 ### Nested Schema for `credential_details.key_credentials`
 
 Required:
@@ -167,8 +165,8 @@ Required:
 - `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO).
 - `key_wo_version` (Number) The version of the `key_wo`.
 
-<a id="nestedatt--credential_details--service_principal_credentials"></a>
 
+<a id="nestedatt--credential_details--service_principal_credentials"></a>
 ### Nested Schema for `credential_details.service_principal_credentials`
 
 Required:
@@ -178,8 +176,8 @@ Required:
 - `client_secret_wo_version` (Number) The version of the `client_secret_wo`.
 - `tenant_id` (String) The tenant ID.
 
-<a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
 
+<a id="nestedatt--credential_details--shared_access_signature_credentials"></a>
 ### Nested Schema for `credential_details.shared_access_signature_credentials`
 
 Required:
@@ -187,8 +185,9 @@ Required:
 - `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO).
 - `token_wo_version` (Number) The version of the `token_wo`.
 
-<a id="nestedatt--timeouts"></a>
 
+
+<a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:

@@ -42,15 +42,14 @@ data "fabric_shortcuts" "example" {
 - `values` (Attributes Set) The set of Shortcuts. (see [below for nested schema](#nestedatt--values))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--values"></a>
 
+<a id="nestedatt--values"></a>
 ### Nested Schema for `values`
 
 Required:
@@ -66,7 +65,6 @@ Read-Only:
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--values--target))
 
 <a id="nestedatt--values--target"></a>
-
 ### Nested Schema for `values.target`
 
 Read-Only:
@@ -82,7 +80,6 @@ Read-Only:
 - `type` (String) The type object contains properties like target shortcut account type. Additional types may be added over time.
 
 <a id="nestedatt--values--target--adls_gen2"></a>
-
 ### Nested Schema for `values.target.adls_gen2`
 
 Read-Only:
@@ -91,28 +88,28 @@ Read-Only:
 - `location` (String) Specifies the location of the target ADLS container. The URI must be in the format https://[account-name].dfs.core.windows.net where [account-name] is the name of the target ADLS account.
 - `subpath` (String) Specifies the container and subfolder within the ADLS account where the target folder is located. Must be of the format [container]/[subfolder] where [container] is the name of the container that holds the files and folders; [subfolder] is the name of the subfolder within the container (optional). For example: /mycontainer/mysubfolder.
 
-<a id="nestedatt--values--target--amazon_s3"></a>
 
+<a id="nestedatt--values--target--amazon_s3"></a>
 ### Nested Schema for `values.target.amazon_s3`
 
 Read-Only:
 
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Amazon S3 data location. Open the cloud connection's Settings view and copy the connection ID; this is a GUID.
-- `location` (String) HTTP URL that points to the target bucket in S3. The URL should be in the format https://[bucket-name].s3.[region-code].amazonaws.com, where 'bucket-name' is the name of the S3 bucket you want to point to, and 'region-code' is the code for the region where the bucket is located. For example: <https://my-s3-bucket.s3.us-west-2.amazonaws.com>.
+- `location` (String) HTTP URL that points to the target bucket in S3. The URL should be in the format https://[bucket-name].s3.[region-code].amazonaws.com, where 'bucket-name' is the name of the S3 bucket you want to point to, and 'region-code' is the code for the region where the bucket is located. For example: https://my-s3-bucket.s3.us-west-2.amazonaws.com.
 - `subpath` (String) Specifies a target folder or subfolder within the S3 bucket.
 
-<a id="nestedatt--values--target--azure_blob_storage"></a>
 
+<a id="nestedatt--values--target--azure_blob_storage"></a>
 ### Nested Schema for `values.target.azure_blob_storage`
 
 Read-Only:
 
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
+- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: https://my-gcs-bucket.storage.googleapis.com.
 - `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
 
-<a id="nestedatt--values--target--dataverse"></a>
 
+<a id="nestedatt--values--target--dataverse"></a>
 ### Nested Schema for `values.target.dataverse`
 
 Read-Only:
@@ -122,26 +119,26 @@ Read-Only:
 - `environment_domain` (String) URI that indicates the Dataverse target environment's domain name. The URI should be formatted as 'https://[orgname].crm[xx].dynamics.com', where [orgname] represents the name of your Dataverse organization.
 - `table_name` (String) Specifies the name of the target table in Dataverse.
 
-<a id="nestedatt--values--target--external_data_share"></a>
 
+<a id="nestedatt--values--target--external_data_share"></a>
 ### Nested Schema for `values.target.external_data_share`
 
 Read-Only:
 
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
 
-<a id="nestedatt--values--target--google_cloud_storage"></a>
 
+<a id="nestedatt--values--target--google_cloud_storage"></a>
 ### Nested Schema for `values.target.google_cloud_storage`
 
 Read-Only:
 
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
+- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: https://my-gcs-bucket.storage.googleapis.com.
 - `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
 
-<a id="nestedatt--values--target--onelake"></a>
 
+<a id="nestedatt--values--target--onelake"></a>
 ### Nested Schema for `values.target.onelake`
 
 Read-Only:
@@ -150,13 +147,13 @@ Read-Only:
 - `path` (String) A string representing the full path to the target folder within the Item. This path should be relative to the root of the OneLake directory structure. For example: 'Tables/myTablesFolder/someTableSubFolder'.
 - `workspace_id` (String) The ID of the target workspace.
 
-<a id="nestedatt--values--target--s3_compatible"></a>
 
+<a id="nestedatt--values--target--s3_compatible"></a>
 ### Nested Schema for `values.target.s3_compatible`
 
 Read-Only:
 
 - `bucket` (String) Specifies the target bucket within the S3 compatible location.
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-- `location` (String) HTTP URL of the S3 compatible endpoint. This endpoint must be able to receive ListBuckets S3 API calls. The URL must be in the non-bucket specific format; no bucket should be specified here. For example: <https://s3endpoint.contoso.com>.
+- `location` (String) HTTP URL of the S3 compatible endpoint. This endpoint must be able to receive ListBuckets S3 API calls. The URL must be in the non-bucket specific format; no bucket should be specified here. For example: https://s3endpoint.contoso.com.
 - `subpath` (String) Specifies a target folder or subfolder within the S3 compatible bucket. For example: /folder.

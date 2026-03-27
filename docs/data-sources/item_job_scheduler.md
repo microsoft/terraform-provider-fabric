@@ -49,15 +49,14 @@ data "fabric_item_job_scheduler" "example" {
 - `owner` (Attributes) The user identity that created this schedule or last modified. (see [below for nested schema](#nestedatt--owner))
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--configuration"></a>
 
+<a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 Read-Only:
@@ -72,7 +71,6 @@ Read-Only:
 - `weekdays` (Set of String) A list of weekdays, at most seven elements are allowed.
 
 <a id="nestedatt--configuration--occurrence"></a>
-
 ### Nested Schema for `configuration.occurrence`
 
 Read-Only:
@@ -82,8 +80,9 @@ Read-Only:
 - `week_index` (String) The week of the month.
 - `weekday` (String) Week day for triggering jobs.
 
-<a id="nestedatt--owner"></a>
 
+
+<a id="nestedatt--owner"></a>
 ### Nested Schema for `owner`
 
 Read-Only:

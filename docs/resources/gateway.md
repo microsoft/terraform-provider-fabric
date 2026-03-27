@@ -58,7 +58,6 @@ resource "fabric_gateway" "example" {
 - `version` (String) The Gateway version.
 
 <a id="nestedatt--timeouts"></a>
-
 ### Nested Schema for `timeouts`
 
 Optional:
@@ -68,8 +67,8 @@ Optional:
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--virtual_network_azure_resource"></a>
 
+<a id="nestedatt--virtual_network_azure_resource"></a>
 ### Nested Schema for `virtual_network_azure_resource`
 
 Required:
@@ -79,8 +78,8 @@ Required:
 - `subscription_id` (String) The subscription ID.
 - `virtual_network_name` (String) The virtual network name.
 
-<a id="nestedatt--public_key"></a>
 
+<a id="nestedatt--public_key"></a>
 ### Nested Schema for `public_key`
 
 Read-Only:
