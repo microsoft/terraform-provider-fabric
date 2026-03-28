@@ -12,6 +12,7 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -431,6 +432,7 @@ func TestUnit_ShortcutResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_ShortcutResource_CRUD(t *testing.T) {
+	existingTableName := "bigintpropertyvalue"
 	entityCreateDisplayName := testhelp.RandomName()
 	entityTargetPath := "Tables/" + testhelp.WellKnown()["Lakehouse"].(map[string]any)["tableName"].(string)
 	entityUpdatedTargetPath := testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutPath"].(string) + "/" + testhelp.WellKnown()["Shortcut"].(map[string]any)["shortcutName"].(string)
@@ -443,10 +445,39 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":      lakehouseID,
-					"workspace_id": workspaceID,
-					"name":         entityCreateDisplayName,
-					"path":         "Tables",
+					"item_id":                  lakehouseID,
+					"workspace_id":             workspaceID,
+					"name":                     existingTableName,
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyOverwriteOnly),
+					"path":                     "Tables",
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": workspaceID,
+							"item_id":      lakehouseID,
+							"path":         entityTargetPath,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", existingTableName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.item_id", lakehouseID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.onelake.path", entityTargetPath),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "target.type", "OneLake"),
+			),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"item_id":                  lakehouseID,
+					"workspace_id":             workspaceID,
+					"name":                     entityCreateDisplayName,
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyCreateOrOverwrite),
+					"path":                     "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,
