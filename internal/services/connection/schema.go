@@ -7,6 +7,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
@@ -324,7 +325,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
 									utils.RemoveSlicesByValues(
 										fabcore.PossibleCredentialTypeValues(),
-										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2, fabcore.CredentialTypeKeyPair},
+										[]fabcore.CredentialType{fabcore.CredentialTypeOAuth2},
 									),
 									true,
 								)...),
@@ -359,17 +360,28 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"password_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The password (WO).",
-									Required:            true,
+									MarkdownDescription: "The password (WO). Use password or password_reference. You can't use both at the same time.",
+									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.ExactlyOneOf(
+											path.MatchRelative().AtParent().AtName("password_wo"),
+											path.MatchRelative().AtParent().AtName("password_reference"),
+										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo_version")),
+									},
 								},
 							},
 							"password_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `password_wo`.",
-									Required:            true,
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo")),
+									},
 								},
 							},
+							"password_reference": kvReferenceSchemaBlock("The Key Vault reference for the password secret."),
 						},
 					},
 					"key_credentials": superschema.SuperSingleNestedAttributeOf[credentialsKeyModel]{
@@ -389,16 +401,27 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							"key_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The key (WO).",
-									Required:            true,
+									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.ExactlyOneOf(
+											path.MatchRelative().AtParent().AtName("key_wo"),
+											path.MatchRelative().AtParent().AtName("key_reference"),
+										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key_wo_version")),
+									},
 								},
 							},
 							"key_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
-									MarkdownDescription: "The version of the `key_wo`.",
-									Required:            true,
+									MarkdownDescription: "The version of the `key_wo`. Use key or key_reference. You can't use both at the same time.",
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("key_wo")),
+									},
 								},
 							},
+							"key_reference": kvReferenceSchemaBlock("The Key Vault reference for the key secret."),
 						},
 					},
 					"service_principal_credentials": superschema.SuperSingleNestedAttributeOf[credentialsServicePrincipalModel]{
@@ -429,15 +452,82 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"client_secret_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The client secret (WO).",
-									Required:            true,
+									MarkdownDescription: "The client secret (WO). Use client_secret or client_secret_reference. You can't use both at the same time.",
+									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.ExactlyOneOf(
+											path.MatchRelative().AtParent().AtName("client_secret_wo"),
+											path.MatchRelative().AtParent().AtName("service_principal_secret_reference"),
+										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("client_secret_wo_version")),
+									},
 								},
 							},
 							"client_secret_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `client_secret_wo`.",
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("client_secret_wo")),
+									},
+								},
+							},
+							"service_principal_secret_reference": kvReferenceSchemaBlock(
+								"The reference to a service principal secret stored in Azure Key Vault. Use servicePrincipalSecret or servicePrincipalSecretReference. You can't use both at the same time.",
+							),
+						},
+					},
+					"key_pair_credentials": superschema.SuperSingleNestedAttributeOf[credentialsKeyPairModel]{
+						Resource: &schemaR.SingleNestedAttribute{
+							MarkdownDescription: "The key pair credentials.",
+							Optional:            true,
+							Validators: []validator.Object{
+								superobjectvalidator.RequireIfAttributeIsOneOf(
+									path.MatchRelative().AtParent().AtName("credential_type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.CredentialTypeKeyPair)),
+									},
+								),
+							},
+						},
+						Attributes: superschema.Attributes{
+							"identifier": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The identifier for the key.",
 									Required:            true,
+								},
+							},
+							"private_key_wo": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The private key based on PKCS #8 standard (WO).",
+									Required:            true,
+									WriteOnly:           true,
+								},
+							},
+							"private_key_wo_version": superschema.Int32Attribute{
+								Resource: &schemaR.Int32Attribute{
+									MarkdownDescription: "The version of the `private_key_wo`.",
+									Required:            true,
+								},
+							},
+							"passphrase_wo": superschema.StringAttribute{
+								Resource: &schemaR.StringAttribute{
+									MarkdownDescription: "The passphrase for the private key if the private key is encrypted (WO).",
+									Optional:            true,
+									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("passphrase_wo_version")),
+									},
+								},
+							},
+							"passphrase_wo_version": superschema.Int32Attribute{
+								Resource: &schemaR.Int32Attribute{
+									MarkdownDescription: "The version of the `passphrase_wo`.",
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("passphrase_wo")),
+									},
 								},
 							},
 						},
@@ -459,16 +549,27 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							"token_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
 									MarkdownDescription: "The token (WO).",
-									Required:            true,
+									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.ExactlyOneOf(
+											path.MatchRelative().AtParent().AtName("token_wo"),
+											path.MatchRelative().AtParent().AtName("token_reference"),
+										),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("token_wo_version")),
+									},
 								},
 							},
 							"token_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `token_wo`.",
-									Required:            true,
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("token_wo")),
+									},
 								},
 							},
+							"token_reference": kvReferenceSchemaBlock("The Key Vault reference for the SAS token secret. Use token or token_reference. You can't use both at the same time."),
 						},
 					},
 				},
@@ -481,6 +582,36 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					Delete: true,
 				},
 				DataSource: dsTimeout,
+			},
+		},
+	}
+}
+
+func kvReferenceSchemaBlock(description string) superschema.SuperSingleNestedAttributeOf[credentialsKeyVaultReferenceModel] {
+	return superschema.SuperSingleNestedAttributeOf[credentialsKeyVaultReferenceModel]{
+		Resource: &schemaR.SingleNestedAttribute{
+			MarkdownDescription: description,
+			Optional:            true,
+		},
+		Attributes: superschema.Attributes{
+			"connection_id": superschema.SuperStringAttribute{
+				Resource: &schemaR.StringAttribute{
+					MarkdownDescription: "The connection ID of the Key Vault connection.",
+					Required:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+			},
+			"secret_name": superschema.StringAttribute{
+				Resource: &schemaR.StringAttribute{
+					MarkdownDescription: "The name of the secret in Key Vault.",
+					Required:            true,
+				},
+			},
+			"version": superschema.StringAttribute{
+				Resource: &schemaR.StringAttribute{
+					MarkdownDescription: "The version of the secret in Key Vault.",
+					Optional:            true,
+				},
 			},
 		},
 	}
