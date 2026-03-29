@@ -55,7 +55,7 @@ func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.I
 
 	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
-	if from.SensitivityLabel != nil && from.SensitivityLabel.ID != nil {
+	if from.SensitivityLabel != nil {
 		sensitivityLabelModel := &sensitivityLabelModel{}
 		sensitivityLabelModel.set(*from.SensitivityLabel)
 
@@ -101,7 +101,7 @@ func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx c
 
 	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
-	if from.SensitivityLabel != nil && from.SensitivityLabel.ID != nil {
+	if from.SensitivityLabel != nil {
 		sensitivityLabelModel := &sensitivityLabelModel{}
 		sensitivityLabelModel.set(*from.SensitivityLabel)
 
