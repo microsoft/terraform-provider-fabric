@@ -279,16 +279,40 @@ func asFabricItem(element any) fabcore.Item {
 	itemType := fabcore.ItemType(*getReflectedStringPropertyValue(element, "Type"))
 
 	item := fabcore.Item{
-		Type:        &itemType,
-		Description: getReflectedStringPropertyValue(element, "Description"),
-		DisplayName: getReflectedStringPropertyValue(element, "DisplayName"),
-		ID:          getReflectedStringPropertyValue(element, "ID"),
-		WorkspaceID: getReflectedStringPropertyValue(element, "WorkspaceID"),
-		FolderID:    getReflectedStringPropertyValue(element, "FolderID"),
-		Tags:        getReflectedTagsPropertyValue(element, "Tags"),
+		Type:             &itemType,
+		Description:      getReflectedStringPropertyValue(element, "Description"),
+		DisplayName:      getReflectedStringPropertyValue(element, "DisplayName"),
+		ID:               getReflectedStringPropertyValue(element, "ID"),
+		WorkspaceID:      getReflectedStringPropertyValue(element, "WorkspaceID"),
+		FolderID:         getReflectedStringPropertyValue(element, "FolderID"),
+		SensitivityLabel: getReflectedSensitivityLabelPropertyValue(element, "SensitivityLabel"),
+		Tags:             getReflectedTagsPropertyValue(element, "Tags"),
 	}
 
 	return item
+}
+
+func getReflectedSensitivityLabelPropertyValue(element any, propertyName string) *fabcore.SensitivityLabel {
+	reflectedValue := reflect.ValueOf(element)
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	if propertyValue.Kind() == reflect.Pointer {
+		if propertyValue.IsNil() {
+			return nil
+		}
+
+		propertyValue = propertyValue.Elem()
+	}
+
+	if !propertyValue.IsValid() || !propertyValue.CanInterface() {
+		return nil
+	}
+
+	if sl, ok := propertyValue.Interface().(fabcore.SensitivityLabel); ok {
+		return &sl
+	}
+
+	return nil
 }
 
 func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {

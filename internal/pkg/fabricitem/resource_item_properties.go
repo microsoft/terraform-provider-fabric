@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -98,6 +99,10 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	reqCreate.setDescription(plan.Description)
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
+
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	respCreate, err := CreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
@@ -296,9 +301,12 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 	}
 
 	state := ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
+		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
+			FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
+				ID:          uuidFabricItemID,
+				WorkspaceID: uuidWorkspaceID,
+			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		Timeouts: timeout,
 	}

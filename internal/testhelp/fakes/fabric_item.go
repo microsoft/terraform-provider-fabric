@@ -42,6 +42,12 @@ func (o *operationsItem) CreateWithParentID(parentID string, data fabcore.Create
 	result.Description = data.Description
 	result.FolderID = data.FolderID
 
+	if data.SensitivityLabelSettings != nil {
+		result.SensitivityLabel = &fabcore.SensitivityLabel{
+			ID: data.SensitivityLabelSettings.LabelID,
+		}
+	}
+
 	return result
 }
 
@@ -200,7 +206,10 @@ func NewRandomItem(itemType fabcore.ItemType) fabcore.Item {
 		Description: new(testhelp.RandomName()),
 		WorkspaceID: new(testhelp.RandomUUID()),
 		FolderID:    new(testhelp.RandomUUID()),
-		Tags:        []fabcore.ItemTag{},
+		SensitivityLabel: &fabcore.SensitivityLabel{
+			ID: new(testhelp.RandomUUID()),
+		},
+		Tags: []fabcore.ItemTag{},
 	}
 }
 

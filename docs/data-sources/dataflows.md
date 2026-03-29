@@ -54,4 +54,13 @@ Read-Only:
 - `display_name` (String) The Dataflow display name.
 - `folder_id` (String) The Dataflow Folder ID.
 - `id` (String) The Dataflow ID.
+- `sensitivity_label` (Attributes) The Dataflow sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

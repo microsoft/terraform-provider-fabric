@@ -154,6 +154,10 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -390,9 +394,12 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 	}
 
 	state := ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
+		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
+			FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
+				ID:          uuidFabricItemID,
+				WorkspaceID: uuidWorkspaceID,
+			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		DefinitionUpdateEnabled: definitionUpdateEnabled,
 		Definition:              definition,
