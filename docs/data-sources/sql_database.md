@@ -73,7 +73,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `**/*.sql`, `*.sqlproj`, `.sharedqueries/*.sql` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The SQL Database Folder ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))

@@ -25,10 +25,9 @@ type sqlDatabaseConfigurationModel struct {
 }
 
 type sourceDatabaseReferenceModel struct {
-	ItemID            customtypes.UUID `tfsdk:"item_id"`
-	ReferenceType     types.String     `tfsdk:"reference_type"`
-	WorkspaceID       customtypes.UUID `tfsdk:"workspace_id"`
-	VariableReference types.String     `tfsdk:"variable_reference"`
+	ItemID        customtypes.UUID `tfsdk:"item_id"`
+	ReferenceType types.String     `tfsdk:"reference_type"`
+	WorkspaceID   customtypes.UUID `tfsdk:"workspace_id"`
 }
 
 type requestCreateSQLDatabasePayload struct {
@@ -111,13 +110,7 @@ func getSourceDatabaseReference(
 		}
 
 		return &ref, nil
-	case fabsqldatabase.ItemReferenceTypeByVariable:
-		ref := fabsqldatabase.ItemReferenceByVariable{
-			ReferenceType:     &refType,
-			VariableReference: model.VariableReference.ValueStringPointer(),
-		}
 
-		return &ref, nil
 	default:
 		var diags diag.Diagnostics
 

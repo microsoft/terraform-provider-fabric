@@ -35,6 +35,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  "sqlproj",
 		API:   "sqlproj",
-		Paths: []string{"*.sqlproj", ".sharedqueries/*.sql", "**/*.sql"},
+		Paths: []string{"*.sqlproj", "*.sql"},
 	},
 }

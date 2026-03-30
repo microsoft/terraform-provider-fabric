@@ -32,22 +32,7 @@ resource "fabric_sql_database" "example_restore_by_id" {
   }
 }
 
-# Example 4 - Item with configuration - restore a SQL database by variable reference
-resource "fabric_sql_database" "example_restore_by_variable" {
-  display_name = "example_restore_by_variable"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-
-  configuration = {
-    creation_mode         = "Restore"
-    restore_point_in_time = "2026-01-01T00:00:00Z"
-    source_database_reference = {
-      reference_type     = "ByVariable"
-      variable_reference = "$(/**/_VarLibrary_/_VarName_)"
-    }
-  }
-}
-
-# Example 5 - Item with definition only - deploy a SQL project
+# Example 4 - Item with definition only - deploy a SQL project
 resource "fabric_sql_database" "example_sqlproj" {
   display_name = "example_sqlproj"
   workspace_id = "00000000-0000-0000-0000-000000000000"

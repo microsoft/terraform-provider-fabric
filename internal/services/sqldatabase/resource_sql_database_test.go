@@ -56,7 +56,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":    "00000000-0000-0000-0000-000000000000",
+					"workspace_id":    testhelp.RandomUUID(),
 					"unexpected_attr": "test",
 				},
 			),
@@ -79,7 +79,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
@@ -90,7 +90,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"format":       "invalid",
 					"definition": map[string]any{
@@ -110,7 +110,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"workspace_id": testhelp.RandomUUID(),
 						"display_name": "test",
 						"format":       "dacpac",
 						"definition": map[string]any{
@@ -130,7 +130,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"workspace_id": testhelp.RandomUUID(),
 						"display_name": "test",
 						"format":       "sqlproj",
 						"definition": map[string]any{
@@ -150,7 +150,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"workspace_id": testhelp.RandomUUID(),
 						"display_name": "test",
 						"format":       "sqlproj",
 						"definition": map[string]any{
@@ -176,7 +176,7 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":  "00000000-0000-0000-0000-000000000000",
+					"workspace_id":  testhelp.RandomUUID(),
 					"display_name":  "test",
 					"configuration": map[string]any{},
 				},
@@ -189,7 +189,7 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode": "Invalid",
@@ -204,11 +204,11 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "New",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 					},
 				},
 			),
@@ -220,14 +220,14 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode": "New",
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"item_id":        "00000000-0000-0000-0000-000000000000",
-							"workspace_id":   "00000000-0000-0000-0000-000000000000",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
@@ -240,14 +240,14 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode": "Restore",
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"item_id":        "00000000-0000-0000-0000-000000000000",
-							"workspace_id":   "00000000-0000-0000-0000-000000000000",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
@@ -260,11 +260,11 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 					},
 				},
 			),
@@ -276,16 +276,16 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 						"backup_retention_days": 7,
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"item_id":        "00000000-0000-0000-0000-000000000000",
-							"workspace_id":   "00000000-0000-0000-0000-000000000000",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
@@ -298,16 +298,16 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
-						"collation":             "Latin1_General_100_BIN2_UTF8",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"collation":             testhelp.RandomName(),
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"item_id":        "00000000-0000-0000-0000-000000000000",
-							"workspace_id":   "00000000-0000-0000-0000-000000000000",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
@@ -320,19 +320,19 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"workspace_id":   "00000000-0000-0000-0000-000000000000",
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference.item_id`),
+			ExpectError: regexp.MustCompile(`"source_database_reference": attribute "item_id" is required`),
 		},
 		// error - ById reference_type without workspace_id (required)
 		{
@@ -340,80 +340,19 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 						"source_database_reference": map[string]any{
 							"reference_type": "ById",
-							"item_id":        "00000000-0000-0000-0000-000000000000",
+							"item_id":        testhelp.RandomUUID(),
 						},
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference.workspace_id`),
-		},
-		// error - ByVariable reference_type without variable_reference (required)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"configuration": map[string]any{
-						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
-						"source_database_reference": map[string]any{
-							"reference_type": "ByVariable",
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference.variable_reference`),
-		},
-		// error - ByVariable reference_type with item_id (should be null)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"configuration": map[string]any{
-						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
-						"source_database_reference": map[string]any{
-							"reference_type":     "ByVariable",
-							"variable_reference": "test_var",
-							"item_id":            "00000000-0000-0000-0000-000000000000",
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference.item_id`),
-		},
-		// error - ByVariable reference_type with workspace_id (should be null)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"configuration": map[string]any{
-						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
-						"source_database_reference": map[string]any{
-							"reference_type":     "ByVariable",
-							"variable_reference": "test_var",
-							"workspace_id":       "00000000-0000-0000-0000-000000000000",
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference.workspace_id`),
+			ExpectError: regexp.MustCompile(`"source_database_reference": attribute "workspace_id" is required`),
 		},
 		// error - invalid reference_type value
 		{
@@ -421,13 +360,15 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 					"display_name": "test",
 					"configuration": map[string]any{
 						"creation_mode":         "Restore",
-						"restore_point_in_time": "2026-03-22T00:00:00Z",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
 						"source_database_reference": map[string]any{
 							"reference_type": "Invalid",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
 						},
 					},
 				},
@@ -757,6 +698,9 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 		`"dbo/Tables/TestTable.sql"`: map[string]any{
 			"source": "${local.path}/dbo/Tables/TestTable.sql.tmpl",
 		},
+		`".sharedqueries/SQL query 1.sql"`: map[string]any{
+			"source": "${local.path}/.sharedqueries/SQL query 1.sql.tmpl",
+		},
 	}
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
@@ -804,6 +748,7 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.dbo/Tables/TestTable.sql.source_content_sha256"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition..sharedqueries/SQL query 1.sql.source_content_sha256"),
 			),
 		},
 	}))

@@ -50,22 +50,7 @@ resource "fabric_sql_database" "example_restore_by_id" {
   }
 }
 
-# Example 4 - Item with configuration - restore a SQL database by variable reference
-resource "fabric_sql_database" "example_restore_by_variable" {
-  display_name = "example_restore_by_variable"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-
-  configuration = {
-    creation_mode         = "Restore"
-    restore_point_in_time = "2026-01-01T00:00:00Z"
-    source_database_reference = {
-      reference_type     = "ByVariable"
-      variable_reference = "$(/**/_VarLibrary_/_VarName_)"
-    }
-  }
-}
-
-# Example 5 - Item with definition only - deploy a SQL project
+# Example 4 - Item with definition only - deploy a SQL project
 resource "fabric_sql_database" "example_sqlproj" {
   display_name = "example_sqlproj"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -96,7 +81,7 @@ resource "fabric_sql_database" "example_sqlproj" {
 
 Any changes to this configuration will result in recreation of the SQL Database. (see [below for nested schema](#nestedatt--configuration))
 
-- `definition` (Attributes Map) Definition parts. Read more about [SQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/sql-database-definition). Accepted path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `**/*.sql`, `*.sqlproj`, `.sharedqueries/*.sql` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [SQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/sql-database-definition). Accepted path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The Folder ID.
@@ -129,12 +114,8 @@ Optional:
 
 Required:
 
-- `reference_type` (String) The item reference type.
-
-Optional:
-
 - `item_id` (String) The ID of the item.
-- `variable_reference` (String) The variable reference. Required when `reference_type` is `ByVariable`.
+- `reference_type` (String) The item reference type.
 - `workspace_id` (String) The workspace ID of the item.
 
 <a id="nestedatt--definition"></a>

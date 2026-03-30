@@ -96,10 +96,6 @@ func getResourceSQLDatabaseConfigurationAttributes(ctx context.Context) map[stri
 					path.MatchRelative().AtParent().AtName("creation_mode"),
 					[]attr.Value{types.StringValue(string(fabsqldatabase.CreationModeNew))},
 				),
-				superstringvalidator.RequireIfAttributeIsOneOf(
-					path.MatchRelative().AtParent().AtName("creation_mode"),
-					[]attr.Value{types.StringValue(string(fabsqldatabase.CreationModeRestore))},
-				),
 			},
 		},
 		"source_database_reference": schema.SingleNestedAttribute{
@@ -114,29 +110,12 @@ func getResourceSQLDatabaseConfigurationAttributes(ctx context.Context) map[stri
 					path.MatchRelative().AtParent().AtName("creation_mode"),
 					[]attr.Value{types.StringValue(string(fabsqldatabase.CreationModeNew))},
 				),
-				superobjectvalidator.RequireIfAttributeIsOneOf(
-					path.MatchRelative().AtParent().AtName("creation_mode"),
-					[]attr.Value{types.StringValue(string(fabsqldatabase.CreationModeRestore))},
-				),
 			},
 			Attributes: map[string]schema.Attribute{
 				"item_id": schema.StringAttribute{
 					MarkdownDescription: "The ID of the item.",
-					Optional:            true,
+					Required:            true,
 					CustomType:          customtypes.UUIDType{},
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
-					Validators: []validator.String{
-						superstringvalidator.RequireIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByID))},
-						),
-						superstringvalidator.NullIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByVariable))},
-						),
-					},
 				},
 				"reference_type": schema.StringAttribute{
 					MarkdownDescription: "The item reference type.",
@@ -145,43 +124,15 @@ func getResourceSQLDatabaseConfigurationAttributes(ctx context.Context) map[stri
 						stringplanmodifier.RequiresReplace(),
 					},
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabsqldatabase.PossibleItemReferenceTypeValues(), false)...),
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices([]string{
+							string(fabsqldatabase.ItemReferenceTypeByID),
+						}, false)...),
 					},
 				},
 				"workspace_id": schema.StringAttribute{
 					MarkdownDescription: "The workspace ID of the item.",
-					Optional:            true,
+					Required:            true,
 					CustomType:          customtypes.UUIDType{},
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
-					Validators: []validator.String{
-						superstringvalidator.RequireIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByID))},
-						),
-						superstringvalidator.NullIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByVariable))},
-						),
-					},
-				},
-				"variable_reference": schema.StringAttribute{
-					MarkdownDescription: "The variable reference. Required when `reference_type` is `ByVariable`.",
-					Optional:            true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.RequiresReplace(),
-					},
-					Validators: []validator.String{
-						superstringvalidator.RequireIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByVariable))},
-						),
-						superstringvalidator.NullIfAttributeIsOneOf(
-							path.MatchRelative().AtParent().AtName("reference_type"),
-							[]attr.Value{types.StringValue(string(fabsqldatabase.ItemReferenceTypeByID))},
-						),
-					},
 				},
 			},
 		},
