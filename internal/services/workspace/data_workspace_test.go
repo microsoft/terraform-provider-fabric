@@ -217,7 +217,7 @@ func TestUnit_WorkspaceDataSource_SkipCapacityStateValidation(t *testing.T) {
 
 	fakes.FakeServer.Upsert(entity)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - capacity not found without skip
 		{
 			Config: at.CompileConfig(
