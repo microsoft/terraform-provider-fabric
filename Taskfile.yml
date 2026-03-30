@@ -290,12 +290,13 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" --rerun-fails --rerun-fails-max-failures 5 --rerun-fails-max-retries 5 --rerun-fails-run-root-test -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} -- {{.TEST_PATH}} -run "^TestAcc_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
       TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
       FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
+      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails --rerun-fails-max-failures 5 --rerun-fails-max-retries 5 --rerun-fails-run-root-test{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
@@ -307,12 +308,13 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" --rerun-fails --rerun-fails-max-failures 5 --rerun-fails-max-retries 5 --rerun-fails-run-root-test -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} -- {{.TEST_PATH}} -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
       TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
       FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
+      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails --rerun-fails-max-failures 5 --rerun-fails-max-retries 5 --rerun-fails-run-root-test{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:
