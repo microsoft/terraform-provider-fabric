@@ -49,6 +49,7 @@ resource "fabric_workspace" "example2" {
 - `capacity_id` (String) The ID of the Fabric Capacity to assign to the Workspace.
 - `description` (String) The Workspace description. Value defaults to ``. String length must be at most 4000.
 - `identity` (Attributes) A workspace identity (see [Workspace Identity](https://learn.microsoft.com/fabric/security/workspace-identity) for more information). (see [below for nested schema](#nestedatt--identity))
+- `skip_capacity_state_validation` (Boolean) Whether to skip the Fabric Capacity state validation. When `true`, the provider will not verify that the assigned capacity is in an Active state. Use this when the caller does not have permissions to list capacities. **Warning:** Skipping this validation means the provider cannot detect a suspended or inactive capacity. If the capacity becomes inactive, subsequent `terraform apply` runs may fail to find workspace items and could remove them from the Terraform state, potentially causing unrecoverable state drift. Value defaults to `false`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

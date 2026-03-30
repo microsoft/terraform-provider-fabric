@@ -39,6 +39,7 @@ data "fabric_workspace" "example_by_name" {
 
 - `display_name` (String) The Workspace display name.
 - `id` (String) The Workspace ID.
+- `skip_capacity_state_validation` (Boolean) Whether to skip the Fabric Capacity state validation. When `true`, the provider will not verify that the assigned capacity is in an Active state. Use this when the caller does not have permissions to list capacities. **Warning:** Skipping this validation means the provider cannot detect a suspended or inactive capacity. If the capacity becomes inactive, subsequent `terraform apply` runs may fail to find workspace items and could remove them from the Terraform state, potentially causing unrecoverable state drift. Value defaults to `false`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
