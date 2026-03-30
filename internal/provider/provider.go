@@ -488,7 +488,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
-		sqldatabase.NewResourceSQLDatabase,
+		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
