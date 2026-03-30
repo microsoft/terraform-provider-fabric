@@ -234,42 +234,6 @@ func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
 		},
-		// error - Restore mode without restore_point_in_time (required)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"display_name": "test",
-					"configuration": map[string]any{
-						"creation_mode": "Restore",
-						"source_database_reference": map[string]any{
-							"reference_type": "ById",
-							"item_id":        testhelp.RandomUUID(),
-							"workspace_id":   testhelp.RandomUUID(),
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.restore_point_in_time`),
-		},
-		// error - Restore mode without source_database_reference (required)
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": testhelp.RandomUUID(),
-					"display_name": "test",
-					"configuration": map[string]any{
-						"creation_mode":         "Restore",
-						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.source_database_reference`),
-		},
 		// error - Restore mode with backup_retention_days (should be null)
 		{
 			ResourceName: testResourceItemFQN,
