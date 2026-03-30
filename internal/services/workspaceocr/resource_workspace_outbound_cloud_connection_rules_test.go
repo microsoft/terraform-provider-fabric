@@ -144,6 +144,34 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_Attributes(t *testin
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - allowed_endpoints and allowed_workspaces are conflicting
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"default_action": string(fabcore.ConnectionAccessActionTypeDeny),
+					"rules": []map[string]any{
+						{
+							"connection_type": "SQL",
+							"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
+							"allowed_endpoints": []map[string]any{
+								{
+									"hostname_pattern": "*.microsoft.com",
+								},
+							},
+							"allowed_workspaces": []map[string]any{
+								{
+									"workspace_id": workspaceID,
+								},
+							},
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute "rules\[0\].allowed_(endpoints|workspaces)" cannot be specified when`),
+		},
 	}))
 }
 

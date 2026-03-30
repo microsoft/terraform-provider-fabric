@@ -4,10 +4,12 @@
 package workspaceocr
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -145,6 +147,9 @@ func allowedEndpointsAttribute() superschema.SuperListNestedAttributeOf[endpoint
 		},
 		Resource: &schemaR.ListNestedAttribute{
 			Optional: true,
+			Validators: []validator.List{
+				listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("allowed_workspaces")),
+			},
 			Default: listdefault.StaticValue(types.ListValueMust(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
@@ -178,6 +183,9 @@ func allowedWorkspacesAttribute() superschema.SuperListNestedAttributeOf[workspa
 		},
 		Resource: &schemaR.ListNestedAttribute{
 			Optional: true,
+			Validators: []validator.List{
+				listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("allowed_endpoints")),
+			},
 			Default: listdefault.StaticValue(types.ListValueMust(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
