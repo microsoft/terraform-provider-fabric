@@ -59,6 +59,7 @@ func (r *resourceConnection) ConfigValidators(_ context.Context) []resource.Conf
 		resourcevalidator.Conflicting(
 			path.MatchRoot("credential_details").AtName("basic_credentials"),
 			path.MatchRoot("credential_details").AtName("key_credentials"),
+			path.MatchRoot("credential_details").AtName("key_pair_credentials"),
 			path.MatchRoot("credential_details").AtName("service_principal_credentials"),
 			path.MatchRoot("credential_details").AtName("shared_access_signature_credentials"),
 		),
