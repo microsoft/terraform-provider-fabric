@@ -24,17 +24,6 @@ func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabc
 	slice := make([]*dataSourceFabricItemBaseModel, 0, len(from))
 
 	for _, entity := range from {
-		sensitivityLabel := supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
-
-		if entity.SensitivityLabel != nil && entity.SensitivityLabel.ID != nil {
-			sensitivityLabelModel := &sensitivityLabelModel{}
-			sensitivityLabelModel.set(*entity.SensitivityLabel)
-
-			if diags := sensitivityLabel.Set(ctx, sensitivityLabelModel); diags.HasError() {
-				return diags
-			}
-		}
-
 		var entityModel dataSourceFabricItemBaseModel
 		entityModel.set(ctx, entity)
 
