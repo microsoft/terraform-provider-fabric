@@ -116,6 +116,7 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	defer cancel()
 
 	state.Timeouts = plan.Timeouts
+	state.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	var reqCreate requestCreateWorkspace
 
@@ -243,6 +244,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	intermediary.Timeouts = plan.Timeouts
+	intermediary.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -486,12 +488,20 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			return diags
 
 		case fabcore.CapacityAssignmentProgressCompleted:
+			skipValidation := model.SkipCapacityStateValidation
+
 			diags = model.set(ctx, respGet.WorkspaceInfo)
 			if diags.HasError() {
 				return diags
 			}
 
-			return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
+			model.SkipCapacityStateValidation = skipValidation
+
+			if !model.SkipCapacityStateValidation.ValueBool() {
+				return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
+			}
+
+			return nil
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018

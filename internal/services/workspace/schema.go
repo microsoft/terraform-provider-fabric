@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -235,6 +236,19 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 				DataSource: dsTimeout,
 			},
+			"skip_capacity_state_validation": superschema.BoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Whether to skip the Fabric Capacity state validation. When `true`, the provider will not verify that the assigned capacity is in an Active state. Use this when the caller does not have permissions to list capacities. **Warning:** Skipping this validation means the provider cannot detect a suspended or inactive capacity. If the capacity becomes inactive, subsequent `terraform apply` runs may fail to find workspace items and could remove them from the Terraform state, potentially causing unrecoverable state drift.",
+					Optional:            true,
+				},
+				Resource: &schemaR.BoolAttribute{
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
+				},
+				DataSource: &schemaD.BoolAttribute{
+					MarkdownDescription: "Value defaults to `false`.",
+				},
+			},
 		},
 	}
 
@@ -243,6 +257,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		delete(r.Attributes, "capacity_region")
 		delete(r.Attributes, "onelake_endpoints")
 		delete(r.Attributes, "identity")
+		delete(r.Attributes, "skip_capacity_state_validation")
 	}
 
 	return r
