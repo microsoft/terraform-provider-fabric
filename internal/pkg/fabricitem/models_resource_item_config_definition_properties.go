@@ -10,7 +10,7 @@ import (
 )
 
 type ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig any] struct {
-	ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
+	resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
 
 	Configuration           supertypes.SingleNestedObjectValueOf[Ttfconfig]                          `tfsdk:"configuration"`
 	Format                  types.String                                                             `tfsdk:"format"`

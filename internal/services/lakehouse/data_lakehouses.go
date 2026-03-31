@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceLakehouses(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.FabricItemPropertiesModel[lakehousePropertiesModel, fablakehouse.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fablakehouse.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[lakehousePropertiesModel, fablakehouse.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[lakehousePropertiesModel](ctx)
 
 		if from != nil {

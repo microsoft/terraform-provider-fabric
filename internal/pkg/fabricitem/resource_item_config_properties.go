@@ -348,8 +348,8 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	state := ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
-			FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
+		resourceFabricItemPropertiesBaseModel: resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
+			fabricItemPropertiesModel: fabricItemPropertiesModel[Ttfprop, Titemprop]{
 				ID:          uuidFabricItemID,
 				WorkspaceID: uuidWorkspaceID,
 			},
