@@ -1,5 +1,0 @@
-kind: added
-body: Added `skip_capacity_state_validation` attribute to `fabric_workspace` resource and data source
-time: 2026-03-30T07:00:00.000000000Z
-custom:
-  Issue: "743"
