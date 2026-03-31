@@ -98,6 +98,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
@@ -488,12 +489,13 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
-		sqldatabase.NewResourceSQLDatabase,
+		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
 		workspace.NewResourceWorkspace,
+		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
@@ -606,6 +608,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,

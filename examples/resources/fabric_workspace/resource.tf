@@ -17,3 +17,12 @@ resource "fabric_workspace" "example2" {
     type = "SystemAssigned"
   }
 }
+
+# Workspace with skip_capacity_state_validation
+# Use this when the caller does not have permissions to list capacities
+resource "fabric_workspace" "example3" {
+  display_name                   = "example3"
+  description                    = "Example Workspace 3"
+  capacity_id                    = "00000000-0000-0000-0000-000000000000"
+  skip_capacity_state_validation = true
+}
