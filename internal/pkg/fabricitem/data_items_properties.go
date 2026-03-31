@@ -30,7 +30,7 @@ type DataSourceFabricItemsProperties[Ttfprop, Titemprop any] struct {
 	DataSourceFabricItems
 
 	PropertiesAttributes map[string]schema.Attribute
-	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) diag.Diagnostics
 	ItemListGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop], fabricItems *[]FabricItemProperties[Titemprop]) error
 }
 
@@ -94,7 +94,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The set of %s.", d.TypeInfo.Names),
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceFabricItemListPropertiesModel[Ttfprop, Titemprop]](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},

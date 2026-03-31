@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceDigitalTwinBuilderFlows(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabdigitaltwinbuilderflow.Properties, to *fabricitem.FabricItemPropertiesModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabdigitaltwinbuilderflow.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[digitalTwinBuilderFlowConfigPropertiesModel](ctx)
 
 		if from != nil {
