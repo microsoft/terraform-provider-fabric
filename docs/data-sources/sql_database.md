@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The SQL Database data-source allows you to retrieve details about a Fabric SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_database (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The SQL Database data-source allows you to retrieve details about a Fabric [SQL Database](https://learn.microsoft.com/fabric/database/sql/overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -27,6 +24,24 @@ data "fabric_sql_database" "example_by_id" {
 data "fabric_sql_database" "example_by_name" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Example with definition output
+data "fabric_sql_database" "example_definition" {
+  id                = "11111111-1111-1111-1111-111111111111"
+  workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "sqlproj"
+  output_definition = true
+}
+
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_sql_database.example_definition.definition["definition.sqlproj"].content, "")
+}
+
+# Access the content of the definition as JSON object
+output "example_definition_content_object" {
+  value = provider::fabric::content_decode(data.fabric_sql_database.example_definition.definition["definition.sqlproj"].content)
 }
 
 # This is an invalid data source
@@ -48,11 +63,17 @@ data "fabric_sql_database" "example_by_name" {
 ### Optional
 
 - `display_name` (String) The SQL Database display name.
+- `format` (String) The SQL Database format. Possible values: `dacpac`, `sqlproj`
 - `id` (String) The SQL Database ID.
+- `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
+
+!> Your terraform state file may grow a lot if you output definition content. Only use it when you must use data from the definition.
+
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
+- `definition` (Attributes Map) Definition parts. Possible path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The SQL Database Folder ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
@@ -65,6 +86,15 @@ data "fabric_sql_database" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Read-Only:
+
+- `content` (String) Gzip base64 content of definition part.
+Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
 
 <a id="nestedatt--properties"></a>
 

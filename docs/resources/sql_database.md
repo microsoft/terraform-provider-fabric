@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The SQL Database resource allows you to manage a Fabric SQL Database https://learn.microsoft.com/fabric/database/sql/overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_database (Resource)
@@ -14,14 +13,57 @@ The SQL Database resource allows you to manage a Fabric [SQL Database](https://l
 
 -> This resource supports Service Principal authentication.
 
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
-
 ## Example Usage
 
 ```terraform
+# Example 1 - Item without configuration or definition (default)
 resource "fabric_sql_database" "example" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Example 2 - Item with configuration - create a new SQL database with custom settings
+resource "fabric_sql_database" "example_new" {
+  display_name = "example_new"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+
+  configuration = {
+    creation_mode         = "New"
+    backup_retention_days = 10
+    collation             = "SQL_Latin1_General_CP1_CI_AS"
+  }
+}
+
+# Example 3 - Item with configuration - restore a SQL database by ID
+resource "fabric_sql_database" "example_restore_by_id" {
+  display_name = "example_restore_by_id"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+
+  configuration = {
+    creation_mode         = "Restore"
+    restore_point_in_time = "2026-01-01T00:00:00Z"
+    source_database_reference = {
+      item_id        = "11111111-1111-1111-1111-111111111111"
+      reference_type = "ById"
+      workspace_id   = "00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
+
+# Example 4 - Item with definition only - deploy a SQL project
+resource "fabric_sql_database" "example_sqlproj" {
+  display_name = "example_sqlproj"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "sqlproj"
+
+  definition = {
+    "definition.sqlproj" = {
+      source = "${local.path}/definition.sqlproj.tmpl"
+    }
+    "dbo/Tables/TestTable.sql" = {
+      source = "${local.path}/dbo/Tables/TestTable.sql.tmpl"
+    }
+  }
 }
 ```
 
@@ -35,8 +77,15 @@ resource "fabric_sql_database" "example" {
 
 ### Optional
 
+- `configuration` (Attributes) The SQL Database creation configuration.
+
+Any changes to this configuration will result in recreation of the SQL Database. (see [below for nested schema](#nestedatt--configuration))
+
+- `definition` (Attributes Map) Definition parts. Read more about [SQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/sql-database-definition). Accepted path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj` (see [below for nested schema](#nestedatt--definition))
+- `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The Folder ID.
+- `format` (String) The SQL Database format. Possible values: `dacpac`, `sqlproj`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -44,6 +93,62 @@ resource "fabric_sql_database" "example" {
 
 - `id` (String) The SQL Database ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--configuration"></a>
+
+### Nested Schema for `configuration`
+
+Required:
+
+- `creation_mode` (String) The creation mode of the SQL database.
+
+Optional:
+
+- `backup_retention_days` (Number) Set the backup retention period in days. The minimum is 1 days. The maximum is 35 days.
+- `collation` (String) Set the collation of the SQL database.
+- `restore_point_in_time` (String) Set the time to restore the source database in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+- `source_database_reference` (Attributes) Set the reference for the source database to be restored from. (see [below for nested schema](#nestedatt--configuration--source_database_reference))
+
+<a id="nestedatt--configuration--source_database_reference"></a>
+
+### Nested Schema for `configuration.source_database_reference`
+
+Required:
+
+- `item_id` (String) The ID of the item.
+- `reference_type` (String) The item reference type.
+- `workspace_id` (String) The workspace ID of the item.
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Required:
+
+- `source` (String) Path to the file with source of the definition part.
+
+The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.
+
+Optional:
+
+- `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
+- `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
+- `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+- `tokens_delimiter` (String) The delimiter for the tokens in the source content. Possible values: `<<>>`, `@{}@`, `____`, `{{}}`. Default: `{{}}`
+
+Read-Only:
+
+- `source_content_sha256` (String) SHA256 of source's content of definition part.
+
+<a id="nestedatt--definition--parameters"></a>
+
+### Nested Schema for `definition.parameters`
+
+Required:
+
+- `find` (String) The find value of the parameter.
+- `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
+- `value` (String) The value of the parameter.
 
 <a id="nestedatt--sensitivity_label_settings"></a>
 

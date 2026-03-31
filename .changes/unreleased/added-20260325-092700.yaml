@@ -1,0 +1,5 @@
+kind: added
+body: Enhanced `fabric_sql_database` resource by adding definition and creation payload support
+time: 2026-03-25T09:27:00.236857031Z
+custom:
+  Issue: "872"
