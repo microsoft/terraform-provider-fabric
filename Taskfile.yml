@@ -296,7 +296,7 @@ tasks:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
       TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
       FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
-      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test{{end}}'
+      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test --rerun-fails-max-failures=50 --rerun-fails-report=rerun-report.txt{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
@@ -314,7 +314,7 @@ tasks:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
       TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
       FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
-      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test{{end}}'
+      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test --rerun-fails-max-failures=50 --rerun-fails-report=rerun-report.txt{{end}}'
       LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:

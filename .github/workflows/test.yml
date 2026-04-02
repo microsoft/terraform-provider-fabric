@@ -428,7 +428,9 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
-          path: testresults.json
+          path: |
+            testresults.json
+            rerun-report.txt
           if-no-files-found: warn
           overwrite: true
 
@@ -450,7 +452,9 @@ jobs:
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
           reporter: golang-json
-          path: testresults.json
+          path: |
+            testresults.json
+            rerun-report.txt
 
       - name: ⚙️ Get Coverage summary
         if: always()
