@@ -13,7 +13,7 @@ import (
 func getDataSourceOperationsAgentPropertiesAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"state": schema.StringAttribute{
-			MarkdownDescription: "The current state of the OperationsAgent. Possible values:" + utils.ConvertStringSlicesToString(faboperationsagent.PossibleAgentStateValues(), true, true) + ".",
+			MarkdownDescription: "The current state of the OperationsAgent. Possible values: " + utils.ConvertStringSlicesToString(faboperationsagent.PossibleAgentStateValues(), true, true) + ".",
 			Computed:            true,
 		},
 	}

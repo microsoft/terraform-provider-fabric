@@ -67,4 +67,4 @@ Read-Only:
 
 Read-Only:
 
-- `state` (String) The current state of the OperationsAgent. Possible values:`Active`, `Inactive`.
+- `state` (String) The current state of the OperationsAgent. Possible values: `Active`, `Inactive`.

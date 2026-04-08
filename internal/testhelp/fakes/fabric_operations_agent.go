@@ -193,7 +193,7 @@ func NewRandomOperationsAgentWithWorkspace(workspaceID string) faboperationsagen
 
 func NewRandomOperationsAgentDefinition() faboperationsagent.PublicDefinition {
 	defPart := faboperationsagent.PublicDefinitionPart{
-		PayloadType: new(faboperationsagent.PayloadTypeInlineBase64),
+		PayloadType: to.Ptr(faboperationsagent.PayloadTypeInlineBase64),
 		Path:        new("OperationsAgentV1.json"),
 		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==", // {"content":"Hello World"} in base64
