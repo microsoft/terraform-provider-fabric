@@ -63,7 +63,7 @@ Read-Only:
 - `id` (String) The Shortcut ID.
 - `name` (String) Name of the shortcut.
 - `path` (String) A string representing the full path where the shortcut is created, including either "Files" or "Tables".
-- `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--values--target))
+- `target` (Attributes) An object that contains the target datasource. An object that contains the target datasource, and it must specify exactly one of the supported destinations: `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`. (see [below for nested schema](#nestedatt--values--target))
 
 <a id="nestedatt--values--target"></a>
 
@@ -73,13 +73,13 @@ Read-Only:
 
 - `adls_gen2` (Attributes) An object containing the properties of the target ADLS Gen2 data source. (see [below for nested schema](#nestedatt--values--target--adls_gen2))
 - `amazon_s3` (Attributes) An object containing the properties of the target Amazon S3 data source. (see [below for nested schema](#nestedatt--values--target--amazon_s3))
-- `azure_blob_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--values--target--azure_blob_storage))
+- `azure_blob_storage` (Attributes) An object containing the properties of the target Azure Blob Storage data source. (see [below for nested schema](#nestedatt--values--target--azure_blob_storage))
 - `dataverse` (Attributes) An object containing the properties of the target Dataverse data source. (see [below for nested schema](#nestedatt--values--target--dataverse))
 - `external_data_share` (Attributes) An object containing the properties of the target external data share. (see [below for nested schema](#nestedatt--values--target--external_data_share))
 - `google_cloud_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--values--target--google_cloud_storage))
 - `onelake` (Attributes) An object containing the properties of the target OneLake data source. (see [below for nested schema](#nestedatt--values--target--onelake))
 - `s3_compatible` (Attributes) An object containing the properties of the target S3 compatible data source. (see [below for nested schema](#nestedatt--values--target--s3_compatible))
-- `type` (String) The type object contains properties like target shortcut account type. Additional types may be added over time.
+- `type` (String) The type object contains properties like target shortcut account type. Value must be one of : `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`.
 
 <a id="nestedatt--values--target--adls_gen2"></a>
 
@@ -107,9 +107,9 @@ Read-Only:
 
 Read-Only:
 
-- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
-- `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.
+- `location` (String) Specifies the location of the target Azure Blob Storage container. The URI must be in the format https://[account-name].blob.core.windows.net where [account-name] is the name of the target Azure Blob Storage account.
+- `subpath` (String) Specifies the container and subfolder within the Azure Blob Storage account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder.
 
 <a id="nestedatt--values--target--dataverse"></a>
 

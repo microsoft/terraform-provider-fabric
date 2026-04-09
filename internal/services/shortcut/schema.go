@@ -12,10 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
@@ -124,7 +126,14 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"target": superschema.SuperSingleNestedAttributeOf[targetModel]{
 				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse.",
+					MarkdownDescription: "An object that contains the target datasource. An object that contains the target datasource, and it must specify exactly one of the supported destinations: " + utils.ConvertStringSlicesToString(
+						utils.RemoveSliceByValue(
+							fabcore.PossibleTypeValues(),
+							fabcore.TypeOneDriveSharePoint,
+						),
+						true,
+						true,
+					) + ".",
 				},
 				Resource: &schemaR.SingleNestedAttribute{
 					Required: true,
@@ -135,7 +144,10 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				Attributes: map[string]superschema.Attribute{
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The type object contains properties like target shortcut account type. Additional types may be added over time.",
+							MarkdownDescription: "The type object contains properties like target shortcut account type.",
+							Validators: []validator.String{
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleTypeValues(), fabcore.TypeOneDriveSharePoint), true)...),
+							},
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
@@ -331,7 +343,7 @@ func amazonS3Schema() superschema.SuperSingleNestedAttributeOf[targetDataSourceM
 func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDataSourceModel] {
 	return superschema.SuperSingleNestedAttributeOf[targetDataSourceModel]{
 		Common: &schemaR.SingleNestedAttribute{
-			MarkdownDescription: "An object containing the properties of the target Google Cloud Storage data source.",
+			MarkdownDescription: "An object containing the properties of the target Azure Blob Storage data source.",
 		},
 		Resource: &schemaR.SingleNestedAttribute{
 			Optional: true,
@@ -342,7 +354,8 @@ func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDat
 		Attributes: map[string]superschema.Attribute{
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.",
+					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.",
+					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
@@ -353,7 +366,7 @@ func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDat
 			},
 			"location": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: https://my-gcs-bucket.storage.googleapis.com",
+					MarkdownDescription: "Specifies the location of the target Azure Blob Storage container. The URI must be in the format https://[account-name].blob.core.windows.net where [account-name] is the name of the target Azure Blob Storage account.",
 					CustomType:          customtypes.URLType{},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -365,7 +378,7 @@ func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDat
 			},
 			"subpath": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Specifies a target folder or subfolder within the GCS bucket. For example: /folder",
+					MarkdownDescription: "Specifies the container and subfolder within the Azure Blob Storage account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder",
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
