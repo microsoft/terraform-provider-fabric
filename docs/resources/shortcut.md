@@ -22,102 +22,100 @@ The Shortcut resource allows you to manage a Fabric [Shortcut](https://learn.mic
 # Example of using the fabric_shortcut resource
 resource "fabric_shortcut" "onelake" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     onelake = {
       workspace_id = "00000000-0000-0000-0000-000000000000"
-      item_id      = "00000000-0000-0000-0000-000000000000"
-      path         = "MyTargetPath"
+      item_id      = "22222222-2222-2222-2222-222222222222"
+      path         = "Tables/myTablesFolder/someTableSubFolder"
     }
   }
 }
 
 resource "fabric_shortcut" "adls_gen2" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     adls_gen2 = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[account-name].dfs.core.windows.net"
+      subpath       = "[container]/[subfolder]"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "amazon_s3" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     amazon_s3 = {
-      location      = "MyLocation"
+      location      = "https://[bucket-name].s3.[region-code].amazonaws.com"
       subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "google_cloud_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     google_cloud_storage = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[bucket-name].storage.googleapis.com"
+      subpath       = "/folder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "s3_compatible" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     s3_compatible = {
-      location      = "MyLocation"
+      location      = "https://s3endpoint.contoso.com"
       bucket        = "MyBucket"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      subpath       = "/folder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "dataverse" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     dataverse = {
       table_name         = "MyTableName"
       deltalake_folder   = "MyDeltaLakeFolder"
-      environment_domain = "MyEnvironmentDomainURI"
-      bucket             = "MyBucket"
-      subpath            = "MySubpath"
-      connection_id      = "00000000-0000-0000-0000-000000000000"
+      environment_domain = "https://[orgname].crm[xx].dynamics.com"
+      connection_id      = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "azure_blob_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     azure_blob_storage = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[account-name].blob.core.windows.net"
+      subpath       = "/mycontainer/mysubfolder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
@@ -131,7 +129,7 @@ resource "fabric_shortcut" "azure_blob_storage" {
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
 - `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Name of the shortcut. Name must contain at least one non-whitespace character.
 - `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Shortcut path can't start with forward slash '/'.
-- `target` (Attributes) An object that contains the target datasource. An object that contains the target datasource, and it must specify exactly one of the supported destinations: `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`. (see [below for nested schema](#nestedatt--target))
+- `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
@@ -187,7 +185,7 @@ Required:
 
 Required:
 
-- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's Settings view and copy the GUID that is the connection ID.
 - `location` (String) Specifies the location of the target Azure Blob Storage container. The URI must be in the format https://[account-name].blob.core.windows.net where [account-name] is the name of the target Azure Blob Storage account.
 - `subpath` (String) Specifies the container and subfolder within the Azure Blob Storage account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder.
 

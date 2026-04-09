@@ -125,21 +125,21 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 				},
 			},
 			"target": superschema.SuperSingleNestedAttributeOf[targetModel]{
-				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "An object that contains the target datasource. An object that contains the target datasource, and it must specify exactly one of the supported destinations: " + utils.ConvertStringSlicesToString(
-						utils.RemoveSliceByValue(
+				Common: &schemaR.SingleNestedAttribute{},
+				Resource: &schemaR.SingleNestedAttribute{
+					Required: true,
+					MarkdownDescription: "An object that contains the target datasource, and it must specify exactly one of the supported destinations: " + utils.ConvertStringSlicesToString(
+						utils.RemoveSlicesByValues(
 							fabcore.PossibleTypeValues(),
-							fabcore.TypeOneDriveSharePoint,
+							[]fabcore.Type{fabcore.TypeOneDriveSharePoint, fabcore.TypeExternalDataShare},
 						),
 						true,
 						true,
 					) + ".",
 				},
-				Resource: &schemaR.SingleNestedAttribute{
-					Required: true,
-				},
 				DataSource: &schemaD.SingleNestedAttribute{
-					Computed: true,
+					Computed:            true,
+					MarkdownDescription: "An object that contains the target datasource.",
 				},
 				Attributes: map[string]superschema.Attribute{
 					"type": superschema.StringAttribute{
@@ -354,7 +354,7 @@ func azureBlobStorageSchema() superschema.SuperSingleNestedAttributeOf[targetDat
 		Attributes: map[string]superschema.Attribute{
 			"connection_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.",
+					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's Settings view and copy the GUID that is the connection ID.",
 					CustomType:          customtypes.UUIDType{},
 				},
 				Resource: &schemaR.StringAttribute{

@@ -44,7 +44,7 @@ data "fabric_shortcut" "example_by_name_path_workspaceid_itemid" {
 ### Read-Only
 
 - `id` (String) The Shortcut ID.
-- `target` (Attributes) An object that contains the target datasource. An object that contains the target datasource, and it must specify exactly one of the supported destinations: `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `ExternalDataShare`, `GoogleCloudStorage`, `OneLake`, `S3Compatible`. (see [below for nested schema](#nestedatt--target))
+- `target` (Attributes) An object that contains the target datasource. (see [below for nested schema](#nestedatt--target))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -96,7 +96,7 @@ Read-Only:
 
 Read-Only:
 
-- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's Settings view and copy the GUID that is the connection ID.
 - `location` (String) Specifies the location of the target Azure Blob Storage container. The URI must be in the format https://[account-name].blob.core.windows.net where [account-name] is the name of the target Azure Blob Storage account.
 - `subpath` (String) Specifies the container and subfolder within the Azure Blob Storage account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder.
 
