@@ -28,11 +28,11 @@ func fakeWorkspaceRoleAssignment(
 func NewRandomWorkspaceRoleAssignment() fabcore.WorkspaceRoleAssignment {
 	return fabcore.WorkspaceRoleAssignment{
 		ID: new(testhelp.RandomUUID()),
-		Principal: &fabcore.Principal{
+		Principal: &fabcore.UserPrincipal{
 			ID:          new(testhelp.RandomUUID()),
 			Type:        azto.Ptr(fabcore.PrincipalTypeUser),
 			DisplayName: new(testhelp.RandomName()),
-			UserDetails: &fabcore.PrincipalUserDetails{
+			UserDetails: &fabcore.UserPrincipalUserDetails{
 				UserPrincipalName: new(testhelp.RandomName()),
 			},
 		},
@@ -62,11 +62,11 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 			{
 				ID:   new(principal0ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleAdmin),
-				Principal: &fabcore.Principal{
+				Principal: &fabcore.GroupPrincipal{
 					ID:          new(principal0ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeGroup),
 					DisplayName: new(testhelp.RandomName()),
-					GroupDetails: &fabcore.PrincipalGroupDetails{
+					GroupDetails: &fabcore.GroupPrincipalGroupDetails{
 						GroupType: azto.Ptr(fabcore.GroupTypeSecurityGroup),
 					},
 				},
@@ -74,11 +74,11 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 			{
 				ID:   new(principal1ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
-				Principal: &fabcore.Principal{
+				Principal: &fabcore.UserPrincipal{
 					ID:          new(principal1ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeUser),
 					DisplayName: new(testhelp.RandomName()),
-					UserDetails: &fabcore.PrincipalUserDetails{
+					UserDetails: &fabcore.UserPrincipalUserDetails{
 						UserPrincipalName: new(testhelp.RandomName()),
 					},
 				},
@@ -86,11 +86,11 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 			{
 				ID:   new(principal2ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
-				Principal: &fabcore.Principal{
+				Principal: &fabcore.ServicePrincipal{
 					ID:          new(principal2ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
 					DisplayName: new(testhelp.RandomName()),
-					ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
+					ServicePrincipalDetails: &fabcore.ServicePrincipalDetails{
 						AADAppID: new(testhelp.RandomUUID()),
 					},
 				},
@@ -98,16 +98,16 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 			{
 				ID:   new(principal3ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleViewer),
-				Principal: &fabcore.Principal{
+				Principal: &fabcore.ServicePrincipalProfilePrincipal{
 					ID:          new(principal3ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
 					DisplayName: new(testhelp.RandomName()),
-					ServicePrincipalProfileDetails: &fabcore.PrincipalServicePrincipalProfileDetails{
-						ParentPrincipal: &fabcore.Principal{
+					ServicePrincipalProfileDetails: &fabcore.ServicePrincipalProfilePrincipalServicePrincipalProfileDetails{
+						ParentPrincipal: &fabcore.ServicePrincipal{
 							ID:          new(principal2ID),
 							Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
 							DisplayName: new(testhelp.RandomName()),
-							ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
+							ServicePrincipalDetails: &fabcore.ServicePrincipalDetails{
 								AADAppID: new(testhelp.RandomUUID()),
 							},
 						},

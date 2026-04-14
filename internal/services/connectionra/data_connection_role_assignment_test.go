@@ -71,8 +71,8 @@ func TestUnit_ConnectionRoleAssignmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "connection_id", connectionID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "role", (*string)(entity.Role)),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.id", entity.Principal.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.type", (*string)(entity.Principal.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.id", entity.Principal.GetPrincipal().ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.type", (*string)(entity.Principal.GetPrincipal().Type)),
 			),
 		},
 	}))

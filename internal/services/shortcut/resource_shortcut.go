@@ -1,5 +1,5 @@
-// // Copyright (c) Microsoft Corporation
-// // SPDX-License-Identifier: MPL-2.0
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
 
 package shortcut
 

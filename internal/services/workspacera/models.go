@@ -38,7 +38,7 @@ func (to *baseWorkspaceRoleAssignmentModel) set(ctx context.Context, workspaceID
 	if from.Principal != nil {
 		principalModel := &common.PrincipalModel{}
 
-		principalModel.Set(*from.Principal)
+		principalModel.Set(*from.Principal.GetPrincipal())
 
 		if diags := principal.Set(ctx, principalModel); diags.HasError() {
 			return diags

@@ -65,7 +65,7 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	if from.Owner != nil {
 		principalModel := &principalModel{}
 
-		principalModel.set(*from.Owner)
+		principalModel.set(*from.Owner.GetPrincipal())
 
 		if diags := principal.Set(ctx, principalModel); diags.HasError() {
 			return diags
