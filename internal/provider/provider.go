@@ -58,6 +58,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamdestinationconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
@@ -541,6 +542,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamdestinationconnection.NewDataSourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		externaldatashare.NewDataSourceExternalDataShare,
 		externaldatashare.NewDataSourceExternalDataShares,
@@ -622,6 +624,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 
 func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
+		eventstreamdestinationconnection.NewEphemeralResourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
