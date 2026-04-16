@@ -61,6 +61,7 @@ func (r *resourceShortcut) ConfigValidators(_ context.Context) []resource.Config
 			path.MatchRoot("target").AtName("s3_compatible"),
 			path.MatchRoot("target").AtName("dataverse"),
 			path.MatchRoot("target").AtName("azure_blob_storage"),
+			path.MatchRoot("target").AtName("one_drive_share_point"),
 		),
 	}
 }

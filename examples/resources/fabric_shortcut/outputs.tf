@@ -25,3 +25,7 @@ output "dataverse" {
 output "azure_blob_storage" {
   value = fabric_shortcut.azure_blob_storage
 }
+
+output "one_drive_share_point" {
+  value = fabric_shortcut.one_drive_share_point
+}

@@ -41,6 +41,7 @@ type targetModel struct {
 	S3Compatible       supertypes.SingleNestedObjectValueOf[s3Compatible]          `tfsdk:"s3_compatible"`
 	AzureBlobStorage   supertypes.SingleNestedObjectValueOf[targetDataSourceModel] `tfsdk:"azure_blob_storage"`
 	ExternalDataShare  supertypes.SingleNestedObjectValueOf[externalDataShare]     `tfsdk:"external_data_share"`
+	OneDriveSharePoint supertypes.SingleNestedObjectValueOf[oneDriveSharePoint]    `tfsdk:"one_drive_share_point"`
 }
 
 type targetDataSourceModel struct {
@@ -68,8 +69,16 @@ type s3Compatible struct {
 	Subpath      types.String     `tfsdk:"subpath"`
 	Bucket       types.String     `tfsdk:"bucket"`
 }
+
 type externalDataShare struct {
 	ConnectionID customtypes.UUID `tfsdk:"connection_id"`
+}
+
+type oneDriveSharePoint struct {
+	ConnectionID                customtypes.UUID `tfsdk:"connection_id"`
+	Location                    customtypes.URL  `tfsdk:"location"`
+	Subpath                     types.String     `tfsdk:"subpath"`
+	UpdateFabricItemSensitivity types.Bool       `tfsdk:"update_fabric_item_sensitivity"`
 }
 
 func (to *baseShortcutModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.Shortcut) diag.Diagnostics {
@@ -109,6 +118,7 @@ func (to *targetModel) set(ctx context.Context, from fabcore.Target) {
 	to.S3Compatible = supertypes.NewSingleNestedObjectValueOfNull[s3Compatible](ctx)
 	to.AzureBlobStorage = supertypes.NewSingleNestedObjectValueOfNull[targetDataSourceModel](ctx)
 	to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOfNull[externalDataShare](ctx)
+	to.OneDriveSharePoint = supertypes.NewSingleNestedObjectValueOfNull[oneDriveSharePoint](ctx)
 
 	if from.OneLake != nil {
 		onelakeModel := &oneLakeModel{
@@ -180,6 +190,16 @@ func (to *targetModel) set(ctx context.Context, from fabcore.Target) {
 			ConnectionID: customtypes.NewUUIDPointerValue(from.ExternalDataShare.ConnectionID),
 		}
 		to.ExternalDataShare = supertypes.NewSingleNestedObjectValueOf(ctx, externalDataShareModel)
+	}
+
+	if from.OneDriveSharePoint != nil {
+		oneDriveSharePointModel := &oneDriveSharePoint{
+			ConnectionID:                customtypes.NewUUIDPointerValue(from.OneDriveSharePoint.ConnectionID),
+			Location:                    customtypes.NewURLPointerValue(from.OneDriveSharePoint.Location),
+			Subpath:                     types.StringPointerValue(from.OneDriveSharePoint.Subpath),
+			UpdateFabricItemSensitivity: types.BoolPointerValue(from.OneDriveSharePoint.UpdateFabricItemSensitivity),
+		}
+		to.OneDriveSharePoint = supertypes.NewSingleNestedObjectValueOf(ctx, oneDriveSharePointModel)
 	}
 }
 
@@ -340,6 +360,20 @@ func (to *requestCreateShortcut) set(ctx context.Context, from resourceShortcutM
 			ConnectionID: entity.ConnectionID.ValueStringPointer(),
 			Location:     entity.Location.ValueStringPointer(),
 			Subpath:      entity.Subpath.ValueStringPointer(),
+		}
+	}
+
+	if !target.OneDriveSharePoint.IsNull() {
+		entity, diags := target.OneDriveSharePoint.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		creatableShortcutTarget.OneDriveSharePoint = &fabcore.OneDriveSharePoint{
+			ConnectionID:                entity.ConnectionID.ValueStringPointer(),
+			Location:                    entity.Location.ValueStringPointer(),
+			Subpath:                     entity.Subpath.ValueStringPointer(),
+			UpdateFabricItemSensitivity: entity.UpdateFabricItemSensitivity.ValueBoolPointer(),
 		}
 	}
 

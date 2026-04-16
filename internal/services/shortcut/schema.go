@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -131,7 +132,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					MarkdownDescription: "An object that contains the target datasource, and it must specify exactly one of the supported destinations: " + utils.ConvertStringSlicesToString(
 						utils.RemoveSlicesByValues(
 							fabcore.PossibleTypeValues(),
-							[]fabcore.Type{fabcore.TypeOneDriveSharePoint, fabcore.TypeExternalDataShare},
+							[]fabcore.Type{fabcore.TypeExternalDataShare},
 						),
 						true,
 						true,
@@ -145,9 +146,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The type object contains properties like target shortcut account type.",
-							Validators: []validator.String{
-								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleTypeValues(), fabcore.TypeOneDriveSharePoint), true)...),
-							},
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
@@ -156,14 +154,15 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							Computed: true,
 						},
 					},
-					"onelake":              onelakeSchema(),
-					"adls_gen2":            adlsGen2Schema(),
-					"amazon_s3":            amazonS3Schema(),
-					"azure_blob_storage":   azureBlobStorageSchema(),
-					"google_cloud_storage": googleCloudStorageSchema(),
-					"s3_compatible":        s3CompatibleSchema(),
-					"external_data_share":  externalDataShareSchema(),
-					"dataverse":            dataverseSchema(),
+					"onelake":               onelakeSchema(),
+					"adls_gen2":             adlsGen2Schema(),
+					"amazon_s3":             amazonS3Schema(),
+					"azure_blob_storage":    azureBlobStorageSchema(),
+					"google_cloud_storage":  googleCloudStorageSchema(),
+					"s3_compatible":         s3CompatibleSchema(),
+					"external_data_share":   externalDataShareSchema(),
+					"dataverse":             dataverseSchema(),
+					"one_drive_share_point": oneDriveSharePointSchema(),
 				},
 			},
 
@@ -590,6 +589,70 @@ func externalDataShareSchema() superschema.SuperSingleNestedAttributeOf[external
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func oneDriveSharePointSchema() superschema.SuperSingleNestedAttributeOf[oneDriveSharePoint] {
+	return superschema.SuperSingleNestedAttributeOf[oneDriveSharePoint]{
+		Common: &schemaR.SingleNestedAttribute{
+			MarkdownDescription: "An object containing the properties of the target OneDrive for Business & SharePoint Online data source.",
+		},
+		Resource: &schemaR.SingleNestedAttribute{
+			Optional: true,
+		},
+		DataSource: &schemaD.SingleNestedAttribute{
+			Computed: true,
+		},
+		Attributes: map[string]superschema.Attribute{
+			"connection_id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the OneDrive SharePoint data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.",
+					CustomType:          customtypes.UUIDType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"location": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Specifies the location of the target OneDrive SharePoint container. The URI must be in the format https://microsoft.sharepoint.com which is the path of the target OneDrive SharePoint account.",
+					CustomType:          customtypes.URLType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"subpath": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "Specifies the container and subfolder within the OneDrive SharePoint account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder",
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"update_fabric_item_sensitivity": superschema.SuperBoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Specifies whether the user wants the fabric item sensitivity to be consistent with site level labels for Sharepoint shortcuts. If user sets it to true, and if a sharepoint site has a more restrictive label than the Fabric item, then only the label of the fabric item will be updated to match the sharepoint site",
+				},
+				Resource: &schemaR.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
+				},
+				DataSource: &schemaD.BoolAttribute{
 					Computed: true,
 				},
 			},

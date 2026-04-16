@@ -98,3 +98,18 @@ resource "fabric_shortcut" "azure_blob_storage" {
     }
   }
 }
+
+resource "fabric_shortcut" "one_drive_share_point" {
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
+  name         = "MyShortcutName"
+  path         = "MyShortcutPath"
+  target = {
+    one_drive_share_point = {
+      location                       = "https://microsoft.sharepoint.com"
+      subpath                        = "/mycontainer/mysubfolder"
+      connection_id                  = "22222222-2222-2222-2222-222222222222"
+      update_fabric_item_sensitivity = true //default is false
+    }
+  }
+}
