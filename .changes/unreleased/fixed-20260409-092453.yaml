@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed an issue where v1.9.0 could fail to install with OpenTofu due to a checksum mismatch; OpenTofu users should upgrade to v1.9.1 or later.
+time: 2026-04-09T09:24:53.415984639Z
+custom:
+  Issue: "910"
