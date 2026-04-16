@@ -263,7 +263,7 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 	})
 
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 4 {
+	if len(parts) < 4 {
 		resp.Diagnostics.AddError(
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name"),
@@ -272,7 +272,10 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 		return
 	}
 
-	workspaceID, itemID, shortcutPath, name := parts[0], parts[1], parts[2], parts[3]
+	workspaceID := parts[0]
+	itemID := parts[1]
+	name := parts[len(parts)-1]
+	shortcutPath := strings.Join(parts[2:len(parts)-1], "/")
 
 	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
 	resp.Diagnostics.Append(diags...)
