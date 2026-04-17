@@ -21,13 +21,13 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 	fakeWorkspaceID := testhelp.RandomUUID()
 	fakeEventstreamID := testhelp.RandomUUID()
-	fakeSourceID := testhelp.RandomUUID()
+	fakeDestinationID := testhelp.RandomUUID()
 
 	entity := NewRandomEventstreamDestinationConnection()
 	fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamDestinationConnection = fakeGetEventstreamDestinationConnection(
 		fakeWorkspaceID,
 		fakeEventstreamID,
-		fakeSourceID,
+		fakeDestinationID,
 		entity)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -46,7 +46,7 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   "invalid uuid",
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -58,19 +58,19 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": "invalid uuid",
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - source_id - invalid UUID
+		// error - destination_id - invalid UUID
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      "invalid uuid",
+					"destination_id": "invalid uuid",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -82,7 +82,7 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":    fakeWorkspaceID,
 					"eventstream_id":  fakeEventstreamID,
-					"source_id":       fakeSourceID,
+					"destination_id":  fakeDestinationID,
 					"unexpected_attr": "test",
 				},
 			),
@@ -94,7 +94,7 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found`),
@@ -104,13 +104,13 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id": fakeWorkspaceID,
-					"source_id":    fakeSourceID,
+					"workspace_id":   fakeWorkspaceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "eventstream_id" is required, but no definition was found`),
 		},
-		// error - no required attributes source_id
+		// error - no required attributes destination_id
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
@@ -119,7 +119,7 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 					"eventstream_id": fakeEventstreamID,
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "source_id" is required, but no definition was found`),
+			ExpectError: regexp.MustCompile(`The argument "destination_id" is required, but no definition was found`),
 		},
 		// error - invalid workspace_id
 		{
@@ -128,7 +128,7 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   testhelp.RandomUUID(),
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
@@ -140,19 +140,19 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": testhelp.RandomUUID(),
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-		// error - invalid source_id
+		// error - invalid destination_id
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      testhelp.RandomUUID(),
+					"destination_id": testhelp.RandomUUID(),
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
@@ -164,12 +164,12 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      fakeSourceID,
+					"destination_id": fakeDestinationID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", fakeWorkspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "source_id", fakeSourceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "destination_id", fakeDestinationID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "eventstream_id", fakeEventstreamID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "event_hub_name", entity.EventHubName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "consumer_group_name", entity.ConsumerGroupName),
