@@ -93,6 +93,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
@@ -494,6 +495,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
+		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
@@ -604,6 +606,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
+		warehousesqlauditsetting.NewDataSourceWarehouseSQLAuditSettings,
 		warehousesnapshot.NewDataSourceWarehouseSnapshot,
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
