@@ -21,6 +21,19 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("data_agent"),
+})
+
+var testHelperDefinition = map[string]any{
+	`"Files/Config/data_agent.json"`: map[string]any{
+		"source": "${local.path}/data_agent.json.tmpl",
+	},
+	`"Files/Config/draft/stage_config.json"`: map[string]any{
+		"source": "${local.path}/stage_config.json.tmpl",
+	},
+}
+
 func TestUnit_DataAgentResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -261,4 +274,34 @@ func TestAcc_DataAgentResource_CRUD(t *testing.T) {
 		},
 	},
 	))
+}
+
+func TestAcc_DataAgentDefinitionResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	}))
 }

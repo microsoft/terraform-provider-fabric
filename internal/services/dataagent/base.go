@@ -21,7 +21,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "data_agent",
 	Names:          "Data Agents",
 	Types:          "data_agents",
-	DocsURL:        "https://learn.microsoft.com/rest/api/fabric/dataagent/items",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-science/concept-data-agent",
 	IsPreview:      false,
 	IsSPNSupported: true,
 }

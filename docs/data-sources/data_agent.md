@@ -3,13 +3,13 @@
 page_title: "fabric_data_agent Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Data Agent data-source allows you to retrieve details about a Fabric Data Agent https://learn.microsoft.com/rest/api/fabric/dataagent/items.
+  The Data Agent data-source allows you to retrieve details about a Fabric Data Agent https://learn.microsoft.com/fabric/data-science/concept-data-agent.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_data_agent (Data Source)
 
-The Data Agent data-source allows you to retrieve details about a Fabric [Data Agent](https://learn.microsoft.com/rest/api/fabric/dataagent/items).
+The Data Agent data-source allows you to retrieve details about a Fabric [Data Agent](https://learn.microsoft.com/fabric/data-science/concept-data-agent).
 
 -> This data-source supports Service Principal authentication.
 
