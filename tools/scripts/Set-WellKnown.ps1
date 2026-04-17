@@ -1344,7 +1344,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1430,29 +1430,6 @@ $wellKnown['MirroredDatabase'] = @{
   id          = $mirroredDatabase.id
   displayName = $mirroredDatabase.displayName
   description = $mirroredDatabase.description
-}
-
-# Create DataAgent if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['DataAgent'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = "Files/Config/data_agent.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/data_agent/data_agent.json.tmpl' -Values @(@{ key = '{{ .SCHEMA }}'; value = '2.1.0' })
-      payloadType = 'InlineBase64'
-    }
-    @{
-      path        = "Files/Config/draft/stage_config.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/data_agent/stage_config.json.tmpl' -Values @(@{ key = '{{ .SCHEMA }}'; value = '1.0.0' })
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-$dataAgent = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DataAgent' -Definition $definition
-$wellKnown['DataAgent'] = @{
-  id          = $dataAgent.id
-  displayName = $dataAgent.displayName
-  description = $dataAgent.description
 }
 
 # Create SemanticModel if not exists
