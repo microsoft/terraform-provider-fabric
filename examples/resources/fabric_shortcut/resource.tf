@@ -2,7 +2,7 @@
 resource "fabric_shortcut" "onelake" {
   workspace_id             = "00000000-0000-0000-0000-000000000000"
   item_id                  = "00000000-0000-0000-0000-000000000000"
-  shortcut_conflict_policy = "GenerateUniqueName"
+  shortcut_conflict_policy = "CreateOrOverwrite"
   name                     = "MyShortcutName"
   path                     = "MyShortcutPath"
   target = {

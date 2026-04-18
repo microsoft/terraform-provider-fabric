@@ -5,7 +5,6 @@ package shortcut
 
 import (
 	"regexp"
-	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
@@ -87,9 +86,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					MarkdownDescription: "When provided, it defines the action to take when a shortcut with the same name and path already exists. The default action is 'Abort'",
 					Optional:            true,
 					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(slices.DeleteFunc(fabcore.PossibleShortcutConflictPolicyValues(), func(v fabcore.ShortcutConflictPolicy) bool {
-							return v == fabcore.ShortcutConflictPolicyGenerateUniqueName
-						}), true)...),
+						stringvalidator.OneOf(
+							utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleShortcutConflictPolicyValues(), fabcore.ShortcutConflictPolicyGenerateUniqueName), true)...),
 					},
 				},
 			},
