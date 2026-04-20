@@ -20,6 +20,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -110,12 +111,7 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 
 		var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		var gatewayID *string
-		if !plan.GatewayID.IsNull() && !plan.GatewayID.IsUnknown() {
-			gatewayID = plan.GatewayID.ValueStringPointer()
-		}
-
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, gatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
 			return
 		}
 
@@ -345,11 +341,16 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
-func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, gatewayID *string, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
-	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
+func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, gatewayID customtypes.UUID, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
+	opts := &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: new(true),
-		GatewayID:             gatewayID,
-	})
+	}
+
+	if !gatewayID.IsNull() && !gatewayID.IsUnknown() {
+		opts.GatewayID = gatewayID.ValueStringPointer()
+	}
+
+	pager := r.client.NewListSupportedConnectionTypesPager(opts)
 
 	var allConnections []fabcore.ConnectionCreationMetadata
 
