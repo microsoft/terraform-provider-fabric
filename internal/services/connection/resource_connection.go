@@ -110,7 +110,12 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 
 		var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID.ValueStringPointer(), &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		var gatewayID *string
+		if !plan.GatewayID.IsNull() && !plan.GatewayID.IsUnknown() {
+			gatewayID = plan.GatewayID.ValueStringPointer()
+		}
+
+		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, gatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
 			return
 		}
 
