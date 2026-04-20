@@ -69,7 +69,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Operations Agent display name.
-- `format` (String) The Operations Agent format. Possible values: `OperationsAgentV1`
+- `format` (String) The Operations Agent format. Possible values: `Default`
 - `id` (String) The Operations Agent ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -79,7 +79,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **OperationsAgentV1** format: `Configurations.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `Configurations.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Operations Agent description.
 - `folder_id` (String) The Operations Agent Folder ID.
 - `properties` (Attributes) The Operations Agent properties. (see [below for nested schema](#nestedatt--properties))

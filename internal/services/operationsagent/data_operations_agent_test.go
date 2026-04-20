@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-	faboperationsagent "github.com/microsoft/fabric-sdk-go/fabric/operationsagent"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -121,7 +120,6 @@ func TestUnit_OperationsAgentDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-
 		// read by name
 		{
 			Config: at.CompileConfig(
@@ -248,7 +246,7 @@ func TestAcc_OperationsAgentDataSource(t *testing.T) {
 					"workspace_id":      workspaceID,
 					"id":                entityID,
 					"output_definition": true,
-					"format":            string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+					"format":            "Default",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

@@ -105,11 +105,11 @@ resource "fabric_operations_agent" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Operations Agent definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/operations-agent-definition#operationsagentconfiguration-contents). Accepted path keys: **OperationsAgentV1** format: `Configurations.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Operations Agent definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/operations-agent-definition#operationsagentconfiguration-contents). Accepted path keys: **Default** format: `Configurations.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Operations Agent description.
 - `folder_id` (String) The Folder ID.
-- `format` (String) The Operations Agent format. Possible values: `OperationsAgentV1`
+- `format` (String) The Operations Agent format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -174,6 +174,6 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
-# terraform import fabric_operations_agent.example "<WorkspaceID>/OperationsAgentID"
+# terraform import fabric_operations_agent.example "<WorkspaceID>/<OperationsAgentID>"
 terraform import fabric_operations_agent.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111"
 ```

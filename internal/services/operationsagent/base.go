@@ -5,7 +5,6 @@ package operationsagent
 
 import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	faboperationsagent "github.com/microsoft/fabric-sdk-go/fabric/operationsagent"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
@@ -29,8 +28,8 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type:  string(faboperationsagent.DefinitionFormatOperationsAgentV1),
-		API:   string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+		Type:  fabricitem.DefinitionFormatDefault,
+		API:   "",
 		Paths: []string{"Configurations.json"},
 	},
 }

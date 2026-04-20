@@ -12,7 +12,6 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	faboperationsagent "github.com/microsoft/fabric-sdk-go/fabric/operationsagent"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -115,7 +114,7 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 						"definition":   testHelperDefinition,
 					},
 				)),
-			ExpectError: regexp.MustCompile(`Attribute format value must be one of: \["OperationsAgentV1"\]`),
+			ExpectError: regexp.MustCompile(`Attribute format value must be one of: \["Default"\]`),
 		},
 	}))
 }
@@ -135,7 +134,7 @@ func TestUnit_OperationsAgentResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
-				"format":       string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
 		))
@@ -213,7 +212,7 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
-						"format":       string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -230,7 +229,7 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -253,7 +252,7 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
@@ -348,7 +347,7 @@ func TestAcc_OperationsAgentDefinitionResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"format":       string(faboperationsagent.DefinitionFormatOperationsAgentV1),
+						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
 				)),
