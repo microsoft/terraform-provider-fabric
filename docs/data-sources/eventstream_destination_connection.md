@@ -43,6 +43,7 @@ data "fabric_eventstream_destination_connection" "example" {
 ### Read-Only
 
 - `access_keys` (Attributes) The access keys for the event hub. (see [below for nested schema](#nestedatt--access_keys))
+- `consumer_group_name` (String) The consumer group name of the event hub.
 - `event_hub_name` (String) The name of the event hub.
 - `fully_qualified_namespace` (String) The fully qualified namespace of the event hub.
 

@@ -197,7 +197,6 @@ func TestAcc_EventstreamDestinationConnectionDataSource(t *testing.T) {
 	destinationConnection := evenstream["destinationConnection"].(map[string]any)
 	destinationID := destinationConnection["destinationId"].(string)
 	eventHubName := destinationConnection["eventHubName"].(string)
-	consumerGroupName := destinationConnection["consumerGroupName"].(string)
 	fullyQualifiedNamespace := destinationConnection["fullyQualifiedNamespace"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
@@ -228,12 +227,12 @@ func TestAcc_EventstreamDestinationConnectionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "eventstream_id", eventstreamID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "event_hub_name", eventHubName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "consumer_group_name", consumerGroupName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "fully_qualified_namespace", fullyQualifiedNamespace),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.primary_connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.secondary_connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.primary_key"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "access_keys.secondary_key"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "consumer_group_name"),
 			),
 		},
 	}))

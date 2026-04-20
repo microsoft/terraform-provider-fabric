@@ -68,6 +68,10 @@ func (d *dataSourceEventstreamDestinationConnection) Schema(ctx context.Context,
 				MarkdownDescription: "The fully qualified namespace of the event hub.",
 				Computed:            true,
 			},
+			"consumer_group_name": schema.StringAttribute{
+				MarkdownDescription: "The consumer group name of the event hub.",
+				Computed:            true,
+			},
 			"access_keys": schema.SingleNestedAttribute{
 				MarkdownDescription: "The access keys for the event hub.",
 				Computed:            true,

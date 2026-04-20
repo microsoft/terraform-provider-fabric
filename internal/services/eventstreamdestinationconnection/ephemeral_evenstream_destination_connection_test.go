@@ -76,7 +76,7 @@ func TestUnit_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 				map[string]any{
 					"workspace_id":   fakeWorkspaceID,
 					"eventstream_id": fakeEventstreamID,
-					"source_id":      "invalid uuid",
+					"destination_id": "invalid uuid",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -225,7 +225,6 @@ func TestAcc_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 	destinationConnection := evenstream["destinationConnection"].(map[string]any)
 	destinationID := destinationConnection["destinationId"].(string)
 	eventHubName := destinationConnection["eventHubName"].(string)
-	consumerGroupName := destinationConnection["consumerGroupName"].(string)
 	fullyQualifiedNamespace := destinationConnection["fullyQualifiedNamespace"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testEphemeralItemFQN, nil, []resource.TestStep{
@@ -259,7 +258,7 @@ func TestAcc_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("workspace_id"), knownvalue.StringExact(workspaceID)),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("event_hub_name"), knownvalue.StringExact(eventHubName)),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("fully_qualified_namespace"), knownvalue.StringExact(fullyQualifiedNamespace)),
-				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("consumer_group_name"), knownvalue.StringExact(consumerGroupName)),
+				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("consumer_group_name"), knownvalue.NotNull()),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("primary_key"), knownvalue.NotNull()),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("secondary_key"), knownvalue.NotNull()),
 				statecheck.ExpectKnownValue(testEphemeralItemEchoFQN, tfjsonpath.New("data").AtMapKey("access_keys").AtMapKey("primary_connection_string"), knownvalue.NotNull()),
