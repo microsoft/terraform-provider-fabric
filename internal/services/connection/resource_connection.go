@@ -110,7 +110,7 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 
 		var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID.ValueStringPointer(), &supportedConnectionType)...); resp.Diagnostics.HasError() {
 			return
 		}
 
@@ -340,9 +340,10 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
-func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
+func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, gatewayID *string, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
 	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: new(true),
+		GatewayID:             gatewayID,
 	})
 
 	var allConnections []fabcore.ConnectionCreationMetadata
