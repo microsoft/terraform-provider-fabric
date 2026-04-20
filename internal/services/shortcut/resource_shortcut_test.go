@@ -159,6 +159,28 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
+		// error - shortcut_conflict_policy - invalid value "GenerateUniqueName"
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":             testhelp.RandomUUID(),
+					"item_id":                  testhelp.RandomUUID(),
+					"name":                     testhelp.RandomName(),
+					"path":                     testhelp.RandomName(),
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyGenerateUniqueName),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute shortcut_conflict_policy value must be one of`),
+		},
 		// error - location - invalid URL
 		{
 			ResourceName: testResourceItemFQN,
