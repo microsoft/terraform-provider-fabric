@@ -4,8 +4,10 @@
 package tenantsetting_test
 
 import (
+	"cmp"
 	"context"
 	"net/http"
+	"slices"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -90,6 +92,10 @@ func GetAllStoredTenantSettings() []fabadmin.TenantSetting {
 	for _, tenantSetting := range fakeTenantSettingsStore {
 		tenantSettings = append(tenantSettings, tenantSetting)
 	}
+
+	slices.SortFunc(tenantSettings, func(a, b fabadmin.TenantSetting) int {
+		return cmp.Compare(*a.SettingName, *b.SettingName)
+	})
 
 	return tenantSettings
 }
