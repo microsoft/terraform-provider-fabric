@@ -1,5 +1,0 @@
-kind: added
-body: Added `fabric_workspace_git_outbound_policy` resource
-time: 2026-03-09T14:30:29.95646671Z
-custom:
-    Issue: "842"
