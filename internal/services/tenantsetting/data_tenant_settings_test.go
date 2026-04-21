@@ -35,8 +35,6 @@ func TestUnit_TenantSettingsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.tenant_setting_group"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.title"),
-				// resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled_security_groups.0.graph_id"),
-				// resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled_security_groups.0.name"),
 			),
 		},
 	}))

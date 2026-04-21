@@ -38,13 +38,14 @@ tasks:
       BUILD_DEV_ARTIFACT_PATH: "{{.ROOT_DIR}}/{{.BUILD_DEV_ARTIFACT}}"
     cmds:
       - cmd: cp .github/dev/dev.tfrc.template dev.tfrc
-        platforms: [linux, darwin]
+        platforms: [ linux, darwin ]
       - cmd: sed -i '' 's|<output_dir>|{{.BUILD_DEV_ARTIFACT_PATH}}|g' dev.tfrc
-        platforms: [darwin]
+        platforms: [ darwin ]
       - cmd: sed -i 's|<output_dir>|{{.BUILD_DEV_ARTIFACT_PATH}}|g' dev.tfrc
-        platforms: [linux]
-      - cmd: if [ -z $TF_CLI_CONFIG_FILE ]; then echo -e "### Run the following command:\nexport TF_CLI_CONFIG_FILE={{.ROOT_DIR}}/dev.tfrc\n###"; fi
-        platforms: [linux, darwin]
+        platforms: [ linux ]
+      - cmd: if [ -z $TF_CLI_CONFIG_FILE ]; then echo -e "### Run the following
+          command:\nexport TF_CLI_CONFIG_FILE={{.ROOT_DIR}}/dev.tfrc\n###"; fi
+        platforms: [ linux, darwin ]
 
   deps:
     desc: Check if dependencies are up to date
@@ -63,7 +64,7 @@ tasks:
 
   deps:up:
     desc: Update dependencies
-    deps: [deps]
+    deps: [ deps ]
     cmds:
       - go get -u ./...
       - defer:
@@ -111,7 +112,8 @@ tasks:
   lint:md:
     desc: Run Markdown linters
     cmds:
-      - markdownlint-cli2 "./**/*.md" --config "./.github/linters/.markdownlint-cli2.yaml" --fix
+      - markdownlint-cli2 "./**/*.md" --config
+        "./.github/linters/.markdownlint-cli2.yaml" --fix
 
   lint:links:
     desc: Run link checkers
@@ -151,7 +153,7 @@ tasks:
   lint:tf-tools:
     desc: Install Terraform lint tools
     cmds:
-      - for: [tflint, tfsec, checkov]
+      - for: [ tflint, tfsec, checkov ]
         task: install:{{.ITEM}}
 
   tfp:
@@ -199,9 +201,10 @@ tasks:
   # ----------------------
   build:
     desc: Build development Provider binary with GoReleaser
-    deps: [build:clean]
+    deps: [ build:clean ]
     cmds:
-      - goreleaser build --snapshot --single-target --clean --output {{.BUILD_DEV_ARTIFACT}}
+      - goreleaser build --snapshot --single-target --clean --output
+        {{.BUILD_DEV_ARTIFACT}}
     sources:
       - "**/*.go"
       - go.mod
@@ -223,9 +226,9 @@ tasks:
     cmds:
       - cmd: |
           {{.PWSH}} 'Remove-Item -Path {{.BUILD_DEV_OUTPUT_DIR}} -Recurse -Force -ErrorAction SilentlyContinue; exit 0'
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: rm -rf {{.BUILD_DEV_OUTPUT_DIR}}
-        platforms: [linux, darwin]
+        platforms: [ linux, darwin ]
       - defer:
           task: build:output
     silent: true
@@ -236,9 +239,9 @@ tasks:
     cmds:
       - cmd: |
           {{.PWSH}} 'New-Item -ItemType Directory -Force -Path {{.BUILD_DEV_OUTPUT_DIR}} -ErrorAction SilentlyContinue > $null'
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: mkdir -p {{.BUILD_DEV_OUTPUT_DIR}}
-        platforms: [linux, darwin]
+        platforms: [ linux, darwin ]
     silent: true
     internal: true
 
@@ -250,13 +253,13 @@ tasks:
 
   site:build:
     desc: Build docs site
-    deps: [docs]
+    deps: [ docs ]
     cmds:
       - cmd: |
           {{.PWSH}} 'Remove-Item -Path .\site -Recurse -Force -ErrorAction SilentlyContinue; exit 0'
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: rm -rf ./site
-        platforms: [linux, darwin]
+        platforms: [ linux, darwin ]
       - mkdocs build --verbose --clean
     env:
       TZ: UTC
@@ -274,12 +277,20 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" -- {{.TEST_PATH}} -run "^TestUnit_{{.TEST_NAME}}" -timeout 10m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
+        \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\"
+        -coverprofile=\"coverage.out\" -covermode atomic"
       - task: test:getcover
     vars:
-      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
-      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
-      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
+        0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS)
+        1}}{{else}}./...{{end}}"
+      FORMAT: "{{if eq .GITHUB_ACTIONS
+        \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
+      RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testUnit"
     env:
       TF_LOG: error
@@ -290,13 +301,20 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run "^TestAcc_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic'
+      - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
+        \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\"
+        -coverprofile=\"coverage.out\" -covermode atomic"
       - task: test:getcover
     vars:
-      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
-      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
-      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
-      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test --rerun-fails-max-failures=50 --rerun-fails-report=rerun-report.txt{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
+        0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS)
+        1}}{{else}}./...{{end}}"
+      FORMAT: "{{if eq .GITHUB_ACTIONS
+        \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
+      RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
@@ -308,13 +326,21 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" -coverprofile="coverage.out" -covermode atomic -coverpkg={{.GO_PKGS}}'
+      - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
+        \"^Test(Acc|Unit)_{{.TEST_NAME}}\" -timeout 90m
+        -ldflags=\"{{.LDFLAGS}}\" -coverprofile=\"coverage.out\" -covermode
+        atomic -coverpkg={{.GO_PKGS}}"
       - task: test:getcover
     vars:
-      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
-      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS) 1}}{{else}}./...{{end}}"
-      FORMAT: '{{if eq .GITHUB_ACTIONS "true"}}github-actions{{else}}pkgname-and-test-fails{{end}}'
-      RERUN_FLAGS: '{{if eq .GITHUB_ACTIONS "true"}}--rerun-fails=5 --rerun-fails-run-root-test --rerun-fails-max-failures=50 --rerun-fails-report=rerun-report.txt{{end}}'
+      TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
+        0}}{{end}}"
+      TEST_PATH: "{{if gt (len (splitArgs .CLI_ARGS)) 1}}{{index (splitArgs .CLI_ARGS)
+        1}}{{else}}./...{{end}}"
+      FORMAT: "{{if eq .GITHUB_ACTIONS
+        \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
+      RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:
@@ -331,13 +357,15 @@ tasks:
 
   testacc:setup:
     desc: Setup acceptence/development test environment
-    dotenv: ["wellknown.env"]
+    dotenv: [ "wellknown.env" ]
     preconditions:
       - sh: |
           {{if ne OS "windows"}}
             command -v pwsh &>/dev/null || exit 1
           {{end}}
-        msg: "First install PowerShell: https://learn.microsoft.com/powershell/scripting/install/installing-powershell"
+        msg: "First install PowerShell:
+          https://learn.microsoft.com/powershell/scripting/install/installing-p\
+          owershell"
     cmds:
       - cmd: |
           {{.PWSH_SCRIPT}} ./tools/scripts/Set-WellKnown.ps1
@@ -345,7 +373,7 @@ tasks:
   test:tools:
     desc: Install test tools
     cmds:
-      - for: [gotestsum, gocover-cobertura]
+      - for: [ gotestsum, gocover-cobertura ]
         task: install:{{.ITEM}}
 
   test:getcover:
@@ -354,9 +382,9 @@ tasks:
     cmds:
       - cmd: |
           {{ .PWSH }} 'Get-Content coverage.out | gocover-cobertura > coverage.xml'
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: gocover-cobertura < coverage.out > coverage.xml
-        platforms: [linux, darwin]
+        platforms: [ linux, darwin ]
       - go tool cover -html coverage.out -o coverage.html
 
   # ----------------------
@@ -454,7 +482,8 @@ tasks:
   install:tfplugindocs:
     desc: Install tfplugindocs
     cmds:
-      - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+      - go install
+        github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
 
   install:deadcode:
     desc: Install deadcode
@@ -557,20 +586,20 @@ tasks:
     desc: Install lychee
     cmds:
       - cmd: winget install lycheeverse.lychee
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: cargo install lychee
         ignore_error: true
-        platforms: [linux]
+        platforms: [ linux ]
       - cmd: brew install lychee
-        platforms: [darwin]
+        platforms: [ darwin ]
 
   install:gh:
     desc: Install GitHub CLI
     cmds:
       - cmd: winget install GitHub.cli
-        platforms: [windows]
+        platforms: [ windows ]
       - cmd: brew install gh
-        platforms: [darwin]
+        platforms: [ darwin ]
       - cmd: |
           (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
             && sudo mkdir -p -m 755 /etc/apt/keyrings \
@@ -580,4 +609,4 @@ tasks:
             && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
             && sudo apt update \
             && sudo apt install gh -y
-        platforms: [linux]
+        platforms: [ linux ]

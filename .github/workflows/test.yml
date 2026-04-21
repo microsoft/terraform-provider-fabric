@@ -311,7 +311,7 @@ jobs:
     environment:
       name: development
     runs-on: ubuntu-24.04
-    timeout-minutes: 100
+    timeout-minutes: 90
     permissions:
       contents: read
       actions: read
@@ -393,7 +393,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform'
         run: task test
-        timeout-minutes: 100
+        timeout-minutes: 90
         env:
           # TF_LOG: DEBUG
           FABRIC_USE_OIDC: true
@@ -410,7 +410,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
         run: task test
-        timeout-minutes: 100
+        timeout-minutes: 90
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -428,9 +428,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
-          path: |
-            testresults.json
-            rerun-report.txt
+          path: testresults.json
           if-no-files-found: warn
           overwrite: true
 
@@ -452,9 +450,7 @@ jobs:
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
           reporter: golang-json
-          path: |
-            testresults.json
-            rerun-report.txt
+          path: testresults.json
 
       - name: ⚙️ Get Coverage summary
         if: always()
