@@ -70,14 +70,16 @@ func TestUnit_TenantSettingsResource_Attributes(t *testing.T) {
 func TestUnit_TenantSettingsResource_CRUD(t *testing.T) {
 	entity := NewRandomTenantSettingsWithoutProperties()
 
-	fakeTestUpsert(entity)
+	store := newFakeTenantSettingsStore()
+	fakeTestUpsert(store, entity)
 
-	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
+	fakeServer := fakes.NewFakeServer()
+	fakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc(store)
 	entityUpdate := entity
 	entityUpdate.Enabled = new(!*entity.Enabled)
-	fakes.FakeServer.ServerFactory.Admin.TenantsServer.UpdateTenantSetting = fakeUpdateTenantSettings()
+	fakeServer.ServerFactory.Admin.TenantsServer.UpdateTenantSetting = fakeUpdateTenantSettings(store)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
 		// success
 		{
 			ResourceName: testResourceItemFQN,

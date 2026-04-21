@@ -17,13 +17,15 @@ import (
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_TenantSettingsDataSource(t *testing.T) {
-	fakeTestUpsert(NewRandomTenantSetting())
-	fakeTestUpsert(NewRandomTenantSetting())
-	fakeTestUpsert(NewRandomTenantSetting())
+	store := newFakeTenantSettingsStore()
+	fakeTestUpsert(store, NewRandomTenantSetting())
+	fakeTestUpsert(store, NewRandomTenantSetting())
+	fakeTestUpsert(store, NewRandomTenantSetting())
 
-	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
+	fakeServer := fakes.NewFakeServer()
+	fakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc(store)
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakeServer.ServerFactory, nil, []resource.TestStep{
 		// read
 		{
 			Config: at.CompileConfig(

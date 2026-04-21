@@ -4,10 +4,8 @@
 package tenantsetting_test
 
 import (
-	"cmp"
 	"context"
 	"net/http"
-	"slices"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -18,12 +16,14 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-var fakeTenantSettingsStore = map[string]fabadmin.TenantSetting{}
+func newFakeTenantSettingsStore() map[string]fabadmin.TenantSetting {
+	return make(map[string]fabadmin.TenantSetting)
+}
 
-func fakeTenantSettingFunc() func(options *fabadmin.TenantsClientListTenantSettingsOptions) (resp azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]) {
+func fakeTenantSettingFunc(store map[string]fabadmin.TenantSetting) func(options *fabadmin.TenantsClientListTenantSettingsOptions) (resp azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]) {
 	return func(_ *fabadmin.TenantsClientListTenantSettingsOptions) (resp azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]) {
 		resp = azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]{}
-		resp.AddPage(http.StatusOK, fabadmin.TenantsClientListTenantSettingsResponse{TenantSettings: fabadmin.TenantSettings{Value: GetAllStoredTenantSettings()}}, nil)
+		resp.AddPage(http.StatusOK, fabadmin.TenantsClientListTenantSettingsResponse{TenantSettings: fabadmin.TenantSettings{Value: getAllStoredTenantSettings(store)}}, nil)
 
 		return resp
 	}
@@ -87,42 +87,38 @@ func NewRandomTenantSetting() fabadmin.TenantSetting {
 	}
 }
 
-func GetAllStoredTenantSettings() []fabadmin.TenantSetting {
-	tenantSettings := make([]fabadmin.TenantSetting, 0, len(fakeTenantSettingsStore))
-	for _, tenantSetting := range fakeTenantSettingsStore {
+func getAllStoredTenantSettings(store map[string]fabadmin.TenantSetting) []fabadmin.TenantSetting {
+	tenantSettings := make([]fabadmin.TenantSetting, 0, len(store))
+	for _, tenantSetting := range store {
 		tenantSettings = append(tenantSettings, tenantSetting)
 	}
-
-	slices.SortFunc(tenantSettings, func(a, b fabadmin.TenantSetting) int {
-		return cmp.Compare(*a.SettingName, *b.SettingName)
-	})
 
 	return tenantSettings
 }
 
-func fakeTestUpsert(entity fabadmin.TenantSetting) {
-	fakeTenantSettingsStore[*entity.SettingName] = entity
+func fakeTestUpsert(store map[string]fabadmin.TenantSetting, entity fabadmin.TenantSetting) {
+	store[*entity.SettingName] = entity
 }
 
-func fakeUpdateTenantSettings() func(ctx context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, options *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
+func fakeUpdateTenantSettings(store map[string]fabadmin.TenantSetting) func(ctx context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, options *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, tenantSettingName string, updateTenantSettingRequest fabadmin.UpdateTenantSettingRequest, _ *fabadmin.TenantsClientUpdateTenantSettingOptions) (resp azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabadmin.TenantsClientUpdateTenantSettingResponse]{}
 
 		errItemNotFound := fabcore.ErrItem.ItemNotFound.Error()
 
-		if _, ok := fakeTenantSettingsStore[tenantSettingName]; !ok {
+		if _, ok := store[tenantSettingName]; !ok {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errItemNotFound, "Tenant Setting not found"))
 			resp.SetResponse(http.StatusNotFound, fabadmin.TenantsClientUpdateTenantSettingResponse{}, nil)
 
 			return resp, errResp
 		}
 
-		fakeTenantSettingsStore[tenantSettingName] = fabadmin.TenantSetting{
+		store[tenantSettingName] = fabadmin.TenantSetting{
 			SettingName:              new(tenantSettingName),
-			Title:                    fakeTenantSettingsStore[tenantSettingName].Title,
-			TenantSettingGroup:       fakeTenantSettingsStore[tenantSettingName].TenantSettingGroup,
+			Title:                    store[tenantSettingName].Title,
+			TenantSettingGroup:       store[tenantSettingName].TenantSettingGroup,
 			Enabled:                  updateTenantSettingRequest.Enabled,
-			CanSpecifySecurityGroups: fakeTenantSettingsStore[tenantSettingName].CanSpecifySecurityGroups,
+			CanSpecifySecurityGroups: store[tenantSettingName].CanSpecifySecurityGroups,
 			DelegateToCapacity:       updateTenantSettingRequest.DelegateToCapacity,
 			DelegateToDomain:         updateTenantSettingRequest.DelegateToDomain,
 			DelegateToWorkspace:      updateTenantSettingRequest.DelegateToWorkspace,
@@ -133,7 +129,7 @@ func fakeUpdateTenantSettings() func(ctx context.Context, tenantSettingName stri
 
 		resp.SetResponse(
 			http.StatusOK,
-			fabadmin.TenantsClientUpdateTenantSettingResponse{UpdateTenantSettingResponse: fabadmin.UpdateTenantSettingResponse{TenantSettings: GetAllStoredTenantSettings()}},
+			fabadmin.TenantsClientUpdateTenantSettingResponse{UpdateTenantSettingResponse: fabadmin.UpdateTenantSettingResponse{TenantSettings: getAllStoredTenantSettings(store)}},
 			nil,
 		)
 
