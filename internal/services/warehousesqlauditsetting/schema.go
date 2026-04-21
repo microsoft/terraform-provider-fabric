@@ -6,9 +6,13 @@ package warehousesqlauditsetting
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -71,6 +75,7 @@ func itemSchema() superschema.Schema {
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
 					Computed: true,
+					Default:  stringdefault.StaticString(string(fabwarehouse.AuditSettingsStateDisabled)),
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
@@ -83,6 +88,7 @@ func itemSchema() superschema.Schema {
 				Resource: &schemaR.Int32Attribute{
 					Optional: true,
 					Computed: true,
+					Default:  int32default.StaticInt32(0),
 					Validators: []validator.Int32{
 						int32validator.AtLeast(0),
 					},
@@ -102,7 +108,13 @@ func itemSchema() superschema.Schema {
 					ElementType: types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
-					Required: true,
+					Optional: true,
+					Computed: true,
+					Default: setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{
+						types.StringValue("SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"),
+						types.StringValue("FAILED_DATABASE_AUTHENTICATION_GROUP"),
+						types.StringValue("BATCH_COMPLETED_GROUP"),
+					})),
 				},
 				DataSource: &schemaD.SetAttribute{
 					Computed: true,

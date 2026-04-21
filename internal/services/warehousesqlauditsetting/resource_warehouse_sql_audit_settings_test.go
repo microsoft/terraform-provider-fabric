@@ -195,7 +195,7 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id":             workspaceID,
 						"item_id":                  testhelp.RefByFQN(warehouseResourceFQN, "id"),
-						"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
+						"state":                    string(fabwarehouse.AuditSettingsStateDisabled),
 						"retention_days":           10,
 						"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
 					},
@@ -203,7 +203,7 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateEnabled)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "10"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "1"),
 			),
@@ -218,18 +218,36 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"item_id":      testhelp.RefByFQN(warehouseResourceFQN, "id"),
-						"state":        string(fabwarehouse.AuditSettingsStateDisabled),
+						"state":        string(fabwarehouse.AuditSettingsStateEnabled),
 						"audit_actions_and_groups": []string{
 							"SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-							"FAILED_DATABASE_AUTHENTICATION_GROUP",
 							"BATCH_COMPLETED_GROUP",
 						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateEnabled)),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "0"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "2"),
+			),
+		},
+		// Update - reset all to defaults
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				warehouseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      testhelp.RefByFQN(warehouseResourceFQN, "id"),
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "10"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "0"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "3"),
 			),
 		},

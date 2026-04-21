@@ -17,8 +17,8 @@ The Warehouse SQL Audit Settings resource allows you to manage a Fabric [Warehou
 
 ```terraform
 resource "fabric_warehouse_sql_audit_settings" "example" {
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "11111111-1111-1111-1111-111111111111"
+  workspace_id   = "00000000-0000-0000-0000-000000000000"
+  item_id        = "11111111-1111-1111-1111-111111111111"
   state          = "Enabled"
   retention_days = 10
   audit_actions_and_groups = [
@@ -34,14 +34,14 @@ resource "fabric_warehouse_sql_audit_settings" "example" {
 
 ### Required
 
-- `audit_actions_and_groups` (Set of String) Audit actions and groups.
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
-- `retention_days` (Number) Retention days. `0` indicates indefinite retention period. Value must be at least 0.
-- `state` (String) Audit settings state type. Possible values: `Disabled`, `Enabled`. Value must be one of : `Disabled`, `Enabled`.
+- `audit_actions_and_groups` (Set of String) Audit actions and groups. Value defaults to `["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"]`.
+- `retention_days` (Number) Retention days. `0` indicates indefinite retention period. Value defaults to `0`. Value must be at least 0.
+- `state` (String) Audit settings state type. Possible values: `Disabled`, `Enabled`. Value defaults to `Disabled`. Value must be one of : `Disabled`, `Enabled`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--timeouts"></a>

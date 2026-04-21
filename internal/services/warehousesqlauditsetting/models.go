@@ -71,13 +71,8 @@ type requestUpdateWarehouseSQLAuditSettings struct {
 }
 
 func (to *requestUpdateWarehouseSQLAuditSettings) set(from resourceWarehouseSQLAuditSettingsModel) {
-	if !from.State.IsNull() && !from.State.IsUnknown() {
-		to.State = (*fabwarehouse.AuditSettingsState)(from.State.ValueStringPointer())
-	}
-
-	if !from.RetentionDays.IsNull() && !from.RetentionDays.IsUnknown() {
-		to.RetentionDays = from.RetentionDays.ValueInt32Pointer()
-	}
+	to.State = (*fabwarehouse.AuditSettingsState)(from.State.ValueStringPointer())
+	to.RetentionDays = from.RetentionDays.ValueInt32Pointer()
 }
 
 /*
