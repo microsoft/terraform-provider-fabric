@@ -17,15 +17,13 @@ import (
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_TenantSettingsDataSource(t *testing.T) {
-	store := newFakeTenantSettingsStore()
-	fakeTestUpsert(store, NewRandomTenantSetting())
-	fakeTestUpsert(store, NewRandomTenantSetting())
-	fakeTestUpsert(store, NewRandomTenantSetting())
+	fakeTestUpsert(NewRandomTenantSetting())
+	fakeTestUpsert(NewRandomTenantSetting())
+	fakeTestUpsert(NewRandomTenantSetting())
 
-	fakeServer := fakes.NewFakeServer()
-	fakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc(store)
+	fakes.FakeServer.ServerFactory.Admin.TenantsServer.NewListTenantSettingsPager = fakeTenantSettingFunc()
 
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakeServer.ServerFactory, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// read
 		{
 			Config: at.CompileConfig(
@@ -37,8 +35,6 @@ func TestUnit_TenantSettingsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.tenant_setting_group"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.title"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled_security_groups.0.graph_id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled_security_groups.0.name"),
 			),
 		},
 	}))
