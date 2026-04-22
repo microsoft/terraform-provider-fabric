@@ -454,20 +454,8 @@ jobs:
           reporter: golang-json
           path: testresults.json
 
-      - name: 🔄 Check for test reruns
-        id: check_reruns
-        if: always()
-        run: |
-          if [ -f rerun-report.txt ]; then
-            echo "reruns=true" >> "$GITHUB_OUTPUT"
-            echo "⚠️ Tests were rerun - coverage data is unreliable (partial packages only)"
-            cat rerun-report.txt
-          else
-            echo "reruns=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: ⚙️ Get Coverage summary
-        if: always() && steps.check_reruns.outputs.reruns != 'true'
+        if: always()
         uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
         with:
           filename: coverage.xml
@@ -518,12 +506,7 @@ jobs:
           merge-multiple: true
 
       - name: 📝 Publish
-        run: |
-          if [ -f code-coverage-results.md ]; then
-            cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ Coverage summary not available (tests were rerun, coverage data unreliable)" >> $GITHUB_STEP_SUMMARY
-          fi
+        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       # - name: 📤 Upload test results to Codecov
       #   uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1

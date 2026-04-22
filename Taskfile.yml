@@ -277,10 +277,11 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
+      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
-        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
-        \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\"
-        -coverprofile=\"coverage.out\" -covermode atomic"
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
+        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
+        \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\""
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -290,8 +291,7 @@ tasks:
       FORMAT: "{{if eq .GITHUB_ACTIONS
         \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
       RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
-        --rerun-fails-run-root-test
-        --rerun-fails-report=rerun-report.txt{{end}}"
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testUnit"
     env:
       TF_LOG: error
@@ -302,10 +302,11 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
+      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
-        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
-        \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\"
-        -coverprofile=\"coverage.out\" -covermode atomic"
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
+        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
+        \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\""
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -315,8 +316,7 @@ tasks:
       FORMAT: "{{if eq .GITHUB_ACTIONS
         \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
       RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
-        --rerun-fails-run-root-test
-        --rerun-fails-report=rerun-report.txt{{end}}"
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testAcc"
     env:
       TF_LOG: error
@@ -328,11 +328,12 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
+      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
-        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} -- -run
+        \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
+        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
         \"^Test(Acc|Unit)_{{.TEST_NAME}}\" -timeout 90m
-        -ldflags=\"{{.LDFLAGS}}\" -coverprofile=\"coverage.out\" -covermode
-        atomic -coverpkg={{.GO_PKGS}}"
+        -ldflags=\"{{.LDFLAGS}}\""
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -342,8 +343,7 @@ tasks:
       FORMAT: "{{if eq .GITHUB_ACTIONS
         \"true\"}}github-actions{{else}}pkgname-and-test-fails{{end}}"
       RERUN_FLAGS: "{{if eq .GITHUB_ACTIONS \"true\"}}--rerun-fails=5
-        --rerun-fails-run-root-test
-        --rerun-fails-report=rerun-report.txt{{end}}"
+        --rerun-fails-run-root-test{{end}}"
       LDFLAGS: "-s -w -X main.version=testAcc"
       GO_PKGS_EXCLUDE: "/testhelp|/fakes|/terraform-provider-fabric"
       GO_PKGS:
@@ -356,6 +356,7 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 1
+      COVERPKG: "{{.GO_PKGS}}"
       # CGO_ENABLED: 1
 
   testacc:setup:
