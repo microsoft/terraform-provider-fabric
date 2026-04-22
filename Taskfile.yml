@@ -280,7 +280,8 @@ tasks:
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
         --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
-        \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\""
+        \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\"
+        {{.TEST_PATH}}"
       - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
@@ -305,7 +306,8 @@ tasks:
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
         --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
-        \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\""
+        \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\"
+        {{.TEST_PATH}}"
       - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
@@ -332,7 +334,7 @@ tasks:
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
         --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
         \"^Test(Acc|Unit)_{{.TEST_NAME}}\" -timeout 90m
-        -ldflags=\"{{.LDFLAGS}}\""
+        -ldflags=\"{{.LDFLAGS}}\" {{.TEST_PATH}}"
       - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:

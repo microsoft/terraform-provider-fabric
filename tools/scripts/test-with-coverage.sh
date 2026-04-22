@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# Copyright (c) Microsoft Corporation
+# Copyright Microsoft Corporation 2026
 # SPDX-License-Identifier: MPL-2.0
 
 # Wrapper for go test that writes coverage to a unique temp file per run.
