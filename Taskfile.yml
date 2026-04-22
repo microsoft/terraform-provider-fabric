@@ -277,11 +277,11 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
-        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
+        --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
         \"^TestUnit_{{.TEST_NAME}}\" -timeout 10m -ldflags=\"{{.LDFLAGS}}\""
+      - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -302,11 +302,11 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
-        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
+        --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
         \"^TestAcc_{{.TEST_NAME}}\" -timeout 90m -ldflags=\"{{.LDFLAGS}}\""
+      - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -328,12 +328,12 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - rm -f coverage.out
       - "gotestsum --format-hivis --format {{.FORMAT}} --jsonfile
         \"testresults.json\" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}}
-        --raw-command -- ./tools/scripts/test-with-coverage.sh -run
+        --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run
         \"^Test(Acc|Unit)_{{.TEST_NAME}}\" -timeout 90m
         -ldflags=\"{{.LDFLAGS}}\""
+      - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS)
@@ -377,7 +377,7 @@ tasks:
   test:tools:
     desc: Install test tools
     cmds:
-      - for: [ gotestsum, gocover-cobertura ]
+      - for: [ gotestsum, gocover-cobertura, gocovmerge ]
         task: install:{{.ITEM}}
 
   test:getcover:
@@ -477,6 +477,11 @@ tasks:
     desc: Install gocover-cobertura
     cmds:
       - go install github.com/boumenot/gocover-cobertura@latest
+
+  install:gocovmerge:
+    desc: Install gocovmerge
+    cmds:
+      - go install github.com/wadey/gocovmerge@latest
 
   install:go-test-coverage:
     desc: Install go-test-coverage
