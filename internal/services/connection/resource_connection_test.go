@@ -1341,6 +1341,66 @@ func TestUnit_ConnectionResource_ModifyPlan_Validations(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing connection parameter key`),
 		},
+		// Test 8: Unsupported credential type for usage in user-controlled code validation
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                        "test-connection",
+					"connectivity_type":                   "ShareableCloud",
+					"privacy_level":                       "Organizational",
+					"allow_usage_in_user_controlled_code": true,
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  false,
+						"credential_type":       string(fabcore.CredentialTypeAnonymous), // Not in SupportedCredentialTypesForUsageInUserControlledCode
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Unsupported credential type for usage in user-controlled code`),
+		},
+		// Test 9: Unsupported usage in user-controlled code (connection type has no supported credential types for it)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                        "test-connection",
+					"connectivity_type":                   "ShareableCloud",
+					"privacy_level":                       "Organizational",
+					"allow_usage_in_user_controlled_code": true,
+					"connection_details": map[string]any{
+						"type":            "SharePoint",
+						"creation_method": "SharePointList",
+						"parameters": []map[string]any{
+							{
+								"name":  "sharePointSiteUrl",
+								"value": "sharepoint.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  false,
+						"credential_type":       string(fabcore.CredentialTypeAnonymous),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Unsupported credential type for usage in user-controlled code`),
+		},
 	}))
 }
 

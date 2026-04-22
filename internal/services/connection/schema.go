@@ -164,6 +164,25 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					Optional: true,
 				},
 			},
+			"allow_usage_in_user_controlled_code": superschema.BoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Allow this connection to be used with items that allow user-controlled code such as Notebook.",
+				},
+				Resource: &schemaR.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					Validators: []validator.Bool{
+						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
+							}),
+					},
+				},
+				DataSource: &schemaD.BoolAttribute{
+					Computed: true,
+					Optional: true,
+				},
+			},
 			"connection_details": superschema.SuperSingleNestedAttribute{
 				Common: &schemaR.SingleNestedAttribute{
 					MarkdownDescription: "The " + ItemTypeInfo.Name + " connection details.",

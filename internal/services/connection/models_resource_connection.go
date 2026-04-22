@@ -137,12 +137,13 @@ func (to *requestCreateConnection) set(
 	switch connectivityType {
 	case fabcore.ConnectivityTypeShareableCloud: // fabcore.ConnectivityTypePersonalCloud:
 		to.CreateConnectionRequestClassification = &fabcore.CreateCloudConnectionRequest{
-			DisplayName:                   displayName,
-			PrivacyLevel:                  privacyLevel,
-			ConnectivityType:              &connectivityType,
-			ConnectionDetails:             &requestCreateConnectionDetails.CreateConnectionDetails,
-			CredentialDetails:             &requestCreateCredentialDetails.CreateCredentialDetails,
-			AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
+			DisplayName:                    displayName,
+			PrivacyLevel:                   privacyLevel,
+			ConnectivityType:               &connectivityType,
+			ConnectionDetails:              &requestCreateConnectionDetails.CreateConnectionDetails,
+			CredentialDetails:              &requestCreateCredentialDetails.CreateCredentialDetails,
+			AllowConnectionUsageInGateway:  plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
+			AllowUsageInUserControlledCode: plan.AllowUsageInUserControlledCode.ValueBoolPointer(),
 		}
 
 	case fabcore.ConnectivityTypeVirtualNetworkGateway:

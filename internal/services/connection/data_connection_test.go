@@ -164,6 +164,7 @@ func TestAcc_ConnectionDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.single_sign_on_type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "credential_details.skip_test_connection"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "allow_connection_usage_in_gateway"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "allow_usage_in_user_controlled_code"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "gateway_id"),
 			),
 		},
