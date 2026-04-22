@@ -518,7 +518,12 @@ jobs:
           merge-multiple: true
 
       - name: 📝 Publish
-        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+        run: |
+          if [ -f code-coverage-results.md ]; then
+            cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Coverage summary not available (tests were rerun, coverage data unreliable)" >> $GITHUB_STEP_SUMMARY
+          fi
 
       # - name: 📤 Upload test results to Codecov
       #   uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
