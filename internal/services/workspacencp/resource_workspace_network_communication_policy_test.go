@@ -147,8 +147,6 @@ func TestUnit_WorkspaceNetworkCommunicationPolicyResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WorkspaceNetworkCommunicationPolicy_CRUD(t *testing.T) {
-	t.Skip("Skipping test until a stable version is found")
-
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
 

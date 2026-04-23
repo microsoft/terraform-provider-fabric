@@ -114,32 +114,20 @@ func TestUnit_WorkspaceGitOutboundPolicyResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WorkspaceSetGitOutboundPolicy_CRUD(t *testing.T) {
-	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
-	capacityID := capacity["id"].(string)
-
-	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
-	workspaceNetworkCommunicationPolicyHCL, workspaceNetworkCommunicationPolicyFQN := testhelp.WorkspaceNetworkCommunicationPolicyResource(
-		t,
-		testhelp.RefByFQN(workspaceResourceFQN, "id"),
-		string(fabcore.NetworkAccessRuleAllow),
-		string(fabcore.NetworkAccessRuleDeny),
-	)
+	entity := testhelp.WellKnown()["WorkspaceOAP"].(map[string]any)
+	entityID := entity["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				workspaceNetworkCommunicationPolicyHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"default_action": string(fabcore.NetworkAccessRuleDeny),
-						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
-					},
-				)),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   entityID,
+					"default_action": string(fabcore.NetworkAccessRuleDeny),
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.NetworkAccessRuleDeny)),
 			),
@@ -147,17 +135,13 @@ func TestAcc_WorkspaceSetGitOutboundPolicy_CRUD(t *testing.T) {
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				workspaceResourceHCL,
-				workspaceNetworkCommunicationPolicyHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
-						"default_action": string(fabcore.NetworkAccessRuleAllow),
-						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
-					},
-				)),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   entityID,
+					"default_action": string(fabcore.NetworkAccessRuleAllow),
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),
