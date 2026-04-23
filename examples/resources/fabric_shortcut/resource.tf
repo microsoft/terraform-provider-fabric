@@ -1,10 +1,10 @@
 # Example of using the fabric_shortcut resource
 resource "fabric_shortcut" "onelake" {
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "11111111-1111-1111-1111-111111111111"
+  workspace_id             = "00000000-0000-0000-0000-000000000000"
+  item_id                  = "11111111-1111-1111-1111-111111111111"
   shortcut_conflict_policy = "CreateOrOverwrite"
-  name         = "MyShortcutName"
-  path         = "MyShortcutPath"
+  name                     = "MyShortcutName"
+  path                     = "MyShortcutPath"
   target = {
     onelake = {
       workspace_id = "00000000-0000-0000-0000-000000000000"
