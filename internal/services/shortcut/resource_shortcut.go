@@ -116,12 +116,23 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, nil)
+	var reqCreateOptions requestCreateShortcutOptions
+
+	reqCreateOptions.set(plan)
+
+	respCreate, err := r.client.CreateShortcut(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.ItemID.ValueString(),
+		reqCreate.CreateShortcutRequest,
+		&reqCreateOptions.OneLakeShortcutsClientCreateShortcutOptions,
+	)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -160,9 +171,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyOverwriteOnly
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
-		ShortcutConflictPolicy: &overwriteOnlyPolicy,
+		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
 	}
 
 	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
@@ -170,7 +180,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -319,7 +330,7 @@ func (r *resourceShortcut) get(ctx context.Context, model *resourceShortcutModel
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ShortcutConflictPolicy.ValueStringPointer(), respGet.Shortcut)
 
 	return nil
 }

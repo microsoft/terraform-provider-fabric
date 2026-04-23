@@ -33,7 +33,7 @@ data "fabric_shortcut" "example_by_name_path_workspaceid_itemid" {
 ### Required
 
 - `item_id` (String) Item ID.
-- `name` (String) Name of the shortcut.
+- `name` (String) The requested name of the shortcut. This is the name specified in the configuration.
 - `path` (String) A string representing the full path where the shortcut is created, including either "Files" or "Tables".
 - `workspace_id` (String) The Workspace ID.
 
