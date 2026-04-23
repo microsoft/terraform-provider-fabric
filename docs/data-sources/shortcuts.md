@@ -61,7 +61,7 @@ Required:
 Read-Only:
 
 - `id` (String) The Shortcut ID.
-- `name` (String) Name of the shortcut.
+- `name` (String) The requested name of the shortcut. This is the name specified in the configuration.
 - `path` (String) A string representing the full path where the shortcut is created, including either "Files" or "Tables".
 - `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--values--target))
 
