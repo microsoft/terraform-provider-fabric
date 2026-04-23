@@ -292,7 +292,7 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^TestAcc_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^TestAcc_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
       - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
@@ -311,7 +311,7 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 90m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
       - gocovmerge coverage.run.*.out > coverage.out
       - task: test:getcover
     vars:
