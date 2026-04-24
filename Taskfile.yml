@@ -274,8 +274,9 @@ tasks:
   testunit:
     desc: Run unit tests
     cmds:
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^TestUnit_{{.TEST_NAME}}" -timeout 10m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
-      - gocovmerge coverage.run.*.out > coverage.out
+      - task: test:precover
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/gotest-cover.sh -run "^TestUnit_{{.TEST_NAME}}" -timeout 10m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
+      - task: test:mergecover
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -286,14 +287,16 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 0
+      GOCOVERDIR: ".coverdata"
       # CGO_ENABLED: 1
 
   testacc:
     desc: Run acceptance tests
     cmds:
       - go clean -testcache
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^TestAcc_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
-      - gocovmerge coverage.run.*.out > coverage.out
+      - task: test:precover
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/gotest-cover.sh -run "^TestAcc_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
+      - task: test:mergecover
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -304,6 +307,7 @@ tasks:
     env:
       TF_LOG: error
       TF_ACC: 1
+      GOCOVERDIR: ".coverdata"
       # CGO_ENABLED: 1
 
   test:
@@ -311,8 +315,9 @@ tasks:
     cmds:
       - go clean -testcache
       - go test -failfast -run ^TestDevEnv_WellKnown$ ./internal/testhelp
-      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/test-with-coverage.sh -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
-      - gocovmerge coverage.run.*.out > coverage.out
+      - task: test:precover
+      - 'gotestsum --format-hivis --format {{.FORMAT}} --jsonfile "testresults.json" {{.RERUN_FLAGS}} --packages {{.TEST_PATH}} --raw-command -- bash ./tools/scripts/gotest-cover.sh -run "^Test(Acc|Unit)_{{.TEST_NAME}}" -timeout 100m -ldflags="{{.LDFLAGS}}" {{.TEST_PATH}}'
+      - task: test:mergecover
       - task: test:getcover
     vars:
       TEST_NAME: "{{if gt (len (splitArgs .CLI_ARGS)) 0}}{{index (splitArgs .CLI_ARGS) 0}}{{end}}"
@@ -332,6 +337,7 @@ tasks:
       TF_LOG: error
       TF_ACC: 1
       COVERPKG: "{{.GO_PKGS}}"
+      GOCOVERDIR: ".coverdata"
       # CGO_ENABLED: 1
 
   testacc:setup:
@@ -350,8 +356,24 @@ tasks:
   test:tools:
     desc: Install test tools
     cmds:
-      - for: [gotestsum, gocover-cobertura, gocovmerge]
+      - for: [gotestsum, gocover-cobertura]
         task: install:{{.ITEM}}
+
+  test:precover:
+    desc: Prepare a clean GOCOVERDIR for binary coverage data
+    internal: true
+    cmds:
+      - cmd: rm -rf .coverdata && mkdir -p .coverdata
+        platforms: [linux, darwin]
+      - cmd: |
+          {{ .PWSH }} 'if (Test-Path .coverdata) { Remove-Item -Recurse -Force .coverdata }; New-Item -ItemType Directory -Path .coverdata | Out-Null'
+        platforms: [windows]
+
+  test:mergecover:
+    desc: Convert covdata binary files in GOCOVERDIR into coverage.out (text format)
+    internal: true
+    cmds:
+      - go tool covdata textfmt -i=.coverdata -o=coverage.out
 
   test:getcover:
     desc: Get coverage results
@@ -450,11 +472,6 @@ tasks:
     desc: Install gocover-cobertura
     cmds:
       - go install github.com/boumenot/gocover-cobertura@latest
-
-  install:gocovmerge:
-    desc: Install gocovmerge
-    cmds:
-      - go install github.com/wadey/gocovmerge@latest
 
   install:go-test-coverage:
     desc: Install go-test-coverage
