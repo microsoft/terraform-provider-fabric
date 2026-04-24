@@ -18,4 +18,9 @@ set -eu
 
 : "${GOCOVERDIR:?GOCOVERDIR must be set}"
 
-exec go test -json -cover -covermode=atomic ${COVERPKG:+-coverpkg="$COVERPKG"} "$@" -args -test.gocoverdir="$GOCOVERDIR"
+# Resolve to an absolute path: each test binary runs in its package directory,
+# so a relative path would not point to the shared coverage directory.
+mkdir -p "$GOCOVERDIR"
+ABS_GOCOVERDIR="$(cd "$GOCOVERDIR" && pwd)"
+
+exec go test -json -cover -covermode=atomic ${COVERPKG:+-coverpkg="$COVERPKG"} "$@" -args -test.gocoverdir="$ABS_GOCOVERDIR"
