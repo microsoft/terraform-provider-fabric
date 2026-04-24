@@ -28,9 +28,15 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 var testHelperDefinition = map[string]any{
 	`"Files/Config/data_agent.json"`: map[string]any{
 		"source": "${local.path}/data_agent.json.tmpl",
+		"tokens": map[string]any{
+			"SCHEMA": "2.1.0",
+		},
 	},
 	`"Files/Config/draft/stage_config.json"`: map[string]any{
 		"source": "${local.path}/stage_config.json.tmpl",
+		"tokens": map[string]any{
+			"SCHEMA": "1.0.0",
+		},
 	},
 }
 
