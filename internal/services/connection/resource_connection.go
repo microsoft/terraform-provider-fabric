@@ -115,6 +115,12 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 			return
 		}
 
+		// If the supported connection metadata wasn't resolved (e.g., gateway_id is unknown at plan time),
+		// skip the metadata-dependent validations and defer them to apply time.
+		if supportedConnectionType.Type == nil {
+			return
+		}
+
 		if resp.Diagnostics.Append(r.validateCreationMethod(*connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -341,7 +347,23 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
-func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, gatewayID customtypes.UUID, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
+func (r *resourceConnection) getConnectionTypeMetadata(
+	ctx context.Context,
+	model rsConnectionDetailsModel,
+	gatewayID customtypes.UUID,
+	supportedConnectionType *fabcore.ConnectionCreationMetadata,
+) diag.Diagnostics {
+	// If gateway_id is provided but its value is unknown at plan time (e.g., it comes from a
+	// deferred data source or another resource's output), skip fetching the supported-connection
+	// metadata. Without the gateway context the result would be incorrect for VirtualNetworkGateway
+	// connections, so defer validation to apply time by returning early with no diagnostics and
+	// leaving supportedConnectionType unset.
+	if !gatewayID.IsNull() && gatewayID.IsUnknown() {
+		tflog.Debug(ctx, "skipping supported-connection metadata lookup: gateway_id is unknown")
+
+		return nil
+	}
+
 	opts := &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: new(true),
 	}
