@@ -83,10 +83,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 }
 
 func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	lakehouse := testhelp.WellKnown()["Lakehouse"].(map[string]any)
+	lakehouse := testhelp.WellKnown()["LakehouseRS"].(map[string]any)
 	itemID := lakehouse["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
