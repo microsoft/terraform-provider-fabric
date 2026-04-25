@@ -39,8 +39,47 @@ resource "fabric_snowflake_database" "example_definition_update" {
     "SnowflakeDatabaseProperties.json" = {
       source = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
       tokens = {
-        "MyKey" = "MyValue"
+        "DATABASE_NAME" = "ExampleDatabase"
       }
+    }
+  }
+}
+
+
+# Example 5 - Item with custom tokens delimiter
+resource "fabric_snowflake_database" "example_custom_delimiter" {
+  display_name = "example"
+  description  = "example with custom tokens delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "SnowflakeDatabaseProperties.json" = {
+      source           = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
+      tokens_delimiter = "{{}}"
+      tokens = {
+        "DATABASE_NAME" = "ExampleDatabase"
+      }
+    }
+  }
+}
+
+# Example 5 - Item with parameters processing mode
+resource "fabric_snowflake_database" "example_parameters" {
+  display_name = "example"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "SnowflakeDatabaseProperties.json" = {
+      source          = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
+      processing_mode = "Parameters"
+      parameters = [
+        {
+          type  = "TextReplace"
+          find  = "OldDatabaseName"
+          value = "NewDatabaseName"
+        }
+      ]
     }
   }
 }
