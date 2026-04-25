@@ -157,3 +157,86 @@ func TestUnit_SnowflakeDatabaseDataSource(t *testing.T) {
 		},
 	}))
 }
+
+func TestAcc_SnowflakeDatabaseDataSource(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entity := testhelp.WellKnown()["SnowflakeDatabase"].(map[string]any)
+	entityID := entity["id"].(string)
+	entityDisplayName := entity["displayName"].(string)
+	entityDescription := entity["description"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
+		// read by id
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           entityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.snowflake_account_url"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.snowflake_database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.snowflake_volume_path"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
+			),
+		},
+		// read by id - not found
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"id":           testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// read by name
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityDisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.snowflake_database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.id"),
+			),
+		},
+		// read by name - not found
+		{
+			ResourceName: testDataSourceItemFQN,
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": testhelp.RandomName(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+	}))
+}

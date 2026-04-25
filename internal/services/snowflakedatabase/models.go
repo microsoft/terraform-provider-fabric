@@ -15,12 +15,12 @@ import (
 )
 
 type snowflakeDatabasePropertiesModel struct {
-	ConnectionID          customtypes.UUID                                                                 `tfsdk:"connection_id"`
-	DefaultSchema         types.String                                                                     `tfsdk:"default_schema"`
-	OnelakeTablesPath     types.String                                                                     `tfsdk:"onelake_tables_path"`
-	SnowflakeAccountURL   types.String                                                                     `tfsdk:"snowflake_account_url"`
-	SnowflakeDatabaseName types.String                                                                     `tfsdk:"snowflake_database_name"`
-	SnowflakeVolumePath   types.String                                                                     `tfsdk:"snowflake_volume_path"`
+	ConnectionID          customtypes.UUID                                                                  `tfsdk:"connection_id"`
+	DefaultSchema         types.String                                                                      `tfsdk:"default_schema"`
+	OnelakeTablesPath     types.String                                                                      `tfsdk:"onelake_tables_path"`
+	SnowflakeAccountURL   types.String                                                                      `tfsdk:"snowflake_account_url"`
+	SnowflakeDatabaseName types.String                                                                      `tfsdk:"snowflake_database_name"`
+	SnowflakeVolumePath   types.String                                                                      `tfsdk:"snowflake_volume_path"`
 	SQLEndpointProperties supertypes.SingleNestedObjectValueOf[snowflakeDatabaseSQLEndpointPropertiesModel] `tfsdk:"sql_endpoint_properties"`
 }
 
