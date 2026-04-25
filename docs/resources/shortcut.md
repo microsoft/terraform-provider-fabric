@@ -22,103 +22,116 @@ The Shortcut resource allows you to manage a Fabric [Shortcut](https://learn.mic
 # Example of using the fabric_shortcut resource
 resource "fabric_shortcut" "onelake" {
   workspace_id             = "00000000-0000-0000-0000-000000000000"
-  item_id                  = "00000000-0000-0000-0000-000000000000"
+  item_id                  = "11111111-1111-1111-1111-111111111111"
   shortcut_conflict_policy = "CreateOrOverwrite"
   name                     = "MyShortcutName"
   path                     = "MyShortcutPath"
   target = {
     onelake = {
       workspace_id = "00000000-0000-0000-0000-000000000000"
-      item_id      = "00000000-0000-0000-0000-000000000000"
-      path         = "MyTargetPath"
+      item_id      = "22222222-2222-2222-2222-222222222222"
+      path         = "Tables/myTablesFolder/someTableSubFolder"
     }
   }
 }
 
 resource "fabric_shortcut" "adls_gen2" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     adls_gen2 = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[account-name].dfs.core.windows.net"
+      subpath       = "[container]/[subfolder]"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "amazon_s3" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     amazon_s3 = {
-      location      = "MyLocation"
+      location      = "https://[bucket-name].s3.[region-code].amazonaws.com"
       subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "google_cloud_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     google_cloud_storage = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[bucket-name].storage.googleapis.com"
+      subpath       = "/folder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "s3_compatible" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     s3_compatible = {
-      location      = "MyLocation"
+      location      = "https://s3endpoint.contoso.com"
       bucket        = "MyBucket"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      subpath       = "/folder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "dataverse" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     dataverse = {
       table_name         = "MyTableName"
       deltalake_folder   = "MyDeltaLakeFolder"
-      environment_domain = "MyEnvironmentDomainURI"
-      bucket             = "MyBucket"
-      subpath            = "MySubpath"
-      connection_id      = "00000000-0000-0000-0000-000000000000"
+      environment_domain = "https://[orgname].crm[xx].dynamics.com"
+      connection_id      = "22222222-2222-2222-2222-222222222222"
     }
   }
 }
 
 resource "fabric_shortcut" "azure_blob_storage" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
   name         = "MyShortcutName"
   path         = "MyShortcutPath"
   target = {
     azure_blob_storage = {
-      location      = "MyLocation"
-      subpath       = "MySubpath"
-      connection_id = "00000000-0000-0000-0000-000000000000"
+      location      = "https://[account-name].blob.core.windows.net"
+      subpath       = "/mycontainer/mysubfolder"
+      connection_id = "22222222-2222-2222-2222-222222222222"
+    }
+  }
+}
+
+resource "fabric_shortcut" "one_drive_share_point" {
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
+  name         = "MyShortcutName"
+  path         = "MyShortcutPath"
+  target = {
+    one_drive_share_point = {
+      location                       = "https://microsoft.sharepoint.com"
+      subpath                        = "/mycontainer/mysubfolder"
+      connection_id                  = "22222222-2222-2222-2222-222222222222"
+      update_fabric_item_sensitivity = true //default is false
     }
   }
 }
@@ -134,7 +147,7 @@ resource "fabric_shortcut" "azure_blob_storage" {
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Item ID.
 - `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The requested name of the shortcut. This is the name specified in the configuration. Name must contain at least one non-whitespace character.
 - `path` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> A string representing the full path where the shortcut is created, including either "Files" or "Tables". String length must be at most 256. Shortcut path can't start with forward slash '/'.
-- `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: OneLake, Amazon S3, ADLS Gen2, Google Cloud Storage, S3 compatible or Dataverse. (see [below for nested schema](#nestedatt--target))
+- `target` (Attributes) An object that contains the target datasource, and it must specify exactly one of the supported destinations: `AdlsGen2`, `AmazonS3`, `AzureBlobStorage`, `Dataverse`, `GoogleCloudStorage`, `OneDriveSharePoint`, `OneLake`, `S3Compatible`. (see [below for nested schema](#nestedatt--target))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
@@ -154,16 +167,17 @@ Optional:
 
 - `adls_gen2` (Attributes) An object containing the properties of the target ADLS Gen2 data source. (see [below for nested schema](#nestedatt--target--adls_gen2))
 - `amazon_s3` (Attributes) An object containing the properties of the target Amazon S3 data source. (see [below for nested schema](#nestedatt--target--amazon_s3))
-- `azure_blob_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--azure_blob_storage))
+- `azure_blob_storage` (Attributes) An object containing the properties of the target Azure Blob Storage data source. (see [below for nested schema](#nestedatt--target--azure_blob_storage))
 - `dataverse` (Attributes) An object containing the properties of the target Dataverse data source. (see [below for nested schema](#nestedatt--target--dataverse))
 - `google_cloud_storage` (Attributes) An object containing the properties of the target Google Cloud Storage data source. (see [below for nested schema](#nestedatt--target--google_cloud_storage))
+- `one_drive_share_point` (Attributes) An object containing the properties of the target OneDrive for Business & SharePoint Online data source. (see [below for nested schema](#nestedatt--target--one_drive_share_point))
 - `onelake` (Attributes) An object containing the properties of the target OneLake data source. (see [below for nested schema](#nestedatt--target--onelake))
 - `s3_compatible` (Attributes) An object containing the properties of the target S3 compatible data source. (see [below for nested schema](#nestedatt--target--s3_compatible))
 
 Read-Only:
 
 - `external_data_share` (Attributes) An object containing the properties of the target external data share. (see [below for nested schema](#nestedatt--target--external_data_share))
-- `type` (String) The type object contains properties like target shortcut account type. Additional types may be added over time.
+- `type` (String) The type object contains properties like target shortcut account type.
 
 <a id="nestedatt--target--adls_gen2"></a>
 
@@ -191,9 +205,9 @@ Required:
 
 Required:
 
-- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
-- `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
-- `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the Azure Blob Storage data location. Open the cloud connection's Settings view and copy the GUID that is the connection ID.
+- `location` (String) Specifies the location of the target Azure Blob Storage container. The URI must be in the format https://[account-name].blob.core.windows.net where [account-name] is the name of the target Azure Blob Storage account.
+- `subpath` (String) Specifies the container and subfolder within the Azure Blob Storage account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder.
 
 <a id="nestedatt--target--dataverse"></a>
 
@@ -215,6 +229,20 @@ Required:
 - `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource.
 - `location` (String) HTTP URL that points to the target bucket in GCS. The URL should be in the format https://[bucket-name].storage.googleapis.com, where [bucket-name] is the name of the bucket you want to point to. For example: <https://my-gcs-bucket.storage.googleapis.com>.
 - `subpath` (String) Specifies a target folder or subfolder within the GCS bucket. For example: /folder.
+
+<a id="nestedatt--target--one_drive_share_point"></a>
+
+### Nested Schema for `target.one_drive_share_point`
+
+Required:
+
+- `connection_id` (String) A string representing the connection that is bound with the shortcut. The connectionId is a unique identifier used to establish a connection between the shortcut and the target datasource. To find this connection ID, first create a cloud connection to be used by the shortcut when connecting to the OneDrive SharePoint data location. Open the cloud connection's settings view and copy the GUID that is the connection ID.
+- `location` (String) Specifies the location of the target OneDrive SharePoint container. The URI must be in the format <https://microsoft.sharepoint.com> which is the path of the target OneDrive SharePoint account.
+- `subpath` (String) Specifies the container and subfolder within the OneDrive SharePoint account where the target folder is located. Must be of the format [container]/[subfolder]. [Container] is the name of the container that holds the files and folders. [Subfolder] is the name of the subfolder within the container and is optional. For example: /mycontainer/mysubfolder.
+
+Optional:
+
+- `update_fabric_item_sensitivity` (Boolean) Specifies whether the user wants the fabric item sensitivity to be consistent with site level labels for Sharepoint shortcuts. If user sets it to true, and if a sharepoint site has a more restrictive label than the Fabric item, then only the label of the fabric item will be updated to match the sharepoint site. Value defaults to `false`.
 
 <a id="nestedatt--target--onelake"></a>
 
