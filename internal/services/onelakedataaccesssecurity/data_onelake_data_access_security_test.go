@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package onelakedataaccesssecurity_test
@@ -18,9 +18,9 @@ import (
 var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
 func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
-	workspaeID := testhelp.RandomUUID()
+	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaeID)
+	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
 
 	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), testhelp.RandomUUID()))
 	fakes.FakeServer.Upsert(entity)

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package onelakedataaccesssecurity
@@ -63,11 +63,14 @@ type FabricItemMember struct {
 type MicrosoftEntraMember struct {
 	ObjectID   customtypes.UUID `tfsdk:"object_id"`
 	ObjectType types.String     `tfsdk:"object_type"`
-	TenantID   types.String     `tfsdk:"tenant_id"`
+	TenantID   customtypes.UUID `tfsdk:"tenant_id"`
 }
 
 func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
-	to.Etag.Set(*from.Etag)
+	if from.Etag != nil {
+		to.Etag.Set(*from.Etag)
+	}
+
 	slice := make([]*dataAccessRole, 0, len(from.Value))
 
 	for _, item := range from.Value {
@@ -250,7 +253,7 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 		for _, item := range from.MicrosoftEntraMembers {
 			microsoftEntraMember := &MicrosoftEntraMember{
 				ObjectID: customtypes.NewUUIDPointerValue(item.ObjectID),
-				TenantID: types.StringPointerValue(item.TenantID),
+				TenantID: customtypes.NewUUIDPointerValue(item.TenantID),
 			}
 
 			if item.ObjectType != nil {

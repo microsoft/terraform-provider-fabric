@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -16,12 +16,12 @@ type operationsOneLakeDataAccessSecurity struct{}
 func (o *operationsOneLakeDataAccessSecurity) TransformGet(entity fabcore.DataAccessRoles) fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse {
 	return fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{
 		DataAccessRoles: entity,
-		Etag:            to.Ptr(testhelp.RandomUUID()),
+		Etag:            new(testhelp.RandomUUID()),
 	}
 }
 
-func transformDataAccessRole(entity fabcore.DataAccessRole) fabcore.DataAccessRole {
-	return fabcore.DataAccessRole{
+func transformDataAccessRole(entity fabcore.DataAccessRole) fabcore.DataAccessRoleListItem {
+	return fabcore.DataAccessRoleListItem{
 		ID:            entity.ID,
 		Members:       entity.Members,
 		Name:          entity.Name,
@@ -30,7 +30,7 @@ func transformDataAccessRole(entity fabcore.DataAccessRole) fabcore.DataAccessRo
 }
 
 func (o *operationsOneLakeDataAccessSecurity) TransformList(entities []fabcore.DataAccessRole) fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse {
-	list := make([]fabcore.DataAccessRole, len(entities))
+	list := make([]fabcore.DataAccessRoleListItem, len(entities))
 	for i, entity := range entities {
 		list[i] = transformDataAccessRole(entity)
 	}
@@ -65,8 +65,8 @@ func configureOneLakeDataAccessSecurity(server *fakeServer) fabcore.DataAccessRo
 
 func NewRandomOneLakeDataAccessSecurityClient() fabcore.DataAccessRole {
 	return fabcore.DataAccessRole{
-		ID:   to.Ptr(testhelp.RandomUUID()),
-		Name: to.Ptr(testhelp.RandomName()),
+		ID:   new(testhelp.RandomUUID()),
+		Name: new(testhelp.RandomName()),
 		DecisionRules: []fabcore.DecisionRule{
 			{
 				Effect: to.Ptr(fabcore.EffectPermit),
@@ -86,7 +86,7 @@ func NewRandomOneLakeDataAccessSecurityClient() fabcore.DataAccessRole {
 			FabricItemMembers: []fabcore.FabricItemMember{
 				{
 					ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-					SourcePath: to.Ptr(testhelp.RandomUUID() + "/" + testhelp.RandomUUID()),
+					SourcePath: new(testhelp.RandomUUID() + "/" + testhelp.RandomUUID()),
 				},
 			},
 		},
@@ -95,10 +95,10 @@ func NewRandomOneLakeDataAccessSecurityClient() fabcore.DataAccessRole {
 
 func NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID string) fabcore.DataAccessRoles {
 	return fabcore.DataAccessRoles{
-		Value: []fabcore.DataAccessRole{
+		Value: []fabcore.DataAccessRoleListItem{
 			{
-				ID:   to.Ptr(itemID),
-				Name: to.Ptr(testhelp.RandomName()),
+				ID:   new(itemID),
+				Name: new(testhelp.RandomName()),
 				DecisionRules: []fabcore.DecisionRule{
 					{
 						Effect: to.Ptr(fabcore.EffectPermit),
@@ -118,7 +118,7 @@ func NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID string) fabc
 					FabricItemMembers: []fabcore.FabricItemMember{
 						{
 							ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-							SourcePath: to.Ptr(workspaceID + "/" + itemID),
+							SourcePath: new(workspaceID + "/" + itemID),
 						},
 					},
 				},
