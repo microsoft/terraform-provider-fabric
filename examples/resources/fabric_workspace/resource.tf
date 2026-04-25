@@ -27,7 +27,7 @@ resource "fabric_workspace" "example3" {
   skip_capacity_state_validation = true
 }
 
-# Workspace with Identity on shared capacity (Power BI Pro)
+# Workspace with Identity on shared capacity
 resource "fabric_workspace" "example4" {
   display_name = "example4"
   description  = "Example Workspace 4"
