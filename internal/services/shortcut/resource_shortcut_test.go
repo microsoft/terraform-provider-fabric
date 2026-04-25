@@ -12,6 +12,7 @@ import (
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -157,6 +158,28 @@ func TestUnit_ShortcutResource_Attributes(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - shortcut_conflict_policy - invalid value "GenerateUniqueName"
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":             testhelp.RandomUUID(),
+					"item_id":                  testhelp.RandomUUID(),
+					"name":                     testhelp.RandomName(),
+					"path":                     testhelp.RandomName(),
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyGenerateUniqueName),
+					"target": map[string]any{
+						"onelake": map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"item_id":      testhelp.RandomUUID(),
+							"path":         testhelp.RandomName(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Attribute shortcut_conflict_policy value must be one of`),
 		},
 		// error - location - invalid URL
 		{
@@ -443,10 +466,11 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":      lakehouseID,
-					"workspace_id": workspaceID,
-					"name":         entityCreateDisplayName,
-					"path":         "Tables",
+					"item_id":                  lakehouseID,
+					"workspace_id":             workspaceID,
+					"name":                     entityCreateDisplayName,
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyCreateOrOverwrite),
+					"path":                     "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,
@@ -470,10 +494,11 @@ func TestAcc_ShortcutResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":      lakehouseID,
-					"workspace_id": workspaceID,
-					"name":         entityCreateDisplayName,
-					"path":         "Tables",
+					"item_id":                  lakehouseID,
+					"workspace_id":             workspaceID,
+					"name":                     entityCreateDisplayName,
+					"shortcut_conflict_policy": string(fabcore.ShortcutConflictPolicyCreateOrOverwrite),
+					"path":                     "Tables",
 					"target": map[string]any{
 						"onelake": map[string]any{
 							"workspace_id": workspaceID,
