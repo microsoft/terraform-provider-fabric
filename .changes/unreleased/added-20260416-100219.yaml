@@ -1,0 +1,5 @@
+kind: added
+body: Added new data source `fabric_eventstream_destination_connection`
+time: 2026-04-16T10:02:19.497331241Z
+custom:
+    Issue: "825"
