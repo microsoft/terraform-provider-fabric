@@ -63,7 +63,7 @@ resource "fabric_snowflake_database" "example_custom_delimiter" {
   }
 }
 
-# Example 5 - Item with parameters processing mode
+# Example 6 - Item with parameters processing mode
 resource "fabric_snowflake_database" "example_parameters" {
   display_name = "example"
   description  = "example with parameters processing mode"
