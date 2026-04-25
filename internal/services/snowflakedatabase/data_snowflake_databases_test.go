@@ -90,3 +90,28 @@ func TestUnit_SnowflakeDatabasesDataSource(t *testing.T) {
 		},
 	}))
 }
+
+func TestAcc_SnowflakeDatabasesDataSource(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
+		// read
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemsHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.connection_id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.snowflake_database_name"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.sql_endpoint_properties.id"),
+			),
+		},
+	},
+	))
+}
