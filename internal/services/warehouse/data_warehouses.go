@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceWarehouses() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.FabricItemPropertiesModel[warehousePropertiesModel, fabwarehouse.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabwarehouse.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[warehousePropertiesModel, fabwarehouse.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[warehousePropertiesModel](ctx)
 
 		if from != nil {

@@ -142,7 +142,9 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
@@ -172,7 +174,9 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

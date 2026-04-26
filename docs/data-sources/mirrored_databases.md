@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Database Folder ID.
 - `id` (String) The Mirrored Database ID.
 - `properties` (Attributes) The Mirrored Database properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Mirrored Database sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -76,3 +77,11 @@ Read-Only:
 - `connection_string` (String) The SQL endpoint connection string.
 - `id` (String) The SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
