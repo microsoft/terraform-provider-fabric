@@ -20,6 +20,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -110,7 +111,13 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 
 		var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		// If the supported connection metadata wasn't resolved (e.g., gateway_id is unknown at plan time),
+		// skip the metadata-dependent validations and defer them to apply time.
+		if supportedConnectionType.Type == nil {
 			return
 		}
 
@@ -340,10 +347,32 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
-func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
-	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
+func (r *resourceConnection) getConnectionTypeMetadata(
+	ctx context.Context,
+	model rsConnectionDetailsModel,
+	gatewayID customtypes.UUID,
+	supportedConnectionType *fabcore.ConnectionCreationMetadata,
+) diag.Diagnostics {
+	// If gateway_id is provided but its value is unknown at plan time (e.g., it comes from a
+	// deferred data source or another resource's output), skip fetching the supported-connection
+	// metadata. Without the gateway context the result would be incorrect for VirtualNetworkGateway
+	// connections, so defer validation to apply time by returning early with no diagnostics and
+	// leaving supportedConnectionType unset.
+	if !gatewayID.IsNull() && gatewayID.IsUnknown() {
+		tflog.Debug(ctx, "skipping supported-connection metadata lookup: gateway_id is unknown")
+
+		return nil
+	}
+
+	opts := &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: new(true),
-	})
+	}
+
+	if !gatewayID.IsNull() && !gatewayID.IsUnknown() {
+		opts.GatewayID = gatewayID.ValueStringPointer()
+	}
+
+	pager := r.client.NewListSupportedConnectionTypesPager(opts)
 
 	var allConnections []fabcore.ConnectionCreationMetadata
 

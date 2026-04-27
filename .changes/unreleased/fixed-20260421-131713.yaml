@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_connection` `skip_test_connection` validation issue
+time: 2026-04-21T13:17:13.652990587Z
+custom:
+    Issue: "886"
