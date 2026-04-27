@@ -3,13 +3,13 @@
 page_title: "fabric_snowflake_database Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Snowflake Database resource allows you to manage a Fabric Snowflake Database https://learn.microsoft.com/fabric/database/snowflake/overview.
+  The Snowflake Database resource allows you to manage a Fabric Snowflake Database https://learn.microsoft.com/fabric/data-factory/connector-snowflake-overview.
   -> This resource supports Service Principal authentication.
 ---
 
 # fabric_snowflake_database (Resource)
 
-The Snowflake Database resource allows you to manage a Fabric [Snowflake Database](https://learn.microsoft.com/fabric/database/snowflake/overview).
+The Snowflake Database resource allows you to manage a Fabric [Snowflake Database](https://learn.microsoft.com/fabric/data-factory/connector-snowflake-overview).
 
 -> This resource supports Service Principal authentication.
 
