@@ -454,6 +454,37 @@ func TestUnit_ConnectionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute gateway_id`),
 		},
+		// step 17: error - VirtualNetworkGateway connection with AllowUsageInUserControlledCode set
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                        "test",
+					"connectivity_type":                   "VirtualNetworkGateway",
+					"privacy_level":                       "Organizational",
+					"gateway_id":                          testhelp.RandomUUID(),
+					"allow_usage_in_user_controlled_code": true,
+					"connection_details": map[string]any{
+						"type":            "FTP",
+						"creation_method": "FTP.Contents",
+						"parameters": []map[string]any{
+							{
+								"name":  "server",
+								"value": "ftp.example.com",
+							},
+						},
+					},
+					"credential_details": map[string]any{
+						"connection_encryption": string(fabcore.ConnectionEncryptionNotEncrypted),
+						"single_sign_on_type":   string(fabcore.SingleSignOnTypeNone),
+						"skip_test_connection":  false,
+						"credential_type":       string(fabcore.CredentialTypeAnonymous),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute allow_usage_in_user_controlled_code`),
+		},
 	}))
 }
 
