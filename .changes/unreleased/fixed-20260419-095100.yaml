@@ -1,0 +1,5 @@
+kind: fixed
+body: Allow `fabric_workspace` resource to configure `identity` (Managed Identity) without requiring `capacity_id`, matching the Fabric/Power BI portal which supports Managed Identity on shared-capacity (Power BI Pro) workspaces.
+time: 2026-04-19T09:51:00.000000000Z
+custom:
+  Issue: "859"
