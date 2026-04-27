@@ -103,7 +103,7 @@ func fakeDeleteShortcutFunc() func(ctx context.Context, workspaceID, itemID, sho
 func NewRandomShortcut() fabcore.Shortcut {
 	return fabcore.Shortcut{
 		Name:   new(testhelp.RandomName()),
-		Path:   new(testhelp.RandomName()),
+		Path:   new(testhelp.RandomName() + "/" + testhelp.RandomName() + "/" + testhelp.RandomName()),
 		Target: NewRandomShortcutTarget(),
 	}
 }

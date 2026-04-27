@@ -61,6 +61,7 @@ func (r *resourceShortcut) ConfigValidators(_ context.Context) []resource.Config
 			path.MatchRoot("target").AtName("s3_compatible"),
 			path.MatchRoot("target").AtName("dataverse"),
 			path.MatchRoot("target").AtName("azure_blob_storage"),
+			path.MatchRoot("target").AtName("one_drive_share_point"),
 		),
 	}
 }
@@ -116,12 +117,23 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, nil)
+	var reqCreateOptions requestCreateShortcutOptions
+
+	reqCreateOptions.set(plan)
+
+	respCreate, err := r.client.CreateShortcut(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.ItemID.ValueString(),
+		reqCreate.CreateShortcutRequest,
+		&reqCreateOptions.OneLakeShortcutsClientCreateShortcutOptions,
+	)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -160,9 +172,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	overwriteOnlyPolicy := fabcore.ShortcutConflictPolicyOverwriteOnly
 	options := fabcore.OneLakeShortcutsClientCreateShortcutOptions{
-		ShortcutConflictPolicy: &overwriteOnlyPolicy,
+		ShortcutConflictPolicy: (*fabcore.ShortcutConflictPolicy)(plan.ShortcutConflictPolicy.ValueStringPointer()),
 	}
 
 	respCreate, err := r.client.CreateShortcut(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateShortcutRequest, &options)
@@ -170,7 +181,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -262,7 +274,7 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 	})
 
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 4 {
+	if len(parts) < 4 {
 		resp.Diagnostics.AddError(
 			common.ErrorImportIdentifierHeader,
 			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Path/Name"),
@@ -271,7 +283,10 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 		return
 	}
 
-	workspaceID, itemID, shortcutPath, name := parts[0], parts[1], parts[2], parts[3]
+	workspaceID := parts[0]
+	itemID := parts[1]
+	name := parts[len(parts)-1]
+	shortcutPath := strings.Join(parts[2:len(parts)-1], "/")
 
 	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
 	resp.Diagnostics.Append(diags...)
@@ -319,7 +334,7 @@ func (r *resourceShortcut) get(ctx context.Context, model *resourceShortcutModel
 		return diags
 	}
 
-	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.Shortcut)
+	model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.ShortcutConflictPolicy.ValueStringPointer(), respGet.Shortcut)
 
 	return nil
 }
