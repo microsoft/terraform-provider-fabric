@@ -26,6 +26,7 @@ coverage.out
 coverage.html
 coverage.md
 coverage.json
+.coverdata/
 .task/
 site/
 website/vendor
