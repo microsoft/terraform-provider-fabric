@@ -21,7 +21,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "snowflake_database",
 	Names:          "Snowflake Databases",
 	Types:          "snowflake_databases",
-	DocsURL:        "https://learn.microsoft.com/fabric/database/snowflake/overview",
+	DocsURL:        "https://learn.microsoft.com/fabric/data-factory/connector-snowflake-overview",
 	IsPreview:      false,
 	IsSPNSupported: true,
 }

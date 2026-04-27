@@ -3,13 +3,13 @@
 page_title: "fabric_snowflake_database Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Snowflake Database data-source allows you to retrieve details about a Fabric Snowflake Database https://learn.microsoft.com/fabric/database/snowflake/overview.
+  The Snowflake Database data-source allows you to retrieve details about a Fabric Snowflake Database https://learn.microsoft.com/fabric/data-factory/connector-snowflake-overview.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_snowflake_database (Data Source)
 
-The Snowflake Database data-source allows you to retrieve details about a Fabric [Snowflake Database](https://learn.microsoft.com/fabric/database/snowflake/overview).
+The Snowflake Database data-source allows you to retrieve details about a Fabric [Snowflake Database](https://learn.microsoft.com/fabric/data-factory/connector-snowflake-overview).
 
 -> This data-source supports Service Principal authentication.
 
@@ -31,6 +31,7 @@ data "fabric_snowflake_database" "example_by_name" {
 data "fabric_snowflake_database" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "Default"
   output_definition = true
 }
 
