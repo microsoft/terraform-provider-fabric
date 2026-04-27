@@ -268,33 +268,46 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
-	entity := testhelp.WellKnown()["WorkspaceOAP"].(map[string]any)
-	workspaceDS := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceDSID := workspaceDS["id"].(string)
-	entityID := entity["id"].(string)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
+	workspaceNetworkCommunicationPolicyHCL, workspaceNetworkCommunicationPolicyFQN := testhelp.WorkspaceNetworkCommunicationPolicyResource(
+		t,
+		testhelp.RefByFQN(workspaceResourceFQN, "id"),
+		string(fabcore.NetworkAccessRuleAllow),
+		string(fabcore.NetworkAccessRuleDeny),
+	)
+
+	workspaceRS := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceRSID := workspaceRS["id"].(string)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   entityID,
-					"default_action": "Deny",
-					"rules": []map[string]any{
-						{
-							"connection_type": "SQL",
-							"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
-							"allowed_endpoints": []map[string]any{
-								{
-									"hostname_pattern": "*.microsoft.com",
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				workspaceNetworkCommunicationPolicyHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"default_action": "Deny",
+						"rules": []map[string]any{
+							{
+								"connection_type": "SQL",
+								"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
+								"allowed_endpoints": []map[string]any{
+									{
+										"hostname_pattern": "*.microsoft.com",
+									},
 								},
 							},
 						},
+						"depends_on": []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "1"),
@@ -307,40 +320,48 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   entityID,
-					"default_action": string(fabcore.ConnectionAccessActionTypeDeny),
-					"rules": []map[string]any{
-						{
-							"connection_type": "lakehouse",
-							"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
-							"allowed_workspaces": []map[string]any{
-								{
-									"workspace_id": workspaceDSID,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				workspaceNetworkCommunicationPolicyHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"default_action": string(fabcore.ConnectionAccessActionTypeDeny),
+						"rules": []map[string]any{
+							{
+								"connection_type": "lakehouse",
+								"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
+								"allowed_workspaces": []map[string]any{
+									{
+										"workspace_id": workspaceRSID,
+									},
 								},
 							},
 						},
+						"depends_on": []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				},
-			),
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_workspaces.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_workspaces.0.workspace_id", workspaceDSID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_workspaces.0.workspace_id", workspaceRSID),
 			),
 		},
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   entityID,
-					"default_action": string(fabcore.ConnectionAccessActionTypeAllow),
-				},
-			),
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				workspaceNetworkCommunicationPolicyHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":   testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"default_action": string(fabcore.ConnectionAccessActionTypeAllow),
+						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeAllow)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "0"),
