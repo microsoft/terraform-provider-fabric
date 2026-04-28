@@ -76,7 +76,7 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 		"action": "start",
 	})
 
-	var state resourceOneLakeDataAccessSecurityModel
+	var state baseOneLakeDataAccessSecurityModel
 
 	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
@@ -100,7 +100,7 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		"action": "start",
 	})
 
-	var plan, state resourceOneLakeDataAccessSecurityModel
+	var plan, state baseOneLakeDataAccessSecurityModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -113,13 +113,14 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		return
 	}
 
-	respCreate, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateOrUpdateDataAccessRolesRequest, nil)
+	_, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.CreateOrUpdateDataAccessRolesRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	state = plan
-	state.setEtag(respCreate.Etag)
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -137,7 +138,7 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 		"action": "start",
 	})
 
-	var plan resourceOneLakeDataAccessSecurityModel
+	var plan baseOneLakeDataAccessSecurityModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -147,13 +148,14 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 
 	reqUpdate.set(ctx, plan)
 
-	respUpdate, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqUpdate.CreateOrUpdateDataAccessRolesRequest, nil)
+	_, err := r.client.CreateOrUpdateDataAccessRoles(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqUpdate.CreateOrUpdateDataAccessRolesRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Set the etag from the response
-	plan.setEtag(respUpdate.Etag)
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -216,7 +218,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 		return
 	}
 
-	state := resourceOneLakeDataAccessSecurityModel{
+	state := baseOneLakeDataAccessSecurityModel{
 		WorkspaceID: uuidWorkspaceID,
 		ItemID:      uuidID,
 	}
@@ -236,7 +238,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 	}
 }
 
-func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *resourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
 	respList, err := r.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
 		diags.AddError(

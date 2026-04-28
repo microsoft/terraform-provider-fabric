@@ -197,7 +197,6 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
@@ -242,7 +241,6 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
@@ -301,7 +299,6 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
@@ -345,7 +342,6 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "etag"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),

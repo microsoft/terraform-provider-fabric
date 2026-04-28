@@ -62,10 +62,6 @@ resource "fabric_onelake_data_access_security" "example" {
 - `value` (Attributes Set) Map of data access roles. (see [below for nested schema](#nestedatt--value))
 - `workspace_id` (String) The Workspace ID.
 
-### Read-Only
-
-- `etag` (String) The ETag of the item.
-
 <a id="nestedatt--value"></a>
 
 ### Nested Schema for `value`

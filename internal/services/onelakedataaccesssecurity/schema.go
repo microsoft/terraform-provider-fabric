@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -54,15 +53,6 @@ func itemSchema() superschema.Schema {
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: true,
-				},
-			},
-			"etag": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The ETag of the item.",
-					CustomType:          supertypes.StringType{},
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
 				},
 			},
 			"value": superschema.SuperSetNestedAttributeOf[dataAccessRole]{

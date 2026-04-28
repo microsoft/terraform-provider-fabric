@@ -15,23 +15,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type dataSourceOneLakeDataAccessSecurityModel struct {
-	baseOneLakeDataAccessSecurityModel
-
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	ItemID      customtypes.UUID `tfsdk:"item_id"`
-}
-
-type resourceOneLakeDataAccessSecurityModel struct {
-	baseOneLakeDataAccessSecurityModel
-
-	WorkspaceID customtypes.UUID       `tfsdk:"workspace_id"`
-	ItemID      customtypes.UUID       `tfsdk:"item_id"`
-	Etag        supertypes.StringValue `tfsdk:"etag"`
-}
-
 type baseOneLakeDataAccessSecurityModel struct {
-	Value supertypes.SetNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
+	WorkspaceID customtypes.UUID                                  `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID                                  `tfsdk:"item_id"`
+	Value       supertypes.SetNestedObjectValueOf[dataAccessRole] `tfsdk:"value"`
 }
 
 type dataAccessRole struct {
@@ -66,59 +53,7 @@ type MicrosoftEntraMember struct {
 	TenantID   customtypes.UUID `tfsdk:"tenant_id"`
 }
 
-func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
-	if from.Etag != nil {
-		to.Etag.Set(*from.Etag)
-	}
-
-	slice := make([]*dataAccessRole, 0, len(from.Value))
-
-	for _, item := range from.Value {
-		role := &dataAccessRole{
-			Name: types.StringPointerValue(item.Name),
-		}
-
-		role.DecisionRules = supertypes.NewSetNestedObjectValueOfNull[decisionRule](ctx)
-
-		if item.DecisionRules != nil {
-			decisionRules := make([]*decisionRule, 0, len(item.DecisionRules))
-
-			for _, rule := range item.DecisionRules {
-				decisionRule := decisionRule{}
-				if diags := decisionRule.set(ctx, rule); diags.HasError() {
-					return diags
-				}
-
-				decisionRules = append(decisionRules, &decisionRule)
-			}
-
-			if diags := role.DecisionRules.Set(ctx, decisionRules); diags.HasError() {
-				return diags
-			}
-		}
-
-		role.Members.SetNull(ctx)
-
-		members := &Member{}
-		if diags := members.set(ctx, item.Members); diags.HasError() {
-			return diags
-		}
-
-		if diags := role.Members.Set(ctx, members); diags.HasError() {
-			return diags
-		}
-
-		slice = append(slice, role)
-	}
-
-	if diags := to.Value.Set(ctx, slice); diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
-func (to *dataSourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
+func (to *baseOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse) diag.Diagnostics {
 	slice := make([]*dataAccessRole, 0, len(from.Value))
 
 	for _, item := range from.Value {
@@ -273,15 +208,11 @@ func (to *Member) set(ctx context.Context, from *fabcore.Members) diag.Diagnosti
 	return nil
 }
 
-func (to *resourceOneLakeDataAccessSecurityModel) setEtag(from *string) {
-	to.Etag = supertypes.NewStringValue(*from)
-}
-
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {
 	fabcore.CreateOrUpdateDataAccessRolesRequest
 }
 
-func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) set(ctx context.Context, from resourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) set(ctx context.Context, from baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
 	fromValueElements, diags := from.Value.Get(ctx)
 	if diags.HasError() {
 		return diags
