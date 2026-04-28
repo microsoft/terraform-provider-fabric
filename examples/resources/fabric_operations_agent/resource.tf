@@ -10,7 +10,7 @@ resource "fabric_operations_agent" "example_definition_bootstrap" {
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
-  format                    = "OperationsAgentV1"
+  format                    = "Default"
   definition = {
     "Configurations.json" = {
       source = "${path.module}/Configurations.json"
@@ -23,7 +23,7 @@ resource "fabric_operations_agent" "example_definition_update" {
   display_name = "example"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "OperationsAgentV1"
+  format       = "Default"
   definition = {
     "Configurations.json" = {
       source = "${path.module}/Configurations.json"
@@ -40,7 +40,7 @@ resource "fabric_operations_agent" "example_custom_delimiter" {
   display_name = "example"
   description  = "example with custom tokens delimiter"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "OperationsAgentV1"
+  format       = "Default"
   definition = {
     "Configurations.json" = {
       source           = "${local.path}/Configurations.json"
@@ -57,7 +57,7 @@ resource "fabric_operations_agent" "example_parameters" {
   display_name = "example"
   description  = "example with parameters processing mode"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "OperationsAgentV1"
+  format       = "Default"
   definition = {
     "Configurations.json" = {
       source          = "${local.path}/Configurations.json"
