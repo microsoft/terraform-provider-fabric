@@ -318,6 +318,9 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
+    'SnowflakeDatabase' {
+      $itemEndpoint = 'snowflakeDatabases'
+    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -1221,6 +1224,7 @@ $itemNaming = @{
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
+  'SnowflakeDatabase'               = 'sfdb'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
@@ -1400,6 +1404,25 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
+# Create SnowflakeDatabase if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "SnowflakeDatabaseProperties.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+
+$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
+$wellKnown['SnowflakeDatabase'] = @{
+  id          = $snowflakeDatabase.id
+  displayName = $snowflakeDatabase.displayName
+  description = $snowflakeDatabase.description
+}
+
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
 $displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
 $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'Lakehouse'
@@ -1545,6 +1568,8 @@ $wellKnown['Eventstream'] = @{
 $eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
 $eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
 $eventstreamSourceId = $eventstreamSource.id
+$eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamDestinationId = $eventstreamDestination.id
 
 $eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
 $wellKnown['Eventstream']['sourceConnection'] = @{
@@ -1553,7 +1578,12 @@ $wellKnown['Eventstream']['sourceConnection'] = @{
   fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
 }
 
-
+$eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
+$wellKnown['Eventstream']['destinationConnection'] = @{
+  destinationId           = $eventstreamDestinationId
+  eventHubName            = $eventstreamDestinationConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
+}
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"
