@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_shortcut` `azure_blob_storage` documentation
+time: 2026-04-09T06:27:19.839649774Z
+custom:
+    Issue: "892"

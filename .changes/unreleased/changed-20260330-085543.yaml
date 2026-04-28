@@ -1,5 +1,0 @@
-kind: changed
-body: Changed `fabric_gateway` maximum `number_of_member_gateways` limit to 9
-time: 2026-03-30T08:55:43.727736765Z
-custom:
-    Issue: "847"

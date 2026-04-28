@@ -1,5 +1,0 @@
-kind: added
-body: Added `fabric_workspace_outbound_cloud_connection_rules` data source
-time: 2026-03-09T10:50:13.248170502Z
-custom:
-  Issue: "843"

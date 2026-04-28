@@ -1,5 +1,0 @@
-kind: added
-body: Added `fabric_connection` KeyVaultReference creation support
-time: 2026-03-23T08:53:19.035359193Z
-custom:
-  Issue: "706"

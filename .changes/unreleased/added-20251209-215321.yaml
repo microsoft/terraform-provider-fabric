@@ -1,0 +1,5 @@
+kind: added
+body: Added `shortcut_conflict_policy` attribute to `fabric_shortcut` resource
+time: 2025-12-09T21:53:21.029793074Z
+custom:
+  Issue: "765"
