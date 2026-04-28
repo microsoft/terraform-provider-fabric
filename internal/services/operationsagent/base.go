@@ -12,7 +12,7 @@ import (
 
 const (
 	FabricItemType            = fabcore.ItemTypeOperationsAgent
-	ItemDefinitionEmpty       = `{"$schema": "https://developer.microsoft.com/json-schemas/fabric/item/operationsAgents/definition/1.0.0/schema.json","configuration": {"goals": "","instructions": "","dataSources": {},"actions": {}},"shouldRun": false}`
+	ItemDefinitionEmpty       = `{}`
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/operations-agent-definition#operationsagentconfiguration-contents"
 )
 
