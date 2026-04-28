@@ -21,9 +21,10 @@ The Connection resource allows you to manage a Fabric [Connection](https://learn
 ```terraform
 # Example 1 - ShareableCloud Connection
 resource "fabric_connection" "example_cloud" {
-  display_name      = "example"
-  connectivity_type = "ShareableCloud"
-  privacy_level     = "Organizational"
+  display_name                        = "example"
+  connectivity_type                   = "ShareableCloud"
+  privacy_level                       = "Organizational"
+  allow_usage_in_user_controlled_code = true
   connection_details = {
     type            = "FTP"
     creation_method = "FTP.Contents"

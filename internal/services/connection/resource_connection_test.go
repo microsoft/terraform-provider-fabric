@@ -995,10 +995,11 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":                      *entityAfter.DisplayName,
-					"connectivity_type":                 string(fabcore.ConnectivityTypeShareableCloud),
-					"privacy_level":                     string(*entityAfter.PrivacyLevel),
-					"allow_connection_usage_in_gateway": true,
+					"display_name":                        *entityAfter.DisplayName,
+					"connectivity_type":                   string(fabcore.ConnectivityTypeShareableCloud),
+					"privacy_level":                       string(*entityAfter.PrivacyLevel),
+					"allow_connection_usage_in_gateway":   true,
+					"allow_usage_in_user_controlled_code": true,
 					"connection_details": map[string]any{
 						"type":            "FTP",
 						"creation_method": "FTP.Contents",
@@ -1025,6 +1026,7 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.single_sign_on_type", (*string)(entityBefore.CredentialDetails.SingleSignOnType)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeAnonymous)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_usage_in_user_controlled_code", "true"),
 			),
 		},
 		{
@@ -1032,10 +1034,11 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":                      *entityAfter.DisplayName,
-					"connectivity_type":                 string(fabcore.ConnectivityTypeShareableCloud),
-					"privacy_level":                     string(*entityAfter.PrivacyLevel),
-					"allow_connection_usage_in_gateway": false,
+					"display_name":                        *entityAfter.DisplayName,
+					"connectivity_type":                   string(fabcore.ConnectivityTypeShareableCloud),
+					"privacy_level":                       string(*entityAfter.PrivacyLevel),
+					"allow_connection_usage_in_gateway":   false,
+					"allow_usage_in_user_controlled_code": true,
 					"connection_details": map[string]any{
 						"type":            "FTP",
 						"creation_method": "FTP.Contents",
@@ -1062,6 +1065,7 @@ func TestUnit_ConnectionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "credential_details.single_sign_on_type", (*string)(entityBefore.CredentialDetails.SingleSignOnType)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.credential_type", string(fabcore.CredentialTypeAnonymous)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_usage_in_user_controlled_code", "true"),
 			),
 		},
 		// Update connectivity type - replacement
@@ -1523,9 +1527,10 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":      displayName,
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
+					"display_name":                        displayName,
+					"connectivity_type":                   "ShareableCloud",
+					"privacy_level":                       "Organizational",
+					"allow_usage_in_user_controlled_code": true,
 					"connection_details": map[string]any{
 						"type":            "FTP",
 						"creation_method": "FTP.Contents",
@@ -1556,6 +1561,7 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", string(fabcore.SingleSignOnTypeNone)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_usage_in_user_controlled_code", "true"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
@@ -1565,9 +1571,10 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"display_name":      displayNameUpdated,
-					"connectivity_type": "ShareableCloud",
-					"privacy_level":     "Organizational",
+					"display_name":                        displayNameUpdated,
+					"connectivity_type":                   "ShareableCloud",
+					"privacy_level":                       "Organizational",
+					"allow_usage_in_user_controlled_code": true,
 					"connection_details": map[string]any{
 						"type":            "FTP",
 						"creation_method": "FTP.Contents",
@@ -1598,6 +1605,7 @@ func TestAcc_ConnectionResource_ShareableCloud(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.single_sign_on_type", string(fabcore.SingleSignOnTypeNone)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "credential_details.skip_test_connection", "false"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_connection_usage_in_gateway", "false"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allow_usage_in_user_controlled_code", "true"),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "gateway_id"),
 			),
 		},
