@@ -589,12 +589,9 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
-<<<<<<< HEAD
-		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
-=======
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
->>>>>>> 98448814cc24ef733fe757546a3b416237b00426
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,
