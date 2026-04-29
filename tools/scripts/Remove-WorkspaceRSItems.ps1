@@ -531,28 +531,31 @@ if (Test-Path -Path './wellknown.env') {
   Import-Dotenv -Path ./wellknown.env -AllowClobber
 }
 
-if (
-  !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
-  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
-) {
-  Write-Log -Message @'
-  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
-  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID,
-  are required environment variables.
-'@ `
-    -Level 'ERROR'
-  return
-}
-
-
-# Check if already logged in to Azure, if not then login
+# Check if already logged in to Azure (e.g. via azure/login OIDC in CI). If not, login interactively.
 $azContext = Get-AzContext
-if (!$azContext -or $azContext.Tenant.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or $azContext.Subscription.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID) {
+if (!$azContext) {
+  if (
+    !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
+    !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  ) {
+    Write-Log -Message @'
+  No existing Az PowerShell session found and the following environment variables are not set:
+  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID.
+  Either sign in beforehand (e.g. via Connect-AzAccount or azure/login) or provide these variables.
+'@ `
+      -Level 'ERROR'
+    return
+  }
+
   Write-Log -Message 'Logging in to Azure.' -Level 'DEBUG'
   Connect-AzAccount -Tenant $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -SubscriptionId $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -UseDeviceAuthentication
   $azContext = Get-AzContext
   Write-Log -Message 'Logged in successfully' -Level 'DEBUG'
   # Disconnect-AzAccount
+}
+else {
+  Write-Log -Message "Reusing existing Az PowerShell session (Tenant: $($azContext.Tenant.Id), Subscription: $($azContext.Subscription.Id))." -Level 'DEBUG'
 }
 
 if (-not $WellKnownPath) {
