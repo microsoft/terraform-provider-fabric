@@ -208,7 +208,6 @@ jobs:
             echo "::error::Azure.subscriptionId not found in FABRIC_TESTACC_WELLKNOWN" >&2
             exit 1
           fi
-          echo "AZURE_SUBSCRIPTION_ID=$subscription_id" >> "$GITHUB_ENV"
 
       - name: 🔐 Azure Login (OIDC)
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
