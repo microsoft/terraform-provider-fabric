@@ -410,7 +410,6 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"display_name": entityCreateDisplayName,
-					"capacity_id":  capacityID,
 					"identity": map[string]any{
 						"type": "SystemAssigned",
 					},
@@ -419,7 +418,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
 			),
 		},
@@ -508,71 +507,6 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-			),
-		},
-	},
-	))
-}
-
-func TestAcc_WorkspaceResource_Identity_NoCapacity_CRUD(t *testing.T) {
-	entityCreateDisplayName := testhelp.RandomName()
-	entityUpdateDisplayName := testhelp.RandomName()
-	entityUpdateDescription := testhelp.RandomName()
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create with identity and no capacity_id
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityCreateDisplayName,
-					"identity": map[string]any{
-						"type": "SystemAssigned",
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-			),
-		},
-		// Update and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-					"identity": map[string]any{
-						"type": "SystemAssigned",
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
-			),
-		},
-		// Update - unassign identity
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": entityUpdateDisplayName,
-					"description":  entityUpdateDescription,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "identity"),
 			),
 		},
 	},
