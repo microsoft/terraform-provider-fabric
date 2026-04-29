@@ -18,6 +18,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 }
 
 var AllowedJobTypesByItemType = map[string][]string{ //nolint:gochecknoglobals
-	"dataflow":  {"Execute", "ApplyChanges"},
-	"lakehouse": {"RefreshMaterializedLakeViews"},
+	"dataflow":     {"Execute", "ApplyChanges"},
+	"datapipeline": {"Execute"},
+	"lakehouse":    {"RefreshMaterializedLakeViews"},
 }
