@@ -21,9 +21,10 @@ The Connection resource allows you to manage a Fabric [Connection](https://learn
 ```terraform
 # Example 1 - ShareableCloud Connection
 resource "fabric_connection" "example_cloud" {
-  display_name      = "example"
-  connectivity_type = "ShareableCloud"
-  privacy_level     = "Organizational"
+  display_name                        = "example"
+  connectivity_type                   = "ShareableCloud"
+  privacy_level                       = "Organizational"
+  allow_usage_in_user_controlled_code = true
   connection_details = {
     type            = "FTP"
     creation_method = "FTP.Contents"
@@ -92,6 +93,7 @@ resource "fabric_connection" "example_virtual_network_gateway" {
 ### Optional
 
 - `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
+- `allow_usage_in_user_controlled_code` (Boolean) <i style="color:red;font-weight: bold">(ForceNew)</i> Allow this connection to be used with items that allow user-controlled code such as Notebook. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **NULL**.
 - `gateway_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
 - `privacy_level` (String) The Connection privacy level. Value defaults to `Organizational`. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
