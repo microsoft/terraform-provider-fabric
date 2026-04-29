@@ -45,6 +45,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/cosmosdb"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/dataagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
@@ -58,6 +59,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamdestinationconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
@@ -78,6 +80,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -450,6 +453,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
 		cosmosdb.NewResourceCosmosDB,
+		dataagent.NewResourceDataAgent,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
@@ -483,6 +487,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
+		operationsagent.NewResourceOperationsAgent,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
@@ -521,6 +526,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		copyjob.NewDataSourceCopyJobs,
 		cosmosdb.NewDataSourceCosmosDB,
 		cosmosdb.NewDataSourceCosmosDBs,
+		dataagent.NewDataSourceDataAgent,
+		dataagent.NewDataSourceDataAgents,
 		dashboard.NewDataSourceDashboards,
 		dataflow.NewDataSourceDataflow,
 		dataflow.NewDataSourceDataflows,
@@ -543,6 +550,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamdestinationconnection.NewDataSourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		externaldatashare.NewDataSourceExternalDataShare,
 		externaldatashare.NewDataSourceExternalDataShares,
@@ -579,6 +587,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		operationsagent.NewDataSourceOperationsAgent,
+		operationsagent.NewDataSourceOperationsAgents,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,
@@ -625,6 +635,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 
 func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
+		eventstreamdestinationconnection.NewEphemeralResourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
