@@ -18,7 +18,7 @@ The Warehouse SQL Audit Settings resource allows you to manage a Fabric [Warehou
 ```terraform
 resource "fabric_warehouse_sql_audit_settings" "example" {
   workspace_id   = "00000000-0000-0000-0000-000000000000"
-  item_id        = "11111111-1111-1111-1111-111111111111"
+  warehouse_id   = "11111111-1111-1111-1111-111111111111"
   state          = "Enabled"
   retention_days = 10
   audit_actions_and_groups = [
@@ -34,7 +34,7 @@ resource "fabric_warehouse_sql_audit_settings" "example" {
 
 ### Required
 
-- `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The item ID.
+- `warehouse_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Warehouse ID.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional

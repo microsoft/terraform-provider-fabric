@@ -93,15 +93,21 @@ func (d *dataSourceWarehouseSQLAuditSettings) Read(ctx context.Context, req data
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
 	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (d *dataSourceWarehouseSQLAuditSettings) get(ctx context.Context, model *dataSourceWarehouseSQLAuditSettingsModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s for Warehouse ID: %s in Workspace ID: %s", d.TypeInfo.Name, model.ItemID.ValueString(), model.WorkspaceID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s for Warehouse ID: %s in Workspace ID: %s", d.TypeInfo.Name, model.WarehouseID.ValueString(), model.WorkspaceID.ValueString()))
 
-	respGet, err := d.client.GetSQLAuditSettings(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
+	respGet, err := d.client.GetSQLAuditSettings(ctx, model.WorkspaceID.ValueString(), model.WarehouseID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	return model.set(ctx, respGet.SQLAuditSettings)
+	model.set(ctx, respGet.SQLAuditSettings)
+
+	return nil
 }

@@ -37,19 +37,19 @@ func TestUnit_WarehouseSQLAuditSettingsDataSource_Attributes(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
-					"item_id":      testhelp.RandomUUID(),
+					"warehouse_id": testhelp.RandomUUID(),
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - item_id - invalid UUID
+		// error - warehouse_id - invalid UUID
 		{
 			ResourceName: testDataSourceItemFQN,
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": testhelp.RandomUUID(),
-					"item_id":      "invalid uuid",
+					"warehouse_id": "invalid uuid",
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -58,10 +58,10 @@ func TestUnit_WarehouseSQLAuditSettingsDataSource_Attributes(t *testing.T) {
 }
 
 func TestUnit_WarehouseSQLAuditSettingsDataSource_CRUD(t *testing.T) {
-	itemID := testhelp.RandomUUID()
+	warehouseID := testhelp.RandomUUID()
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomSQLAuditSettings()
-	fakeTestUpsertSQLAuditSettings(itemID, entity)
+	fakeTestUpsertSQLAuditSettings(warehouseID, entity)
 
 	fakes.FakeServer.ServerFactory.Warehouse.SQLAuditSettingsServer.GetSQLAuditSettings = fakeGetSQLAuditSettingsFunc()
 
@@ -73,12 +73,12 @@ func TestUnit_WarehouseSQLAuditSettingsDataSource_CRUD(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      itemID,
+					"warehouse_id": warehouseID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "warehouse_id", warehouseID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "state", string(*entity.State)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "retention_days", strconv.Itoa(int(*entity.RetentionDays))),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "audit_actions_and_groups.#", "1"),
@@ -101,12 +101,12 @@ func TestAcc_WarehouseSQLAuditSettingsDataSource(t *testing.T) {
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
-					"item_id":      entityID,
+					"warehouse_id": entityID,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "warehouse_id", entityID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "state"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "retention_days"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "audit_actions_and_groups.#"),

@@ -18,7 +18,7 @@ The Warehouse SQL Audit Settings data-source allows you to retrieve details abou
 ```terraform
 data "fabric_warehouse_sql_audit_settings" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  item_id      = "11111111-1111-1111-1111-111111111111"
+  warehouse_id = "11111111-1111-1111-1111-111111111111"
 }
 ```
 
@@ -27,7 +27,7 @@ data "fabric_warehouse_sql_audit_settings" "example" {
 
 ### Required
 
-- `item_id` (String) The item ID.
+- `warehouse_id` (String) The Warehouse ID.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional

@@ -6,9 +6,8 @@ package warehousesqlauditsetting
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/attr"                    //revive:disable-line:import-alias-naming
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
@@ -39,30 +38,24 @@ func itemSchema() superschema.Schema {
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
-			"item_id": superschema.SuperStringAttribute{
+			"warehouse_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The item ID.",
+					MarkdownDescription: "The Warehouse ID.",
 					CustomType:          customtypes.UUIDType{},
+					Required:            true,
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Required: true,
 				},
 			},
 			"state": superschema.StringAttribute{
@@ -71,30 +64,24 @@ func itemSchema() superschema.Schema {
 					Validators: []validator.String{
 						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabwarehouse.PossibleAuditSettingsStateValues(), true)...),
 					},
+					Computed: true,
 				},
 				Resource: &schemaR.StringAttribute{
 					Optional: true,
-					Computed: true,
 					Default:  stringdefault.StaticString(string(fabwarehouse.AuditSettingsStateDisabled)),
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
 				},
 			},
 			"retention_days": superschema.Int32Attribute{
 				Common: &schemaR.Int32Attribute{
 					MarkdownDescription: "Retention days. `0` indicates indefinite retention period.",
+					Computed:            true,
 				},
 				Resource: &schemaR.Int32Attribute{
 					Optional: true,
-					Computed: true,
 					Default:  int32default.StaticInt32(0),
 					Validators: []validator.Int32{
 						int32validator.AtLeast(0),
 					},
-				},
-				DataSource: &schemaD.Int32Attribute{
-					Computed: true,
 				},
 			},
 			"audit_actions_and_groups": superschema.SuperSetAttribute{
@@ -105,19 +92,15 @@ func itemSchema() superschema.Schema {
 							ElemType: types.StringType,
 						},
 					},
-					ElementType: types.StringType,
+					Computed: true,
 				},
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
-					Computed: true,
 					Default: setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{
 						types.StringValue("SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"),
 						types.StringValue("FAILED_DATABASE_AUTHENTICATION_GROUP"),
 						types.StringValue("BATCH_COMPLETED_GROUP"),
 					})),
-				},
-				DataSource: &schemaD.SetAttribute{
-					Computed: true,
 				},
 			},
 			"timeouts": superschema.TimeoutAttribute{

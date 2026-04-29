@@ -93,7 +93,7 @@ func (r *resourceWarehouseSQLAuditSettings) Create(ctx context.Context, req reso
 	_, err := r.client.UpdateSQLAuditSettings(
 		ctx,
 		plan.WorkspaceID.ValueString(),
-		plan.ItemID.ValueString(),
+		plan.WarehouseID.ValueString(),
 		reqUpdate.SQLAuditSettingsUpdate,
 		nil,
 	)
@@ -108,17 +108,15 @@ func (r *resourceWarehouseSQLAuditSettings) Create(ctx context.Context, req reso
 		return
 	}
 
-	if reqSetAuditActions.AuditActionsAndGroups != nil {
-		_, err = r.client.SetAuditActionsAndGroups(
-			ctx,
-			plan.WorkspaceID.ValueString(),
-			plan.ItemID.ValueString(),
-			reqSetAuditActions.AuditActionsAndGroups,
-			nil,
-		)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
+	_, err = r.client.SetAuditActionsAndGroups(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.WarehouseID.ValueString(),
+		reqSetAuditActions.AuditActionsAndGroups,
+		nil,
+	)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	// Read back the full state
@@ -131,6 +129,10 @@ func (r *resourceWarehouseSQLAuditSettings) Create(ctx context.Context, req reso
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
 	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceWarehouseSQLAuditSettings) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -153,7 +155,7 @@ func (r *resourceWarehouseSQLAuditSettings) Read(ctx context.Context, req resour
 	defer cancel()
 
 	diags = r.get(ctx, &state)
-	if utils.IsErrNotFound(state.ItemID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+	if utils.IsErrNotFound(state.WarehouseID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
 		resp.Diagnostics.Append(diags...)
@@ -170,6 +172,10 @@ func (r *resourceWarehouseSQLAuditSettings) Read(ctx context.Context, req resour
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
 	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceWarehouseSQLAuditSettings) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -199,7 +205,7 @@ func (r *resourceWarehouseSQLAuditSettings) Update(ctx context.Context, req reso
 	_, err := r.client.UpdateSQLAuditSettings(
 		ctx,
 		plan.WorkspaceID.ValueString(),
-		plan.ItemID.ValueString(),
+		plan.WarehouseID.ValueString(),
 		reqUpdate.SQLAuditSettingsUpdate,
 		nil,
 	)
@@ -214,17 +220,15 @@ func (r *resourceWarehouseSQLAuditSettings) Update(ctx context.Context, req reso
 		return
 	}
 
-	if reqSetAuditActions.AuditActionsAndGroups != nil {
-		_, err = r.client.SetAuditActionsAndGroups(
-			ctx,
-			plan.WorkspaceID.ValueString(),
-			plan.ItemID.ValueString(),
-			reqSetAuditActions.AuditActionsAndGroups,
-			nil,
-		)
-		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
-			return
-		}
+	_, err = r.client.SetAuditActionsAndGroups(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.WarehouseID.ValueString(),
+		reqSetAuditActions.AuditActionsAndGroups,
+		nil,
+	)
+	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+		return
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
@@ -236,6 +240,10 @@ func (r *resourceWarehouseSQLAuditSettings) Update(ctx context.Context, req reso
 	tflog.Debug(ctx, "UPDATE", map[string]any{
 		"action": "end",
 	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *resourceWarehouseSQLAuditSettings) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -259,12 +267,14 @@ func (r *resourceWarehouseSQLAuditSettings) Delete(ctx context.Context, _ resour
 }
 
 func (r *resourceWarehouseSQLAuditSettings) get(ctx context.Context, model *resourceWarehouseSQLAuditSettingsModel) diag.Diagnostics {
-	tflog.Trace(ctx, fmt.Sprintf("getting %s for Warehouse ID: %s in Workspace ID: %s", r.TypeInfo.Name, model.ItemID.ValueString(), model.WorkspaceID.ValueString()))
+	tflog.Trace(ctx, fmt.Sprintf("getting %s for Warehouse ID: %s in Workspace ID: %s", r.TypeInfo.Name, model.WarehouseID.ValueString(), model.WorkspaceID.ValueString()))
 
-	respGet, err := r.client.GetSQLAuditSettings(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
+	respGet, err := r.client.GetSQLAuditSettings(ctx, model.WorkspaceID.ValueString(), model.WarehouseID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
-	return model.set(ctx, respGet.SQLAuditSettings)
+	model.set(ctx, respGet.SQLAuditSettings)
+
+	return nil
 }

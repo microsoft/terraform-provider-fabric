@@ -38,7 +38,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             "invalid uuid",
-					"item_id":                  testhelp.RandomUUID(),
+					"warehouse_id":             testhelp.RandomUUID(),
 					"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
 					"retention_days":           10,
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -46,14 +46,14 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - item_id - invalid UUID
+		// error - warehouse_id - invalid UUID
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             testhelp.RandomUUID(),
-					"item_id":                  "invalid uuid",
+					"warehouse_id":             "invalid uuid",
 					"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
 					"retention_days":           10,
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -68,7 +68,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             testhelp.RandomUUID(),
-					"item_id":                  testhelp.RandomUUID(),
+					"warehouse_id":             testhelp.RandomUUID(),
 					"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
 					"retention_days":           10,
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -83,7 +83,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":                  testhelp.RandomUUID(),
+					"warehouse_id":             testhelp.RandomUUID(),
 					"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
 					"retention_days":           10,
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -91,7 +91,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
-		// error - missing item_id
+		// error - missing warehouse_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -103,7 +103,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "item_id" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`The argument "warehouse_id" is required, but no definition was found.`),
 		},
 		// error - invalid state value
 		{
@@ -112,7 +112,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             testhelp.RandomUUID(),
-					"item_id":                  testhelp.RandomUUID(),
+					"warehouse_id":             testhelp.RandomUUID(),
 					"state":                    "InvalidState",
 					"retention_days":           10,
 					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -124,11 +124,11 @@ func TestUnit_WarehouseSQLAuditSettingsResource_Attributes(t *testing.T) {
 }
 
 func TestUnit_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
-	itemID := testhelp.RandomUUID()
+	warehouseID := testhelp.RandomUUID()
 	workspaceID := testhelp.RandomUUID()
 
 	entity := NewRandomSQLAuditSettings()
-	fakeTestUpsertSQLAuditSettings(itemID, entity)
+	fakeTestUpsertSQLAuditSettings(warehouseID, entity)
 
 	fakes.FakeServer.ServerFactory.Warehouse.SQLAuditSettingsServer.GetSQLAuditSettings = fakeGetSQLAuditSettingsFunc()
 	fakes.FakeServer.ServerFactory.Warehouse.SQLAuditSettingsServer.UpdateSQLAuditSettings = fakeUpdateSQLAuditSettingsFunc()
@@ -142,7 +142,7 @@ func TestUnit_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             workspaceID,
-					"item_id":                  itemID,
+					"warehouse_id":             warehouseID,
 					"state":                    string(*entity.State),
 					"retention_days":           int(*entity.RetentionDays),
 					"audit_actions_and_groups": entity.AuditActionsAndGroups,
@@ -150,29 +150,67 @@ func TestUnit_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "warehouse_id", warehouseID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(*entity.State)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", strconv.Itoa(int(*entity.RetentionDays))),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "1"),
 			),
 		},
-		// Update
+		// Update - omit state, expect default (Disabled)
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id":             workspaceID,
-					"item_id":                  itemID,
-					"state":                    string(fabwarehouse.AuditSettingsStateDisabled),
-					"retention_days":           0,
-					"audit_actions_and_groups": []string{testhelp.RandomName(), testhelp.RandomName()},
+					"warehouse_id":             warehouseID,
+					"retention_days":           10,
+					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "10"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "1"),
+			),
+		},
+		// Update - omit retention_days, expect default (0)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":             workspaceID,
+					"warehouse_id":             warehouseID,
+					"state":                    string(fabwarehouse.AuditSettingsStateEnabled),
+					"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateEnabled)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "0"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "1"),
+			),
+		},
+		// Update - omit audit_actions_and_groups, expect defaults (3 groups)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"warehouse_id":   warehouseID,
+					"state":          string(fabwarehouse.AuditSettingsStateDisabled),
+					"retention_days": 5,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "5"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "3"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "FAILED_DATABASE_AUTHENTICATION_GROUP"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "BATCH_COMPLETED_GROUP"),
 			),
 		},
 	}))
@@ -194,7 +232,7 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id":             workspaceID,
-						"item_id":                  testhelp.RefByFQN(warehouseResourceFQN, "id"),
+						"warehouse_id":             testhelp.RefByFQN(warehouseResourceFQN, "id"),
 						"state":                    string(fabwarehouse.AuditSettingsStateDisabled),
 						"retention_days":           10,
 						"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
@@ -202,10 +240,11 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "10"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "1"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "BATCH_COMPLETED_GROUP"),
 			),
 		},
 		// Update
@@ -217,7 +256,7 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
-						"item_id":      testhelp.RefByFQN(warehouseResourceFQN, "id"),
+						"warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
 						"state":        string(fabwarehouse.AuditSettingsStateEnabled),
 						"audit_actions_and_groups": []string{
 							"SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
@@ -227,9 +266,11 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateEnabled)),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "0"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "BATCH_COMPLETED_GROUP"),
 			),
 		},
 		// Update - reset all to defaults
@@ -241,14 +282,17 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
-						"item_id":      testhelp.RefByFQN(warehouseResourceFQN, "id"),
+						"warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "item_id", warehouseResourceFQN, "id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", "0"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "audit_actions_and_groups.#", "3"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "FAILED_DATABASE_AUTHENTICATION_GROUP"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "audit_actions_and_groups.*", "BATCH_COMPLETED_GROUP"),
 			),
 		},
 	}))

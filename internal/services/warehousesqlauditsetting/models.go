@@ -22,15 +22,16 @@ BASE MODEL
 
 type baseWarehouseSQLAuditSettingsModel struct {
 	WorkspaceID           customtypes.UUID                    `tfsdk:"workspace_id"`
-	ItemID                customtypes.UUID                    `tfsdk:"item_id"`
+	WarehouseID           customtypes.UUID                    `tfsdk:"warehouse_id"`
 	State                 types.String                        `tfsdk:"state"`
 	RetentionDays         types.Int32                         `tfsdk:"retention_days"`
 	AuditActionsAndGroups supertypes.SetValueOf[types.String] `tfsdk:"audit_actions_and_groups"`
 }
 
-func (to *baseWarehouseSQLAuditSettingsModel) set(ctx context.Context, from fabwarehouse.SQLAuditSettings) diag.Diagnostics {
+func (to *baseWarehouseSQLAuditSettingsModel) set(ctx context.Context, from fabwarehouse.SQLAuditSettings) {
 	to.State = types.StringPointerValue((*string)(from.State))
 	to.RetentionDays = types.Int32PointerValue(from.RetentionDays)
+	to.AuditActionsAndGroups = supertypes.NewSetValueOfNull[types.String](ctx)
 
 	elements := make([]types.String, len(from.AuditActionsAndGroups))
 	for i, v := range from.AuditActionsAndGroups {
@@ -38,8 +39,6 @@ func (to *baseWarehouseSQLAuditSettingsModel) set(ctx context.Context, from fabw
 	}
 
 	to.AuditActionsAndGroups = supertypes.NewSetValueOfSlice(ctx, elements)
-
-	return nil
 }
 
 /*
