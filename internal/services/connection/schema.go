@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -152,6 +153,28 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 				Resource: &schemaR.BoolAttribute{
 					Optional: true,
 					Computed: true,
+					Validators: []validator.Bool{
+						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
+							}),
+					},
+				},
+				DataSource: &schemaD.BoolAttribute{
+					Computed: true,
+					Optional: true,
+				},
+			},
+			"allow_usage_in_user_controlled_code": superschema.BoolAttribute{
+				Common: &schemaR.BoolAttribute{
+					MarkdownDescription: "Allow this connection to be used with items that allow user-controlled code such as Notebook.",
+				},
+				Resource: &schemaR.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					PlanModifiers: []planmodifier.Bool{
+						boolplanmodifier.RequiresReplace(),
+					},
 					Validators: []validator.Bool{
 						superboolvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
 							[]attr.Value{
