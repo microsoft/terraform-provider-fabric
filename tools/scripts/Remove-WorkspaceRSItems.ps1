@@ -187,7 +187,8 @@ function Invoke-FabricRest {
     }
   }
   catch {
-    Write-Log -Message "Failed to invoke Fabric REST API: $($_.Exception.Message)" -Level 'ERROR'
+    Write-Log -Message "Failed to invoke Fabric REST API: $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+    throw $_
   }
 }
 
@@ -231,7 +232,7 @@ function Get-FolderDepth {
 
 function Remove-WorkspaceRSItems {
   param (
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [string]$WellKnownJsonPath,
 
     [Parameter(Mandatory = $false)]
@@ -241,18 +242,28 @@ function Remove-WorkspaceRSItems {
     [switch]$DryRun
   )
 
-  # Check if the .wellknown.json file exists
-  if (-not (Test-Path -Path $WellKnownJsonPath)) {
-    Write-Log -Message "The .wellknown.json file was not found at path: $WellKnownJsonPath" -Level 'ERROR'
-    return
+  # Prefer the FABRIC_TESTACC_WELLKNOWN env var (inline JSON) over the file on disk.
+  $wellKnownJson = $Env:FABRIC_TESTACC_WELLKNOWN
+
+  if ([string]::IsNullOrWhiteSpace($wellKnownJson)) {
+    if (-not $WellKnownJsonPath -or -not (Test-Path -Path $WellKnownJsonPath)) {
+      Write-Log -Message "FABRIC_TESTACC_WELLKNOWN env var is not set and the .wellknown.json file was not found at path: $WellKnownJsonPath" -Level 'ERROR'
+      return
+    }
+
+    Write-Log -Message "Using .wellknown.json file: $WellKnownJsonPath" -Level 'INFO'
+    $wellKnownJson = Get-Content -Path $WellKnownJsonPath -Raw
+  }
+  else {
+    Write-Log -Message 'Using FABRIC_TESTACC_WELLKNOWN environment variable for well-known data.' -Level 'INFO'
   }
 
-  # Read and parse the .wellknown.json file
+  # Parse the well-known JSON
   try {
-    $wellKnownContent = Get-Content -Path $WellKnownJsonPath -Raw | ConvertFrom-Json
+    $wellKnownContent = $wellKnownJson | ConvertFrom-Json
   }
   catch {
-    Write-Log -Message "Failed to parse .wellknown.json file: $($_.Exception.Message)" -Level 'ERROR'
+    Write-Log -Message "Failed to parse well-known JSON: $($_.Exception.Message)" -Level 'ERROR'
     return
   }
 
@@ -549,7 +560,6 @@ if (-not $WellKnownPath) {
 }
 
 Write-Log -Message "Starting WorkspaceRS cleanup process..." -Level 'INFO'
-Write-Log -Message "Using .wellknown.json file: $WellKnownPath" -Level 'INFO'
 
 Remove-WorkspaceRSItems -WellKnownJsonPath $WellKnownPath -Force:$Force -DryRun:$DryRun
 
