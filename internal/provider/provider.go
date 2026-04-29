@@ -59,6 +59,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamdestinationconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
@@ -79,6 +80,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -94,6 +96,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
@@ -484,6 +487,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
+		operationsagent.NewResourceOperationsAgent,
 		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
@@ -496,6 +500,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
+		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
@@ -545,6 +550,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamdestinationconnection.NewDataSourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
 		externaldatashare.NewDataSourceExternalDataShare,
 		externaldatashare.NewDataSourceExternalDataShares,
@@ -581,6 +587,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		operationsagent.NewDataSourceOperationsAgent,
+		operationsagent.NewDataSourceOperationsAgents,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,
@@ -608,6 +616,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
+		warehousesqlauditsetting.NewDataSourceWarehouseSQLAuditSettings,
 		warehousesnapshot.NewDataSourceWarehouseSnapshot,
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
@@ -626,6 +635,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 
 func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
+		eventstreamdestinationconnection.NewEphemeralResourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
