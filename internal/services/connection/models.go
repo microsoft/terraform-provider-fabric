@@ -15,14 +15,15 @@ import (
 )
 
 type baseConnectionModel[ConnectionDetails dsConnectionDetailsModel | rsConnectionDetailsModel, CredentialDetails dsCredentialDetailsModel | rsCredentialDetailsModel] struct {
-	ID                            customtypes.UUID                                        `tfsdk:"id"`
-	DisplayName                   types.String                                            `tfsdk:"display_name"`
-	GatewayID                     customtypes.UUID                                        `tfsdk:"gateway_id"`
-	ConnectivityType              types.String                                            `tfsdk:"connectivity_type"`
-	PrivacyLevel                  types.String                                            `tfsdk:"privacy_level"`
-	AllowConnectionUsageInGateway types.Bool                                              `tfsdk:"allow_connection_usage_in_gateway"`
-	ConnectionDetails             supertypes.SingleNestedObjectValueOf[ConnectionDetails] `tfsdk:"connection_details"`
-	CredentialDetails             supertypes.SingleNestedObjectValueOf[CredentialDetails] `tfsdk:"credential_details"`
+	ID                             customtypes.UUID                                        `tfsdk:"id"`
+	DisplayName                    types.String                                            `tfsdk:"display_name"`
+	GatewayID                      customtypes.UUID                                        `tfsdk:"gateway_id"`
+	ConnectivityType               types.String                                            `tfsdk:"connectivity_type"`
+	PrivacyLevel                   types.String                                            `tfsdk:"privacy_level"`
+	AllowConnectionUsageInGateway  types.Bool                                              `tfsdk:"allow_connection_usage_in_gateway"`
+	AllowUsageInUserControlledCode types.Bool                                              `tfsdk:"allow_usage_in_user_controlled_code"`
+	ConnectionDetails              supertypes.SingleNestedObjectValueOf[ConnectionDetails] `tfsdk:"connection_details"`
+	CredentialDetails              supertypes.SingleNestedObjectValueOf[CredentialDetails] `tfsdk:"credential_details"`
 }
 
 func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx context.Context, from fabcore.ConnectionClassification) diag.Diagnostics { //nolint:gocognit
@@ -131,10 +132,17 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 		} else {
 			to.AllowConnectionUsageInGateway = types.BoolValue(false) // default is false
 		}
+
+		if v.AllowUsageInUserControlledCode != nil {
+			to.AllowUsageInUserControlledCode = types.BoolValue(*v.AllowUsageInUserControlledCode)
+		} else {
+			to.AllowUsageInUserControlledCode = types.BoolValue(false) // default is false
+		}
 	case *fabcore.VirtualNetworkGatewayConnection:
 		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
 		// keep it here due to default being "false"
 		to.AllowConnectionUsageInGateway = types.BoolNull()
+		to.AllowUsageInUserControlledCode = types.BoolNull()
 	default:
 		diags.AddError("unexpected connectivity type", "unsupported connection classification type")
 
