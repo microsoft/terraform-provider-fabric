@@ -37,7 +37,7 @@ resource "fabric_workspace_outbound_gateway_rules" "example" {
 
 ### Optional
 
-- `allowed_gateways` (Attributes List) A list of rules that define outbound access behavior for gateways. Value defaults to `[]`. (see [below for nested schema](#nestedatt--allowed_gateways))
+- `allowed_gateways` (Attributes Set) A set of rules that define outbound access behavior for gateways. Value defaults to `[]`. (see [below for nested schema](#nestedatt--allowed_gateways))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--allowed_gateways"></a>
