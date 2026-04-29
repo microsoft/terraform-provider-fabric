@@ -138,6 +138,17 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 			return
 		}
 
+		//nolint:godox
+		// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
+		// if resp.Diagnostics.Append(
+		// 	r.validateCredentialTypeForUsageInUserControlledCode(
+		// 		plan.AllowUsageInUserControlledCode,
+		// 		*credentialDetails,
+		// 		supportedConnectionType.SupportedCredentialTypesForUsageInUserControlledCode,
+		// 	)...); resp.Diagnostics.HasError() {
+		// 	return
+		// }
+
 		if resp.Diagnostics.Append(r.validateSkipTestConnection(*credentialDetails, *supportedConnectionType.SupportsSkipTestConnection)...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -469,6 +480,36 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 
 	return diags
 }
+
+//nolint:godox
+// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
+// func (r *resourceConnection) validateCredentialTypeForUsageInUserControlledCode(
+// 	allowUsageInUserControlledCode types.Bool,
+// 	credentialDetails rsCredentialDetailsModel,
+// 	supportedCredentialTypesForUsageInUserControlledCode []fabcore.CredentialType,
+// ) diag.Diagnostics {
+// 	if allowUsageInUserControlledCode.IsNull() || allowUsageInUserControlledCode.IsUnknown() || !allowUsageInUserControlledCode.ValueBool() {
+// 		return nil
+// 	}
+
+// 	if !slices.Contains(supportedCredentialTypesForUsageInUserControlledCode, fabcore.CredentialType(credentialDetails.CredentialType.ValueString())) {
+// 		var diags diag.Diagnostics
+
+// 		diags.AddAttributeError(
+// 			path.Root("credential_details").AtName("credential_type"),
+// 			"Unsupported credential type for usage in user-controlled code",
+// 			fmt.Sprintf(
+// 				"The credential type '%s' is not supported for usage in user-controlled code. Supported values: %s",
+// 				credentialDetails.CredentialType.ValueString(),
+// 				utils.ConvertStringSlicesToString(utils.ConvertEnumsToStringSlices(supportedCredentialTypesForUsageInUserControlledCode, true), true, false),
+// 			),
+// 		)
+
+// 		return diags
+// 	}
+
+// 	return nil
+// }
 
 func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	if model.SkipTestConnection.ValueBool() && !supportsSkipTestConnection {

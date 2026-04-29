@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_shortcut` import not working
+time: 2026-04-16T12:19:07.885078627Z
+custom:
+  Issue: "926"

@@ -306,6 +306,9 @@ function Set-FabricItem {
     'Ontology' {
       $itemEndpoint = 'ontologies'
     }
+    'OperationsAgent' {
+      $itemEndpoint = 'operationsAgents'
+    }
     'Reflex' {
       $itemEndpoint = 'reflexes'
     }
@@ -314,6 +317,9 @@ function Set-FabricItem {
     }
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
+    }
+    'SnowflakeDatabase' {
+      $itemEndpoint = 'snowflakeDatabases'
     }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
@@ -1212,11 +1218,13 @@ $itemNaming = @{
   'MountedDataFactory'              = 'mdf'
   'Notebook'                        = 'nb'
   'Ontology'                        = 'ont'
+  'OperationsAgent'                 = 'oa'
   'Shortcut'                        = 'srt'
   'PaginatedReport'                 = 'prpt'
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
+  'SnowflakeDatabase'               = 'sfdb'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
@@ -1344,7 +1352,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1394,6 +1402,25 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
+}
+
+# Create SnowflakeDatabase if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "SnowflakeDatabaseProperties.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+
+$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
+$wellKnown['SnowflakeDatabase'] = @{
+  id          = $snowflakeDatabase.id
+  displayName = $snowflakeDatabase.displayName
+  description = $snowflakeDatabase.description
 }
 
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
@@ -1541,6 +1568,8 @@ $wellKnown['Eventstream'] = @{
 $eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
 $eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
 $eventstreamSourceId = $eventstreamSource.id
+$eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamDestinationId = $eventstreamDestination.id
 
 $eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
 $wellKnown['Eventstream']['sourceConnection'] = @{
@@ -1549,7 +1578,12 @@ $wellKnown['Eventstream']['sourceConnection'] = @{
   fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
 }
 
-
+$eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
+$wellKnown['Eventstream']['destinationConnection'] = @{
+  destinationId           = $eventstreamDestinationId
+  eventHubName            = $eventstreamDestinationConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
+}
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"

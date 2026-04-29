@@ -250,13 +250,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
@@ -311,7 +311,7 @@ jobs:
     environment:
       name: development
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 100
     permissions:
       contents: read
       actions: read
@@ -393,7 +393,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform'
         run: task test
-        timeout-minutes: 90
+        timeout-minutes: 100
         env:
           # TF_LOG: DEBUG
           FABRIC_USE_OIDC: true
@@ -410,7 +410,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
         run: task test
-        timeout-minutes: 90
+        timeout-minutes: 100
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}

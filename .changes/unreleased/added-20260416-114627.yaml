@@ -1,0 +1,5 @@
+kind: added
+body: Added `one_drive_share_point` attribute to `fabric_shortcut` data source
+time: 2026-04-16T11:46:27.762305896Z
+custom:
+    Issue: "929"
