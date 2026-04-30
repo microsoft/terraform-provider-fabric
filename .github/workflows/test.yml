@@ -197,25 +197,12 @@ jobs:
     steps:
       - name: ⤵️ Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: 🔂 Extract Azure subscription from FABRIC_TESTACC_WELLKNOWN
-        shell: bash
-        env:
-          FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
-        run: |
-          subscription_id="$(printf '%s' "$FABRIC_TESTACC_WELLKNOWN" | jq -r '.Azure.subscriptionId')"
-          if [[ -z "$subscription_id" || "$subscription_id" == "null" ]]; then
-            echo "::error::Azure.subscriptionId not found in FABRIC_TESTACC_WELLKNOWN" >&2
-            exit 1
-          fi
-          echo "AZURE_SUBSCRIPTION_ID=$subscription_id" >> "$GITHUB_ENV"
-
       - name: 🔐 Azure Login (OIDC)
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ secrets.TESTACC_SPN_OIDC_CLIENT_ID }}
           tenant-id: ${{ secrets.TESTACC_TENANT_ID }}
-          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: true
 
       - name: 🧹 Run Remove-WorkspaceRSItems.ps1
