@@ -22,7 +22,7 @@ Non-Item resources (~20%) do **not** use the `fabricitem` generic abstraction. T
 
 ## `base.go` Pattern
 
-Only defines `ItemTypeInfo` — no `FabricItemType`, `ItemFormatTypeDefault`, or `itemDefinitionFormats`. Optionally add resource-specific constants (e.g. `PossibleInactivityMinutesBeforeSleepValues` in gateway).
+Only defines `ItemTypeInfo` (including `IsPreview` and `IsSPNSupported` — values sourced from the GitHub issue) — no `FabricItemType`, `ItemFormatTypeDefault`, or `itemDefinitionFormats`. Optionally add resource-specific constants (e.g. `PossibleInactivityMinutesBeforeSleepValues` in gateway).
 
 Reference: `internal/services/connection/base.go`, `internal/services/gateway/base.go`
 

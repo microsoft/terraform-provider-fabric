@@ -36,6 +36,7 @@ Read the issue and determine:
 
 1. **Category confirmation** — Verify this is a Fabric Item (not a Non-Item). If it's a Non-Item, stop and tell the user to use the **Non-Item Implementor** agent.
 2. **Scope** — Is this a **new resource** (`[RS]`/`[DS]`/`[EPH]` prefix) or an **enhancement** (`[FEAT]` prefix)?
+3. **Preview and SPN status** — Extract the `Preview` and `SPN Supported` values from the issue's "Details / References" section. These map directly to `IsPreview` and `IsSPNSupported` in `base.go`'s `ItemTypeInfo` struct.
 
 ```
 Step 0: Determine Scope
@@ -82,15 +83,15 @@ In `data_<item>.go` and `data_<items>.go`, implement `propertiesSetter`, `itemGe
 
 The itemgen scaffold generates `<TBD>`, `// TBD`, and `// TODO` markers across **6+ files** (up to 8+ for config-definition-properties). This is where most debugging time occurs. Follow the **Post-Itemgen Fix Guide** in `fabric-item-patterns.instructions.md` systematically — apply fixes in order (Fix 1 → Fix 7).
 
-| Fix # | File                                                  | What to Fix                                                                   | Archetypes            | Detailed Reference                      |
-| :---: | ----------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------- | --------------------------------------- |
-|   1   | `base.go`                                             | `<TBD>` → DocsURL, ItemDefinitionEmpty, definition paths                      | All                   | `fabric-item-patterns.instructions.md`  |
-|   2   | `models.go`                                           | Stub structs → real SDK fields; fix `set()` signature; implement `set()` body | Properties+           | `schema-model-patterns.instructions.md` |
-|   3   | `schema_resource_<type>.go` / `schema_data_<type>.go` | `"TBD"` keys → real attribute names, types, descriptions                      | Properties+           | `schema-model-patterns.instructions.md` |
-|   4   | `resource_<type>.go`                                  | `"<TBD>"` booleans → `true`/`false`; implement `creationPayloadSetter`        | Definition+ / Config+ | `fabric-item-patterns.instructions.md`  |
-|   5   | `data_<type>.go` / `data_<types>.go`                  | Align `set()` calls with Fix 2 signature changes                              | Properties+           | `fabric-item-patterns.instructions.md`  |
-|   6   | `internal/testhelp/fakes/fabric_<type>.go`            | `// TODO` → populate `Properties` field with test data                        | Properties+           | `fake-handler-patterns.instructions.md` |
-|   7   | `*_test.go` (6–8 locations)                           | `// TODO` → real `resource.TestCheckResourceAttrSet` assertions               | Properties+           | `testing-patterns.instructions.md`      |
+| Fix # | File                                                  | What to Fix                                                                         | Archetypes            | Detailed Reference                      |
+| :---: | ----------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------- | --------------------------------------- |
+|   1   | `base.go`                                             | `<TBD>` → DocsURL, IsPreview, IsSPNSupported, ItemDefinitionEmpty, definition paths | All                   | `fabric-item-patterns.instructions.md`  |
+|   2   | `models.go`                                           | Stub structs → real SDK fields; fix `set()` signature; implement `set()` body       | Properties+           | `schema-model-patterns.instructions.md` |
+|   3   | `schema_resource_<type>.go` / `schema_data_<type>.go` | `"TBD"` keys → real attribute names, types, descriptions                            | Properties+           | `schema-model-patterns.instructions.md` |
+|   4   | `resource_<type>.go`                                  | `"<TBD>"` booleans → `true`/`false`; implement `creationPayloadSetter`              | Definition+ / Config+ | `fabric-item-patterns.instructions.md`  |
+|   5   | `data_<type>.go` / `data_<types>.go`                  | Align `set()` calls with Fix 2 signature changes                                    | Properties+           | `fabric-item-patterns.instructions.md`  |
+|   6   | `internal/testhelp/fakes/fabric_<type>.go`            | `// TODO` → populate `Properties` field with test data                              | Properties+           | `fake-handler-patterns.instructions.md` |
+|   7   | `*_test.go` (6–8 locations)                           | `// TODO` → real `resource.TestCheckResourceAttrSet` assertions                     | Properties+           | `testing-patterns.instructions.md`      |
 
 > Verify against the **canonical reference** for your archetype and the **Post-Itemgen Fix Guide** in `fabric-item-patterns.instructions.md` for detailed per-fix instructions.
 >

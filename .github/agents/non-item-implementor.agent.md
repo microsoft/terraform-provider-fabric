@@ -38,6 +38,7 @@ Read the issue and determine:
 
 1. **Category confirmation** — Verify this is a Non-Item resource (not a Fabric Item). If it's a Fabric Item, stop and tell the user to use the **Fabric Item Implementor** agent.
 2. **Scope** — Is this a **new resource** (`[RS]`/`[DS]`/`[EPH]` prefix) or an **enhancement** (`[FEAT]` prefix)?
+3. **Preview and SPN status** — Extract the `Preview` and `SPN Supported` values from the issue's "Details / References" section. These map directly to `IsPreview` and `IsSPNSupported` in `base.go`'s `ItemTypeInfo` struct.
 
 ```
 Step 0: Determine Scope
@@ -87,7 +88,7 @@ Implement singular and plural data sources in `data_<type>.go` / `data_<types>.g
 
 ### Step 5 — Complete Base Constants
 
-In `base.go`, define only `ItemTypeInfo`. See `non-item-patterns.instructions.md` for the exact structure.
+In `base.go`, define `ItemTypeInfo` with all fields including `IsPreview` and `IsSPNSupported` (values extracted from the issue in Step 0). See `non-item-patterns.instructions.md` for the exact structure.
 
 ### Step 6 — Register in Provider
 
