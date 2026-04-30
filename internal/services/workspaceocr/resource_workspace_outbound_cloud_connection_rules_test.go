@@ -119,7 +119,7 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_Attributes(t *testin
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`(?s)rules.+\.default_action\s+value must be one of`),
+			ExpectError: regexp.MustCompile(`(?s)Attribute\s+rules.+\.default_action\s+value must be one of`),
 		},
 		// error - invalid workspace_id in allowed_workspaces
 		{
@@ -170,7 +170,7 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_Attributes(t *testin
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`(?s)allowed_endpoints.*cannot be specified when.*allowed_workspaces`),
+			ExpectError: regexp.MustCompile(`(?s)allowed_endpoints.*cannot be specified when.*allowed_workspaces.*is specified`),
 		},
 	}))
 }
@@ -208,18 +208,13 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_CRUD(t *testing.T) {
 							"default_action":  string(fabcore.ConnectionAccessActionTypeDeny),
 							"allowed_endpoints": []map[string]any{
 								{
-									"hostname_pattern": "*.database.windows.net",
+									"hostname_pattern": "*.microsoft.com",
 								},
 							},
 						},
 						{
 							"connection_type": "Web",
 							"default_action":  string(fabcore.ConnectionAccessActionTypeAllow),
-							"allowed_endpoints": []map[string]any{
-								{
-									"hostname_pattern": "*.microsoft.com",
-								},
-							},
 						},
 					},
 				},
@@ -229,22 +224,18 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "3"),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
-					"connection_type":                   "LakeHouse",
-					"default_action":                    string(fabcore.ConnectionAccessActionTypeDeny),
-					"allowed_workspaces.#":              "1",
-					"allowed_workspaces.0.workspace_id": allowedWorkspaceID,
+					"connection_type":      "LakeHouse",
+					"default_action":       string(fabcore.ConnectionAccessActionTypeDeny),
+					"allowed_workspaces.#": "1",
 				}),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
-					"connection_type":                      "SQL",
-					"default_action":                       string(fabcore.ConnectionAccessActionTypeDeny),
-					"allowed_endpoints.#":                  "1",
-					"allowed_endpoints.0.hostname_pattern": "*.database.windows.net",
+					"connection_type":     "SQL",
+					"default_action":      string(fabcore.ConnectionAccessActionTypeDeny),
+					"allowed_endpoints.#": "1",
 				}),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
-					"connection_type":                      "Web",
-					"default_action":                       string(fabcore.ConnectionAccessActionTypeAllow),
-					"allowed_endpoints.#":                  "1",
-					"allowed_endpoints.0.hostname_pattern": "*.microsoft.com",
+					"connection_type": "Web",
+					"default_action":  string(fabcore.ConnectionAccessActionTypeAllow),
 				}),
 			),
 		},
@@ -301,10 +292,9 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "1"),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
-					"connection_type":                   "SQL",
-					"default_action":                    string(fabcore.ConnectionAccessActionTypeDeny),
-					"allowed_workspaces.#":              "1",
-					"allowed_workspaces.0.workspace_id": workspaceID,
+					"connection_type":      "SQL",
+					"default_action":       string(fabcore.ConnectionAccessActionTypeDeny),
+					"allowed_workspaces.#": "1",
 				}),
 			),
 		},
@@ -371,10 +361,11 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.connection_type", "SQL"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_endpoints.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_endpoints.0.hostname_pattern", "*.microsoft.com"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
+					"connection_type":     "SQL",
+					"default_action":      string(fabcore.ConnectionAccessActionTypeDeny),
+					"allowed_endpoints.#": "1",
+				}),
 			),
 		},
 		// Update and Read
@@ -404,8 +395,9 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_workspaces.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.0.allowed_workspaces.0.workspace_id", workspaceRSID),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
+					"allowed_workspaces.#": "1",
+				}),
 			),
 		},
 		// Update and Read

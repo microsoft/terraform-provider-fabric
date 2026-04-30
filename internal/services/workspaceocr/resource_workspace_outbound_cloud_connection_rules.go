@@ -76,11 +76,7 @@ func (r *resourceWorkspaceOutboundCloudConnectionRules) ValidateConfig(ctx conte
 			if len(endpoints) > 0 && len(workspaces) > 0 {
 				resp.Diagnostics.AddError(
 					"Invalid Attribute Combination",
-					fmt.Sprintf(
-						"Attribute \"rules[%s].allowed_endpoints\" cannot be specified when \"rules[%s].allowed_workspaces\" is specified",
-						rule.ConnectionType.ValueString(),
-						rule.ConnectionType.ValueString(),
-					),
+					"Attribute \"allowed_endpoints\" cannot be specified when \"allowed_workspaces\" is specified.",
 				)
 			}
 		}
