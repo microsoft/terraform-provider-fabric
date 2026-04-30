@@ -1,0 +1,5 @@
+kind: added
+body: Added `DataPipeline` `Execute` job type support in `fabric_item_job_scheduler` resource and data source
+time: 2026-04-28T12:36:02.954736177Z
+custom:
+    Issue: "950"

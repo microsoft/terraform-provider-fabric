@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_warehouse_sql_audit_settings` data source
+time: 2026-04-17T13:03:13.876972878Z
+custom:
+    Issue: "923"
