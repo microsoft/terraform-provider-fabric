@@ -77,7 +77,7 @@ func NewResourceSnowflakeDatabase(ctx context.Context) resource.Resource {
 			DefinitionFormats:  itemDefinitionFormats,
 		},
 		ConfigRequired:             false,
-		ConfigOrDefinitionRequired: false,
+		ConfigOrDefinitionRequired: true,
 		ConfigAttributes:           getResourceSnowflakeDatabaseConfigurationAttributes(),
 		CreationPayloadSetter:      creationPayloadSetter,
 		PropertiesAttributes:       getResourceSnowflakeDatabasePropertiesAttributes(ctx),

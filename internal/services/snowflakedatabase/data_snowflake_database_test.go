@@ -174,8 +174,10 @@ func TestAcc_SnowflakeDatabaseDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id": workspaceID,
-					"id":           entityID,
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "Default",
+					"output_definition": true,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -212,8 +214,10 @@ func TestAcc_SnowflakeDatabaseDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityDisplayName,
+					"workspace_id":      workspaceID,
+					"display_name":      entityDisplayName,
+					"output_definition": true,
+					"format":            "Default",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
