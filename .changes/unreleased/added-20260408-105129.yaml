@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_operations_agent` resource
+time: 2026-04-08T10:51:29.553766025Z
+custom:
+    Issue: "899"
