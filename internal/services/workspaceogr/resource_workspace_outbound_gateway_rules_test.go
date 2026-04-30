@@ -91,7 +91,8 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_Attributes(t *testing.T) {
 
 func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 	entity := NewRandomWorkspaceOutboundGateways()
-	gatewayID := testhelp.RandomUUID()
+	gatewayID1 := testhelp.RandomUUID()
+	gatewayID2 := testhelp.RandomUUID()
 	workspaceID := testhelp.RandomUUID()
 
 	fakeServer := fakes.NewFakeServer()
@@ -109,7 +110,10 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 					"default_action": string(fabcore.GatewayAccessActionTypeDeny),
 					"allowed_gateways": []map[string]any{
 						{
-							"id": gatewayID,
+							"id": gatewayID1,
+						},
+						{
+							"id": gatewayID2,
 						},
 					},
 				},
@@ -117,8 +121,9 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.0.id", gatewayID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "2"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "allowed_gateways.*", map[string]string{"id": gatewayID1}),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "allowed_gateways.*", map[string]string{"id": gatewayID2}),
 			),
 		},
 		// update and read - set to default values
@@ -135,68 +140,6 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeAllow)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "0"),
-			),
-		},
-	}))
-}
-
-func TestUnit_WorkspaceOutboundGatewayRulesResource_SetOrdering(t *testing.T) {
-	entity := NewRandomWorkspaceOutboundGateways()
-	gatewayID1 := testhelp.RandomUUID()
-	gatewayID2 := testhelp.RandomUUID()
-	workspaceID := testhelp.RandomUUID()
-
-	fakeServer := fakes.NewFakeServer()
-	fakeServer.ServerFactory.Core.WorkspacesServer.SetOutboundGatewayRules = fakeSetOutboundGatewayRules(&entity)
-	fakeServer.ServerFactory.Core.WorkspacesServer.GetOutboundGatewayRules = fakeGetOutboundGatewayRulesReversed(&entity)
-
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
-		// create with two gateways - API returns them in reversed order
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   workspaceID,
-					"default_action": string(fabcore.GatewayAccessActionTypeDeny),
-					"allowed_gateways": []map[string]any{
-						{
-							"id": gatewayID1,
-						},
-						{
-							"id": gatewayID2,
-						},
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "2"),
-			),
-		},
-		// re-apply with same config - should not produce inconsistent result
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   workspaceID,
-					"default_action": string(fabcore.GatewayAccessActionTypeDeny),
-					"allowed_gateways": []map[string]any{
-						{
-							"id": gatewayID1,
-						},
-						{
-							"id": gatewayID2,
-						},
-					},
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "2"),
 			),
 		},
 	}))
