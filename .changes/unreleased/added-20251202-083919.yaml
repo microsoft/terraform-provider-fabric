@@ -1,0 +1,5 @@
+kind: added
+body: Added `domain_id` attribute to `fabric_workspace` datasource
+time: 2025-12-02T08:39:19.676537484Z
+custom:
+    Issue: "659"
