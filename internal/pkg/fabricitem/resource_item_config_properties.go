@@ -87,6 +87,48 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	if r.TagsSupported {
+		r.tagsClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTagsClient()
+	}
+}
+
+// reconcileTags computes the diff between the desired tag IDs (plan) and the
+// currently applied tag IDs (state) and issues unapply+apply calls. It returns
+// true if any change was made (so caller knows to re-fetch the item).
+func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) reconcileTags(
+	ctx context.Context,
+	workspaceID, itemID string,
+	planTagSet, stateTagSet supertypes.SetValueOf[customtypes.UUID],
+) (bool, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if !r.TagsSupported {
+		return false, diags
+	}
+
+	planTags, d := extractTagIDs(ctx, planTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	stateTags, d := extractTagIDs(ctx, stateTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	added, removed := diffTagSets(planTags, stateTags)
+	if len(added) == 0 && len(removed) == 0 {
+		return false, diags
+	}
+
+	if err := applyTagDiff(ctx, r.tagsClient, workspaceID, itemID, added, removed); err != nil {
+		diags.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...)
+
+		return false, diags
+	}
+
+	return true, diags
 }
 
 func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Create(
@@ -141,6 +183,22 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
+	}
+
+	if r.TagsSupported {
+		// State after create has no applied tags; reconcile against an empty set.
+		emptyState := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+		changed, d := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, emptyState)
+		if resp.Diagnostics.Append(d...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if changed {
+			if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
@@ -245,6 +303,13 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 
 		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if r.TagsSupported {
+		_, dTags := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, state.Tags)
+		if resp.Diagnostics.Append(dTags...); resp.Diagnostics.HasError() {
 			return
 		}
 	}

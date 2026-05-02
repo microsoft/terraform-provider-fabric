@@ -467,3 +467,111 @@ func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
 		},
 	}))
 }
+
+func TestUnit_LakehouseResource_Tags(t *testing.T) {
+workspaceID := testhelp.RandomUUID()
+tagID1 := testhelp.RandomUUID()
+tagID2 := testhelp.RandomUUID()
+tagID3 := testhelp.RandomUUID()
+
+entityCreateWithoutTags := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+entityCreateWithTags := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+entityUpdateTags := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+entityImportWithTags := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+
+// Setup fake tag operations
+fakes.FakeServer.ServerFactory.Core.TagsServer.ApplyTags = fakeApplyTagsFunc()
+fakes.FakeServer.ServerFactory.Core.TagsServer.UnapplyTags = fakeUnapplyTagsFunc()
+
+fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
+fakes.FakeServer.Upsert(entityCreateWithoutTags)
+fakes.FakeServer.Upsert(entityCreateWithTags)
+fakes.FakeServer.Upsert(entityUpdateTags)
+fakes.FakeServer.Upsert(entityImportWithTags)
+fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
+
+resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+// Test 1: Create WITHOUT tags → verify tags are empty
+{
+ResourceName: testResourceItemFQN,
+Config: at.CompileConfig(
+testResourceItemHeader,
+map[string]any{
+"workspace_id": *entityCreateWithoutTags.WorkspaceID,
+"display_name": *entityCreateWithoutTags.DisplayName,
+},
+),
+Check: resource.ComposeAggregateTestCheckFunc(
+resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityCreateWithoutTags.DisplayName),
+resource.TestCheckNoResourceAttr(testResourceItemFQN, "tags"),
+),
+},
+// Test 2: Create WITH tags → verify tags applied
+{
+ResourceName: testResourceItemFQN,
+Config: at.CompileConfig(
+testResourceItemHeader,
+map[string]any{
+"workspace_id": *entityCreateWithTags.WorkspaceID,
+"display_name": *entityCreateWithTags.DisplayName,
+"tags": []string{
+tagID1,
+tagID2,
+},
+},
+),
+Check: resource.ComposeAggregateTestCheckFunc(
+resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityCreateWithTags.DisplayName),
+resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+),
+},
+// Test 3: Update - adding tags
+{
+ResourceName: testResourceItemFQN,
+Config: at.CompileConfig(
+testResourceItemHeader,
+map[string]any{
+"workspace_id": *entityUpdateTags.WorkspaceID,
+"display_name": *entityUpdateTags.DisplayName,
+"tags": []string{
+tagID1,
+tagID2,
+tagID3,
+},
+},
+),
+Check: resource.ComposeAggregateTestCheckFunc(
+resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityUpdateTags.DisplayName),
+resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "3"),
+),
+},
+// Test 4: Update - removing tags
+{
+ResourceName: testResourceItemFQN,
+Config: at.CompileConfig(
+testResourceItemHeader,
+map[string]any{
+"workspace_id": *entityUpdateTags.WorkspaceID,
+"display_name": *entityUpdateTags.DisplayName,
+"tags": []string{
+tagID1,
+},
+},
+),
+Check: resource.ComposeAggregateTestCheckFunc(
+resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityUpdateTags.DisplayName),
+resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "1"),
+),
+},
+// Test 5: Import tagged item → state contains tags
+{
+ResourceName:       testResourceItemFQN,
+ImportStateId:      fmt.Sprintf("%s/%s", *entityImportWithTags.WorkspaceID, *entityImportWithTags.ID),
+ImportState:        true,
+ImportStatePersist: true,
+Check: resource.ComposeAggregateTestCheckFunc(
+resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityImportWithTags.DisplayName),
+),
+},
+}))
+}

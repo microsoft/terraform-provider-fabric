@@ -13,3 +13,10 @@ resource "fabric_warehouse" "example2" {
     collation_type = "Latin1_General_100_BIN2_UTF8"
   }
 }
+
+# Warehouse resource with tags
+resource "fabric_warehouse" "example_with_tags" {
+  display_name = "warehouse_with_tags"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  tags         = [fabric_tag.warehouse_tag.id]
+}

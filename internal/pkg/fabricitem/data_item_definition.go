@@ -33,6 +33,7 @@ type DataSourceFabricItemDefinition struct {
 	FabricItemType      fabcore.ItemType
 	TypeInfo            tftypeinfo.TFTypeInfo
 	IsDisplayNameUnique bool
+	TagsSupported       bool
 	DefinitionFormats   []DefinitionFormat
 }
 

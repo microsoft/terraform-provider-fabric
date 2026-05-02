@@ -77,6 +77,7 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			TagsSupported:       true,
 		},
 		PropertiesAttributes: getDataSourceEnvironmentPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,

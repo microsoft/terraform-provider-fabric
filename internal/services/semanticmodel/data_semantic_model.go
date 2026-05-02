@@ -14,6 +14,7 @@ func NewDataSourceSemanticModel() datasource.DataSource {
 		TypeInfo:            ItemTypeInfo,
 		FabricItemType:      FabricItemType,
 		IsDisplayNameUnique: false,
+		TagsSupported:       true,
 		DefinitionFormats:   itemDefinitionFormats,
 	}
 

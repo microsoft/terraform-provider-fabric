@@ -108,15 +108,24 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Co
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	var fabricItem FabricItemProperties[Titemprop]
+
 	if data.ID.ValueString() != "" {
-		diags = d.getByID(ctx, &data)
+		fabricItem, diags = d.getByID(ctx, &data)
 	} else {
-		diags = d.getByDisplayName(ctx, &data)
+		fabricItem, diags = d.getByDisplayName(ctx, &data)
 	}
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	tagSet, dT := dataSourceTagsValueFromTagInfos(ctx, fabricItem.Tags)
+	if resp.Diagnostics.Append(dT...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	data.Tags = tagSet
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
@@ -132,25 +141,25 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Co
 func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByID(
 	ctx context.Context,
 	model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop],
-) diag.Diagnostics {
+) (FabricItemProperties[Titemprop], diag.Diagnostics) {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", d.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := d.ItemGetter(ctx, *d.pConfigData.FabricClient, *model, &fabricItem)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
-		return diags
+		return fabricItem, diags
 	}
 
 	model.set(fabricItem)
 
-	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
+	return fabricItem, d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
 
 func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(
 	ctx context.Context,
 	model *DataSourceFabricItemPropertiesModel[Ttfprop, Titemprop],
-) diag.Diagnostics {
+) (FabricItemProperties[Titemprop], diag.Diagnostics) {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by Display Name: %s", d.TypeInfo.Name, model.DisplayName.ValueString()))
 
 	errNotFoundCode := fabcore.ErrCommon.EntityNotFound.Error()
@@ -169,10 +178,10 @@ func (d *DataSourceFabricItemProperties[Ttfprop, Titemprop]) getByDisplayName(
 
 	err := d.ItemListGetter(ctx, *d.pConfigData.FabricClient, *model, errNotFound, &fabricItem)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
-		return diags
+		return fabricItem, diags
 	}
 
 	model.set(fabricItem)
 
-	return d.PropertiesSetter(ctx, fabricItem.Properties, model)
+	return fabricItem, d.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

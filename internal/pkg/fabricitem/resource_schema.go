@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	supermapvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/mapvalidator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
@@ -51,6 +52,8 @@ func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabric
 
 	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
+	attributes[TagsAttrPath] = getResourceFabricItemTagsAttribute(r.TypeInfo.Name, r.TagsSupported)
+
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
@@ -60,6 +63,7 @@ func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabric
 func getResourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, r ResourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
+	attributes[TagsAttrPath] = getResourceFabricItemTagsAttribute(r.TypeInfo.Name, r.TagsSupported)
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -72,6 +76,7 @@ func getResourceFabricItemDefinitionPropertiesSchema[Ttfprop, Titemprop any](ctx
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
 	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
+	attributes[TagsAttrPath] = getResourceFabricItemTagsAttribute(r.TypeInfo.Name, r.TagsSupported)
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -86,6 +91,7 @@ func getResourceFabricItemConfigPropertiesSchema[Ttfprop, Titemprop, Ttfconfig, 
 	attributes := getResourceFabricItemBaseAttributes(ctx, r.TypeInfo.Name, r.DisplayNameMaxLength, r.DescriptionMaxLength, r.NameRenameAllowed)
 	attributes["configuration"] = getResourceFabricItemConfigNestedAttr[Ttfconfig](ctx, r.TypeInfo.Name, r.ConfigRequired, r.ConfigAttributes)
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
+	attributes[TagsAttrPath] = getResourceFabricItemTagsAttribute(r.TypeInfo.Name, r.TagsSupported)
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -110,6 +116,7 @@ func getResourceFabricItemConfigDefinitionPropertiesSchema[Ttfprop, Titemprop, T
 	attributes["properties"] = getResourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, r.TypeInfo.Name, r.PropertiesAttributes)
 
 	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, true))
+	attributes[TagsAttrPath] = getResourceFabricItemTagsAttribute(r.TypeInfo.Name, r.TagsSupported)
 
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
@@ -209,6 +216,29 @@ func getResourceFabricItemBaseAttributes(
 	}
 
 	return attributes
+}
+
+// getResourceFabricItemTagsAttribute returns the schema attribute used by
+// item resources for the `tags` field. When TagsSupported is true, the user can
+// manage tags by setting tag UUIDs in the configuration; when false, the attribute
+// is read-only (purely Computed) and reflects whatever tags the API returns.
+func getResourceFabricItemTagsAttribute(name string, tagsSupported bool) schema.Attribute { //revive:disable-line:flag-parameter
+	attr := schema.SetAttribute{
+		MarkdownDescription: "Set of tag IDs (UUID) applied to this " + name + ". Tags must already exist (typically created via the `fabric_tag` resource).",
+		Computed:            true,
+		CustomType: supertypes.SetTypeOf[customtypes.UUID]{
+			SetType: basetypes.SetType{
+				ElemType: customtypes.UUIDType{},
+			},
+		},
+		ElementType: customtypes.UUIDType{},
+	}
+
+	if tagsSupported {
+		attr.Optional = true
+	}
+
+	return attr
 }
 
 // Helper function to get Fabric Item definition attributes.

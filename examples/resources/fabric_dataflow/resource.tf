@@ -4,6 +4,13 @@ resource "fabric_dataflow" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
+# Dataflow with tags
+resource "fabric_dataflow" "example_with_tags" {
+  display_name = "example_with_tags"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  tags         = [fabric_tag.dataflow_tag.id]
+}
+
 # Dataflow bootstrapping only
 resource "fabric_dataflow" "example_bootstrap" {
   display_name              = "example"

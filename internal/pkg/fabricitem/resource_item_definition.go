@@ -35,9 +35,11 @@ var (
 type ResourceFabricItemDefinition struct {
 	pConfigData                 *pconfig.ProviderData
 	client                      *fabcore.ItemsClient
+	tagsClient                  *fabcore.TagsClient
 	FabricItemType              fabcore.ItemType
 	TypeInfo                    tftypeinfo.TFTypeInfo
 	NameRenameAllowed           bool
+	TagsSupported               bool
 	DisplayNameMaxLength        int
 	DescriptionMaxLength        int
 	DefinitionPathDocsURL       string
@@ -125,6 +127,45 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	r.tagsClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTagsClient()
+}
+
+// reconcileTags computes the diff between the desired tag IDs (plan) and the
+// currently applied tag IDs (state) and issues unapply+apply calls. It returns
+// true if any change was made (so caller knows to re-fetch the item).
+func (r *ResourceFabricItemDefinition) reconcileTags(
+	ctx context.Context,
+	workspaceID, itemID string,
+	planTagSet, stateTagSet supertypes.SetValueOf[customtypes.UUID],
+) (bool, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if !r.TagsSupported {
+		return false, diags
+	}
+
+	planTags, d := extractTagIDs(ctx, planTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	stateTags, d := extractTagIDs(ctx, stateTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	added, removed := diffTagSets(planTags, stateTags)
+	if len(added) == 0 && len(removed) == 0 {
+		return false, diags
+	}
+
+	if err := applyTagDiff(ctx, r.tagsClient, workspaceID, itemID, added, removed); err != nil {
+		diags.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...)
+
+		return false, diags
+	}
+
+	return true, diags
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -163,6 +204,23 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 	}
 
 	plan.set(respCreate.Item)
+
+	if r.TagsSupported {
+		// State after create has no applied tags; reconcile against an empty set.
+		emptyState := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+		changed, d := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, emptyState)
+		if resp.Diagnostics.Append(d...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if changed {
+			if diags := r.get(ctx, &plan); diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -283,6 +341,13 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 
 		_, err := r.client.UpdateItemDefinition(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdateDefinition.UpdateItemDefinitionRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if r.TagsSupported {
+		_, dTags := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, state.Tags)
+		if resp.Diagnostics.Append(dTags...); resp.Diagnostics.HasError() {
 			return
 		}
 	}

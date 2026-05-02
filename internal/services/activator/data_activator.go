@@ -14,6 +14,7 @@ func NewDataSourceActivator() datasource.DataSource {
 		FabricItemType:      FabricItemType,
 		TypeInfo:            ItemTypeInfo,
 		IsDisplayNameUnique: true,
+		TagsSupported:       true,
 		DefinitionFormats:   itemDefinitionFormats,
 	}
 

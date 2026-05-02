@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -71,6 +72,48 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.C
 	}
 
 	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	if r.TagsSupported {
+		r.tagsClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTagsClient()
+	}
+}
+
+// reconcileTags computes the diff between the desired tag IDs (plan) and the
+// currently applied tag IDs (state) and issues unapply+apply calls. It returns
+// true if any change was made (so caller knows to re-fetch the item).
+func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) reconcileTags(
+	ctx context.Context,
+	workspaceID, itemID string,
+	planTagSet, stateTagSet supertypes.SetValueOf[customtypes.UUID],
+) (bool, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if !r.TagsSupported {
+		return false, diags
+	}
+
+	planTags, d := extractTagIDs(ctx, planTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	stateTags, d := extractTagIDs(ctx, stateTagSet)
+	if diags.Append(d...); diags.HasError() {
+		return false, diags
+	}
+
+	added, removed := diffTagSets(planTags, stateTags)
+	if len(added) == 0 && len(removed) == 0 {
+		return false, diags
+	}
+
+	if err := applyTagDiff(ctx, r.tagsClient, workspaceID, itemID, added, removed); err != nil {
+		diags.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...)
+
+		return false, diags
+	}
+
+	return true, diags
 }
 
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -108,9 +151,29 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	plan.WorkspaceID = customtypes.NewUUIDValue(*respCreate.WorkspaceID)
 
 	// r.get() updates the plan with current server state
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	fabricItem, diags := r.get(ctx, &plan)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	if r.TagsSupported {
+		// State after create has no applied tags; reconcile against an empty set.
+		emptyState := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+		changed, d := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, emptyState)
+		if resp.Diagnostics.Append(d...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if changed {
+			fabricItem, diags = r.get(ctx, &plan)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
+	}
+
+	plan.Tags = resourceTagsValueFromTagInfos(ctx, fabricItem.Tags)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -142,7 +205,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Cont
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state)
+	fabricItem, diags := r.get(ctx, &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -154,6 +217,8 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Cont
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	state.Tags = resourceTagsValueFromTagInfos(ctx, fabricItem.Tags)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -210,10 +275,20 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 		}
 	}
 
+	if r.TagsSupported {
+		_, dTags := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, state.Tags)
+		if resp.Diagnostics.Append(dTags...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	// r.get() updates the plan with current server state
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	fabricItem, diagsGet := r.get(ctx, &plan)
+	if resp.Diagnostics.Append(diagsGet...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	plan.Tags = resourceTagsValueFromTagInfos(ctx, fabricItem.Tags)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -303,9 +378,12 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 		Timeouts: timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+	fabricItem, diagsGet := r.get(ctx, &state)
+	if resp.Diagnostics.Append(diagsGet...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	state.Tags = resourceTagsValueFromTagInfos(ctx, fabricItem.Tags)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 
@@ -321,15 +399,15 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(
 	ctx context.Context,
 	model *ResourceFabricItemPropertiesModel[Ttfprop, Titemprop],
-) diag.Diagnostics {
+) (FabricItemProperties[Titemprop], diag.Diagnostics) {
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := r.ItemGetter(ctx, *r.pConfigData.FabricClient, *model, &fabricItem)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		return diags
+		return fabricItem, diags
 	}
 
 	model.set(fabricItem)
 
-	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
+	return fabricItem, r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }
