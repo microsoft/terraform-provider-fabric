@@ -18,6 +18,7 @@ linters:
     - err113
     - exhaustruct
     - funlen
+    - goconst
     - goheader
     - gomoddirectives
     - ireturn
@@ -83,7 +84,6 @@ linters:
           - forcetypeassert
           - gochecknoglobals
           - gocognit
-          - goconst
           - nonamedreturns
         path: (.+)_test\.go
       - linters:

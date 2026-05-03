@@ -58,7 +58,7 @@ Use **#skill:sdk-contract-navigator** to get the full SDK contract (client facto
 
 Use **#skill:itemgen-command-builder** to build and execute the `go run tools/itemgen/main.go` command with the correct archetype and flags. The skill determines all flag values from the SDK analysis.
 
-This generates the file structure in `internal/services/<package>/` with `TBD` placeholders that must be completed in subsequent steps.
+This generates the file structure in `internal/services/<package>/` with `TODO` placeholders that must be completed in subsequent steps.
 
 ### Step 3.1 — Generate Models
 
@@ -81,17 +81,17 @@ In `data_<item>.go` and `data_<items>.go`, implement `propertiesSetter`, `itemGe
 
 ### Step 5 — Fix All Itemgen Placeholders (Critical Step)
 
-The itemgen scaffold generates `<TBD>`, `// TBD`, and `// TODO` markers across **6+ files** (up to 8+ for config-definition-properties). This is where most debugging time occurs. Follow the **Post-Itemgen Fix Guide** in `fabric-item-patterns.instructions.md` systematically — apply fixes in order (Fix 1 → Fix 7).
+The itemgen scaffold generates `<TODO>` and `// TODO` markers across **6+ files** (up to 8+ for config-definition-properties). This is where most debugging time occurs. Follow the **Post-Itemgen Fix Guide** in `fabric-item-patterns.instructions.md` systematically — apply fixes in order (Fix 1 → Fix 7).
 
-| Fix # | File                                                  | What to Fix                                                                         | Archetypes            | Detailed Reference                      |
-| :---: | ----------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------- | --------------------------------------- |
-|   1   | `base.go`                                             | `<TBD>` → DocsURL, IsPreview, IsSPNSupported, ItemDefinitionEmpty, definition paths | All                   | `fabric-item-patterns.instructions.md`  |
-|   2   | `models.go`                                           | Stub structs → real SDK fields; fix `set()` signature; implement `set()` body       | Properties+           | `schema-model-patterns.instructions.md` |
-|   3   | `schema_resource_<type>.go` / `schema_data_<type>.go` | `"TBD"` keys → real attribute names, types, descriptions                            | Properties+           | `schema-model-patterns.instructions.md` |
-|   4   | `resource_<type>.go`                                  | `"<TBD>"` booleans → `true`/`false`; implement `creationPayloadSetter`              | Definition+ / Config+ | `fabric-item-patterns.instructions.md`  |
-|   5   | `data_<type>.go` / `data_<types>.go`                  | Align `set()` calls with Fix 2 signature changes                                    | Properties+           | `fabric-item-patterns.instructions.md`  |
-|   6   | `internal/testhelp/fakes/fabric_<type>.go`            | `// TODO` → populate `Properties` field with test data                              | Properties+           | `fake-handler-patterns.instructions.md` |
-|   7   | `*_test.go` (6–8 locations)                           | `// TODO` → real `resource.TestCheckResourceAttrSet` assertions                     | Properties+           | `testing-patterns.instructions.md`      |
+| Fix # | File                                                  | What to Fix                                                                          | Archetypes            | Detailed Reference                      |
+| :---: | ----------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------- | --------------------------------------- |
+|   1   | `base.go`                                             | `<TODO>` → DocsURL, IsPreview, IsSPNSupported, ItemDefinitionEmpty, definition paths | All                   | `fabric-item-patterns.instructions.md`  |
+|   2   | `models.go`                                           | Stub structs → real SDK fields; fix `set()` signature; implement `set()` body        | Properties+           | `schema-model-patterns.instructions.md` |
+|   3   | `schema_resource_<type>.go` / `schema_data_<type>.go` | `"TODO"` keys → real attribute names, types, descriptions                            | Properties+           | `schema-model-patterns.instructions.md` |
+|   4   | `resource_<type>.go`                                  | `"<TODO>"` booleans → `true`/`false`; implement `creationPayloadSetter`              | Definition+ / Config+ | `fabric-item-patterns.instructions.md`  |
+|   5   | `data_<type>.go` / `data_<types>.go`                  | Align `set()` calls with Fix 2 signature changes                                     | Properties+           | `fabric-item-patterns.instructions.md`  |
+|   6   | `internal/testhelp/fakes/fabric_<type>.go`            | `// TODO` → populate `Properties` field with test data                               | Properties+           | `fake-handler-patterns.instructions.md` |
+|   7   | `*_test.go` (6–8 locations)                           | `// TODO` → real `resource.TestCheckResourceAttrSet` assertions                      | Properties+           | `testing-patterns.instructions.md`      |
 
 > Verify against the **canonical reference** for your archetype and the **Post-Itemgen Fix Guide** in `fabric-item-patterns.instructions.md` for detailed per-fix instructions.
 >
@@ -137,7 +137,7 @@ After all lint, docs, and tests pass, verify:
 - [ ] UUID fields use `customtypes.UUID`; enums cast via `(*string)(from.Field)`
 - [ ] Resource registered in `provider.go`; example HCL files exist
 - [ ] `task docs`, `task lint`, and unit tests pass
-- [ ] No `<TBD>`, `// TBD`, or `// TODO` placeholders remain
+- [ ] No `<TODO>` or `// TODO` placeholders remain
 - [ ] Correct `fabricitem.NewResource*` constructor; closures wired; `set()` call sites match signature; `ctx` in constructor if schema uses `supertypes`; fakes have `Properties` populated
 - [ ] Fakes follow `fake-handler-patterns.instructions.md` — operations struct, configure function, random entity generators with populated Properties
 
@@ -263,7 +263,7 @@ This agent uses the GitHub MCP server to:
    - `schema-model-patterns.instructions.md` — type mappings, `set()` patterns, schema attributes (`internal/services/**/schema_*.go`, `models.go`)
    - `fake-handler-patterns.instructions.md` — operations struct, configure function, entity generators (`internal/testhelp/fakes/**`)
    - `testing-patterns.instructions.md` — test naming, black-box testing, helpers, fakes (`internal/**/*_test.go`)
-6. **Complete all TBD placeholders** — never leave `TBD` markers in generated code.
+6. **Complete all TODO placeholders** — never leave `TODO` markers in generated code.
 7. **Always register in provider** — new resources must be registered in `provider.go` (enhancements skip this — already registered).
 
 ## Output

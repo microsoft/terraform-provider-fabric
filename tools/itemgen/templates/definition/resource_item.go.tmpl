@@ -23,7 +23,7 @@ func NewResource{{.TypeInfo}}() resource.Resource {
 			mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
-		DefinitionRequired:    "<TBD>",
+		DefinitionRequired:    "<TODO>",
 		DefinitionEmpty:       ItemDefinitionEmpty,
 		DefinitionFormats:     itemDefinitionFormats,
 	}

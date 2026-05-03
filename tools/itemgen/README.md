@@ -11,6 +11,7 @@ go run tools/itemgen/main.go \
   -item-name="<item-name>" \
   -items-name="<items-name>" \
   -item-type=<item-category> \
+  -definition-path=<definition-file-path> \
   -rename-allowed=<true|false> \
   -is-preview=<true|false> \
   -is-spn-supported=<true|false>
@@ -21,6 +22,7 @@ go run tools/itemgen/main.go \
 - `-item-name`: The display name of the item (e.g., "Data Pipeline")
 - `-items-name`: The display name of the item in plural form (e.g., "Data Pipelines")
 - `-item-type`: The category of item to generate (see Item Types section below)
+- `-definition-path`: The path of the definition file used in templates (default: content.json)
 - `-rename-allowed`: Whether the item can be renamed (default: true)
 - `-is-preview`: Whether the item is in preview (default: false)
 - `-is-spn-supported`: Whether the item supports SPN (default: false)
@@ -134,7 +136,7 @@ The generator automatically handles file naming based on the provided item name:
 After generating the files, you may need to:
 
 1. Review and update the generated files.
-1. Complete all `TBD` placeholders.
+1. Complete all `TODO` placeholders.
 1. Add the resource/data-source/s to the provider configuration.
 1. Update the well-known script.
 1. Run the tests to verify the implementation.

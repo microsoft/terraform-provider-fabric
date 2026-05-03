@@ -28,18 +28,19 @@ Also read `tools/itemgen/main.go` for the canonical list of valid item types fro
 
 ## Step 2 — Gather Flag Values
 
-The `itemgen` tool accepts 8 command-line flags. Determine each value from the SDK analysis and Fabric API docs:
+The `itemgen` tool accepts 9 command-line flags. Determine each value from the SDK analysis and Fabric API docs:
 
-| Flag                 | Type   | How to Determine                                                                                 | Default      |
-| -------------------- | ------ | ------------------------------------------------------------------------------------------------ | ------------ |
-| `-item-name`         | string | Display name with spaces (e.g. `"Data Pipeline"`, `"Eventhouse"`)                                | **required** |
-| `-items-name`        | string | Plural form (e.g. `"Data Pipelines"`, `"Eventhouses"`)                                           | **required** |
-| `-item-type`         | string | Archetype from Step 1                                                                            | **required** |
-| `-rename-allowed`    | bool   | Check SDK for Update/Rename method on the items client                                           | `true`       |
-| `-is-preview`        | bool   | Check Fabric API docs for "preview" badge or header                                              | `false`      |
-| `-is-spn-supported`  | bool   | Check API docs for service principal authentication support                                      | `false`      |
-| `-generate-fakes`    | bool   | set to `true` unless item is of archetype `basic` or `definition` — generates fake test handlers | `true`       |
-| `-generate-examples` | bool   | Always set to `true` — generates TF example files                                                | `true`       |
+| Flag                 | Type   | How to Determine                                                                                                    | Default        |
+| -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `-item-name`         | string | Display name with spaces (e.g. `"Data Pipeline"`, `"Eventhouse"`)                                                   | **required**   |
+| `-items-name`        | string | Plural form (e.g. `"Data Pipelines"`, `"Eventhouses"`)                                                              | **required**   |
+| `-item-type`         | string | Archetype from Step 1                                                                                               | **required**   |
+| `-definition-path`   | string | The definition file path from the issue's "Definition Paths" field (e.g. `"definition.json"`, `"eventstream.json"`) | `content.json` |
+| `-rename-allowed`    | bool   | Check SDK for Update/Rename method on the items client                                                              | `true`         |
+| `-is-preview`        | bool   | Check Fabric API docs for "preview" badge or header                                                                 | `false`        |
+| `-is-spn-supported`  | bool   | Check API docs for service principal authentication support                                                         | `false`        |
+| `-generate-fakes`    | bool   | set to `true` unless item is of archetype `basic` or `definition` — generates fake test handlers                    | `true`         |
+| `-generate-examples` | bool   | Always set to `true` — generates TF example files                                                                   | `true`         |
 
 ### Flag Value Details
 
@@ -50,6 +51,10 @@ The `itemgen` tool accepts 8 command-line flags. Determine each value from the S
 - `TypeInfo` = no spaces (e.g. `DataPipeline`)
 
 **`-items-name`**: The plural form. Usually just append "s" but check API docs for irregular plurals (e.g. "KQL Databases", "Warehouses", "Variable Libraries").
+
+**`-definition-path`**: The definition file path as listed in the issue's "Definition Paths" section (populated by `#skill:issue-composer` from the Fabric definition article). Use the first/primary definition path (e.g. `"eventstream.json"`, `"definition.json"`, `"notebook-content.ipynb"`). This determines the definition key used in Terraform HCL blocks and template source references.
+
+> **Note:** This flag is only relevant for item types that have a definition (`definition`, `definition-properties`, `config-definition-properties`). For archetypes without a definition (`basic`, `properties`, `config-properties`), omit this flag — it will be ignored. If the item archetype includes a definition but the "Definition Paths" field is missing from the issue, **prompt the user** to provide the definition file path before proceeding.
 
 **`-rename-allowed`**: Most items support rename. Set to `false` if the SDK items client lacks an `Update<ItemName>` method.
 
@@ -86,6 +91,7 @@ go run tools/itemgen/main.go \
   -item-name "<Display Name>" \
   -items-name "<Plural Display Name>" \
   -item-type "<archetype>" \
+  -definition-path "<definition-file-path>" \
   -rename-allowed=<true|false> \
   -is-preview=<true|false> \
   -is-spn-supported=<true|false> \

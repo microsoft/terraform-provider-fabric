@@ -72,7 +72,7 @@ func handleEntity[TEntity any](server *fakeServer, configureFunction func(server
 func (s *fakeServer) Upsert(element any) {
 	elementType := reflect.TypeOf(element)
 	// if elementType is a pointer, get the underlying type
-	if elementType.Kind() == reflect.Ptr {
+	if elementType.Kind() == reflect.Pointer {
 		elementType = elementType.Elem()
 	}
 

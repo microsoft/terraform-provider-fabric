@@ -20,7 +20,7 @@ import (
 func NewResource{{.TypeInfo}}() resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from {{.ModelName}}ConfigurationModel) (*fab{{.Package}}.CreationPayload, diag.Diagnostics) {
 		creationPayload := fab{{.Package}}.CreationPayload{}
-		// TBD
+		// TODO
 		return &creationPayload, nil
 	}
 
@@ -68,12 +68,12 @@ func NewResource{{.TypeInfo}}() resource.Resource {
 				mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
 				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 			},
-			DefinitionRequired:    "<TBD>",
+			DefinitionRequired:    "<TODO>",
 			DefinitionEmpty:    ItemDefinitionEmpty,
 			DefinitionFormats:  itemDefinitionFormats,
 		},
-		ConfigRequired:             "<TBD>",
-		ConfigOrDefinitionRequired: "<TBD>",
+		ConfigRequired:             "<TODO>",
+		ConfigOrDefinitionRequired: "<TODO>",
 		ConfigAttributes:           getResource{{.TypeInfo}}ConfigurationAttributes(),
 		CreationPayloadSetter:      creationPayloadSetter,
 		PropertiesAttributes:       getResource{{.TypeInfo}}PropertiesAttributes(),

@@ -44,6 +44,7 @@ type ItemConfig struct {
 	ModelName         string
 	FabricItemType    string
 	DefinitionFormats []string
+	DefinitionPath    string
 	DocsURL           string
 	DisplayNameMax    int
 	DescriptionMax    int
@@ -148,6 +149,7 @@ func parseFlags() (ItemConfig, error) {
 	itemName := flag.String("item-name", "", "Name of the new item (e.g. Data Pipeline)")
 	itemsName := flag.String("items-name", "", "Name of the new item in plural form (e.g. Data Pipelines)")
 	itemTypeFlag := flag.String("item-type", "", fmt.Sprintf("Type of item (%s)", strings.Join(validItemTypes(), "|")))
+	definitionPath := flag.String("definition-path", "content.json", "Path of the definition file used in templates (e.g. definition.json, eventstream.json)")
 	renameAllowed := flag.Bool("rename-allowed", true, "Is item rename allowed?")
 	isPreview := flag.Bool("is-preview", false, "Is the item in preview?")
 	isSPNSupported := flag.Bool("is-spn-supported", false, "Is the item supported for SPN?")
@@ -187,7 +189,8 @@ func parseFlags() (ItemConfig, error) {
 		ModelName:         toCamelCase(*itemName),
 		RenameAllowed:     *renameAllowed,
 		DefinitionFormats: []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
-		DocsURL:           "<docs-url>",                   // Placeholder - should be configurable
+		DefinitionPath:    *definitionPath,
+		DocsURL:           "<docs-url>", // Placeholder - should be configurable
 		DisplayNameMax:    DefaultDisplayNameMax,
 		DescriptionMax:    DefaultDescriptionMax,
 		ItemType:          itemTypeEnum,

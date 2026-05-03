@@ -50,14 +50,14 @@ Additional flags: `-generate-fakes`, `-generate-examples`
 
 ## Post-Itemgen Fix Guide
 
-After scaffolding, fix `<TBD>` / `// TBD` / `// TODO` placeholders:
+After scaffolding, fix `<TODO>` / `// TODO` placeholders:
 
 |  #  | File(s)                  | Fix                                                                                                                                                                                                                  | Applies to          |
 | :-: | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 |  0  | `provider.go`            | Import service pkg (alphabetical); register resource in `Resources()` and data sources in `DataSources()`. If constructor accepts `ctx`, use wrapper: `func() resource.Resource { return pkg.NewResourceType(ctx) }` | All                 |
 |  1  | `base.go`                | Fill `DocsURL`, `IsPreview`, `IsSPNSupported`, definition URLs and paths (values from issue)                                                                                                                         | All                 |
 |  2  | `models.go`              | Replace stub fields/`set()` body (use `#skill:schema-model-generator`)                                                                                                                                               | Properties+         |
-|  3  | `schema_*.go`            | Replace `"TBD"` attributes (use `#skill:schema-model-generator`)                                                                                                                                                     | Properties+         |
+|  3  | `schema_*.go`            | Replace `"TODO"` attributes (use `#skill:schema-model-generator`)                                                                                                                                                    | Properties+         |
 |  4  | `resource_<type>.go`     | Set `DefinitionRequired`/`ConfigRequired` bools; wire `creationPayloadSetter`                                                                                                                                        | Definition+/Config+ |
 |  5  | `data_*.go`              | Align `set()` calls with Fix 2 signature changes                                                                                                                                                                     | Properties+         |
 |  6  | `fakes/fabric_<type>.go` | Populate `Properties` in `NewRandom*`                                                                                                                                                                                | Properties+         |

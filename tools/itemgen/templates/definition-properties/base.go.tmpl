@@ -15,8 +15,8 @@ import (
 const (
 	FabricItemType = fabcore.ItemType{{.TypeInfo}}
 	{{if .HasDefinition}}
-	ItemDefinitionEmpty       = `<TBD>`
-	ItemDefinitionPathDocsURL = "<TBD>"
+	ItemDefinitionEmpty       = `<TODO>`
+	ItemDefinitionPathDocsURL = "<TODO>"
 	{{end}}
 )
 
@@ -25,7 +25,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:  "{{.Type}}",
 	Names: "{{.Names}}",
 	Types: "{{.Types}}",
-	DocsURL: "<TBD>",
+	DocsURL: "<TODO>",
 	IsPreview: {{.IsPreview}},
 	IsSPNSupported: {{.IsSPNSupported}},
 }
@@ -35,7 +35,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{
 	{
 		Type:  fabricitem.DefinitionFormatDefault,
 		API:   "",
-		Paths: []string{"<TBD>"},
+		Paths: []string{"<TODO>"},
 	},
 }
 {{end}}

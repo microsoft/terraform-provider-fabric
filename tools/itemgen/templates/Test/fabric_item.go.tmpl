@@ -215,7 +215,7 @@ func NewRandom{{.TypeInfo}}WithWorkspace(workspaceID string) fab{{.Package}}.{{.
 func NewRandom{{.TypeInfo}}Definition() fab{{.Package}}.Definition {
 	defPart := fab{{.Package}}.DefinitionPart{
 		PayloadType: to.Ptr(fab{{.Package}}.PayloadTypeInlineBase64),
-		Path:        new("{{.Type}}-content.json"),
+		Path:        new("{{.DefinitionPath}}"),
 		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==", // {"content":"Hello World"} in base64
 		),
