@@ -89,6 +89,18 @@ func TestUnit_SnowflakeDatabaseResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
+		// error - no required attributes (configuration or definition)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Missing Attribute Configuration`),
+		},
 		// error - missing required configuration attribute
 		{
 			ResourceName: testResourceItemFQN,
