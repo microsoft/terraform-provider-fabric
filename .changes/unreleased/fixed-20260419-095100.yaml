@@ -1,0 +1,6 @@
+kind: fixed
+body: Allow `fabric_workspace` resource to configure `identity` (Workspace
+  Identity) without requiring `capacity_id`.
+time: 2026-04-19T09:51:00.000000000Z
+custom:
+  Issue: "859"

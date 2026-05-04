@@ -66,20 +66,6 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - missing capacity_id if identity enabled is true
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": "test",
-					"identity": map[string]any{
-						"type": "SystemAssigned",
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorAttConfigMissing),
-		},
 		// error - invalid identity type
 		{
 			ResourceName: testResourceItemFQN,
@@ -424,7 +410,6 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"display_name": entityCreateDisplayName,
-					"capacity_id":  capacityID,
 					"identity": map[string]any{
 						"type": "SystemAssigned",
 					},
@@ -433,7 +418,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
 			),
 		},
