@@ -11,6 +11,10 @@ Given a Go SDK contract (DTOs), generate the corresponding Terraform schema attr
 
 - SDK DTO struct fields have been identified (from `#skill:sdk-contract-navigator`)
 - You know the item archetype (basic, definition, properties, etc.)
+- If the issue contains a **🌳 DTO Nesting Depth Map**, use it to determine:
+  - One model struct per tree node that introduces `[]Type` or `*Type`
+  - Each such struct needs its own `set()` method
+  - Which fields use `supertypes.ListNestedObjectValueOf` (nested objects) vs `supertypes.ListValueOf` (scalars) vs `supertypes.SingleNestedObjectValueOf` (optional nested)
 
 ## Step 1 — Classify Each SDK Field
 

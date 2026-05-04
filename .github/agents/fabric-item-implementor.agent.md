@@ -64,6 +64,8 @@ This generates the file structure in `internal/services/<package>/` with `TODO` 
 
 Use **#skill:schema-model-generator** to generate `models.go` — property model structs with `tfsdk` tags and `set()` methods. If the archetype includes config, also generate configuration model structs. Models must be completed **before** schema (schema references model types for nested objects).
 
+If the issue contains a **🌳 DTO Nesting Depth Map**, pass it to the schema-model-generator skill — it determines the number of sub-model structs, supertype field selections, and `set()` method boundaries.
+
 ### Step 3.2 — Generate Schema
 
 Continue with **#skill:schema-model-generator** to generate `schema_resource_<item>.go` and `schema_data_<item>.go`. The skill handles type mappings, `MarkdownDescription`, plan modifiers, and validators.
@@ -126,7 +128,7 @@ Create example HCL files in `examples/`:
 
 1. **`task docs`** — generate documentation from schema and examples
 2. **`task lint`** — run all linters; fix any reported issues
-3. **`task testunit -- <Name>Resource`** and **`task testunit -- <Name>DataSource`** — run unit tests; fix any failures
+3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
 
 ### Step 9 — Quality Verification
 
@@ -208,7 +210,7 @@ For each item in the change list, update models and schema following `schema-mod
 
 1. **`task docs`** — regenerate documentation
 2. **`task lint`** — run all linters; fix any reported issues
-3. **`task testunit -- <Name>Resource`** and **`task testunit -- <Name>DataSource`** — run unit tests; fix any failures
+3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
 
 Verify:
 
@@ -282,7 +284,7 @@ Files modified:
 - internal/provider/provider.go — registered resource and data sources
 
 Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name>Resource / DataSource
+Next: → task testacc -- <Name> ./internal/services/<package>/
 ```
 
 ### For Enhancements
@@ -301,5 +303,5 @@ Files modified:
 - internal/services/<package>/*_test.go — added test assertions
 
 Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name>Resource / DataSource
+Next: → task testacc -- <Name> ./internal/services/<package>/
 ```

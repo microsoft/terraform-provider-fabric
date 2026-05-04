@@ -182,6 +182,36 @@ so I can automate provisioning and maintain consistent <ResourceName> configurat
   - <related resources>
 ```
 
+#### 🌳 DTO Nesting Depth Map (complex resources only)
+
+**Include this section only for `[RS]` and `[DS]` issues where the SDK DTOs have 3+ nesting levels** (slices containing structs with nested slices/pointers to other structs). Skip for flat resources (Workspace, Domain, role assignments, basic Fabric Items without properties).
+
+Render a tree showing the SDK DTO hierarchy with type annotations. This helps implementors plan model structs, `set()` methods, and `SetNull(ctx)` placement.
+
+Format — use indented tree with type annotations at leaf/branch nodes:
+
+```markdown
+<RootDTO>
+├── Field1 (string)
+├── Field2 (enum)
+├── NestedSlice []ChildDTO                    ← Level 1
+│   ├── ScalarField (string)
+│   ├── DeepSlice []GrandchildDTO             ← Level 2
+│   │   ├── LeafSlice []string               ← Level 3
+│   │   └── LeafField (enum)
+│   └── OptionalNested *AnotherDTO            ← Level 2
+│       └── Items []ItemDTO                   ← Level 3
+└── OptionalTop *TopDTO                       ← Level 1
+    └── Children []ChildDTO                   ← Level 2
+```
+
+Rules:
+
+- Annotate slices as `[]Type`, optional nested as `*Type`, scalars as `(type)`
+- Mark nesting levels with `← Level N` comments on lines introducing a new struct depth
+- Only show fields that map to Terraform schema attributes (skip internal/wire-only fields)
+- Maximum depth shown: 5 levels (truncate deeper with `...`)
+
 #### 🚧 Potential Terraform Configuration
 
 Generate sample HCL based on SDK properties discovered:

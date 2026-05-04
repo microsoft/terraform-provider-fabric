@@ -52,8 +52,10 @@ Use `resource.ParallelTest(t, ...)` unless tests have ordered dependencies. Targ
 
 **CRITICAL: NEVER run `go test` directly.** Always use the Task runner — it sets required environment variables (e.g., `FABRIC_PREVIEW=true`) that are missing from raw `go test`. Tests for preview resources WILL FAIL without these variables.
 
-- `task testunit -- <Group>` — run unit tests (e.g., `task testunit -- LakehouseResource`, `task testunit -- SparkEnvSettingsResource_Attributes`)
-- `task testacc -- <Group>` — run acceptance tests (e.g., `task testacc -- LakehouseResource_CRUD`)
+- `task testunit -- <Group> <Pkg>` — run unit tests scoped to a package (e.g., `task testunit -- LakehouseResource ./internal/services/lakehouse/`)
+- `task testacc -- <Group> <Pkg>` — run acceptance tests scoped to a package (e.g., `task testacc -- LakehouseResource_CRUD ./internal/services/lakehouse/`)
+
+Always provide the package path as the second argument for faster execution. Without it, the runner scans all packages (`./...`).
 
 ## Non-Item Testing Specifics
 

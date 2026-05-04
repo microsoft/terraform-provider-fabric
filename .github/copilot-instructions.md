@@ -45,19 +45,19 @@ This repository is **terraform-provider-fabric** — the official [Terraform](ht
 
 ## Common Commands (Task Runner)
 
-| Command                   | Purpose                              |
-| ------------------------- | ------------------------------------ |
-| `task build`              | Build development provider binary    |
-| `task tools`              | Install dev tools (linters, docgen)  |
-| `task testunit -- <Name>` | Run unit tests matching name         |
-| `task testacc -- <Name>`  | Run acceptance tests matching name   |
-| `task lint`               | Run all linters (Go, TF, Markdown)   |
-| `task docs`               | Auto-generate provider documentation |
-| `task deps:up`            | Update Go dependencies               |
+| Command                         | Purpose                                       |
+| ------------------------------- | --------------------------------------------- |
+| `task build`                    | Build development provider binary             |
+| `task tools`                    | Install dev tools (linters, docgen)           |
+| `task testunit -- <Name> <Pkg>` | Run unit tests matching name in package       |
+| `task testacc -- <Name> <Pkg>`  | Run acceptance tests matching name in package |
+| `task lint`                     | Run all linters (Go, TF, Markdown)            |
+| `task docs`                     | Auto-generate provider documentation          |
+| `task deps:up`                  | Update Go dependencies                        |
 
 **NEVER run `go test` directly.** Always use `task testunit` or `task testacc`. The Taskfile sets required environment variables (e.g., `FABRIC_PREVIEW=true`) that are missing from raw `go test`, causing preview resource tests to fail.
 
-Test name designator is the portion after `TestUnit_` or `TestAcc_`. For example, `task testunit -- WorkspaceResource` runs all tests matching `TestUnit_WorkspaceResource*`.
+Test name designator is the portion after `TestUnit_` or `TestAcc_`. The optional second argument scopes to a specific package for faster execution. For example, `task testunit -- WorkspaceResource ./internal/services/workspace/` runs all tests matching `TestUnit_WorkspaceResource*` in that package only. Without the package path, it defaults to `./...` (all packages).
 
 ## Provider Registration
 

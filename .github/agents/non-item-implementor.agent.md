@@ -66,6 +66,12 @@ Create `internal/services/<package>/` following the file structure in `non-item-
 
 ### Step 3.1 — Design Models
 
+If the issue contains a **🌳 DTO Nesting Depth Map**, use it to plan:
+
+- How many model structs are needed (one per node that introduces a new `[]Type` or `*Type`)
+- Which fields need `supertypes.ListNestedObjectValueOf` vs `supertypes.ListValueOf` vs scalar types
+- The request builder `set()` complexity (each nesting level adds a `for` loop or `if != nil` block)
+
 Create model structs following `schema-model-patterns.instructions.md` for type mappings and `set()` patterns. Non-Item models may use **generic type parameters** to share a base model between resource and data source (see `non-item-patterns.instructions.md` § "Model Pattern"). Include:
 
 - **Base model struct** (with generic type params if resource/data source variants differ)
@@ -117,7 +123,7 @@ Create example HCL files in `examples/`:
 
 1. **`task docs`** — generate documentation from schema and examples
 2. **`task lint`** — run all linters; fix any reported issues
-3. **`task testunit -- <Name>Resource`** and **`task testunit -- <Name>DataSource`** — run unit tests; fix any failures
+3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
 
 ### Step 9 — Quality Verification
 
@@ -213,7 +219,7 @@ For each item in the change list, update models and schema following `schema-mod
 
 1. **`task docs`** — regenerate documentation
 2. **`task lint`** — run all linters; fix any reported issues
-3. **`task testunit -- <Name>Resource`** and **`task testunit -- <Name>DataSource`** — run unit tests; fix any failures
+3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
 
 Verify:
 
@@ -293,7 +299,7 @@ Files modified:
 - internal/provider/provider.go — registered resource and data sources
 
 Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name>Resource / DataSource
+Next: → task testacc -- <Name> ./internal/services/<package>/
 ```
 
 ### For Enhancements
@@ -311,5 +317,5 @@ Files modified:
 - internal/services/<package>/*_test.go — added test assertions
 
 Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name>Resource / DataSource
+Next: → task testacc -- <Name> ./internal/services/<package>/
 ```

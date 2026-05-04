@@ -145,6 +145,7 @@ Pass the following inputs to the skill:
 - Whether this is new (`[RS]`/`[DS]`) or increment (`[FEAT]`)
 - **For Fabric Items:** SDK package, import alias, archetype, Properties/CreationPayload DTO fields, enum types, and definition paths. Do **not** pass CRUD method signatures — the archetype already implies the standard method set.
 - **For Non-Item Resources:** Full SDK contract details including CRUD methods and request/response DTOs
+- **DTO nesting depth** — For complex `[RS]`/`[DS]` issues (DTOs with 3+ nesting levels), pass the full DTO hierarchy so the skill can generate the nesting depth map. Skip for flat resources.
 - **Milestone number** (resolved from Step 5, or null if skipped)
 
 Then use the **GitHub MCP server** `create_issue` tool to create the issues:
