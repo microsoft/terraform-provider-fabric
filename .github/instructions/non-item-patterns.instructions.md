@@ -12,42 +12,59 @@ Non-Item resources (~20%) do **not** use the `fabricitem` generic abstraction. T
 
 **Key difference from Fabric Items:** Non-Item resources use a single `schema.go` with `superschema` instead of separate `schema_resource_*.go` / `schema_data_*.go` files. They may split models across `models_resource_<type>.go` and `models_data_<type>.go`.
 
-| File                                 | Purpose                                                                          |
-| ------------------------------------ | -------------------------------------------------------------------------------- |
-| `base.go`                            | `ItemTypeInfo` only (no `FabricItemType` or `itemDefinitionFormats`)             |
-| `schema.go`                          | Shared `superschema` for both resource and data source                           |
-| `resource_<type>.go`                 | Resource struct with `Create`, `Read`, `Update`, `Delete`                        |
-| `data_<type>.go` / `data_<types>.go` | Singular / plural data sources                                                   |
-| `models.go`                          | Shared models; optionally split into `models_resource_*.go` / `models_data_*.go` |
-
-## `base.go` Pattern
-
-Only defines `ItemTypeInfo` (including `IsPreview` and `IsSPNSupported` — values sourced from the GitHub issue) — no `FabricItemType`, `ItemFormatTypeDefault`, or `itemDefinitionFormats`. Optionally add resource-specific constants (e.g. `PossibleInactivityMinutesBeforeSleepValues` in gateway).
-
-Reference: `internal/services/connection/base.go`, `internal/services/gateway/base.go`
-
-## Superschema
-
-Non-Item resources use `superschema` to define a single schema function `itemSchema(ctx, isList)` in `schema.go`. For superschema details (imports, attribute types, consumption pattern), see `schema-model-patterns.instructions.md` § "Non-Item Resources — Superschema".
-
-Reference: `internal/services/connection/schema.go`, `internal/services/gateway/schema.go`
+| File                                 | Purpose                                                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `base.go`                            | `ItemTypeInfo` only (`IsPreview`, `IsSPNSupported` from issue). No `FabricItemType`/`itemDefinitionFormats`. Optionally add resource-specific constants.     |
+| `schema.go`                          | Shared `superschema` — single `itemSchema(ctx, isList)` function for both resource and data source. See `schema-model-patterns.instructions.md` for details. |
+| `resource_<type>.go`                 | Resource struct with `Create`, `Read`, `Update`, `Delete`                                                                                                    |
+| `data_<type>.go` / `data_<types>.go` | Singular / plural data sources                                                                                                                               |
+| `models.go`                          | Shared models; optionally split into `models_resource_*.go` / `models_data_*.go`                                                                             |
 
 ## Resource Implementation
 
 Non-Item resources implement `resource.Resource` directly — **no closures** like Fabric Items.
 
-**Struct:** Fields are `pConfigData *pconfig.ProviderData`, `client *fabcore.<Resource>Client`, `TypeInfo tftypeinfo.TFTypeInfo`.
+```go
+type resource<Type> struct {
+    pConfigData *pconfig.ProviderData
+    client      *fabcore.<Type>Client
+    TypeInfo    tftypeinfo.TFTypeInfo
+}
 
-**Configure:** Extract `pConfigData` from `req.ProviderData`, create SDK client via `fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).New<Resource>Client()`, call `fabricitem.IsPreviewMode(...)`.
+func (r *resource<Type>) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+    pConfigData := pconfig.Configure(req, resp)
+    if resp.Diagnostics.HasError() { return }
+    r.pConfigData = pConfigData
+    r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).New<Type>Client()
+    fabricitem.IsPreviewMode(r.TypeInfo, r.pConfigData, &resp.Diagnostics)
+}
+```
 
-**CRUD pattern** — each method follows these steps:
+**CRUD pattern:**
 
-1. Read plan/state into model struct
-2. Get timeout from `Timeouts`
-3. Build SDK request DTO via request builder's `set()` method
-4. Call SDK client (e.g. `r.client.Create<Resource>(ctx, ...)`)
-5. Map response → model via `model.set(ctx, response)`
-6. Save model to state
+```go
+func (r *resource<Type>) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+    var plan <type>ResourceModel
+    if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() { return }
+
+    timeout, diags := plan.Timeouts.Create(ctx, r.TypeInfo.Timeouts.Create)
+    if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() { return }
+    ctx, cancel := context.WithTimeout(ctx, timeout)
+    defer cancel()
+
+    // Build request (request builder embeds SDK request type)
+    var reqCreate requestCreate<Type>
+    if resp.Diagnostics.Append(reqCreate.set(ctx, plan)...); resp.Diagnostics.HasError() { return }
+
+    // Call SDK — pass the embedded SDK request field
+    respCreate, err := r.client.Create<Type>(ctx, reqCreate.Create<Type>Request, nil)
+    if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() { return }
+
+    // Map response → model
+    if resp.Diagnostics.Append(plan.set(ctx, respCreate.<Type>)...); resp.Diagnostics.HasError() { return }
+    resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+```
 
 **Read not-found:** Use `utils.IsErrNotFound(...)` → `resp.State.RemoveResource(ctx)`.
 
@@ -57,6 +74,23 @@ Reference: `internal/services/connection/resource_connection.go`, `internal/serv
 
 Same struct pattern as resource but implements `datasource.DataSource`. Constructor: `NewDataSource<Type>()`.
 
+**Plural data source paging:**
+
+```go
+func (d *dataSource<Types>) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+    var state <types>Model
+    if resp.Diagnostics.Append(req.Config.Get(ctx, &state)...); resp.Diagnostics.HasError() { return }
+
+    pager := d.client.NewList<Types>Pager(nil)
+    for pager.More() {
+        page, err := pager.NextPage(ctx)
+        if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationList, nil)...); resp.Diagnostics.HasError() { return }
+        // Append page.Value items to state.Values
+    }
+    resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+```
+
 Reference: `internal/services/connection/data_connection.go`, `internal/services/gateway/data_gateway.go`
 
 ## Model Pattern
@@ -65,23 +99,13 @@ Non-Item models may use **generic type parameters** to share a base model betwee
 
 Reference: `internal/services/connection/models.go`
 
-## SDK Client Mapping
-
-| Resource Type    | SDK Client                       |
-| ---------------- | -------------------------------- |
-| Connection       | `fabcore.ConnectionsClient`      |
-| Shortcut         | `fabcore.ShortcutsClient`        |
-| Gateway          | `fabcore.GatewaysClient`         |
-| Workspace        | `fabcore.WorkspacesClient`       |
-| Domain           | `fabcore.DomainsClient`          |
-| Role Assignments | Various `*Client` from `fabcore` |
-
 ## Canonical References
 
-| Resource Type    | Reference                         |
-| ---------------- | --------------------------------- |
-| Connection       | `internal/services/connection/`   |
-| Shortcut         | `internal/services/shortcut/`     |
-| Gateway          | `internal/services/gateway/`      |
-| Workspace        | `internal/services/workspace/`    |
-| Role Assignments | `internal/services/*ra/` packages |
+| Resource Type    | SDK Client                       | Reference                         | Key Pattern                       |
+| ---------------- | -------------------------------- | --------------------------------- | --------------------------------- |
+| Connection       | `fabcore.ConnectionsClient`      | `internal/services/connection/`   | Generic type params, polymorphic  |
+| Shortcut         | `fabcore.ShortcutsClient`        | `internal/services/shortcut/`     | Inline fakes, non-standard paths  |
+| Gateway          | `fabcore.GatewaysClient`         | `internal/services/gateway/`      | Polymorphic, `simpleIDOperations` |
+| Workspace        | `fabcore.WorkspacesClient`       | `internal/services/workspace/`    | Simple CRUD                       |
+| Domain           | `fabcore.DomainsClient`          | `internal/services/domain/`       | Non-workspace-scoped              |
+| Role Assignments | Various `*Client` from `fabcore` | `internal/services/*ra/` packages | Sub-resource, composite ID        |

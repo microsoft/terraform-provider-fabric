@@ -58,27 +58,7 @@ The `itemgen` tool accepts 9 command-line flags. Determine each value from the S
 
 **`-rename-allowed`**: Most items support rename. Set to `false` if the SDK items client lacks an `Update<ItemName>` method.
 
-**`-is-preview`**: Fetch the Create item API docs page and check for the preview note. The URL pattern is:
-
-```
-https://learn.microsoft.com/rest/api/fabric/<itemlowercase>/items/create-<item-kebab-case>
-```
-
-To check, run:
-
-```bash
-curl -sL -H 'User-Agent: Mozilla/5.0' \
-  'https://learn.microsoft.com/en-us/rest/api/fabric/lakehouse/items/create-lakehouse?tabs=HTTP' \
-  | grep -ci 'currently in preview'
-```
-
-If the output is `0`, the item is NOT in preview (`-is-preview=false`). If greater than `0`, the item IS in preview (`-is-preview=true`).
-
-The preview note appears in the HTML as:
-
-```html
-<p>{ItemType} item is currently in Preview (<a href="...">learn more</a>).</p>
-```
+**`-is-preview`**: Fetch the Create API docs page (`https://learn.microsoft.com/rest/api/fabric/<item>/items/create-<item-kebab-case>`) and check for "currently in Preview" text. Set `true` if found.
 
 **`-is-spn-supported`**: Check if the API documentation mentions service principal support. Also check if the existing `base.go` similar items use `IsSPNSupported: true`.
 

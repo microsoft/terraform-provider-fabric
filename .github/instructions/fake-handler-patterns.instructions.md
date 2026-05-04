@@ -6,38 +6,27 @@ applyTo: "internal/testhelp/fakes/**"
 
 Fake handlers provide mock SDK servers for unit tests. They live in `internal/testhelp/fakes/`.
 
-## Structure
-
-Each fake handler file (`fabric_<type>.go`, package `fakes`) contains:
-
-1. **Operations struct** (`operations<Type>`) — implements CRUD interfaces
-2. **Configure function** (`configure<Type>`) — wires operations to the fake server factory
-3. **Random entity generators** — `NewRandom<Type>()`, `NewRandom<Type>WithWorkspace(workspaceID)`, etc.
-
 ## Operations Struct
 
 Implements typed handler interfaces. Key methods:
 
-| Method                                    | Purpose                                                       |
-| ----------------------------------------- | ------------------------------------------------------------- |
-| `CreateWithParentID(parentID, data)`      | Create entity under a parent (items + parent-ID resources)    |
-| `Create(data)`                            | Create entity (non-parent resources use `simpleIDOperations`) |
-| `Filter(entities, parentID)`              | Filter by parent workspace ID                                 |
-| `GetID(entity)`                           | Generate composite ID                                         |
-| `TransformCreate/Get/List/Update(entity)` | Wrap in SDK response types                                    |
-| `Update(base, data)`                      | Apply update request to existing entity                       |
-| `Validate(newEntity, existing)`           | Check duplicates, return conflict errors                      |
-
-For items with definitions, also implement `CreateDefinition`, `TransformDefinition`, `UpdateDefinition`.
+| Method                                    | Purpose                                  | Required for                   |
+| ----------------------------------------- | ---------------------------------------- | ------------------------------ |
+| `CreateWithParentID(parentID, data)`      | Create entity under a parent             | `parentIDOperations`           |
+| `Create(data)`                            | Create entity (no parent)                | `simpleIDOperations`           |
+| `Filter(entities, parentID)`              | Filter by parent workspace ID            | `parentIDOperations`           |
+| `GetID(entity)`                           | Generate composite ID                    | All                            |
+| `TransformCreate/Get/List/Update(entity)` | Wrap in SDK response types               | All                            |
+| `Update(base, data)`                      | Apply update request to existing entity  | All (except NoUpdate variants) |
+| `Validate(newEntity, existing)`           | Check duplicates, return conflict errors | All                            |
+| `CreateDefinition`/`UpdateDefinition`     | Definition CRUD                          | `definitionOperations`         |
+| `TransformDefinition`                     | Wrap definition in response type         | `definitionOperations`         |
 
 ### Interface Hierarchy
 
-All operations compose from interfaces in `fake_interfaces.go` → `fake_operations.go`:
-
-- **`simpleIDOperations`** = `operationsBase` + `creator` — for resources with a simple ID (workspace, gateway)
-- **`parentIDOperations`** = `operationsBase` + `creatorWithParentID` + `parentFilter` — for resources under a parent (Fabric Items, folders)
+- **`simpleIDOperations`** = `operationsBase` + `creator` — simple ID resources (workspace, gateway)
+- **`parentIDOperations`** = `operationsBase` + `creatorWithParentID` + `parentFilter` — workspace-scoped (Fabric Items, folders)
 - **`definitionOperations`** = `definitionCreator` + `definitionUpdater` + `definitionTransformer`
-- **`definitionOperationsNonLROCreation`** = `definitionUpdater` + `definitionTransformer` (no create)
 
 ## Configure Function
 
@@ -56,13 +45,8 @@ Choose the right wiring function based on your resource's API shape:
 | `configureEntityWithParentID`              | LRO         | ✓          | ✓             | Standard Fabric Items (lakehouse, notebook)             |
 | `configureEntityWithParentIDNoLRO`         | Sync        | ✓          | ✓             | Parent-ID resources with sync create (folder)           |
 | `configureEntityWithParentIDNoLRONoUpdate` | Sync        | ✗          | ✓             | Parent-ID resources with no update (create+delete only) |
-
-For definitions, call **after** the main configure:
-
-| Function                             | Create Type | Use When                          |
-| ------------------------------------ | ----------- | --------------------------------- |
-| `configureDefinitions`               | LRO         | Items with definitions (standard) |
-| `configureDefinitionsNonLROCreation` | Sync        | Items with non-LRO creation       |
+| `configureDefinitions`                     | LRO         | —          | —             | Items with definitions (call **after** main configure)  |
+| `configureDefinitionsNonLROCreation`       | Sync        | —          | —             | Items with non-LRO definition creation                  |
 
 ## Sub-Operations
 

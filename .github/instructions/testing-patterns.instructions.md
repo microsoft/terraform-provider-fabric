@@ -59,11 +59,21 @@ Always provide the package path as the second argument for faster execution. Wit
 
 ## Non-Item Testing Specifics
 
-Non-Item resources use **inline fakes** defined in a `fake_test.go` file inside the service package (not centralized in `internal/testhelp/fakes/`).
+### Fake Pattern Decision Tree
+
+Non-Item resources use **either** centralized fakes or inline fakes depending on their API shape:
+
+| Condition                                                                              | Pattern                                                          | Location                          | Example                                   |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------- | ----------------------------------------- |
+| API uses standard `entityID` or `parentID/entityID` paths                              | **Centralized** — `simpleIDOperations` or `parentIDOperations`   | `internal/testhelp/fakes/`        | workspace, domain, folder                 |
+| Resource is polymorphic with multiple subtypes sharing a client                        | **Centralized** — shared configure + per-subtype wrappers        | `internal/testhelp/fakes/`        | gateway, connection                       |
+| API has 3+ path parameters or non-standard composite IDs that don't fit `typedHandler` | **Inline** — package-level map store + direct handler assignment | `fake_test.go` in service package | shortcut (`workspaceID/itemID/path/name`) |
+
+**Default:** Use centralized fakes unless the SDK method signatures don't fit the `typedHandler` interface (i.e., more than 2 path segments or non-standard ID composition).
 
 ### Inline Fake Pattern (`fake_test.go`)
 
-Each Non-Item service defines its own fake functions directly in the test package:
+For resources that require inline fakes, each service defines its own fake functions directly in the test package:
 
 ```go
 // fake_test.go — package <service>_test
@@ -85,7 +95,7 @@ func NewRandom<Type>() fabcore.<Type> {
 
 ### Inline Fake Wiring
 
-Non-Item fakes are always **inline** (`fake_test.go` in the service package), never centralized. Wire them directly to the SDK fake server. For resources needing state across operations, use a map store:
+For resources using inline fakes (per the decision tree above), wire them directly to the SDK fake server. For resources needing state across operations, use a map store:
 
 ```go
 var fakeStore = map[string]fabcore.<Type>{}
