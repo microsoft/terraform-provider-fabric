@@ -348,7 +348,8 @@ function Remove-WorkspaceRSItems {
     }
 
     # Sort folders by depth (deepest first) to ensure child folders are deleted before parents
-    $foldersToDelete = $foldersWithDepth | Sort-Object -Property Depth -Descending
+    # Exclude known bugged folder that cannot be deleted due to backend issues
+    $foldersToDelete = $foldersWithDepth | Where-Object { $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' } | Sort-Object -Property Depth -Descending
   }
   else {
     $foldersToDelete = @()
@@ -439,11 +440,11 @@ function Remove-WorkspaceRSItems {
           else {
             Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
           }
-          $deletedCount++
+          $deletedItemsCount++
         }
         else {
           Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
-          $failedCount++
+          $failedItemsCount++
         }
       }
       catch {
@@ -451,11 +452,11 @@ function Remove-WorkspaceRSItems {
         $statusCode = $_.Exception.Response.StatusCode.value__
         if ($statusCode -eq 404) {
           Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
-          $deletedCount++
+          $deletedItemsCount++
         }
         else {
           Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-          $failedCount++
+          $failedItemsCount++
         }
       }
 
