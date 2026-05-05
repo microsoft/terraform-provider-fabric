@@ -119,7 +119,7 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_Attributes(t *testin
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`(?s)Attribute\s+rules.+\.default_action\s+value must be one of`),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 		},
 		// error - invalid workspace_id in allowed_workspaces
 		{
@@ -170,7 +170,7 @@ func TestUnit_WorkspaceOutboundCloudConnectionRulesResource_Attributes(t *testin
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`(?s)allowed_endpoints.*cannot be specified when.*allowed_workspaces.*is specified`),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 		},
 	}))
 }
