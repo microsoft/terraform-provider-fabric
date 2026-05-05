@@ -125,13 +125,17 @@ func TestUnit_SnowflakeDatabaseResource_ImportState(t *testing.T) {
 	fakes.FakeServer.Upsert(entity)
 	fakes.FakeServer.Upsert(fakes.NewRandomSnowflakeDatabaseWithWorkspace(workspaceID))
 
-	testCase := at.CompileConfig(
-		testResourceItemHeader,
-		map[string]any{
-			"workspace_id": *entity.WorkspaceID,
-			"display_name": *entity.DisplayName,
-		},
-	)
+	testCase := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": *entity.WorkspaceID,
+				"display_name": *entity.DisplayName,
+				"format":       "Default",
+				"definition":   testHelperDefinition,
+			},
+		))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -199,25 +203,33 @@ func TestUnit_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 		// error - create - existing entity
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityExist.WorkspaceID,
-					"display_name": *entityExist.DisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityBefore.DisplayName,
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -229,14 +241,18 @@ func TestUnit_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": *entityBefore.WorkspaceID,
-					"display_name": *entityBefore.DisplayName,
-					"description":  *entityBefore.Description,
-				},
-			),
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"description":  *entityBefore.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+					},
+				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
@@ -284,22 +300,17 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
-
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL1,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -307,7 +318,6 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
@@ -316,15 +326,12 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL1,
-				folderResourceHCL2,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
@@ -332,7 +339,6 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
