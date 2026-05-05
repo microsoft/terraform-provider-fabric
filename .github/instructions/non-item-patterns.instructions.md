@@ -101,11 +101,17 @@ Reference: `internal/services/connection/models.go`
 
 ## Canonical References
 
-| Resource Type    | SDK Client                       | Reference                         | Key Pattern                       |
-| ---------------- | -------------------------------- | --------------------------------- | --------------------------------- |
-| Connection       | `fabcore.ConnectionsClient`      | `internal/services/connection/`   | Generic type params, polymorphic  |
-| Shortcut         | `fabcore.ShortcutsClient`        | `internal/services/shortcut/`     | Inline fakes, non-standard paths  |
-| Gateway          | `fabcore.GatewaysClient`         | `internal/services/gateway/`      | Polymorphic, `simpleIDOperations` |
-| Workspace        | `fabcore.WorkspacesClient`       | `internal/services/workspace/`    | Simple CRUD                       |
-| Domain           | `fabcore.DomainsClient`          | `internal/services/domain/`       | Non-workspace-scoped              |
-| Role Assignments | Various `*Client` from `fabcore` | `internal/services/*ra/` packages | Sub-resource, composite ID        |
+Each Non-Item resource belongs to an implementation pattern (A–H). Use the pattern to select the best canonical reference. Full pattern classification is in `non-item-implementor.agent.md` § "Step 0".
+
+| Pattern | Resource Type        | SDK Client                       | Reference                            | Key Pattern                             |
+| :-----: | -------------------- | -------------------------------- | ------------------------------------ | --------------------------------------- |
+|  **A**  | Workspace Policies   | `fabcore.WorkspacesClient`       | `internal/services/workspacencp/`    | No ID, delete=reset, singleton          |
+|  **B**  | Spark Settings       | `fabspark.*`                     | `internal/services/sparkwssettings/` | ConfigValidators, dedicated client      |
+|  **C**  | Role Assignments     | Various `*Client`                | `internal/services/workspacera/`     | Composite ID, parent-scoped             |
+|  **D**  | Batch Assignments    | `fabadmin.DomainsClient`         | `internal/services/domainra/`        | Immutable set, no update                |
+|  **E**  | Standalone Entities  | Various dedicated clients        | `internal/services/workspace/`       | Standard CRUD, ImportState              |
+|  **E**  | Polymorphic Entities | `fabcore.GatewaysClient`         | `internal/services/gateway/`         | Type switches, conditional attrs        |
+|  **E**  | Tenant Entities      | `fabadmin.DomainsClient`         | `internal/services/domain/`          | Non-workspace-scoped, Admin API         |
+|  **F**  | Item-Scoped          | `fabcore.OneLakeShortcutsClient` | `internal/services/shortcut/`        | Inline fakes, 3+ path params            |
+|  **G**  | Tenant Settings      | `fabadmin.TenantsClient`         | `internal/services/tenantsetting/`   | Name-based identity, custom delete      |
+|  **H**  | Connection           | `fabcore.ConnectionsClient`      | `internal/services/connection/`      | Generic type params, write-only secrets |

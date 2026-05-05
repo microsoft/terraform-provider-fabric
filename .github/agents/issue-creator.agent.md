@@ -94,15 +94,9 @@ These use the generic `fabricitem` abstraction with per-item SDK packages. Deter
 
 #### Non-Item Resources (Category B)
 
-These use bespoke CRUD implementations with `fabcore.*Client`. They do NOT have archetypes and do NOT use `itemgen`. Note the SDK client type and reference similar existing implementations:
+These use bespoke CRUD implementations with `fabcore.*Client`. They do NOT have archetypes and do NOT use `itemgen`. Classify into an **implementation pattern (A–H)** using the pattern classification table and decision tree defined in **#skill:issue-composer** § "Resource Category Identification".
 
-| Resource Type    | SDK Client                  | Reference                         |
-| ---------------- | --------------------------- | --------------------------------- |
-| Connection       | `fabcore.ConnectionsClient` | `internal/services/connection/`   |
-| Shortcut         | `fabcore.ShortcutsClient`   | `internal/services/shortcut/`     |
-| Gateway          | `fabcore.GatewaysClient`    | `internal/services/gateway/`      |
-| Workspace        | `fabcore.WorkspacesClient`  | `internal/services/workspace/`    |
-| Role assignments | Various `*Client`           | `internal/services/*ra/` packages |
+Pass the classified pattern letter to the issue-composer skill so it is included in the issue's "Details / References" section. The Non-Item Implementor agent uses this pattern to immediately route to the correct canonical reference.
 
 #### Increments/Enhancements
 

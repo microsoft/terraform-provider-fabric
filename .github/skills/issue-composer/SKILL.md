@@ -72,15 +72,48 @@ From the user's description and SDK analysis, gather:
 
 **Fabric Items** — Standard items managed in workspaces (Lakehouse, Eventhouse, SQL Database, Data Pipeline, Notebook, etc.). These use the `fabricitem` generic abstraction and have `ItemType` constants in the core SDK.
 
-**Non-Item Resources** — Specialized resources with bespoke CRUD logic:
+**Non-Item Resources** — Specialized resources with bespoke CRUD logic. Each belongs to an **implementation pattern (A–H)** that determines canonical reference, lifecycle semantics, and test structure:
 
-- **Connection** — `fabric_connection` (uses `fabcore.ConnectionsClient`)
-- **Shortcut** — `fabric_shortcut` (uses `fabcore.ShortcutsClient`)
-- **Gateway** — `fabric_gateway` (uses `fabcore.GatewaysClient`)
-- **Workspace** — `fabric_workspace` (uses `fabcore.WorkspacesClient`)
-- **Domain** — `fabric_domain` (uses admin APIs)
-- **Role Assignments** — `fabric_workspace_role_assignment`, `fabric_connection_role_assignment`, etc.
-- **Spark settings** — `fabric_spark_custom_pool`, `fabric_spark_environment_settings`, etc.
+| Pattern | Characteristic                                       | SDK Client                         | Canonical Reference                    |
+| :-----: | ---------------------------------------------------- | ---------------------------------- | -------------------------------------- |
+|  **A**  | Workspace policy singleton (no ID, delete=reset)     | `fabcore.WorkspacesClient`         | `internal/services/workspacencp/`      |
+|  **B**  | Workspace settings (dedicated client, validators)    | `fabspark.*`                       | `internal/services/sparkwssettings/`   |
+|  **C**  | Role assignment (parent+principal+role, ImportState) | Various `*Client`                  | `internal/services/workspacera/`       |
+|  **D**  | Batch assignment (immutable set, no update)          | `fabadmin.DomainsClient`           | `internal/services/domainra/`          |
+|  **E**  | Standalone entity, standard CRUD                     | Various dedicated clients          | `internal/services/workspace/`         |
+|  **E**  | Standalone entity, polymorphic types                 | `fabcore.GatewaysClient`           | `internal/services/gateway/`           |
+|  **E**  | Standalone entity, tenant-scoped                     | `fabadmin.DomainsClient`           | `internal/services/domain/`            |
+|  **E**  | Standalone entity, connect/disconnect lifecycle      | `fabcore.GitClient`                | `internal/services/workspacegit/`      |
+|  **F**  | Item-scoped (workspace_id+item_id, 3+ path params)   | `fabcore.OneLakeShortcutsClient`   | `internal/services/shortcut/`          |
+|  **F**  | Item-scoped (ModifyPlan, conditional validation)     | `fabcore.JobSchedulerClient`       | `internal/services/itemjobscheduler/`  |
+|  **F**  | Item-scoped (simple CRUD, no Update)                 | `fabcore.ExternalDataSharesClient` | `internal/services/externaldatashare/` |
+|  **G**  | Tenant-level, custom identity/delete semantics       | `fabadmin.TenantsClient`           | `internal/services/tenantsetting/`     |
+|  **H**  | Complex: dual clients, write-only secrets, KV refs   | `fabcore.ConnectionsClient`        | `internal/services/connection/`        |
+
+**Pattern classification decision tree:**
+
+```
+Is it a workspace policy/settings with no real entity ID?
+├── YES → Uses WorkspacesClient sub-endpoint, delete=reset? → Pattern A
+│         Uses dedicated Spark/Environment client, ConfigValidators? → Pattern B
+│
+├── NO → Is it an assignment of principals/items to a parent?
+│         ├── Single-item assignment with updatable role, ImportState? → Pattern C
+│         └── Batch set assignment, fully immutable, no Import? → Pattern D
+│
+├── NO → Is it scoped to a specific item (workspace_id + item_id)?
+│         └── YES → Pattern F
+│
+├── NO → Is it a tenant-level admin resource with non-UUID identity or custom delete?
+│         └── YES → Pattern G
+│
+├── NO → Does it have write-only secrets, dual clients, KV references?
+│         └── YES → Pattern H
+│
+└── NO → Standalone entity with dedicated client → Pattern E
+```
+
+When composing the issue, include the pattern letter in the "Details / References" section so downstream agents can immediately route to the correct implementation reference.
 
 ### Item Definition Paths
 
@@ -175,12 +208,15 @@ so I can automate provisioning and maintain consistent <ResourceName> configurat
   - https://learn.microsoft.com/rest/api/fabric/core/<service>/list-<resources>
 - SDK Client: `fabcore.<Resource>Client`
 - Resource Category: Non-Item (bespoke CRUD)
+- Implementation Pattern: <A|B|C|D|E|F|G|H> — <pattern description>
 - Estimated complexity/effort: <easy|moderate|hard>
 - Preview: <yes|no>
 - SPN Supported: <yes|no>
 - Related resources/data-sources:
   - <related resources>
 ```
+
+> **Pattern key:** A=Workspace policy singleton, B=Workspace settings (Spark), C=Role assignment, D=Batch assignment, E=Standalone entity, F=Item-scoped, G=Tenant-level custom, H=Connection (complex credentials)
 
 #### 🌳 DTO Nesting Depth Map (complex resources only)
 

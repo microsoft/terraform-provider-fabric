@@ -39,11 +39,25 @@ Read the issue and determine:
 1. **Category confirmation** — Verify this is a Non-Item resource (not a Fabric Item). If it's a Fabric Item, stop and tell the user to use the **Fabric Item Implementor** agent.
 2. **Scope** — Is this a **new resource** (`[RS]`/`[DS]`/`[EPH]` prefix) or an **enhancement** (`[FEAT]` prefix)?
 3. **Preview and SPN status** — Extract the `Preview` and `SPN Supported` values from the issue's "Details / References" section. These map directly to `IsPreview` and `IsSPNSupported` in `base.go`'s `ItemTypeInfo` struct.
+4. **Implementation pattern** — Extract the pattern letter (A–H) from the issue's "Details / References" section. If not present, classify using the decision tree in **#skill:issue-composer** § "Resource Category Identification". The pattern determines the canonical reference, lifecycle semantics, and test structure.
+
+### Pattern Summary
+
+| Pattern | Canonical Reference                                    | Key Traits                                             | ImportState  | Tests                            |
+| :-----: | ------------------------------------------------------ | ------------------------------------------------------ | :----------: | -------------------------------- |
+|  **A**  | `workspacencp/`, `workspaceocr/`                       | Workspace policy singleton, no ID, delete=reset        |      ❌      | No import tests                  |
+|  **B**  | `sparkwssettings/`, `sparkenvsettings/`                | Workspace settings, dedicated client, ConfigValidators |      ❌      | No import tests                  |
+|  **C**  | `workspacera/`, `gatewayra/`                           | Role assignment: parent+principal+role, composite ID   |      ✅      | Import tests with composite ID   |
+|  **D**  | `domainra/`, `domainwa/`                               | Batch assignment, immutable set, no update             |      ❌      | No import/update tests           |
+|  **E**  | `workspace/`, `gateway/`, `domain/`                    | Standalone entity, full CRUD, dedicated client         | ✅ (usually) | Full CRUD + import tests         |
+|  **F**  | `shortcut/`, `itemjobscheduler/`, `externaldatashare/` | Item-scoped, workspace_id+item_id, 3+ path params      |      ✅      | Import with composite ID         |
+|  **G**  | `tenantsetting/`, `tags/`                              | Tenant-level, admin API, non-standard identity         |      ❌      | No import tests                  |
+|  **H**  | `connection/`                                          | Dual client, write-only secrets, KV refs, ModifyPlan   |      ❌      | No import; secret rotation tests |
 
 ```
 Step 0: Determine Scope
     │
-    ├── [RS] / [DS] / [EPH] ──► New Resource Workflow (Steps 1–9)
+    ├── [RS] / [DS] / [EPH] ──► Classify Pattern (A–H) ──► New Resource Workflow (Steps 1–10)
     │
     └── [FEAT] ──► Enhancement Workflow (Steps E1–E4)
 ```
@@ -62,16 +76,22 @@ Use **#skill:sdk-contract-navigator** to get the full SDK contract (client type,
 
 ### Step 2 — Create File Structure
 
-Create `internal/services/<package>/` following the file structure in `non-item-patterns.instructions.md`. Choose the canonical reference using this decision guide:
+Create `internal/services/<package>/` following the file structure in `non-item-patterns.instructions.md`. Use the **pattern classified in Step 0** to select the canonical reference:
 
-| Your resource characteristic                       | Follow                           | Why                             |
-| -------------------------------------------------- | -------------------------------- | ------------------------------- |
-| Simple workspace-scoped CRUD, no polymorphism      | `internal/services/workspace/`   | Simplest pattern                |
-| Polymorphic types / subtypes with classification   | `internal/services/gateway/`     | Type switches, shared configure |
-| Generic type params for resource/DS model variants | `internal/services/connection/`  | Most complex model pattern      |
-| Sub-resource under a parent (role assignments)     | `internal/services/workspacera/` | Composite ID, parent-scoped     |
-| Non-standard path params (3+)                      | `internal/services/shortcut/`    | Inline fakes, custom ID         |
-| Not workspace-scoped (tenant-level)                | `internal/services/domain/`      | No workspace_id in schema       |
+| Pattern | Your resource characteristic                       | Follow                                | Why                                          |
+| :-----: | -------------------------------------------------- | ------------------------------------- | -------------------------------------------- |
+|  **A**  | Workspace policy singleton (no ID, delete=reset)   | `internal/services/workspacencp/`     | No ID, WorkspacesClient, reset-on-delete     |
+|  **B**  | Workspace settings (dedicated client, validators)  | `internal/services/sparkwssettings/`  | ConfigValidators, dedicated Spark client     |
+|  **C**  | Sub-resource under a parent (role assignments)     | `internal/services/workspacera/`      | Composite ID, parent-scoped, role updatable  |
+|  **D**  | Batch assignment (immutable set, no update)        | `internal/services/domainra/`         | SetNestedAttribute, all forces replace       |
+|  **E**  | Simple workspace-scoped CRUD, no polymorphism      | `internal/services/workspace/`        | Simplest standalone pattern                  |
+|  **E**  | Polymorphic types / subtypes with classification   | `internal/services/gateway/`          | Type switches, conditional attributes        |
+|  **E**  | Non-workspace-scoped, standard CRUD (tenant-level) | `internal/services/domain/`           | No workspace_id, Admin API                   |
+|  **E**  | Workspace-scoped with connect/disconnect lifecycle | `internal/services/workspacegit/`     | Non-standard create/delete semantics         |
+|  **F**  | Item-scoped, non-standard path params (3+)         | `internal/services/shortcut/`         | Inline fakes, custom composite ID            |
+|  **F**  | Item-scoped with ModifyPlan/conditional validation | `internal/services/itemjobscheduler/` | Schedule-type-conditional fields             |
+|  **G**  | Tenant-level with custom identity or delete        | `internal/services/tenantsetting/`    | Name-based identity, delete_behaviour        |
+|  **H**  | Dual clients, write-only secrets, KV references    | `internal/services/connection/`       | Generic type params, polymorphic credentials |
 
 ### Step 3.1 — Design Models
 
@@ -252,21 +272,6 @@ Verify:
 - [ ] No existing tests broken
 - [ ] `task docs`, `task lint`, and unit tests pass
 - [ ] Examples updated if new user-facing HCL attributes were added
-
----
-
-## Canonical References - Non-Item Resources
-
-| Resource Type    | SDK Client                  | Reference Implementation          | Key Pattern                                                     |
-| ---------------- | --------------------------- | --------------------------------- | --------------------------------------------------------------- |
-| Connection       | `fabcore.ConnectionsClient` | `internal/services/connection/`   | Generic type params, polymorphic DTOs, type switches in `set()` |
-| Shortcut         | `fabcore.ShortcutsClient`   | `internal/services/shortcut/`     | Inline fakes (`fake_test.go`), unique API patterns              |
-| Gateway          | `fabcore.GatewaysClient`    | `internal/services/gateway/`      | Polymorphic types, `simpleIDOperations` fakes                   |
-| Workspace        | `fabcore.WorkspacesClient`  | `internal/services/workspace/`    | `simpleIDOperations` fakes, simple CRUD                         |
-| Domain           | `fabcore.DomainsClient`     | `internal/services/domain/`       | Non-workspace-scoped resource                                   |
-| Role Assignments | Various `*Client`           | `internal/services/*ra/` packages | Sub-resource pattern                                            |
-
-> Fake pattern decision: see `fake-handler-patterns.instructions.md` and `testing-patterns.instructions.md` for detailed patterns.
 
 ---
 
