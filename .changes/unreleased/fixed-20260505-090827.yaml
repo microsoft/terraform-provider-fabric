@@ -1,5 +1,5 @@
 kind: fixed
-body: Fixed `fabric_workspace_git` resource producing unexpected plan diffs due to Git Connection API returning lowercased `organization_name`, `project_name`, and `repository_name` values
+body: Fixed `fabric_workspace_git` resource reporting unexpected plan diffs for `organization_name`, `project_name`, and `repository_name` attributes
 time: 2026-05-05T09:08:27.010Z
 custom:
-    Issue: 0
+    Issue: 963

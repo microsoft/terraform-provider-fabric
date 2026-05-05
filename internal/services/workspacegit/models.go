@@ -351,13 +351,13 @@ func (to *gitCredentialsModel) set(from fabcore.GitCredentialsConfigurationRespo
 }
 
 type gitProviderDetailsModel struct {
-	GitProviderType  types.String `tfsdk:"git_provider_type"`
+	GitProviderType  types.String                      `tfsdk:"git_provider_type"`
 	OrganizationName customtypes.CaseInsensitiveString `tfsdk:"organization_name"`
 	ProjectName      customtypes.CaseInsensitiveString `tfsdk:"project_name"`
-	OwnerName        types.String                       `tfsdk:"owner_name"`
+	OwnerName        types.String                      `tfsdk:"owner_name"`
 	RepositoryName   customtypes.CaseInsensitiveString `tfsdk:"repository_name"`
-	BranchName       types.String `tfsdk:"branch_name"`
-	DirectoryName    types.String `tfsdk:"directory_name"`
+	BranchName       types.String                      `tfsdk:"branch_name"`
+	DirectoryName    types.String                      `tfsdk:"directory_name"`
 }
 
 func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassification) diag.Diagnostics {
