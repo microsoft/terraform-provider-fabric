@@ -72,9 +72,6 @@ func itemSchema() superschema.Schema {
 						[]attr.Value{},
 					)),
 				},
-				DataSource: &schemaD.SetNestedAttribute{
-					Computed: true,
-				},
 				Attributes: superschema.Attributes{
 					"id": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
