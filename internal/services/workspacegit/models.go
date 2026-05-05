@@ -352,10 +352,10 @@ func (to *gitCredentialsModel) set(from fabcore.GitCredentialsConfigurationRespo
 
 type gitProviderDetailsModel struct {
 	GitProviderType  types.String `tfsdk:"git_provider_type"`
-	OrganizationName types.String `tfsdk:"organization_name"`
-	ProjectName      types.String `tfsdk:"project_name"`
-	OwnerName        types.String `tfsdk:"owner_name"`
-	RepositoryName   types.String `tfsdk:"repository_name"`
+	OrganizationName customtypes.CaseInsensitiveString `tfsdk:"organization_name"`
+	ProjectName      customtypes.CaseInsensitiveString `tfsdk:"project_name"`
+	OwnerName        types.String                       `tfsdk:"owner_name"`
+	RepositoryName   customtypes.CaseInsensitiveString `tfsdk:"repository_name"`
 	BranchName       types.String `tfsdk:"branch_name"`
 	DirectoryName    types.String `tfsdk:"directory_name"`
 }
@@ -367,9 +367,9 @@ func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassifica
 		to.OwnerName = types.StringNull()
 
 		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
-		to.OrganizationName = types.StringPointerValue(gitProviderDetails.OrganizationName)
-		to.ProjectName = types.StringPointerValue(gitProviderDetails.ProjectName)
-		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
+		to.OrganizationName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.OrganizationName)
+		to.ProjectName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.ProjectName)
+		to.RepositoryName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.RepositoryName)
 		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
 		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
 
@@ -377,12 +377,12 @@ func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassifica
 
 	case *fabcore.GitHubDetails:
 		// GitHub does not have an organization name or project name
-		to.OrganizationName = types.StringNull()
-		to.ProjectName = types.StringNull()
+		to.OrganizationName = customtypes.NewCaseInsensitiveStringNull()
+		to.ProjectName = customtypes.NewCaseInsensitiveStringNull()
 
 		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
 		to.OwnerName = types.StringPointerValue(gitProviderDetails.OwnerName)
-		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
+		to.RepositoryName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.RepositoryName)
 		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
 		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
 

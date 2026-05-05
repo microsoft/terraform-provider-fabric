@@ -196,9 +196,10 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							Computed: true,
 						},
 					},
-					"organization_name": superschema.StringAttribute{
+					"organization_name": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The Azure DevOps organization name.",
+							CustomType:          customtypes.CaseInsensitiveStringType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
@@ -219,9 +220,10 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							Computed: true,
 						},
 					},
-					"project_name": superschema.StringAttribute{
+					"project_name": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The Azure DevOps project name.",
+							CustomType:          customtypes.CaseInsensitiveStringType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Computed: true,
@@ -264,9 +266,10 @@ func itemSchema() superschema.Schema { //nolint:maintidx
 							Computed: true,
 						},
 					},
-					"repository_name": superschema.StringAttribute{
+					"repository_name": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The repository name.",
+							CustomType:          customtypes.CaseInsensitiveStringType{},
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
