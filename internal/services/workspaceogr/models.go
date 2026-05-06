@@ -17,9 +17,9 @@ import (
 )
 
 type baseWorkspaceOutboundGatewayRulesModel struct {
-	WorkspaceID     customtypes.UUID                                                   `tfsdk:"workspace_id"`
-	AllowedGateways supertypes.ListNestedObjectValueOf[gatewayAccessRuleMetadataModel] `tfsdk:"allowed_gateways"`
-	DefaultAction   types.String                                                       `tfsdk:"default_action"`
+	WorkspaceID     customtypes.UUID                                                  `tfsdk:"workspace_id"`
+	AllowedGateways supertypes.SetNestedObjectValueOf[gatewayAccessRuleMetadataModel] `tfsdk:"allowed_gateways"`
+	DefaultAction   types.String                                                      `tfsdk:"default_action"`
 }
 
 type gatewayAccessRuleMetadataModel struct {

@@ -4,14 +4,12 @@
 package workspaceocr
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -74,27 +72,27 @@ func itemSchema() superschema.Schema {
 	}
 }
 
-func rulesAttribute() superschema.SuperListNestedAttributeOf[rulesModel] {
-	return superschema.SuperListNestedAttributeOf[rulesModel]{
-		Common: &schemaR.ListNestedAttribute{
-			MarkdownDescription: "A list of rules that define outbound access behavior for specific cloud connection types. Each rule may include endpoint-based or workspace-based restrictions depending on supported connection types.",
+func rulesAttribute() superschema.SuperSetNestedAttributeOf[rulesModel] {
+	return superschema.SuperSetNestedAttributeOf[rulesModel]{
+		Common: &schemaR.SetNestedAttribute{
+			MarkdownDescription: "A set of rules that define outbound access behavior for specific cloud connection types. Each rule may include endpoint-based or workspace-based restrictions depending on supported connection types.",
 			Computed:            true,
 		},
-		Resource: &schemaR.ListNestedAttribute{
+		Resource: &schemaR.SetNestedAttribute{
 			Optional: true,
-			Default: listdefault.StaticValue(types.ListValueMust(
+			Default: setdefault.StaticValue(types.SetValueMust(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"connection_type": customtypes.CaseInsensitiveStringType{},
 						"default_action":  types.StringType,
-						"allowed_endpoints": types.ListType{
+						"allowed_endpoints": types.SetType{
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 									"hostname_pattern": types.StringType,
 								},
 							},
 						},
-						"allowed_workspaces": types.ListType{
+						"allowed_workspaces": types.SetType{
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 									"workspace_id": customtypes.UUIDType{},
@@ -139,18 +137,15 @@ func rulesAttribute() superschema.SuperListNestedAttributeOf[rulesModel] {
 	}
 }
 
-func allowedEndpointsAttribute() superschema.SuperListNestedAttributeOf[endpointModel] {
-	return superschema.SuperListNestedAttributeOf[endpointModel]{
-		Common: &schemaR.ListNestedAttribute{
-			MarkdownDescription: "Defines a list of explicitly permitted external endpoints for the connectionType. Each entry in the array represents a hostname pattern that is allowed for outbound communication from the workspace. This field is applicable only to connection types that support endpoint-based filtering (e.g., SQL, MySQL, Web, etc.). If defaultAction is set to \"Deny\" for the connection type, only the endpoints listed here will be allowed; all others will be blocked.",
+func allowedEndpointsAttribute() superschema.SuperSetNestedAttributeOf[endpointModel] {
+	return superschema.SuperSetNestedAttributeOf[endpointModel]{
+		Common: &schemaR.SetNestedAttribute{
+			MarkdownDescription: "Defines a set of explicitly permitted external endpoints for the connectionType. Each entry in the array represents a hostname pattern that is allowed for outbound communication from the workspace. This field is applicable only to connection types that support endpoint-based filtering (e.g., SQL, MySQL, Web, etc.). If defaultAction is set to \"Deny\" for the connection type, only the endpoints listed here will be allowed; all others will be blocked.",
 			Computed:            true,
 		},
-		Resource: &schemaR.ListNestedAttribute{
+		Resource: &schemaR.SetNestedAttribute{
 			Optional: true,
-			Validators: []validator.List{
-				listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("allowed_workspaces")),
-			},
-			Default: listdefault.StaticValue(types.ListValueMust(
+			Default: setdefault.StaticValue(types.SetValueMust(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"hostname_pattern": types.StringType,
@@ -175,18 +170,15 @@ func allowedEndpointsAttribute() superschema.SuperListNestedAttributeOf[endpoint
 	}
 }
 
-func allowedWorkspacesAttribute() superschema.SuperListNestedAttributeOf[workspaceModel] {
-	return superschema.SuperListNestedAttributeOf[workspaceModel]{
-		Common: &schemaR.ListNestedAttribute{
-			MarkdownDescription: "Specifies a list of workspace IDs that are explicitly permitted for outbound communication for the given fabric connectionType. This field is applicable only to fabric connection types that support workspace-based filtering, limited to Lakehouse, Warehouse, FabricSql, and PowerPlatformDataflows. When defaultAction is set to \"Deny\" for a connection type, only the workspaces listed in allowedWorkspaces will be allowed for outbound access; all others will be blocked.",
+func allowedWorkspacesAttribute() superschema.SuperSetNestedAttributeOf[workspaceModel] {
+	return superschema.SuperSetNestedAttributeOf[workspaceModel]{
+		Common: &schemaR.SetNestedAttribute{
+			MarkdownDescription: "Specifies a set of workspace IDs that are explicitly permitted for outbound communication for the given fabric connectionType. This field is applicable only to fabric connection types that support workspace-based filtering, limited to Lakehouse, Warehouse, FabricSql, and PowerPlatformDataflows. When defaultAction is set to \"Deny\" for a connection type, only the workspaces listed in allowedWorkspaces will be allowed for outbound access; all others will be blocked.",
 			Computed:            true,
 		},
-		Resource: &schemaR.ListNestedAttribute{
+		Resource: &schemaR.SetNestedAttribute{
 			Optional: true,
-			Validators: []validator.List{
-				listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("allowed_endpoints")),
-			},
-			Default: listdefault.StaticValue(types.ListValueMust(
+			Default: setdefault.StaticValue(types.SetValueMust(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"workspace_id": customtypes.UUIDType{},

@@ -17,16 +17,16 @@ import (
 )
 
 type baseWorkspaceOutboundCloudConnectionRulesModel struct {
-	WorkspaceID   customtypes.UUID                               `tfsdk:"workspace_id"`
-	Rules         supertypes.ListNestedObjectValueOf[rulesModel] `tfsdk:"rules"`
-	DefaultAction types.String                                   `tfsdk:"default_action"`
+	WorkspaceID   customtypes.UUID                              `tfsdk:"workspace_id"`
+	Rules         supertypes.SetNestedObjectValueOf[rulesModel] `tfsdk:"rules"`
+	DefaultAction types.String                                  `tfsdk:"default_action"`
 }
 
 type rulesModel struct {
-	ConnectionType    customtypes.CaseInsensitiveString                  `tfsdk:"connection_type"`
-	DefaultAction     types.String                                       `tfsdk:"default_action"`
-	AllowedEndpoints  supertypes.ListNestedObjectValueOf[endpointModel]  `tfsdk:"allowed_endpoints"`
-	AllowedWorkspaces supertypes.ListNestedObjectValueOf[workspaceModel] `tfsdk:"allowed_workspaces"`
+	ConnectionType    customtypes.CaseInsensitiveString                 `tfsdk:"connection_type"`
+	DefaultAction     types.String                                      `tfsdk:"default_action"`
+	AllowedEndpoints  supertypes.SetNestedObjectValueOf[endpointModel]  `tfsdk:"allowed_endpoints"`
+	AllowedWorkspaces supertypes.SetNestedObjectValueOf[workspaceModel] `tfsdk:"allowed_workspaces"`
 }
 
 type workspaceModel struct {
