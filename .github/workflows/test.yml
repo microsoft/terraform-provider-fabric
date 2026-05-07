@@ -186,7 +186,7 @@ jobs:
   cleanup-workspace:
     name: 🧹 Cleanup WorkspaceRS
     needs: changes
-    if: needs.changes.outputs.src == 'true'
+    if: github.event_name == 'schedule' && needs.changes.outputs.src == 'true'
     environment:
       name: development
     runs-on: ubuntu-24.04
@@ -215,7 +215,7 @@ jobs:
     needs:
       - changes
       - cleanup-workspace
-    if: needs.changes.outputs.src == 'true'
+    if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -339,7 +339,7 @@ jobs:
     needs:
       - changes
       - cleanup-workspace
-    if: needs.changes.outputs.src == 'true'
+    if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
     environment:
       name: development
     runs-on: ubuntu-24.04
