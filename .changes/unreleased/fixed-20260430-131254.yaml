@@ -1,5 +1,6 @@
 kind: fixed
-body: Fixed `fabric_workspace_outbound_gateway_rules` inconsistent result after apply due to ordering difference
+body: Fixed `fabric_workspace_outbound_gateway_rules` producing inconsistent
+  result after apply due to ordering
 time: 2026-04-30T13:12:54.346609806Z
 custom:
-    Issue: "954"
+  Issue: "954"
