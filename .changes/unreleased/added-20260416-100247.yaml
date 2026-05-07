@@ -1,5 +1,0 @@
-kind: added
-body: Added `fabric_eventstream_destination_connection` ephemeral resource
-time: 2026-04-16T10:02:47.501288852Z
-custom:
-  Issue: "826"
