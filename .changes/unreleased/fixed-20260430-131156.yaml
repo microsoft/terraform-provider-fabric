@@ -1,5 +1,6 @@
 kind: fixed
-body: Fixed `fabric_workspace_outbound_cloud_connection_rules` inconsistent result after apply due to ordering difference
+body: Fixed `fabric_workspace_outbound_cloud_connection_rules` producing
+  inconsistent result after apply due to ordering
 time: 2026-04-30T13:11:56.191476652Z
 custom:
-    Issue: "956"
+  Issue: "956"
