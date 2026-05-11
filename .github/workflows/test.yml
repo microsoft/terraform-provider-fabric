@@ -198,7 +198,7 @@ jobs:
       - name: ⤵️ Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: 🔐 Azure Login (OIDC)
-        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
         with:
           client-id: ${{ secrets.TESTACC_SPN_OIDC_CLIENT_ID }}
           tenant-id: ${{ secrets.TESTACC_TENANT_ID }}
@@ -280,13 +280,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
