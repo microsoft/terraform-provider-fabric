@@ -21,8 +21,7 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ format('{0}-{1}-{2}-{3}-{4}', github.workflow, github.event_name,
-    github.ref, github.base_ref || null, github.head_ref || null) }}
+  group: ${{ format('{0}-{1}-{2}-{3}-{4}', github.workflow, github.event_name, github.ref, github.base_ref || null, github.head_ref || null) }}
   cancel-in-progress: true
 
 env:
@@ -65,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        method: [ oidc, certificate, secret ]
+        method: [oidc, certificate, secret]
     steps:
       - name: ⤵️ Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -183,38 +182,10 @@ jobs:
   #         FABRIC_USE_MSI: true
   #         FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
 
-  cleanup-workspace:
-    name: 🧹 Cleanup WorkspaceRS
-    needs: changes
-    if: github.event_name == 'schedule' && needs.changes.outputs.src == 'true'
-    environment:
-      name: development
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: 🔐 Azure Login (OIDC)
-        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
-        with:
-          client-id: ${{ secrets.TESTACC_SPN_OIDC_CLIENT_ID }}
-          tenant-id: ${{ secrets.TESTACC_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
-
-      - name: 🧹 Run Remove-WorkspaceRSItems.ps1
-        shell: pwsh
-        run: |
-          ./tools/scripts/Remove-WorkspaceRSItems.ps1 -Force
-
   checkbuild:
     name: 🏗️ Check Build
     needs:
       - changes
-      - cleanup-workspace
     if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -338,7 +309,6 @@ jobs:
     name: 🧪 Run Tests (${{ matrix.cli }} ${{ matrix.version }})
     needs:
       - changes
-      - cleanup-workspace
     if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
     environment:
       name: development
@@ -468,7 +438,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION)
+          name:
+            ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION)
             }}
           path: |
             coverage.html
@@ -503,7 +474,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION)
+          name:
+            ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION)
             }}
           path: |
             code-coverage-results.md
@@ -571,7 +543,8 @@ jobs:
           body-includes: Minimum allowed line rate is
 
       - name: 📝 Create comment
-        if: steps.fc.outputs.comment-id == '' && (github.event_name == 'pull_request' ||
+        if:
+          steps.fc.outputs.comment-id == '' && (github.event_name == 'pull_request' ||
           github.event_name == 'pull_request_target')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
@@ -579,7 +552,8 @@ jobs:
           body-path: code-coverage-results.md
 
       - name: 📝 Update comment
-        if: steps.fc.outputs.comment-id != '' && (github.event_name == 'pull_request' ||
+        if:
+          steps.fc.outputs.comment-id != '' && (github.event_name == 'pull_request' ||
           github.event_name == 'pull_request_target')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
