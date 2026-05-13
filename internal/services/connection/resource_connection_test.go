@@ -4,12 +4,15 @@
 package connection_test
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -1375,6 +1378,89 @@ func TestUnit_ConnectionResource_ModifyPlan_Validations(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(`Missing connection parameter key`),
+		},
+	}))
+}
+
+func TestUnit_ConnectionResource_ImportState(t *testing.T) {
+	entity := fakes.NewRandomShareableCloudConnection()
+
+	fakes.FakeServer.Upsert(fakes.NewRandomShareableCloudConnection())
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(fakes.NewRandomShareableCloudConnection())
+
+	testCase := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"display_name":      *entity.DisplayName,
+			"connectivity_type": string(fabcore.ConnectivityTypeShareableCloud),
+			"privacy_level":     string(*entity.PrivacyLevel),
+			"connection_details": map[string]any{
+				"type":            "FTP",
+				"creation_method": "FTP.Contents",
+				"parameters": []map[string]any{
+					{
+						"name":  "server",
+						"value": "ftp.example.com",
+					},
+				},
+			},
+			"credential_details": map[string]any{
+				"connection_encryption": string(*entity.CredentialDetails.ConnectionEncryption),
+				"single_sign_on_type":   string(*entity.CredentialDetails.SingleSignOnType),
+				"skip_test_connection":  true,
+				"credential_type":       string(fabcore.CredentialTypeAnonymous),
+			},
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "not-valid",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "test/id",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", "test", *entity.ID),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", *entity.ID, "test"),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// Import state testing
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             testCase,
+			ImportStateId:      *entity.ID,
+			ImportState:        true,
+			ImportStatePersist: true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				if is[0].ID != *entity.ID {
+					return errors.New(testResourceItemFQN + ": unexpected ID")
+				}
+
+				return nil
+			},
 		},
 	}))
 }

@@ -46,6 +46,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			return diags
 		}
 	} else {
+		connectionDetails = supertypes.NewSingleNestedObjectValueOfNull[ConnectionDetails](ctx)
 		var defaultModel ConnectionDetails
 		connectionDetailsModel = &defaultModel
 	}
@@ -61,7 +62,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 				connectionDetailsModelPtr = &convertedValue
 			}
 		case *rsConnectionDetailsModel:
-			setRSConnectionDetails(*fromConnection.ConnectionDetails, v)
+			setRSConnectionDetails(ctx, *fromConnection.ConnectionDetails, v)
 
 			if convertedValue, ok := any(*v).(ConnectionDetails); ok {
 				connectionDetailsModelPtr = &convertedValue
@@ -106,7 +107,7 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 				credentialDetailsModelPtr = &convertedValue
 			}
 		case *rsCredentialDetailsModel:
-			setRSCredentialDetails(*fromConnection.CredentialDetails, v)
+			setRSCredentialDetails(ctx, *fromConnection.CredentialDetails, v)
 
 			if convertedValue, ok := any(*v).(CredentialDetails); ok {
 				credentialDetailsModelPtr = &convertedValue

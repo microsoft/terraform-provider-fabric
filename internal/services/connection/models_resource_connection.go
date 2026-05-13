@@ -69,9 +69,13 @@ func (m rsConnectionDetailsModel) getParameters(ctx context.Context) (map[string
 	return nil, nil
 }
 
-func setRSConnectionDetails(from fabcore.ListConnectionDetails, to *rsConnectionDetailsModel) {
+func setRSConnectionDetails(ctx context.Context, from fabcore.ListConnectionDetails, to *rsConnectionDetailsModel) {
 	to.Path = types.StringPointerValue(from.Path)
 	to.Type = types.StringPointerValue(from.Type)
+
+	if to.Parameters.IsNull() && !to.Parameters.IsKnown() {
+		to.Parameters = supertypes.NewSetNestedObjectValueOfNull[connectionParametersModel](ctx)
+	}
 }
 
 type rsCredentialDetailsModel struct {
@@ -87,11 +91,31 @@ type rsCredentialDetailsModel struct {
 	SharedAccessSignatureCredentials supertypes.SingleNestedObjectValueOf[credentialsSharedAccessSignatureModel] `tfsdk:"shared_access_signature_credentials"`
 }
 
-func setRSCredentialDetails(from fabcore.ListCredentialDetails, to *rsCredentialDetailsModel) {
+func setRSCredentialDetails(ctx context.Context, from fabcore.ListCredentialDetails, to *rsCredentialDetailsModel) {
 	to.ConnectionEncryption = types.StringPointerValue((*string)(from.ConnectionEncryption))
 	to.SingleSignOnType = types.StringPointerValue((*string)(from.SingleSignOnType))
 	to.SkipTestConnection = types.BoolPointerValue(from.SkipTestConnection)
 	to.CredentialType = types.StringPointerValue((*string)(from.CredentialType))
+
+	if to.BasicCredentials.IsNull() && !to.BasicCredentials.IsKnown() {
+		to.BasicCredentials = supertypes.NewSingleNestedObjectValueOfNull[credentialsBasicModel](ctx)
+	}
+
+	if to.KeyCredentials.IsNull() && !to.KeyCredentials.IsKnown() {
+		to.KeyCredentials = supertypes.NewSingleNestedObjectValueOfNull[credentialsKeyModel](ctx)
+	}
+
+	if to.KeyPairCredentials.IsNull() && !to.KeyPairCredentials.IsKnown() {
+		to.KeyPairCredentials = supertypes.NewSingleNestedObjectValueOfNull[credentialsKeyPairModel](ctx)
+	}
+
+	if to.ServicePrincipalCredentials.IsNull() && !to.ServicePrincipalCredentials.IsKnown() {
+		to.ServicePrincipalCredentials = supertypes.NewSingleNestedObjectValueOfNull[credentialsServicePrincipalModel](ctx)
+	}
+
+	if to.SharedAccessSignatureCredentials.IsNull() && !to.SharedAccessSignatureCredentials.IsKnown() {
+		to.SharedAccessSignatureCredentials = supertypes.NewSingleNestedObjectValueOfNull[credentialsSharedAccessSignatureModel](ctx)
+	}
 }
 
 func getKeyVaultSecretReference(ctx context.Context, kvRef supertypes.SingleNestedObjectValueOf[credentialsKeyVaultReferenceModel]) (*fabcore.KeyVaultSecretReference, diag.Diagnostics) {
