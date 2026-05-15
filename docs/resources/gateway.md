@@ -13,6 +13,8 @@ The Gateway resource allows you to manage a Fabric [Gateway](https://learn.micro
 
 -> This resource supports Service Principal authentication.
 
+~> This resource provisions only `VirtualNetwork` gateways. `OnPremises` and `OnPremisesPersonal` gateways can be discovered with the `fabric_gateway` and `fabric_gateways` data sources, but they cannot be created or managed with this resource.
+
 ## Example Usage
 
 ```terraform
