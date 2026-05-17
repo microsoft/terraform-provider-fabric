@@ -186,7 +186,7 @@ jobs:
     name: 🏗️ Check Build
     needs:
       - changes
-    if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
+    if: needs.changes.outputs.src == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -309,7 +309,7 @@ jobs:
     name: 🧪 Run Tests (${{ matrix.cli }} ${{ matrix.version }})
     needs:
       - changes
-    if: ${{ !cancelled() && !failure() && needs.changes.outputs.src == 'true' }}
+    if: needs.changes.outputs.src == 'true'
     environment:
       name: development
     runs-on: ubuntu-24.04
