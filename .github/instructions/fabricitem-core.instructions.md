@@ -4,7 +4,7 @@ applyTo: "internal/pkg/fabricitem/**"
 
 # Fabric Item Core Abstraction
 
-`internal/pkg/fabricitem/` is the generic abstraction layer used by ~80% of provider resources. Service packages compose with it via configuration structs and closures — they never implement CRUD directly.
+`internal/pkg/fabricitem/` is the generic abstraction layer used by ~60% of provider resources. Service packages compose with it via configuration structs and closures — they never implement CRUD directly.
 
 > **Do not modify this package for individual item implementations.** Service-specific logic belongs in `internal/services/<package>/`. Only modify this package to add capabilities that apply to ALL Fabric Items.
 

@@ -4,7 +4,7 @@ applyTo: "internal/services/**/*.go"
 
 # Non-Item Resource Patterns
 
-Non-Item resources (~20%) do **not** use the `fabricitem` generic abstraction. They include Connection, Shortcut, Gateway, Workspace, role assignments, and similar bespoke CRUD resources.
+Non-Item resources (~40%) do **not** use the `fabricitem` generic abstraction. They include Connection, Shortcut, Gateway, Workspace, role assignments, and similar bespoke CRUD resources.
 
 > For Fabric Item patterns (Category A), see `fabric-item-patterns.instructions.md`.
 

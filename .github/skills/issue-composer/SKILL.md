@@ -60,7 +60,7 @@ From the user's description and SDK analysis, gather:
 | **Display name**      | PascalCase with spaces — e.g. "Lakehouse", "Connection", "Shortcut"                                                          |
 | **API doc links**     | Browse `learn.microsoft.com/rest/api/fabric/` for API pages                                                                  |
 | **SDK availability**  | Check if the SDK package/client exists (from `#skill:sdk-contract-navigator`)                                                |
-| **Resource category** | Fabric Item (~80%) or Non-Item (~20%) — see below                                                                            |
+| **Resource category** | Fabric Item (~60%) or Non-Item (~40%) — see below                                                                            |
 | **Item archetype**    | For Fabric Items only: basic, definition, properties, definition-properties, config-properties, config-definition-properties |
 | **Complexity**        | `easy` (basic/definition), `moderate` (properties/non-item), `hard` (config-\*/complex non-item)                             |
 | **Definition paths**  | For Fabric Items with definitions: fetch the definition article to list supported definition parts — see below               |

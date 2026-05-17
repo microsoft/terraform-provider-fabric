@@ -6,7 +6,7 @@ applyTo: "internal/services/**/*.go"
 
 ## Item Archetypes
 
-~80% of resources use the generic `fabricitem` abstraction. Choose archetype based on SDK capabilities:
+~60% of resources use the generic `fabricitem` abstraction. Choose archetype based on SDK capabilities:
 
 | Archetype                      | Definition | Properties | Config | Example              |
 | ------------------------------ | :--------: | :--------: | :----: | -------------------- |

@@ -59,7 +59,7 @@ Get-ChildItem "<sdk-path>\fabric\" -Directory | Select-Object -ExpandProperty Na
 
 This provider has **two** resource categories with different SDK patterns:
 
-### Category A: Fabric Items (~80% of resources)
+### Category A: Fabric Items (~60% of resources)
 
 These use the generic `fabricitem` abstraction with per-item SDK packages.
 
@@ -67,7 +67,7 @@ These use the generic `fabricitem` abstraction with per-item SDK packages.
 
 **Examples:** Lakehouse, Eventhouse, Data Pipeline, SQL Database, KQL Database, Notebook, Semantic Model, Spark Job Definition, ML Experiment, ML Model, Environment, Warehouse, etc.
 
-### Category B: Non-Item Resources (~20% of resources)
+### Category B: Non-Item Resources (~40% of resources)
 
 These use bespoke CRUD implementations with clients from the `fabric/core/` package or other shared packages.
 

@@ -24,7 +24,7 @@ This repository is **terraform-provider-fabric** — the official [Terraform](ht
 | Directory                  | Purpose                                                                                 |
 | -------------------------- | --------------------------------------------------------------------------------------- |
 | `internal/services/`       | All resource and data source implementations, one package per Fabric item or service    |
-| `internal/pkg/fabricitem/` | Generic abstraction layer for Fabric Item resources (~80% of resources use this)        |
+| `internal/pkg/fabricitem/` | Generic abstraction layer for Fabric Item resources (~60% of resources use this)        |
 | `internal/pkg/utils/`      | Shared utility functions (`IsErrNotFound`, `GetDiagsFromError`, enum converters)        |
 | `internal/provider/`       | Provider definition, configuration, and registration of all resources/data sources      |
 | `internal/common/`         | Shared error constants (`common.Err*`), warnings, and base models                       |
@@ -39,8 +39,8 @@ This repository is **terraform-provider-fabric** — the official [Terraform](ht
 
 ## Resource Categories
 
-1. **Fabric Items (~80%)** — Use the generic `internal/pkg/fabricitem/` abstraction. Scaffold with `go run tools/itemgen/main.go`. Canonical reference: `internal/services/lakehouse/`
-2. **Non-Item resources (~20%)** — Custom CRUD implementations using `superschema`. Examples: Workspace, Gateway, Connection, Domain, Shortcut. References: `internal/services/workspace/`, `internal/services/gateway/`, `internal/services/connection/`
+1. **Fabric Items (~60%)** — Use the generic `internal/pkg/fabricitem/` abstraction. Scaffold with `go run tools/itemgen/main.go`. Canonical reference: `internal/services/lakehouse/`
+2. **Non-Item resources (~40%)** — Custom CRUD implementations using `superschema`. Examples: Workspace, Gateway, Connection, Domain, Shortcut. References: `internal/services/workspace/`, `internal/services/gateway/`, `internal/services/connection/`
 3. **Sub-resources** — Scoped under a parent resource (role assignments, workspace settings, spark settings, tags, folders, schedulers). References: `internal/services/workspacera/`, `internal/services/sparkcustompool/`, `internal/services/tags/`
 
 ## Common Commands (Task Runner)
