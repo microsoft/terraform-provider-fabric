@@ -99,11 +99,13 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	}
 
 	if from.Recipient != nil {
-		recipient := &recipientModel{}
-		recipient.set(*from.Recipient)
+		if userRecipient, ok := from.Recipient.(*fabcore.ExternalDataShareUserRecipient); ok && userRecipient != nil {
+			recipient := &recipientModel{}
+			recipient.set(*userRecipient)
 
-		if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
-			return diags
+			if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
+				return diags
+			}
 		}
 	}
 
@@ -136,7 +138,7 @@ func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceI
 	return to.Values.Set(ctx, slice)
 }
 
-func (to *recipientModel) set(from fabcore.ExternalDataShareRecipient) {
+func (to *recipientModel) set(from fabcore.ExternalDataShareUserRecipient) {
 	to.UserPrincipalName = types.StringPointerValue(from.UserPrincipalName)
 	to.TenantID = customtypes.NewUUIDPointerValue(from.TenantID)
 }
@@ -162,7 +164,9 @@ func (to *requestCreateExternalDataShare) set(ctx context.Context, from resource
 		return diags
 	}
 
-	to.Recipient = &fabcore.ExternalDataShareRecipient{
+	recipientType := fabcore.ExternalDataShareRecipientTypeUser
+	to.Recipient = &fabcore.ExternalDataShareUserRecipient{
+		Type:              &recipientType,
 		UserPrincipalName: recipientModel.UserPrincipalName.ValueStringPointer(),
 		TenantID:          recipientModel.TenantID.ValueStringPointer(),
 	}

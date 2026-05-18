@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -139,6 +140,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomExternalDataShare(workspaceID)
+	entityRecipient := entity.Recipient.(*fabcore.ExternalDataShareUserRecipient)
 
 	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
 
@@ -157,7 +159,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 					"item_id":      *entity.ItemID,
 					"paths":        entity.Paths,
 					"recipient": map[string]any{
-						"user_principal_name": *entity.Recipient.UserPrincipalName,
+						"user_principal_name": *entityRecipient.UserPrincipalName,
 					},
 				},
 			),
