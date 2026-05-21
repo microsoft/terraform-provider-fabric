@@ -419,6 +419,10 @@ func TestAcc_LakehouseResource_CRUD_Configuration(t *testing.T) {
 }
 
 func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("API issue")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

@@ -39,13 +39,25 @@ func fakeSetOutboundGatewayRules(
 	}
 }
 
+// fakeGetOutboundGatewayRules returns gateways in reversed order to simulate
+// non-deterministic API response ordering.
 func fakeGetOutboundGatewayRules(
 	entity *fabcore.WorkspaceOutboundGateways,
 ) func(ctx context.Context, workspaceID string, options *fabcore.WorkspacesClientGetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _ string, _ *fabcore.WorkspacesClientGetOutboundGatewayRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse], errResp azfake.ErrorResponder) {
+		reversed := make([]fabcore.GatewayAccessRuleMetadata, len(entity.AllowedGateways))
+		for i, gw := range entity.AllowedGateways {
+			reversed[len(entity.AllowedGateways)-1-i] = gw
+		}
+
+		reversedEntity := fabcore.WorkspaceOutboundGateways{
+			DefaultAction:   entity.DefaultAction,
+			AllowedGateways: reversed,
+		}
+
 		resp = azfake.Responder[fabcore.WorkspacesClientGetOutboundGatewayRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetOutboundGatewayRulesResponse{
-			WorkspaceOutboundGateways: *entity,
+			WorkspaceOutboundGateways: reversedEntity,
 			ETag:                      new("fake-etag"),
 		}, nil)
 
