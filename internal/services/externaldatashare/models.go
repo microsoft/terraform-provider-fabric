@@ -5,6 +5,7 @@ package externaldatashare
 
 import (
 	"context"
+	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -36,6 +37,7 @@ type baseExternalDataShareModel struct {
 }
 
 type recipientModel struct {
+	Type              types.String     `tfsdk:"type"`
 	UserPrincipalName types.String     `tfsdk:"user_principal_name"`
 	TenantID          customtypes.UUID `tfsdk:"tenant_id"`
 }
@@ -99,13 +101,13 @@ func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, item
 	}
 
 	if from.Recipient != nil {
-		if userRecipient, ok := from.Recipient.(*fabcore.ExternalDataShareUserRecipient); ok && userRecipient != nil {
-			recipient := &recipientModel{}
-			recipient.set(*userRecipient)
+		recipient := &recipientModel{}
+		if diags := recipient.set(from.Recipient); diags.HasError() {
+			return diags
+		}
 
-			if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
-				return diags
-			}
+		if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
+			return diags
 		}
 	}
 
@@ -138,9 +140,28 @@ func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceI
 	return to.Values.Set(ctx, slice)
 }
 
-func (to *recipientModel) set(from fabcore.ExternalDataShareUserRecipient) {
-	to.UserPrincipalName = types.StringPointerValue(from.UserPrincipalName)
-	to.TenantID = customtypes.NewUUIDPointerValue(from.TenantID)
+func (to *recipientModel) set(from fabcore.BaseExternalDataShareRecipientClassification) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	switch entity := from.(type) {
+	case *fabcore.ExternalDataShareUserRecipient:
+		to.Type = types.StringPointerValue((*string)(entity.Type))
+		to.UserPrincipalName = types.StringPointerValue(entity.UserPrincipalName)
+		to.TenantID = customtypes.NewUUIDPointerValue(entity.TenantID)
+	case *fabcore.ExternalDataShareSPRecipient:
+		to.Type = types.StringPointerValue((*string)(entity.Type))
+		to.UserPrincipalName = types.StringNull()
+		to.TenantID = customtypes.NewUUIDPointerValue(entity.TenantID)
+	default:
+		diags.AddError(
+			"Unsupported External Data Share recipient type",
+			fmt.Sprintf("The External Data Share recipient type '%T' is not supported.", entity),
+		)
+
+		return diags
+	}
+
+	return diags
 }
 
 func (to *requestCreateExternalDataShare) set(ctx context.Context, from resourceExternalDataSharesModel) diag.Diagnostics {
@@ -164,11 +185,27 @@ func (to *requestCreateExternalDataShare) set(ctx context.Context, from resource
 		return diags
 	}
 
-	recipientType := fabcore.ExternalDataShareRecipientTypeUser
-	to.Recipient = &fabcore.ExternalDataShareUserRecipient{
-		Type:              &recipientType,
-		UserPrincipalName: recipientModel.UserPrincipalName.ValueStringPointer(),
-		TenantID:          recipientModel.TenantID.ValueStringPointer(),
+	recipientType := fabcore.ExternalDataShareRecipientType(recipientModel.Type.ValueString())
+
+	switch recipientType {
+	case fabcore.ExternalDataShareRecipientTypeUser:
+		to.Recipient = &fabcore.ExternalDataShareUserRecipient{
+			Type:              &recipientType,
+			UserPrincipalName: recipientModel.UserPrincipalName.ValueStringPointer(),
+			TenantID:          recipientModel.TenantID.ValueStringPointer(),
+		}
+	case fabcore.ExternalDataShareRecipientTypeServicePrincipal:
+		to.Recipient = &fabcore.ExternalDataShareSPRecipient{
+			Type:     &recipientType,
+			TenantID: recipientModel.TenantID.ValueStringPointer(),
+		}
+	default:
+		diags.AddError(
+			"Unsupported External Data Share recipient type",
+			fmt.Sprintf("The External Data Share recipient type '%s' is not supported.", string(recipientType)),
+		)
+
+		return diags
 	}
 
 	return nil

@@ -65,11 +65,12 @@ resource "fabric_external_data_share" "example_with_tenant" {
 
 Required:
 
-- `user_principal_name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The user principal name of the recipient. String length must be at most 256.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the recipient. Value must be one of : `ServicePrincipal`, `User`.
 
 Optional:
 
-- `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID of the recipient.
+- `tenant_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The tenant ID of the recipient. Required when `type` is `ServicePrincipal`. If the value of [`<.type`](#<.type) attribute is `ServicePrincipal` this attribute is **REQUIRED**.
+- `user_principal_name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The user principal name of the recipient. Required when `type` is `User`. String length must be at most 256. If the value of [`<.type`](#<.type) attribute is `User` this attribute is **REQUIRED**. If the value of [`<.type`](#<.type) attribute is `ServicePrincipal` this attribute is **NULL**.
 
 <a id="nestedatt--timeouts"></a>
 

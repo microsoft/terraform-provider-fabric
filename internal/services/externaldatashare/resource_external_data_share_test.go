@@ -46,6 +46,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      itemID,
 						"paths":        []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -63,6 +64,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      "invalid uuid",
 						"paths":        []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -81,6 +83,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"unexpected_attr": "test",
 						"paths":           []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -111,6 +114,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"workspace_id": workspaceID,
 						"item_id":      itemID,
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -128,6 +132,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      itemID,
 						"paths":        []string{"InvalidPath"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -159,6 +164,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 					"item_id":      *entity.ItemID,
 					"paths":        entity.Paths,
 					"recipient": map[string]any{
+						"type":                string(*entityRecipient.Type),
 						"user_principal_name": *entityRecipient.UserPrincipalName,
 					},
 				},
@@ -195,6 +201,7 @@ func TestAcc_ExternalDataShareResource_CRUD(t *testing.T) {
 						"item_id":      testhelp.RefByFQN(lakehouseResourceFQN, "id"),
 						"paths":        []string{"Tables/publicholidays"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": userPrincipalName,
 						},
 					},
