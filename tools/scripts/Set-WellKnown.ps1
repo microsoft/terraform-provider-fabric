@@ -1101,17 +1101,13 @@ BEGIN
 END
 "@
 
-  try {
-    Invoke-Sqlcmd `
-      -ServerInstance "$ServerName.database.windows.net" `
-      -Database $DatabaseName `
-      -AccessToken $unsecureToken `
-      -Query $createTableQuery
-    Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
-  }
-  catch {
-    Write-Log -Message "Failed to create tables: $($_.Exception.Message)" -Level 'WARN'
-  }
+  Invoke-Sqlcmd `
+    -ServerInstance "$ServerName.database.windows.net" `
+    -Database $DatabaseName `
+    -AccessToken $unsecureToken `
+    -Query $createTableQuery `
+    -ErrorAction Stop
+  Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
 
   return @{
     Server     = $sqlServer
@@ -2030,6 +2026,7 @@ $azureSql = Set-AzureSqlDatabase `
 
 if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
   Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "Server: $sqlServerName.database.windows.net / Database: $sqlDatabaseName" -Level 'ERROR' -Stop $false
   Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
   Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
 }
