@@ -10,11 +10,12 @@ import (
 )
 
 func NewDataSourceGraphQLApi() datasource.DataSource {
-	config := fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinition{
 		TypeInfo:            ItemTypeInfo,
 		FabricItemType:      FabricItemType,
 		IsDisplayNameUnique: true,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
-	return fabricitem.NewDataSourceFabricItem(config)
+	return fabricitem.NewDataSourceFabricItemDefinition(config)
 }
