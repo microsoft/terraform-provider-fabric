@@ -69,5 +69,6 @@ Read-Only:
 
 Read-Only:
 
-- `tenant_id` (String) The tenant ID of the recipient.
-- `user_principal_name` (String) The user principal name of the recipient.
+- `tenant_id` (String) The tenant ID of the recipient. Required when `type` is `ServicePrincipal`.
+- `type` (String) The type of the recipient. Defaults to `User`. Value must be one of : `ServicePrincipal`, `User`.
+- `user_principal_name` (String) The user principal name of the recipient. Required when `type` is `User`.
