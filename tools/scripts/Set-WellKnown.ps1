@@ -1024,6 +1024,103 @@ function Set-AzureDataFactory {
   return $dataFactory
 }
 
+function Set-AzureSqlDatabase {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ResourceGroupName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ServerName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DatabaseName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Location
+  )
+
+  # Attempt to get the existing SQL Server
+  $sqlServer = Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -ErrorAction SilentlyContinue
+  if (-not $sqlServer) {
+    Write-Log -Message "Creating SQL Server: $ServerName in Resource Group: $ResourceGroupName" -Level 'WARN'
+    $sqlServer = New-AzSqlServer `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -Location $Location `
+      -ExternalAdminName $azContext.Account.Id `
+      -EnableActiveDirectoryOnlyAuthentication
+    Write-Log -Message "Created SQL Server: $ServerName" -Level 'INFO'
+  }
+  Write-Log -Message "Az SQL Server - Name: $($sqlServer.ServerName)"
+
+  # Allow Azure services to access the server (required for Fabric mirroring/replication)
+  $firewallRule = Get-AzSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $ServerName -FirewallRuleName 'AllowAllAzureIPs' -ErrorAction SilentlyContinue
+  if (-not $firewallRule) {
+    Write-Log -Message "Creating firewall rule to allow Azure services" -Level 'WARN'
+    New-AzSqlServerFirewallRule `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -FirewallRuleName 'AllowAllAzureIPs' `
+      -StartIpAddress '0.0.0.0' `
+      -EndIpAddress '0.0.0.0'
+  }
+
+  # Attempt to get the existing SQL Database
+  $sqlDatabase = Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -ErrorAction SilentlyContinue
+  if (-not $sqlDatabase) {
+    Write-Log -Message "Creating SQL Database: $DatabaseName on server: $ServerName" -Level 'WARN'
+    $sqlDatabase = New-AzSqlDatabase `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -DatabaseName $DatabaseName `
+      -Edition 'Basic'
+    Write-Log -Message "Created SQL Database: $DatabaseName" -Level 'INFO'
+  }
+  Write-Log -Message "Az SQL Database - Name: $($sqlDatabase.DatabaseName)"
+
+  # Create test tables using Entra auth
+  $accessToken = (Get-AzAccessToken -ResourceUrl 'https://database.windows.net/' -WarningAction SilentlyContinue -AsSecureString).Token
+  $unsecureToken = $accessToken | ConvertFrom-SecureString -AsPlainText
+
+  $table1Name = 'TestTable1'
+  $table2Name = 'TestTable2'
+
+  $createTableQuery = @"
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '$table1Name')
+BEGIN
+  CREATE TABLE [dbo].[$table1Name] (
+    [Id] INT IDENTITY(1,1) PRIMARY KEY
+  )
+END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '$table2Name')
+BEGIN
+  CREATE TABLE [dbo].[$table2Name] (
+    [Id] INT IDENTITY(1,1) PRIMARY KEY
+  )
+END
+"@
+
+  try {
+    Invoke-Sqlcmd `
+      -ServerInstance "$ServerName.database.windows.net" `
+      -Database $DatabaseName `
+      -AccessToken $unsecureToken `
+      -Query $createTableQuery
+    Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
+  }
+  catch {
+    Write-Log -Message "Failed to create tables: $($_.Exception.Message)" -Level 'WARN'
+  }
+
+  return @{
+    Server     = $sqlServer
+    Database   = $sqlDatabase
+    TableName1 = $table1Name
+    TableName2 = $table2Name
+  }
+}
+
 function Set-Shortcut {
   param (
     [Parameter(Mandatory = $true)]
@@ -1120,7 +1217,7 @@ function Set-ItemJobScheduler {
 
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Sql', 'SqlServer')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -1191,6 +1288,7 @@ $wellKnown['Capacity'] = @{
 $itemNaming = @{
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
+  'AzureSqlServer'                  = 'sql'
   'CopyJob'                         = 'cj'
   'CosmosDB'                        = 'cdb'
   'Dashboard'                       = 'dash'
@@ -1269,6 +1367,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
   'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
+  'FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1917,6 +2016,28 @@ $wellKnown['AzureDataFactory'] = @{
   resourceGroupName = $wellKnown['ResourceGroup'].name
   location          = $wellKnown['ResourceGroup'].location
   subscriptionId    = $wellKnown['Azure'].subscriptionId
+}
+
+# Create the Azure SQL Server and Database if not exists
+$sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
+$sqlDatabaseName = "graphqldb"
+
+$azureSql = Set-AzureSqlDatabase `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
+  -ServerName $sqlServerName `
+  -DatabaseName $sqlDatabaseName `
+  -Location $wellKnown['ResourceGroup'].location
+
+if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
+  Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
+  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
+}
+
+$wellKnown['AzureSqlDatabase'] = @{
+  connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
+  tableName1   = $azureSql.TableName1
+  tableName2   = $azureSql.TableName2
 }
 
 # Create the Mounted Data Factory if not exists
