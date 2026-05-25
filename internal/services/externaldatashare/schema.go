@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -164,9 +165,9 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				Attributes: superschema.Attributes{
-					"type": superschema.SuperStringAttribute{
+					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The type of the recipient.",
+							MarkdownDescription: "The type of the recipient. Defaults to `" + string(fabcore.ExternalDataShareRecipientTypeUser) + "`.",
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleExternalDataShareRecipientTypeValues(), true)...),
 							},
@@ -175,13 +176,15 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							Computed: true,
 						},
 						Resource: &schemaR.StringAttribute{
-							Required: true,
+							Optional: true,
+							Computed: true,
+							Default:  stringdefault.StaticString(string(fabcore.ExternalDataShareRecipientTypeUser)),
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.RequiresReplace(),
 							},
 						},
 					},
-					"user_principal_name": superschema.SuperStringAttribute{
+					"user_principal_name": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The user principal name of the recipient. Required when `type` is `" + string(fabcore.ExternalDataShareRecipientTypeUser) + "`.",
 						},
