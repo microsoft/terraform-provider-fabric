@@ -95,7 +95,8 @@ func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 		ID:          new(testhelp.RandomUUID()),
 		Paths:       []string{"Files/MyFile1"},
 		WorkspaceID: new(workspaceID),
-		Recipient: &fabcore.ExternalDataShareRecipient{
+		Recipient: &fabcore.ExternalDataShareUserRecipient{
+			Type:              to.Ptr(fabcore.ExternalDataShareRecipientTypeUser),
 			UserPrincipalName: new(testhelp.RandomName()),
 		},
 		CreatorPrincipal: &fabcore.UserPrincipal{
