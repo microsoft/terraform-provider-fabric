@@ -19,7 +19,10 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
-var _ datasource.DataSourceWithConfigure = (*dataSourceOneLakeDataAccessSecurity)(nil)
+// Ensure the implementation satisfies the expected interfaces.
+var (
+	_ datasource.DataSourceWithConfigure = (*dataSourceOneLakeDataAccessSecurity)(nil)
+)
 
 type dataSourceOneLakeDataAccessSecurity struct {
 	pConfigData *pconfig.ProviderData
@@ -34,11 +37,11 @@ func NewDataSourceOneLakeDataAccessSecurity() datasource.DataSource {
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = d.TypeInfo.FullTypeName(true)
+	resp.TypeName = d.TypeInfo.FullTypeName(false)
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = itemSchema().GetDataSource(ctx)
+	resp.Schema = itemSchema(false).GetDataSource(ctx)
 }
 
 func (d *dataSourceOneLakeDataAccessSecurity) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -70,37 +73,36 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 		"action": "start",
 	})
 
-	var data baseOneLakeDataAccessSecurityModel
+	var data dataSourceOneLakeDataAccessSecurityModel
 
 	if resp.Diagnostics.Append(req.Config.Get(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(d.list(ctx, &data)...); resp.Diagnostics.HasError() {
+	timeout, diags := data.Timeouts.Read(ctx, d.pConfigData.Timeout)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	if resp.Diagnostics.Append(d.get(ctx, &data)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	tflog.Debug(ctx, "READ", map[string]any{
 		"action": "end",
 	})
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
-func (d *dataSourceOneLakeDataAccessSecurity) list(ctx context.Context, model *baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
-	respList, err := d.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		diags.AddError(
-			common.ErrorReadHeader,
-			"Unable to find an item with 'item_id' "+model.ItemID.ValueString()+" and 'workspace_id': "+model.WorkspaceID.ValueString()+".",
-		)
-
+func (d *dataSourceOneLakeDataAccessSecurity) get(ctx context.Context, model *dataSourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+	respGet, err := d.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Name.ValueString(), nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	return model.set(ctx, respList)
+	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.DataAccessRoleBase)
 }

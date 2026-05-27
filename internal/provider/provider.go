@@ -592,6 +592,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,

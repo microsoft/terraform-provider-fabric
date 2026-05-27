@@ -3,14 +3,14 @@
 page_title: "fabric_onelake_data_access_security Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The  data-source allows you to retrieve a list of Fabric  https://learn.microsoft.com/power-bi/consumer/end-user-dashboards.
+  The OneLake Data Access Security data-source allows you to retrieve details about a Fabric OneLake Data Access Security https://learn.microsoft.com/fabric/onelake/security/data-access-security-overview.
   -> This data-source supports Service Principal authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_onelake_data_access_security (Data Source)
 
-The  data-source allows you to retrieve a list of Fabric [](https://learn.microsoft.com/power-bi/consumer/end-user-dashboards).
+The OneLake Data Access Security data-source allows you to retrieve details about a Fabric [OneLake Data Access Security](https://learn.microsoft.com/fabric/onelake/security/data-access-security-overview).
 
 -> This data-source supports Service Principal authentication.
 
@@ -22,6 +22,7 @@ The  data-source allows you to retrieve a list of Fabric [](https://learn.micros
 data "fabric_onelake_data_access_security" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
+  name         = "example"
 }
 ```
 
@@ -31,61 +32,67 @@ data "fabric_onelake_data_access_security" "example" {
 ### Required
 
 - `item_id` (String) The ID of the Fabric item.
+- `name` (String) The name of the Data access role.
 - `workspace_id` (String) The Workspace ID.
+
+### Optional
+
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `value` (Attributes Set) Map of data access roles. (see [below for nested schema](#nestedatt--value))
+- `decision_rules` (Attributes Set) The array of permissions that make up the Data access role. (see [below for nested schema](#nestedatt--decision_rules))
+- `id` (String) The unique id of the Data access role.
+- `kind` (String) The kind of the Data access role. Possible values: `Policy`. Value must be one of : `Policy`.
+- `members` (Attributes) The members object which contains the members of the role as arrays of different member types. (see [below for nested schema](#nestedatt--members))
 
-<a id="nestedatt--value"></a>
+<a id="nestedatt--timeouts"></a>
 
-### Nested Schema for `value`
+### Nested Schema for `timeouts`
 
-Read-Only:
+Optional:
 
-- `decision_rules` (Attributes Set) The array of permissions that make up the Data access role. (see [below for nested schema](#nestedatt--value--decision_rules))
-- `members` (Attributes) The members object which contains the members of the role as arrays of different member types. (see [below for nested schema](#nestedatt--value--members))
-- `name` (String) The name of the Data access role.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
-<a id="nestedatt--value--decision_rules"></a>
+<a id="nestedatt--decision_rules"></a>
 
-### Nested Schema for `value.decision_rules`
+### Nested Schema for `decision_rules`
 
 Read-Only:
 
 - `effect` (String) The effect that a role has on access to the data resource. Possible values: `Permit`. Value must be one of : `Permit`.
-- `permission` (Attributes Set) Permissions defined by attribute name and values. (see [below for nested schema](#nestedatt--value--decision_rules--permission))
+- `permission` (Attributes Set) Permissions defined by attribute name and values. (see [below for nested schema](#nestedatt--decision_rules--permission))
 
-<a id="nestedatt--value--decision_rules--permission"></a>
+<a id="nestedatt--decision_rules--permission"></a>
 
-### Nested Schema for `value.decision_rules.permission`
+### Nested Schema for `decision_rules.permission`
 
 Read-Only:
 
 - `attribute_name` (String) The name of the attribute that is being evaluated for access permissions. Possible values: `Action`, `Path`. Value must be one of : `Action`, `Path`.
 - `attribute_value_included_in` (Set of String) Allowed values for this attribute.
 
-<a id="nestedatt--value--members"></a>
+<a id="nestedatt--members"></a>
 
-### Nested Schema for `value.members`
+### Nested Schema for `members`
 
 Read-Only:
 
-- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. (see [below for nested schema](#nestedatt--value--members--fabric_item_members))
-- `microsoft_entra_members` (Attributes Set) The list of Microsoft Entra ID members. (see [below for nested schema](#nestedatt--value--members--microsoft_entra_members))
+- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. (see [below for nested schema](#nestedatt--members--fabric_item_members))
+- `microsoft_entra_members` (Attributes Set) The list of Microsoft Entra ID members. (see [below for nested schema](#nestedatt--members--microsoft_entra_members))
 
-<a id="nestedatt--value--members--fabric_item_members"></a>
+<a id="nestedatt--members--fabric_item_members"></a>
 
-### Nested Schema for `value.members.fabric_item_members`
+### Nested Schema for `members.fabric_item_members`
 
 Read-Only:
 
 - `item_access` (Set of String) Permissions for the item.
 - `source_path` (String) The path to Fabric item having the specified item access. Source path must be a combination of two GUIDs separated by a slash.
 
-<a id="nestedatt--value--members--microsoft_entra_members"></a>
+<a id="nestedatt--members--microsoft_entra_members"></a>
 
-### Nested Schema for `value.members.microsoft_entra_members`
+### Nested Schema for `members.microsoft_entra_members`
 
 Read-Only:
 

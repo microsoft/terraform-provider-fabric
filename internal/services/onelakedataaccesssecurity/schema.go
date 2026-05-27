@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -19,16 +21,21 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func itemSchema() superschema.Schema {
-	markdownDescriptionR := fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false)
-	markdownDescriptionD := fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, true)
+func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
+	var dsTimeout *superschema.DatasourceTimeoutAttribute
+
+	if !isList {
+		dsTimeout = &superschema.DatasourceTimeoutAttribute{
+			Read: true,
+		}
+	}
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionR,
+			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
 		},
 		DataSource: superschema.SchemaDetails{
-			MarkdownDescription: markdownDescriptionD,
+			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList),
 		},
 		Attributes: map[string]superschema.Attribute{
 			"workspace_id": superschema.SuperStringAttribute{
@@ -38,6 +45,9 @@ func itemSchema() superschema.Schema {
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: true,
@@ -50,14 +60,69 @@ func itemSchema() superschema.Schema {
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Required: true,
 				},
 			},
-			"value": superschema.SuperSetNestedAttributeOf[dataAccessRole]{
+			"id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The unique id of the Data access role.",
+					CustomType:          customtypes.UUIDType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"name": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The name of the Data access role.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Required: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.RequiresReplace(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Required: !isList,
+					Computed: isList,
+				},
+			},
+			"kind": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The kind of the Data access role. Possible values: " + utils.ConvertStringSlicesToString(
+						fabcore.PossibleDataAccessRoleKindValues(),
+						true,
+						true,
+					) + ".",
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleDataAccessRoleKindValues(), true)...),
+					},
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"decision_rules": superschema.SuperSetNestedAttributeOf[decisionRule]{
 				Common: &schemaR.SetNestedAttribute{
-					MarkdownDescription: "Map of data access roles.",
+					MarkdownDescription: "The array of permissions that make up the Data access role.",
 				},
 				Resource: &schemaR.SetNestedAttribute{
 					Required: true,
@@ -66,9 +131,16 @@ func itemSchema() superschema.Schema {
 					Computed: true,
 				},
 				Attributes: superschema.Attributes{
-					"name": superschema.SuperStringAttribute{
+					"effect": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The name of the Data access role.",
+							MarkdownDescription: "The effect that a role has on access to the data resource. Possible values: " + utils.ConvertStringSlicesToString(
+								fabcore.PossibleEffectValues(),
+								true,
+								true,
+							) + ".",
+							Validators: []validator.String{
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleEffectValues(), true)...),
+							},
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
@@ -77,9 +149,9 @@ func itemSchema() superschema.Schema {
 							Computed: true,
 						},
 					},
-					"decision_rules": superschema.SuperSetNestedAttributeOf[decisionRule]{
+					"permission": superschema.SuperSetNestedAttributeOf[permissionScope]{
 						Common: &schemaR.SetNestedAttribute{
-							MarkdownDescription: "The array of permissions that make up the Data access role.",
+							MarkdownDescription: "Permissions defined by attribute name and values.",
 						},
 						Resource: &schemaR.SetNestedAttribute{
 							Required: true,
@@ -88,15 +160,15 @@ func itemSchema() superschema.Schema {
 							Computed: true,
 						},
 						Attributes: superschema.Attributes{
-							"effect": superschema.SuperStringAttribute{
+							"attribute_name": superschema.StringAttribute{
 								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The effect that a role has on access to the data resource. Possible values: " + utils.ConvertStringSlicesToString(
-										fabcore.PossibleEffectValues(),
+									MarkdownDescription: "The name of the attribute that is being evaluated for access permissions. Possible values: " + utils.ConvertStringSlicesToString(
+										fabcore.PossibleAttributeNameValues(),
 										true,
 										true,
 									) + ".",
 									Validators: []validator.String{
-										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleEffectValues(), true)...),
+										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleAttributeNameValues(), true)...),
 									},
 								},
 								Resource: &schemaR.StringAttribute{
@@ -106,166 +178,144 @@ func itemSchema() superschema.Schema {
 									Computed: true,
 								},
 							},
-							"permission": superschema.SuperSetNestedAttributeOf[permissionScope]{
-								Common: &schemaR.SetNestedAttribute{
-									MarkdownDescription: "Permissions defined by attribute name and values.",
+							"attribute_value_included_in": superschema.SuperSetAttribute{
+								Common: &schemaR.SetAttribute{
+									ElementType:         types.StringType,
+									MarkdownDescription: "Allowed values for this attribute.",
 								},
-								Resource: &schemaR.SetNestedAttribute{
-									Required: true,
+								Resource: &schemaR.SetAttribute{
+									ElementType: types.StringType,
+									Required:    true,
 								},
-								DataSource: &schemaD.SetNestedAttribute{
-									Computed: true,
-								},
-								Attributes: superschema.Attributes{
-									"attribute_name": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The name of the attribute that is being evaluated for access permissions. Possible values: " + utils.ConvertStringSlicesToString(
-												fabcore.PossibleAttributeNameValues(),
-												true,
-												true,
-											) + ".",
-											Validators: []validator.String{
-												stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleAttributeNameValues(), true)...),
-											},
-										},
-										Resource: &schemaR.StringAttribute{
-											Required: true,
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-									},
-									"attribute_value_included_in": superschema.SuperSetAttribute{
-										Common: &schemaR.SetAttribute{
-											ElementType:         types.StringType,
-											MarkdownDescription: "Allowed values for this attribute.",
-										},
-										Resource: &schemaR.SetAttribute{
-											ElementType: types.StringType,
-											Required:    true,
-										},
-										DataSource: &schemaD.SetAttribute{
-											ElementType: types.StringType,
-											Computed:    true,
-										},
-									},
-								},
-							},
-						},
-					},
-					"members": superschema.SingleNestedAttribute{
-						Common: &schemaR.SingleNestedAttribute{
-							MarkdownDescription: "The members object which contains the members of the role as arrays of different member types.",
-						},
-						Resource: &schemaR.SingleNestedAttribute{
-							Required: true,
-						},
-						DataSource: &schemaD.SingleNestedAttribute{
-							Computed: true,
-						},
-						Attributes: superschema.Attributes{
-							"fabric_item_members": superschema.SuperSetNestedAttributeOf[FabricItemMember]{
-								Common: &schemaR.SetNestedAttribute{
-									MarkdownDescription: "Fabric-scoped members with path-based access.",
-								},
-								Resource: &schemaR.SetNestedAttribute{
-									Optional: true,
-								},
-								DataSource: &schemaD.SetNestedAttribute{
-									Computed: true,
-								},
-								Attributes: superschema.Attributes{
-									"item_access": superschema.SuperSetAttribute{
-										Common: &schemaR.SetAttribute{
-											ElementType:         types.StringType,
-											MarkdownDescription: "Permissions for the item.",
-										},
-										Resource: &schemaR.SetAttribute{
-											ElementType: types.StringType,
-											Required:    true,
-										},
-										DataSource: &schemaD.SetAttribute{
-											ElementType: types.StringType,
-											Computed:    true,
-										},
-									},
-									"source_path": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The path to Fabric item having the specified item access.",
-											Validators: []validator.String{
-												stringvalidator.RegexMatches(
-													regexp.MustCompile(`^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?/[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$`),
-													"Source path must be a combination of two GUIDs separated by a slash.",
-												),
-											},
-										},
-										Resource: &schemaR.StringAttribute{
-											Required: true,
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-									},
-								},
-							},
-							"microsoft_entra_members": superschema.SuperSetNestedAttributeOf[MicrosoftEntraMember]{
-								Common: &schemaR.SetNestedAttribute{
-									MarkdownDescription: "The list of Microsoft Entra ID members.",
-								},
-								Resource: &schemaR.SetNestedAttribute{
-									Optional: true,
-								},
-								DataSource: &schemaD.SetNestedAttribute{
-									Computed: true,
-								},
-								Attributes: superschema.Attributes{
-									"object_id": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The object id.",
-											CustomType:          customtypes.UUIDType{},
-										},
-										Resource: &schemaR.StringAttribute{
-											Required: true,
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-									},
-									"object_type": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The type of Microsoft Entra ID object. Possible values: " + utils.ConvertStringSlicesToString(
-												fabcore.PossibleObjectTypeValues(),
-												true,
-												true,
-											) + ".",
-											Validators: []validator.String{
-												stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleObjectTypeValues(), true)...),
-											},
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-										Resource: &schemaR.StringAttribute{
-											Required: true,
-										},
-									},
-									"tenant_id": superschema.SuperStringAttribute{
-										Common: &schemaR.StringAttribute{
-											MarkdownDescription: "The tenant id.",
-											CustomType:          customtypes.UUIDType{},
-										},
-										DataSource: &schemaD.StringAttribute{
-											Computed: true,
-										},
-										Resource: &schemaR.StringAttribute{
-											Required: true,
-										},
-									},
+								DataSource: &schemaD.SetAttribute{
+									ElementType: types.StringType,
+									Computed:    true,
 								},
 							},
 						},
 					},
 				},
+			},
+			"members": superschema.SuperSingleNestedAttributeOf[memberModel]{
+				Common: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "The members object which contains the members of the role as arrays of different member types.",
+				},
+				Resource: &schemaR.SingleNestedAttribute{
+					Required: true,
+				},
+				DataSource: &schemaD.SingleNestedAttribute{
+					Computed: true,
+				},
+				Attributes: superschema.Attributes{
+					"fabric_item_members": superschema.SuperSetNestedAttributeOf[fabricItemMember]{
+						Common: &schemaR.SetNestedAttribute{
+							MarkdownDescription: "Fabric-scoped members with path-based access.",
+						},
+						Resource: &schemaR.SetNestedAttribute{
+							Optional: true,
+						},
+						DataSource: &schemaD.SetNestedAttribute{
+							Computed: true,
+						},
+						Attributes: superschema.Attributes{
+							"item_access": superschema.SuperSetAttribute{
+								Common: &schemaR.SetAttribute{
+									ElementType:         types.StringType,
+									MarkdownDescription: "Permissions for the item.",
+								},
+								Resource: &schemaR.SetAttribute{
+									ElementType: types.StringType,
+									Required:    true,
+								},
+								DataSource: &schemaD.SetAttribute{
+									ElementType: types.StringType,
+									Computed:    true,
+								},
+							},
+							"source_path": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The path to Fabric item having the specified item access.",
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?/[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$`),
+											"Source path must be a combination of two GUIDs separated by a slash.",
+										),
+									},
+								},
+								Resource: &schemaR.StringAttribute{
+									Required: true,
+								},
+								DataSource: &schemaD.StringAttribute{
+									Computed: true,
+								},
+							},
+						},
+					},
+					"microsoft_entra_members": superschema.SuperSetNestedAttributeOf[microsoftEntraMember]{
+						Common: &schemaR.SetNestedAttribute{
+							MarkdownDescription: "The list of Microsoft Entra ID members.",
+						},
+						Resource: &schemaR.SetNestedAttribute{
+							Optional: true,
+						},
+						DataSource: &schemaD.SetNestedAttribute{
+							Computed: true,
+						},
+						Attributes: superschema.Attributes{
+							"object_id": superschema.SuperStringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The object id.",
+									CustomType:          customtypes.UUIDType{},
+								},
+								Resource: &schemaR.StringAttribute{
+									Required: true,
+								},
+								DataSource: &schemaD.StringAttribute{
+									Computed: true,
+								},
+							},
+							"object_type": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The type of Microsoft Entra ID object. Possible values: " + utils.ConvertStringSlicesToString(
+										fabcore.PossibleObjectTypeValues(),
+										true,
+										true,
+									) + ".",
+									Validators: []validator.String{
+										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleObjectTypeValues(), true)...),
+									},
+								},
+								Resource: &schemaR.StringAttribute{
+									Required: true,
+								},
+								DataSource: &schemaD.StringAttribute{
+									Computed: true,
+								},
+							},
+							"tenant_id": superschema.SuperStringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The tenant id.",
+									CustomType:          customtypes.UUIDType{},
+								},
+								Resource: &schemaR.StringAttribute{
+									Required: true,
+								},
+								DataSource: &schemaD.StringAttribute{
+									Computed: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			"timeouts": superschema.TimeoutAttribute{
+				Resource: &superschema.ResourceTimeoutAttribute{
+					Create: true,
+					Read:   true,
+					Update: true,
+					Delete: true,
+				},
+				DataSource: dsTimeout,
 			},
 		},
 	}

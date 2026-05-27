@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -16,20 +17,25 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Types, "test")
 
-func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
+func TestUnit_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOneLakeDataAccessRole()
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRole(entity)
+	entity1 := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	entity2 := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	entity3 := fakes.NewRandomOneLakeDataAccessRoleListItem()
 
-	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRoles(
+		[]fabcore.DataAccessRoleListItem{entity1, entity2, entity3},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemsFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
 			Config: at.CompileConfig(
-				testDataSourceItemHeader,
+				testDataSourceItemsHeader,
 				map[string]any{},
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
@@ -37,11 +43,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 		// error - workspace_id - invalid UUID
 		{
 			Config: at.CompileConfig(
-				testDataSourceItemHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
 					"item_id":      itemID,
-					"name":         *entity.Name,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -49,11 +54,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 		// error - item_id - invalid UUID
 		{
 			Config: at.CompileConfig(
-				testDataSourceItemHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      "invalid uuid",
-					"name":         *entity.Name,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -61,43 +65,40 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 		// read
 		{
 			Config: at.CompileConfig(
-				testDataSourceItemHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         *entity.Name,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", *entity.Name),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.#", "3"),
 			),
 		},
 	}))
 }
 
-func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
+func TestAcc_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
 	lakehouse := testhelp.WellKnown()["LakehouseRS"].(map[string]any)
 	itemID := lakehouse["id"].(string)
 
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
+	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemsFQN, nil, []resource.TestStep{
 		{
 			Config: at.CompileConfig(
-				testDataSourceItemHeader,
+				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         "DefaultReader",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "item_id", itemID),
 			),
 		},
 	}))

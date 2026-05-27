@@ -4,14 +4,14 @@
 package onelakedataaccesssecurity_test
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -19,7 +19,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
 
-var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Types, "test")
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -38,8 +38,9 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"item_id":         testhelp.RandomUUID(),
 					"workspace_id":    testhelp.RandomUUID(),
+					"item_id":         testhelp.RandomUUID(),
+					"name":            "role",
 					"unexpected_attr": "test",
 				},
 			),
@@ -67,49 +68,63 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
+		// error - no required attribute - name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"item_id":      testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(`The argument "name" is required, but no definition was found.`),
+		},
 	}))
 }
 
 func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), workspaceID))
-	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), workspaceID))
+	entity := fabcore.DataAccessRoleBase{
+		Name: to.Ptr("example"),
+		Kind: to.Ptr(fabcore.DataAccessRoleKindPolicy),
+		DecisionRules: []fabcore.DecisionRule{{
+			Effect: to.Ptr(fabcore.EffectPermit),
+			Permission: []fabcore.PermissionScope{
+				{AttributeName: to.Ptr(fabcore.AttributeNamePath), AttributeValueIncludedIn: []string{"*"}},
+				{AttributeName: to.Ptr(fabcore.AttributeNameAction), AttributeValueIncludedIn: []string{"Read"}},
+			},
+		}},
+		Members: &fabcore.Members{
+			FabricItemMembers: []fabcore.FabricItemMember{{
+				ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
+				SourcePath: to.Ptr(workspaceID + "/" + itemID),
+			}},
+		},
+	}
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRole(entity)
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
 		map[string]any{
 			"workspace_id": workspaceID,
 			"item_id":      itemID,
-			"value": []map[string]any{
+			"name":         "example",
+			"decision_rules": []map[string]any{
 				{
-					"name": *entity.Value[0].Name,
-					"decision_rules": []map[string]any{
-						{
-							"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
-							"permission": []map[string]any{
-								{
-									"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
-									"attribute_value_included_in": []string{"*"},
-								},
-								{
-									"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
-									"attribute_value_included_in": []string{"Read"},
-								},
-							},
-						},
+					"effect": "Permit",
+					"permission": []map[string]any{
+						{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+						{"attribute_name": "Action", "attribute_value_included_in": []string{"Read"}},
 					},
-					"members": map[string]any{
-						"fabric_item_members": []map[string]any{
-							{
-								"item_access": []string{"ReadAll"},
-								"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
-							},
-						},
-					},
+				},
+			},
+			"members": map[string]any{
+				"fabric_item_members": []map[string]any{
+					{"item_access": []string{"ReadAll"}, "source_path": workspaceID + "/" + itemID},
 				},
 			},
 		},
@@ -121,41 +136,45 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID")),
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Name")),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
 			Config:        testCase,
-			ImportStateId: "test/id",
+			ImportStateId: "test/id/name",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
-		},
-		// Import state testing - onelake data access security
-		{
-			ResourceName:       testResourceItemFQN,
-			Config:             testCase,
-			ImportStateId:      fmt.Sprintf("%s/%s", workspaceID, itemID),
-			ImportState:        true,
-			ImportStatePersist: true,
-			ImportStateCheck: func(is []*terraform.InstanceState) error {
-				if len(is) != 1 {
-					return errors.New("expected one instance state")
-				}
-
-				return nil
-			},
 		},
 	}))
 }
 
 func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(testhelp.RandomUUID(), testhelp.RandomUUID())
-
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateDataAccessRoles = fakeCreateOrUpdateOneLakeDataAccessSecurity()
-
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entityNameUpdate := testhelp.RandomName()
+
+	entity := fabcore.DataAccessRoleBase{
+		Name: to.Ptr("example"),
+		Kind: to.Ptr(fabcore.DataAccessRoleKindPolicy),
+		DecisionRules: []fabcore.DecisionRule{{
+			Effect: to.Ptr(fabcore.EffectPermit),
+			Permission: []fabcore.PermissionScope{
+				{AttributeName: to.Ptr(fabcore.AttributeNamePath), AttributeValueIncludedIn: []string{"*"}},
+				{AttributeName: to.Ptr(fabcore.AttributeNameAction), AttributeValueIncludedIn: []string{"Read"}},
+			},
+		}},
+		Members: &fabcore.Members{
+			FabricItemMembers: []fabcore.FabricItemMember{{
+				ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
+				SourcePath: to.Ptr(workspaceID + "/" + itemID),
+			}},
+		},
+	}
+
+	state := newOneLakeDataAccessSecurityState(entity)
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRole(state)
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeStatefulGetDataAccessRole(state)
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRole()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
@@ -166,40 +185,28 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"value": []map[string]any{
+					"name":         "example",
+					"decision_rules": []map[string]any{
 						{
-							"name": *entity.Value[0].Name,
-							"decision_rules": []map[string]any{
-								{
-									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
-									"permission": []map[string]any{
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
-											"attribute_value_included_in": []string{"*"},
-										},
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
-											"attribute_value_included_in": []string{"Read"},
-										},
-									},
-								},
+							"effect": "Permit",
+							"permission": []map[string]any{
+								{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+								{"attribute_name": "Action", "attribute_value_included_in": []string{"Read"}},
 							},
-							"members": map[string]any{
-								"fabric_item_members": []map[string]any{
-									{
-										"item_access": []string{"ReadAll"},
-										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
-									},
-								},
-							},
+						},
+					},
+					"members": map[string]any{
+						"fabric_item_members": []map[string]any{
+							{"item_access": []string{"ReadAll"}, "source_path": workspaceID + "/" + itemID},
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", "example"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "decision_rules.0.effect", "Permit"),
 			),
 		},
 		// Update and Read
@@ -210,38 +217,25 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"value": []map[string]any{
+					"name":         "example",
+					"decision_rules": []map[string]any{
 						{
-							"name": entityNameUpdate,
-							"decision_rules": []map[string]any{
-								{
-									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
-									"permission": []map[string]any{
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
-											"attribute_value_included_in": []string{"*"},
-										},
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
-											"attribute_value_included_in": []string{"Read"},
-										},
-									},
-								},
+							"effect": "Permit",
+							"permission": []map[string]any{
+								{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+								{"attribute_name": "Action", "attribute_value_included_in": []string{"ReadWrite"}},
 							},
-							"members": map[string]any{
-								"fabric_item_members": []map[string]any{
-									{
-										"item_access": []string{"ReadAll"},
-										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
-									},
-								},
-							},
+						},
+					},
+					"members": map[string]any{
+						"fabric_item_members": []map[string]any{
+							{"item_access": []string{"ReadAll", "Write"}, "source_path": workspaceID + "/" + itemID},
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", "example"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
@@ -256,9 +250,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	lakehouse := testhelp.WellKnown()["LakehouseRS"].(map[string]any)
 	itemID := lakehouse["id"].(string)
 
-	entity := fakes.NewRandomOneLakeDataAccessesSecurityClient(itemID, workspaceID)
-
-	entityNameUpdate := testhelp.RandomName()
+	roleName := testhelp.RandomName()
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -268,38 +260,25 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"value": []map[string]any{
+					"name":         roleName,
+					"decision_rules": []map[string]any{
 						{
-							"name": *entity.Value[0].Name,
-							"decision_rules": []map[string]any{
-								{
-									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
-									"permission": []map[string]any{
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
-											"attribute_value_included_in": []string{"*"},
-										},
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
-											"attribute_value_included_in": []string{"Read"},
-										},
-									},
-								},
+							"effect": "Permit",
+							"permission": []map[string]any{
+								{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+								{"attribute_name": "Action", "attribute_value_included_in": []string{"Read"}},
 							},
-							"members": map[string]any{
-								"fabric_item_members": []map[string]any{
-									{
-										"item_access": []string{"ReadAll"},
-										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
-									},
-								},
-							},
+						},
+					},
+					"members": map[string]any{
+						"fabric_item_members": []map[string]any{
+							{"item_access": []string{"ReadAll"}, "source_path": workspaceID + "/" + itemID},
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", *entity.Value[0].Name),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", roleName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
@@ -311,40 +290,25 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"value": []map[string]any{
+					"name":         roleName,
+					"decision_rules": []map[string]any{
 						{
-							"name": entityNameUpdate,
-							"decision_rules": []map[string]any{
-								{
-									"effect": (string)(*entity.Value[0].DecisionRules[0].Effect),
-									"permission": []map[string]any{
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[0].AttributeName),
-											"attribute_value_included_in": []string{"*"},
-										},
-										{
-											"attribute_name":              string(*entity.Value[0].DecisionRules[0].Permission[1].AttributeName),
-											"attribute_value_included_in": []string{"Read"},
-										},
-									},
-								},
+							"effect": "Permit",
+							"permission": []map[string]any{
+								{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+								{"attribute_name": "Action", "attribute_value_included_in": []string{"ReadWrite"}},
 							},
-							"members": map[string]any{
-								"fabric_item_members": []map[string]any{
-									{
-										"item_access": []string{"ReadAll"},
-										"source_path": *entity.Value[0].Members.FabricItemMembers[0].SourcePath,
-									},
-								},
-							},
+						},
+					},
+					"members": map[string]any{
+						"fabric_item_members": []map[string]any{
+							{"item_access": []string{"ReadAll", "Write"}, "source_path": workspaceID + "/" + itemID},
 						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "value.0.name", entityNameUpdate),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "name", roleName),
 			),
 		},
 	}))

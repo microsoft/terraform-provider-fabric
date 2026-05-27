@@ -9,8 +9,10 @@ import (
 
 var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "OneLake Data Access Security",
-	Types:          "onelake_data_access_security",
-	DocsURL:        "https://learn.microsoft.com/power-bi/consumer/end-user-dashboards",
+	Type:           "onelake_data_access_security",
+	Names:          "OneLake Data Access Securities",
+	Types:          "onelake_data_access_securities",
+	DocsURL:        "https://learn.microsoft.com/fabric/onelake/security/data-access-security-overview",
 	IsPreview:      true,
 	IsSPNSupported: true,
 }
