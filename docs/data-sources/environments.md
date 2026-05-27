@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Environment Folder ID.
 - `id` (String) The Environment ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Environment sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -104,3 +105,11 @@ Read-Only:
 Read-Only:
 
 - `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

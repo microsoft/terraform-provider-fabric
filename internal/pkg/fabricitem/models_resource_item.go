@@ -17,7 +17,7 @@ import (
 )
 
 type resourceFabricItemModel struct {
-	fabricItemModel
+	resourceFabricItemBaseModel
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
@@ -41,6 +41,24 @@ func (to *requestCreateFabricItem) setDescription(v types.String) {
 
 func (to *requestCreateFabricItem) setFolderID(v customtypes.UUID) {
 	to.FolderID = v.ValueStringPointer()
+}
+
+func (to *requestCreateFabricItem) setSensitivityLabelSettings(ctx context.Context, v supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel]) diag.Diagnostics {
+	if !v.IsNull() && !v.IsUnknown() {
+		sensitivityLabelSettingsModel, diags := v.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		strategy := fabcore.SensitivityLabelApplyStrategy(sensitivityLabelSettingsModel.SensitivityLabelApplyStrategy.ValueString())
+
+		to.SensitivityLabelSettings = &fabcore.SensitivityLabelSettings{
+			LabelID:                       sensitivityLabelSettingsModel.LabelID.ValueStringPointer(),
+			SensitivityLabelApplyStrategy: &strategy,
+		}
+	}
+
+	return nil
 }
 
 func (to *requestCreateFabricItem) setType(v fabcore.ItemType) {

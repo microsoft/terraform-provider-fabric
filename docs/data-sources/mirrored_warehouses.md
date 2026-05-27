@@ -57,4 +57,13 @@ Read-Only:
 - `display_name` (String) The Mirrored Warehouse display name.
 - `folder_id` (String) The Mirrored Warehouse Folder ID.
 - `id` (String) The Mirrored Warehouse ID.
+- `sensitivity_label` (Attributes) The Mirrored Warehouse sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

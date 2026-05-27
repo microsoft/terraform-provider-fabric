@@ -150,9 +150,7 @@ func (d *DataSourceFabricItemDefinition) getByID(ctx context.Context, model *dat
 		return diags
 	}
 
-	model.set(respGet.Item)
-
-	return nil
+	return model.set(ctx, respGet.Item)
 }
 
 func (d *DataSourceFabricItemDefinition) getByDisplayName(ctx context.Context, model *dataSourceFabricItemDefinitionModel) diag.Diagnostics {
@@ -173,9 +171,7 @@ func (d *DataSourceFabricItemDefinition) getByDisplayName(ctx context.Context, m
 
 		for _, entity := range page.Value {
 			if *entity.DisplayName == model.DisplayName.ValueString() {
-				model.set(entity)
-
-				return nil
+				return model.set(ctx, entity)
 			}
 		}
 	}

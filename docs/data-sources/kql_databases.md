@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The KQL Database Folder ID.
 - `id` (String) The KQL Database ID.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The KQL Database sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -67,3 +68,11 @@ Read-Only:
 - `eventhouse_id` (String) Parent Eventhouse ID.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

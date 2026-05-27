@@ -123,6 +123,10 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	creationPayload, diags := getCreationPayload(ctx, config.Configuration, r.CreationPayloadSetter)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -344,9 +348,12 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	state := ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
+		resourceFabricItemPropertiesBaseModel: resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
+			fabricItemPropertiesModel: fabricItemPropertiesModel[Ttfprop, Titemprop]{
+				ID:          uuidFabricItemID,
+				WorkspaceID: uuidWorkspaceID,
+			},
+			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
 		},
 		Configuration: configuration,
 		Timeouts:      timeout,

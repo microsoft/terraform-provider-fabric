@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -100,12 +101,20 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabelSettings(ctx, plan.SensitivityLabelSettings)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	respCreate, err := CreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	plan.set(respCreate.Item)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -289,6 +298,7 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 	state := resourceFabricItemModel{}
 	state.ID = uuidFabricItemID
 	state.WorkspaceID = uuidWorkspaceID
+	state.SensitivityLabelSettings = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx)
 	state.Timeouts = timeout
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

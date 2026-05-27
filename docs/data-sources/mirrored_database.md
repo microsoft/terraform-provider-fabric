@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The Mirrored Database description.
 - `folder_id` (String) The Mirrored Database Folder ID.
 - `properties` (Attributes) The Mirrored Database properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label` (Attributes) The Mirrored Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -117,3 +118,11 @@ Read-Only:
 - `connection_string` (String) The SQL endpoint connection string.
 - `id` (String) The SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
