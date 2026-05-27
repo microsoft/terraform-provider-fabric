@@ -14,6 +14,7 @@ import (
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/params"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/transforms"
 )
@@ -24,6 +25,7 @@ type resourceFabricItemDefinitionModel struct {
 	Format                  types.String                                                             `tfsdk:"format"`
 	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`
 	Definition              supertypes.MapNestedObjectValueOf[resourceFabricItemDefinitionPartModel] `tfsdk:"definition"`
+	Tags                    supertypes.SetValueOf[customtypes.UUID]                                  `tfsdk:"tags"`
 	Timeouts                timeouts.Value                                                           `tfsdk:"timeouts"`
 }
 

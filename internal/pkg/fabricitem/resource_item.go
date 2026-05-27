@@ -31,9 +31,11 @@ var (
 type ResourceFabricItem struct {
 	pConfigData          *pconfig.ProviderData
 	client               *fabcore.ItemsClient
+	tagsClient           *fabcore.TagsClient
 	FabricItemType       fabcore.ItemType
 	TypeInfo             tftypeinfo.TFTypeInfo
 	NameRenameAllowed    bool
+	TagsSupported        bool
 	DisplayNameMaxLength int
 	DescriptionMaxLength int
 }

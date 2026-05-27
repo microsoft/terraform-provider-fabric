@@ -32,6 +32,7 @@ type DataSourceFabricItem struct {
 	FabricItemType      fabcore.ItemType
 	TypeInfo            tftypeinfo.TFTypeInfo
 	IsDisplayNameUnique bool
+	TagsSupported       bool
 }
 
 func NewDataSourceFabricItem(config DataSourceFabricItem) datasource.DataSource {

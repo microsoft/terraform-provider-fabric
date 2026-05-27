@@ -74,6 +74,7 @@ func NewDataSourceWarehouse() datasource.DataSource {
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			TagsSupported:       true,
 		},
 		PropertiesAttributes: getDataSourceWarehousePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,

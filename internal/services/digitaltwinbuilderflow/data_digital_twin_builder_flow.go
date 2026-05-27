@@ -76,6 +76,7 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			TagsSupported:       true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceDigitalTwinBuilderFlowProperties(ctx),

@@ -54,6 +54,7 @@ func NewResourceEnvironment(ctx context.Context) resource.Resource {
 			TypeInfo:             ItemTypeInfo,
 			FabricItemType:       FabricItemType,
 			NameRenameAllowed:    true,
+			TagsSupported:        true,
 			DisplayNameMaxLength: 123,
 			DescriptionMaxLength: 256,
 		},

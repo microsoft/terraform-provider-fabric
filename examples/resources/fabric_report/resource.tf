@@ -22,11 +22,12 @@ resource "fabric_report" "example_pbir" {
   }
 }
 
-# Create Report with PBIR format, with visuals
-resource "fabric_report" "example_pbir_with_visuals" {
-  display_name = "test"
+# Create Report with PBIR format, with visuals and tags
+resource "fabric_report" "example_pbir_with_visuals_and_tags" {
+  display_name = "test_with_tags"
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "PBIR"
+  tags         = [fabric_tag.report_tag.id]
   definition = {
     "definition/report.json" = {
       source = "${local.path}/definition/report.json"

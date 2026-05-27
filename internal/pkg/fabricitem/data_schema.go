@@ -36,6 +36,10 @@ func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFa
 
 	maps.Copy(attributes, getDataSourceFabricItemDefinitionAttributes(ctx, d.TypeInfo.Name, d.DefinitionFormats))
 
+	if d.TagsSupported {
+		attributes[TagsAttrPath] = getDataSourceFabricItemTagsAttribute(d.TypeInfo.Name)
+	}
+
 	return schema.Schema{
 		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
 		Attributes:          attributes,
@@ -45,6 +49,7 @@ func getDataSourceFabricItemDefinitionSchema(ctx context.Context, d DataSourceFa
 func getDataSourceFabricItemPropertiesSchema[Ttfprop, Titemprop any](ctx context.Context, d DataSourceFabricItemProperties[Ttfprop, Titemprop]) schema.Schema {
 	attributes := getDataSourceFabricItemBaseAttributes(ctx, d.TypeInfo.Name, d.IsDisplayNameUnique)
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
+	attributes[TagsAttrPath] = getDataSourceFabricItemTagsAttribute(d.TypeInfo.Name)
 
 	return schema.Schema{
 		MarkdownDescription: NewDataSourceMarkdownDescription(d.TypeInfo, false),
@@ -166,5 +171,28 @@ func getDataSourceFabricItemPropertiesNestedAttr[Ttfprop any](ctx context.Contex
 		Computed:            true,
 		CustomType:          supertypes.NewSingleNestedObjectTypeOf[Ttfprop](ctx),
 		Attributes:          attributes,
+	}
+}
+
+// getDataSourceFabricItemTagsAttribute returns the schema attribute used by
+// tag-supporting item data sources. Tags are exposed as a Computed Set of nested
+// objects ({id, display_name}) reflecting the server-of-record state.
+func getDataSourceFabricItemTagsAttribute(name string) schema.Attribute {
+	return schema.SetNestedAttribute{
+		MarkdownDescription: "Set of tags applied to this " + name + ".",
+		Computed:            true,
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				"id": schema.StringAttribute{
+					MarkdownDescription: "The Tag ID.",
+					Computed:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+				"display_name": schema.StringAttribute{
+					MarkdownDescription: "The Tag display name.",
+					Computed:            true,
+				},
+			},
+		},
 	}
 }

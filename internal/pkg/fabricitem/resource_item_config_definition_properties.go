@@ -161,6 +161,10 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
+
+	if r.TagsSupported {
+		r.tagsClient = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewTagsClient()
+	}
 }
 
 func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) Create(
@@ -219,6 +223,22 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
+	}
+
+	if r.TagsSupported {
+		// State after create has no applied tags; reconcile against an empty set.
+		emptyState := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+		changed, d := r.reconcileTags(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), plan.Tags, emptyState)
+		if resp.Diagnostics.Append(d...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		if changed {
+			if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+				return
+			}
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)

@@ -74,6 +74,7 @@ func NewDataSourceVariableLibrary() datasource.DataSource {
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			TagsSupported:       true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceVariableLibraryPropertiesAttributes(),

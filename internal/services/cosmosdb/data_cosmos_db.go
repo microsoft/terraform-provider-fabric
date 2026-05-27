@@ -14,6 +14,7 @@ func NewDataSourceCosmosDB() datasource.DataSource {
 		TypeInfo:            ItemTypeInfo,
 		FabricItemType:      FabricItemType,
 		IsDisplayNameUnique: true,
+		TagsSupported:       true,
 		DefinitionFormats:   itemDefinitionFormats,
 	}
 

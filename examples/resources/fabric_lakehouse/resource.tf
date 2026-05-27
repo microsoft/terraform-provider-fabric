@@ -15,6 +15,12 @@ resource "fabric_lakehouse" "example2" {
   }
 }
 
+# Lakehouse resource with tags
+resource "fabric_lakehouse" "example_with_tags" {
+  display_name = "example_with_tags"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  tags         = [fabric_tag.lakehouse_tag.id]
+}
 
 # Item with definition bootstrapping only
 resource "fabric_lakehouse" "example_definition_bootstrap" {

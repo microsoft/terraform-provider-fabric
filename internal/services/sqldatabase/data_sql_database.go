@@ -74,6 +74,7 @@ func NewDataSourceSQLDatabase() datasource.DataSource {
 			TypeInfo:            ItemTypeInfo,
 			FabricItemType:      FabricItemType,
 			IsDisplayNameUnique: true,
+			TagsSupported:       true,
 			DefinitionFormats:   itemDefinitionFormats,
 		},
 		PropertiesAttributes: getDataSourceSQLDatabasePropertiesAttributes(),

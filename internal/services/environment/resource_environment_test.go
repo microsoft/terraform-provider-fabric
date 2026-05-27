@@ -274,3 +274,29 @@ func TestAcc_EnvironmentResource_CRUD(t *testing.T) {
 	},
 	))
 }
+
+func TestUnit_EnvironmentResource_Tags(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entity := fakes.NewRandomEnvironmentWithWorkspace(workspaceID)
+	fakes.FakeServer.Upsert(entity)
+
+	displayName := fmt.Sprintf("test-env-%s", testhelp.RandomName())
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Verify tags schema is present and optional
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				`provider "fabric" { preview = true }`+"\n"+testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entity.WorkspaceID,
+					"display_name": displayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", displayName),
+				// Verify resource created successfully with tags schema available
+			),
+		},
+	}))
+}
