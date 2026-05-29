@@ -39,12 +39,6 @@ func SetResourceTagsFromItem(_ context.Context, tags *types.Set, from []fabcore.
 }
 
 func SetDataSourceTagsFromItem(ctx context.Context, tags *supertypes.SetNestedObjectValueOf[DataSourceTagModel], from []fabcore.ItemTag) diag.Diagnostics {
-	if from == nil {
-		*tags = supertypes.NewSetNestedObjectValueOfNull[DataSourceTagModel](ctx)
-
-		return nil
-	}
-
 	result := make([]*DataSourceTagModel, 0, len(from))
 
 	for _, tag := range from {
@@ -61,44 +55,37 @@ func SetDataSourceTagsFromItem(ctx context.Context, tags *supertypes.SetNestedOb
 	return nil
 }
 
-// SyncTags synchronizes item tags: lists current tags, unapplies all existing, then applies desired ones.
-// A null set means "remove all tags" (attribute omitted from config).
-func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, itemsClient *fabcore.ItemsClient, tags types.Set, workspaceID, itemID string) diag.Diagnostics {
+// SyncTags synchronizes item tags: unapplies current tags, then applies desired ones.
+// A null or empty desiredTags means "remove all tags". CurrentTags represents the known state tags.
+func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, desiredTags, currentTags types.Set, workspaceID, itemID string) diag.Diagnostics {
 	var desiredTagIDs []string
 
-	if !tags.IsNull() {
-		if diags := tags.ElementsAs(ctx, &desiredTagIDs, false); diags.HasError() {
+	if !desiredTags.IsNull() {
+		if diags := desiredTags.ElementsAs(ctx, &desiredTagIDs, false); diags.HasError() {
 			return diags
 		}
 	}
 
-	// Get current tags from the item
-	respGet, err := itemsClient.GetItem(ctx, workspaceID, itemID, nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
-		return diags
+	var currentTagIDs []string
+
+	if !currentTags.IsNull() {
+		if diags := currentTags.ElementsAs(ctx, &currentTagIDs, false); diags.HasError() {
+			return diags
+		}
 	}
 
-	// Unapply all current tags
-	if len(respGet.Tags) > 0 {
-		currentTagIDs := make([]string, 0, len(respGet.Tags))
-		for _, tag := range respGet.Tags {
-			if tag.ID != nil {
-				currentTagIDs = append(currentTagIDs, *tag.ID)
-			}
-		}
-
-		if len(currentTagIDs) > 0 {
-			_, err := tagsClient.UnapplyTags(ctx, workspaceID, itemID, fabcore.UnapplyTagsRequest{Tags: currentTagIDs}, nil)
-			if diags := utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil); diags.HasError() {
-				return diags
-			}
+	// Unapply current tags
+	if len(currentTagIDs) > 0 {
+		_, err := tagsClient.UnapplyTags(ctx, workspaceID, itemID, fabcore.UnapplyTagsRequest{Tags: currentTagIDs}, nil)
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil); diags.HasError() {
+			return diags
 		}
 	}
 
 	// Apply desired tags
 	if len(desiredTagIDs) > 0 {
 		_, err := tagsClient.ApplyTags(ctx, workspaceID, itemID, fabcore.ApplyTagsRequest{Tags: desiredTagIDs}, nil)
-		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil); diags.HasError() {
+		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil); diags.HasError() {
 			return diags
 		}
 	}

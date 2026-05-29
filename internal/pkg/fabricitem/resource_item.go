@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
@@ -114,14 +115,20 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	tagDiags := SyncTags(ctx, r.tagsClient, r.client, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())
+	// Save state immediately so the item is tracked even if tags fail
+	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plannedTags, types.SetNull(customtypes.UUIDType{}), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
-	resp.Diagnostics.Append(tagDiags...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
@@ -221,7 +228,7 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
-		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, r.client, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plan.Tags, state.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
