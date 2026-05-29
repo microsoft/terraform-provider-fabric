@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -141,8 +142,11 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
 	plan.WorkspaceID = customtypes.NewUUIDPointerValue(respCreate.WorkspaceID)
 
-	// Save state immediately so the item is tracked even if tags fail
-	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+	// Save state with empty tags so the item is tracked even if tags fail
+	createdState := plan
+	createdState.Tags = types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})
+
+	if resp.Diagnostics.Append(resp.State.Set(ctx, createdState)...); resp.Diagnostics.HasError() {
 		return
 	}
 
