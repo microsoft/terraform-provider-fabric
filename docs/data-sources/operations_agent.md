@@ -83,6 +83,7 @@ output "example_definition_content_object" {
 - `description` (String) The Operations Agent description.
 - `folder_id` (String) The Operations Agent Folder ID.
 - `properties` (Attributes) The Operations Agent properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -108,3 +109,12 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 Read-Only:
 
 - `state` (String) The current state of the OperationsAgent. Possible values: `Active`, `Inactive`.
+
+<a id="nestedatt--tags"></a>
+
+### Nested Schema for `tags`
+
+Read-Only:
+
+- `display_name` (String) The name of the tag.
+- `id` (String) The tag ID.

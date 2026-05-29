@@ -56,6 +56,7 @@ data "fabric_warehouse_snapshot" "example_by_name" {
 - `description` (String) The Warehouse Snapshot description.
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -74,3 +75,12 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `parent_warehouse_id` (String) The parent Warehouse ID.
 - `snapshot_date_time` (String) The current warehouse snapshot date and time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+
+<a id="nestedatt--tags"></a>
+
+### Nested Schema for `tags`
+
+Read-Only:
+
+- `display_name` (String) The name of the tag.
+- `id` (String) The tag ID.

@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Digital Twin Builder Flow Folder ID.
 - `id` (String) The Digital Twin Builder Flow ID.
 - `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Attributes Set) A set of tags assigned to the Digital Twin Builder Flow. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -77,3 +78,12 @@ Read-Only:
 - `item_id` (String) The DigitalTwinBuilderFlow item ID.
 - `reference_type` (String) The DigitalTwinBuilderFlow reference type.
 - `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

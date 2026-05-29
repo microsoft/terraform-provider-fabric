@@ -37,6 +37,7 @@ resource "fabric_ml_model" "example" {
 
 - `description` (String) The ML Model description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

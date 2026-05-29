@@ -58,4 +58,14 @@ Read-Only:
 - `display_name` (String) The Map display name.
 - `folder_id` (String) The Map Folder ID.
 - `id` (String) The Map ID.
+- `tags` (Attributes Set) A set of tags assigned to the Map. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

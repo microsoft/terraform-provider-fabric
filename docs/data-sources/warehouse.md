@@ -53,6 +53,7 @@ data "fabric_warehouse" "example_by_name" {
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Warehouse Folder ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -72,3 +73,12 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.
+
+<a id="nestedatt--tags"></a>
+
+### Nested Schema for `tags`
+
+Read-Only:
+
+- `display_name` (String) The name of the tag.
+- `id` (String) The tag ID.

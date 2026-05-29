@@ -57,4 +57,14 @@ Read-Only:
 - `display_name` (String) The Mirrored Warehouse display name.
 - `folder_id` (String) The Mirrored Warehouse Folder ID.
 - `id` (String) The Mirrored Warehouse ID.
+- `tags` (Attributes Set) A set of tags assigned to the Mirrored Warehouse. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

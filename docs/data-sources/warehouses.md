@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Folder ID.
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Attributes Set) A set of tags assigned to the Warehouse. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -67,3 +68,12 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Lakehouse Folder ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -116,3 +117,12 @@ Read-Only:
 - `connection_string` (String) SQL endpoint connection string.
 - `id` (String) SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--tags"></a>
+
+### Nested Schema for `tags`
+
+Read-Only:
+
+- `display_name` (String) The name of the tag.
+- `id` (String) The tag ID.

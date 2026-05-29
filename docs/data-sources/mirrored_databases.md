@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Database Folder ID.
 - `id` (String) The Mirrored Database ID.
 - `properties` (Attributes) The Mirrored Database properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Attributes Set) A set of tags assigned to the Mirrored Database. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -76,3 +77,12 @@ Read-Only:
 - `connection_string` (String) The SQL endpoint connection string.
 - `id` (String) The SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.
