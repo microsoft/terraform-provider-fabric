@@ -1404,24 +1404,24 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
-# Create SnowflakeDatabase if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = "SnowflakeDatabaseProperties.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
-      payloadType = 'InlineBase64'
-    }
-  )
-}
+# # Create SnowflakeDatabase if not exists
+# $displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
+# $definition = @{
+#   parts = @(
+#     @{
+#       path        = "SnowflakeDatabaseProperties.json"
+#       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
+#       payloadType = 'InlineBase64'
+#     }
+#   )
+# }
 
-$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
-$wellKnown['SnowflakeDatabase'] = @{
-  id          = $snowflakeDatabase.id
-  displayName = $snowflakeDatabase.displayName
-  description = $snowflakeDatabase.description
-}
+# $snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
+# $wellKnown['SnowflakeDatabase'] = @{
+#   id          = $snowflakeDatabase.id
+#   displayName = $snowflakeDatabase.displayName
+#   description = $snowflakeDatabase.description
+# }
 
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
 $displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
@@ -1564,26 +1564,26 @@ $wellKnown['Eventstream'] = @{
   description = $eventstream.description
 }
 
-# Set Eventstream source connection
-$eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
-$eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
-$eventstreamSourceId = $eventstreamSource.id
-$eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
-$eventstreamDestinationId = $eventstreamDestination.id
+# # Set Eventstream source connection
+# $eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
+# $eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+# $eventstreamSourceId = $eventstreamSource.id
+# $eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+# $eventstreamDestinationId = $eventstreamDestination.id
 
-$eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
-$wellKnown['Eventstream']['sourceConnection'] = @{
-  sourceId                = $eventstreamSourceId
-  eventHubName            = $eventstreamConnection.eventHubName
-  fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
-}
+# $eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
+# $wellKnown['Eventstream']['sourceConnection'] = @{
+#   sourceId                = $eventstreamSourceId
+#   eventHubName            = $eventstreamConnection.eventHubName
+#   fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
+# }
 
-$eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
-$wellKnown['Eventstream']['destinationConnection'] = @{
-  destinationId           = $eventstreamDestinationId
-  eventHubName            = $eventstreamDestinationConnection.eventHubName
-  fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
-}
+# $eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
+# $wellKnown['Eventstream']['destinationConnection'] = @{
+#   destinationId           = $eventstreamDestinationId
+#   eventHubName            = $eventstreamDestinationConnection.eventHubName
+#   fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
+# }
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"
@@ -1937,7 +1937,7 @@ $definition = @{
 
 function Set-Tags {
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
-  $result = $results.Response.value[0]
+  $result = $results.Response.value | Where-Object { $_.scope.type -eq 'Tenant' } | Select-Object -First 1
   if (-not $result) {
     $payload = @{
       createTagsRequest = @(
@@ -1966,6 +1966,31 @@ $wellKnown['MountedDataFactory'] = @{
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
 }
+
+# Apply tag to Mounted Data Factory item (only if not already applied)
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+$existingTagIds = @()
+if ($itemDetails.tags) {
+  $existingTagIds = $itemDetails.tags | ForEach-Object { $_.id }
+}
+
+if ($wellKnown['Tags'].id -notin $existingTagIds) {
+  $applyTagsPayload = @{
+    tags = @($wellKnown['Tags'].id)
+  }
+  Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/applyTags" -Payload $applyTagsPayload | Out-Null
+  Write-Log -Message "ItemTags - Applied tag '$($wellKnown['Tags'].displayName)' to Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+
+  # Re-read after apply to get accurate tag data
+  $itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+}
+else {
+  Write-Log -Message "ItemTags - Tag '$($wellKnown['Tags'].displayName)' already applied to Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+}
+
+$actualTag = $itemDetails.tags | Select-Object -First 1
+$wellKnown['MountedDataFactory']['tagId'] = $actualTag.id
+$wellKnown['MountedDataFactory']['tagName'] = $actualTag.displayName
 
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {
