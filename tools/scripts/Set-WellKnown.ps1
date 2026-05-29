@@ -1085,21 +1085,8 @@ function Set-AzureSqlDatabase {
   $table1Name = 'TestTable1'
   $table2Name = 'TestTable2'
 
-  $createTableQuery = @"
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '$table1Name')
-BEGIN
-  CREATE TABLE [dbo].[$table1Name] (
-    [Id] INT IDENTITY(1,1) PRIMARY KEY
-  )
-END
-
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '$table2Name')
-BEGIN
-  CREATE TABLE [dbo].[$table2Name] (
-    [Id] INT IDENTITY(1,1) PRIMARY KEY
-  )
-END
-"@
+  $createTableQuery = (Get-Content -Path 'internal/testhelp/fixtures/azure_sql_database/create_tables.sql.tmpl' -Raw).Trim()
+  $createTableQuery = $createTableQuery.Replace('{{ .TABLE1_NAME }}', $table1Name).Replace('{{ .TABLE2_NAME }}', $table2Name)
 
   Invoke-Sqlcmd `
     -ServerInstance "$ServerName.database.windows.net" `
@@ -1110,8 +1097,6 @@ END
   Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
 
   return @{
-    Server     = $sqlServer
-    Database   = $sqlDatabase
     TableName1 = $table1Name
     TableName2 = $table2Name
   }
@@ -2015,26 +2000,26 @@ $wellKnown['AzureDataFactory'] = @{
 }
 
 # Create the Azure SQL Server and Database if not exists
-$sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
-$sqlDatabaseName = "graphqldb"
-
-$azureSql = Set-AzureSqlDatabase `
-  -ResourceGroupName $wellKnown['ResourceGroup'].name `
-  -ServerName $sqlServerName `
-  -DatabaseName $sqlDatabaseName `
-  -Location $wellKnown['ResourceGroup'].location
-
 if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
   Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "Server: $sqlServerName.database.windows.net / Database: $sqlDatabaseName" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Connections: https://app.fabric.microsoft.com/groups/me/gateways" -Level 'ERROR' -Stop $false
   Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
 }
+else {
+  $sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
+  $sqlDatabaseName = "graphqldb"
 
-$wellKnown['AzureSqlDatabase'] = @{
-  connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
-  tableName1   = $azureSql.TableName1
-  tableName2   = $azureSql.TableName2
+  $azureSql = Set-AzureSqlDatabase `
+    -ResourceGroupName $wellKnown['ResourceGroup'].name `
+    -ServerName $sqlServerName `
+    -DatabaseName $sqlDatabaseName `
+    -Location $wellKnown['ResourceGroup'].location
+
+  $wellKnown['AzureSqlDatabase'] = @{
+    connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
+    tableName1   = $azureSql.TableName1
+    tableName2   = $azureSql.TableName2
+  }
 }
 
 # Create the Mounted Data Factory if not exists
