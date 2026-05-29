@@ -10,6 +10,7 @@ resource "fabric_graphql_api" "example_definition_bootstrap" {
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
+  format                    = "Default"
   definition = {
     "graphql-definition.json" = {
       source = "${local.path}/graphql-definition.json.tmpl"
@@ -22,6 +23,7 @@ resource "fabric_graphql_api" "example_definition_update" {
   display_name = "example"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
   definition = {
     "graphql-definition.json" = {
       source = "${local.path}/graphql-definition.json.tmpl"
@@ -43,7 +45,7 @@ resource "fabric_graphql_api" "example_custom_delimiter" {
   definition = {
     "graphql-definition.json" = {
       source           = "${local.path}/graphql-definition.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "{{}}"
       tokens = {
         "CONNECTION_ID" = "11111111-1111-1111-1111-111111111111"
         "TABLE_NAME"    = "my_table"
@@ -61,7 +63,7 @@ resource "fabric_graphql_api" "example_parameters" {
   definition = {
     "graphql-definition.json" = {
       source          = "${local.path}/graphql-definition.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
