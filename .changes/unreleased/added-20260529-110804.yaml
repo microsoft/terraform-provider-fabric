@@ -1,0 +1,5 @@
+kind: added
+body: Enhanced `fabric_item` resource by adding `tags` attribute
+time: 2026-05-29T11:08:04.938042067Z
+custom:
+    Issue: "987"
