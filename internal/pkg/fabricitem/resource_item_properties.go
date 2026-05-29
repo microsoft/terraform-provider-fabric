@@ -70,7 +70,9 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Configure(_ context.C
 		return
 	}
 
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 }
 
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -107,12 +109,14 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	plan.ID = customtypes.NewUUIDValue(*respCreate.ID)
 	plan.WorkspaceID = customtypes.NewUUIDValue(*respCreate.WorkspaceID)
 
-	// r.get() updates the plan with current server state
+	tagDiags := SyncTags(ctx, r.tagsClient, r.client, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())
+
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(tagDiags...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
@@ -210,6 +214,12 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 		}
 	}
 
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, r.client, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -296,7 +306,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 	}
 
 	state := ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
+		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},
@@ -329,7 +339,9 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

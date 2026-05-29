@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceEventhouses(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabeventhouse.Properties, to *fabricitem.FabricItemPropertiesModel[eventhousePropertiesModel, fabeventhouse.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabeventhouse.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[eventhousePropertiesModel, fabeventhouse.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[eventhousePropertiesModel](ctx)
 
 		if from != nil {

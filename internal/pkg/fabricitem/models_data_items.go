@@ -15,17 +15,21 @@ import (
 )
 
 type dataSourceFabricItemsModel struct {
-	WorkspaceID customtypes.UUID                                   `tfsdk:"workspace_id"`
-	Values      supertypes.SetNestedObjectValueOf[fabricItemModel] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                     `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                                 `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[DataSourceFabricItemBaseModel] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                                   `tfsdk:"timeouts"`
 }
 
 func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabcore.Item) diag.Diagnostics {
-	slice := make([]*fabricItemModel, 0, len(from))
+	slice := make([]*DataSourceFabricItemBaseModel, 0, len(from))
 
 	for _, entity := range from {
-		var entityModel fabricItemModel
-		entityModel.set(entity)
+		var entityModel DataSourceFabricItemBaseModel
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
+
 		slice = append(slice, &entityModel)
 	}
 

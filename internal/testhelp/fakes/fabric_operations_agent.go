@@ -26,6 +26,7 @@ func (o *operationsOperationsAgent) ConvertItemToEntity(item fabcore.Item) fabop
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(faboperationsagent.ItemTypeOperationsAgent),
 		Properties:  NewRandomOperationsAgent().Properties,
+		Tags:        convertItemTags[faboperationsagent.ItemTag](item.Tags),
 	}
 }
 

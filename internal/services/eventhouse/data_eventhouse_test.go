@@ -107,6 +107,15 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "tags.*", map[string]string{
+					"id":           *entity.Tags[0].ID,
+					"display_name": *entity.Tags[0].DisplayName,
+				}),
+				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "tags.*", map[string]string{
+					"id":           *entity.Tags[1].ID,
+					"display_name": *entity.Tags[1].DisplayName,
+				}),
 			),
 		},
 		// read by id - not found
@@ -139,6 +148,7 @@ func TestUnit_EventhouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_ids.0"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.minimum_consumption_units"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
 			),
 		},
 		// read by name - not found

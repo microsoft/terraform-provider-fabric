@@ -26,6 +26,7 @@ func (o *operationsVariableLibrary) ConvertItemToEntity(item fabcore.Item) fabva
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties:  NewRandomVariableLibrary().Properties,
+		Tags:        convertItemTags[fabvariablelibrary.ItemTag](item.Tags),
 	}
 }
 

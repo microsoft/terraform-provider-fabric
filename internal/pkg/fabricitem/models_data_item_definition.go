@@ -16,7 +16,7 @@ import (
 )
 
 type dataSourceFabricItemDefinitionModel struct {
-	fabricItemModel
+	DataSourceFabricItemBaseModel
 
 	Format           types.String                                                               `tfsdk:"format"`
 	OutputDefinition types.Bool                                                                 `tfsdk:"output_definition"`

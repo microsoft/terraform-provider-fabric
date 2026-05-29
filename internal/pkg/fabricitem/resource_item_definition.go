@@ -35,6 +35,7 @@ var (
 type ResourceFabricItemDefinition struct {
 	pConfigData                 *pconfig.ProviderData
 	client                      *fabcore.ItemsClient
+	tagsClient                  *fabcore.TagsClient
 	FabricItemType              fabcore.ItemType
 	TypeInfo                    tftypeinfo.TFTypeInfo
 	NameRenameAllowed           bool
@@ -124,7 +125,9 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 		return
 	}
 
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -162,9 +165,20 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	plan.set(respCreate.Item)
+	plannedTags := plan.Tags
+
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Item)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	tagDiags := SyncTags(ctx, r.tagsClient, r.client, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())
+
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(tagDiags...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
@@ -287,6 +301,12 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 		}
 	}
 
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, r.client, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -379,7 +399,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 	}
 
 	state := resourceFabricItemDefinitionModel{
-		fabricItemModel: fabricItemModel{
+		resourceFabricItemBaseModel: resourceFabricItemBaseModel{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},
@@ -411,7 +431,5 @@ func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceF
 		return diags
 	}
 
-	model.set(respGet.Item)
-
-	return nil
+	return model.set(ctx, respGet.Item)
 }

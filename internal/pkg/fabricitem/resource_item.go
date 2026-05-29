@@ -31,6 +31,7 @@ var (
 type ResourceFabricItem struct {
 	pConfigData          *pconfig.ProviderData
 	client               *fabcore.ItemsClient
+	tagsClient           *fabcore.TagsClient
 	FabricItemType       fabcore.ItemType
 	TypeInfo             tftypeinfo.TFTypeInfo
 	NameRenameAllowed    bool
@@ -71,7 +72,9 @@ func (r *ResourceFabricItem) Configure(_ context.Context, req resource.Configure
 		return
 	}
 
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 }
 
 func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -105,9 +108,20 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	plan.set(respCreate.Item)
+	plannedTags := plan.Tags
+
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Item)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	tagDiags := SyncTags(ctx, r.tagsClient, r.client, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())
+
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(tagDiags...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "end",
@@ -202,6 +216,12 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 
 		_, err := MoveItem(ctx, r.client, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqMovePlan.MoveItemRequest)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, r.client, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
@@ -312,7 +332,5 @@ func (r *ResourceFabricItem) get(ctx context.Context, model *resourceFabricItemM
 		return diags
 	}
 
-	model.set(respGet.Item)
-
-	return nil
+	return model.set(ctx, respGet.Item)
 }

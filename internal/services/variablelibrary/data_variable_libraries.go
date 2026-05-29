@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceVariableLibraries() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabvariablelibrary.Properties, to *fabricitem.FabricItemPropertiesModel[variableLibraryPropertiesModel, fabvariablelibrary.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabvariablelibrary.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[variableLibraryPropertiesModel, fabvariablelibrary.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[variableLibraryPropertiesModel](ctx)
 
 		if from != nil {
