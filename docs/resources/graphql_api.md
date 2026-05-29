@@ -16,9 +16,86 @@ The GraphQL API resource allows you to manage a Fabric [GraphQL API](https://lea
 ## Example Usage
 
 ```terraform
+# Example 1 - Item without definition
 resource "fabric_graphql_api" "example" {
   display_name = "example"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Example 2 - Item with definition bootstrapping only
+resource "fabric_graphql_api" "example_definition_bootstrap" {
+  display_name              = "example"
+  description               = "example with definition bootstrapping"
+  workspace_id              = "00000000-0000-0000-0000-000000000000"
+  definition_update_enabled = false
+  format                    = "Default"
+  definition = {
+    "graphql-definition.json" = {
+      source = "${local.path}/graphql-definition.json.tmpl"
+    }
+  }
+}
+
+# Example 3 - Item with definition update when source or tokens changed
+resource "fabric_graphql_api" "example_definition_update" {
+  display_name = "example"
+  description  = "example with definition update when source or tokens changed"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "graphql-definition.json" = {
+      source = "${local.path}/graphql-definition.json.tmpl"
+      tokens = {
+        "CONNECTION_ID" = "11111111-1111-1111-1111-111111111111"
+        "TABLE_NAME"    = "my_table"
+      }
+    }
+  }
+}
+
+
+# Example 4 - Item with custom tokens delimiter
+resource "fabric_graphql_api" "example_custom_delimiter" {
+  display_name = "example"
+  description  = "example with custom tokens delimiter"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "graphql-definition.json" = {
+      source           = "${local.path}/graphql-definition.json.tmpl"
+      tokens_delimiter = "{{}}"
+      tokens = {
+        "CONNECTION_ID" = "11111111-1111-1111-1111-111111111111"
+        "TABLE_NAME"    = "my_table"
+      }
+    }
+  }
+}
+
+# Example 5 - Item with parameters processing mode
+resource "fabric_graphql_api" "example_parameters" {
+  display_name = "example"
+  description  = "example with parameters processing mode"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  format       = "Default"
+  definition = {
+    "graphql-definition.json" = {
+      source          = "${local.path}/graphql-definition.json.tmpl"
+      processing_mode = "Parameters"
+      parameters = [
+        {
+          type  = "JsonPathReplace"
+          find  = "$.connectionId"
+          value = "00000000-0000-0000-0000-000000000001"
+        },
+        {
+          type  = "TextReplace"
+          find  = "OldValue"
+          value = "NewValue"
+        }
+      ]
+    }
+  }
 }
 ```
 
@@ -32,13 +109,47 @@ resource "fabric_graphql_api" "example" {
 
 ### Optional
 
+- `definition` (Attributes Map) Definition parts. Read more about [GraphQL API definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/graphql-api-definition). Accepted path keys: **Default** format: `graphql-definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The Folder ID.
+- `format` (String) The GraphQL API format. Possible values: `Default`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `id` (String) The GraphQL API ID.
+
+<a id="nestedatt--definition"></a>
+
+### Nested Schema for `definition`
+
+Required:
+
+- `source` (String) Path to the file with source of the definition part.
+
+The source content may include placeholders for token substitution. Use the dot with the token name `{{ .TokenName }}`.
+
+Optional:
+
+- `parameters` (Attributes Set) The set of parameters to be passed and processed in the source content. (see [below for nested schema](#nestedatt--definition--parameters))
+- `processing_mode` (String) Processing mode of the tokens/parameters. Possible values: `GoTemplate`, `None`, `Parameters`. Default `GoTemplate`
+- `tokens` (Map of String) A map of key/value pairs of tokens substitutes in the source.
+- `tokens_delimiter` (String) The delimiter for the tokens in the source content. Possible values: `<<>>`, `@{}@`, `____`, `{{}}`. Default: `{{}}`
+
+Read-Only:
+
+- `source_content_sha256` (String) SHA256 of source's content of definition part.
+
+<a id="nestedatt--definition--parameters"></a>
+
+### Nested Schema for `definition.parameters`
+
+Required:
+
+- `find` (String) The find value of the parameter.
+- `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
+- `value` (String) The value of the parameter.
 
 <a id="nestedatt--timeouts"></a>
 

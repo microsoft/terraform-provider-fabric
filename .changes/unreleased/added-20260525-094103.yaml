@@ -1,0 +1,5 @@
+kind: added
+body: Enhanced `fabric_graphql_api` data source by adding definition support
+time: 2026-05-25T09:41:03.400555673Z
+custom:
+    Issue: "973"
