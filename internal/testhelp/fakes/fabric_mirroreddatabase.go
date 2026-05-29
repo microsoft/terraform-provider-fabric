@@ -30,6 +30,7 @@ func (o *operationsMirroredDatabase) ConvertItemToEntity(item fabcore.Item) fabm
 		// Set the type to mirrored database.
 		Type:       to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: NewRandomMirroredDatabase().Properties,
+		Tags:       convertItemTags[fabmirroreddatabase.ItemTag](item.Tags),
 	}
 }
 

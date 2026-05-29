@@ -17,7 +17,7 @@ import (
 )
 
 type resourceFabricItemModel struct {
-	fabricItemModel
+	resourceFabricItemBaseModel
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
@@ -136,6 +136,10 @@ func fabricItemCheckMove(planFolderID, stateFolderID customtypes.UUID, reqMovePl
 	reqMoveState.setTargetFolderID(stateFolderID)
 
 	return !reflect.DeepEqual(reqMovePlan.MoveItemRequest, reqMoveState.MoveItemRequest)
+}
+
+func fabricItemCheckSyncTags(planTags, stateTags types.Set) bool {
+	return !planTags.Equal(stateTags)
 }
 
 func fabricItemCheckUpdateDefinition(

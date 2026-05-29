@@ -80,6 +80,7 @@ output "example_definition_pq_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mashup.pq`, `queryMetadata.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Dataflow description.
 - `folder_id` (String) The Dataflow Folder ID.
+- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -97,3 +98,12 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--tags"></a>
+
+### Nested Schema for `tags`
+
+Read-Only:
+
+- `display_name` (String) The name of the tag.
+- `id` (String) The tag ID.

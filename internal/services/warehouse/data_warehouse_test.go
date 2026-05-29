@@ -108,6 +108,15 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "tags.*", map[string]string{
+					"id":           *entity.Tags[0].ID,
+					"display_name": *entity.Tags[0].DisplayName,
+				}),
+				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "tags.*", map[string]string{
+					"id":           *entity.Tags[1].ID,
+					"display_name": *entity.Tags[1].DisplayName,
+				}),
 			),
 		},
 		// read by id - not found
@@ -142,6 +151,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
 			),
 		},
 		// read by name - not found

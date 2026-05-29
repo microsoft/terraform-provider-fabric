@@ -14,21 +14,24 @@ import (
 )
 
 type DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop any] struct {
-	WorkspaceID customtypes.UUID                                                                 `tfsdk:"workspace_id"`
-	Values      supertypes.SetNestedObjectValueOf[FabricItemPropertiesModel[Ttfprop, Titemprop]] `tfsdk:"values"`
-	Timeouts    timeouts.Value                                                                   `tfsdk:"timeouts"`
+	WorkspaceID customtypes.UUID                                                                               `tfsdk:"workspace_id"`
+	Values      supertypes.SetNestedObjectValueOf[DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]] `tfsdk:"values"`
+	Timeouts    timeouts.Value                                                                                 `tfsdk:"timeouts"`
 }
 
 func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(
 	ctx context.Context,
 	from []FabricItemProperties[Titemprop],
-	propertiesSetter func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics,
+	propertiesSetter func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) diag.Diagnostics,
 ) diag.Diagnostics {
-	slice := make([]*FabricItemPropertiesModel[Ttfprop, Titemprop], 0, len(from))
+	slice := make([]*DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop], 0, len(from))
 
 	for _, entity := range from {
-		var entityModel FabricItemPropertiesModel[Ttfprop, Titemprop]
-		entityModel.set(entity)
+		var entityModel DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
 
 		diags := propertiesSetter(ctx, entity.Properties, &entityModel)
 		if diags.HasError() {

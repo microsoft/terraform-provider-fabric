@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -156,7 +157,10 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	}
 
 	r.pConfigData = pConfigData
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 
 	if resp.Diagnostics.Append(IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
@@ -216,7 +220,18 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
 	plan.WorkspaceID = customtypes.NewUUIDPointerValue(respCreate.WorkspaceID)
 
-	// r.get() updates the plan with current server state
+	// Save state with empty tags so the item is tracked even if tags fail
+	createdState := plan
+	createdState.Tags = types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})
+
+	if resp.Diagnostics.Append(resp.State.Set(ctx, createdState)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plan.Tags, types.SetNull(customtypes.UUIDType{}), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -352,6 +367,12 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 		}
 	}
 
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plan.Tags, state.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	// r.get() updates the plan with current server state
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
@@ -457,7 +478,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	}
 
 	state := ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
+		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},
@@ -495,7 +516,9 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

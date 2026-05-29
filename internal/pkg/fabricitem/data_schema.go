@@ -81,6 +81,24 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
+		"tags": schema.SetNestedAttribute{
+			MarkdownDescription: "List of applied tags.",
+			Computed:            true,
+			CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceTagModel](ctx),
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						MarkdownDescription: "The tag ID.",
+						Computed:            true,
+						CustomType:          customtypes.UUIDType{},
+					},
+					"display_name": schema.StringAttribute{
+						MarkdownDescription: "The name of the tag.",
+						Computed:            true,
+					},
+				},
+			},
+		},
 		"timeouts": timeouts.Attributes(ctx),
 	}
 

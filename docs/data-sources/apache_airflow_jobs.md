@@ -54,4 +54,14 @@ Read-Only:
 - `display_name` (String) The Apache Airflow Job display name.
 - `folder_id` (String) The Apache Airflow Job Folder ID.
 - `id` (String) The Apache Airflow Job ID.
+- `tags` (Attributes Set) A set of tags assigned to the Apache Airflow Job. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

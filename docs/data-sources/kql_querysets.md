@@ -54,4 +54,14 @@ Read-Only:
 - `display_name` (String) The KQL Queryset display name.
 - `folder_id` (String) The KQL Queryset Folder ID.
 - `id` (String) The KQL Queryset ID.
+- `tags` (Attributes Set) A set of tags assigned to the KQL Queryset. (see [below for nested schema](#nestedatt--values--tags))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--tags"></a>
+
+### Nested Schema for `values.tags`
+
+Read-Only:
+
+- `display_name` (String) The tag display name.
+- `id` (String) The tag ID.

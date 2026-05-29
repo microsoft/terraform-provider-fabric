@@ -26,6 +26,7 @@ func (o *operationsSparkJobDefinition) ConvertItemToEntity(item fabcore.Item) fa
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties:  NewRandomSparkJobDefinition().Properties,
+		Tags:        convertItemTags[fabsparkjobdefinition.ItemTag](item.Tags),
 	}
 }
 
