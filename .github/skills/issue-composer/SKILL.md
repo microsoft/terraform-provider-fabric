@@ -48,7 +48,7 @@ Choose the correct issue template based on what is being requested.
 - **`[EPH]`** — A new ephemeral resource (short-lived, not stored in state)
 - **`[FEAT]`** — Adding new attributes to an existing resource, changing behavior, adding support for a new API feature on an existing resource, or any other enhancement that modifies existing code
 
-If both a resource and data source are needed for the same item, create **two** separate issues.
+If both a resource and data source are needed for the same Fabric resource, create **two** separate issues.
 
 ## Step 3 — Extract Resource Details
 
@@ -60,7 +60,7 @@ From the user's description and SDK analysis, gather:
 | **Display name**      | PascalCase with spaces — e.g. "Lakehouse", "Connection", "Shortcut"                                                          |
 | **API doc links**     | Browse `learn.microsoft.com/rest/api/fabric/` for API pages                                                                  |
 | **SDK availability**  | Check if the SDK package/client exists (from `#skill:sdk-contract-navigator`)                                                |
-| **Resource category** | Fabric Item (~60%) or Non-Item (~40%) — see below                                                                            |
+| **Resource category** | Fabric Item (~60%) or non-item (~40%) — see below                                                                            |
 | **Item archetype**    | For Fabric Items only: basic, definition, properties, definition-properties, config-properties, config-definition-properties |
 | **Complexity**        | `easy` (basic/definition), `moderate` (properties/non-item), `hard` (config-\*/complex non-item)                             |
 | **Definition paths**  | For Fabric Items with definitions: fetch the definition article to list supported definition parts — see below               |
@@ -72,7 +72,7 @@ From the user's description and SDK analysis, gather:
 
 **Fabric Items** — Standard items managed in workspaces (Lakehouse, Eventhouse, SQL Database, Data Pipeline, Notebook, etc.). These use the `fabricitem` generic abstraction and have `ItemType` constants in the core SDK.
 
-**Non-Item Resources** — Specialized resources with bespoke CRUD logic. Each belongs to an **implementation pattern (A–H)** that determines canonical reference, lifecycle semantics, and test structure:
+**Non-item resources** — Specialized resources with bespoke CRUD logic. Each belongs to an **implementation pattern (A–H)** that determines canonical reference, lifecycle semantics, and test structure:
 
 | Pattern | Characteristic                                       | SDK Client                         | Canonical Reference                    |
 | :-----: | ---------------------------------------------------- | ---------------------------------- | -------------------------------------- |
@@ -198,7 +198,7 @@ so I can automate provisioning and maintain consistent <ResourceName> configurat
   - `fabric_workspace` (required parent)
 ```
 
-**For Non-Item Resources:**
+**For non-item resources:**
 
 ```markdown
 - Resource Name: `fabric_<snake_case_name>`
@@ -207,7 +207,7 @@ so I can automate provisioning and maintain consistent <ResourceName> configurat
   - https://learn.microsoft.com/rest/api/fabric/core/<service>/get-<resource>
   - https://learn.microsoft.com/rest/api/fabric/core/<service>/list-<resources>
 - SDK Client: `fabcore.<Resource>Client`
-- Resource Category: Non-Item (bespoke CRUD)
+- Resource Category: non-item (bespoke CRUD)
 - Implementation Pattern: <A|B|C|D|E|F|G|H> — <pattern description>
 - Estimated complexity/effort: <easy|moderate|hard>
 - Preview: <yes|no>
@@ -346,13 +346,13 @@ Service package: `internal/services/<package>/`
 | ~ Changed | `Properties.<FieldName>`      | `*int32` (was `*string`) | Type change in model              |
 ```
 
-**For Non-Item enhancements:**
+**For non-item enhancements:**
 
 ```markdown
 ### SDK Diff
 
 Resource: `fabric_<snake_case_name>`
-Category: Non-Item (bespoke CRUD)
+Category: non-item (bespoke CRUD)
 Service package: `internal/services/<package>/`
 SDK Client: `fabcore.<Resource>Client`
 
@@ -414,5 +414,5 @@ After creating the issue, report:
 
 - Issue number and URL
 - Summary of what was filed
-- Resource category (Fabric Item vs Non-Item) and archetype (if applicable)
+- Resource category (Fabric Item vs non-item) and archetype (if applicable)
 - Any gaps or unknowns that need follow-up (e.g. API not yet public, SDK package missing)

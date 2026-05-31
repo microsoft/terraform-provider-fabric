@@ -17,7 +17,7 @@ Define attributes in `schema_resource_<item>.go` / `schema_data_<item>.go`:
 
 Reference: `internal/services/lakehouse/schema_resource_lakehouse.go`
 
-### 2. Non-Item Resources — Superschema (Combined)
+### 2. Non-item resources — Superschema (Combined)
 
 Single `schema.go` using [`superschema`](https://github.com/orange-cloudavenue/terraform-plugin-framework-superschema) with `Common`, `Resource`, `DataSource` variants per attribute.
 

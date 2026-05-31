@@ -2,15 +2,15 @@
 applyTo: "internal/services/**/*.go"
 ---
 
-# Non-Item Resource Patterns
+# Non-item resource patterns
 
-Non-Item resources (~40%) do **not** use the `fabricitem` generic abstraction. They include Connection, Shortcut, Gateway, Workspace, role assignments, and similar bespoke CRUD resources.
+Non-item resources (~40%) do **not** use the `fabricitem` generic abstraction. They include Connection, Shortcut, Gateway, Workspace, role assignments, and similar bespoke CRUD resources.
 
 > For Fabric Item patterns (Category A), see `fabric-item-patterns.instructions.md`.
 
 ## File Structure
 
-**Key difference from Fabric Items:** Non-Item resources use a single `schema.go` with `superschema` instead of separate `schema_resource_*.go` / `schema_data_*.go` files. They may split models across `models_resource_<type>.go` and `models_data_<type>.go`.
+**Key difference from Fabric Items:** Non-item resources use a single `schema.go` with `superschema` instead of separate `schema_resource_*.go` / `schema_data_*.go` files. They may split models across `models_resource_<type>.go` and `models_data_<type>.go`.
 
 | File                                 | Purpose                                                                                                                                                      |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -22,7 +22,7 @@ Non-Item resources (~40%) do **not** use the `fabricitem` generic abstraction. T
 
 ## Resource Implementation
 
-Non-Item resources implement `resource.Resource` directly — **no closures** like Fabric Items.
+Non-item resources implement `resource.Resource` directly — **no closures** like Fabric Items.
 
 ```go
 type resource<Type> struct {
@@ -95,13 +95,13 @@ Reference: `internal/services/connection/data_connection.go`, `internal/services
 
 ## Model Pattern
 
-Non-Item models may use **generic type parameters** to share a base model between resource and data source with different nested types (e.g. `baseConnectionModel[ConnectionDetails, CredentialDetails]`). The `set()` method uses type switches to handle both variants.
+Non-item models may use **generic type parameters** to share a base model between resource and data source with different nested types (e.g. `baseConnectionModel[ConnectionDetails, CredentialDetails]`). The `set()` method uses type switches to handle both variants.
 
 Reference: `internal/services/connection/models.go`
 
 ## Canonical References
 
-Each Non-Item resource belongs to an implementation pattern (A–H). Use the pattern to select the best canonical reference. Full pattern classification is in `non-item-implementor.agent.md` § "Step 0".
+Each non-item resource belongs to an implementation pattern (A–H). Use the pattern to select the best canonical reference. Full pattern classification is in `non-item-implementor.agent.md` § "Step 0".
 
 | Pattern | Resource Type        | SDK Client                       | Reference                            | Key Pattern                             |
 | :-----: | -------------------- | -------------------------------- | ------------------------------------ | --------------------------------------- |

@@ -1,11 +1,11 @@
 ---
 name: sdk-contract-navigator
-description: Navigate the fabric-sdk-go SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric item or non-item resource. USE FOR: identifying SDK packages, client factories, DTO structs, item type constants, and pager methods for any Fabric resource.
+description: Navigate the fabric-sdk-go SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric Item or non-item resource. USE FOR: identifying SDK packages, client factories, DTO structs, item type constants, and pager methods for any Fabric resource.
 ---
 
 # Skill: SDK Contract Navigator
 
-Navigate the `fabric-sdk-go` SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric item or non-item resource.
+Navigate the `fabric-sdk-go` SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric Item or non-item resource.
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ These use the generic `fabricitem` abstraction with per-item SDK packages.
 
 **Examples:** Lakehouse, Eventhouse, Data Pipeline, SQL Database, KQL Database, Notebook, Semantic Model, Spark Job Definition, ML Experiment, ML Model, Environment, Warehouse, etc.
 
-### Category B: Non-Item Resources (~40% of resources)
+### Category B: Non-item resources (~40% of resources)
 
 These use bespoke CRUD implementations with clients from the `fabric/core/` package or other shared packages.
 
@@ -75,7 +75,7 @@ These use bespoke CRUD implementations with clients from the `fabric/core/` pack
 
 **Examples:** Connection, Shortcut, Gateway, Workspace, Domain, Workspace Role Assignment, Connection Role Assignment, Gateway Role Assignment, Deployment Pipeline Role Assignment, Workspace Git, etc.
 
-Proceed with **Step 3A** for Fabric Items or **Step 3B** for Non-Item Resources.
+Proceed with **Step 3A** for Fabric Items or **Step 3B** for non-item resources.
 
 ---
 
@@ -171,7 +171,7 @@ Use the **"Item Archetypes"** table in `.github/instructions/fabric-item-pattern
 
 ---
 
-## Non-Item Resources Path (Category B)
+## Non-item resources path (Category B)
 
 ### Step 3B — Locate the SDK Client
 
@@ -220,11 +220,11 @@ Read `fabric/core/models.go` or the specific client models for:
 | **CreationPayload DTO** | `fab<package>.CreationPayload` — list fields (or "N/A")                  |
 | **Enum Types**          | List any enum types with their possible values                           |
 
-### For Non-Item Resources (Category B)
+### For non-item resources (Category B)
 
 | Field             | Value                                                       |
 | ----------------- | ----------------------------------------------------------- |
-| **Category**      | Non-Item (bespoke CRUD)                                     |
+| **Category**      | Non-item (bespoke CRUD)                                     |
 | **SDK Version**   | `<version from go.mod>`                                     |
 | **SDK Package**   | `github.com/microsoft/fabric-sdk-go/fabric/core` (or other) |
 | **Import Alias**  | `fabcore` (or other)                                        |

@@ -76,7 +76,7 @@ type lakehouseSQLEndpointPropertiesModel struct {
 
 Generate both directions of mapping: **response `set()`** (SDK → TF) and **request builders** (TF → SDK).
 
-### 3a. Response `set()` — SDK → TF (both Fabric Items and Non-Items)
+### 3a. Response `set()` — SDK → TF (both Fabric Items and non-items)
 
 Every model struct needs a `set()` method that maps SDK response DTO → TF model.
 
@@ -120,12 +120,12 @@ func (to *<nestedModel>) set(from fab<package>.<NestedDTO>) {
 
 ### 3b. Request Builders — TF → SDK (Create/Update)
 
-Both Fabric Items and Non-Items need TF→SDK mapping for writable fields. The pattern differs by category:
+Both Fabric Items and non-items need TF→SDK mapping for writable fields. The pattern differs by category:
 
 - **Fabric Items:** Inline in `creationPayloadSetter` closure (simple — typically 1-3 fields from configuration model). See `fabric-item-patterns.instructions.md` § "Closure Examples".
-- **Non-Items:** Dedicated request builder structs with `set()` method that builds the SDK request directly (complex — full request DTOs)
+- **Non-items:** Dedicated request builder structs with `set()` method that builds the SDK request directly (complex — full request DTOs)
 
-**Non-Item Request Builder Struct** — embeds the SDK request type, `set()` populates it:
+**Non-item request builder struct** — embeds the SDK request type, `set()` populates it:
 
 ```go
 type requestCreate<Type> struct {

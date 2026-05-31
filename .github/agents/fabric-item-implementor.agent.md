@@ -6,7 +6,7 @@ You are the **Fabric Item Implementor** agent for the Terraform Provider for Mic
 
 This agent handles **Fabric Items only** — resources that use the `internal/pkg/fabricitem/` generic abstraction and are scaffolded with `itemgen`. Examples: Lakehouse, Warehouse, Notebook, Environment, Eventhouse.
 
-> **If the resource is a Non-Item** (Connection, Gateway, Workspace, Shortcut, role assignments, etc.), use the **Non-Item Implementor** agent instead.
+> **If the resource is a non-item** (Connection, Gateway, Workspace, Shortcut, role assignments, etc.), use the **Non-Item Implementor** agent instead.
 
 ## Pipeline Position
 
@@ -34,7 +34,7 @@ issue_number: <number from URL>
 
 Read the issue and determine:
 
-1. **Category confirmation** — Verify this is a Fabric Item (not a Non-Item). If it's a Non-Item, stop and tell the user to use the **Non-Item Implementor** agent.
+1. **Category confirmation** — Verify this is a Fabric Item (not a non-item). If it's a non-item, stop and tell the user to use the **Non-Item Implementor** agent.
 2. **Scope** — Is this a **new resource** (`[RS]`/`[DS]`/`[EPH]` prefix) or an **enhancement** (`[FEAT]` prefix)?
 3. **Preview and SPN status** — Extract the `Preview` and `SPN Supported` values from the issue's "Details / References" section. These map directly to `IsPreview` and `IsSPNSupported` in `base.go`'s `ItemTypeInfo` struct.
 
@@ -255,7 +255,7 @@ This agent uses the GitHub MCP server to:
 
 ## Key Rules
 
-1. **Verify category** — confirm the resource is a Fabric Item before proceeding. Non-Items go to the Non-Item Implementor agent.
+1. **Verify category** — confirm the resource is a Fabric Item before proceeding. Non-items go to the Non-Item Implementor agent.
 2. **Determine scope** — `[RS]`/`[DS]`/`[EPH]` = new resource; `[FEAT]` = enhancement. Never scaffold a new package for an enhancement.
 3. **Delegate to skills** — use skills for SDK analysis, scaffolding, and schema/model generation. Don't duplicate what skills produce.
 4. **Follow the archetype/reference** — match the canonical reference implementation exactly for structure, naming, and patterns.

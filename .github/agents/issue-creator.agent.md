@@ -10,7 +10,7 @@ You are **Stage 1** of a 3-stage pipeline:
 User (plain-language description) → **Agent 1: Issue Creator** → Agent 2: Well-Known Setup → Agent 3: Fabric Item Implementor / Non-Item Implementor → Resource implemented
 ```
 
-Your output (GitHub issue URLs) feeds directly into the Well-Known Setup agent and the appropriate Implementor agent (Fabric Item or Non-Item).
+Your output (GitHub issue URLs) feeds directly into the Well-Known Setup agent and the appropriate Implementor agent (Fabric Item or non-item).
 
 ---
 
@@ -32,22 +32,16 @@ Accept a plain-language description of a needed Fabric resource. Examples:
 
 From the user's description, determine:
 
-| Detail              | How to Extract                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| **Item name**       | The Fabric item or resource type mentioned (e.g. "Eventhouse", "Connection", "Shortcut") |
-| **Snake-case name** | Convert to Terraform naming: `eventhouse`, `connection`, `sql_database`                  |
-| **Package name**    | Lowercased, no spaces or underscores: `eventhouse`, `connection`, `sqldatabase`          |
-| **Intent**          | New resource, new data source, or enhancement to existing                                |
+| Detail              | How to Extract                                                                   |
+| ------------------- | -------------------------------------------------------------------------------- |
+| **Resource name**   | The Fabric resource type mentioned (e.g. "Eventhouse", "Connection", "Shortcut") |
+| **Snake-case name** | Convert to Terraform naming: `eventhouse`, `connection`, `sql_database`          |
+| **Package name**    | Lowercased, no spaces or underscores: `eventhouse`, `connection`, `sqldatabase`  |
+| **Intent**          | New resource, new data source, or enhancement to existing                        |
 
 ### Step 2 — Validate SDK Support
 
-Use **#skill:sdk-contract-navigator** to check if the Go SDK (`github.com/microsoft/fabric-sdk-go`) supports this resource. The skill will:
-
-1. Read `go.mod` to get the current SDK version
-2. Browse the SDK repo via the GitHub MCP server
-3. Determine whether this is a **Fabric Item** (Category A — dedicated SDK package under `fabric/<package>/`) or a **Non-Item Resource** (Category B — uses `fabcore.*Client` from `fabric/core/`)
-4. Identify the client factory, CRUD methods, DTOs, and constants
-5. For Fabric Items: determine the archetype from SDK capabilities
+Use **#skill:sdk-contract-navigator** to check if the Go SDK (`github.com/microsoft/fabric-sdk-go`) supports this feature.
 
 **If the SDK does NOT support this resource**, report to the user:
 
@@ -65,7 +59,7 @@ requesting support for <ResourceName>.
 
 > **For Fabric Items (Category A):** Only record the essential classification details — SDK package, import alias, item type constant, archetype, Properties DTO fields, CreationPayload DTO fields (if any), enum types, and definition format/paths. Do **not** record individual CRUD method signatures (e.g. `Get`, `Create`, `Update`, `Delete`, `List`, `GetDefinition`, `UpdateDefinition`) — these follow a standardized pattern determined by the archetype and are not needed in the issue.
 >
-> **For Non-Item Resources (Category B):** Record the full SDK contract output including all CRUD methods, since these have bespoke method signatures that vary per resource.
+> **For non-item resources (Category B):** Record the full SDK contract output including all CRUD methods, since these have bespoke method signatures that vary per resource.
 
 ### Step 3 — Detect New vs Increment
 
@@ -92,7 +86,7 @@ These use the generic `fabricitem` abstraction with per-item SDK packages. Deter
 | **config-properties**            | Has `CreationPayload` + properties, no definition | `internal/services/warehouse/`, `internal/services/warehousesnapshot/`                           |
 | **config-definition-properties** | Has `CreationPayload` + definition + properties   | `internal/services/lakehouse/`, `internal/services/eventhouse/`                                  |
 
-#### Non-Item Resources (Category B)
+#### Non-item resources (Category B)
 
 These use bespoke CRUD implementations with `fabcore.*Client`. They do NOT have archetypes and do NOT use `itemgen`. Classify into an **implementation pattern (A–H)** using the pattern classification table and decision tree defined in **#skill:issue-composer** § "Resource Category Identification".
 
@@ -100,7 +94,7 @@ Pass the classified pattern letter to the issue-composer skill so it is included
 
 #### Increments/Enhancements
 
-For enhancements to existing resources (either Fabric Items or Non-Items), identify:
+For enhancements to existing resources (either Fabric Items or non-items), identify:
 
 - Which existing resource is being enhanced
 - What new capability or attributes are being added
@@ -134,11 +128,11 @@ Use **#skill:issue-composer** to compose the issue title, body, and labels. The 
 
 Pass the following inputs to the skill:
 
-- Item/resource name and snake-case name
-- Resource category: Fabric Item (with archetype) or Non-Item
+- Resource name and snake-case name
+- Resource category: Fabric Item (with archetype) or non-item
 - Whether this is new (`[RS]`/`[DS]`) or increment (`[FEAT]`)
 - **For Fabric Items:** SDK package, import alias, archetype, Properties/CreationPayload DTO fields, enum types, and definition paths. Do **not** pass CRUD method signatures — the archetype already implies the standard method set.
-- **For Non-Item Resources:** Full SDK contract details including CRUD methods and request/response DTOs
+- **For non-item resources:** Full SDK contract details including CRUD methods and request/response DTOs
 - **DTO nesting depth** — For complex `[RS]`/`[DS]` issues (DTOs with 3+ nesting levels), pass the full DTO hierarchy so the skill can generate the nesting depth map. Skip for flat resources.
 - **Milestone number** (resolved from Step 5, or null if skipped)
 
@@ -166,12 +160,12 @@ After the issues are created, report the issue URLs and summary. Then prompt the
 After creating the issues, report:
 
 1. **Issue URLs** — both `[RS]` and `[DS]` issue URLs (or `[FEAT]` URLs for increments)
-2. **Summary** — resource name, category (Fabric Item or Non-Item), archetype (if applicable), SDK package, complexity estimate
+2. **Summary** — resource name, category (Fabric Item or non-item), archetype (if applicable), SDK package, complexity estimate
 3. **Next steps** — instruct the user to pass these issue URLs to:
    - The **Well-Known Setup** agent (`@wellknown-setup`) to configure test infrastructure (for new Fabric Items)
    - Then the appropriate Implementor agent:
      - **Fabric Item Implementor** (`@fabric-item-implementor`) — for Fabric Item resources
-     - **Non-Item Implementor** (`@non-item-implementor`) — for Non-Item resources
+     - **Non-Item Implementor** (`@non-item-implementor`) — for non-item resources
 
 Example output:
 
@@ -205,7 +199,7 @@ This agent uses the GitHub MCP server for all GitHub operations:
 
 ## Key Rules
 
-1. **Always create paired issues** — one `[RS]` and one `[DS]` for new resources (both Fabric Items and Non-Items)
+1. **Always create paired issues** — one `[RS]` and one `[DS]` for new resources (both Fabric Items and non-items)
 2. **Never create issues without SDK validation** — always run #skill:sdk-contract-navigator first
 3. **Delegate formatting to the skill** — #skill:issue-composer owns the issue body structure, template compliance, and label mapping
 4. **Include classification in the issue** — downstream agents depend on category/archetype for implementation decisions

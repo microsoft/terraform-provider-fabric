@@ -57,11 +57,11 @@ Use `resource.ParallelTest(t, ...)` unless tests have ordered dependencies. Targ
 
 Always provide the package path as the second argument for faster execution. Without it, the runner scans all packages (`./...`).
 
-## Non-Item Testing Specifics
+## Non-item testing specifics
 
 ### Fake Pattern Decision Tree
 
-Non-Item resources use **either** centralized fakes or inline fakes depending on their API shape:
+Non-item resources use **either** centralized fakes or inline fakes depending on their API shape:
 
 | Condition                                                                              | Pattern                                                          | Location                          | Example                                   |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------- | ----------------------------------------- |
@@ -103,19 +103,19 @@ var fakeStore = map[string]fabcore.<Type>{}
 
 For simpler resources (like role assignments), pass the fake response directly to the handler function.
 
-### Non-Item Import State Formats
+### Non-item import state formats
 
-Non-Item resources may use composite IDs beyond the standard `workspaceID/entityID`:
+Non-item resources may use composite IDs beyond the standard `workspaceID/entityID`:
 
 | Resource           | Import ID Format                          |
 | ------------------ | ----------------------------------------- |
 | Shortcut           | `workspaceID/itemID/path/name`            |
 | Role Assignments   | `parentID/roleAssignmentID`               |
-| Standard Non-Items | `workspaceID/entityID` or just `entityID` |
+| Standard Non-items | `workspaceID/entityID` or just `entityID` |
 
 ### Polymorphic Test Data
 
-Non-Items with polymorphic types (gateway, connection, role assignments) should generate test entities covering different type variants:
+Non-items with polymorphic types (gateway, connection, role assignments) should generate test entities covering different type variants:
 
 ```go
 func NewRandom<Types>() fabcore.<Types> {
@@ -133,7 +133,7 @@ Reference: `internal/services/shortcut/fake_test.go`, `internal/services/workspa
 
 ### Fake Responder Types
 
-Non-Item fakes use three responder types depending on the SDK operation:
+Non-item fakes use three responder types depending on the SDK operation:
 
 | Responder Type           | SDK Operation      | Setup Method          | Example                     |
 | ------------------------ | ------------------ | --------------------- | --------------------------- |

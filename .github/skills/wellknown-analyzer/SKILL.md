@@ -13,9 +13,9 @@ Acceptance tests run against real Fabric APIs and need pre-existing infrastructu
 
 When adding a new resource, you must determine:
 
-1. Can the new item be created simply (no payload, no definition)?
+1. Can the new resource be created simply (no payload, no definition)?
 2. Does it need a `CreationPayload` or `Definition`?
-3. Does it depend on other Fabric items that must exist first?
+3. Does it depend on other Fabric Items that must exist first?
 4. Does it require Azure infrastructure (Resource Groups, VNets, Storage Accounts, etc.)?
 5. Does it need Entra ID objects (service principals, groups)?
 6. Does it need external service connections (AzDO, GitHub)?
@@ -24,15 +24,15 @@ When adding a new resource, you must determine:
 
 Read the SDK analysis (from `#skill:sdk-contract-navigator`) and Fabric API documentation to answer:
 
-### Fabric Item Dependencies
+### Fabric Resource Dependencies
 
-| Question                                    | How to Check                                 | Example                                                                 |
-| ------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------- |
-| Does Create require a `workspace_id`?       | Almost always yes                            | All workspace-scoped items                                              |
-| Does Create require another item's ID?      | Check `CreationPayload` for reference fields | KQL Database needs `parentEventhouseItemId`                             |
-| Does Create require a `Definition`?         | Check if API requires definition on create   | Report needs `definition.pbir`, Semantic Model needs `definition.pbism` |
-| Does it have a parent item relationship?    | Check if item is scoped under another item   | DigitalTwinBuilderFlow requires a DigitalTwinBuilder                    |
-| Does it need data populated after creation? | Check if tests rely on item content          | Lakehouse needs sample data loaded for shortcut tests                   |
+| Question                                     | How to Check                                 | Example                                                                 |
+| -------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------- |
+| Does Create require a `workspace_id`?        | Almost always yes                            | All workspace-scoped items                                              |
+| Does Create require another resource's ID?   | Check `CreationPayload` for reference fields | KQL Database needs `parentEventhouseItemId`                             |
+| Does Create require a `Definition`?          | Check if API requires definition on create   | Report needs `definition.pbir`, Semantic Model needs `definition.pbism` |
+| Does it have a parent resource relationship? | Check if resource is scoped under another    | DigitalTwinBuilderFlow requires a DigitalTwinBuilder                    |
+| Does it need data populated after creation?  | Check if tests rely on resource content      | Lakehouse needs sample data loaded for shortcut tests                   |
 
 ### Azure Infrastructure Dependencies
 
@@ -79,7 +79,7 @@ The endpoint is the camelCase plural of the item type (e.g. `lakehouses`, `event
 
 ### Check the `$itemNaming` hashtable
 
-Every item/resource that gets created needs a short naming abbreviation in `$itemNaming`:
+Every item that gets created needs a short naming abbreviation in `$itemNaming`:
 
 ```powershell
 '<NewItemType>' = '<2-5 char abbreviation>'
@@ -113,7 +113,7 @@ foreach ($itemType in $itemTypes) {
 }
 ```
 
-**Items currently using this pattern:** ApacheAirflowJob, CopyJob, Dataflow, DataPipeline, DigitalTwinBuilder, Environment, Eventhouse, GraphQLApi, KQLDashboard, KQLQueryset, Lakehouse, Map, MLExperiment, MLModel, Notebook, Reflex, SparkJobDefinition, SQLDatabase, VariableLibrary, Warehouse
+**Fabric Items currently using this pattern:** ApacheAirflowJob, CopyJob, Dataflow, DataPipeline, DigitalTwinBuilder, Environment, Eventhouse, GraphQLApi, KQLDashboard, KQLQueryset, Lakehouse, Map, MLExperiment, MLModel, Notebook, Reflex, SparkJobDefinition, SQLDatabase, VariableLibrary, Warehouse
 
 ### Strategy B: Item with CreationPayload
 
@@ -179,7 +179,7 @@ This strategy also requires:
 
 ### Strategy D: Non-Fabric-Item Infrastructure
 
-For non-Fabric-item resources that need dedicated setup:
+For non-Fabric-Item resources that need dedicated setup:
 
 **Azure resources:**
 
@@ -221,9 +221,9 @@ Well-known resources are created sequentially. Ensure dependencies are created b
 
 1. **Azure infrastructure first** — Resource Groups, VNets, Storage Accounts, Data Factories
 2. **Workspaces second** — WorkspaceMPE, WorkspaceOAP, WorkspaceRS, WorkspaceDS
-3. **Simple items third** — items in the `$itemTypes` array
-4. **Dependent items fourth** — items that reference other items (KQLDatabase→Eventhouse, DigitalTwinBuilderFlow→DigitalTwinBuilder)
-5. **Items with definitions fifth** — items requiring definition fixtures
+3. **Simple Fabric Items third** — items in the `$itemTypes` array
+4. **Dependent Fabric Items fourth** — items that reference other items (KQLDatabase→Eventhouse, DigitalTwinBuilderFlow→DigitalTwinBuilder)
+5. **Fabric Items with definitions fifth** — items requiring definition fixtures
 6. **Non-item resources sixth** — Connections, Gateways, Domains, etc.
 7. **Sub-resources last** — Role assignments, shortcuts, folders, schedulers
 
@@ -237,7 +237,7 @@ Output a structured recommendation:
 
 ```
 Resource: fabric_<name>
-Category: Fabric Item / Non-Item
+Category: Fabric Item / non-item
 Creation Strategy: A (simple) / B (payload) / C (definition) / D (non-item infra)
 ```
 
