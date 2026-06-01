@@ -1,17 +1,17 @@
 ---
-name: issue-composer
-description: Compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource, pre-filling the appropriate template from Fabric API documentation and SDK analysis. USE FOR: creating well-structured GitHub issues for new Terraform resources or enhancements. INVOKES: GitHub MCP tools for issue creation, sdk-contract-navigator skill for SDK analysis.
+name: resource-designer
+description: Research SDK contracts, design Terraform schema approach, and compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource. USE FOR: analyzing SDK DTOs, determining design patterns (polymorphic flattening, immutability, enum filtering), and creating well-structured GitHub issues. INVOKES: GitHub MCP tools for issue creation, sdk-contract-navigator skill for SDK analysis.
 ---
 
-# Skill: Issue Composer
+# Skill: Resource Designer
 
-Compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource, pre-filling the appropriate template from Fabric API documentation and SDK analysis.
+Research SDK contracts, design the Terraform schema approach, and compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource.
 
 ## Prerequisites
 
 - The user has described what they want to add or change
 - Ideally, `#skill:sdk-contract-navigator` has already been run to identify SDK availability
-- If the caller (issue-creator agent or user) has not provided a milestone name, this skill should prompt for one, then resolve it to a numeric milestone ID via the GitHub API
+- If the caller (resource-designer agent or user) has not provided a milestone name, this skill should prompt for one, then resolve it to a numeric milestone ID via the GitHub API
 
 ## Step 1 — Resolve Milestone Name to Number
 
@@ -150,6 +150,29 @@ https://learn.microsoft.com/rest/api/fabric/core/gateways
 https://learn.microsoft.com/rest/api/fabric/core/workspaces
 ```
 
+## Step 3.5 — Terraform Design Analysis
+
+After gathering SDK details (Step 3), analyze the DTOs to determine **which design patterns apply** to this resource. This produces the "🎨 Terraform Design Notes" section in the issue body, giving the implementor explicit guidance.
+
+### Analysis Checks
+
+Perform each check by comparing the SDK DTOs discovered in Step 3:
+
+| #   | Check                       | How to Detect                                                                                                          | Output                                                                          |
+| --- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1   | **Immutable fields**        | Fields present in `Create<Resource>Request` but absent from `Update<Resource>Request` (or no Update method exists)     | List fields → `RequiresReplace`                                                 |
+| 2   | **Computed-only fields**    | Fields in response DTO absent from all request DTOs                                                                    | List fields → `Computed: true` + `UseStateForUnknown`                           |
+| 3   | **Polymorphic flattening**  | Response/request DTO has an interface type, or a struct with a `Type`/`Kind` discriminator and variant-specific fields | Describe variants → separate optional nested blocks + `ExactlyOneOf`            |
+| 4   | **Write-only secrets**      | Request DTO has `*Password`/`*Secret`/`*Token`/`*Key`/`*Credential` fields absent from response DTO                    | List fields → `WriteOnly: true` + `*_reference` alternative                     |
+| 5   | **Conditional fields**      | Properties that only apply when a type discriminator has a specific value (variant-specific fields)                    | List field→type mappings → `NullIfAttributeIsOneOf`/`RequireIfAttributeIsOneOf` |
+| 6   | **Enum filtering**          | `Possible*Values()` contains values representing system-managed/read-only states that cannot be set via Create/Update  | List values to exclude from `OneOf` validator                                   |
+| 7   | **Composite ID for import** | Sub-resource with 3+ path parameters (e.g., `workspace_id` + `item_id` + `name`)                                       | Describe import ID format                                                       |
+
+### Skip Conditions
+
+- For **basic Fabric Items** (archetype `basic` or `definition` with no properties), checks 3–6 typically don't apply — skip them.
+- For **enhancements** (`[FEAT]`), only run checks relevant to the new fields being added.
+
 ## Step 4 — Compose Issue Title
 
 | Type            | Format                                      |
@@ -248,9 +271,46 @@ Rules:
 - Only show fields that map to Terraform schema attributes (skip internal/wire-only fields)
 - Maximum depth shown: 5 levels (truncate deeper with `...`)
 
+#### 🎨 Terraform Design Notes
+
+**Include this section for all `[RS]` and `[DS]` issues.** Populate from the analysis in Step 3.5. Only include applicable items — omit checks that returned no findings.
+
+Format:
+
+```markdown
+**Immutable fields** (→ `RequiresReplace`):
+
+- `<field_name>` — only in Create request, not updatable
+
+**Computed-only fields** (→ `Computed: true`):
+
+- `<field_name>` — response-only, server-generated
+
+**Polymorphic type** (→ separate optional blocks + `ExactlyOneOf`):
+
+- SDK type `<InterfaceName>` has variants: `<Variant1>`, `<Variant2>`, ...
+- Model as: `<variant_1> {}`, `<variant_2> {}` optional nested blocks
+
+**Write-only secrets** (→ `WriteOnly: true` + `*_reference` alternative):
+
+- `<field_name>` — credential/secret in request, absent from response
+
+**Conditional fields** (→ `NullIfAttributeIsOneOf` / `RequireIfAttributeIsOneOf`):
+
+- `<field_name>` only applies when `type == "<value>"`
+
+**Enum filtering** (→ exclude from `OneOf` validator):
+
+- `<EnumType>`: exclude `<Value1>`, `<Value2>` (system-managed/non-creatable)
+
+**Import ID format**:
+
+- `<workspace_id>/<item_id>/<name>` (composite)
+```
+
 #### 🚧 Potential Terraform Configuration
 
-Generate sample HCL based on SDK properties discovered:
+Generate sample HCL based on SDK properties discovered and **informed by the design notes above** (use optional blocks for polymorphic types, add comments for immutable/computed fields):
 
 ```terraform
 resource "fabric_<snake_case_name>" "example" {

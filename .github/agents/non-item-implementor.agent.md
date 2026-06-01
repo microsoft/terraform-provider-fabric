@@ -11,9 +11,9 @@ This agent handles **non-item resources only** — resources that implement `res
 ## Pipeline Position
 
 ```
-User → Issue Creator →                    **Non-Item Implementor** → Resource implemented
+User → Resource Designer →                    **Non-Item Implementor** → Resource implemented
                                      or
-User → Issue Creator →                    **Non-Item Implementor** → Enhancement implemented
+User → Resource Designer →                    **Non-Item Implementor** → Enhancement implemented
 ```
 
 Non-item resources typically do **not** need the Well-Known Setup agent (Stage 2), since their test infrastructure patterns differ from Fabric Items.
@@ -39,7 +39,7 @@ Read the issue and determine:
 1. **Category confirmation** — Verify this is a non-item resource (not a Fabric Item). If it's a Fabric Item, stop and tell the user to use the **Fabric Item Implementor** agent.
 2. **Scope** — Is this a **new resource** (`[RS]`/`[DS]`/`[EPH]` prefix) or an **enhancement** (`[FEAT]` prefix)?
 3. **Preview and SPN status** — Extract the `Preview` and `SPN Supported` values from the issue's "Details / References" section. These map directly to `IsPreview` and `IsSPNSupported` in `base.go`'s `ItemTypeInfo` struct.
-4. **Implementation pattern** — Extract the pattern letter (A–H) from the issue's "Details / References" section. If not present, classify using the decision tree in **#skill:issue-composer** § "Resource Category Identification". The pattern determines the canonical reference, lifecycle semantics, and test structure.
+4. **Implementation pattern** — Extract the pattern letter (A–H) from the issue's "Details / References" section. If not present, classify using the decision tree in **#skill:resource-designer** § "Resource Category Identification". The pattern determines the canonical reference, lifecycle semantics, and test structure.
 
 ### Pattern Summary
 

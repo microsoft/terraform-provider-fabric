@@ -110,3 +110,70 @@ Every field needs a `tfsdk:"snake_case"` tag.
 Every model must have `set()` mapping SDK DTO → TF model. Models with nested objects take `(ctx, from) diag.Diagnostics`; leaf models can omit `ctx` and return nothing. For nested sub-models: create `Null` value, check nil, create sub-model, call `sub.set()`, wrap with `.Set(ctx, sub)`.
 
 Reference: `internal/services/lakehouse/models.go`
+
+---
+
+## Design Decisions — When to Apply Patterns
+
+### Polymorphic / Union Types
+
+When the SDK has an interface or struct with a type discriminator and variant-specific fields:
+
+- Model each variant as a **separate optional nested block** in the schema
+- Add `ExactlyOneOf` or `AtLeastOneOf` resource-level validator across the variant blocks
+- Each variant gets its own model struct with its own `set()` method
+- The parent model holds all variant fields; non-applicable variants are set to `Null`
+
+References: `internal/services/shortcut/` (target variants), `internal/services/connection/` (credential types)
+
+### Immutability — When to Use `RequiresReplace`
+
+Apply `RequiresReplace()` plan modifier when:
+
+- The field exists only in the Create request DTO, not in the Update request DTO
+- The field is used as a path/identity parameter (e.g., `workspace_id`, `item_id`, `path`, `name` for sub-resources)
+- The API returns an error if you attempt to change the value after creation
+
+Do **not** apply `RequiresReplace` to fields that are simply omitted from Update for convenience — only when the API fundamentally cannot change them.
+
+### Enum Filtering
+
+When exposing SDK enum values via `OneOf` validators:
+
+- **Remove non-creatable variants** — enum values that only appear in responses or represent system-managed states (e.g., `OnPremises`/`OnPremisesPersonal` gateway types cannot be created via API)
+- **Remove deprecated/internal values** — enum values marked for removal or internal-only use
+- Use `utils.RemoveSlicesByValues()` to filter `Possible*Values()` slices
+
+Reference: `internal/services/gateway/schema.go`
+
+### Conditional Nulling by Type Discriminator
+
+When a resource has type-specific fields that only apply to certain variants:
+
+- Use `superstringvalidator.NullIfAttributeIsOneOf(path, values...)` to enforce null when type doesn't match
+- Use `superstringvalidator.RequireIfAttributeIsOneOf(path, values...)` to enforce presence when type matches
+- In `set()` methods, explicitly set non-applicable fields to `types.<Type>Null()` based on the type discriminator
+
+Reference: `internal/services/gateway/models.go`
+
+### Computed-Only Fields
+
+Mark as `Computed: true` (without `Optional`) when:
+
+- The field is only in the response DTO, never in create/update requests
+- The field represents server-generated state (e.g., `provisioning_status`, `capacity_region`, endpoint URLs)
+- Add `UseStateForUnknown()` if the value never changes after creation
+
+### Provider-Only Attributes
+
+Add attributes not in the SDK only when **operational control** is needed:
+
+- Validation bypass flags (`skip_capacity_state_validation`) — controls provider-side logic (e.g., whether to call the capacity list API before proceeding). Always `Optional` + `BoolDefault(false)`. Never sent to the Fabric API.
+
+Do **not** invent provider-only attributes speculatively. Only add them when a concrete operational need exists (e.g., the provider performs a pre-flight check that some callers cannot execute due to permissions).
+
+### Resource vs Data Source Field Subsetting
+
+- **Data sources** expose only read fields (response DTO) — no create/update-only fields, no write-only attributes
+- **Resources** expose the full schema including request-only fields
+- Use separate model types when the field set differs significantly (e.g., `dsConnectionDetailsModel` vs `rsConnectionDetailsModel`)

@@ -11,9 +11,9 @@ This agent handles **Fabric Items only** — resources that use the `internal/pk
 ## Pipeline Position
 
 ```
-User → Issue Creator → Well-Known Setup → **Fabric Item Implementor** → Resource implemented
+User → Resource Designer → Well-Known Setup → **Fabric Item Implementor** → Resource implemented
                                      or
-User → Issue Creator →                    **Fabric Item Implementor** → Enhancement implemented
+User → Resource Designer →                    **Fabric Item Implementor** → Enhancement implemented
 ```
 
 ---

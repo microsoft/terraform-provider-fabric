@@ -52,7 +52,7 @@ The `itemgen` tool accepts 9 command-line flags. Determine each value from the S
 
 **`-items-name`**: The plural form. Usually just append "s" but check API docs for irregular plurals (e.g. "KQL Databases", "Warehouses", "Variable Libraries").
 
-**`-definition-path`**: The definition file path as listed in the issue's "Definition Paths" section (populated by `#skill:issue-composer` from the Fabric definition article). Use the first/primary definition path (e.g. `"eventstream.json"`, `"definition.json"`, `"notebook-content.ipynb"`). This determines the definition key used in Terraform HCL blocks and template source references.
+**`-definition-path`**: The definition file path as listed in the issue's "Definition Paths" section (populated by `#skill:resource-designer` from the Fabric definition article). Use the first/primary definition path (e.g. `"eventstream.json"`, `"definition.json"`, `"notebook-content.ipynb"`). This determines the definition key used in Terraform HCL blocks and template source references.
 
 > **Note:** This flag is only relevant for item types that have a definition (`definition`, `definition-properties`, `config-definition-properties`). For archetypes without a definition (`basic`, `properties`, `config-properties`), omit this flag — it will be ignored. If the item archetype includes a definition but the "Definition Paths" field is missing from the issue, **prompt the user** to provide the definition file path before proceeding.
 

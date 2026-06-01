@@ -9,7 +9,7 @@ This document describes the AI automation infrastructure used in the Terraform P
 - [Architecture Overview](#architecture-overview)
 - [Pipeline Flow](#pipeline-flow)
 - [Agents](#agents)
-  - [Issue Creator](#issue-creator-agent)
+  - [Resource Designer](#resource-designer-agent)
   - [Well-Known Setup](#well-known-setup-agent)
   - [Fabric Item Implementor](#fabric-item-implementor-agent)
   - [Non-Item Implementor](#non-item-implementor-agent)
@@ -23,7 +23,7 @@ This document describes the AI automation infrastructure used in the Terraform P
   - [Testing Patterns](#testing-patterns)
 - [Skills](#skills)
   - [SDK Contract Navigator](#sdk-contract-navigator)
-  - [Issue Composer](#issue-composer)
+  - [Resource Designer](#resource-designer)
   - [Itemgen Command Builder](#itemgen-command-builder)
   - [Schema Model Generator](#schema-model-generator)
   - [Well-Known Analyzer](#well-known-analyzer)
@@ -40,7 +40,7 @@ The AI infrastructure is organized into three layers, each serving a distinct pu
 ```mermaid
 graph TD
     subgraph Agents
-        A1[issue-creator - Stage 1]
+        A1[resource-designer - Stage 1]
         A2[wellknown-setup - Stage 2]
         A3[fabric-item-implementor - Stage 3A]
         A4[non-item-implementor - Stage 3B]
@@ -48,7 +48,7 @@ graph TD
 
     subgraph Skills
         S1[sdk-contract-navigator]
-        S2[issue-composer]
+        S2[resource-designer]
         S3[itemgen-command-builder]
         S4[schema-model-generator]
         S5[wellknown-analyzer]
@@ -102,7 +102,7 @@ graph LR
     U[User Request] --> A1
 
     subgraph Stage-1
-        A1[Issue Creator]
+        A1[Resource Designer]
     end
 
     subgraph Stage-2
@@ -121,7 +121,7 @@ graph LR
     A4 --> R
 ```
 
-**Stage 1 — Issue Creation:** The Issue Creator agent validates that the Go SDK supports the requested resource, classifies it (Fabric Item or Non-Item), determines the archetype or pattern, and creates properly-formatted GitHub issues with all the details downstream agents need.
+**Stage 1 — Resource Design:** The Resource Designer agent validates that the Go SDK supports the requested resource, classifies it (Fabric Item or Non-Item), determines the archetype or pattern, analyzes DTOs for design decisions (immutability, polymorphism, enum filtering), and creates properly-formatted GitHub issues with all the details downstream agents need.
 
 **Stage 2 — Test Infrastructure:** The Well-Known Setup agent ensures acceptance test fixtures exist. It checks and updates `tools/scripts/Set-WellKnown.ps1` (the PowerShell script that creates pre-requisite Fabric resources) and `internal/testhelp/wellknown.go` (the Go struct that test code uses to access fixture data).
 
@@ -133,13 +133,13 @@ graph LR
 
 Agents live in `.github/agents/` and define multi-step workflows. Each agent has a clear scope, input/output contract, and a numbered sequence of steps.
 
-### Issue Creator Agent
+### Resource Designer Agent
 
-**File:** `agents/issue-creator.agent.md`
+**File:** `agents/resource-designer.agent.md`
 
-**Invocation:** `@issue-creator`
+**Invocation:** `@resource-designer`
 
-**Purpose:** Transforms a plain-language resource request into well-structured GitHub issues that contain all the information downstream agents need.
+**Purpose:** Researches SDK contracts, designs the Terraform schema approach, and transforms a plain-language resource request into well-structured GitHub issues that contain all the information downstream agents need.
 
 **Workflow:**
 
@@ -148,7 +148,7 @@ Agents live in `.github/agents/` and define multi-step workflows. Each agent has
 3. **Detect new vs increment** — Check if `internal/services/<package>/` already exists
 4. **Classify the resource** — Determine if it's a Fabric Item (with archetype) or Non-Item (with pattern A–H)
 5. **Collect milestone** — Ask the user which milestone to assign, resolve name to GitHub milestone ID
-6. **Create issues** — Invoke `#skill:issue-composer` to format the issue body, then use GitHub MCP to create paired `[RS]` + `[DS]` issues (or `[FEAT]` for enhancements)
+6. **Create issues** — Invoke `#skill:resource-designer` to format the issue body, then use GitHub MCP to create paired `[RS]` + `[DS]` issues (or `[FEAT]` for enhancements)
 7. **Report output** — Provide issue URLs and next steps
 
 **Key rules:**
@@ -455,11 +455,11 @@ Skills live in `.github/skills/<name>/SKILL.md` and contain step-by-step procedu
 
 **Output:** Structured table with category, SDK version, package, import alias, client factory, methods, DTOs, and archetype.
 
-### Issue Composer
+### Resource Designer
 
-**File:** `skills/issue-composer/SKILL.md`
+**File:** `skills/resource-designer/SKILL.md`
 
-**Purpose:** Composes properly-formatted GitHub issue bodies with all required sections, labels, and templates.
+**Purpose:** Researches SDK DTOs, determines design patterns (polymorphic flattening, immutability, enum filtering, write-only secrets), and composes properly-formatted GitHub issue bodies with all required sections, labels, and templates.
 
 **Key behaviors:**
 - Resolves milestone names to GitHub milestone IDs via the API
@@ -578,7 +578,7 @@ This file is always loaded by Copilot regardless of which file is being edited. 
 
 When a developer says *"I need a Fabric Eventhouse resource"*, the system works as follows:
 
-1. **`@issue-creator`** invokes `#skill:sdk-contract-navigator` → finds `fabric/eventhouse/` package, determines `config-definition-properties` archetype → invokes `#skill:issue-composer` → creates `[RS] fabric_eventhouse` and `[DS] fabric_eventhouse` GitHub issues
+1. **`@resource-designer`** invokes `#skill:sdk-contract-navigator` → finds `fabric/eventhouse/` package, determines `config-definition-properties` archetype → invokes `#skill:resource-designer` → creates `[RS] fabric_eventhouse` and `[DS] fabric_eventhouse` GitHub issues
 
 2. **`@wellknown-setup`** invokes `#skill:wellknown-analyzer` → confirms Eventhouse is already in the `$itemTypes` simple array → reports "already configured"
 
