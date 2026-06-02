@@ -56,7 +56,7 @@ data "fabric_environment" "example_by_name" {
 - `description` (String) The Environment description.
 - `folder_id` (String) The Environment Folder ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -110,12 +110,3 @@ Read-Only:
 Read-Only:
 
 - `state` (String) Publish state. Possible values: `Cancelled`, `Cancelling`, `Failed`, `Running`, `Success`, `Waiting`.
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

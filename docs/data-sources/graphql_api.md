@@ -52,7 +52,7 @@ data "fabric_graphql_api" "example_by_name" {
 
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The GraphQL API Folder ID.
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -61,12 +61,3 @@ data "fabric_graphql_api" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

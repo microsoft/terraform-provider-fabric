@@ -30,7 +30,7 @@ type DataSourceFabricItemsProperties[Ttfprop, Titemprop any] struct {
 	DataSourceFabricItems
 
 	PropertiesAttributes map[string]schema.Attribute
-	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) diag.Diagnostics
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
 	ItemListGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop], fabricItems *[]FabricItemProperties[Titemprop]) error
 }
 
@@ -67,23 +67,10 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
-		"tags": schema.SetNestedAttribute{
-			MarkdownDescription: "A set of tags assigned to the " + d.TypeInfo.Name + ".",
+		"tags": schema.SetAttribute{
+			MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
 			Computed:            true,
-			CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceTagModel](ctx),
-			NestedObject: schema.NestedAttributeObject{
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						MarkdownDescription: "The tag ID.",
-						Computed:            true,
-						CustomType:          customtypes.UUIDType{},
-					},
-					"display_name": schema.StringAttribute{
-						MarkdownDescription: "The tag display name.",
-						Computed:            true,
-					},
-				},
-			},
+			ElementType:         customtypes.UUIDType{},
 		},
 	}
 
@@ -100,7 +87,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The set of %s.", d.TypeInfo.Names),
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},

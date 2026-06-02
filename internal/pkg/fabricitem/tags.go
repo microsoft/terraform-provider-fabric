@@ -10,16 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
-
-type DataSourceTagModel struct {
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-}
 
 func SetResourceTagsFromItem(_ context.Context, tags *types.Set, from []fabcore.ItemTag) diag.Diagnostics {
 	elements := make([]attr.Value, 0, len(from))
@@ -34,23 +28,6 @@ func SetResourceTagsFromItem(_ context.Context, tags *types.Set, from []fabcore.
 	}
 
 	*tags = setValue
-
-	return nil
-}
-
-func SetDataSourceTagsFromItem(ctx context.Context, tags *supertypes.SetNestedObjectValueOf[DataSourceTagModel], from []fabcore.ItemTag) diag.Diagnostics {
-	result := make([]*DataSourceTagModel, 0, len(from))
-
-	for _, tag := range from {
-		result = append(result, &DataSourceTagModel{
-			ID:          customtypes.NewUUIDPointerValue(tag.ID),
-			DisplayName: types.StringPointerValue(tag.DisplayName),
-		})
-	}
-
-	if diags := tags.Set(ctx, result); diags.HasError() {
-		return diags
-	}
 
 	return nil
 }

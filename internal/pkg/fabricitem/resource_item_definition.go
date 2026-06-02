@@ -405,7 +405,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 	}
 
 	state := resourceFabricItemDefinitionModel{
-		resourceFabricItemBaseModel: resourceFabricItemBaseModel{
+		fabricItemModel: fabricItemModel{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},

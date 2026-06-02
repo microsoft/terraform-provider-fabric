@@ -56,7 +56,7 @@ Read-Only:
 - `folder_id` (String) The Variable Library Folder ID.
 - `id` (String) The Variable Library ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Attributes Set) A set of tags assigned to the Variable Library. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Variable Library.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -66,12 +66,3 @@ Read-Only:
 Read-Only:
 
 - `active_value_set_name` (String) The VariableLibrary current active value set.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

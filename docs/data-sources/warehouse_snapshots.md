@@ -58,7 +58,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `id` (String) The Warehouse Snapshot ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Attributes Set) A set of tags assigned to the Warehouse Snapshot. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Warehouse Snapshot.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -70,12 +70,3 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `parent_warehouse_id` (String) The parent Warehouse ID.
 - `snapshot_date_time` (String) The current warehouse snapshot date and time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

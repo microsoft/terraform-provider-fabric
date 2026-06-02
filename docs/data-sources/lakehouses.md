@@ -55,7 +55,7 @@ Read-Only:
 - `folder_id` (String) The Lakehouse Folder ID.
 - `id` (String) The Lakehouse ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Attributes Set) A set of tags assigned to the Lakehouse. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Lakehouse.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -78,12 +78,3 @@ Read-Only:
 - `connection_string` (String) SQL endpoint connection string.
 - `id` (String) SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

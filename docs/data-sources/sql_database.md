@@ -77,7 +77,7 @@ output "example_definition_content_object" {
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The SQL Database Folder ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--properties))
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -105,12 +105,3 @@ Read-Only:
 - `connection_string` (String) The connection string of the database.
 - `database_name` (String) The database name.
 - `server_fqdn` (String) The server fully qualified domain name (FQDN).
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

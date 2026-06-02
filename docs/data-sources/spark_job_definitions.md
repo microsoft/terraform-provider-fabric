@@ -55,7 +55,7 @@ Read-Only:
 - `folder_id` (String) The Spark Job Definition Folder ID.
 - `id` (String) The Spark Job Definition ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Attributes Set) A set of tags assigned to the Spark Job Definition. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Spark Job Definition.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -65,12 +65,3 @@ Read-Only:
 Read-Only:
 
 - `onelake_root_path` (String) OneLake path to the Spark Job Definition root directory.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

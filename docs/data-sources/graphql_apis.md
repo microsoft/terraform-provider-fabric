@@ -54,14 +54,5 @@ Read-Only:
 - `display_name` (String) The GraphQL API display name.
 - `folder_id` (String) The GraphQL API Folder ID.
 - `id` (String) The GraphQL API ID.
-- `tags` (Attributes Set) A set of tags assigned to the GraphQL API. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the GraphQL API.
 - `workspace_id` (String) The Workspace ID.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

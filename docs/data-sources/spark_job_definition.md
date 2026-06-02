@@ -80,7 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Spark Job Definition Folder ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -106,12 +106,3 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 Read-Only:
 
 - `onelake_root_path` (String) OneLake path to the Spark Job Definition root directory.
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

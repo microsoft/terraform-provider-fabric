@@ -15,7 +15,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type resourceFabricItemBaseModel struct {
+type fabricItemModel struct {
 	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
 	ID          customtypes.UUID `tfsdk:"id"`
 	DisplayName types.String     `tfsdk:"display_name"`
@@ -24,7 +24,7 @@ type resourceFabricItemBaseModel struct {
 	Tags        types.Set        `tfsdk:"tags"`
 }
 
-func (to *resourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
+func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
@@ -34,46 +34,7 @@ func (to *resourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Ite
 	return SetResourceTagsFromItem(ctx, &to.Tags, from.Tags)
 }
 
-type DataSourceFabricItemBaseModel struct {
-	WorkspaceID customtypes.UUID                                      `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                                      `tfsdk:"id"`
-	DisplayName types.String                                          `tfsdk:"display_name"`
-	Description types.String                                          `tfsdk:"description"`
-	FolderID    customtypes.UUID                                      `tfsdk:"folder_id"`
-	Tags        supertypes.SetNestedObjectValueOf[DataSourceTagModel] `tfsdk:"tags"`
-}
-
-func (to *DataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
-
-	return SetDataSourceTagsFromItem(ctx, &to.Tags, from.Tags)
-}
-
-type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
-	WorkspaceID customtypes.UUID                                      `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                                      `tfsdk:"id"`
-	DisplayName types.String                                          `tfsdk:"display_name"`
-	Description types.String                                          `tfsdk:"description"`
-	FolderID    customtypes.UUID                                      `tfsdk:"folder_id"`
-	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop]         `tfsdk:"properties"`
-	Tags        supertypes.SetNestedObjectValueOf[DataSourceTagModel] `tfsdk:"tags"`
-}
-
-func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
-
-	return SetDataSourceTagsFromItem(ctx, &to.Tags, from.Tags)
-}
-
-type ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
 	WorkspaceID customtypes.UUID                              `tfsdk:"workspace_id"`
 	ID          customtypes.UUID                              `tfsdk:"id"`
 	DisplayName types.String                                  `tfsdk:"display_name"`
@@ -83,7 +44,7 @@ type ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //re
 	Tags        types.Set                                     `tfsdk:"tags"`
 }
 
-func (to *ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
+func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)

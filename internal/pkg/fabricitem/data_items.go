@@ -54,7 +54,7 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The set of %s.", d.TypeInfo.Names),
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceFabricItemBaseModel](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[fabricItemModel](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"workspace_id": schema.StringAttribute{
@@ -80,23 +80,10 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 							Computed:            true,
 							CustomType:          customtypes.UUIDType{},
 						},
-						"tags": schema.SetNestedAttribute{
-							MarkdownDescription: "A set of tags assigned to the " + d.TypeInfo.Name + ".",
+						"tags": schema.SetAttribute{
+							MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
 							Computed:            true,
-							CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceTagModel](ctx),
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"id": schema.StringAttribute{
-										MarkdownDescription: "The tag ID.",
-										Computed:            true,
-										CustomType:          customtypes.UUIDType{},
-									},
-									"display_name": schema.StringAttribute{
-										MarkdownDescription: "The tag display name.",
-										Computed:            true,
-									},
-								},
-							},
+							ElementType:         customtypes.UUIDType{},
 						},
 					},
 				},

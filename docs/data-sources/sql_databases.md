@@ -55,7 +55,7 @@ Read-Only:
 - `folder_id` (String) The SQL Database Folder ID.
 - `id` (String) The SQL Database ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Attributes Set) A set of tags assigned to the SQL Database. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the SQL Database.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -67,12 +67,3 @@ Read-Only:
 - `connection_string` (String) The connection string of the database.
 - `database_name` (String) The database name.
 - `server_fqdn` (String) The server fully qualified domain name (FQDN).
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

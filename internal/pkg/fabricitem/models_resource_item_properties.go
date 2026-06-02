@@ -8,7 +8,7 @@ import (
 )
 
 type ResourceFabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
-	ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
+	FabricItemPropertiesModel[Ttfprop, Titemprop]
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }

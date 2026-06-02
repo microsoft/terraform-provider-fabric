@@ -55,14 +55,5 @@ Read-Only:
 - `display_name` (String) The Cosmos DB display name.
 - `folder_id` (String) The Cosmos DB Folder ID.
 - `id` (String) The Cosmos DB ID.
-- `tags` (Attributes Set) A set of tags assigned to the Cosmos DB. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Cosmos DB.
 - `workspace_id` (String) The Workspace ID.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

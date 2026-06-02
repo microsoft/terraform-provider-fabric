@@ -317,7 +317,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 	}
 
 	state := ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]{
-		ResourceFabricItemPropertiesBaseModel: ResourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
+		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
 			ID:          uuidFabricItemID,
 			WorkspaceID: uuidWorkspaceID,
 		},

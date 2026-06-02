@@ -57,14 +57,5 @@ Read-Only:
 - `display_name` (String) The Activator display name.
 - `folder_id` (String) The Activator Folder ID.
 - `id` (String) The Activator ID.
-- `tags` (Attributes Set) A set of tags assigned to the Activator. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Activator.
 - `workspace_id` (String) The Workspace ID.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

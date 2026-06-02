@@ -54,14 +54,5 @@ Read-Only:
 - `display_name` (String) The Dataflow display name.
 - `folder_id` (String) The Dataflow Folder ID.
 - `id` (String) The Dataflow ID.
-- `tags` (Attributes Set) A set of tags assigned to the Dataflow. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Dataflow.
 - `workspace_id` (String) The Workspace ID.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.

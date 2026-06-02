@@ -83,7 +83,7 @@ output "example_definition_content_object" {
 - `description` (String) The Digital Twin Builder Flow description.
 - `folder_id` (String) The Digital Twin Builder Flow Folder ID.
 - `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--properties))
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -119,12 +119,3 @@ Read-Only:
 - `item_id` (String) The DigitalTwinBuilderFlow item ID.
 - `reference_type` (String) The DigitalTwinBuilderFlow reference type.
 - `workspace_id` (String) The workspace ID the DigitalTwinBuilderFlow belongs to.
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

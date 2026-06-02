@@ -79,7 +79,7 @@ output "example_definition_content_object" {
 - `description` (String) The Variable Library description.
 - `folder_id` (String) The Variable Library Folder ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
-- `tags` (Attributes Set) List of applied tags. (see [below for nested schema](#nestedatt--tags))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -105,12 +105,3 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 Read-Only:
 
 - `active_value_set_name` (String) The VariableLibrary current active value set.
-
-<a id="nestedatt--tags"></a>
-
-### Nested Schema for `tags`
-
-Read-Only:
-
-- `display_name` (String) The name of the tag.
-- `id` (String) The tag ID.

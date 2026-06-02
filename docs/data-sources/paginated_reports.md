@@ -57,14 +57,5 @@ Read-Only:
 - `display_name` (String) The Paginated Report display name.
 - `folder_id` (String) The Paginated Report Folder ID.
 - `id` (String) The Paginated Report ID.
-- `tags` (Attributes Set) A set of tags assigned to the Paginated Report. (see [below for nested schema](#nestedatt--values--tags))
+- `tags` (Set of String) A set of tag IDs assigned to the Paginated Report.
 - `workspace_id` (String) The Workspace ID.
-
-<a id="nestedatt--values--tags"></a>
-
-### Nested Schema for `values.tags`
-
-Read-Only:
-
-- `display_name` (String) The tag display name.
-- `id` (String) The tag ID.
