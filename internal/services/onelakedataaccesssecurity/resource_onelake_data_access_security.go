@@ -136,7 +136,7 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 	defer cancel()
 
 	diags = r.get(ctx, &state.baseOneLakeDataAccessSecurityModel)
-	if utils.IsErrNotFound(state.Name.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
+	if utils.IsErrNotFound(state.RoleName.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 		resp.Diagnostics.Append(diags...)
 
@@ -179,9 +179,15 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 		return
 	}
 
-	_, err := r.client.CreateOrUpdateSingleDataAccessRole(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqUpdate.DataAccessRoleBase, &fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleOptions{
-		DataAccessRoleConflictPolicy: to.Ptr(fabcore.DataAccessRoleConflictPolicyOverwrite),
-	})
+	_, err := r.client.CreateOrUpdateSingleDataAccessRole(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.ItemID.ValueString(),
+		reqUpdate.DataAccessRoleBase,
+		&fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleOptions{
+			DataAccessRoleConflictPolicy: to.Ptr(fabcore.DataAccessRoleConflictPolicyOverwrite),
+		},
+	)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -216,7 +222,7 @@ func (r *resourceOneLakeDataAccessSecurity) Delete(ctx context.Context, req reso
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err := r.client.DeleteDataAccessRole(ctx, state.WorkspaceID.ValueString(), state.ItemID.ValueString(), state.Name.ValueString(), nil)
+	_, err := r.client.DeleteDataAccessRole(ctx, state.WorkspaceID.ValueString(), state.ItemID.ValueString(), state.RoleName.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -238,13 +244,13 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 	if len(parts) != 3 {
 		resp.Diagnostics.AddError(
 			common.ErrorImportIdentifierHeader,
-			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Name"),
+			fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/RoleName"),
 		)
 
 		return
 	}
 
-	workspaceID, itemID, name := parts[0], parts[1], parts[2]
+	workspaceID, itemID, roleName := parts[0], parts[1], parts[2]
 
 	uuidWorkspaceID, diags := customtypes.NewUUIDValueMust(workspaceID)
 	resp.Diagnostics.Append(diags...)
@@ -265,7 +271,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 		baseOneLakeDataAccessSecurityModel: baseOneLakeDataAccessSecurityModel{
 			WorkspaceID: uuidWorkspaceID,
 			ItemID:      uuidItemID,
-			Name:        types.StringValue(name),
+			RoleName:    types.StringValue(roleName),
 		},
 		Timeouts: timeout,
 	}
@@ -282,7 +288,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 }
 
 func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
-	respGet, err := r.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Name.ValueString(), nil)
+	respGet, err := r.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.RoleName.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}

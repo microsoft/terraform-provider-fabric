@@ -61,10 +61,9 @@ Required:
 Read-Only:
 
 - `decision_rules` (Attributes Set) The array of permissions that make up the Data access role. (see [below for nested schema](#nestedatt--values--decision_rules))
-- `id` (String) The unique id of the Data access role.
 - `kind` (String) The kind of the Data access role. Possible values: `Policy`. Value must be one of : `Policy`.
 - `members` (Attributes) The members object which contains the members of the role as arrays of different member types. (see [below for nested schema](#nestedatt--values--members))
-- `name` (String) The name of the Data access role.
+- `role_name` (String) The name of the Data access role.
 
 <a id="nestedatt--values--decision_rules"></a>
 
@@ -72,8 +71,38 @@ Read-Only:
 
 Read-Only:
 
+- `constraints` (Attributes) Any constraints such as row or column level security that are applied to tables as part of this role. If not included, no constraints apply to any tables in the role. (see [below for nested schema](#nestedatt--values--decision_rules--constraints))
 - `effect` (String) The effect that a role has on access to the data resource. Possible values: `Permit`. Value must be one of : `Permit`.
 - `permission` (Attributes Set) Permissions defined by attribute name and values. (see [below for nested schema](#nestedatt--values--decision_rules--permission))
+
+<a id="nestedatt--values--decision_rules--constraints"></a>
+
+### Nested Schema for `values.decision_rules.constraints`
+
+Read-Only:
+
+- `columns` (Attributes Set) The array of column constraints applied to one or more tables in the data access role. (see [below for nested schema](#nestedatt--values--decision_rules--constraints--columns))
+- `rows` (Attributes Set) The array of row constraints applied to one or more tables in the data access role. (see [below for nested schema](#nestedatt--values--decision_rules--constraints--rows))
+
+<a id="nestedatt--values--decision_rules--constraints--columns"></a>
+
+### Nested Schema for `values.decision_rules.constraints.columns`
+
+Read-Only:
+
+- `column_action` (Set of String) The array of actions applied to the column names. Possible values: `Read`. Element value must satisfy all validations: value must be one of: ["Read"].
+- `column_effect` (String) The effect given to the column names. Possible values: `Permit`. Value must be one of : `Permit`.
+- `column_names` (Set of String) An array of case sensitive column names. Use `*` to indicate all columns in the table.
+- `table_path` (String) A relative file path specifying which table the column constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.
+
+<a id="nestedatt--values--decision_rules--constraints--rows"></a>
+
+### Nested Schema for `values.decision_rules.constraints.rows`
+
+Read-Only:
+
+- `table_path` (String) A relative file path specifying which table the row constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.
+- `value` (String) A T-SQL expression that is used to evaluate which rows the role members can see. Only a subset of T-SQL can be used as a predicate.
 
 <a id="nestedatt--values--decision_rules--permission"></a>
 

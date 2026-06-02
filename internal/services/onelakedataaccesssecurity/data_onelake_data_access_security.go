@@ -87,7 +87,7 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if resp.Diagnostics.Append(d.get(ctx, &data)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(d.getByRoleName(ctx, &data)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -98,8 +98,12 @@ func (d *dataSourceOneLakeDataAccessSecurity) Read(ctx context.Context, req data
 	})
 }
 
-func (d *dataSourceOneLakeDataAccessSecurity) get(ctx context.Context, model *dataSourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
-	respGet, err := d.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.Name.ValueString(), nil)
+func (d *dataSourceOneLakeDataAccessSecurity) getByRoleName(ctx context.Context, model *dataSourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
+	tflog.Trace(ctx, "GET BY ROLE NAME", map[string]any{
+		"role_name": model.RoleName.ValueString(),
+	})
+
+	respGet, err := d.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.RoleName.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}

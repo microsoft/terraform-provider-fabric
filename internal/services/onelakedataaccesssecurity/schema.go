@@ -6,6 +6,7 @@ package onelakedataaccesssecurity
 import (
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
@@ -68,22 +69,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Required: true,
 				},
 			},
-			"id": superschema.SuperStringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The unique id of the Data access role.",
-					CustomType:          customtypes.UUIDType{},
-				},
-				Resource: &schemaR.StringAttribute{
-					Computed: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
-				},
-			},
-			"name": superschema.StringAttribute{
+			"role_name": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The name of the Data access role.",
 				},
@@ -147,6 +133,131 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
+						},
+					},
+					"constraints": superschema.SuperSingleNestedAttributeOf[constraintsModel]{
+						Common: &schemaR.SingleNestedAttribute{
+							MarkdownDescription: "Any constraints such as row or column level security that are applied to tables as part of this role. If not included, no constraints apply to any tables in the role.",
+						},
+						Resource: &schemaR.SingleNestedAttribute{
+							Optional: true,
+						},
+						DataSource: &schemaD.SingleNestedAttribute{
+							Computed: true,
+						},
+						Attributes: superschema.Attributes{
+							"columns": superschema.SuperSetNestedAttributeOf[columnConstraint]{
+								Common: &schemaR.SetNestedAttribute{
+									MarkdownDescription: "The array of column constraints applied to one or more tables in the data access role.",
+								},
+								Resource: &schemaR.SetNestedAttribute{
+									Optional: true,
+								},
+								DataSource: &schemaD.SetNestedAttribute{
+									Computed: true,
+								},
+								Attributes: superschema.Attributes{
+									"column_action": superschema.SuperSetAttribute{
+										Common: &schemaR.SetAttribute{
+											ElementType: types.StringType,
+											MarkdownDescription: "The array of actions applied to the column names. Possible values: " + utils.ConvertStringSlicesToString(
+												fabcore.PossibleColumnActionValues(),
+												true,
+												true,
+											) + ".",
+											Validators: []validator.Set{
+												setvalidator.ValueStringsAre(stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleColumnActionValues(), true)...)),
+											},
+										},
+										Resource: &schemaR.SetAttribute{
+											ElementType: types.StringType,
+											Required:    true,
+										},
+										DataSource: &schemaD.SetAttribute{
+											ElementType: types.StringType,
+											Computed:    true,
+										},
+									},
+									"column_effect": superschema.StringAttribute{
+										Common: &schemaR.StringAttribute{
+											MarkdownDescription: "The effect given to the column names. Possible values: " + utils.ConvertStringSlicesToString(
+												fabcore.PossibleColumnEffectValues(),
+												true,
+												true,
+											) + ".",
+											Validators: []validator.String{
+												stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleColumnEffectValues(), true)...),
+											},
+										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
+										},
+										DataSource: &schemaD.StringAttribute{
+											Computed: true,
+										},
+									},
+									"column_names": superschema.SuperSetAttribute{
+										Common: &schemaR.SetAttribute{
+											ElementType:         types.StringType,
+											MarkdownDescription: "An array of case sensitive column names. Use `*` to indicate all columns in the table.",
+										},
+										Resource: &schemaR.SetAttribute{
+											ElementType: types.StringType,
+											Required:    true,
+										},
+										DataSource: &schemaD.SetAttribute{
+											ElementType: types.StringType,
+											Computed:    true,
+										},
+									},
+									"table_path": superschema.StringAttribute{
+										Common: &schemaR.StringAttribute{
+											MarkdownDescription: "A relative file path specifying which table the column constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.",
+										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
+										},
+										DataSource: &schemaD.StringAttribute{
+											Computed: true,
+										},
+									},
+								},
+							},
+							"rows": superschema.SuperSetNestedAttributeOf[rowConstraint]{
+								Common: &schemaR.SetNestedAttribute{
+									MarkdownDescription: "The array of row constraints applied to one or more tables in the data access role.",
+								},
+								Resource: &schemaR.SetNestedAttribute{
+									Optional: true,
+								},
+								DataSource: &schemaD.SetNestedAttribute{
+									Computed: true,
+								},
+								Attributes: superschema.Attributes{
+									"table_path": superschema.StringAttribute{
+										Common: &schemaR.StringAttribute{
+											MarkdownDescription: "A relative file path specifying which table the row constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.",
+										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
+										},
+										DataSource: &schemaD.StringAttribute{
+											Computed: true,
+										},
+									},
+									"value": superschema.StringAttribute{
+										Common: &schemaR.StringAttribute{
+											MarkdownDescription: "A T-SQL expression that is used to evaluate which rows the role members can see. Only a subset of T-SQL can be used as a predicate.",
+										},
+										Resource: &schemaR.StringAttribute{
+											Required: true,
+										},
+										DataSource: &schemaD.StringAttribute{
+											Computed: true,
+										},
+									},
+								},
+							},
 						},
 					},
 					"permission": superschema.SuperSetNestedAttributeOf[permissionScope]{

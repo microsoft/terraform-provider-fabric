@@ -40,7 +40,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 				map[string]any{
 					"workspace_id":    testhelp.RandomUUID(),
 					"item_id":         testhelp.RandomUUID(),
-					"name":            "role",
+					"role_name":       "role",
 					"unexpected_attr": "test",
 				},
 			),
@@ -68,7 +68,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
-		// error - no required attribute - name
+		// error - no required attribute - role_name
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -78,7 +78,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_Attributes(t *testing.T) {
 					"item_id":      testhelp.RandomUUID(),
 				},
 			),
-			ExpectError: regexp.MustCompile(`The argument "name" is required, but no definition was found.`),
+			ExpectError: regexp.MustCompile(`The argument "role_name" is required, but no definition was found.`),
 		},
 	}))
 }
@@ -87,8 +87,9 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 
-	entity := fabcore.DataAccessRoleBase{
-		Name: to.Ptr("example"),
+	entity := fabcore.DataAccessRoleListItem{
+		ID:   new(testhelp.RandomUUID()),
+		Name: new("example"),
 		Kind: to.Ptr(fabcore.DataAccessRoleKindPolicy),
 		DecisionRules: []fabcore.DecisionRule{{
 			Effect: to.Ptr(fabcore.EffectPermit),
@@ -100,19 +101,21 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 		Members: &fabcore.Members{
 			FabricItemMembers: []fabcore.FabricItemMember{{
 				ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-				SourcePath: to.Ptr(workspaceID + "/" + itemID),
+				SourcePath: new(workspaceID + "/" + itemID),
 			}},
 		},
 	}
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRole(entity)
+	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity)
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
 
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
 		map[string]any{
 			"workspace_id": workspaceID,
 			"item_id":      itemID,
-			"name":         "example",
+			"role_name":    "example",
 			"decision_rules": []map[string]any{
 				{
 					"effect": "Permit",
@@ -136,7 +139,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 			Config:        testCase,
 			ImportStateId: "not-valid",
 			ImportState:   true,
-			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/Name")),
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, "WorkspaceID/ItemID/RoleName")),
 		},
 		{
 			ResourceName:  testResourceItemFQN,
@@ -152,29 +155,13 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 
-	entity := fabcore.DataAccessRoleBase{
-		Name: to.Ptr("example"),
-		Kind: to.Ptr(fabcore.DataAccessRoleKindPolicy),
-		DecisionRules: []fabcore.DecisionRule{{
-			Effect: to.Ptr(fabcore.EffectPermit),
-			Permission: []fabcore.PermissionScope{
-				{AttributeName: to.Ptr(fabcore.AttributeNamePath), AttributeValueIncludedIn: []string{"*"}},
-				{AttributeName: to.Ptr(fabcore.AttributeNameAction), AttributeValueIncludedIn: []string{"Read"}},
-			},
-		}},
-		Members: &fabcore.Members{
-			FabricItemMembers: []fabcore.FabricItemMember{{
-				ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-				SourcePath: to.Ptr(workspaceID + "/" + itemID),
-			}},
-		},
+	for key := range fakeOneLakeDataAccessRoleStore {
+		delete(fakeOneLakeDataAccessRoleStore, key)
 	}
 
-	state := newOneLakeDataAccessSecurityState(entity)
-
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRole(state)
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeStatefulGetDataAccessRole(state)
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRole()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRoleFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read
@@ -185,7 +172,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         "example",
+					"role_name":    "example",
 					"decision_rules": []map[string]any{
 						{
 							"effect": "Permit",
@@ -203,7 +190,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "name", "example"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role_name", "example"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "decision_rules.0.effect", "Permit"),
@@ -217,7 +204,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         "example",
+					"role_name":    "example",
 					"decision_rules": []map[string]any{
 						{
 							"effect": "Permit",
@@ -235,7 +222,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "name", "example"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role_name", "example"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
@@ -260,7 +247,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         roleName,
+					"role_name":    roleName,
 					"decision_rules": []map[string]any{
 						{
 							"effect": "Permit",
@@ -278,7 +265,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "name", roleName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role_name", roleName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 			),
@@ -290,7 +277,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         roleName,
+					"role_name":    roleName,
 					"decision_rules": []map[string]any{
 						{
 							"effect": "Permit",
@@ -308,7 +295,7 @@ func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "name", roleName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "role_name", roleName),
 			),
 		},
 	}))

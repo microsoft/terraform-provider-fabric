@@ -22,7 +22,7 @@ The OneLake Data Access Security resource allows you to manage a Fabric [OneLake
 resource "fabric_onelake_data_access_security" "example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
-  name         = "example"
+  role_name    = "example"
   decision_rules = [
     {
       effect = "Permit"
@@ -57,17 +57,13 @@ resource "fabric_onelake_data_access_security" "example" {
 - `decision_rules` (Attributes Set) The array of permissions that make up the Data access role. (see [below for nested schema](#nestedatt--decision_rules))
 - `item_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The ID of the Fabric item.
 - `members` (Attributes) The members object which contains the members of the role as arrays of different member types. (see [below for nested schema](#nestedatt--members))
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the Data access role.
+- `role_name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the Data access role.
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
 - `kind` (String) The kind of the Data access role. Possible values: `Policy`. Value must be one of : `Policy`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-
-### Read-Only
-
-- `id` (String) The unique id of the Data access role.
 
 <a id="nestedatt--decision_rules"></a>
 
@@ -78,6 +74,10 @@ Required:
 - `effect` (String) The effect that a role has on access to the data resource. Possible values: `Permit`. Value must be one of : `Permit`.
 - `permission` (Attributes Set) Permissions defined by attribute name and values. (see [below for nested schema](#nestedatt--decision_rules--permission))
 
+Optional:
+
+- `constraints` (Attributes) Any constraints such as row or column level security that are applied to tables as part of this role. If not included, no constraints apply to any tables in the role. (see [below for nested schema](#nestedatt--decision_rules--constraints))
+
 <a id="nestedatt--decision_rules--permission"></a>
 
 ### Nested Schema for `decision_rules.permission`
@@ -86,6 +86,35 @@ Required:
 
 - `attribute_name` (String) The name of the attribute that is being evaluated for access permissions. Possible values: `Action`, `Path`. Value must be one of : `Action`, `Path`.
 - `attribute_value_included_in` (Set of String) Allowed values for this attribute.
+
+<a id="nestedatt--decision_rules--constraints"></a>
+
+### Nested Schema for `decision_rules.constraints`
+
+Optional:
+
+- `columns` (Attributes Set) The array of column constraints applied to one or more tables in the data access role. (see [below for nested schema](#nestedatt--decision_rules--constraints--columns))
+- `rows` (Attributes Set) The array of row constraints applied to one or more tables in the data access role. (see [below for nested schema](#nestedatt--decision_rules--constraints--rows))
+
+<a id="nestedatt--decision_rules--constraints--columns"></a>
+
+### Nested Schema for `decision_rules.constraints.columns`
+
+Required:
+
+- `column_action` (Set of String) The array of actions applied to the column names. Possible values: `Read`. Element value must satisfy all validations: value must be one of: ["Read"].
+- `column_effect` (String) The effect given to the column names. Possible values: `Permit`. Value must be one of : `Permit`.
+- `column_names` (Set of String) An array of case sensitive column names. Use `*` to indicate all columns in the table.
+- `table_path` (String) A relative file path specifying which table the column constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.
+
+<a id="nestedatt--decision_rules--constraints--rows"></a>
+
+### Nested Schema for `decision_rules.constraints.rows`
+
+Required:
+
+- `table_path` (String) A relative file path specifying which table the row constraint applies to. Should be in the form `/Tables/{optionalSchema}/{tableName}`.
+- `value` (String) A T-SQL expression that is used to evaluate which rows the role members can see. Only a subset of T-SQL can be used as a predicate.
 
 <a id="nestedatt--members"></a>
 
@@ -133,6 +162,6 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
-# terraform import fabric_onelake_data_access_security.example "<WorkspaceID>/<ItemID>/<Name>"
+# terraform import fabric_onelake_data_access_security.example "<WorkspaceID>/<ItemID>/<RoleName>"
 terraform import fabric_onelake_data_access_security.example "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111/example"
 ```

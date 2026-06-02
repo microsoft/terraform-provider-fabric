@@ -21,9 +21,16 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOneLakeDataAccessRole()
+	entity := fakes.NewRandomOneLakeDataAccessRoleListItem()
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRole(entity)
+	for key := range fakeOneLakeDataAccessRoleStore {
+		delete(fakeOneLakeDataAccessRoleStore, key)
+	}
+
+	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity)
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -41,7 +48,7 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id": "invalid uuid",
 					"item_id":      itemID,
-					"name":         *entity.Name,
+					"role_name":    *entity.Name,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -53,25 +60,25 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      "invalid uuid",
-					"name":         *entity.Name,
+					"role_name":    *entity.Name,
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// read
+		// read by role_name
 		{
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         *entity.Name,
+					"role_name":    *entity.Name,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "name", *entity.Name),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
 			),
 		},
@@ -92,7 +99,7 @@ func TestAcc_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				map[string]any{
 					"workspace_id": workspaceID,
 					"item_id":      itemID,
-					"name":         "DefaultReader",
+					"role_name":    "DefaultReader",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

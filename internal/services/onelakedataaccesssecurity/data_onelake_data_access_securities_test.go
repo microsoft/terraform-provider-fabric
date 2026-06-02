@@ -9,7 +9,6 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -27,9 +26,15 @@ func TestUnit_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 	entity2 := fakes.NewRandomOneLakeDataAccessRoleListItem()
 	entity3 := fakes.NewRandomOneLakeDataAccessRoleListItem()
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRoles(
-		[]fabcore.DataAccessRoleListItem{entity1, entity2, entity3},
-	)
+	for key := range fakeOneLakeDataAccessRoleStore {
+		delete(fakeOneLakeDataAccessRoleStore, key)
+	}
+
+	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity1)
+	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity2)
+	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity3)
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemsFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
