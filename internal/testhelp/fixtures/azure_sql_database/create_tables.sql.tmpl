@@ -1,0 +1,13 @@
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '{{ .TABLE1_NAME }}')
+BEGIN
+  CREATE TABLE [dbo].[{{ .TABLE1_NAME }}] (
+    [Id] INT IDENTITY(1,1) PRIMARY KEY
+  )
+END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '{{ .TABLE2_NAME }}')
+BEGIN
+  CREATE TABLE [dbo].[{{ .TABLE2_NAME }}] (
+    [Id] INT IDENTITY(1,1) PRIMARY KEY
+  )
+END
