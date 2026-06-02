@@ -4,6 +4,7 @@
 package onelakedataaccesssecurity_test
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -147,6 +149,31 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 			ImportStateId: "test/id/name",
 			ImportState:   true,
 			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s/%s", workspaceID, itemID, *entity.Name),
+			ImportState:   true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				if got := is[0].Attributes["workspace_id"]; got != workspaceID {
+					return fmt.Errorf("%s: unexpected workspace_id — got %q, want %q", testResourceItemFQN, got, workspaceID)
+				}
+
+				if got := is[0].Attributes["item_id"]; got != itemID {
+					return fmt.Errorf("%s: unexpected item_id — got %q, want %q", testResourceItemFQN, got, itemID)
+				}
+
+				if got := is[0].Attributes["role_name"]; got != *entity.Name {
+					return fmt.Errorf("%s: unexpected role_name — got %q, want %q", testResourceItemFQN, got, *entity.Name)
+				}
+
+				return nil
+			},
 		},
 	}))
 }
