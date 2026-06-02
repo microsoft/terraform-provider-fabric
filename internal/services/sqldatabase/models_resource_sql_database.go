@@ -93,7 +93,7 @@ func (to *requestCreateSQLDatabasePayload) set(ctx context.Context, from sqlData
 func getSourceDatabaseReference(
 	ctx context.Context,
 	sourceDatabaseReference supertypes.SingleNestedObjectValueOf[sourceDatabaseReferenceModel],
-) (fabsqldatabase.ItemReferenceClassification, diag.Diagnostics) {
+) (*fabsqldatabase.ItemReferenceByID, diag.Diagnostics) {
 	model, diags := sourceDatabaseReference.Get(ctx)
 	if diags.HasError() {
 		return nil, diags
