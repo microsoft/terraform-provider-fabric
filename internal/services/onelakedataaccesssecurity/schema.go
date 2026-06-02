@@ -22,6 +22,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
+//nolint:maintidx
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 

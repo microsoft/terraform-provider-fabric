@@ -12,7 +12,7 @@ import (
 
 func NewRandomOneLakeDataAccessRole() fabcore.DataAccessRoleBase {
 	return fabcore.DataAccessRoleBase{
-		Name: to.Ptr(testhelp.RandomName()),
+		Name: new(testhelp.RandomName()),
 		Kind: to.Ptr(fabcore.DataAccessRoleKindPolicy),
 		DecisionRules: []fabcore.DecisionRule{
 			{
@@ -33,7 +33,7 @@ func NewRandomOneLakeDataAccessRole() fabcore.DataAccessRoleBase {
 			FabricItemMembers: []fabcore.FabricItemMember{
 				{
 					ItemAccess: []fabcore.ItemAccess{fabcore.ItemAccessReadAll},
-					SourcePath: to.Ptr(testhelp.RandomUUID() + "/" + testhelp.RandomUUID()),
+					SourcePath: new(testhelp.RandomUUID() + "/" + testhelp.RandomUUID()),
 				},
 			},
 		},
@@ -44,7 +44,7 @@ func NewRandomOneLakeDataAccessRoleListItem() fabcore.DataAccessRoleListItem {
 	role := NewRandomOneLakeDataAccessRole()
 
 	return fabcore.DataAccessRoleListItem{
-		ID:            to.Ptr(testhelp.RandomUUID()),
+		ID:            new(testhelp.RandomUUID()),
 		Name:          role.Name,
 		Kind:          role.Kind,
 		DecisionRules: role.DecisionRules,
