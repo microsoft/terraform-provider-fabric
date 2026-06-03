@@ -18,14 +18,14 @@ data "fabric_variable_library" "example_definition" {
   output_definition = true
 }
 
-# Access the content of the definition with JSONPath expression
+# Access the content of the definition with JSONPath expressionariablelibrary-content
 output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_variable_library.example_definition.definition["variablelibrary-content.json"].content, ".payload")
+  value = provider::fabric::content_decode(data.fabric_variable_library.example_definition.definition["variables.json"].content, ".payload")
 }
 
 # Access the content of the definition as JSON object
 output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_variable_library.example_definition.definition["variablelibrary-content.json"].content).payload
+  value = provider::fabric::content_decode(data.fabric_variable_library.example_definition.definition["variables.json"].content).payload
 }
 
 # This is an invalid data source

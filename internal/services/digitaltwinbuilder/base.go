@@ -29,8 +29,14 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type:  fabricitem.DefinitionFormatDefault,
-		API:   "",
-		Paths: []string{"definition.json"},
+		Type: fabricitem.DefinitionFormatDefault,
+		API:  "",
+		Paths: []string{
+			"definition.json",
+			"EntityTypes/*",
+			"EntityTypeRelationships/*",
+			"ContextualizationOperations/*",
+			"MappingOperations/*",
+		},
 	},
 }
