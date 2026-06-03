@@ -2015,6 +2015,8 @@ if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
   Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
 }
 else {
+  Set-FabricConnectionRoleAssignment -ConnectionId $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
+
   $wellKnown['AzureSqlDatabase'] = @{
     connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
     tableName1   = $azureSql.TableName1
