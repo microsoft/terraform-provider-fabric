@@ -4,14 +4,14 @@ page_title: "fabric_ml_model Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The ML Model resource allows you to manage a Fabric ML Model https://learn.microsoft.com/fabric/data-science/machine-learning-model.
-  -> This resource does not support Service Principal. Please use a User context authentication.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_ml_model (Resource)
 
 The ML Model resource allows you to manage a Fabric [ML Model](https://learn.microsoft.com/fabric/data-science/machine-learning-model).
 
--> This resource does not support Service Principal. Please use a User context authentication.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 

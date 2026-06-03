@@ -18,5 +18,5 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Types:          "ml_experiments",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-science/machine-learning-experiment",
 	IsPreview:      false,
-	IsSPNSupported: false,
+	IsSPNSupported: true,
 }
