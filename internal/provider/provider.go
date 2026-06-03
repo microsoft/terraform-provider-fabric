@@ -84,6 +84,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodelcb"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
@@ -491,6 +492,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		activator.NewResourceActivator,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
+		semanticmodelcb.NewResourceSemanticModelConnectionBinding,
 		sparkcustompool.NewResourceSparkCustomPool,
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
