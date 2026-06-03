@@ -176,8 +176,7 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.tagsClient, plannedTags, supertypes.NewSetValueOfNull[customtypes.UUID](ctx), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -309,7 +308,7 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	}
 
 	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
-		if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plan.Tags, state.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 			return
 		}
 	}

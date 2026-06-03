@@ -5,6 +5,7 @@ package fabricitem
 
 import (
 	"context"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -32,40 +33,69 @@ func SetTags(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID],
 	return nil
 }
 
-// SyncTags synchronizes item tags: unapplies current tags, then applies desired ones.
-// A null or empty plannedTags means "remove all tags". CurrentTags represents the known state tags.
-func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, plannedTags, currentTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
-	var desiredTagIDs []string
+// SyncTags synchronizes item tags by fetching the current applied tags from the API,
+// computing the diff against the planned tags, then only unapplying removed tags and applying new ones.
+func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient *fabcore.TagsClient, plannedTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
+	var plannedTagIDs []string
 
 	if !plannedTags.IsNull() {
-		if diags := plannedTags.ElementsAs(ctx, &desiredTagIDs, false); diags.HasError() {
+		if diags := plannedTags.ElementsAs(ctx, &plannedTagIDs, false); diags.HasError() {
 			return diags
 		}
+	}
+
+	// Fetch current tags from the API
+	respGet, err := itemsClient.GetItem(ctx, workspaceID, itemID, nil)
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
+		return diags
 	}
 
 	var currentTagIDs []string
 
-	if !currentTags.IsNull() {
-		if diags := currentTags.ElementsAs(ctx, &currentTagIDs, false); diags.HasError() {
-			return diags
+	for _, tag := range respGet.Tags {
+		if tag.ID != nil {
+			currentTagIDs = append(currentTagIDs, *tag.ID)
 		}
 	}
 
-	// Unapply current tags
-	if len(currentTagIDs) > 0 {
-		_, err := tagsClient.UnapplyTags(ctx, workspaceID, itemID, fabcore.UnapplyTagsRequest{Tags: currentTagIDs}, nil)
+	toAdd, toRemove := diffTags(currentTagIDs, plannedTagIDs)
+
+	// Unapply only the tags that were removed
+	if len(toRemove) > 0 {
+		_, err := tagsClient.UnapplyTags(ctx, workspaceID, itemID, fabcore.UnapplyTagsRequest{Tags: toRemove}, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil); diags.HasError() {
 			return diags
 		}
 	}
 
-	// Apply desired tags
-	if len(desiredTagIDs) > 0 {
-		_, err := tagsClient.ApplyTags(ctx, workspaceID, itemID, fabcore.ApplyTagsRequest{Tags: desiredTagIDs}, nil)
+	// Apply only the tags that are newly added
+	if len(toAdd) > 0 {
+		_, err := tagsClient.ApplyTags(ctx, workspaceID, itemID, fabcore.ApplyTagsRequest{Tags: toAdd}, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil); diags.HasError() {
 			return diags
 		}
 	}
 
 	return nil
+}
+
+// diffTags computes which tags to add and remove by comparing current and planned tag IDs.
+func diffTags(current, planned []string) (toAdd, toRemove []string) { //nolint:nonamedreturns
+	for _, id := range planned {
+		if !containsTagID(current, id) {
+			toAdd = append(toAdd, id)
+		}
+	}
+
+	for _, id := range current {
+		if !containsTagID(planned, id) {
+			toRemove = append(toRemove, id)
+		}
+	}
+
+	return toAdd, toRemove
+}
+
+func containsTagID(tags []string, id string) bool {
+	return slices.Contains(tags, id)
 }
