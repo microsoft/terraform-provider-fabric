@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphqlApi/definition/1.0.0/schema.json",
+  "datasources": [
+    {
+      "connectionId": "{{ .CONNECTION_ID }}",
+      "objects": [
+        {
+          "actions": {
+            "Query": "Enabled",
+            "Query_by_pk": "Enabled",
+            "Create": "Enabled",
+            "Update": "Enabled",
+            "Delete": "Enabled"
+          },
+          "fieldMappings": {
+            "Id": "Id"
+          },
+          "graphqlType": "{{ .TABLE_NAME }}",
+          "relationships": [],
+          "sourceObject": "dbo.{{ .TABLE_NAME }}",
+          "sourceObjectType": "Table"
+        }
+      ],
+      "sourceItemId": "{{ .CONNECTION_ID }}",
+      "sourceType": "AzureSql"
+    }
+  ]
+}
