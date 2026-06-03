@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The ML Experiment data-source allows you to retrieve details about a Fabric ML Experiment https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
   -> This data-source does not support Service Principal. Please use a User context authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_ml_experiment (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The ML Experiment data-source allows you to retrieve details about a Fabric [ML Experiment](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
 -> This data-source does not support Service Principal. Please use a User context authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

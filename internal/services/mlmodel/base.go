@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "ML Models",
 	Types:          "ml_models",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-science/machine-learning-model",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: false,
 }
