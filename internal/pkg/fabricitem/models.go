@@ -31,7 +31,7 @@ func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diag
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 
-	return SetResourceTagsFromItem(ctx, &to.Tags, from.Tags)
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
@@ -51,7 +51,7 @@ func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 
-	return SetResourceTagsFromItem(ctx, &to.Tags, from.Tags)
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported
@@ -107,20 +107,14 @@ func getFieldStructValue[Titemprop any](v reflect.Value, fieldName string) *Tite
 
 func getFieldSliceValue[T any](v reflect.Value, fieldName string) []T {
 	field := v.FieldByName(fieldName)
-	if !field.IsValid() {
-		return nil
-	}
-
 	if field.Kind() == reflect.Pointer {
 		field = field.Elem()
 	}
 
-	if !field.IsValid() || field.Kind() != reflect.Slice || field.Len() == 0 {
-		return nil
-	}
-
-	if value, ok := field.Interface().([]T); ok {
-		return value
+	if field.IsValid() && field.CanInterface() {
+		if value, ok := field.Interface().([]T); ok {
+			return value
+		}
 	}
 
 	// Convert element-by-element for structurally identical but differently-named types

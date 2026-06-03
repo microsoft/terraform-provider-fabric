@@ -14,7 +14,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func SetResourceTagsFromItem(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID], from []fabcore.ItemTag) diag.Diagnostics {
+func SetTags(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID], from []fabcore.ItemTag) diag.Diagnostics {
 	elements := make([]customtypes.UUID, 0, len(from))
 
 	for _, tag := range from {
@@ -33,12 +33,12 @@ func SetResourceTagsFromItem(ctx context.Context, tags *supertypes.SetValueOf[cu
 }
 
 // SyncTags synchronizes item tags: unapplies current tags, then applies desired ones.
-// A null or empty desiredTags means "remove all tags". CurrentTags represents the known state tags.
-func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, desiredTags, currentTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
+// A null or empty plannedTags means "remove all tags". CurrentTags represents the known state tags.
+func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, plannedTags, currentTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
 	var desiredTagIDs []string
 
-	if !desiredTags.IsNull() {
-		if diags := desiredTags.ElementsAs(ctx, &desiredTagIDs, false); diags.HasError() {
+	if !plannedTags.IsNull() {
+		if diags := plannedTags.ElementsAs(ctx, &desiredTagIDs, false); diags.HasError() {
 			return diags
 		}
 	}
