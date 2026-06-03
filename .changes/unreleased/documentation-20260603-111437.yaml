@@ -1,0 +1,5 @@
+kind: documentation
+body: Removed preview flag from GA resources
+time: 2026-06-03T11:14:37.7017315+03:00
+custom:
+    Issue: "998"
