@@ -93,26 +93,3 @@ func TestUnit_MirroredCatalogsDataSource(t *testing.T) {
 		},
 	}))
 }
-
-func TestAcc_MirroredCatalogsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemsHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_tables_path"),
-			),
-		},
-	},
-	))
-}

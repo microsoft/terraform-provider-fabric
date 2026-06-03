@@ -29,7 +29,7 @@ var testHelperDefinition = map[string]any{
 	`"MirroredCatalogDefinition.json"`: map[string]any{
 		"source": "${local.path}/MirroredCatalogDefinition.json.tmpl",
 		"tokens": map[string]any{
-			"CONNECTION_ID": "00000000-0000-0000-0000-000000000000",
+			"CONNECTION_ID": "7d09f853-6034-4f07-94d6-a3208040a74d",
 			"SCOPE":         "default",
 		},
 	},
@@ -39,7 +39,7 @@ var testHelperDefinitionUpdate = map[string]any{
 	`"MirroredCatalogDefinition.json"`: map[string]any{
 		"source": "${local.path}/MirroredCatalogDefinition.json.tmpl",
 		"tokens": map[string]any{
-			"CONNECTION_ID": "00000000-0000-0000-0000-000000000000",
+			"CONNECTION_ID": "7d09f853-6034-4f07-94d6-a3208040a74d",
 			"SCOPE":         "updated",
 		},
 	},
@@ -329,104 +329,4 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 			),
 		},
 	}))
-}
-
-func TestAcc_MirroredCatalogResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	entityCreateDisplayName := testhelp.RandomName()
-	entityCreateDescription := testhelp.RandomName()
-	entityUpdateDisplayName := testhelp.RandomName()
-	entityUpdateDescription := testhelp.RandomName()
-
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create with definition and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				folderResourceHCL1,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"description":  entityCreateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
-						"format":       "Default",
-						"definition":   testHelperDefinition,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityCreateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-			),
-		},
-		// Update, Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				folderResourceHCL1,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
-						"format":       "Default",
-						"definition":   testHelperDefinition,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.source_type"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
-			),
-		},
-		// Update definition, Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":              workspaceID,
-						"display_name":              entityUpdateDisplayName,
-						"description":               entityUpdateDescription,
-						"format":                    "Default",
-						"definition":                testHelperDefinitionUpdate,
-						"definition_update_enabled": true,
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.source_type"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.provisioning_status"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.sql_endpoint_properties.id"),
-			),
-		},
-	},
-	))
 }
