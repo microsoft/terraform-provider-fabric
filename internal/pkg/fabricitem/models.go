@@ -16,12 +16,12 @@ import (
 )
 
 type fabricItemModel struct {
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Description types.String     `tfsdk:"description"`
-	FolderID    customtypes.UUID `tfsdk:"folder_id"`
-	Tags        types.Set        `tfsdk:"tags"`
+	WorkspaceID customtypes.UUID                        `tfsdk:"workspace_id"`
+	ID          customtypes.UUID                        `tfsdk:"id"`
+	DisplayName types.String                            `tfsdk:"display_name"`
+	Description types.String                            `tfsdk:"description"`
+	FolderID    customtypes.UUID                        `tfsdk:"folder_id"`
+	Tags        supertypes.SetValueOf[customtypes.UUID] `tfsdk:"tags"`
 }
 
 func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
@@ -41,7 +41,7 @@ type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable
 	Description types.String                                  `tfsdk:"description"`
 	FolderID    customtypes.UUID                              `tfsdk:"folder_id"`
 	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop] `tfsdk:"properties"`
-	Tags        types.Set                                     `tfsdk:"tags"`
+	Tags        supertypes.SetValueOf[customtypes.UUID]       `tfsdk:"tags"`
 }
 
 func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {

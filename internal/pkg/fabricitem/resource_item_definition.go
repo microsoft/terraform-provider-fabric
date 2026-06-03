@@ -176,7 +176,8 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plannedTags, types.SetNull(customtypes.UUIDType{}), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		SyncTags(ctx, r.tagsClient, plannedTags, supertypes.NewSetValueOfNull[customtypes.UUID](ctx), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 		return
 	}
 

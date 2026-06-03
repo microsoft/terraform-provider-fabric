@@ -84,6 +84,7 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 		"tags": schema.SetAttribute{
 			MarkdownDescription: "A set of tag IDs applied to the item.",
 			Computed:            true,
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
 			ElementType:         customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.Attributes(ctx),

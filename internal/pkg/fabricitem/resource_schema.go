@@ -211,6 +211,7 @@ func getResourceFabricItemBaseAttributes(
 			Optional:            true,
 			Computed:            true,
 			Default:             setdefault.StaticValue(types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})),
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
 			ElementType:         customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.AttributesAll(ctx),

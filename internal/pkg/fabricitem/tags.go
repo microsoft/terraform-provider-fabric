@@ -6,35 +6,35 @@ package fabricitem
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func SetResourceTagsFromItem(_ context.Context, tags *types.Set, from []fabcore.ItemTag) diag.Diagnostics {
-	elements := make([]attr.Value, 0, len(from))
+func SetResourceTagsFromItem(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID], from []fabcore.ItemTag) diag.Diagnostics {
+	elements := make([]customtypes.UUID, 0, len(from))
 
 	for _, tag := range from {
 		elements = append(elements, customtypes.NewUUIDPointerValue(tag.ID))
 	}
 
-	setValue, diags := types.SetValue(customtypes.UUIDType{}, elements)
-	if diags.HasError() {
+	v := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+	if diags := v.Set(ctx, elements); diags.HasError() {
 		return diags
 	}
 
-	*tags = setValue
+	*tags = v
 
 	return nil
 }
 
 // SyncTags synchronizes item tags: unapplies current tags, then applies desired ones.
 // A null or empty desiredTags means "remove all tags". CurrentTags represents the known state tags.
-func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, desiredTags, currentTags types.Set, workspaceID, itemID string) diag.Diagnostics {
+func SyncTags(ctx context.Context, tagsClient *fabcore.TagsClient, desiredTags, currentTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
 	var desiredTagIDs []string
 
 	if !desiredTags.IsNull() {

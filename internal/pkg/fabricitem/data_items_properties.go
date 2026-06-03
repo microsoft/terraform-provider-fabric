@@ -70,6 +70,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 		"tags": schema.SetAttribute{
 			MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
 			Computed:            true,
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
 			ElementType:         customtypes.UUIDType{},
 		},
 	}

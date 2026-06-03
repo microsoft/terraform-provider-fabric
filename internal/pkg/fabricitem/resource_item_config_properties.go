@@ -9,12 +9,10 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -144,13 +142,14 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 
 	// Save state with empty tags so the item is tracked even if tags fail
 	createdState := plan
-	createdState.Tags = types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})
+	createdState.Tags = supertypes.NewSetValueOfSlice(ctx, []customtypes.UUID{})
 
 	if resp.Diagnostics.Append(resp.State.Set(ctx, createdState)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(SyncTags(ctx, r.tagsClient, plan.Tags, types.SetNull(customtypes.UUIDType{}), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(
+		SyncTags(ctx, r.tagsClient, plan.Tags, supertypes.NewSetValueOfNull[customtypes.UUID](ctx), plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 		return
 	}
 
