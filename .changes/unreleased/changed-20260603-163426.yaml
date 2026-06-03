@@ -1,0 +1,5 @@
+kind: changed
+body: SPN support for `fabric_ml_experiment` and `fabric_ml_model`
+time: 2026-06-03T16:34:26.7232351+03:00
+custom:
+    Issue: "999"
