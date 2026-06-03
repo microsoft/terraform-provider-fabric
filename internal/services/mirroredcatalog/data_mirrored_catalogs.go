@@ -21,7 +21,10 @@ func NewDataSourceMirroredCatalogs(ctx context.Context) datasource.DataSource {
 
 		if from != nil {
 			propertiesModel := &mirroredCatalogPropertiesModel{}
-			propertiesModel.set(ctx, *from)
+
+			if diags := propertiesModel.set(ctx, *from); diags.HasError() {
+				return diags
+			}
 
 			if diags := properties.Set(ctx, propertiesModel); diags.HasError() {
 				return diags

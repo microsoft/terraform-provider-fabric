@@ -35,16 +35,6 @@ var testHelperDefinition = map[string]any{
 	},
 }
 
-var testHelperDefinitionUpdate = map[string]any{
-	`"MirroredCatalogDefinition.json"`: map[string]any{
-		"source": "${local.path}/MirroredCatalogDefinition.json.tmpl",
-		"tokens": map[string]any{
-			"CONNECTION_ID": "7d09f853-6034-4f07-94d6-a3208040a74d",
-			"SCOPE":         "updated",
-		},
-	},
-}
-
 func TestUnit_MirroredCatalogResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
