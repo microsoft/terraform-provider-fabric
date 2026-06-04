@@ -1,5 +1,5 @@
 kind: changed
-body:  Moved `fabric_connection`, `fabric_connection_role_assignment`, `fabric_deployment_pipeline`, `fabric_deployment_pipeline_role_assignment`, `fabric_item_job_scheduler`, `fabric_tag`, `fabric_workspace_git`, `fabric_shortcut`, `fabric_ml_experiment`, `fabric_ml_model`, `fabric_spark_workspace_settings`, and `fabric_workspace_managed_private_endpoint` to GA
+body:  Removed preview for `fabric_connection`, `fabric_connection_role_assignment`, `fabric_deployment_pipeline`, `fabric_deployment_pipeline_role_assignment`, `fabric_item_job_scheduler`, `fabric_tag`, `fabric_workspace_git`, `fabric_shortcut`, `fabric_ml_experiment`, `fabric_ml_model`, `fabric_spark_workspace_settings`, and `fabric_workspace_managed_private_endpoint`
 time: 2026-06-03T16:27:43.9504508+03:00
 custom:
     Issue: "998"
