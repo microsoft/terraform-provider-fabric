@@ -4,7 +4,7 @@ page_title: "fabric_digital_twin_builders Data Source - terraform-provider-fabri
 subcategory: ""
 description: |-
   The Digital Twin Builders data-source allows you to retrieve a list of Fabric Digital Twin Builders https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview.
-  -> This data-source supports Service Principal authentication.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Digital Twin Builders data-source allows you to retrieve a list of Fabric [Digital Twin Builders](https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview).
 
--> This data-source supports Service Principal authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
