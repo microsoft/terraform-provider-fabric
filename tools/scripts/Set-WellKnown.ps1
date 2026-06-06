@@ -2000,20 +2000,22 @@ $wellKnown['AzureDataFactory'] = @{
 }
 
 # Create the Azure SQL Server and Database if not exists
+$sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
+$sqlDatabaseName = "graphqldb"
+
+$azureSql = Set-AzureSqlDatabase `
+  -ResourceGroupName $wellKnown['ResourceGroup'].name `
+  -ServerName $sqlServerName `
+  -DatabaseName $sqlDatabaseName `
+  -Location $wellKnown['ResourceGroup'].location
+
 if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
   Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
   Write-Log -Message "Server: $sqlServerName.database.windows.net / Database: $sqlDatabaseName" -Level 'ERROR' -Stop $false
   Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
 }
 else {
-  $sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
-  $sqlDatabaseName = "graphqldb"
-
-  $azureSql = Set-AzureSqlDatabase `
-    -ResourceGroupName $wellKnown['ResourceGroup'].name `
-    -ServerName $sqlServerName `
-    -DatabaseName $sqlDatabaseName `
-    -Location $wellKnown['ResourceGroup'].location
+  Set-FabricConnectionRoleAssignment -ConnectionId $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
 
   $wellKnown['AzureSqlDatabase'] = @{
     connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID

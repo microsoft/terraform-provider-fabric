@@ -21,6 +21,37 @@ import (
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
+var (
+	azureSQLDatabase = testhelp.WellKnown()["AzureSqlDatabase"].(map[string]any)
+	connectionID     = azureSQLDatabase["connectionId"].(string)
+	tableName1       = azureSQLDatabase["tableName1"].(string)
+	tableName2       = azureSQLDatabase["tableName2"].(string)
+)
+
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("graphql_api"),
+})
+
+var testHelperDefinition = map[string]any{
+	`"graphql-definition.json"`: map[string]any{
+		"source": "${local.path}/graphql-definition.json.tmpl",
+		"tokens": map[string]any{
+			"CONNECTION_ID": connectionID,
+			"TABLE_NAME":    tableName1,
+		},
+	},
+}
+
+var testHelperDefinitionUpdate = map[string]any{
+	`"graphql-definition.json"`: map[string]any{
+		"source": "${local.path}/graphql-definition.json.tmpl",
+		"tokens": map[string]any{
+			"CONNECTION_ID": connectionID,
+			"TABLE_NAME":    tableName2,
+		},
+	},
+}
+
 func TestUnit_GraphQLApiResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -297,6 +328,129 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+			),
+		},
+	},
+	))
+}
+
+func TestUnit_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+						"definition":   testHelperDefinition,
+						"format":       "Default",
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"folder_id":    *entityBefore.FolderID,
+						"definition":   testHelperDefinition,
+						"format":       "Default",
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
+						"definition":   testHelperDefinitionUpdate,
+						"format":       "Default",
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+			),
+		},
+	}))
+}
+
+func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read - with definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"definition":   testHelperDefinition,
+						"format":       "Default",
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read - with definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"definition":   testHelperDefinitionUpdate,
+						"format":       "Default",
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
 	},
