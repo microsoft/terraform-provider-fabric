@@ -19,10 +19,16 @@ The OneLake Data Access Security data-source allows you to retrieve details abou
 ## Example Usage
 
 ```terraform
-data "fabric_onelake_data_access_security" "example" {
+data "fabric_onelake_data_access_security" "example_by_name" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
   role_name    = "example"
+}
+
+data "fabric_onelake_data_access_security" "example_by_id" {
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
+  id           = "22222222-2222-2222-2222-222222222222"
 }
 ```
 
@@ -32,11 +38,12 @@ data "fabric_onelake_data_access_security" "example" {
 ### Required
 
 - `item_id` (String) The ID of the Fabric item.
-- `role_name` (String) The name of the Data access role.
 - `workspace_id` (String) The Workspace ID.
 
 ### Optional
 
+- `id` (String) The Data access role ID.
+- `role_name` (String) The name of the Data access role.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

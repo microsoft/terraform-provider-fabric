@@ -65,6 +65,10 @@ resource "fabric_onelake_data_access_security" "example" {
 - `kind` (String) The kind of the Data access role. Possible values: `Policy`. Value must be one of : `Policy`.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
+### Read-Only
+
+- `id` (String) The Data access role ID.
+
 <a id="nestedatt--decision_rules"></a>
 
 ### Nested Schema for `decision_rules`

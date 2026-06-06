@@ -40,6 +40,22 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList),
 		},
 		Attributes: map[string]superschema.Attribute{
+			"id": superschema.SuperStringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The Data access role ID.",
+					CustomType:          customtypes.UUIDType{},
+				},
+				Resource: &schemaR.StringAttribute{
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Optional: !isList,
+					Computed: true,
+				},
+			},
 			"workspace_id": superschema.SuperStringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The Workspace ID.",
@@ -81,8 +97,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Required: !isList,
-					Computed: isList,
+					Optional: !isList,
+					Computed: true,
 				},
 			},
 			"kind": superschema.StringAttribute{
