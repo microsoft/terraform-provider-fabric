@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Shortcut resource allows you to manage a Fabric Shortcut https://learn.microsoft.com/fabric/onelake/onelake-shortcuts.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_shortcut (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Shortcut resource allows you to manage a Fabric [Shortcut](https://learn.microsoft.com/fabric/onelake/onelake-shortcuts).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

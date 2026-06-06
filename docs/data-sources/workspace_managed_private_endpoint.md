@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Managed Private Endpoint data-source allows you to retrieve details about a Fabric Workspace Managed Private Endpoint https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_managed_private_endpoint (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Managed Private Endpoint data-source allows you to retrieve details about a Fabric [Workspace Managed Private Endpoint](https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

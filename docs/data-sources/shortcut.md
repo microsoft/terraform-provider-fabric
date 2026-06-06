@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Shortcut data-source allows you to retrieve details about a Fabric Shortcut https://learn.microsoft.com/fabric/onelake/onelake-shortcuts.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_shortcut (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Shortcut data-source allows you to retrieve details about a Fabric [Shortcut](https://learn.microsoft.com/fabric/onelake/onelake-shortcuts).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

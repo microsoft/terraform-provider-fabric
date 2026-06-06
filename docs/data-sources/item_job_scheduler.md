@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Item Job Scheduler data-source allows you to retrieve details about a Fabric Item Job Scheduler https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_scheduler (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Item Job Scheduler data-source allows you to retrieve details about a Fabric [Item Job Scheduler](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
