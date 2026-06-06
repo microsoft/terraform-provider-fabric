@@ -3,5 +3,8 @@
 config:
   extends: ./.markdownlint.yml
 gitignore: true
-# ignores:
-#   - ./.changes/*.md
+ignores:
+  - ".github/agents/**"
+  - ".github/copilot-instructions.md"
+  - ".github/instructions/**"
+  - ".github/skills/**"
