@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Managed Private Endpoint resource allows you to manage a Fabric Workspace Managed Private Endpoint https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_managed_private_endpoint (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Managed Private Endpoint resource allows you to manage a Fabric [Workspace Managed Private Endpoint](https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -36,11 +33,11 @@ resource "fabric_workspace_managed_private_endpoint" "example" {
 - `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace Managed Private Endpoint name. String length must be at most 64.
 - `request_message` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Request message. String length must be at most 140.
 - `target_private_link_resource_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Resource ID of data source for which private endpoint is created. Resource ID must be in the format `/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}`.
-- `target_subresource_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource).
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
+- `target_subresource_type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource). Leave unset when the target is a Private Link Service, which does not expose sub-resources.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
