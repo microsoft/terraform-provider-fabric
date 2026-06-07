@@ -82,20 +82,16 @@ func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient 
 // diffTags computes which tags to add and remove by comparing current and planned tag IDs.
 func diffTags(current, planned []string) (toAdd, toRemove []string) { //nolint:nonamedreturns
 	for _, id := range planned {
-		if !containsTagID(current, id) {
+		if !slices.Contains(current, id) {
 			toAdd = append(toAdd, id)
 		}
 	}
 
 	for _, id := range current {
-		if !containsTagID(planned, id) {
+		if !slices.Contains(planned, id) {
 			toRemove = append(toRemove, id)
 		}
 	}
 
 	return toAdd, toRemove
-}
-
-func containsTagID(tags []string, id string) bool {
-	return slices.Contains(tags, id)
 }
