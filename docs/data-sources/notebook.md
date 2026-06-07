@@ -66,7 +66,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Notebook display name.
-- `format` (String) The Notebook format. Possible values: `ipynb`, `py`
+- `format` (String) The Notebook format. Possible values: `Default`, `ipynb`, `py`
 - `id` (String) The Notebook ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -76,7 +76,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **ipynb** format: `notebook-content.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `*.ipynb`, `notebook-content.py`, `notebook-content.r`, `notebook-content.scala`, `notebook-content.sql` **ipynb** format: `*.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Notebook description.
 - `folder_id` (String) The Notebook Folder ID.
 

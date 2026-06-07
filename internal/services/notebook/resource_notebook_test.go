@@ -32,7 +32,7 @@ var testHelperDefinitionIPYNB = map[string]any{
 }
 
 var testHelperDefinitionPY = map[string]any{
-	`"notebook-content.py"`: map[string]any{
+	`"notebook.py"`: map[string]any{
 		"source": "${local.path}/notebook.py.tmpl",
 	},
 }
@@ -108,7 +108,7 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -132,7 +132,7 @@ func TestUnit_NotebookResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
-				"format":       "ipynb",
+				"format":       "Default",
 				"definition":   testHelperDefinitionIPYNB,
 			},
 		))
@@ -210,7 +210,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -227,7 +227,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -249,7 +249,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),

@@ -108,11 +108,11 @@ resource "fabric_notebook" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Notebook definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/notebook-definition). Accepted path keys: **ipynb** format: `notebook-content.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Notebook definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/notebook-definition). Accepted path keys: **Default** format: `*.ipynb`, `notebook-content.py`, `notebook-content.r`, `notebook-content.scala`, `notebook-content.sql` **ipynb** format: `*.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Notebook description.
 - `folder_id` (String) The Folder ID.
-- `format` (String) The Notebook format. Possible values: `ipynb`, `py`
+- `format` (String) The Notebook format. Possible values: `Default`, `ipynb`, `py`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
