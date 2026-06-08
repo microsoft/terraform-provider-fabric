@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_mirrored_catalog` and `fabric_mirrored_catalogs` data sources
+time: 2026-05-25T00:00:00Z
+custom:
+  Issue: "979"
