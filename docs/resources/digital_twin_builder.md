@@ -115,6 +115,7 @@ resource "fabric_digital_twin_builder" "example_parameters" {
 - `description` (String) The Digital Twin Builder description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Digital Twin Builder format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

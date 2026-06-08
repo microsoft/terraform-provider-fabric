@@ -106,6 +106,7 @@ resource "fabric_cosmos_db" "example_parameters" {
 - `description` (String) The Cosmos DB description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Cosmos DB format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

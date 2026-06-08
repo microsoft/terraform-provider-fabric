@@ -57,4 +57,5 @@ Read-Only:
 - `display_name` (String) The Activator display name.
 - `folder_id` (String) The Activator Folder ID.
 - `id` (String) The Activator ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Activator.
 - `workspace_id` (String) The Workspace ID.

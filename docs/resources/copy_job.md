@@ -118,6 +118,7 @@ resource "fabric_copy_job" "example_parameters" {
 - `description` (String) The Copy Job description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Copy Job format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

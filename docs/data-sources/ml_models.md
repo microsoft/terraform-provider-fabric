@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The ML Model display name.
 - `folder_id` (String) The ML Model Folder ID.
 - `id` (String) The ML Model ID.
+- `tags` (Set of String) A set of tag IDs assigned to the ML Model.
 - `workspace_id` (String) The Workspace ID.

@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The ML Experiment display name.
 - `folder_id` (String) The ML Experiment Folder ID.
 - `id` (String) The ML Experiment ID.
+- `tags` (Set of String) A set of tag IDs assigned to the ML Experiment.
 - `workspace_id` (String) The Workspace ID.

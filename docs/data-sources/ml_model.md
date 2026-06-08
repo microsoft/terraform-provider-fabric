@@ -52,6 +52,7 @@ data "fabric_ml_model" "example_by_name" {
 
 - `description` (String) The ML Model description.
 - `folder_id` (String) The ML Model Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

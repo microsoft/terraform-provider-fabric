@@ -153,6 +153,9 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomEnvironmentWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomEnvironmentWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomEnvironmentWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomEnvironmentWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -181,6 +184,7 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -190,9 +194,30 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -211,6 +236,7 @@ func TestUnit_EnvironmentResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_libraries.state"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.publish_details.component_publish_info.spark_settings.state"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
