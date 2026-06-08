@@ -10,7 +10,7 @@ import (
 )
 
 type DataSourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop any] struct {
-	FabricItemPropertiesModel[Ttfprop, Titemprop]
+	DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]
 
 	Format           types.String                                                               `tfsdk:"format"`
 	OutputDefinition types.Bool                                                                 `tfsdk:"output_definition"`

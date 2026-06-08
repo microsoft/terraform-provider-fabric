@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceSQLDatabases() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabsqldatabase.Properties, to *fabricitem.FabricItemPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabsqldatabase.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[sqlDatabasePropertiesModel](ctx)
 
 		if from != nil {

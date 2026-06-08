@@ -81,6 +81,18 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
+		"sensitivity_label": schema.SingleNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s sensitivity label.", itemName),
+			Computed:            true,
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
+			Attributes: map[string]schema.Attribute{
+				"label_id": schema.StringAttribute{
+					MarkdownDescription: "The sensitivity label ID.",
+					Computed:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+			},
+		},
 		"timeouts": timeouts.Attributes(ctx),
 	}
 

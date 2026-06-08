@@ -54,4 +54,13 @@ Read-Only:
 - `display_name` (String) The KQL Dashboard display name.
 - `folder_id` (String) The KQL Dashboard Folder ID.
 - `id` (String) The KQL Dashboard ID.
+- `sensitivity_label` (Attributes) The KQL Dashboard sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

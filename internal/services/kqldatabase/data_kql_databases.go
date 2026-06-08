@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceKQLDatabases() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.FabricItemPropertiesModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabkqldatabase.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[kqlDatabasePropertiesModel, fabkqldatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[kqlDatabasePropertiesModel](ctx)
 
 		if from != nil {

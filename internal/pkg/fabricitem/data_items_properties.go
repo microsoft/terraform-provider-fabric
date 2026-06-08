@@ -30,7 +30,7 @@ type DataSourceFabricItemsProperties[Ttfprop, Titemprop any] struct {
 	DataSourceFabricItems
 
 	PropertiesAttributes map[string]schema.Attribute
-	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *FabricItemPropertiesModel[Ttfprop, Titemprop]) diag.Diagnostics
+	PropertiesSetter     func(ctx context.Context, from *Titemprop, to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) diag.Diagnostics
 	ItemListGetter       func(ctx context.Context, fabricClient fabric.Client, model DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop], fabricItems *[]FabricItemProperties[Titemprop]) error
 }
 
@@ -67,6 +67,18 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
+		"sensitivity_label": schema.SingleNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s sensitivity label.", d.TypeInfo.Name),
+			Computed:            true,
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
+			Attributes: map[string]schema.Attribute{
+				"label_id": schema.StringAttribute{
+					MarkdownDescription: "The sensitivity label ID.",
+					Computed:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+			},
+		},
 	}
 
 	attributes["properties"] = getDataSourceFabricItemPropertiesNestedAttr[Ttfprop](ctx, d.TypeInfo.Name, d.PropertiesAttributes)
@@ -82,7 +94,7 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			"values": schema.SetNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: fmt.Sprintf("The set of %s.", d.TypeInfo.Names),
-				CustomType:          supertypes.NewSetNestedObjectTypeOf[FabricItemPropertiesModel[Ttfprop, Titemprop]](ctx),
+				CustomType:          supertypes.NewSetNestedObjectTypeOf[DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]](ctx),
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: attributes,
 				},

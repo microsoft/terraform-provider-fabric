@@ -52,6 +52,7 @@ data "fabric_graphql_api" "example_by_name" {
 
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The GraphQL API Folder ID.
+- `sensitivity_label` (Attributes) The GraphQL API sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -60,3 +61,11 @@ data "fabric_graphql_api" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

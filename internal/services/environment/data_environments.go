@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceEnvironments(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabenvironment.Properties, to *fabricitem.FabricItemPropertiesModel[environmentPropertiesModel, fabenvironment.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabenvironment.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[environmentPropertiesModel, fabenvironment.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[environmentPropertiesModel](ctx)
 
 		if from != nil {

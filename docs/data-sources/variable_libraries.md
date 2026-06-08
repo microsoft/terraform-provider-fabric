@@ -56,6 +56,7 @@ Read-Only:
 - `folder_id` (String) The Variable Library Folder ID.
 - `id` (String) The Variable Library ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Variable Library sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
@@ -65,3 +66,11 @@ Read-Only:
 Read-Only:
 
 - `active_value_set_name` (String) The VariableLibrary current active value set.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.
