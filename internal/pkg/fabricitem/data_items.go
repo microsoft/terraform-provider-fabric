@@ -80,6 +80,12 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 							Computed:            true,
 							CustomType:          customtypes.UUIDType{},
 						},
+						"tags": schema.SetAttribute{
+							MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
+							Computed:            true,
+							CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
+							ElementType:         customtypes.UUIDType{},
+						},
 					},
 				},
 			},

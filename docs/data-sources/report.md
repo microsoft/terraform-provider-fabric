@@ -67,6 +67,7 @@ output "example_definition_report_object" {
 - `description` (String) The Report description.
 - `display_name` (String) The Report display name.
 - `folder_id` (String) The Report Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

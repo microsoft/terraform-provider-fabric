@@ -25,7 +25,11 @@ func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabc
 
 	for _, entity := range from {
 		var entityModel fabricItemModel
-		entityModel.set(entity)
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
+
 		slice = append(slice, &entityModel)
 	}
 

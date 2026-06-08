@@ -52,6 +52,7 @@ data "fabric_ml_experiment" "example_by_name" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The ML Experiment Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

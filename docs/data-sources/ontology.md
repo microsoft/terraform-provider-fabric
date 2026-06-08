@@ -81,6 +81,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Ontology description.
 - `folder_id` (String) The Ontology Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

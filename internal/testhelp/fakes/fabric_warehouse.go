@@ -104,6 +104,7 @@ func (o *operationsWarehouse) ConvertItemToEntity(entity fabcore.Item) fabwareho
 		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties:  NewRandomWarehouse().Properties,
+		Tags:        convertItemTags[fabwarehouse.ItemTag](entity.Tags),
 	}
 }
 
@@ -149,6 +150,10 @@ func NewRandomWarehouse() fabwarehouse.Warehouse {
 			ConnectionString: new(testhelp.RandomURI()),
 			CreatedDate:      new(time.Now()),
 			LastUpdatedTime:  new(time.Now()),
+		},
+		Tags: []fabwarehouse.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

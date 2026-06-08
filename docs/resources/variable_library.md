@@ -118,6 +118,7 @@ resource "fabric_variable_library" "example_parameters" {
 - `description` (String) The Variable Library description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Variable Library format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
