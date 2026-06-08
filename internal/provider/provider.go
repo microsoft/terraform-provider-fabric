@@ -80,6 +80,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
@@ -485,6 +486,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
 		ontology.NewResourceOntology,
 		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
@@ -593,6 +595,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebooks,
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		shortcut.NewDataSourceShortcut,
