@@ -21,7 +21,6 @@ BASE MODEL
 */
 
 type baseOneLakeDataAccessSecurityModel struct {
-	ID            customtypes.UUID                                  `tfsdk:"id"`
 	WorkspaceID   customtypes.UUID                                  `tfsdk:"workspace_id"`
 	ItemID        customtypes.UUID                                  `tfsdk:"item_id"`
 	RoleName      types.String                                      `tfsdk:"role_name"`
@@ -77,13 +76,11 @@ type microsoftEntraMember struct {
 func (to *baseOneLakeDataAccessSecurityModel) setFromBase(
 	ctx context.Context,
 	workspaceID, itemID string,
-	id *string,
 	roleName *string,
 	kind *fabcore.DataAccessRoleKind,
 	decisionRules []fabcore.DecisionRule,
 	members *fabcore.Members,
 ) diag.Diagnostics {
-	to.ID = customtypes.NewUUIDPointerValue(id)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
 	to.ItemID = customtypes.NewUUIDValue(itemID)
 	to.RoleName = types.StringPointerValue(roleName)
@@ -97,11 +94,11 @@ func (to *baseOneLakeDataAccessSecurityModel) setFromBase(
 }
 
 func (to *baseOneLakeDataAccessSecurityModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.DataAccessRoleBase) diag.Diagnostics {
-	return to.setFromBase(ctx, workspaceID, itemID, nil, from.Name, from.Kind, from.DecisionRules, from.Members)
+	return to.setFromBase(ctx, workspaceID, itemID, from.Name, from.Kind, from.DecisionRules, from.Members)
 }
 
 func (to *baseOneLakeDataAccessSecurityModel) setFromListItem(ctx context.Context, workspaceID, itemID string, from fabcore.DataAccessRoleListItem) diag.Diagnostics {
-	return to.setFromBase(ctx, workspaceID, itemID, from.ID, from.Name, from.Kind, from.DecisionRules, from.Members)
+	return to.setFromBase(ctx, workspaceID, itemID, from.Name, from.Kind, from.DecisionRules, from.Members)
 }
 
 func (to *baseOneLakeDataAccessSecurityModel) setDecisionRules(ctx context.Context, from []fabcore.DecisionRule) diag.Diagnostics {

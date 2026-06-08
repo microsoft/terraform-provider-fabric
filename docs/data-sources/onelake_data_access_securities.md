@@ -61,7 +61,6 @@ Required:
 Read-Only:
 
 - `decision_rules` (Attributes Set) The array of permissions that make up the Data access role. (see [below for nested schema](#nestedatt--values--decision_rules))
-- `id` (String) The Data access role ID.
 - `kind` (String) The kind of the Data access role. Possible values: `Policy`. Value must be one of : `Policy`.
 - `members` (Attributes) The members object which contains the members of the role as arrays of different member types. (see [below for nested schema](#nestedatt--values--members))
 - `role_name` (String) The name of the Data access role.

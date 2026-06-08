@@ -65,19 +65,6 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - both id and role_name set
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"item_id":      itemID,
-					"id":           *entity.ID,
-					"role_name":    *entity.Name,
-				},
-			),
-			ExpectError: regexp.MustCompile(`These attributes cannot be configured together`),
-		},
 		// read by role_name
 		{
 			Config: at.CompileConfig(
@@ -92,25 +79,7 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", *entity.ID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
-			),
-		},
-		// read by id
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"item_id":      itemID,
-					"id":           *entity.ID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", *entity.ID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
 			),
 		},
 	}))

@@ -293,32 +293,5 @@ func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *base
 		return diags
 	}
 
-	if diags := model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.DataAccessRoleBase); diags.HasError() {
-		return diags
-	}
-
-	return r.enrichID(ctx, model)
-}
-
-// enrichID populates model.ID from a list lookup matched by role name. The
-// GetDataAccessRole endpoint returns DataAccessRoleBase with no ID — only the
-// list endpoint surfaces it via DataAccessRoleListItem.
-func (r *resourceOneLakeDataAccessSecurity) enrichID(ctx context.Context, model *baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
-	respList, err := r.client.ListDataAccessRoles(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationList, nil); diags.HasError() {
-		return diags
-	}
-
-	wantName := model.RoleName.ValueString()
-	for _, role := range respList.Value {
-		if role.Name != nil && *role.Name == wantName {
-			model.ID = customtypes.NewUUIDPointerValue(role.ID)
-
-			return nil
-		}
-	}
-
-	model.ID = customtypes.NewUUIDNull()
-
-	return nil
+	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.DataAccessRoleBase)
 }
