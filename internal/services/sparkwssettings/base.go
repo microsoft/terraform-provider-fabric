@@ -11,6 +11,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Spark Workspace Settings",
 	Type:           "spark_workspace_settings",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
