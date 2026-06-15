@@ -77,6 +77,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `graphql-definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The GraphQL API Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

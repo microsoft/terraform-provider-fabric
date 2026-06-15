@@ -27,6 +27,7 @@ func (o *operationsEnvironment) ConvertItemToEntity(item fabcore.Item) fabenviro
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
 		Properties:  NewRandomEnvironment().Properties,
+		Tags:        convertItemTags[fabenvironment.ItemTag](item.Tags),
 	}
 }
 

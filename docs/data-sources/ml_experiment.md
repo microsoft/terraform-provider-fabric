@@ -4,17 +4,14 @@ page_title: "fabric_ml_experiment Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The ML Experiment data-source allows you to retrieve details about a Fabric ML Experiment https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_ml_experiment (Data Source)
 
 The ML Experiment data-source allows you to retrieve details about a Fabric [ML Experiment](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -55,6 +52,7 @@ data "fabric_ml_experiment" "example_by_name" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The ML Experiment Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

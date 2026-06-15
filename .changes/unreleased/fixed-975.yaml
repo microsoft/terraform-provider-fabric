@@ -1,5 +1,0 @@
-kind: fixed
-body: Fixed `fabric_workspace_managed_private_endpoint` to allow creating endpoints for Private Link Services by making `target_subresource_type` optional
-time: 2026-05-25T00:00:00Z
-custom:
-  Issue: "975"

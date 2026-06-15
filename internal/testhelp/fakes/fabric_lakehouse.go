@@ -26,6 +26,7 @@ func (o *operationsLakehouse) ConvertItemToEntity(item fabcore.Item) fablakehous
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
 		Properties:  NewRandomLakehouse().Properties,
+		Tags:        convertItemTags[fablakehouse.ItemTag](item.Tags),
 	}
 }
 

@@ -28,7 +28,10 @@ func (to *DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop]) setValues(
 
 	for _, entity := range from {
 		var entityModel FabricItemPropertiesModel[Ttfprop, Titemprop]
-		entityModel.set(entity)
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
 
 		diags := propertiesSetter(ctx, entity.Properties, &entityModel)
 		if diags.HasError() {

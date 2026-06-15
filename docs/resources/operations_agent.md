@@ -110,6 +110,7 @@ resource "fabric_operations_agent" "example_parameters" {
 - `description` (String) The Operations Agent description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Operations Agent format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

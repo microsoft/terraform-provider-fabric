@@ -2041,15 +2041,16 @@ $definition = @{
 }
 
 function Set-Tags {
+  $tagDisplayName = "Test Tag"
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
-  $result = $results.Response.value[0]
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $tagDisplayName -and $_.scope.type -eq 'Tenant' } | Select-Object -First 1
   if (-not $result) {
     $payload = @{
       createTagsRequest = @(
-        @{ displayName = "Test Tag" }
+        @{ displayName = $tagDisplayName }
       )
     }
-    Write-Log -Message "Creating Tag: $($payload.createTagsRequest[0].displayName)" -Level 'WARN'
+    Write-Log -Message "Creating Tag: $tagDisplayName" -Level 'WARN'
 
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/tags/bulkCreateTags" -Payload $payload).Response.tags[0]
   }
@@ -2071,6 +2072,32 @@ $wellKnown['MountedDataFactory'] = @{
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
 }
+
+# Ensure only the expected tag is applied to Mounted Data Factory
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+
+# Unapply all existing tags
+if ($itemDetails.tags -and $itemDetails.tags.Count -gt 0) {
+  $existingTagIds = $itemDetails.tags | ForEach-Object { $_.id }
+  $unapplyPayload = @{ tags = @($existingTagIds) }
+  Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/unapplyTags" -Payload $unapplyPayload | Out-Null
+  Write-Log -Message "ItemTags - Unapplied $($existingTagIds.Count) existing tag(s) from Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+}
+
+# Apply the desired tag
+$applyTagsPayload = @{ tags = @($wellKnown['Tags'].id) }
+Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/applyTags" -Payload $applyTagsPayload | Out-Null
+Write-Log -Message "ItemTags - Applied tag '$($wellKnown['Tags'].displayName)' to Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+
+# Read back to confirm
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+$actualTag = $itemDetails.tags | Select-Object -First 1
+if (-not $actualTag -or $actualTag.id -ne $wellKnown['Tags'].id) {
+  Write-Log -Message "ItemTags - Expected tag '$($wellKnown['Tags'].id)' not found on Mounted Data Factory after apply." -Level 'ERROR'
+}
+
+$wellKnown['MountedDataFactory']['tagId'] = $actualTag.id
+$wellKnown['MountedDataFactory']['tagName'] = $actualTag.displayName
 
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {

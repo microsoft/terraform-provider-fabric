@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Workspace Settings data-source allows you to retrieve details about a Fabric Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_workspace_settings (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Spark Workspace Settings data-source allows you to retrieve details about a Fabric [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

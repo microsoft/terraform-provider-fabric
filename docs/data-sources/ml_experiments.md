@@ -4,17 +4,14 @@ page_title: "fabric_ml_experiments Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The ML Experiments data-source allows you to retrieve a list of Fabric ML Experiments https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_ml_experiments (Data Source)
 
 The ML Experiments data-source allows you to retrieve a list of Fabric [ML Experiments](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -57,4 +54,5 @@ Read-Only:
 - `display_name` (String) The ML Experiment display name.
 - `folder_id` (String) The ML Experiment Folder ID.
 - `id` (String) The ML Experiment ID.
+- `tags` (Set of String) A set of tag IDs assigned to the ML Experiment.
 - `workspace_id` (String) The Workspace ID.

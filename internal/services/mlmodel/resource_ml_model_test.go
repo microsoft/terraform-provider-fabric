@@ -153,6 +153,9 @@ func TestUnit_MLModelResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -181,15 +184,37 @@ func TestUnit_MLModelResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -205,6 +230,7 @@ func TestUnit_MLModelResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -212,10 +238,6 @@ func TestUnit_MLModelResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_MLModelResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

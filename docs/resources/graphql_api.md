@@ -114,6 +114,7 @@ resource "fabric_graphql_api" "example_parameters" {
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The GraphQL API format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
