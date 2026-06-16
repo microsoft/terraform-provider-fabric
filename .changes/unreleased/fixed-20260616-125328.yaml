@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed several item definition path keys to align with the Fabric API documentation
+time: 2026-06-16T12:53:28.505533082Z
+custom:
+    Issue: "1002"
