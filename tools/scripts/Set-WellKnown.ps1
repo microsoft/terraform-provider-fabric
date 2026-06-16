@@ -1488,24 +1488,24 @@ $wellKnown['KQLDatabase'] = @{
   description = $kqlDatabase.description
 }
 
-# # Create SnowflakeDatabase if not exists
-# $displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
-# $definition = @{
-#   parts = @(
-#     @{
-#       path        = "SnowflakeDatabaseProperties.json"
-#       payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
-#       payloadType = 'InlineBase64'
-#     }
-#   )
-# }
+# Create SnowflakeDatabase if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "SnowflakeDatabaseProperties.json"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
+      payloadType = 'InlineBase64'
+    }
+  )
+}
 
-# $snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
-# $wellKnown['SnowflakeDatabase'] = @{
-#   id          = $snowflakeDatabase.id
-#   displayName = $snowflakeDatabase.displayName
-#   description = $snowflakeDatabase.description
-# }
+$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
+$wellKnown['SnowflakeDatabase'] = @{
+  id          = $snowflakeDatabase.id
+  displayName = $snowflakeDatabase.displayName
+  description = $snowflakeDatabase.description
+}
 
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
 $displayNameTemp = "$displayName_$($itemNaming['Lakehouse'])"
@@ -1648,26 +1648,26 @@ $wellKnown['Eventstream'] = @{
   description = $eventstream.description
 }
 
-# # Set Eventstream source connection
-# $eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
-# $eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
-# $eventstreamSourceId = $eventstreamSource.id
-# $eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
-# $eventstreamDestinationId = $eventstreamDestination.id
+# Set Eventstream source connection
+$eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
+$eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamSourceId = $eventstreamSource.id
+$eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamDestinationId = $eventstreamDestination.id
 
-# $eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
-# $wellKnown['Eventstream']['sourceConnection'] = @{
-#   sourceId                = $eventstreamSourceId
-#   eventHubName            = $eventstreamConnection.eventHubName
-#   fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
-# }
+$eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
+$wellKnown['Eventstream']['sourceConnection'] = @{
+  sourceId                = $eventstreamSourceId
+  eventHubName            = $eventstreamConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
+}
 
-# $eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
-# $wellKnown['Eventstream']['destinationConnection'] = @{
-#   destinationId           = $eventstreamDestinationId
-#   eventHubName            = $eventstreamDestinationConnection.eventHubName
-#   fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
-# }
+$eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
+$wellKnown['Eventstream']['destinationConnection'] = @{
+  destinationId           = $eventstreamDestinationId
+  eventHubName            = $eventstreamDestinationConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
+}
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"
