@@ -49,6 +49,14 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 		md += PreviewResource
 	}
 
+	if typeInfo.IsAdmin {
+		md += IsAdminNote
+	}
+
+	if typeInfo.IsAdmin && typeInfo.IsSPNSupported {
+		md += TenantPermissionBlocksAPINote
+	}
+
 	return md
 }
 

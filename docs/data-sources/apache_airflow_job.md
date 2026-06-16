@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `apacheairflowjob-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Apache Airflow Job description.
 - `folder_id` (String) The Apache Airflow Job Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

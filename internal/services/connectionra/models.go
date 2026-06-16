@@ -36,7 +36,7 @@ func (to *baseConnectionRoleAssignmentModel) set(ctx context.Context, connection
 	if from.Principal != nil {
 		principalModel := &principalModel{}
 
-		principalModel.set(*from.Principal)
+		principalModel.set(*from.Principal.GetPrincipal())
 
 		if diags := to.Principal.Set(ctx, principalModel); diags.HasError() {
 			return diags

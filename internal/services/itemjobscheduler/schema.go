@@ -6,7 +6,7 @@ package itemjobscheduler
 import (
 	"fmt"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -21,8 +21,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
@@ -268,11 +270,15 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 			"times": superschema.SuperSetAttribute{
 				Common: &schemaR.SetAttribute{
 					MarkdownDescription: "A list of time slots in hh:mm format, at most 100 elements are allowed.",
-					ElementType:         types.StringType,
+					CustomType: supertypes.SetTypeOf[types.String]{
+						SetType: basetypes.SetType{
+							ElemType: types.StringType,
+						},
+					},
+					ElementType: types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
-					Optional:    true,
-					ElementType: types.StringType,
+					Optional: true,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(100),
 						setvalidator.ValueStringsAre(
@@ -300,7 +306,12 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 			"weekdays": superschema.SuperSetAttribute{
 				Common: &schemaR.SetAttribute{
 					MarkdownDescription: "A list of weekdays, at most seven elements are allowed.",
-					ElementType:         types.StringType,
+					CustomType: supertypes.SetTypeOf[types.String]{
+						SetType: basetypes.SetType{
+							ElemType: types.StringType,
+						},
+					},
+					ElementType: types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
@@ -472,11 +483,11 @@ func allowedJobTypesMarkdownDescription() string {
 		keys = append(keys, k)
 	}
 
-	sort.Strings(keys)
+	slices.Sort(keys)
 
 	for i, k := range keys {
 		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
-		sort.Strings(vals)
+		slices.Sort(vals)
 		_, _ = fmt.Fprintf(&b, "%s: {%s}", k, strings.Join(vals, ", "))
 
 		if i < len(keys)-1 {

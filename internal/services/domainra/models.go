@@ -34,7 +34,7 @@ type requestCreateDomainRoleAssignments struct {
 
 func (to *requestCreateDomainRoleAssignments) set(ctx context.Context, from resourceDomainRoleAssignmentsModel) diag.Diagnostics {
 	to.Type = (*fabadmin.DomainRole)(from.Role.ValueStringPointer())
-	to.Principals = []fabadmin.Principal{}
+	to.Principals = []fabadmin.PrincipalClassification{}
 
 	principals, diags := from.Principals.Get(ctx)
 	if diags.HasError() {
@@ -42,7 +42,7 @@ func (to *requestCreateDomainRoleAssignments) set(ctx context.Context, from reso
 	}
 
 	for _, principal := range principals {
-		to.Principals = append(to.Principals, fabadmin.Principal{
+		to.Principals = append(to.Principals, &fabadmin.Principal{
 			ID:   principal.ID.ValueStringPointer(),
 			Type: (*fabadmin.PrincipalType)(principal.Type.ValueStringPointer()),
 		})
@@ -57,7 +57,7 @@ type requestDeleteDomainRoleAssignments struct {
 
 func (to *requestDeleteDomainRoleAssignments) set(ctx context.Context, from resourceDomainRoleAssignmentsModel) diag.Diagnostics {
 	to.Type = (*fabadmin.DomainRole)(from.Role.ValueStringPointer())
-	to.Principals = []fabadmin.Principal{}
+	to.Principals = []fabadmin.PrincipalClassification{}
 
 	principals, diags := from.Principals.Get(ctx)
 	if diags.HasError() {
@@ -65,7 +65,7 @@ func (to *requestDeleteDomainRoleAssignments) set(ctx context.Context, from reso
 	}
 
 	for _, principal := range principals {
-		to.Principals = append(to.Principals, fabadmin.Principal{
+		to.Principals = append(to.Principals, &fabadmin.Principal{
 			ID:   principal.ID.ValueStringPointer(),
 			Type: (*fabadmin.PrincipalType)(principal.Type.ValueStringPointer()),
 		})

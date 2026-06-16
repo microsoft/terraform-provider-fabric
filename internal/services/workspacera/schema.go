@@ -13,6 +13,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -86,7 +87,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Computed: true,
 				},
 			},
-			"principal": superschema.SuperSingleNestedAttributeOf[principalModel]{
+			"principal": superschema.SuperSingleNestedAttributeOf[common.PrincipalModel]{
 				Common: &schemaR.SingleNestedAttribute{
 					MarkdownDescription: "The principal.",
 				},

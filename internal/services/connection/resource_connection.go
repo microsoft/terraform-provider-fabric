@@ -20,6 +20,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/tftypeinfo"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
@@ -31,6 +32,7 @@ var (
 	_ resource.ResourceWithConfigure        = (*resourceConnection)(nil)
 	_ resource.ResourceWithModifyPlan       = (*resourceConnection)(nil)
 	_ resource.ResourceWithConfigValidators = (*resourceConnection)(nil)
+	_ resource.ResourceWithImportState      = (*resourceConnection)(nil)
 )
 
 type resourceConnection struct {
@@ -59,6 +61,7 @@ func (r *resourceConnection) ConfigValidators(_ context.Context) []resource.Conf
 		resourcevalidator.Conflicting(
 			path.MatchRoot("credential_details").AtName("basic_credentials"),
 			path.MatchRoot("credential_details").AtName("key_credentials"),
+			path.MatchRoot("credential_details").AtName("key_pair_credentials"),
 			path.MatchRoot("credential_details").AtName("service_principal_credentials"),
 			path.MatchRoot("credential_details").AtName("shared_access_signature_credentials"),
 		),
@@ -109,7 +112,13 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 
 		var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+			return
+		}
+
+		// If the supported connection metadata wasn't resolved (e.g., gateway_id is unknown at plan time),
+		// skip the metadata-dependent validations and defer them to apply time.
+		if supportedConnectionType.Type == nil {
 			return
 		}
 
@@ -129,6 +138,17 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		if resp.Diagnostics.Append(r.validateCredentialType(*credentialDetails, supportedConnectionType.SupportedCredentialTypes)...); resp.Diagnostics.HasError() {
 			return
 		}
+
+		//nolint:godox
+		// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
+		// if resp.Diagnostics.Append(
+		// 	r.validateCredentialTypeForUsageInUserControlledCode(
+		// 		plan.AllowUsageInUserControlledCode,
+		// 		*credentialDetails,
+		// 		supportedConnectionType.SupportedCredentialTypesForUsageInUserControlledCode,
+		// 	)...); resp.Diagnostics.HasError() {
+		// 	return
+		// }
 
 		if resp.Diagnostics.Append(r.validateSkipTestConnection(*credentialDetails, *supportedConnectionType.SupportsSkipTestConnection)...); resp.Diagnostics.HasError() {
 			return
@@ -326,6 +346,30 @@ func (r *resourceConnection) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
+func (r *resourceConnection) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "IMPORT", map[string]any{
+		"id": req.ID,
+	})
+
+	_, diags := customtypes.NewUUIDValueMust(req.ID)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
 func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]) diag.Diagnostics {
 	tflog.Trace(ctx, "GET", map[string]any{
 		"id": model.ID.ValueString(),
@@ -339,10 +383,32 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
-func (r *resourceConnection) getConnectionTypeMetadata(ctx context.Context, model rsConnectionDetailsModel, supportedConnectionType *fabcore.ConnectionCreationMetadata) diag.Diagnostics {
-	pager := r.client.NewListSupportedConnectionTypesPager(&fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
+func (r *resourceConnection) getConnectionTypeMetadata(
+	ctx context.Context,
+	model rsConnectionDetailsModel,
+	gatewayID customtypes.UUID,
+	supportedConnectionType *fabcore.ConnectionCreationMetadata,
+) diag.Diagnostics {
+	// If gateway_id is provided but its value is unknown at plan time (e.g., it comes from a
+	// deferred data source or another resource's output), skip fetching the supported-connection
+	// metadata. Without the gateway context the result would be incorrect for VirtualNetworkGateway
+	// connections, so defer validation to apply time by returning early with no diagnostics and
+	// leaving supportedConnectionType unset.
+	if !gatewayID.IsNull() && gatewayID.IsUnknown() {
+		tflog.Debug(ctx, "skipping supported-connection metadata lookup: gateway_id is unknown")
+
+		return nil
+	}
+
+	opts := &fabcore.ConnectionsClientListSupportedConnectionTypesOptions{
 		ShowAllCreationMethods: new(true),
-	})
+	}
+
+	if !gatewayID.IsNull() && !gatewayID.IsUnknown() {
+		opts.GatewayID = gatewayID.ValueStringPointer()
+	}
+
+	pager := r.client.NewListSupportedConnectionTypesPager(opts)
 
 	var allConnections []fabcore.ConnectionCreationMetadata
 
@@ -439,6 +505,36 @@ func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsMod
 
 	return diags
 }
+
+//nolint:godox
+// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
+// func (r *resourceConnection) validateCredentialTypeForUsageInUserControlledCode(
+// 	allowUsageInUserControlledCode types.Bool,
+// 	credentialDetails rsCredentialDetailsModel,
+// 	supportedCredentialTypesForUsageInUserControlledCode []fabcore.CredentialType,
+// ) diag.Diagnostics {
+// 	if allowUsageInUserControlledCode.IsNull() || allowUsageInUserControlledCode.IsUnknown() || !allowUsageInUserControlledCode.ValueBool() {
+// 		return nil
+// 	}
+
+// 	if !slices.Contains(supportedCredentialTypesForUsageInUserControlledCode, fabcore.CredentialType(credentialDetails.CredentialType.ValueString())) {
+// 		var diags diag.Diagnostics
+
+// 		diags.AddAttributeError(
+// 			path.Root("credential_details").AtName("credential_type"),
+// 			"Unsupported credential type for usage in user-controlled code",
+// 			fmt.Sprintf(
+// 				"The credential type '%s' is not supported for usage in user-controlled code. Supported values: %s",
+// 				credentialDetails.CredentialType.ValueString(),
+// 				utils.ConvertStringSlicesToString(utils.ConvertEnumsToStringSlices(supportedCredentialTypesForUsageInUserControlledCode, true), true, false),
+// 			),
+// 		)
+
+// 		return diags
+// 	}
+
+// 	return nil
+// }
 
 func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetailsModel, supportsSkipTestConnection bool) diag.Diagnostics { //revive:disable-line:flag-parameter
 	if model.SkipTestConnection.ValueBool() && !supportsSkipTestConnection {

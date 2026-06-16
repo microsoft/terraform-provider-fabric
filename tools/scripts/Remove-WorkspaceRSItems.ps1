@@ -187,7 +187,8 @@ function Invoke-FabricRest {
     }
   }
   catch {
-    Write-Log -Message "Failed to invoke Fabric REST API: $($_.Exception.Message)" -Level 'ERROR'
+    Write-Log -Message "Failed to invoke Fabric REST API: $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+    throw $_
   }
 }
 
@@ -231,7 +232,7 @@ function Get-FolderDepth {
 
 function Remove-WorkspaceRSItems {
   param (
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [string]$WellKnownJsonPath,
 
     [Parameter(Mandatory = $false)]
@@ -241,18 +242,28 @@ function Remove-WorkspaceRSItems {
     [switch]$DryRun
   )
 
-  # Check if the .wellknown.json file exists
-  if (-not (Test-Path -Path $WellKnownJsonPath)) {
-    Write-Log -Message "The .wellknown.json file was not found at path: $WellKnownJsonPath" -Level 'ERROR'
-    return
+  # Prefer the FABRIC_TESTACC_WELLKNOWN env var (inline JSON) over the file on disk.
+  $wellKnownJson = $Env:FABRIC_TESTACC_WELLKNOWN
+
+  if ([string]::IsNullOrWhiteSpace($wellKnownJson)) {
+    if (-not $WellKnownJsonPath -or -not (Test-Path -Path $WellKnownJsonPath)) {
+      Write-Log -Message "FABRIC_TESTACC_WELLKNOWN env var is not set and the .wellknown.json file was not found at path: $WellKnownJsonPath" -Level 'ERROR'
+      return
+    }
+
+    Write-Log -Message "Using .wellknown.json file: $WellKnownJsonPath" -Level 'INFO'
+    $wellKnownJson = Get-Content -Path $WellKnownJsonPath -Raw
+  }
+  else {
+    Write-Log -Message 'Using FABRIC_TESTACC_WELLKNOWN environment variable for well-known data.' -Level 'INFO'
   }
 
-  # Read and parse the .wellknown.json file
+  # Parse the well-known JSON
   try {
-    $wellKnownContent = Get-Content -Path $WellKnownJsonPath -Raw | ConvertFrom-Json
+    $wellKnownContent = $wellKnownJson | ConvertFrom-Json
   }
   catch {
-    Write-Log -Message "Failed to parse .wellknown.json file: $($_.Exception.Message)" -Level 'ERROR'
+    Write-Log -Message "Failed to parse well-known JSON: $($_.Exception.Message)" -Level 'ERROR'
     return
   }
 
@@ -337,7 +348,8 @@ function Remove-WorkspaceRSItems {
     }
 
     # Sort folders by depth (deepest first) to ensure child folders are deleted before parents
-    $foldersToDelete = $foldersWithDepth | Sort-Object -Property Depth -Descending
+    # Exclude known bugged folder that cannot be deleted due to backend issues
+    $foldersToDelete = $foldersWithDepth | Where-Object { $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' } | Sort-Object -Property Depth -Descending
   }
   else {
     $foldersToDelete = @()
@@ -428,11 +440,11 @@ function Remove-WorkspaceRSItems {
           else {
             Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
           }
-          $deletedCount++
+          $deletedItemsCount++
         }
         else {
           Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
-          $failedCount++
+          $failedItemsCount++
         }
       }
       catch {
@@ -440,11 +452,11 @@ function Remove-WorkspaceRSItems {
         $statusCode = $_.Exception.Response.StatusCode.value__
         if ($statusCode -eq 404) {
           Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
-          $deletedCount++
+          $deletedItemsCount++
         }
         else {
           Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
-          $failedCount++
+          $failedItemsCount++
         }
       }
 
@@ -520,28 +532,31 @@ if (Test-Path -Path './wellknown.env') {
   Import-Dotenv -Path ./wellknown.env -AllowClobber
 }
 
-if (
-  !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
-  !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
-) {
-  Write-Log -Message @'
-  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
-  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID,
-  are required environment variables.
-'@ `
-    -Level 'ERROR'
-  return
-}
-
-
-# Check if already logged in to Azure, if not then login
+# Check if already logged in to Azure (e.g. via azure/login OIDC in CI). If not, login interactively.
 $azContext = Get-AzContext
-if (!$azContext -or $azContext.Tenant.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or $azContext.Subscription.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID) {
+if (!$azContext) {
+  if (
+    !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
+    !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
+  ) {
+    Write-Log -Message @'
+  No existing Az PowerShell session found and the following environment variables are not set:
+  FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
+  FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID.
+  Either sign in beforehand (e.g. via Connect-AzAccount or azure/login) or provide these variables.
+'@ `
+      -Level 'ERROR'
+    return
+  }
+
   Write-Log -Message 'Logging in to Azure.' -Level 'DEBUG'
   Connect-AzAccount -Tenant $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -SubscriptionId $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -UseDeviceAuthentication
   $azContext = Get-AzContext
   Write-Log -Message 'Logged in successfully' -Level 'DEBUG'
   # Disconnect-AzAccount
+}
+else {
+  Write-Log -Message "Reusing existing Az PowerShell session (Tenant: $($azContext.Tenant.Id), Subscription: $($azContext.Subscription.Id))." -Level 'DEBUG'
 }
 
 if (-not $WellKnownPath) {
@@ -549,7 +564,6 @@ if (-not $WellKnownPath) {
 }
 
 Write-Log -Message "Starting WorkspaceRS cleanup process..." -Level 'INFO'
-Write-Log -Message "Using .wellknown.json file: $WellKnownPath" -Level 'INFO'
 
 Remove-WorkspaceRSItems -WellKnownJsonPath $WellKnownPath -Force:$Force -DryRun:$DryRun
 

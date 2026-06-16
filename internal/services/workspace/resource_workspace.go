@@ -24,9 +24,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure      = (*resourceWorkspace)(nil)
-	_ resource.ResourceWithValidateConfig = (*resourceWorkspace)(nil)
-	_ resource.ResourceWithImportState    = (*resourceWorkspace)(nil)
+	_ resource.ResourceWithConfigure   = (*resourceWorkspace)(nil)
+	_ resource.ResourceWithImportState = (*resourceWorkspace)(nil)
 )
 
 type resourceWorkspace struct {
@@ -70,32 +69,6 @@ func (r *resourceWorkspace) Configure(_ context.Context, req resource.ConfigureR
 	r.clientCapacity = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewCapacitiesClient()
 }
 
-func (r *resourceWorkspace) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var config resourceWorkspaceModel
-	var diags diag.Diagnostics
-
-	if resp.Diagnostics.Append(req.Config.Get(ctx, &config)...); resp.Diagnostics.HasError() {
-		return
-	}
-
-	identityConfig := &workspaceIdentityModel{}
-
-	if !config.Identity.IsNull() && !config.Identity.IsUnknown() {
-		identityConfig, diags = config.Identity.Get(ctx)
-		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
-	if !identityConfig.Type.IsNull() && config.CapacityID.IsNull() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("capacity_id"),
-			common.ErrorAttConfigMissing,
-			"Expected 'capacity_id' to be configured if 'identity.enabled' is true.",
-		)
-	}
-}
-
 func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, "CREATE", map[string]any{
 		"action": "start",
@@ -116,6 +89,7 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 	defer cancel()
 
 	state.Timeouts = plan.Timeouts
+	state.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	var reqCreate requestCreateWorkspace
 
@@ -243,6 +217,7 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	intermediary.Timeouts = plan.Timeouts
+	intermediary.SkipCapacityStateValidation = plan.SkipCapacityStateValidation
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -486,12 +461,20 @@ func (r *resourceWorkspace) get(ctx context.Context, model *resourceWorkspaceMod
 			return diags
 
 		case fabcore.CapacityAssignmentProgressCompleted:
+			skipValidation := model.SkipCapacityStateValidation
+
 			diags = model.set(ctx, respGet.WorkspaceInfo)
 			if diags.HasError() {
 				return diags
 			}
 
-			return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
+			model.SkipCapacityStateValidation = skipValidation
+
+			if !model.SkipCapacityStateValidation.ValueBool() {
+				return validateCapacityState(ctx, r.clientCapacity, model.CapacityID.ValueStringPointer())
+			}
+
+			return nil
 		default:
 			tflog.Info(ctx, "Workspace capacity assignment in progress, waiting 30 seconds before retrying")
 			time.Sleep(30 * time.Second) // lintignore:R018

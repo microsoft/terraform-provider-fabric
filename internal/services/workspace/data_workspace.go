@@ -144,7 +144,11 @@ func (d *dataSourceWorkspace) getByID(ctx context.Context, model *dataSourceWork
 		return diags
 	}
 
-	return validateCapacityState(ctx, d.clientCapacity, model.CapacityID.ValueStringPointer())
+	if !model.SkipCapacityStateValidation.ValueBool() {
+		return validateCapacityState(ctx, d.clientCapacity, model.CapacityID.ValueStringPointer())
+	}
+
+	return nil
 }
 
 func (d *dataSourceWorkspace) getByDisplayName(ctx context.Context, model *dataSourceWorkspaceModel) diag.Diagnostics {

@@ -8,6 +8,24 @@ data "fabric_sql_database" "example_by_name" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
+# Example with definition output
+data "fabric_sql_database" "example_definition" {
+  id                = "11111111-1111-1111-1111-111111111111"
+  workspace_id      = "00000000-0000-0000-0000-000000000000"
+  format            = "sqlproj"
+  output_definition = true
+}
+
+# Access the content of the definition with JSONPath expression
+output "example_definition_content_jsonpath" {
+  value = provider::fabric::content_decode(data.fabric_sql_database.example_definition.definition["definition.sqlproj"].content, "")
+}
+
+# Access the content of the definition as JSON object
+output "example_definition_content_object" {
+  value = provider::fabric::content_decode(data.fabric_sql_database.example_definition.definition["definition.sqlproj"].content)
+}
+
 # This is an invalid data source
 # Do not specify `id` and `display_name` in the same data source block
 # data "fabric_sql_database" "example" {

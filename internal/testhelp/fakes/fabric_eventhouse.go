@@ -26,6 +26,7 @@ func (o *operationsEventhouse) ConvertItemToEntity(item fabcore.Item) fabeventho
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties:  NewRandomEventhouse().Properties,
+		Tags:        convertItemTags[fabeventhouse.ItemTag](item.Tags),
 	}
 }
 
@@ -187,6 +188,10 @@ func NewRandomEventhouse() fabeventhouse.Eventhouse {
 			QueryServiceURI:         new(testhelp.RandomURI()),
 			DatabasesItemIDs:        []string{testhelp.RandomUUID()},
 			MinimumConsumptionUnits: new(0.0),
+		},
+		Tags: []fabeventhouse.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

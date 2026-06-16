@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Item Job Schedulers data-source allows you to retrieve a list of Fabric Item Job Schedulers https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_schedulers (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Item Job Schedulers data-source allows you to retrieve a list of Fabric [Item Job Schedulers](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -58,7 +55,7 @@ Optional:
 Required:
 
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; lakehouse: {RefreshMaterializedLakeViews}.
+- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; datapipeline: {Execute}; lakehouse: {RefreshMaterializedLakeViews}.
 - `workspace_id` (String) The Workspace ID.
 
 Read-Only:

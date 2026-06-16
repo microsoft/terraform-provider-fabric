@@ -26,6 +26,7 @@ func (o *operationsKQLDatabase) ConvertItemToEntity(item fabcore.Item) fabkqldat
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties:  NewRandomKQLDatabase().Properties,
+		Tags:        convertItemTags[fabkqldatabase.ItemTag](item.Tags),
 	}
 }
 

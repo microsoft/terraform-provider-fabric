@@ -31,11 +31,11 @@ func fakeCreateDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 	return func(_ context.Context, _ string, body fabcore.AddDeploymentPipelineRoleAssignmentRequest, _ *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		// Return a response that matches the request
 		response := fabcore.DeploymentPipelineRoleAssignment{
-			ID:   body.Principal.ID,
+			ID:   body.Principal.GetPrincipal().ID,
 			Role: body.Role,
 			Principal: &fabcore.Principal{
-				ID:   body.Principal.ID,
-				Type: body.Principal.Type,
+				ID:   body.Principal.GetPrincipal().ID,
+				Type: body.Principal.GetPrincipal().Type,
 			},
 		}
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse]{}

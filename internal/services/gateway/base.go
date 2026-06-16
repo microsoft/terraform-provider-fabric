@@ -9,7 +9,7 @@ var PossibleInactivityMinutesBeforeSleepValues = []int32{30, 60, 90, 120, 150, 2
 
 const (
 	MinNumberOfMemberGatewaysValues int32 = 1
-	MaxNumberOfMemberGatewaysValues int32 = 7
+	MaxNumberOfMemberGatewaysValues int32 = 9
 )
 
 var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals

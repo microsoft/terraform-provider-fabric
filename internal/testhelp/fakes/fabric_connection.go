@@ -36,11 +36,12 @@ func (o *operationsConnection) Create(data fabcore.CreateConnectionRequestClassi
 	switch req := data.(type) {
 	case *fabcore.CreateCloudConnectionRequest:
 		entity := &fabcore.ShareableCloudConnection{
-			ID:                            new(testhelp.RandomUUID()),
-			DisplayName:                   d.DisplayName,
-			PrivacyLevel:                  d.PrivacyLevel,
-			ConnectivityType:              d.ConnectivityType,
-			AllowConnectionUsageInGateway: req.AllowConnectionUsageInGateway,
+			ID:                             new(testhelp.RandomUUID()),
+			DisplayName:                    d.DisplayName,
+			PrivacyLevel:                   d.PrivacyLevel,
+			ConnectivityType:               d.ConnectivityType,
+			AllowConnectionUsageInGateway:  req.AllowConnectionUsageInGateway,
+			AllowUsageInUserControlledCode: req.AllowUsageInUserControlledCode,
 			ConnectionDetails: &fabcore.ListConnectionDetails{
 				Path: new(testhelp.RandomURI()),
 				Type: d.ConnectionDetails.Type,
@@ -278,7 +279,12 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 							fabcore.CredentialTypeBasic,
 							fabcore.CredentialTypeOAuth2,
 							fabcore.CredentialTypeKey,
+							fabcore.CredentialTypeKeyPair,
 							fabcore.CredentialTypeAnonymous,
+						},
+						SupportedCredentialTypesForUsageInUserControlledCode: []fabcore.CredentialType{
+							fabcore.CredentialTypeBasic,
+							fabcore.CredentialTypeOAuth2,
 						},
 						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
 							fabcore.ConnectionEncryptionNotEncrypted,
@@ -376,6 +382,7 @@ func NewRandomConnection() fabcore.ConnectionClassification {
 	credentialTypes := []fabcore.CredentialType{
 		fabcore.CredentialTypeBasic,
 		fabcore.CredentialTypeKey,
+		fabcore.CredentialTypeKeyPair,
 		fabcore.CredentialTypeServicePrincipal,
 		fabcore.CredentialTypeSharedAccessSignature,
 		fabcore.CredentialTypeAnonymous,
@@ -389,6 +396,8 @@ func NewRandomConnection() fabcore.ConnectionClassification {
 		return NewRandomConnectionWithBasicCredentials()
 	case fabcore.CredentialTypeKey:
 		return NewRandomConnectionWithKeyCredentials()
+	case fabcore.CredentialTypeKeyPair:
+		return NewRandomConnectionWithKeyPairCredentials()
 	case fabcore.CredentialTypeServicePrincipal:
 		return NewRandomConnectionWithServicePrincipalCredentials()
 	case fabcore.CredentialTypeSharedAccessSignature:
@@ -405,11 +414,12 @@ func NewRandomConnection() fabcore.ConnectionClassification {
 // NewRandomShareableCloudConnection creates a new random ShareableCloudConnection.
 func NewRandomShareableCloudConnection() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            new(testhelp.RandomUUID()),
-		DisplayName:                   new(testhelp.RandomName()),
-		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
-		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
+		ID:                             new(testhelp.RandomUUID()),
+		DisplayName:                    new(testhelp.RandomName()),
+		PrivacyLevel:                   to.Ptr(fabcore.PrivacyLevelPrivate),
+		ConnectivityType:               to.Ptr(fabcore.ConnectivityTypeShareableCloud),
+		AllowConnectionUsageInGateway:  new(testhelp.RandomBool()),
+		AllowUsageInUserControlledCode: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
 			Path: new(testhelp.RandomURI()),
 			Type: new("GitHubSourceControl"),
@@ -448,11 +458,12 @@ func NewRandomVirtualNetworkGatewayConnection() *fabcore.VirtualNetworkGatewayCo
 // NewRandomConnectionWithBasicCredentials creates a connection with Basic credentials.
 func NewRandomConnectionWithBasicCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            new(testhelp.RandomUUID()),
-		DisplayName:                   new(testhelp.RandomName()),
-		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
-		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
+		ID:                             new(testhelp.RandomUUID()),
+		DisplayName:                    new(testhelp.RandomName()),
+		PrivacyLevel:                   to.Ptr(fabcore.PrivacyLevelPrivate),
+		ConnectivityType:               to.Ptr(fabcore.ConnectivityTypeShareableCloud),
+		AllowConnectionUsageInGateway:  new(testhelp.RandomBool()),
+		AllowUsageInUserControlledCode: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
 			Path: new(testhelp.RandomURI()),
 			Type: new("GitHubSourceControl"),
@@ -469,11 +480,12 @@ func NewRandomConnectionWithBasicCredentials() *fabcore.ShareableCloudConnection
 // NewRandomConnectionWithKeyCredentials creates a connection with Key credentials.
 func NewRandomConnectionWithKeyCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            new(testhelp.RandomUUID()),
-		DisplayName:                   new(testhelp.RandomName()),
-		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
-		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
+		ID:                             new(testhelp.RandomUUID()),
+		DisplayName:                    new(testhelp.RandomName()),
+		PrivacyLevel:                   to.Ptr(fabcore.PrivacyLevelPrivate),
+		ConnectivityType:               to.Ptr(fabcore.ConnectivityTypeShareableCloud),
+		AllowConnectionUsageInGateway:  new(testhelp.RandomBool()),
+		AllowUsageInUserControlledCode: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
 			Path: new(testhelp.RandomURI()),
 			Type: new("GitHubSourceControl"),
@@ -487,14 +499,37 @@ func NewRandomConnectionWithKeyCredentials() *fabcore.ShareableCloudConnection {
 	}
 }
 
+// NewRandomConnectionWithKeyPairCredentials creates a connection with KeyPair credentials.
+func NewRandomConnectionWithKeyPairCredentials() *fabcore.ShareableCloudConnection {
+	return &fabcore.ShareableCloudConnection{
+		ID:                             new(testhelp.RandomUUID()),
+		DisplayName:                    new(testhelp.RandomName()),
+		PrivacyLevel:                   to.Ptr(fabcore.PrivacyLevelPrivate),
+		ConnectivityType:               to.Ptr(fabcore.ConnectivityTypeShareableCloud),
+		AllowConnectionUsageInGateway:  new(testhelp.RandomBool()),
+		AllowUsageInUserControlledCode: new(testhelp.RandomBool()),
+		ConnectionDetails: &fabcore.ListConnectionDetails{
+			Path: new(testhelp.RandomURI()),
+			Type: new("GitHubSourceControl"),
+		},
+		CredentialDetails: &fabcore.ListCredentialDetails{
+			CredentialType:       to.Ptr(fabcore.CredentialTypeKeyPair),
+			SingleSignOnType:     to.Ptr(fabcore.SingleSignOnTypeNone),
+			ConnectionEncryption: to.Ptr(fabcore.ConnectionEncryptionNotEncrypted),
+			SkipTestConnection:   new(testhelp.RandomBool()),
+		},
+	}
+}
+
 // NewRandomConnectionWithServicePrincipalCredentials creates a connection with ServicePrincipal credentials.
 func NewRandomConnectionWithServicePrincipalCredentials() *fabcore.ShareableCloudConnection {
 	return &fabcore.ShareableCloudConnection{
-		ID:                            new(testhelp.RandomUUID()),
-		DisplayName:                   new(testhelp.RandomName()),
-		PrivacyLevel:                  to.Ptr(fabcore.PrivacyLevelPrivate),
-		ConnectivityType:              to.Ptr(fabcore.ConnectivityTypeShareableCloud),
-		AllowConnectionUsageInGateway: new(testhelp.RandomBool()),
+		ID:                             new(testhelp.RandomUUID()),
+		DisplayName:                    new(testhelp.RandomName()),
+		PrivacyLevel:                   to.Ptr(fabcore.PrivacyLevelPrivate),
+		ConnectivityType:               to.Ptr(fabcore.ConnectivityTypeShareableCloud),
+		AllowConnectionUsageInGateway:  new(testhelp.RandomBool()),
+		AllowUsageInUserControlledCode: new(testhelp.RandomBool()),
 		ConnectionDetails: &fabcore.ListConnectionDetails{
 			Path: new(testhelp.RandomURI()),
 			Type: new("GitHubSourceControl"),

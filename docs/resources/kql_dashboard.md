@@ -113,6 +113,7 @@ resource "fabric_kql_dashboard" "example_parameters" {
 - `description` (String) The KQL Dashboard description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Dashboard format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

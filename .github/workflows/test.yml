@@ -42,9 +42,9 @@ jobs:
       src: ${{ steps.filter.outputs.src }}
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: 🔂 Check for changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -67,10 +67,10 @@ jobs:
         method: [oidc, certificate, secret]
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
           cache: true
@@ -86,7 +86,7 @@ jobs:
           PROVIDERNAME: microsoft/fabric
 
       - name: 🚧 Setup Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_wrapper: false
 
@@ -131,10 +131,10 @@ jobs:
   #       method: [system, user]
   #   steps:
   #     - name: ⤵️ Checkout
-  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+  #       uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
   #     - name: ✔️ Check for changes
-  #       uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+  #       uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
   #       id: changes_check
   #       with:
   #         filters: |
@@ -144,7 +144,7 @@ jobs:
   #             - 'go.sum'
 
   #     - name: 🚧 Setup Go
-  #       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+  #       uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
   #       with:
   #         go-version-file: go.mod
   #         cache: true
@@ -160,7 +160,7 @@ jobs:
   #         PROVIDERNAME: microsoft/fabric
 
   #     - name: 🚧 Setup Terraform
-  #       uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+  #       uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
   #       with:
   #         terraform_wrapper: false
 
@@ -184,7 +184,8 @@ jobs:
 
   checkbuild:
     name: 🏗️ Check Build
-    needs: changes
+    needs:
+      - changes
     if: needs.changes.outputs.src == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -193,10 +194,10 @@ jobs:
       pull-requests: read
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
           cache: true
@@ -220,7 +221,7 @@ jobs:
           task govulncheck || (echo "::warning::govulncheck found issues" && exit 0)
 
       - name: ✔️ Run Go linters
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
         with:
           version: latest
           # only-new-issues: true
@@ -229,7 +230,7 @@ jobs:
           problem-matchers: true
 
       - name: 🚧 Setup Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_wrapper: false
 
@@ -250,13 +251,13 @@ jobs:
             (echo; echo "Unexpected difference in code. Run 'task lint' command and commit."; git diff --exit-code)
 
       - name: ✔️ Validate GoReleaser config
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:
           version: "~> v2"
           args: check --verbose
 
       - name: 🏗️ Build snapshot binaries
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:
           version: "~> v2"
           args: build --snapshot --clean --verbose
@@ -268,10 +269,10 @@ jobs:
       contents: read
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
           cache: true
@@ -306,12 +307,13 @@ jobs:
   # Run tests in a matrix with Terraform CLI versions
   test:
     name: 🧪 Run Tests (${{ matrix.cli }} ${{ matrix.version }})
-    needs: changes
+    needs:
+      - changes
     if: needs.changes.outputs.src == 'true'
     environment:
       name: development
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 100
     permissions:
       contents: read
       actions: read
@@ -335,19 +337,19 @@ jobs:
             version: "1.10"
     steps:
       - name: ⤵️ Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
 
       - name: 🚧 Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: 🚧 Setup Terraform
         if: matrix.cli == 'terraform'
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: ${{ matrix.version }}
           terraform_wrapper: false
@@ -358,7 +360,7 @@ jobs:
           terraform -version
 
       - name: 🚧 Setup OpenTofu
-        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
+        uses: opentofu/setup-opentofu@847eaa4afeb791b06daa46e8eafa8b1b68d7cfb4 # v2.0.1
         if: matrix.cli == 'tofu'
         with:
           tofu_version: ${{ matrix.version }}
@@ -393,7 +395,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'terraform'
         run: task test
-        timeout-minutes: 60
+        timeout-minutes: 100
         env:
           # TF_LOG: DEBUG
           FABRIC_USE_OIDC: true
@@ -410,7 +412,7 @@ jobs:
       - name: 🧪 Run tests
         if: matrix.cli == 'tofu'
         run: task test
-        timeout-minutes: 60
+        timeout-minutes: 100
         env:
           FABRIC_USE_OIDC: true
           FABRIC_TENANT_ID: ${{ secrets.TESTACC_TENANT_ID }}
@@ -425,7 +427,7 @@ jobs:
 
       - name: 📤 Upload test results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ format('{0}-{1}-test-results', matrix.cli, env.CLI_VERSION) }}
           path: testresults.json
@@ -434,9 +436,11 @@ jobs:
 
       - name: 📤 Upload coverage results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION) }}
+          name:
+            ${{ format('{0}-{1}-test-coverage-results', matrix.cli, env.CLI_VERSION)
+            }}
           path: |
             coverage.html
             coverage.out
@@ -446,7 +450,7 @@ jobs:
 
       - name: 📢 Publish test results
         if: always()
-        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         with:
           name: 📜 Test results (${{ matrix.cli }} ${{ matrix.version }})
           reporter: golang-json
@@ -468,9 +472,11 @@ jobs:
 
       - name: 📤 Upload Coverage summary
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION) }}
+          name:
+            ${{ format('{0}-{1}-test-coverage-summary', matrix.cli, env.CLI_VERSION)
+            }}
           path: |
             code-coverage-results.md
           if-no-files-found: warn
@@ -491,13 +497,13 @@ jobs:
       id-token: write
     steps:
       - name: 📥 Download test results
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: terraform-1_13-test-results
           merge-multiple: true
 
       - name: 📥 Download coverage results
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: terraform-1_13-test-coverage*
           merge-multiple: true
@@ -513,7 +519,7 @@ jobs:
       #     files: ./testresults.xml
 
       - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           # use_oidc: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -527,7 +533,8 @@ jobs:
       #     coverage-file-name: coverage.out
 
       - name: 🔎 Find comment
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        if: github.event_name == 'pull_request' || github.event_name ==
+          'pull_request_target'
         uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: fc
         with:
@@ -536,14 +543,18 @@ jobs:
           body-includes: Minimum allowed line rate is
 
       - name: 📝 Create comment
-        if: steps.fc.outputs.comment-id == '' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+        if:
+          steps.fc.outputs.comment-id == '' && (github.event_name == 'pull_request' ||
+          github.event_name == 'pull_request_target')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: code-coverage-results.md
 
       - name: 📝 Update comment
-        if: steps.fc.outputs.comment-id != '' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+        if:
+          steps.fc.outputs.comment-id != '' && (github.event_name == 'pull_request' ||
+          github.event_name == 'pull_request_target')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}

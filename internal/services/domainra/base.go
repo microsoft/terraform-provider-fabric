@@ -15,7 +15,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Domain Role Assignments",
 	Types:          "domain_role_assignments",
 	DocsURL:        "https://learn.microsoft.com/fabric/governance/domains",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
 

@@ -47,8 +47,8 @@ func TestUnit_GatewayRoleAssignmentDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "gateway_id", gatewayID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "role", (*string)(entity.Role)),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.id", entity.Principal.ID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.type", (*string)(entity.Principal.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.id", entity.Principal.GetPrincipal().ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "principal.type", (*string)(entity.Principal.GetPrincipal().Type)),
 			),
 		},
 	}))

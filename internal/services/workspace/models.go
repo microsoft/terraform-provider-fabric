@@ -39,10 +39,11 @@ func (to *baseWorkspaceModel) set(from fabcore.Workspace) {
 type baseWorkspaceInfoModel struct {
 	baseWorkspaceModel
 
-	CapacityAssignmentProgress types.String                                                 `tfsdk:"capacity_assignment_progress"`
-	CapacityRegion             types.String                                                 `tfsdk:"capacity_region"`
-	OneLakeEndpoints           supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
-	Identity                   supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
+	CapacityAssignmentProgress  types.String                                                 `tfsdk:"capacity_assignment_progress"`
+	CapacityRegion              types.String                                                 `tfsdk:"capacity_region"`
+	SkipCapacityStateValidation types.Bool                                                   `tfsdk:"skip_capacity_state_validation"`
+	OneLakeEndpoints            supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
+	Identity                    supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
 }
 
 func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.WorkspaceInfo) diag.Diagnostics {

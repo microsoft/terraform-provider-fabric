@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Deployment Pipeline Role Assignment resource allows you to manage a Fabric Deployment Pipeline Role Assignment https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_deployment_pipeline_role_assignment (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Deployment Pipeline Role Assignment resource allows you to manage a Fabric [Deployment Pipeline Role Assignment](https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

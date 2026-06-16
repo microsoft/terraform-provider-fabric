@@ -66,20 +66,6 @@ func TestUnit_WorkspaceResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
-		// error - missing capacity_id if identity enabled is true
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"display_name": "test",
-					"identity": map[string]any{
-						"type": "SystemAssigned",
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorAttConfigMissing),
-		},
 		// error - invalid identity type
 		{
 			ResourceName: testResourceItemFQN,
@@ -245,6 +231,53 @@ func TestUnit_WorkspaceResource_NoCapacity_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_WorkspaceResource_SkipCapacityStateValidation(t *testing.T) {
+	// Workspace created with a capacity_id that is NOT in the fake server's capacity list,
+	// simulating a user who lacks permission to list capacities.
+	unknownCapacityID := testhelp.RandomUUID()
+	entityBefore := fakes.NewRandomWorkspaceInfo(&unknownCapacityID)
+	entityAfter := fakes.NewRandomWorkspaceInfo(&unknownCapacityID)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read with skip_capacity_state_validation = true
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                   *entityBefore.DisplayName,
+					"capacity_id":                    unknownCapacityID,
+					"skip_capacity_state_validation": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", unknownCapacityID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "skip_capacity_state_validation", "true"),
+			),
+		},
+		// Update and Read - skip still enabled
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name":                   *entityAfter.DisplayName,
+					"description":                    *entityAfter.Description,
+					"capacity_id":                    unknownCapacityID,
+					"skip_capacity_state_validation": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "skip_capacity_state_validation", "true"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
@@ -377,7 +410,6 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"display_name": entityCreateDisplayName,
-					"capacity_id":  capacityID,
 					"identity": map[string]any{
 						"type": "SystemAssigned",
 					},
@@ -386,7 +418,7 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
 			),
 		},

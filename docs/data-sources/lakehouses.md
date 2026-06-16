@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Lakehouse Folder ID.
 - `id` (String) The Lakehouse ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Lakehouse.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

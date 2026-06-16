@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The SQL Databases data-source allows you to retrieve a list of Fabric SQL Databases https://learn.microsoft.com/fabric/database/sql/overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_sql_databases (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The SQL Databases data-source allows you to retrieve a list of Fabric [SQL Databases](https://learn.microsoft.com/fabric/database/sql/overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -58,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The SQL Database Folder ID.
 - `id` (String) The SQL Database ID.
 - `properties` (Attributes) The SQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the SQL Database.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>
