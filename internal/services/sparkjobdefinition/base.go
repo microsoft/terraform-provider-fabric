@@ -32,4 +32,13 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		API:   "SparkJobDefinitionV1",
 		Paths: []string{"SparkJobDefinitionV1.json"},
 	},
+	{
+		Type: "SparkJobDefinitionV2",
+		API:  "SparkJobDefinitionV2",
+		Paths: []string{
+			"SparkJobDefinitionV1.json",
+			"Main/*",
+			"Libs/*",
+		},
+	},
 }

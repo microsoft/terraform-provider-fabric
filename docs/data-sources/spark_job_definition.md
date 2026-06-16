@@ -66,7 +66,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Spark Job Definition display name.
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`, `SparkJobDefinitionV2`
 - `id` (String) The Spark Job Definition ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -76,7 +76,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` **SparkJobDefinitionV2** format: `Libs/*`, `Main/*`, `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Spark Job Definition Folder ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--properties))

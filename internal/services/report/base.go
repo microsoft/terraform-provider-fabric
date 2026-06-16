@@ -33,6 +33,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 			"report.json",
 			"definition.pbir",
 			"StaticResources/**",
+			"semanticModelDiagramLayout.json",
 		},
 	},
 	{
@@ -42,6 +43,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 			"definition.pbir",
 			"definition/**",
 			"StaticResources/**",
+			"semanticModelDiagramLayout.json",
 		},
 	},
 }

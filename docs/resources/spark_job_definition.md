@@ -108,11 +108,11 @@ resource "fabric_spark_job_definition" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). Accepted path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). Accepted path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` **SparkJobDefinitionV2** format: `Libs/*`, `Main/*`, `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Folder ID.
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`, `SparkJobDefinitionV2`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

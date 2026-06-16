@@ -63,7 +63,7 @@ output "example_definition_report_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **PBIR** format: `StaticResources/**`, `definition.pbir`, `definition/**` **PBIR-Legacy** format: `StaticResources/**`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **PBIR** format: `StaticResources/**`, `definition.pbir`, `definition/**`, `semanticModelDiagramLayout.json` **PBIR-Legacy** format: `StaticResources/**`, `definition.pbir`, `report.json`, `semanticModelDiagramLayout.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Report description.
 - `display_name` (String) The Report display name.
 - `folder_id` (String) The Report Folder ID.
