@@ -290,26 +290,55 @@ func TestAcc_AnomalyDetectorResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
-	workspaceRS := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceRSID := workspaceRS["id"].(string)
-
-	// workspaceDS := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	// workspaceDSID := workspaceDS["id"].(string)
-
-	// kqlDB := testhelp.WellKnown()["KQLDatabase"].(map[string]any)
-	// kqlDBID := kqlDB["id"].(string)
-
+	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 	entityCreateDisplayName := testhelp.RandomName()
-	// entityUpdateDisplayName := testhelp.RandomName()
-	// entityUpdateDescription := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	configurationID := testhelp.RandomUUID()
 
-	testHelperDefinition := map[string]any{
+	eventhouseResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", "eventhouse"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+			"workspace_id": workspaceID,
+		},
+	)
+	eventhouseResourceFQN := testhelp.ResourceFQN("fabric", "eventhouse", "test")
+
+	kqlDatabaseResourceHCL := at.CompileConfig(
+		at.ResourceHeader(testhelp.TypeName("fabric", "kql_database"), "test"),
+		map[string]any{
+			"display_name": testhelp.RandomName(),
+			"workspace_id": workspaceID,
+			"configuration": map[string]any{
+				"database_type": "ReadWrite",
+				"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
+			},
+		},
+	)
+	kqlDatabaseResourceFQN := testhelp.ResourceFQN("fabric", "kql_database", "test")
+
+	testHelperDefinitionCreate := map[string]any{
 		`"Configurations.json"`: map[string]any{
 			"source": "${local.path}/Configurations.json",
-			// "tokens": map[string]any{
-			// 	"WORKSPACE_ID": workspaceDSID,
-			// 	"KQL_DB_ID":    kqlDBID,
-			// },
+			"tokens": map[string]any{
+				"WORKSPACE_ID":       workspaceID,
+				"KQLDB_ID":           testhelp.RefByFQN(kqlDatabaseResourceFQN, "id"),
+				"CONFIGURATION_ID":   configurationID,
+				"CONFIGURATION_NAME": entityCreateDisplayName,
+			},
+		},
+	}
+
+	testHelperDefinitionUpdate := map[string]any{
+		`"Configurations.json"`: map[string]any{
+			"source": "${local.path}/Configurations.json",
+			"tokens": map[string]any{
+				"WORKSPACE_ID":       workspaceID,
+				"KQLDB_ID":           testhelp.RefByFQN(kqlDatabaseResourceFQN, "id"),
+				"CONFIGURATION_ID":   configurationID,
+				"CONFIGURATION_NAME": entityUpdateDisplayName,
+			},
 		},
 	}
 
@@ -319,13 +348,15 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
+				eventhouseResourceHCL,
+				kqlDatabaseResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
-						"workspace_id": workspaceRSID,
+						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionCreate,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -334,27 +365,28 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},
-		// // Update and Read
-		// {
-		// 	ResourceName: testResourceItemFQN,
-		// 	Config: at.JoinConfigs(
-		// 		testHelperLocals,
-		// 		at.CompileConfig(
-		// 			testResourceItemHeader,
-		// 			map[string]any{
-		// 				"workspace_id": workspaceRSID,
-		// 				"display_name": entityUpdateDisplayName,
-		// 				"description":  entityUpdateDescription,
-		// 				"format":       "Default",
-		// 				"definition":   testHelperDefinition,
-		// 			},
-		// 		)),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-		// 		resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-		// 	),
-		// },
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				eventhouseResourceHCL,
+				kqlDatabaseResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinitionUpdate,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
 	},
 	))
 }

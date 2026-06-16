@@ -237,9 +237,6 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
-    'AnomalyDetector' {
-      $itemEndpoint = 'anomalyDetectors'
-    }
     'ApacheAirflowJob' {
       $itemEndpoint = 'apacheAirflowJobs'
     }
@@ -1270,7 +1267,6 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
-  'AnomalyDetector'                 = 'ad'
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
   'AzureSqlServer'                  = 'sql'
@@ -1436,15 +1432,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-<<<<<<< HEAD
-<<<<<<< HEAD
-$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
-=======
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
->>>>>>> main
-=======
 $itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
->>>>>>> main
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -2260,4 +2248,3 @@ else {
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
-

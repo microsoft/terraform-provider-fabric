@@ -3,16 +3,16 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "univariateConfigurations": [
     {
-      "configurationId": "a7ff7558-ab08-4426-9ea1-a763279b1808",
-      "configurationName": "detector test mock",
+      "configurationId": "{{.CONFIGURATION_ID}}",
+      "configurationName": "{{.CONFIGURATION_NAME}}",
       "fabricDataSource": {
         "dataSourceType": "KqlDb",
         "tableName": "MockTableName",
         "timestampColumnName": "mockColumnName",
         "instanceIDColumnName": "MockColumnName",
         "attributeColumnName": "MockColumnName",
-        "workspaceId": "980f528d-f486-4994-a0cc-fcd2b01be340",
-        "artifactId": "4b808054-784b-4287-99d0-f6c70da33270"
+        "workspaceId": "{{.WORKSPACE_ID}}",
+        "artifactId": "{{.KQLDB_ID}}"
       },
       "modelOption": {
         "modelSelection": {

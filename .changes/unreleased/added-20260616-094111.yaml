@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_anomaly_detector` data source
+time: 2026-06-16T09:41:11.166647638Z
+custom:
+    Issue: "811"
