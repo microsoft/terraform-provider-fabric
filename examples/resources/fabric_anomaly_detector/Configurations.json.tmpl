@@ -3,14 +3,13 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "univariateConfigurations": [
     {
-      "configurationId": "{{.CONFIGURATION_ID}}",
-      "configurationName": "{{.CONFIGURATION_NAME}}",
+      "configurationName": "example detector",
       "fabricDataSource": {
         "dataSourceType": "KqlDb",
-        "tableName": "MockTableName",
-        "timestampColumnName": "mockColumnName",
-        "instanceIDColumnName": "MockColumnName",
-        "attributeColumnName": "MockColumnName",
+        "tableName": "ExampleTable",
+        "timestampColumnName": "Timestamp",
+        "instanceIDColumnName": "InstanceId",
+        "attributeColumnName": "Attribute",
         "workspaceId": "{{.WORKSPACE_ID}}",
         "artifactId": "{{.KQLDB_ID}}"
       },

@@ -34,7 +34,7 @@ resource "fabric_anomaly_detector" "example_definition_bootstrap" {
   format                    = "Default"
   definition = {
     "Configurations.json" = {
-      source = "${path.module}/Configurations.json"
+      source = "${local.path}/Configurations.json.tmpl"
     }
   }
 }
@@ -47,7 +47,7 @@ resource "fabric_anomaly_detector" "example_definition_update" {
   format       = "Default"
   definition = {
     "Configurations.json" = {
-      source = "${path.module}/Configurations.json"
+      source = "${local.path}/Configurations.json.tmpl"
       tokens = {
         "WORKSPACE_ID" = "11111111-1111-1111-1111-111111111111"
         "KQLDB_ID"     = "22222222-2222-2222-2222-222222222222"
@@ -65,7 +65,7 @@ resource "fabric_anomaly_detector" "example_custom_delimiter" {
   definition = {
     "Configurations.json" = {
       source           = "${local.path}/Configurations.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "{{}}"
       tokens = {
         "WORKSPACE_ID" = "11111111-1111-1111-1111-111111111111"
         "KQLDB_ID"     = "22222222-2222-2222-2222-222222222222"
@@ -83,7 +83,7 @@ resource "fabric_anomaly_detector" "example_parameters" {
   definition = {
     "Configurations.json" = {
       source          = "${local.path}/Configurations.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
