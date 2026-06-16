@@ -13,6 +13,9 @@ concurrency:
   group: fabric-testacc-environment
   cancel-in-progress: false
 
+env:
+  FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
+
 permissions:
   id-token: write
   contents: read
