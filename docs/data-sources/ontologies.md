@@ -58,4 +58,5 @@ Read-Only:
 - `display_name` (String) The Ontology display name.
 - `folder_id` (String) The Ontology Folder ID.
 - `id` (String) The Ontology ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Ontology.
 - `workspace_id` (String) The Workspace ID.

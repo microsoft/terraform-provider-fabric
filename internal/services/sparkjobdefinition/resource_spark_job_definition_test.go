@@ -190,6 +190,9 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 	entityBefore := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
 	entityNoDefinition := fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomSparkJobDefinitionWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -228,6 +231,7 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"folder_id":    *entityBefore.FolderID,
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
+						"tags":         []string{tag1ID, tag2ID},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -235,9 +239,35 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"description":  *entityBefore.Description,
+						"folder_id":    *entityBefore.FolderID,
+						"format":       "SparkJobDefinitionV1",
+						"definition":   testHelperDefinition,
+						"tags":         []string{tag2ID, tag3ID},
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -259,6 +289,7 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

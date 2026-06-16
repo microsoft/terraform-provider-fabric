@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Folder ID.
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Warehouse.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

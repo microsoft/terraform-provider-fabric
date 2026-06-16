@@ -79,6 +79,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `*.ipynb`, `notebook-content.py`, `notebook-content.r`, `notebook-content.scala`, `notebook-content.sql` **ipynb** format: `*.ipynb` **py** format: `notebook-content.py` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Notebook description.
 - `folder_id` (String) The Notebook Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

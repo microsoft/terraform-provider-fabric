@@ -1,5 +1,0 @@
-kind: fixed
-body: Added missing import functionality to `fabric_connection`
-time: 2026-05-13T21:44:25.392925116Z
-custom:
-    Issue: "729"

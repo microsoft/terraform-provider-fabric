@@ -4,7 +4,7 @@ page_title: "fabric_digital_twin_builder Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The Digital Twin Builder resource allows you to manage a Fabric Digital Twin Builder https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview.
-  -> This resource supports Service Principal authentication.
+  -> This resource does not support Service Principal. Please use a User context authentication.
   ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Digital Twin Builder resource allows you to manage a Fabric [Digital Twin Builder](https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview).
 
--> This resource supports Service Principal authentication.
+-> This resource does not support Service Principal. Please use a User context authentication.
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -115,6 +115,7 @@ resource "fabric_digital_twin_builder" "example_parameters" {
 - `description` (String) The Digital Twin Builder description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Digital Twin Builder format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

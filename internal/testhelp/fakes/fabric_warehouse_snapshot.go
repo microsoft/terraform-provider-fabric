@@ -104,6 +104,7 @@ func (o *operationsWarehouseSnapshot) ConvertItemToEntity(entity fabcore.Item) f
 		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties:  NewRandomWarehouseSnapshot().Properties,
+		Tags:        convertItemTags[fabwarehousesnapshot.ItemTag](entity.Tags),
 	}
 }
 

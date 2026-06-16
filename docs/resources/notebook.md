@@ -113,6 +113,7 @@ resource "fabric_notebook" "example_parameters" {
 - `description` (String) The Notebook description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Notebook format. Possible values: `Default`, `ipynb`, `py`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

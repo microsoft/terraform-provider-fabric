@@ -109,6 +109,7 @@ resource "fabric_ontology" "example_parameters" {
 - `description` (String) The Ontology description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Ontology format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Item Job Scheduler resource allows you to manage a Fabric Item Job Scheduler https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_scheduler (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Item Job Scheduler resource allows you to manage a Fabric [Item Job Scheduler](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

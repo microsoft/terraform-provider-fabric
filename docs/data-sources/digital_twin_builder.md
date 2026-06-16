@@ -4,7 +4,7 @@ page_title: "fabric_digital_twin_builder Data Source - terraform-provider-fabric
 subcategory: ""
 description: |-
   The Digital Twin Builder data-source allows you to retrieve details about a Fabric Digital Twin Builder https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview.
-  -> This data-source supports Service Principal authentication.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Digital Twin Builder data-source allows you to retrieve details about a Fabric [Digital Twin Builder](https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview).
 
--> This data-source supports Service Principal authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -82,6 +82,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `ContextualizationOperations/*`, `EntityTypeRelationships/*`, `EntityTypes/*`, `MappingOperations/*`, `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Digital Twin Builder description.
 - `folder_id` (String) The Digital Twin Builder Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

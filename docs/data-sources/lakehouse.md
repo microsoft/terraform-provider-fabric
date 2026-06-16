@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Lakehouse Folder ID.
 - `properties` (Attributes) The Lakehouse properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

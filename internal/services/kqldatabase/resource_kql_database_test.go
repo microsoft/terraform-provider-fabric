@@ -344,6 +344,9 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomKQLDatabaseWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomKQLDatabaseWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomKQLDatabaseWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomKQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -380,15 +383,44 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 						"database_type": "ReadWrite",
 						"eventhouse_id": *eventhouse.ID,
 					},
+					"tags": []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"configuration": map[string]any{
+						"database_type": "ReadWrite",
+						"eventhouse_id": *eventhouse.ID,
+					},
+					"tags": []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -408,6 +440,7 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -424,6 +457,9 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
 	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+	tagResourceHCL1, tagResourceFQN1 := testhelp.TagResource(t)
+	tagResourceHCL2, tagResourceFQN2 := testhelp.TagResource(t)
+	tagResourceHCL3, tagResourceFQN3 := testhelp.TagResource(t)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
@@ -451,14 +487,86 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
-		// Update and Read
+		// Add tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				eventhouseResourceHCL,
 				folderResourceHCL,
+				tagResourceHCL1,
+				tagResourceHCL2,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"configuration": map[string]any{
+							"database_type": "ReadWrite",
+							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
+						},
+						"tags": []string{testhelp.RefByFQN(tagResourceFQN1, "id"), testhelp.RefByFQN(tagResourceFQN2, "id")},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN1, "id"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN2, "id"),
+			),
+		},
+		// Update, Remove and add tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				eventhouseResourceHCL,
+				folderResourceHCL,
+				tagResourceHCL1,
+				tagResourceHCL2,
+				tagResourceHCL3,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"configuration": map[string]any{
+							"database_type": "ReadWrite",
+							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
+						},
+						"tags": []string{testhelp.RefByFQN(tagResourceFQN1, "id"), testhelp.RefByFQN(tagResourceFQN3, "id")},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN1, "id"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN3, "id"),
+			),
+		},
+		// Update, Remove and add tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				eventhouseResourceHCL,
+				folderResourceHCL,
+				tagResourceHCL1,
+				tagResourceHCL2,
+				tagResourceHCL3,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
@@ -479,6 +587,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 	},
