@@ -232,10 +232,6 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
-		// Save partial state with null properties to avoid unknown values after apply (Terraform 1.8+).
-		resp.Diagnostics.Append(r.PropertiesSetter(ctx, nil, &plan)...)
-		resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
-
 		return
 	}
 
