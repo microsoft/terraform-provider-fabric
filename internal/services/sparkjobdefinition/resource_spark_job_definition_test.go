@@ -31,6 +31,18 @@ var testHelperDefinition = map[string]any{
 	},
 }
 
+var testHelperDefinitionV2 = map[string]any{
+	`"SparkJobDefinitionV1.json"`: map[string]any{
+		"source": "${local.path}/SparkJobDefinitionV1.json.tmpl",
+	},
+	`"Main/main.py"`: map[string]any{
+		"source": "${local.path}/Main/main.py.tmpl",
+	},
+	`"Libs/lib.py"`: map[string]any{
+		"source": "${local.path}/Libs/lib.py.tmpl",
+	},
+}
+
 func TestUnit_SparkJobDefinitionResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -353,6 +365,33 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
+			),
+		},
+		// Update to SparkJobDefinitionV2 definition and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				folderResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"format":       "SparkJobDefinitionV2",
+						"definition":   testHelperDefinitionV2,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "format", "SparkJobDefinitionV2"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),

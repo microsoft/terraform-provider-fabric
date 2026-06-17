@@ -29,7 +29,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
 		Type: "ipynb",
-		API:  "",
+		API:  "ipynb",
 		Paths: []string{
 			"*.ipynb",
 		},

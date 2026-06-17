@@ -36,7 +36,7 @@ data "fabric_variable_library" "example_definition" {
   output_definition = true
 }
 
-# Access the content of the definition with JSONPath expressionariablelibrary-content
+# Access the content of the definition with JSONPath expression
 output "example_definition_content_jsonpath" {
   value = provider::fabric::content_decode(data.fabric_variable_library.example_definition.definition["variables.json"].content, ".payload")
 }
