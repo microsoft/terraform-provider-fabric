@@ -237,6 +237,9 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'AnomalyDetector' {
+      $itemEndpoint = 'anomalyDetectors'
+    }
     'ApacheAirflowJob' {
       $itemEndpoint = 'apacheAirflowJobs'
     }
@@ -1024,6 +1027,84 @@ function Set-AzureDataFactory {
   return $dataFactory
 }
 
+function Set-AzureSqlDatabase {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ResourceGroupName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ServerName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DatabaseName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Location
+  )
+
+  # Attempt to get the existing SQL Server
+  $sqlServer = Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -ErrorAction SilentlyContinue
+  if (-not $sqlServer) {
+    Write-Log -Message "Creating SQL Server: $ServerName in Resource Group: $ResourceGroupName" -Level 'WARN'
+    $sqlServer = New-AzSqlServer `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -Location $Location `
+      -ExternalAdminName $azContext.Account.Id `
+      -EnableActiveDirectoryOnlyAuthentication
+    Write-Log -Message "Created SQL Server: $ServerName" -Level 'INFO'
+  }
+  Write-Log -Message "Az SQL Server - Name: $($sqlServer.ServerName)"
+
+  # Allow Azure services to access the server (required for Fabric mirroring/replication)
+  $firewallRule = Get-AzSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $ServerName -FirewallRuleName 'AllowAllAzureIPs' -ErrorAction SilentlyContinue
+  if (-not $firewallRule) {
+    Write-Log -Message "Creating firewall rule to allow Azure services" -Level 'WARN'
+    New-AzSqlServerFirewallRule `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -FirewallRuleName 'AllowAllAzureIPs' `
+      -StartIpAddress '0.0.0.0' `
+      -EndIpAddress '0.0.0.0'
+  }
+
+  # Attempt to get the existing SQL Database
+  $sqlDatabase = Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -ErrorAction SilentlyContinue
+  if (-not $sqlDatabase) {
+    Write-Log -Message "Creating SQL Database: $DatabaseName on server: $ServerName" -Level 'WARN'
+    $sqlDatabase = New-AzSqlDatabase `
+      -ResourceGroupName $ResourceGroupName `
+      -ServerName $ServerName `
+      -DatabaseName $DatabaseName `
+      -Edition 'Basic'
+    Write-Log -Message "Created SQL Database: $DatabaseName" -Level 'INFO'
+  }
+  Write-Log -Message "Az SQL Database - Name: $($sqlDatabase.DatabaseName)"
+
+  # Create test tables using Entra auth
+  $accessToken = (Get-AzAccessToken -ResourceUrl 'https://database.windows.net/' -WarningAction SilentlyContinue -AsSecureString).Token
+  $unsecureToken = $accessToken | ConvertFrom-SecureString -AsPlainText
+
+  $table1Name = 'TestTable1'
+  $table2Name = 'TestTable2'
+
+  $createTableQuery = (Get-Content -Path 'internal/testhelp/fixtures/azure_sql_database/create_tables.sql.tmpl' -Raw).Trim()
+  $createTableQuery = $createTableQuery.Replace('{{ .TABLE1_NAME }}', $table1Name).Replace('{{ .TABLE2_NAME }}', $table2Name)
+
+  Invoke-Sqlcmd `
+    -ServerInstance "$ServerName.database.windows.net" `
+    -Database $DatabaseName `
+    -AccessToken $unsecureToken `
+    -Query $createTableQuery `
+    -ErrorAction Stop
+  Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
+
+  return @{
+    TableName1 = $table1Name
+    TableName2 = $table2Name
+  }
+}
+
 function Set-Shortcut {
   param (
     [Parameter(Mandatory = $true)]
@@ -1120,7 +1201,7 @@ function Set-ItemJobScheduler {
 
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Sql', 'SqlServer')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -1189,8 +1270,10 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'AnomalyDetector'                 = 'ad'
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
+  'AzureSqlServer'                  = 'sql'
   'CopyJob'                         = 'cj'
   'CosmosDB'                        = 'cdb'
   'Dashboard'                       = 'dash'
@@ -1269,6 +1352,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
   'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
+  'FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1352,7 +1436,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1919,6 +2003,29 @@ $wellKnown['AzureDataFactory'] = @{
   subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
+# Create the Azure SQL Server and Database if not exists
+if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
+  Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
+  Write-Log -Message "Server: $sqlServerName.database.windows.net / Database: $sqlDatabaseName" -Level 'ERROR' -Stop $false
+  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
+}
+else {
+  $sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
+  $sqlDatabaseName = "graphqldb"
+
+  $azureSql = Set-AzureSqlDatabase `
+    -ResourceGroupName $wellKnown['ResourceGroup'].name `
+    -ServerName $sqlServerName `
+    -DatabaseName $sqlDatabaseName `
+    -Location $wellKnown['ResourceGroup'].location
+
+  $wellKnown['AzureSqlDatabase'] = @{
+    connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
+    tableName1   = $azureSql.TableName1
+    tableName2   = $azureSql.TableName2
+  }
+}
+
 # Create the Mounted Data Factory if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
 $definition = @{
@@ -1936,15 +2043,16 @@ $definition = @{
 }
 
 function Set-Tags {
+  $tagDisplayName = "Test Tag"
   $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
-  $result = $results.Response.value[0]
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $tagDisplayName -and $_.scope.type -eq 'Tenant' } | Select-Object -First 1
   if (-not $result) {
     $payload = @{
       createTagsRequest = @(
-        @{ displayName = "Test Tag" }
+        @{ displayName = $tagDisplayName }
       )
     }
-    Write-Log -Message "Creating Tag: $($payload.createTagsRequest[0].displayName)" -Level 'WARN'
+    Write-Log -Message "Creating Tag: $tagDisplayName" -Level 'WARN'
 
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/tags/bulkCreateTags" -Payload $payload).Response.tags[0]
   }
@@ -1966,6 +2074,32 @@ $wellKnown['MountedDataFactory'] = @{
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
 }
+
+# Ensure only the expected tag is applied to Mounted Data Factory
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+
+# Unapply all existing tags
+if ($itemDetails.tags -and $itemDetails.tags.Count -gt 0) {
+  $existingTagIds = $itemDetails.tags | ForEach-Object { $_.id }
+  $unapplyPayload = @{ tags = @($existingTagIds) }
+  Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/unapplyTags" -Payload $unapplyPayload | Out-Null
+  Write-Log -Message "ItemTags - Unapplied $($existingTagIds.Count) existing tag(s) from Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+}
+
+# Apply the desired tag
+$applyTagsPayload = @{ tags = @($wellKnown['Tags'].id) }
+Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/applyTags" -Payload $applyTagsPayload | Out-Null
+Write-Log -Message "ItemTags - Applied tag '$($wellKnown['Tags'].displayName)' to Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+
+# Read back to confirm
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+$actualTag = $itemDetails.tags | Select-Object -First 1
+if (-not $actualTag -or $actualTag.id -ne $wellKnown['Tags'].id) {
+  Write-Log -Message "ItemTags - Expected tag '$($wellKnown['Tags'].id)' not found on Mounted Data Factory after apply." -Level 'ERROR'
+}
+
+$wellKnown['MountedDataFactory']['tagId'] = $actualTag.id
+$wellKnown['MountedDataFactory']['tagName'] = $actualTag.displayName
 
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {

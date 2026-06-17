@@ -5,10 +5,12 @@ package externaldatashare_test
 
 import (
 	"regexp"
+	"strings"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -45,6 +47,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      itemID,
 						"paths":        []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -62,6 +65,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      "invalid uuid",
 						"paths":        []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -80,6 +84,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"unexpected_attr": "test",
 						"paths":           []string{"Files/MyFolder1"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -110,6 +115,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"workspace_id": workspaceID,
 						"item_id":      itemID,
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
@@ -127,11 +133,102 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      itemID,
 						"paths":        []string{"InvalidPath"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": "test@example.com",
 						},
 					},
 				)),
 			ExpectError: regexp.MustCompile(`A valid path must start with 'Files/'\s+or 'Tables/'`),
+		},
+		// error - recipient.type - invalid value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"Files/MyFolder1"},
+						"recipient": map[string]any{
+							"type":                "InvalidType",
+							"user_principal_name": "test@example.com",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`Attribute recipient.type value must be one of`),
+		},
+		// error - recipient.user_principal_name - too long
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"Files/MyFolder1"},
+						"recipient": map[string]any{
+							"type":                "User",
+							"user_principal_name": strings.Repeat("a", 257),
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`Attribute recipient.user_principal_name string length must be at most\s+256`),
+		},
+		// error - recipient.user_principal_name - required when type is User
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"Files/MyFolder1"},
+						"recipient": map[string]any{
+							"type": "User",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`(?i)user_principal_name`),
+		},
+		// error - recipient.user_principal_name - must be null when type is ServicePrincipal
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"Files/MyFolder1"},
+						"recipient": map[string]any{
+							"type":                "ServicePrincipal",
+							"user_principal_name": "test@example.com",
+							"tenant_id":           "00000000-0000-0000-0000-000000000000",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`(?i)user_principal_name`),
+		},
+		// error - recipient.tenant_id - required when type is ServicePrincipal
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"item_id":      itemID,
+						"paths":        []string{"Files/MyFolder1"},
+						"recipient": map[string]any{
+							"type":         "ServicePrincipal",
+							"principal_id": "00000000-0000-0000-0000-000000000000",
+						},
+					},
+				)),
+			ExpectError: regexp.MustCompile(`(?i)tenant_id`),
 		},
 	}))
 }
@@ -139,6 +236,7 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := NewRandomExternalDataShare(workspaceID)
+	entityRecipient := entity.Recipient.(*fabcore.ExternalDataShareUserRecipient)
 
 	fakeTestUpsert(NewRandomExternalDataShare(workspaceID))
 
@@ -147,7 +245,7 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ExternalDataSharesProviderServer.DeleteExternalDataShare = fakeDeleteExternalDataShareProvider()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
-		// Create and Read
+		// Create and Read - recipient.type defaults to User when not specified
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -157,13 +255,14 @@ func TestUnit_ExternalDataShareResource_CRUD(t *testing.T) {
 					"item_id":      *entity.ItemID,
 					"paths":        entity.Paths,
 					"recipient": map[string]any{
-						"user_principal_name": *entity.Recipient.UserPrincipalName,
+						"user_principal_name": *entityRecipient.UserPrincipalName,
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", *entity.WorkspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", *entity.ItemID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "recipient.type", string(fabcore.ExternalDataShareRecipientTypeUser)),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "invitation_url"),
@@ -193,6 +292,7 @@ func TestAcc_ExternalDataShareResource_CRUD(t *testing.T) {
 						"item_id":      testhelp.RefByFQN(lakehouseResourceFQN, "id"),
 						"paths":        []string{"Tables/publicholidays"},
 						"recipient": map[string]any{
+							"type":                "User",
 							"user_principal_name": userPrincipalName,
 						},
 					},

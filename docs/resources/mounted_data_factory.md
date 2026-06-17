@@ -109,6 +109,7 @@ resource "fabric_mounted_data_factory" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mounted Data Factory description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

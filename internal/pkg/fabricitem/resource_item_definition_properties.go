@@ -125,7 +125,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Configure(
 		return
 	}
 
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 }
 
 func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -166,7 +168,19 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	plan.ID = customtypes.NewUUIDPointerValue(respCreate.ID)
 	plan.WorkspaceID = customtypes.NewUUIDPointerValue(respCreate.WorkspaceID)
 
-	// r.get() updates the plan with current server state
+	// Save state with empty tags so the item is tracked even if tags fail
+	createdState := plan
+	createdState.Tags = supertypes.NewSetValueOfSlice(ctx, []customtypes.UUID{})
+
+	if resp.Diagnostics.Append(resp.State.Set(ctx, createdState)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(
+		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		// Save partial state with null properties to avoid unknown values after apply (Terraform 1.8+).
 		resp.Diagnostics.Append(r.PropertiesSetter(ctx, nil, &plan)...)
@@ -294,6 +308,12 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Update(ctx 
 
 		_, err := r.client.UpdateItemDefinition(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdateDefinition.UpdateItemDefinitionRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
@@ -431,7 +451,9 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) get(
 		return diags
 	}
 
-	model.set(fabricItem)
+	if diags := model.set(ctx, fabricItem); diags.HasError() {
+		return diags
+	}
 
 	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

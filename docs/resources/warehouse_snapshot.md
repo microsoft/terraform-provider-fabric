@@ -45,6 +45,7 @@ Any changes to this configuration will result in recreation of the Warehouse Sna
 
 - `description` (String) The Warehouse Snapshot description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

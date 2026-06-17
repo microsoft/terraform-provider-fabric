@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Managed Private Endpoint data-source allows you to retrieve details about a Fabric Workspace Managed Private Endpoint https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_managed_private_endpoint (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Managed Private Endpoint data-source allows you to retrieve details about a Fabric [Workspace Managed Private Endpoint](https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -43,7 +40,7 @@ data "fabric_workspace_managed_private_endpoint" "example" {
 - `connection_state` (Attributes) Endpoint connection state of provisioned endpoints. (see [below for nested schema](#nestedatt--connection_state))
 - `provisioning_state` (String) Provisioning state of the endpoint. Value must be one of : `Deleting`, `Failed`, `Provisioning`, `Succeeded`, `Updating`.
 - `target_private_link_resource_id` (String) Resource ID of data source for which private endpoint is created.
-- `target_subresource_type` (String) Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource).
+- `target_subresource_type` (String) Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource). Leave unset when the target is a Private Link Service, which does not expose sub-resources.
 
 <a id="nestedatt--timeouts"></a>
 

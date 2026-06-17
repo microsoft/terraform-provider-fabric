@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Report display name.
 - `folder_id` (String) The Report Folder ID.
 - `id` (String) The Report ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Report.
 - `workspace_id` (String) The Workspace ID.

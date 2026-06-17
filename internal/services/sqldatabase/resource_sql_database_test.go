@@ -414,6 +414,9 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -442,6 +445,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -451,9 +455,30 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update, Move and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update, Move and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -472,6 +497,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Move and Read

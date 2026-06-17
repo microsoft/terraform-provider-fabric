@@ -100,6 +100,7 @@ Any changes to this configuration will result in recreation of the Digital Twin 
 - `description` (String) The Digital Twin Builder Flow description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Digital Twin Builder Flow format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

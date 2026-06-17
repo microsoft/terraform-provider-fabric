@@ -4,17 +4,14 @@ page_title: "fabric_ml_experiment Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The ML Experiment resource allows you to manage a Fabric ML Experiment https://learn.microsoft.com/fabric/data-science/machine-learning-experiment.
-  -> This resource does not support Service Principal. Please use a User context authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_ml_experiment (Resource)
 
 The ML Experiment resource allows you to manage a Fabric [ML Experiment](https://learn.microsoft.com/fabric/data-science/machine-learning-experiment).
 
--> This resource does not support Service Principal. Please use a User context authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,6 +34,7 @@ resource "fabric_ml_experiment" "example" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

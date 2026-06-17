@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The KQL Database description.
 - `folder_id` (String) The KQL Database Folder ID.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

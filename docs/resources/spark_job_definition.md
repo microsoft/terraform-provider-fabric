@@ -113,6 +113,7 @@ resource "fabric_spark_job_definition" "example_parameters" {
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
