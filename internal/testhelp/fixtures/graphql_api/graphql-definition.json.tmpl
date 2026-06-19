@@ -2,7 +2,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/graphqlApi/definition/1.0.0/schema.json",
   "datasources": [
     {
-      "connectionId": "{{ .CONNECTION_ID }}",
       "objects": [
         {
           "actions": {
@@ -21,8 +20,9 @@
           "sourceObjectType": "Table"
         }
       ],
-      "sourceItemId": "{{ .CONNECTION_ID }}",
-      "sourceType": "AzureSql"
+      "sourceItemId": "{{ .SOURCE_ITEM_ID }}",
+			"sourceWorkspaceId": "{{ .WORKSPACE_ID }}",
+      "sourceType": "SqlDbNative"
     }
   ]
 }

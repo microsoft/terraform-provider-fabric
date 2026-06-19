@@ -22,32 +22,27 @@ import (
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
 var (
-	azureSQLDatabase = testhelp.WellKnown()["AzureSqlDatabase"].(map[string]any)
-	connectionID     = azureSQLDatabase["connectionId"].(string)
-	tableName1       = azureSQLDatabase["tableName1"].(string)
-	tableName2       = azureSQLDatabase["tableName2"].(string)
+	tableName1 = testhelp.RandomName()
+	tableName2 = testhelp.RandomName()
 )
 
 var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("graphql_api"),
 })
 
-var testHelperDefinition = map[string]any{
-	`"graphql-definition.json"`: map[string]any{
-		"source": "${local.path}/graphql-definition.json.tmpl",
-		"tokens": map[string]any{
-			"CONNECTION_ID": connectionID,
-			"TABLE_NAME":    tableName1,
-		},
-	},
-}
+var testHelperLocalsSQL = at.CompileLocalsConfig(map[string]any{
+	"sql_path": testhelp.GetFixturesDirPath("sql_database"),
+})
 
-var testHelperDefinitionUpdate = map[string]any{
-	`"graphql-definition.json"`: map[string]any{
-		"source": "${local.path}/graphql-definition.json.tmpl",
+var testHelperDefinitionSQLDatabase = map[string]any{
+	`"definition.sqlproj"`: map[string]any{
+		"source": "${local.sql_path}/definition.sqlproj.tmpl",
+	},
+	`"dbo/Tables/TestTable.sql"`: map[string]any{
+		"source": "${local.sql_path}/dbo/Tables/TestTables.sql.tmpl",
 		"tokens": map[string]any{
-			"CONNECTION_ID": connectionID,
-			"TABLE_NAME":    tableName2,
+			"TableName1": tableName1,
+			"TableName2": tableName2,
 		},
 	},
 }
@@ -345,6 +340,28 @@ func TestUnit_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 	fakes.FakeServer.Upsert(entityAfter)
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
+	testHelperDefinition := map[string]any{
+		`"graphql-definition.json"`: map[string]any{
+			"source": "${local.path}/graphql-definition.json.tmpl",
+			"tokens": map[string]any{
+				"WORKSPACE_ID":   testhelp.RandomUUID(),
+				"SOURCE_ITEM_ID": testhelp.RandomUUID(),
+				"TABLE_NAME":     tableName1,
+			},
+		},
+	}
+
+	testHelperDefinitionUpdate := map[string]any{
+		`"graphql-definition.json"`: map[string]any{
+			"source": "${local.path}/graphql-definition.json.tmpl",
+			"tokens": map[string]any{
+				"WORKSPACE_ID":   testhelp.RandomUUID(),
+				"SOURCE_ITEM_ID": testhelp.RandomUUID(),
+				"TABLE_NAME":     tableName2,
+			},
+		},
+	}
+
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
 		{
@@ -414,11 +431,49 @@ func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+	sqlDatabaseResourceHCL := at.JoinConfigs(
+		testHelperLocalsSQL,
+		at.CompileConfig(
+			at.ResourceHeader(testhelp.TypeName("fabric", "sql_database"), "test"),
+			map[string]any{
+				"display_name": testhelp.RandomName(),
+				"workspace_id": workspaceID,
+				"format":       "sqlproj",
+				"definition":   testHelperDefinitionSQLDatabase,
+			},
+		))
+
+	sqlDatabaseResourceFQN := testhelp.ResourceFQN("fabric", "sql_database", "test")
+
+	testHelperDefinition := map[string]any{
+		`"graphql-definition.json"`: map[string]any{
+			"source": "${local.path}/graphql-definition.json.tmpl",
+			"tokens": map[string]any{
+				"WORKSPACE_ID":   workspaceID,
+				"SOURCE_ITEM_ID": testhelp.RefByFQN(sqlDatabaseResourceFQN, "id"),
+				"TABLE_NAME":     tableName1,
+			},
+		},
+	}
+
+	testHelperDefinitionUpdate := map[string]any{
+		`"graphql-definition.json"`: map[string]any{
+			"source": "${local.path}/graphql-definition.json.tmpl",
+			"tokens": map[string]any{
+				"WORKSPACE_ID":   workspaceID,
+				"SOURCE_ITEM_ID": testhelp.RefByFQN(sqlDatabaseResourceFQN, "id"),
+				"TABLE_NAME":     tableName2,
+			},
+		},
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &sqlDatabaseResourceFQN, nil, []resource.TestStep{
 		// Create and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(testHelperLocals,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				sqlDatabaseResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
@@ -437,7 +492,9 @@ func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 		// Update and Read - with definition
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(testHelperLocals,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				sqlDatabaseResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
