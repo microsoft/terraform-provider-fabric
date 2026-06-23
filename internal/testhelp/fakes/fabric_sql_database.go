@@ -26,6 +26,7 @@ func (o *operationsSQLDatabase) ConvertItemToEntity(item fabcore.Item) fabsqldat
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties:  NewRandomSQLDatabase().Properties,
+		Tags:        convertItemTags[fabsqldatabase.ItemTag](item.Tags),
 	}
 }
 
@@ -145,6 +146,10 @@ func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 			ConnectionString: new(testhelp.RandomName()),
 			DatabaseName:     new(testhelp.RandomName()),
 			ServerFqdn:       new(testhelp.RandomName()),
+		},
+		Tags: []fabsqldatabase.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

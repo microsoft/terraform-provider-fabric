@@ -35,6 +35,7 @@ var (
 type ResourceFabricItemDefinition struct {
 	pConfigData                 *pconfig.ProviderData
 	client                      *fabcore.ItemsClient
+	tagsClient                  *fabcore.TagsClient
 	FabricItemType              fabcore.ItemType
 	TypeInfo                    tftypeinfo.TFTypeInfo
 	NameRenameAllowed           bool
@@ -124,7 +125,9 @@ func (r *ResourceFabricItemDefinition) Configure(_ context.Context, req resource
 		return
 	}
 
-	r.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewItemsClient()
+	clientFactory := fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient)
+	r.client = clientFactory.NewItemsClient()
+	r.tagsClient = clientFactory.NewTagsClient()
 }
 
 func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -162,7 +165,24 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	plan.set(respCreate.Item)
+	plannedTags := plan.Tags
+
+	if resp.Diagnostics.Append(plan.set(ctx, respCreate.Item)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save state immediately so the item is tracked even if tags fail
+	if resp.Diagnostics.Append(resp.State.Set(ctx, plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
@@ -283,6 +303,12 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 
 		_, err := r.client.UpdateItemDefinition(ctx, plan.WorkspaceID.ValueString(), plan.ID.ValueString(), reqUpdateDefinition.UpdateItemDefinitionRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	if fabricItemCheckSyncTags(plan.Tags, state.Tags) {
+		if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 			return
 		}
 	}
@@ -411,7 +437,5 @@ func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceF
 		return diags
 	}
 
-	model.set(respGet.Item)
-
-	return nil
+	return model.set(ctx, respGet.Item)
 }

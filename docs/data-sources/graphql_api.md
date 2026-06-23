@@ -52,6 +52,7 @@ data "fabric_graphql_api" "example_by_name" {
 
 - `description` (String) The GraphQL API description.
 - `folder_id` (String) The GraphQL API Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

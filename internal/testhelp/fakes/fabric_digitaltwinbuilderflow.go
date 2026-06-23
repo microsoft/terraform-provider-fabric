@@ -26,6 +26,7 @@ func (o *operationsDigitalTwinBuilderFlow) ConvertItemToEntity(item fabcore.Item
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties:  NewRandomDigitalTwinBuilderFlow().Properties,
+		Tags:        convertItemTags[fabdigitaltwinbuilderflow.ItemTag](item.Tags),
 	}
 }
 

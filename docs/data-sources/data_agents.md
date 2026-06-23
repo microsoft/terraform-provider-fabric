@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Data Agent display name.
 - `folder_id` (String) The Data Agent Folder ID.
 - `id` (String) The Data Agent ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Data Agent.
 - `workspace_id` (String) The Workspace ID.

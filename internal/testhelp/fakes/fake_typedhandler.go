@@ -295,23 +295,72 @@ func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.I
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)
 
-	// check if the property is a slice
-	if propertyValue.Kind() != reflect.Slice {
+	if !propertyValue.IsValid() || propertyValue.Kind() != reflect.Slice || propertyValue.Len() == 0 {
 		return nil
 	}
 
-	tags := make([]fabcore.ItemTag, propertyValue.Len())
+	if tags, ok := propertyValue.Interface().([]fabcore.ItemTag); ok {
+		return tags
+	}
+
+	// Fallback: convert structurally compatible tag types (e.g., fabkqldatabase.ItemTag -> fabcore.ItemTag)
+	tags := make([]fabcore.ItemTag, 0, propertyValue.Len())
 
 	for i := range propertyValue.Len() {
-		tag, ok := propertyValue.Index(i).Interface().(fabcore.ItemTag)
-		if !ok {
+		elem := propertyValue.Index(i)
+		if elem.Kind() == reflect.Pointer {
+			elem = elem.Elem()
+		}
+
+		if elem.Kind() != reflect.Struct {
 			continue
 		}
 
-		tags[i] = tag
+		var tag fabcore.ItemTag
+
+		if f := elem.FieldByName("ID"); f.IsValid() && f.Kind() == reflect.Pointer && !f.IsNil() {
+			s := f.Elem().String()
+			tag.ID = &s
+		}
+
+		if f := elem.FieldByName("DisplayName"); f.IsValid() && f.Kind() == reflect.Pointer && !f.IsNil() {
+			s := f.Elem().String()
+			tag.DisplayName = &s
+		}
+
+		tags = append(tags, tag)
 	}
 
 	return tags
+}
+
+// convertItemTags converts []fabcore.ItemTag to []T where T is any structurally compatible ItemTag type.
+func convertItemTags[T any](tags []fabcore.ItemTag) []T {
+	if len(tags) == 0 {
+		return make([]T, 0)
+	}
+
+	result := make([]T, 0, len(tags))
+	elemType := reflect.TypeFor[T]()
+
+	for _, tag := range tags {
+		newTag := reflect.New(elemType).Elem()
+
+		if f := newTag.FieldByName("ID"); f.IsValid() && f.CanSet() {
+			f.Set(reflect.ValueOf(tag.ID))
+		}
+
+		if f := newTag.FieldByName("DisplayName"); f.IsValid() && f.CanSet() {
+			f.Set(reflect.ValueOf(tag.DisplayName))
+		}
+
+		converted, ok := newTag.Interface().(T)
+		if ok {
+			result = append(result, converted)
+		}
+	}
+
+	return result
 }
 
 func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabcore.ItemTag) {
@@ -319,16 +368,24 @@ func setReflectedTagsPropertyValue(element any, propertyName string, tags []fabc
 	propertyValue := reflectedValue.FieldByName(propertyName)
 
 	// create a new slice of the same type as the property
-	slice := reflect.MakeSlice(propertyValue.Type(), len(tags), len(tags))
+	sliceType := propertyValue.Type()
+	elemType := sliceType.Elem()
+	slice := reflect.MakeSlice(sliceType, len(tags), len(tags))
 
 	for i, tag := range tags {
-		// set the value as a pointer
-		ptr := reflect.New(reflect.TypeFor[fabcore.ItemTag]())
-		ptr.Elem().Set(reflect.ValueOf(tag))
-		slice.Index(i).Set(ptr)
+		newTag := reflect.New(elemType).Elem()
+
+		if f := newTag.FieldByName("ID"); f.IsValid() && f.CanSet() {
+			f.Set(reflect.ValueOf(tag.ID))
+		}
+
+		if f := newTag.FieldByName("DisplayName"); f.IsValid() && f.CanSet() {
+			f.Set(reflect.ValueOf(tag.DisplayName))
+		}
+
+		slice.Index(i).Set(newTag)
 	}
 
-	// set the value as a pointer
 	propertyValue.Set(slice)
 }
 
