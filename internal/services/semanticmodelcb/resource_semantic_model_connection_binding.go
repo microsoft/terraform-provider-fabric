@@ -177,6 +177,8 @@ func (r *resourceSemanticModelConnectionBinding) Delete(ctx context.Context, req
 			"reason": "connectivity_type is already None",
 		})
 
+		resp.State.RemoveResource(ctx)
+
 		return
 	}
 
@@ -196,6 +198,7 @@ func (r *resourceSemanticModelConnectionBinding) Delete(ctx context.Context, req
 		return
 	}
 
+	resp.State.RemoveResource(ctx)
 	tflog.Debug(ctx, "DELETE", map[string]any{
 		"action": "end",
 	})

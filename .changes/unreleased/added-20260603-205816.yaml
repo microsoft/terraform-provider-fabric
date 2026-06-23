@@ -1,5 +1,5 @@
 kind: added
-body: Add new `fabric_semantic_model_bind_connection` resource
+body: Add new `fabric_semantic_model_connection_binding` resource
 time: 2026-06-03T20:58:16.556190814Z
 custom:
-    Issue: "1001"
+  Issue: "1001"
