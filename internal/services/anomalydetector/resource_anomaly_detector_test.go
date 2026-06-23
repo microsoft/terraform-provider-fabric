@@ -235,6 +235,9 @@ func TestUnit_AnomalyDetectorResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_AnomalyDetectorResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -290,6 +293,10 @@ func TestAcc_AnomalyDetectorResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("No SPN support")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	entityCreateDisplayName := testhelp.RandomName()
@@ -320,7 +327,7 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 
 	testHelperDefinitionCreate := map[string]any{
 		`"Configurations.json"`: map[string]any{
-			"source": "${local.path}/Configurations.json",
+			"source": "${local.path}/Configurations.json.tmpl",
 			"tokens": map[string]any{
 				"WORKSPACE_ID":       workspaceID,
 				"KQLDB_ID":           testhelp.RefByFQN(kqlDatabaseResourceFQN, "id"),
@@ -332,7 +339,7 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 
 	testHelperDefinitionUpdate := map[string]any{
 		`"Configurations.json"`: map[string]any{
-			"source": "${local.path}/Configurations.json",
+			"source": "${local.path}/Configurations.json.tmpl",
 			"tokens": map[string]any{
 				"WORKSPACE_ID":       workspaceID,
 				"KQLDB_ID":           testhelp.RefByFQN(kqlDatabaseResourceFQN, "id"),
