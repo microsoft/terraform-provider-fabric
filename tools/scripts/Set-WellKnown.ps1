@@ -321,9 +321,6 @@ function Set-FabricItem {
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
     }
-    'SnowflakeDatabase' {
-      $itemEndpoint = 'snowflakeDatabases'
-    }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
     }
@@ -1307,7 +1304,6 @@ $itemNaming = @{
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
-  'SnowflakeDatabase'               = 'sfdb'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
@@ -1486,25 +1482,6 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
-}
-
-# Create SnowflakeDatabase if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = "SnowflakeDatabaseProperties.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-
-$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
-$wellKnown['SnowflakeDatabase'] = @{
-  id          = $snowflakeDatabase.id
-  displayName = $snowflakeDatabase.displayName
-  description = $snowflakeDatabase.description
 }
 
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
