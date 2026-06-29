@@ -1,0 +1,18 @@
+CREATE TABLE [dbo].[{{ .TableName1 }}] (
+    [Id]               INT           NOT NULL,
+    [TestFirstColumn]  NVARCHAR (50) NOT NULL,
+    [TestSecondColumn] NVARCHAR (50) NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+GO
+
+CREATE TABLE [dbo].[{{ .TableName2 }}] (
+    [Id]               INT           NOT NULL,
+    [TestFirstColumn]  NVARCHAR (50) NOT NULL,
+    [TestSecondColumn] NVARCHAR (50) NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+GO
+
