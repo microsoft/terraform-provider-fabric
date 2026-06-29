@@ -1,11 +1,11 @@
 {
-  "executableFile": null,
+  "executableFile": "main.py",
   "defaultLakehouseArtifactId": {{ .DefaultLakehouseID | quote | default "null" }},
   "mainClass": null,
   "additionalLakehouseIds": [{{ .AdditionalLakehouseIDs | default "" }}],
   "retryPolicy": null,
   "commandLineArguments": null,
-  "additionalLibraryUris": null,
+  "additionalLibraryUris": ["lib.py"],
   "language": null,
   "environmentArtifactId": null
 }

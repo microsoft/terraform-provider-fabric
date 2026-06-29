@@ -37,6 +37,7 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 			"EntityTypes/*/DataBindings",
 			"EntityTypes/*/Documents",
 			"EntityTypes/*/Overviews",
+			"EntityTypes/*/ResourceLinks",
 			"RelationshipTypes/*",
 			"RelationshipTypes/*/Contextualizations",
 		},
