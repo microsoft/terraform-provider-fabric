@@ -100,6 +100,11 @@ tasks:
     cmds:
       - tfproviderlintx -fix ./...
 
+  check:preview:
+    desc: Verify each resource/data source IsPreview flag matches the fabric-sdk-go API preview status
+    cmds:
+      - go run ./tools/previewcheck {{.CLI_ARGS}}
+
   lint:tf:
     desc: Run Terraform linters
     cmds:
