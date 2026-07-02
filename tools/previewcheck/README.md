@@ -76,7 +76,4 @@ mismatch, e.g. the SDK removed the marker) is reported as **STALE** so it can be
 removed. Note that a service-level exclusion also suppresses *future* genuine
 preview APIs that item may start calling, so keep the list minimal and reasoned.
 
-## CI
-
-The `test-gaptools` job in `.github/workflows/test.yml` runs this tool's unit
-tests (via `task test:gaptools`) whenever `tools/**` changes.
+The tool's unit tests run via `task test:gaptools`.

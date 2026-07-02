@@ -63,8 +63,5 @@ exclusions:
 You do **not** need to exclude methods that are already used by an existing
 resource — those are detected automatically from the provider source.
 
-## CI
-
-The `test-gaptools` job in `.github/workflows/test.yml` runs the tool's unit
-tests (via `task test:gaptools`) whenever `tools/**` changes. Run the audit
-locally with the commands above before adding new SDK-backed resources.
+Run the audit locally with the commands above before adding new SDK-backed
+resources. The tool's unit tests run via `task test:gaptools`.
