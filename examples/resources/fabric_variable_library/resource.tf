@@ -49,7 +49,7 @@ resource "fabric_variable_library" "example_custom_delimiter" {
   definition = {
     "variablelibrary-content.json" = {
       source           = "${local.path}/variablelibrary-content.json"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

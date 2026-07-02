@@ -121,7 +121,7 @@ resource "fabric_kql_database" "example8" {
   definition = {
     "DatabaseProperties.json" = {
       source           = "${local.path}/DatabaseProperties.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }

@@ -62,7 +62,7 @@ resource "fabric_spark_job_definition" "example_custom_delimiter" {
   definition = {
     "SparkJobDefinitionV1.json" = {
       source           = "${local.path}/SparkJobDefinitionV1.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DefaultLakehouseID"     = "11111111-1111-1111-1111-111111111111"
         "AdditionalLakehouseIDs" = "\"22222222-2222-2222-2222-222222222222\",\"33333333-3333-3333-3333-333333333333\""

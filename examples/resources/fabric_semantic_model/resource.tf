@@ -40,7 +40,7 @@ resource "fabric_semantic_model" "example_custom_delimiter" {
   definition = {
     "model.bim" = {
       source           = "${local.path}/model.bim.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "ColumnName" = "Hello"
       }
