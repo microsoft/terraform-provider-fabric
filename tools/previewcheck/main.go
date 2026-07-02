@@ -28,8 +28,12 @@
 //
 // Usage:
 //
-//	go run ./tools/previewcheck            # report findings, exit 1 if any
-//	go run ./tools/previewcheck -dir DIR   # scan a different services directory
+//	go run ./tools/previewcheck                  # report findings, exit 1 if any
+//	go run ./tools/previewcheck -dir DIR         # scan a different services directory
+//	go run ./tools/previewcheck -exclusions PATH # use a specific exclusions file
+//
+// A GA item whose called SDK API still carries a stale preview marker can be
+// suppressed by listing its service package in exclusions.yaml (see that file).
 package main
 
 import (
@@ -44,11 +48,9 @@ import (
 	"strings"
 
 	"golang.org/x/tools/go/packages"
-)
+	"gopkg.in/yaml.v3"
 
-const (
-	sdkModulePath   = "github.com/microsoft/fabric-sdk-go"
-	defaultServices = "internal/services"
+	"github.com/microsoft/terraform-provider-fabric/tools/internal/toolutil"
 )
 
 // previewMarkers are the doc-comment phrases that flag an SDK API as preview
@@ -74,7 +76,50 @@ const (
 )
 
 // CLI flags.
-var dirFlag = flag.String("dir", defaultServices, "services directory to scan (relative to the module root)") //nolint:gochecknoglobals
+var (
+	dirFlag        = flag.String("dir", toolutil.DefaultServicesDir, "services directory to scan (relative to the module root)") //nolint:gochecknoglobals
+	exclusionsFlag = flag.String("exclusions", "", "path to exclusions YAML file (default: auto-detected)")                      //nolint:gochecknoglobals
+)
+
+// previewExclusion suppresses the preview check for a single service package,
+// typically a GA item whose called SDK API still carries a stale preview marker.
+type previewExclusion struct {
+	Service string `json:"service" yaml:"service"`
+	Reason  string `json:"reason"  yaml:"reason"`
+}
+
+// exclusionsFile is the top-level YAML structure of the exclusions file.
+type exclusionsFile struct {
+	Exclusions []previewExclusion `yaml:"exclusions"`
+}
+
+// loadExclusions reads the exclusions YAML file and returns a map of service
+// package name to reason.
+func loadExclusions(path string) (map[string]string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading exclusions file %s: %w", path, err)
+	}
+
+	var ef exclusionsFile
+
+	err = yaml.Unmarshal(data, &ef)
+	if err != nil {
+		return nil, fmt.Errorf("parsing exclusions file %s: %w", path, err)
+	}
+
+	result := make(map[string]string, len(ef.Exclusions))
+
+	for _, e := range ef.Exclusions {
+		if e.Service == "" || e.Reason == "" {
+			return nil, fmt.Errorf("exclusion entry missing required field (service, reason): %+v", e)
+		}
+
+		result[e.Service] = e.Reason
+	}
+
+	return result, nil
+}
 
 func main() {
 	flag.Parse()
@@ -83,16 +128,28 @@ func main() {
 }
 
 func run() int {
-	root, err := moduleRoot()
+	root, err := toolutil.ModuleRoot()
 	if err != nil {
-		errf("error: %v\n", err)
+		toolutil.Errf("error: %v\n", err)
 
 		return exitError
 	}
 
-	pkgs, err := loadServicePackages(root, *dirFlag)
+	pkgs, err := toolutil.LoadServicePackages(root, *dirFlag)
 	if err != nil {
-		errf("error loading packages: %v\n", err)
+		toolutil.Errf("error loading packages: %v\n", err)
+
+		return exitError
+	}
+
+	exclusionsPath := *exclusionsFlag
+	if exclusionsPath == "" {
+		exclusionsPath = filepath.Join(root, "tools", "previewcheck", "exclusions.yaml")
+	}
+
+	exclusions, err := loadExclusions(exclusionsPath)
+	if err != nil {
+		toolutil.Errf("error loading exclusions: %v\n", err)
 
 		return exitError
 	}
@@ -104,7 +161,7 @@ func run() int {
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
 			for _, e := range pkg.Errors {
-				errf("package %s: %v\n", pkg.PkgPath, e)
+				toolutil.Errf("package %s: %v\n", pkg.PkgPath, e)
 			}
 
 			return exitError
@@ -120,7 +177,7 @@ func run() int {
 
 	slices.SortFunc(results, func(a, b result) int { return strings.Compare(a.service, b.service) })
 
-	return report(results)
+	return report(results, exclusions)
 }
 
 // result captures the analysis outcome for a single service package.
@@ -139,63 +196,127 @@ func (r result) expected() bool { return len(r.previewAPIs) > 0 }
 // expected status can be trusted.
 func (r result) determinable() bool { return r.sdkCalls > 0 }
 
-func report(results []result) int {
-	b := categorize(results)
+func report(results []result, exclusions map[string]string) int {
+	b := categorize(results, exclusions)
 
 	for _, r := range b.undeclared {
-		outf("%-40s no ItemTypeInfo.IsPreview field found\n", r.service)
+		toolutil.Outf("%-40s no ItemTypeInfo.IsPreview field found\n", r.service)
 	}
 
 	printUnderMarked(b.underMarked)
 
 	printReview(b.review)
 
-	outf("\nScanned %d services: %d under-marked, %d to review, %d undetermined\n",
-		len(results), len(b.underMarked), len(b.review), b.undetermined)
+	printExcluded(b.excluded)
 
-	if len(b.underMarked) > 0 || len(b.review) > 0 {
+	printStaleExclusions(b.staleExcl)
+
+	toolutil.Outf("\nScanned %d services: %d under-marked, %d to review, %d undeclared, %d excluded, %d stale, %d undetermined\n",
+		len(results), len(b.underMarked), len(b.review), len(b.undeclared), len(b.excluded), len(b.staleExcl), b.undetermined)
+
+	if len(b.underMarked) > 0 || len(b.review) > 0 || len(b.undeclared) > 0 || len(b.staleExcl) > 0 {
 		return exitMismatch
 	}
 
 	return exitOK
 }
 
-// buckets groups categorized services by confidence level.
-type buckets struct {
-	underMarked  []result // declared GA but a called API is preview
-	review       []result // declared preview but no SDK marker found
-	undeclared   []result // no ItemTypeInfo.IsPreview field found
-	undetermined int      // no SDK calls, status not determinable
+// category is the preview-status classification of a single service.
+type category int
+
+const (
+	catConsistent   category = iota // declared status matches SDK usage
+	catUndetermined                 // no SDK calls, status not determinable
+	catUnderMarked                  // declared GA but a called API is preview
+	catReview                       // declared preview but no SDK marker found
+	catUndeclared                   // no ItemTypeInfo.IsPreview field found
+)
+
+// classify returns the preview-status category for a single result.
+func classify(r result) category {
+	if !r.hasDeclaration {
+		return catUndeclared
+	}
+
+	if !r.determinable() {
+		return catUndetermined
+	}
+
+	switch {
+	case !r.declared && r.expected():
+		return catUnderMarked
+	case r.declared && !r.expected():
+		return catReview
+	default:
+		return catConsistent
+	}
 }
 
-// categorize splits services into high-confidence under-marked, low-confidence
-// review, undeclared, and undetermined buckets.
-func categorize(results []result) buckets {
+// excludedResult is a failing service suppressed by the exclusions file.
+type excludedResult struct {
+	res    result
+	reason string
+}
+
+// buckets groups categorized services by confidence level.
+type buckets struct {
+	underMarked  []result         // declared GA but a called API is preview
+	review       []result         // declared preview but no SDK marker found
+	undeclared   []result         // no ItemTypeInfo.IsPreview field found
+	excluded     []excludedResult // failing but suppressed via exclusions.yaml
+	staleExcl    []string         // excluded services that no longer mismatch
+	undetermined int              // no SDK calls, status not determinable
+}
+
+// categorize splits services into under-marked, review, undeclared, excluded,
+// and undetermined groups, routing failing services listed in exclusions into
+// the excluded bucket and flagging exclusions that no longer apply as stale.
+func categorize(results []result, exclusions map[string]string) buckets {
 	var b buckets
 
+	used := make(map[string]struct{})
+
 	for _, r := range results {
-		if !r.hasDeclaration {
-			b.undeclared = append(b.undeclared, r)
-
-			continue
-		}
-
-		if !r.determinable() {
+		switch cat := classify(r); cat {
+		case catUndetermined:
 			b.undetermined++
-
-			continue
-		}
-
-		switch {
-		case !r.declared && r.expected():
-			b.underMarked = append(b.underMarked, r)
-		case r.declared && !r.expected():
-			b.review = append(b.review, r)
+		case catConsistent:
+			// declared status is correct; nothing to report.
 		default:
+			b.addFailing(r, cat, exclusions, used)
 		}
 	}
 
+	for svc := range exclusions {
+		if _, ok := used[svc]; !ok {
+			b.staleExcl = append(b.staleExcl, svc)
+		}
+	}
+
+	slices.Sort(b.staleExcl)
+
 	return b
+}
+
+// addFailing routes a failing result into the excluded bucket (if its service
+// is listed in exclusions) or its failing-category bucket.
+func (b *buckets) addFailing(r result, cat category, exclusions map[string]string, used map[string]struct{}) {
+	if reason, ok := exclusions[r.service]; ok {
+		b.excluded = append(b.excluded, excludedResult{res: r, reason: reason})
+		used[r.service] = struct{}{}
+
+		return
+	}
+
+	switch cat {
+	case catUnderMarked:
+		b.underMarked = append(b.underMarked, r)
+	case catReview:
+		b.review = append(b.review, r)
+	case catUndeclared:
+		b.undeclared = append(b.undeclared, r)
+	default:
+	}
 }
 
 func printUnderMarked(underMarked []result) {
@@ -203,10 +324,10 @@ func printUnderMarked(underMarked []result) {
 		return
 	}
 
-	outf("\nUNDER-MARKED — declared GA but the SDK marks a called API as preview (should be PREVIEW):\n")
+	toolutil.Outf("\nUNDER-MARKED — declared GA but the SDK marks a called API as preview (should be PREVIEW):\n")
 
 	for _, r := range underMarked {
-		outf("  ✗ %-38s\n", r.service)
+		toolutil.Outf("  ✗ %-38s\n", r.service)
 		printPreviewAPIs(r)
 	}
 }
@@ -216,10 +337,34 @@ func printReview(review []result) {
 		return
 	}
 
-	outf("\nREVIEW — declared PREVIEW but no SDK preview marker found (possibly GA, confirm manually):\n")
+	toolutil.Outf("\nREVIEW — declared PREVIEW but no SDK preview marker found (possibly GA, confirm manually):\n")
 
 	for _, r := range review {
-		outf("  ? %-38s\n", r.service)
+		toolutil.Outf("  ? %-38s\n", r.service)
+	}
+}
+
+func printExcluded(excluded []excludedResult) {
+	if len(excluded) == 0 {
+		return
+	}
+
+	toolutil.Outf("\nEXCLUDED — suppressed via exclusions.yaml (confirmed intentional):\n")
+
+	for _, e := range excluded {
+		toolutil.Outf("  - %-38s %s\n", e.res.service, e.reason)
+	}
+}
+
+func printStaleExclusions(stale []string) {
+	if len(stale) == 0 {
+		return
+	}
+
+	toolutil.Outf("\nSTALE EXCLUSIONS — no longer mismatched, remove from exclusions.yaml:\n")
+
+	for _, svc := range stale {
+		toolutil.Outf("  %s\n", svc)
 	}
 }
 
@@ -229,7 +374,7 @@ func printPreviewAPIs(r result) {
 	}
 
 	for _, api := range r.previewAPIs {
-		outf("    preview API: %s\n", api)
+		toolutil.Outf("    preview API: %s\n", api)
 	}
 }
 
@@ -241,9 +386,10 @@ func analyzePackage(pkg *packages.Package, dc *docCache) (result, bool) {
 	findIsPreview(pkg, &res)
 
 	previewSet := map[string]struct{}{}
+	seen := map[string]struct{}{}
 
 	for _, file := range pkg.Syntax {
-		collectSDKCalls(pkg, file, dc, &res, previewSet)
+		collectSDKCalls(pkg, file, dc, &res, previewSet, seen)
 	}
 
 	// Fallback: generic fabricitem resources make no direct SDK calls in-package.
@@ -253,7 +399,7 @@ func analyzePackage(pkg *packages.Package, dc *docCache) (result, bool) {
 		determineViaItemType(pkg, dc, &res, previewSet)
 	}
 
-	res.previewAPIs = sortedKeys(previewSet)
+	res.previewAPIs = toolutil.SortedKeys(previewSet)
 
 	// Skip packages that have neither a declaration nor any relevance.
 	if !res.hasDeclaration && res.sdkCalls == 0 {
@@ -417,10 +563,9 @@ func extractIsPreview(lit *ast.CompositeLit, res *result) bool {
 }
 
 // collectSDKCalls walks call expressions in a file, resolves each callee, and
-// records distinct fabric-sdk-go functions (flagging preview ones).
-func collectSDKCalls(pkg *packages.Package, file *ast.File, dc *docCache, res *result, previewSet map[string]struct{}) {
-	seen := map[string]struct{}{}
-
+// records distinct fabric-sdk-go functions (flagging preview ones). The seen set
+// is shared across the package's files so each callee is counted at most once.
+func collectSDKCalls(pkg *packages.Package, file *ast.File, dc *docCache, res *result, previewSet, seen map[string]struct{}) {
 	ast.Inspect(file, func(n ast.Node) bool {
 		call, ok := n.(*ast.CallExpr)
 		if !ok {
@@ -442,7 +587,7 @@ func collectSDKCalls(pkg *packages.Package, file *ast.File, dc *docCache, res *r
 			return true
 		}
 
-		if !strings.HasPrefix(fn.Pkg().Path(), sdkModulePath) {
+		if !strings.HasPrefix(fn.Pkg().Path(), toolutil.SDKModulePath) {
 			return true
 		}
 
@@ -486,16 +631,17 @@ func newDocCache() *docCache {
 // scanCRUD scans the *_client.go files in an SDK package directory and returns
 // the count of the item's exported CRUD methods plus the names of those flagged
 // preview. A non-zero count means the item status is determinable. Cached per
-// directory.
+// directory and item.
 func (d *docCache) scanCRUD(pkgDir, item string) (int, []string) {
-	if v, ok := d.methods[pkgDir]; ok {
-		return d.crud[pkgDir], v
+	cacheKey := pkgDir + "\x00" + item
+	if v, ok := d.methods[cacheKey]; ok {
+		return d.crud[cacheKey], v
 	}
 
 	entries, err := os.ReadDir(pkgDir)
 	if err != nil {
-		d.crud[pkgDir] = 0
-		d.methods[pkgDir] = nil
+		d.crud[cacheKey] = 0
+		d.methods[cacheKey] = nil
 
 		return 0, nil
 	}
@@ -523,8 +669,8 @@ func (d *docCache) scanCRUD(pkgDir, item string) (int, []string) {
 
 	slices.Sort(preview)
 
-	d.crud[pkgDir] = crud
-	d.methods[pkgDir] = preview
+	d.crud[cacheKey] = crud
+	d.methods[cacheKey] = preview
 
 	return crud, preview
 }
@@ -600,7 +746,7 @@ func scanItemMethods(lines []string, item string) (int, []string) {
 	)
 
 	for i, line := range lines {
-		name := exportedClientMethodName(line)
+		_, name := toolutil.ParseClientMethod(line)
 		if name == "" || !isItemCRUD(name, item) {
 			continue
 		}
@@ -619,7 +765,7 @@ func scanItemMethods(lines []string, item string) (int, []string) {
 // isItemCRUD reports whether method is a CRUD operation on the item itself,
 // e.g. GetNotebook, BeginCreateNotebook, ListNotebooks, UpdateNotebook.
 func isItemCRUD(method, item string) bool {
-	if !strings.Contains(method, item) {
+	if !strings.Contains(strings.ToLower(method), strings.ToLower(item)) {
 		return false
 	}
 
@@ -630,35 +776,6 @@ func isItemCRUD(method, item string) bool {
 	}
 
 	return false
-}
-
-// exportedClientMethodName extracts the exported method name from a declaration
-// like "func (client *ItemsClient) GetNotebook(...". Returns "" otherwise.
-func exportedClientMethodName(line string) string {
-	const prefix = "func (client *"
-
-	if !strings.HasPrefix(line, prefix) {
-		return ""
-	}
-
-	_, after, ok := strings.Cut(line, ") ")
-	if !ok {
-		return ""
-	}
-
-	rest := strings.TrimSpace(after)
-
-	paren := strings.IndexByte(rest, '(')
-	if paren <= 0 {
-		return ""
-	}
-
-	name := rest[:paren]
-	if name == "" || name[0] < 'A' || name[0] > 'Z' {
-		return ""
-	}
-
-	return name
 }
 
 func containsMarker(doc string) bool {
@@ -675,52 +792,6 @@ func containsMarker(doc string) bool {
 
 // loadServicePackages loads all packages under the services directory with full
 // type information.
-func loadServicePackages(root, servicesDir string) ([]*packages.Package, error) {
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax |
-			packages.NeedTypes | packages.NeedTypesInfo | packages.NeedImports |
-			packages.NeedDeps,
-		Dir:   root,
-		Tests: false,
-	}
-
-	pattern := "./" + filepath.ToSlash(servicesDir) + "/..."
-
-	pkgs, err := packages.Load(cfg, pattern)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(pkgs) == 0 {
-		return nil, fmt.Errorf("no packages found under %q", servicesDir)
-	}
-
-	return pkgs, nil
-}
-
-// moduleRoot walks up from the working directory to find the directory holding
-// go.mod.
-func moduleRoot() (string, error) {
-	dir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	for {
-		_, err := os.Stat(filepath.Join(dir, "go.mod"))
-		if err == nil {
-			return dir, nil
-		}
-
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return "", fmt.Errorf("go.mod not found from %s upward", dir)
-		}
-
-		dir = parent
-	}
-}
-
 func pkgName(pkg *packages.Package) string {
 	if pkg.Name != "" {
 		return pkg.Name
@@ -738,18 +809,3 @@ func hasName(names []*ast.Ident, target string) bool {
 
 	return false
 }
-
-func sortedKeys(set map[string]struct{}) []string {
-	keys := make([]string, 0, len(set))
-	for k := range set {
-		keys = append(keys, k)
-	}
-
-	slices.Sort(keys)
-
-	return keys
-}
-
-func outf(format string, a ...any) { fmt.Printf(format, a...) } //nolint:forbidigo // CLI tool writes results to stdout
-
-func errf(format string, a ...any) { fmt.Fprintf(os.Stderr, format, a...) } //nolint:revive // CLI tool writes diagnostics to stderr

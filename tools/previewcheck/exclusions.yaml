@@ -1,0 +1,13 @@
+# Exclusions for previewcheck — service packages whose preview status should
+# NOT be flagged, typically GA items whose called fabric-sdk-go APIs still carry
+# a stale preview marker in their doc comments.
+#
+# Format: service (the service package name) + reason.
+# When the SDK later removes the stale marker (so the service is no longer a
+# mismatch), previewcheck reports the entry as STALE so it can be removed.
+
+exclusions:
+  - service: tenantsetting
+    reason: GA; admin.UpdateTenantSetting still carries a stale SDK preview marker
+  - service: workspacempe
+    reason: GA; core.*WorkspaceManagedPrivateEndpoint APIs still carry stale SDK preview markers
