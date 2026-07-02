@@ -46,7 +46,7 @@ resource "fabric_{{.Type}}" "example_custom_delimiter" {
   definition = {
     "{{.DefinitionPath}}" = {
       source           = "${local.path}/{{.DefinitionPath}}.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

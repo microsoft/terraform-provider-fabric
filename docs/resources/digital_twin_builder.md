@@ -65,7 +65,7 @@ resource "fabric_digital_twin_builder" "example_custom_delimiter" {
   definition = {
     "definition.json" = {
       source           = "${local.path}/definition.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "LAKEHOUSE_ID" = "Item ID of the parent lakehouse that exists in the workspace"
       }

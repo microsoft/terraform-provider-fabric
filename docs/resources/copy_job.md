@@ -65,7 +65,7 @@ resource "fabric_copy_job" "example_custom_delimiter" {
   definition = {
     "copyjob-content.json" = {
       source           = "${local.path}/copyjob-content.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "SOURCE_WORKSPACE_ID"      = "Source Workspace ID"
         "SOURCE_ARTIFACT_ID"       = "Source Artifact ID"

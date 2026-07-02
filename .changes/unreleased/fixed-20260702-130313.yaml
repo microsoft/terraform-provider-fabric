@@ -1,0 +1,5 @@
+kind: fixed
+body: fixed token delimiter in examples
+time: 2026-07-02T13:03:13.172747487Z
+custom:
+    Issue: "1030"

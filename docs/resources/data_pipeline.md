@@ -64,7 +64,7 @@ resource "fabric_data_pipeline" "example_custom_delimiter" {
   definition = {
     "pipeline-content.json" = {
       source           = "${local.path}/pipeline-content.json"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue" = "World"
       }

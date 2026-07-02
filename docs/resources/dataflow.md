@@ -65,7 +65,7 @@ resource "fabric_dataflow" "example_custom_delimiter" {
   definition = {
     "queryMetadata.json" = {
       source           = "${local.path}/queryMetadata.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

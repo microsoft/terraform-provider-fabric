@@ -57,7 +57,7 @@ resource "fabric_apache_airflow_job" "example_custom_delimiter" {
   definition = {
     "apacheairflowjob-content.json" = {
       source           = "${local.path}/apacheairflowjob-content.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"
