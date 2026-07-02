@@ -1,0 +1,217 @@
+# Exclusions for gapcheck — SDK methods that will NOT be implemented as
+# Terraform resources.
+#
+# For methods that are implemented as part of an existing resource, the tool
+# auto-detects them by scanning service code for SDK method calls.
+#
+# Format: package/client/method → reason
+# Use method: "*" (or omit method) to exclude all methods on a client.
+
+exclusions:
+  - package: core
+    client: LongRunningOperationsClient
+    reason: internal LRO polling, not a user-facing resource
+  - package: core
+    client: CatalogClient
+    reason: read-only catalog search, no CRUD lifecycle
+  - package: core
+    client: OneLakeSettingsClient
+    reason: action-style modify operations, no create/delete lifecycle
+  - package: core
+    client: ExternalDataSharesRecipientClient
+    reason: accept invitation action, no CRUD lifecycle
+  - package: admin
+    client: ExternalDataSharesProviderClient
+    reason: admin-level listing and revoke actions
+  - package: admin
+    client: LabelsClient
+    reason: bulk label set/remove actions
+  - package: admin
+    client: SharingLinksClient
+    reason: bulk sharing link removal actions
+  - package: admin
+    client: ItemsClient
+    reason: admin-level item enumeration, no CRUD
+  - package: admin
+    client: UsersClient
+    reason: admin-level user access enumeration
+  - package: admin
+    client: WorkspacesClient
+    reason: admin-level workspace actions, not CRUD resources
+  - package: admin
+    client: DomainsClient
+    method: SyncRoleAssignmentsToSubdomains
+    reason: admin action, not a resource
+  - package: admin
+    client: DomainsClient
+    method: AssignDomainWorkspacesByCapacities
+    reason: admin domain workspace assignment action
+  - package: admin
+    client: DomainsClient
+    method: AssignDomainWorkspacesByPrincipals
+    reason: admin domain workspace assignment action
+  - package: admin
+    client: DomainsClient
+    method: UnassignAllDomainWorkspaces
+    reason: admin domain workspace unassignment action
+  - package: admin
+    client: DomainsClient
+    method: ListRoleAssignments
+    reason: read-only admin domain role assignment enumeration
+  - package: admin
+    client: DomainsClient
+    method: CreateDomainPreview
+    reason: preview API variant of admin domain CRUD, covered by stable CreateDomain
+  - package: admin
+    client: DomainsClient
+    method: GetDomainPreview
+    reason: preview API variant of admin domain CRUD, covered by stable GetDomain
+  - package: admin
+    client: DomainsClient
+    method: ListDomainsPreview
+    reason: preview API variant of admin domain CRUD, covered by stable ListDomains
+  - package: admin
+    client: DomainsClient
+    method: UpdateDomainPreview
+    reason: preview API variant of admin domain CRUD, covered by stable UpdateDomain
+  - package: lakehouse
+    client: BackgroundJobsClient
+    reason: data-plane background job scheduling
+  - package: lakehouse
+    client: LivySessionsClient
+    reason: data-plane Livy runtime sessions
+  - package: dataflow
+    client: BackgroundJobsClient
+    reason: data-plane background jobs
+  - package: dataflow
+    client: QueryExecutionClient
+    reason: data-plane query execution
+  - package: datapipeline
+    client: BackgroundJobsClient
+    reason: data-plane background jobs
+  - package: notebook
+    client: BackgroundJobsClient
+    reason: data-plane background jobs
+  - package: notebook
+    client: LivySessionsClient
+    reason: data-plane Livy runtime sessions
+  - package: sparkjobdefinition
+    client: BackgroundJobsClient
+    reason: data-plane background jobs
+  - package: sparkjobdefinition
+    client: LivySessionsClient
+    reason: data-plane Livy runtime sessions
+  - package: graphmodel
+    client: BackgroundJobsClient
+    reason: data-plane background jobs
+  - package: spark
+    client: LivySessionsClient
+    reason: data-plane Livy runtime sessions
+  - package: mirroredazuredatabrickscatalog
+    client: DiscoveryClient
+    reason: data-plane catalog discovery
+  - package: mirroredazuredatabrickscatalog
+    client: RefreshClient
+    reason: data-plane metadata refresh
+  - package: mirroredcatalog
+    client: DiscoveryClient
+    reason: data-plane catalog discovery
+  - package: mirroredcatalog
+    client: MonitoringClient
+    reason: data-plane mirroring monitoring
+  - package: mirroredcatalog
+    client: RefreshClient
+    reason: data-plane metadata refresh
+  - package: mirroreddatabase
+    client: MirroringClient
+    reason: data-plane mirroring start/stop
+  - package: sqldatabase
+    client: MirroringClient
+    reason: data-plane mirroring start/stop
+  - package: warehouse
+    client: RestorePointsClient
+    reason: operational restore points, no create lifecycle
+  - package: warehouse
+    client: SQLPoolsClient
+    reason: operational pool management
+  - package: mlmodel
+    client: EndpointClient
+    reason: data-plane ML model endpoint operations
+  - package: apacheairflowjob
+    client: ComputeClient
+    reason: data-plane compute operations
+  - package: realtimeintelligence
+    client: CopilotClient
+    reason: data-plane Copilot NL-to-KQL
+  - package: admin
+    client: TenantsClient
+    method: ListDomainsTenantSettingsOverrides
+    reason: admin tenant setting overrides, no CRUD resource
+  - package: core
+    client: ConnectionsClient
+    method: ListSupportedConnectionTypes
+    reason: read-only supported connection type enumeration
+  - package: core
+    client: GitClient
+    method: GetStatus
+    reason: read-only Git status introspection
+  - package: core
+    client: OneLakeShortcutsClient
+    method: CreatesShortcutsInBulk
+    reason: bulk shortcut creation action; individual shortcuts via fabric_shortcut
+  - package: core
+    client: WorkspacesClient
+    method: AssignToDomain
+    reason: workspace-to-domain assignment action; see fabric_domain_workspace_assignment
+  - package: core
+    client: WorkspacesClient
+    method: UnassignFromDomain
+    reason: workspace-from-domain unassignment action; see fabric_domain_workspace_assignment
+  - package: eventstream
+    client: TopologyClient
+    method: GetEventstreamTopology
+    reason: read-only eventstream topology introspection
+  - package: eventstream
+    client: TopologyClient
+    method: GetEventstreamDestination
+    reason: read-only eventstream topology introspection
+  - package: eventstream
+    client: TopologyClient
+    method: GetEventstreamSource
+    reason: read-only eventstream topology introspection
+  - package: eventstream
+    client: TopologyClient
+    method: PauseEventstream
+    reason: data-plane eventstream pause action
+  - package: eventstream
+    client: TopologyClient
+    method: PauseEventstreamDestination
+    reason: data-plane eventstream pause action
+  - package: eventstream
+    client: TopologyClient
+    method: PauseEventstreamSource
+    reason: data-plane eventstream pause action
+  - package: eventstream
+    client: TopologyClient
+    method: ResumeEventstream
+    reason: data-plane eventstream resume action
+  - package: eventstream
+    client: TopologyClient
+    method: ResumeEventstreamDestination
+    reason: data-plane eventstream resume action
+  - package: eventstream
+    client: TopologyClient
+    method: ResumeEventstreamSource
+    reason: data-plane eventstream resume action
+  - package: lakehouse
+    client: TablesClient
+    method: LoadTable
+    reason: data-plane table load action
+  - package: lakehouse
+    client: TablesClient
+    method: LoadSchemaTableBeta
+    reason: data-plane table load action (beta)
+  - package: spark
+    client: CustomPoolsClient
+    method: ListCapacityCustomPoolsBeta
+    reason: beta capacity-level custom pool enumeration

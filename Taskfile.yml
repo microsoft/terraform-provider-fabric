@@ -100,6 +100,16 @@ tasks:
     cmds:
       - tfproviderlintx -fix ./...
 
+  check:preview:
+    desc: Verify each resource/data source IsPreview flag matches the fabric-sdk-go API preview status
+    cmds:
+      - go run ./tools/previewcheck {{.CLI_ARGS}}
+
+  check:gaps:
+    desc: Detect SDK control-plane entities with no corresponding Terraform resource
+    cmds:
+      - go run ./tools/gapcheck {{.CLI_ARGS}}
+
   lint:tf:
     desc: Run Terraform linters
     cmds:
@@ -289,6 +299,15 @@ tasks:
       TF_ACC: 0
       GOCOVERDIR: ".coverdata"
       # CGO_ENABLED: 1
+
+  test:gaptools:
+    desc: Run unit tests for the gapcheck/previewcheck developer tools
+    cmds:
+      - go test -count=1 -timeout 5m ./tools/gapcheck/... ./tools/previewcheck/... ./tools/internal/toolutil/...
+    env:
+      # Fail loudly if the fabric-sdk-go module cannot be resolved instead of
+      # silently skipping the SDK-backed guard tests.
+      GAPCHECK_REQUIRE_SDK: "1"
 
   testacc:
     desc: Run acceptance tests
