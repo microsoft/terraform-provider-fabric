@@ -29,7 +29,7 @@ import (
 	"unicode"
 
 	"golang.org/x/tools/go/packages"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 
 	"github.com/microsoft/terraform-provider-fabric/tools/internal/toolutil"
 )
