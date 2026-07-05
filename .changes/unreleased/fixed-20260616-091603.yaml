@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_connection` credential rotation forcing replacement instead of an in-place update on `VirtualNetworkGateway` connections
+time: 2026-06-16T09:16:03.249140216Z
+custom:
+    Issue: "1008"
