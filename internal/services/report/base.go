@@ -27,21 +27,23 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type:  "PBIR-Legacy",
-		API:   "PBIR-Legacy",
-		Paths: []string{"report.json", "definition.pbir", "StaticResources/RegisteredResources/*", "StaticResources/SharedResources/*"},
+		Type: "PBIR-Legacy",
+		API:  "PBIR-Legacy",
+		Paths: []string{
+			"report.json",
+			"definition.pbir",
+			"StaticResources/**",
+			"semanticModelDiagramLayout.json",
+		},
 	},
 	{
 		Type: "PBIR",
 		API:  "PBIR",
 		Paths: []string{
-			"definition/report.json",
-			"definition/version.json",
 			"definition.pbir",
-			"definition/bookmarks/*.json",
-			"definition/pages/*.json",
-			"StaticResources/RegisteredResources/*",
-			"StaticResources/SharedResources/*",
+			"definition/**",
+			"StaticResources/**",
+			"semanticModelDiagramLayout.json",
 		},
 	},
 }
