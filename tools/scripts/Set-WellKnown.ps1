@@ -237,6 +237,9 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'AnomalyDetector' {
+      $itemEndpoint = 'anomalyDetectors'
+    }
     'ApacheAirflowJob' {
       $itemEndpoint = 'apacheAirflowJobs'
     }
@@ -317,9 +320,6 @@ function Set-FabricItem {
     }
     'SemanticModel' {
       $itemEndpoint = 'semanticModels'
-    }
-    'SnowflakeDatabase' {
-      $itemEndpoint = 'snowflakeDatabases'
     }
     'SparkJobDefinition' {
       $itemEndpoint = 'sparkJobDefinitions'
@@ -1024,84 +1024,6 @@ function Set-AzureDataFactory {
   return $dataFactory
 }
 
-function Set-AzureSqlDatabase {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$ResourceGroupName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$ServerName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$DatabaseName,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Location
-  )
-
-  # Attempt to get the existing SQL Server
-  $sqlServer = Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -ErrorAction SilentlyContinue
-  if (-not $sqlServer) {
-    Write-Log -Message "Creating SQL Server: $ServerName in Resource Group: $ResourceGroupName" -Level 'WARN'
-    $sqlServer = New-AzSqlServer `
-      -ResourceGroupName $ResourceGroupName `
-      -ServerName $ServerName `
-      -Location $Location `
-      -ExternalAdminName $azContext.Account.Id `
-      -EnableActiveDirectoryOnlyAuthentication
-    Write-Log -Message "Created SQL Server: $ServerName" -Level 'INFO'
-  }
-  Write-Log -Message "Az SQL Server - Name: $($sqlServer.ServerName)"
-
-  # Allow Azure services to access the server (required for Fabric mirroring/replication)
-  $firewallRule = Get-AzSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $ServerName -FirewallRuleName 'AllowAllAzureIPs' -ErrorAction SilentlyContinue
-  if (-not $firewallRule) {
-    Write-Log -Message "Creating firewall rule to allow Azure services" -Level 'WARN'
-    New-AzSqlServerFirewallRule `
-      -ResourceGroupName $ResourceGroupName `
-      -ServerName $ServerName `
-      -FirewallRuleName 'AllowAllAzureIPs' `
-      -StartIpAddress '0.0.0.0' `
-      -EndIpAddress '0.0.0.0'
-  }
-
-  # Attempt to get the existing SQL Database
-  $sqlDatabase = Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -ErrorAction SilentlyContinue
-  if (-not $sqlDatabase) {
-    Write-Log -Message "Creating SQL Database: $DatabaseName on server: $ServerName" -Level 'WARN'
-    $sqlDatabase = New-AzSqlDatabase `
-      -ResourceGroupName $ResourceGroupName `
-      -ServerName $ServerName `
-      -DatabaseName $DatabaseName `
-      -Edition 'Basic'
-    Write-Log -Message "Created SQL Database: $DatabaseName" -Level 'INFO'
-  }
-  Write-Log -Message "Az SQL Database - Name: $($sqlDatabase.DatabaseName)"
-
-  # Create test tables using Entra auth
-  $accessToken = (Get-AzAccessToken -ResourceUrl 'https://database.windows.net/' -WarningAction SilentlyContinue -AsSecureString).Token
-  $unsecureToken = $accessToken | ConvertFrom-SecureString -AsPlainText
-
-  $table1Name = 'TestTable1'
-  $table2Name = 'TestTable2'
-
-  $createTableQuery = (Get-Content -Path 'internal/testhelp/fixtures/azure_sql_database/create_tables.sql.tmpl' -Raw).Trim()
-  $createTableQuery = $createTableQuery.Replace('{{ .TABLE1_NAME }}', $table1Name).Replace('{{ .TABLE2_NAME }}', $table2Name)
-
-  Invoke-Sqlcmd `
-    -ServerInstance "$ServerName.database.windows.net" `
-    -Database $DatabaseName `
-    -AccessToken $unsecureToken `
-    -Query $createTableQuery `
-    -ErrorAction Stop
-  Write-Log -Message "Tables '$table1Name' and '$table2Name' ensured in database '$DatabaseName'" -Level 'INFO'
-
-  return @{
-    TableName1 = $table1Name
-    TableName2 = $table2Name
-  }
-}
-
 function Set-Shortcut {
   param (
     [Parameter(Mandatory = $true)]
@@ -1267,6 +1189,7 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'AnomalyDetector'                 = 'ad'
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
   'AzureSqlServer'                  = 'sql'
@@ -1303,7 +1226,6 @@ $itemNaming = @{
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
-  'SnowflakeDatabase'               = 'sfdb'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
@@ -1432,7 +1354,7 @@ $wellKnown['WorkspaceDS'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1482,25 +1404,6 @@ $wellKnown['KQLDatabase'] = @{
   id          = $kqlDatabase.id
   displayName = $kqlDatabase.displayName
   description = $kqlDatabase.description
-}
-
-# Create SnowflakeDatabase if not exists
-$displayNameTemp = "${displayName}_$($itemNaming['SnowflakeDatabase'])"
-$definition = @{
-  parts = @(
-    @{
-      path        = "SnowflakeDatabaseProperties.json"
-      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/snowflake_database/SnowflakeDatabaseProperties.json.tmpl' -Values @(@{ key = '{{ .DATABASE_NAME }}'; value = 'ExampleDatabase' })
-      payloadType = 'InlineBase64'
-    }
-  )
-}
-
-$snowflakeDatabase = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SnowflakeDatabase' -Definition $definition
-$wellKnown['SnowflakeDatabase'] = @{
-  id          = $snowflakeDatabase.id
-  displayName = $snowflakeDatabase.displayName
-  description = $snowflakeDatabase.description
 }
 
 # Create Lakehouse in WorkspaceRS for fabric_shortcut resource acc tests
@@ -1997,29 +1900,6 @@ $wellKnown['AzureDataFactory'] = @{
   resourceGroupName = $wellKnown['ResourceGroup'].name
   location          = $wellKnown['ResourceGroup'].location
   subscriptionId    = $wellKnown['Azure'].subscriptionId
-}
-
-# Create the Azure SQL Server and Database if not exists
-if (!$Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID) {
-  Write-Log -Message "!!! Please go to the Connections and manually add 'SQL SERVER' connection !!!" -Level 'ERROR' -Stop $false
-  Write-Log -Message "Server: $sqlServerName.database.windows.net / Database: $sqlDatabaseName" -Level 'ERROR' -Stop $false
-  Write-Log -Message "and set FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID" -Level 'ERROR' -Stop $true
-}
-else {
-  $sqlServerName = ("$Env:FABRIC_TESTACC_WELLKNOWN_NAME_PREFIX-$Env:FABRIC_TESTACC_WELLKNOWN_NAME_BASE-$($itemNaming['AzureSqlServer'])").ToLower()
-  $sqlDatabaseName = "graphqldb"
-
-  $azureSql = Set-AzureSqlDatabase `
-    -ResourceGroupName $wellKnown['ResourceGroup'].name `
-    -ServerName $sqlServerName `
-    -DatabaseName $sqlDatabaseName `
-    -Location $wellKnown['ResourceGroup'].location
-
-  $wellKnown['AzureSqlDatabase'] = @{
-    connectionId = $Env:FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID
-    tableName1   = $azureSql.TableName1
-    tableName2   = $azureSql.TableName2
-  }
 }
 
 # Create the Mounted Data Factory if not exists
