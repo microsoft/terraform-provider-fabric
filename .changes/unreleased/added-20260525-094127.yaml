@@ -1,0 +1,5 @@
+kind: added
+body: Enhanced `fabric_graphql_api` resource by adding definition support
+time: 2026-05-25T09:41:27.671804632Z
+custom:
+    Issue: "974"
