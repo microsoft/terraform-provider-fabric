@@ -11,6 +11,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Spark Custom Pool",
 	Type:           "spark_custom_pool",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
