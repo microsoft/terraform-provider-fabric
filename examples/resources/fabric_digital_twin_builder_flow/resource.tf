@@ -51,7 +51,7 @@ resource "fabric_digital_twin_builder_flow" "example_definition_update" {
   definition = {
     "definition.json" = {
       source           = "${local.path}/definition.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DIGITAL_TWIN_BUILDER_ID" = "11111111-1111-1111-1111-111111111111"
       }

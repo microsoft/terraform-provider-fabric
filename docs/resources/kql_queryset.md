@@ -62,7 +62,7 @@ resource "fabric_kql_queryset" "example_custom_delimiter" {
   definition = {
     "RealTimeQueryset.json" = {
       source           = "${local.path}/RealTimeQueryset.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

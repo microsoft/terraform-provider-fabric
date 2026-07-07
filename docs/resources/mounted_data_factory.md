@@ -57,7 +57,7 @@ resource "fabric_mounted_data_factory" "example_custom_delimiter" {
   definition = {
     "mountedDataFactory-content.json" = {
       source           = "${local.path}/mountedDataFactory-content.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "SUBSCRIPTION_ID"     = "00000000-0000-0000-0000-000000000000"
         "RESOURCE_GROUP_NAME" = "MyResourceGroupName"

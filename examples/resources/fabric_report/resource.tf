@@ -109,7 +109,7 @@ resource "fabric_report" "example_custom_delimiter" {
     }
     "definition.pbir" = {
       source           = "${local.path}/definition.pbir.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
       }
