@@ -7,14 +7,19 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabsparkjobdefinition "github.com/microsoft/fabric-sdk-go/fabric/sparkjobdefinition"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
+	fwvalidators "github.com/microsoft/terraform-provider-fabric/internal/framework/validators"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func NewResourceSparkJobDefinition() resource.Resource {
@@ -58,8 +63,28 @@ func NewResourceSparkJobDefinition() resource.Resource {
 			DescriptionMaxLength:  256,
 			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(1),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
+				mapvalidator.KeysAre(
+					fwvalidators.PatternsIfAttributeIsOneOf(
+						path.MatchRoot("format"),
+						[]attr.Value{types.StringValue("SparkJobDefinitionV1")},
+						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "SparkJobDefinitionV1"),
+						"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(
+							fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "SparkJobDefinitionV1"),
+							true,
+							false,
+						),
+					),
+					fwvalidators.PatternsIfAttributeIsOneOf(
+						path.MatchRoot("format"),
+						[]attr.Value{types.StringValue("SparkJobDefinitionV2")},
+						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "SparkJobDefinitionV2"),
+						"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(
+							fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "SparkJobDefinitionV2"),
+							true,
+							false,
+						),
+					),
+				),
 			},
 			DefinitionRequired: false,
 			DefinitionEmpty:    ItemDefinitionEmpty,

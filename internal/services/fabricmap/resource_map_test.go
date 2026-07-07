@@ -171,6 +171,15 @@ func TestUnit_MapResource_CRUD(t *testing.T) {
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
+	testHelperDefinition := map[string]any{
+		`"map.json"`: map[string]any{
+			"source": "${local.path}/map.json.tmpl",
+		},
+		`"queries/layerSource-00000000-0000-0000-0000-000000000000.kql"`: map[string]any{
+			"source": "${local.path}/queries/layerSource-00000000-0000-0000-0000-000000000000.kql.tmpl",
+		},
+	}
+
 	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
@@ -230,6 +239,29 @@ func TestUnit_MapResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 			),
 		},
+		// Update and Read - definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition,
+						"folder_id":    *entityBefore.FolderID,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+			),
+		},
+
 		// Delete testing automatically occurs in TestCase
 	}))
 }

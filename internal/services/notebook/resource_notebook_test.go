@@ -37,6 +37,12 @@ var testHelperDefinitionPY = map[string]any{
 	},
 }
 
+var testHelperDefinitionR = map[string]any{
+	`"notebook-content.r"`: map[string]any{
+		"source": "${local.path}/notebook-content.r.tmpl",
+	},
+}
+
 func TestUnit_NotebookResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -108,7 +114,7 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -132,7 +138,7 @@ func TestUnit_NotebookResource_ImportState(t *testing.T) {
 			map[string]any{
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
-				"format":       "ipynb",
+				"format":       "Default",
 				"definition":   testHelperDefinitionIPYNB,
 			},
 		))
@@ -210,7 +216,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -227,7 +233,7 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
 				)),
@@ -249,8 +255,31 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
 						"folder_id":    *entityBefore.FolderID,
-						"format":       "ipynb",
+						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
+					},
+				)),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
+						"format":       "Default",
+						"definition":   testHelperDefinitionR,
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(

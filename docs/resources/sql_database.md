@@ -81,7 +81,7 @@ resource "fabric_sql_database" "example_sqlproj" {
 
 Any changes to this configuration will result in recreation of the SQL Database. (see [below for nested schema](#nestedatt--configuration))
 
-- `definition` (Attributes Map) Definition parts. Read more about [SQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/sql-database-definition). Accepted path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [SQL Database definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/sql-database-definition). Accepted path keys: **dacpac** format: `*.dacpac` **sqlproj** format: `*.sql`, `*.sqlproj`, `.sharedqueries/*.sql` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The SQL Database description.
 - `folder_id` (String) The Folder ID.
