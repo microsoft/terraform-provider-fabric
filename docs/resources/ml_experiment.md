@@ -34,7 +34,7 @@ resource "fabric_ml_experiment" "example" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The Folder ID.
-- `tags` (Set of String) The set of tag IDs.
+- `tags` (Map of String) (Optional) A mapping of tags to assign to the resource. The map key is the tag display name and the value is the tag ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

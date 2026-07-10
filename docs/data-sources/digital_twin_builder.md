@@ -82,7 +82,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `ContextualizationOperations/*`, `EntityTypeRelationships/*`, `EntityTypes/*`, `MappingOperations/*`, `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Digital Twin Builder description.
 - `folder_id` (String) The Digital Twin Builder Folder ID.
-- `tags` (Set of String) A set of tag IDs applied to the item.
+- `tags` (Map of String) A mapping of tags assigned to the item. The map key is the tag display name and the value is the tag ID.
 
 <a id="nestedatt--timeouts"></a>
 

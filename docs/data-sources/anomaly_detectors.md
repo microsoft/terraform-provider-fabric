@@ -58,5 +58,5 @@ Read-Only:
 - `display_name` (String) The Anomaly Detector display name.
 - `folder_id` (String) The Anomaly Detector Folder ID.
 - `id` (String) The Anomaly Detector ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Anomaly Detector.
+- `tags` (Map of String) A mapping of tags assigned to the Anomaly Detector. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

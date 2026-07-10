@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The ML Experiment display name.
 - `folder_id` (String) The ML Experiment Folder ID.
 - `id` (String) The ML Experiment ID.
-- `tags` (Set of String) A set of tag IDs assigned to the ML Experiment.
+- `tags` (Map of String) A mapping of tags assigned to the ML Experiment. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

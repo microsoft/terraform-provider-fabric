@@ -19,9 +19,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -206,13 +206,13 @@ func getResourceFabricItemBaseAttributes(
 			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
-		"tags": schema.SetAttribute{
-			MarkdownDescription: "The set of tag IDs.",
+		"tags": schema.MapAttribute{
+			MarkdownDescription: "(Optional) A mapping of tags to assign to the resource. The map key is the tag display name and the value is the tag ID.",
 			Optional:            true,
 			Computed:            true,
-			Default:             setdefault.StaticValue(types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})),
-			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
-			ElementType:         customtypes.UUIDType{},
+			Default:             mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{})),
+			CustomType:          supertypes.NewMapTypeOf[string](ctx),
+			ElementType:         types.StringType,
 		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}

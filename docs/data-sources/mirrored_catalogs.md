@@ -58,7 +58,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Catalog Folder ID.
 - `id` (String) The Mirrored Catalog ID.
 - `properties` (Attributes) The Mirrored Catalog properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the Mirrored Catalog.
+- `tags` (Map of String) A mapping of tags assigned to the Mirrored Catalog. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

@@ -138,7 +138,7 @@ func fabricItemCheckMove(planFolderID, stateFolderID customtypes.UUID, reqMovePl
 	return !reflect.DeepEqual(reqMovePlan.MoveItemRequest, reqMoveState.MoveItemRequest)
 }
 
-func fabricItemCheckSyncTags(planTags, stateTags supertypes.SetValueOf[customtypes.UUID]) bool {
+func fabricItemCheckSyncTags(planTags, stateTags supertypes.MapValueOf[string]) bool {
 	return !planTags.Equal(stateTags)
 }
 

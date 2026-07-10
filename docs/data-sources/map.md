@@ -81,7 +81,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `map.json`, `queries/layerSource-*.kql` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Map description.
 - `folder_id` (String) The Map Folder ID.
-- `tags` (Set of String) A set of tag IDs applied to the item.
+- `tags` (Map of String) A mapping of tags assigned to the item. The map key is the tag display name and the value is the tag ID.
 
 <a id="nestedatt--timeouts"></a>
 

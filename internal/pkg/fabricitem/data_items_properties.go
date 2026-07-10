@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -67,11 +68,11 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
-		"tags": schema.SetAttribute{
-			MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
+		"tags": schema.MapAttribute{
+			MarkdownDescription: "A mapping of tags assigned to the " + d.TypeInfo.Name + ". The map key is the tag display name and the value is the tag ID.",
 			Computed:            true,
-			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
-			ElementType:         customtypes.UUIDType{},
+			CustomType:          supertypes.NewMapTypeOf[string](ctx),
+			ElementType:         types.StringType,
 		},
 	}
 

@@ -11,18 +11,29 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
-	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
-func SetTags(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID], from []fabcore.ItemTag) diag.Diagnostics {
-	elements := make([]customtypes.UUID, 0, len(from))
+// SetTags reads the item's applied tags from the API response into the Terraform state model
+// as a map of tag display name to tag ID, aligning with the Azure Terraform provider tags experience.
+func SetTags(ctx context.Context, tags *supertypes.MapValueOf[string], from []fabcore.ItemTag) diag.Diagnostics {
+	elements := make(map[string]string, len(from))
 
 	for _, tag := range from {
-		elements = append(elements, customtypes.NewUUIDPointerValue(tag.ID))
+		var name, id string
+
+		if tag.DisplayName != nil {
+			name = *tag.DisplayName
+		}
+
+		if tag.ID != nil {
+			id = *tag.ID
+		}
+
+		elements[name] = id
 	}
 
-	v := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+	v := supertypes.NewMapValueOfNull[string](ctx)
 
 	if diags := v.Set(ctx, elements); diags.HasError() {
 		return diags
@@ -33,14 +44,27 @@ func SetTags(ctx context.Context, tags *supertypes.SetValueOf[customtypes.UUID],
 	return nil
 }
 
+// newEmptyTags returns an empty (known, non-null) tags map value.
+func newEmptyTags(ctx context.Context) supertypes.MapValueOf[string] {
+	v, _ := supertypes.NewMapValueOfMap(ctx, map[string]string{})
+
+	return v
+}
+
 // SyncTags synchronizes item tags by fetching the current applied tags from the API,
 // computing the diff against the planned tags, then only unapplying removed tags and applying new ones.
-func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient *fabcore.TagsClient, plannedTags supertypes.SetValueOf[customtypes.UUID], workspaceID, itemID string) diag.Diagnostics {
+// The planned tags are a map of tag display name to tag ID; only the tag IDs (map values) drive the API calls.
+func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient *fabcore.TagsClient, plannedTags supertypes.MapValueOf[string], workspaceID, itemID string) diag.Diagnostics {
 	var plannedTagIDs []string
 
 	if !plannedTags.IsNull() {
-		if diags := plannedTags.ElementsAs(ctx, &plannedTagIDs, false); diags.HasError() {
+		plannedMap, diags := plannedTags.Get(ctx)
+		if diags.HasError() {
 			return diags
+		}
+
+		for _, id := range plannedMap {
+			plannedTagIDs = append(plannedTagIDs, id)
 		}
 	}
 

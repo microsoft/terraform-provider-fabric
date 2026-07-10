@@ -78,7 +78,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `mountedDataFactory-content.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Mounted Data Factory description.
 - `folder_id` (String) The Mounted Data Factory Folder ID.
-- `tags` (Set of String) A set of tag IDs applied to the item.
+- `tags` (Map of String) A mapping of tags assigned to the item. The map key is the tag display name and the value is the tag ID.
 
 <a id="nestedatt--timeouts"></a>
 

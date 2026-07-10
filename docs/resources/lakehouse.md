@@ -139,7 +139,7 @@ Any changes to this configuration will result in recreation of the Lakehouse. (s
 - `description` (String) The Lakehouse description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Lakehouse format. Possible values: `Default`
-- `tags` (Set of String) The set of tag IDs.
+- `tags` (Map of String) (Optional) A mapping of tags to assign to the resource. The map key is the tag display name and the value is the tag ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

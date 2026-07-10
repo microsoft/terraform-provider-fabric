@@ -78,7 +78,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Cosmos DB description.
 - `folder_id` (String) The Cosmos DB Folder ID.
-- `tags` (Set of String) A set of tag IDs applied to the item.
+- `tags` (Map of String) A mapping of tags assigned to the item. The map key is the tag display name and the value is the tag ID.
 
 <a id="nestedatt--timeouts"></a>
 

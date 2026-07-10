@@ -58,5 +58,5 @@ Read-Only:
 - `display_name` (String) The Ontology display name.
 - `folder_id` (String) The Ontology Folder ID.
 - `id` (String) The Ontology ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Ontology.
+- `tags` (Map of String) A mapping of tags assigned to the Ontology. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

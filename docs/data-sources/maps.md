@@ -58,5 +58,5 @@ Read-Only:
 - `display_name` (String) The Map display name.
 - `folder_id` (String) The Map Folder ID.
 - `id` (String) The Map ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Map.
+- `tags` (Map of String) A mapping of tags assigned to the Map. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The Data Pipeline display name.
 - `folder_id` (String) The Data Pipeline Folder ID.
 - `id` (String) The Data Pipeline ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Data Pipeline.
+- `tags` (Map of String) A mapping of tags assigned to the Data Pipeline. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

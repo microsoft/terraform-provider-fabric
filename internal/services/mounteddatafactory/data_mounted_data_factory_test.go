@@ -160,6 +160,7 @@ func TestAcc_MountedDataFactoryDataSource(t *testing.T) {
 	entityDisplayName := entity["displayName"].(string)
 	entityDescription := entity["description"].(string)
 	entityTagID := entity["tagId"].(string)
+	entityTagName := entity["tagName"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read by id
@@ -177,8 +178,8 @@ func TestAcc_MountedDataFactoryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "1"),
-				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", entityTagID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.%", "1"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags."+entityTagName, entityTagID),
 			),
 		},
 		// read by id - not found
@@ -207,8 +208,8 @@ func TestAcc_MountedDataFactoryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "1"),
-				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", entityTagID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.%", "1"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags."+entityTagName, entityTagID),
 			),
 		},
 		// read by name - not found
@@ -250,8 +251,8 @@ func TestAcc_MountedDataFactoryDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "1"),
-				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", entityTagID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.%", "1"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags."+entityTagName, entityTagID),
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
 				statecheck.ExpectKnownValue(testDataSourceItemFQN, tfjsonpath.New("definition").AtMapKey("mountedDataFactory-content.json").AtMapKey("content"), knownvalue.NotNull()),

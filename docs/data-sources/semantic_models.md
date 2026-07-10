@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The Semantic Model display name.
 - `folder_id` (String) The Semantic Model Folder ID.
 - `id` (String) The Semantic Model ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Semantic Model.
+- `tags` (Map of String) A mapping of tags assigned to the Semantic Model. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

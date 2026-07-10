@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The Notebook display name.
 - `folder_id` (String) The Notebook Folder ID.
 - `id` (String) The Notebook ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Notebook.
+- `tags` (Map of String) A mapping of tags assigned to the Notebook. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

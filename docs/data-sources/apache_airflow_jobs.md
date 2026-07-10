@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The Apache Airflow Job display name.
 - `folder_id` (String) The Apache Airflow Job Folder ID.
 - `id` (String) The Apache Airflow Job ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Apache Airflow Job.
+- `tags` (Map of String) A mapping of tags assigned to the Apache Airflow Job. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
