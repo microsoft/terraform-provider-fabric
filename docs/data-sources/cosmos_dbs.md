@@ -55,5 +55,5 @@ Read-Only:
 - `display_name` (String) The Cosmos DB display name.
 - `folder_id` (String) The Cosmos DB Folder ID.
 - `id` (String) The Cosmos DB ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Cosmos DB.
+- `tags` (Map of String) A mapping of tags assigned to the Cosmos DB. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

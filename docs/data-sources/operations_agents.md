@@ -59,7 +59,7 @@ Read-Only:
 - `folder_id` (String) The Operations Agent Folder ID.
 - `id` (String) The Operations Agent ID.
 - `properties` (Attributes) The Operations Agent properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the Operations Agent.
+- `tags` (Map of String) A mapping of tags assigned to the Operations Agent. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

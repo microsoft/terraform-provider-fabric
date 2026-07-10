@@ -56,7 +56,7 @@ Read-Only:
 - `folder_id` (String) The Variable Library Folder ID.
 - `id` (String) The Variable Library ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the Variable Library.
+- `tags` (Map of String) A mapping of tags assigned to the Variable Library. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

@@ -64,7 +64,7 @@ output "example_definition_bim_object" {
 - `description` (String) The Semantic Model description.
 - `display_name` (String) The Semantic Model display name.
 - `folder_id` (String) The Semantic Model Folder ID.
-- `tags` (Set of String) A set of tag IDs applied to the item.
+- `tags` (Map of String) A mapping of tags assigned to the item. The map key is the tag display name and the value is the tag ID.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -55,7 +55,7 @@ Read-Only:
 - `folder_id` (String) The KQL Database Folder ID.
 - `id` (String) The KQL Database ID.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the KQL Database.
+- `tags` (Map of String) A mapping of tags assigned to the KQL Database. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

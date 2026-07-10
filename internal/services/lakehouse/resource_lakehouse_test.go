@@ -222,7 +222,10 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
-					"tags":         []string{tag1ID, tag2ID},
+					"tags": map[string]string{
+						`"Tag ` + tag1ID + `"`: tag1ID,
+						`"Tag ` + tag2ID + `"`: tag2ID,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -232,9 +235,9 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag1ID, tag1ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag2ID, tag2ID),
 			),
 		},
 		// Remove and add a new tag and Read
@@ -246,13 +249,16 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
-					"tags":         []string{tag2ID, tag3ID},
+					"tags": map[string]string{
+						`"Tag ` + tag2ID + `"`: tag2ID,
+						`"Tag ` + tag3ID + `"`: tag3ID,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag2ID, tag2ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag3ID, tag3ID),
 			),
 		},
 		// Update and Remove all tags and Read
@@ -272,7 +278,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "0"),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

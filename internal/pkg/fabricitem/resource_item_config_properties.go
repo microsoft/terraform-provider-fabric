@@ -142,7 +142,7 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 
 	// Save state with empty tags so the item is tracked even if tags fail
 	createdState := plan
-	createdState.Tags = supertypes.NewSetValueOfSlice(ctx, []customtypes.UUID{})
+	createdState.Tags = newEmptyTags(ctx)
 
 	if resp.Diagnostics.Append(resp.State.Set(ctx, createdState)...); resp.Diagnostics.HasError() {
 		return

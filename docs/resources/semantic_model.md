@@ -113,7 +113,7 @@ resource "fabric_semantic_model" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Semantic Model description.
 - `folder_id` (String) The Folder ID.
-- `tags` (Set of String) The set of tag IDs.
+- `tags` (Map of String) (Optional) A mapping of tags to assign to the resource. The map key is the tag display name and the value is the tag ID.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

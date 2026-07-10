@@ -58,7 +58,7 @@ Read-Only:
 - `folder_id` (String) The Digital Twin Builder Flow Folder ID.
 - `id` (String) The Digital Twin Builder Flow ID.
 - `properties` (Attributes) The Digital Twin Builder Flow properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the Digital Twin Builder Flow.
+- `tags` (Map of String) A mapping of tags assigned to the Digital Twin Builder Flow. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

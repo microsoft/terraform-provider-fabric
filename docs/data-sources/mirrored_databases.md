@@ -55,7 +55,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Database Folder ID.
 - `id` (String) The Mirrored Database ID.
 - `properties` (Attributes) The Mirrored Database properties. (see [below for nested schema](#nestedatt--values--properties))
-- `tags` (Set of String) A set of tag IDs assigned to the Mirrored Database.
+- `tags` (Map of String) A mapping of tags assigned to the Mirrored Database. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

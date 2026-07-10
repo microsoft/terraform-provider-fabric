@@ -244,7 +244,10 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"folder_id":    *entityBefore.FolderID,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
-						"tags":         []string{tag1ID, tag2ID},
+						"tags": map[string]string{
+							`"Tag ` + tag1ID + `"`: tag1ID,
+							`"Tag ` + tag2ID + `"`: tag2ID,
+						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -255,9 +258,9 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag1ID, tag1ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag2ID, tag2ID),
 			),
 		},
 		// Remove and add a new tag and Read
@@ -273,13 +276,16 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"folder_id":    *entityBefore.FolderID,
 						"format":       "Default",
 						"definition":   testHelperDefinition,
-						"tags":         []string{tag2ID, tag3ID},
+						"tags": map[string]string{
+							`"Tag ` + tag2ID + `"`: tag2ID,
+							`"Tag ` + tag3ID + `"`: tag3ID,
+						},
 					},
 				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
-				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "2"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag2ID, tag2ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.Tag "+tag3ID, tag3ID),
 			),
 		},
 		// Update, Move and Remove all tags and Read
@@ -307,7 +313,7 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.ingestion_service_uri"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_ids.0"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.minimum_consumption_units"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.%", "0"),
 			),
 		},
 		// Move and Read

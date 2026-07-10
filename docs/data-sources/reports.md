@@ -54,5 +54,5 @@ Read-Only:
 - `display_name` (String) The Report display name.
 - `folder_id` (String) The Report Folder ID.
 - `id` (String) The Report ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Report.
+- `tags` (Map of String) A mapping of tags assigned to the Report. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

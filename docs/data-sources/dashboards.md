@@ -57,5 +57,5 @@ Read-Only:
 - `display_name` (String) The Dashboard display name.
 - `folder_id` (String) The Dashboard Folder ID.
 - `id` (String) The Dashboard ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Dashboard.
+- `tags` (Map of String) A mapping of tags assigned to the Dashboard. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

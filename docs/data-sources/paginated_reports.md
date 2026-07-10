@@ -57,5 +57,5 @@ Read-Only:
 - `display_name` (String) The Paginated Report display name.
 - `folder_id` (String) The Paginated Report Folder ID.
 - `id` (String) The Paginated Report ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Paginated Report.
+- `tags` (Map of String) A mapping of tags assigned to the Paginated Report. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.

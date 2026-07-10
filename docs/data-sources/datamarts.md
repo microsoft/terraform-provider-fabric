@@ -57,5 +57,5 @@ Read-Only:
 - `display_name` (String) The Datamart display name.
 - `folder_id` (String) The Datamart Folder ID.
 - `id` (String) The Datamart ID.
-- `tags` (Set of String) A set of tag IDs assigned to the Datamart.
+- `tags` (Map of String) A mapping of tags assigned to the Datamart. The map key is the tag display name and the value is the tag ID.
 - `workspace_id` (String) The Workspace ID.
