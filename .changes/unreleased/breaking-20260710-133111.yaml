@@ -1,0 +1,5 @@
+kind: breaking
+body: Changed `tags` on Fabric items from a set of tag IDs to a map keyed by the tag display name with the tag ID as the value, aligning with the azurerm provider tags experience
+time: 2026-07-10T13:31:11.000000000Z
+custom:
+    Issue: "1"
