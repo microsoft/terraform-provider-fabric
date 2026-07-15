@@ -38,17 +38,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"go/ast"
-	"go/token"
-	"go/types"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
-	"go.yaml.in/yaml/v3"
 
 	"github.com/microsoft/terraform-provider-fabric/tools/internal/toolutil"
 )
@@ -81,46 +76,6 @@ var (
 	exclusionsFlag = flag.String("exclusions", "", "path to exclusions YAML file (default: auto-detected)")                      //nolint:gochecknoglobals
 )
 
-// previewExclusion suppresses the preview check for a single service package,
-// typically a GA item whose called SDK API still carries a stale preview marker.
-type previewExclusion struct {
-	Service string `json:"service" yaml:"service"`
-	Reason  string `json:"reason"  yaml:"reason"`
-}
-
-// exclusionsFile is the top-level YAML structure of the exclusions file.
-type exclusionsFile struct {
-	Exclusions []previewExclusion `yaml:"exclusions"`
-}
-
-// loadExclusions reads the exclusions YAML file and returns a map of service
-// package name to reason.
-func loadExclusions(path string) (map[string]string, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("reading exclusions file %s: %w", path, err)
-	}
-
-	var ef exclusionsFile
-
-	err = yaml.Unmarshal(data, &ef)
-	if err != nil {
-		return nil, fmt.Errorf("parsing exclusions file %s: %w", path, err)
-	}
-
-	result := make(map[string]string, len(ef.Exclusions))
-
-	for _, e := range ef.Exclusions {
-		if e.Service == "" || e.Reason == "" {
-			return nil, fmt.Errorf("exclusion entry missing required field (service, reason): %+v", e)
-		}
-
-		result[e.Service] = e.Reason
-	}
-
-	return result, nil
-}
-
 func main() {
 	flag.Parse()
 
@@ -147,14 +102,14 @@ func run() int {
 		exclusionsPath = filepath.Join(root, "tools", "previewcheck", "exclusions.yaml")
 	}
 
-	exclusions, err := loadExclusions(exclusionsPath)
+	exclusions, err := toolutil.LoadExclusions(exclusionsPath)
 	if err != nil {
 		toolutil.Errf("error loading exclusions: %v\n", err)
 
 		return exitError
 	}
 
-	dc := newDocCache()
+	dc := toolutil.NewDocCache()
 
 	results := make([]result, 0, len(pkgs))
 
@@ -380,16 +335,22 @@ func printPreviewAPIs(r result) {
 
 // analyzePackage inspects a service package: it locates ItemTypeInfo.IsPreview
 // and collects every fabric-sdk-go function it calls, flagging preview ones.
-func analyzePackage(pkg *packages.Package, dc *docCache) (result, bool) {
-	res := result{service: pkgName(pkg)}
+func analyzePackage(pkg *packages.Package, dc *toolutil.DocCache) (result, bool) {
+	res := result{service: toolutil.PkgName(pkg)}
 
-	findIsPreview(pkg, &res)
+	if v, ok := toolutil.ExtractItemTypeInfoBool(pkg, "IsPreview"); ok {
+		res.hasDeclaration = true
+		res.declared = v
+	}
 
 	previewSet := map[string]struct{}{}
-	seen := map[string]struct{}{}
 
-	for _, file := range pkg.Syntax {
-		collectSDKCalls(pkg, file, dc, &res, previewSet, seen)
+	for _, call := range toolutil.CollectSDKCalls(pkg) {
+		res.sdkCalls++
+
+		if containsMarker(dc.DocCommentAt(call.Pos)) {
+			previewSet[call.ID] = struct{}{}
+		}
 	}
 
 	// Fallback: generic fabricitem resources make no direct SDK calls in-package.
@@ -412,370 +373,24 @@ func analyzePackage(pkg *packages.Package, dc *docCache) (result, bool) {
 // determineViaItemType resolves the FabricItemType constant to its dedicated
 // fabric-sdk-go package and scans that package's exported client methods for
 // preview markers, closing the gap for generic fabricitem resources.
-func determineViaItemType(pkg *packages.Package, dc *docCache, res *result, previewSet map[string]struct{}) {
-	pkgDir, item, ok := sdkPackageDir(pkg)
+func determineViaItemType(pkg *packages.Package, dc *toolutil.DocCache, res *result, previewSet map[string]struct{}) {
+	pkgDir, item, ok := toolutil.SDKPackageDir(pkg, sdkPackageOverrides)
 	if !ok {
 		return
 	}
 
-	crud, methods := dc.scanCRUD(pkgDir, item)
-	if crud == 0 {
+	methods := dc.ScanItemCRUD(pkgDir, item)
+	if len(methods) == 0 {
 		return
 	}
 
-	res.sdkCalls += crud
+	res.sdkCalls += len(methods)
 
 	for _, m := range methods {
-		previewSet[strings.ToLower(item)+"."+m] = struct{}{}
-	}
-}
-
-// sdkPackageDir resolves a package's FabricItemType constant to its dedicated
-// fabric-sdk-go package directory, returning the directory and the item name.
-func sdkPackageDir(pkg *packages.Package) (string, string, bool) { //nolint:revive // dir + item name + ok
-	constName, anyFile := findFabricItemType(pkg)
-	if constName == "" || anyFile == "" {
-		return "", "", false
-	}
-
-	// ItemType constants are named ItemType<Name>; the SDK package is fabric/<name>.
-	item := strings.TrimPrefix(constName, "ItemType")
-	if item == constName || item == "" {
-		return "", "", false
-	}
-
-	fabricDir := fabricRoot(anyFile)
-	if fabricDir == "" {
-		return "", "", false
-	}
-
-	pkgName := strings.ToLower(item)
-	if override, ok := sdkPackageOverrides[item]; ok {
-		pkgName = override
-	}
-
-	return filepath.Join(fabricDir, pkgName), item, true
-}
-
-// findFabricItemType locates the FabricItemType const (= fabcore.ItemType<Name>)
-// and returns the SDK constant name plus a file in the fabcore package (used to
-// derive the SDK fabric/ directory).
-func findFabricItemType(pkg *packages.Package) (string, string) { //nolint:revive // two strings: SDK const name and fabcore file path
-	for _, file := range pkg.Syntax {
-		for _, decl := range file.Decls {
-			gen, ok := decl.(*ast.GenDecl)
-			if !ok || gen.Tok != token.CONST {
-				continue
-			}
-
-			for _, spec := range gen.Specs {
-				vs, ok := spec.(*ast.ValueSpec)
-				if !ok || !hasName(vs.Names, "FabricItemType") {
-					continue
-				}
-
-				for _, val := range vs.Values {
-					sel, ok := val.(*ast.SelectorExpr)
-					if !ok {
-						continue
-					}
-
-					obj := pkg.TypesInfo.ObjectOf(sel.Sel)
-					if obj == nil || obj.Pkg() == nil {
-						continue
-					}
-
-					return obj.Name(), pkg.Fset.Position(obj.Pos()).Filename
-				}
-			}
+		if containsMarker(m.Doc) {
+			previewSet[strings.ToLower(item)+"."+m.Name] = struct{}{}
 		}
 	}
-
-	return "", ""
-}
-
-// fabricRoot returns the fabric-sdk-go "fabric" directory given a file inside
-// the fabric/core package (e.g. .../fabric-sdk-go@v/fabric/core/x.go -> .../fabric).
-func fabricRoot(coreFile string) string {
-	dir := filepath.Dir(coreFile)
-	if filepath.Base(dir) != "core" {
-		return ""
-	}
-
-	return filepath.Dir(dir)
-}
-
-// findIsPreview locates the IsPreview field inside the ItemTypeInfo composite
-// literal and records its value.
-func findIsPreview(pkg *packages.Package, res *result) {
-	for _, file := range pkg.Syntax {
-		for _, decl := range file.Decls {
-			gen, ok := decl.(*ast.GenDecl)
-			if !ok || gen.Tok != token.VAR {
-				continue
-			}
-
-			for _, spec := range gen.Specs {
-				vs, ok := spec.(*ast.ValueSpec)
-				if !ok || !hasName(vs.Names, "ItemTypeInfo") {
-					continue
-				}
-
-				for _, val := range vs.Values {
-					lit, ok := val.(*ast.CompositeLit)
-					if !ok {
-						continue
-					}
-
-					if extractIsPreview(lit, res) {
-						return
-					}
-				}
-			}
-		}
-	}
-}
-
-func extractIsPreview(lit *ast.CompositeLit, res *result) bool {
-	for _, elt := range lit.Elts {
-		kv, ok := elt.(*ast.KeyValueExpr)
-		if !ok {
-			continue
-		}
-
-		key, ok := kv.Key.(*ast.Ident)
-		if !ok || key.Name != "IsPreview" {
-			continue
-		}
-
-		ident, ok := kv.Value.(*ast.Ident)
-		if !ok || (ident.Name != "true" && ident.Name != "false") {
-			continue
-		}
-
-		res.hasDeclaration = true
-		res.declared = ident.Name == "true"
-
-		return true
-	}
-
-	return false
-}
-
-// collectSDKCalls walks call expressions in a file, resolves each callee, and
-// records distinct fabric-sdk-go functions (flagging preview ones). The seen set
-// is shared across the package's files so each callee is counted at most once.
-func collectSDKCalls(pkg *packages.Package, file *ast.File, dc *docCache, res *result, previewSet, seen map[string]struct{}) {
-	ast.Inspect(file, func(n ast.Node) bool {
-		call, ok := n.(*ast.CallExpr)
-		if !ok {
-			return true
-		}
-
-		// Only x.Y(...) style calls; SDK funcs are always reached via a selector.
-		sel, ok := call.Fun.(*ast.SelectorExpr)
-		if !ok {
-			return true
-		}
-
-		// Resolve the selector to its real declared object via the type checker
-		// (relies on NeedTypes/NeedTypesInfo/NeedDeps when loading packages).
-		obj := pkg.TypesInfo.ObjectOf(sel.Sel)
-
-		fn, ok := obj.(*types.Func)
-		if !ok || fn.Pkg() == nil {
-			return true
-		}
-
-		if !strings.HasPrefix(fn.Pkg().Path(), toolutil.SDKModulePath) {
-			return true
-		}
-
-		// Identify the callee as "pkgName.FuncName" and skip duplicates.
-		id := fn.Pkg().Name() + "." + fn.Name()
-		if _, dup := seen[id]; dup {
-			return true
-		}
-
-		seen[id] = struct{}{}
-		res.sdkCalls++
-
-		// fn.Pos() points at the SDK declaration; check its doc comment for a
-		// preview marker and record the func if it is preview.
-		if dc.isPreview(pkg.Fset.Position(fn.Pos())) {
-			previewSet[id] = struct{}{}
-		}
-
-		return true
-	})
-}
-
-// docCache reads SDK source files lazily and caches the preview status of the
-// doc comment directly above a declaration position.
-type docCache struct {
-	files   map[string][]string
-	results map[string]bool
-	methods map[string][]string
-	crud    map[string]int
-}
-
-func newDocCache() *docCache {
-	return &docCache{
-		files:   map[string][]string{},
-		results: map[string]bool{},
-		methods: map[string][]string{},
-		crud:    map[string]int{},
-	}
-}
-
-// scanCRUD scans the *_client.go files in an SDK package directory and returns
-// the count of the item's exported CRUD methods plus the names of those flagged
-// preview. A non-zero count means the item status is determinable. Cached per
-// directory and item.
-func (d *docCache) scanCRUD(pkgDir, item string) (int, []string) {
-	cacheKey := pkgDir + "\x00" + item
-	if v, ok := d.methods[cacheKey]; ok {
-		return d.crud[cacheKey], v
-	}
-
-	entries, err := os.ReadDir(pkgDir)
-	if err != nil {
-		d.crud[cacheKey] = 0
-		d.methods[cacheKey] = nil
-
-		return 0, nil
-	}
-
-	var (
-		crud    int
-		preview []string
-	)
-
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), "_client.go") {
-			continue
-		}
-
-		lines, rErr := d.readFile(filepath.Join(pkgDir, e.Name()))
-		if rErr != nil {
-			continue
-		}
-
-		c, p := scanItemMethods(lines, item)
-		crud += c
-
-		preview = append(preview, p...)
-	}
-
-	slices.Sort(preview)
-
-	d.crud[cacheKey] = crud
-	d.methods[cacheKey] = preview
-
-	return crud, preview
-}
-
-// isPreview reports whether the doc comment immediately above the declaration at
-// pos contains a preview marker.
-func (d *docCache) isPreview(pos token.Position) bool {
-	if pos.Filename == "" || pos.Line <= 0 {
-		return false
-	}
-
-	key := fmt.Sprintf("%s:%d", pos.Filename, pos.Line)
-	if v, ok := d.results[key]; ok {
-		return v
-	}
-
-	lines, err := d.readFile(pos.Filename)
-	if err != nil {
-		d.results[key] = false
-
-		return false
-	}
-
-	doc := docCommentAbove(lines, pos.Line)
-	preview := containsMarker(doc)
-	d.results[key] = preview
-
-	return preview
-}
-
-func (d *docCache) readFile(path string) ([]string, error) {
-	if lines, ok := d.files[path]; ok {
-		return lines, nil
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.Split(string(data), "\n")
-	d.files[path] = lines
-
-	return lines, nil
-}
-
-// docCommentAbove returns the contiguous //-style comment block that sits
-// directly above the 1-indexed declLine.
-func docCommentAbove(lines []string, declLine int) string {
-	// declLine is 1-indexed; the line above it is at slice index declLine-2.
-	var doc []string
-
-	for i := declLine - 2; i >= 0; i-- {
-		trimmed := strings.TrimSpace(lines[i])
-		if strings.HasPrefix(trimmed, "//") {
-			doc = append(doc, trimmed)
-
-			continue
-		}
-
-		break
-	}
-
-	return strings.Join(doc, "\n")
-}
-
-// scanItemMethods returns the count of the item's CRUD client methods in the
-// file and the names of those whose preceding doc comment is marked preview.
-func scanItemMethods(lines []string, item string) (int, []string) {
-	var (
-		crud    int
-		preview []string
-	)
-
-	for i, line := range lines {
-		_, name := toolutil.ParseClientMethod(line)
-		if name == "" || !isItemCRUD(name, item) {
-			continue
-		}
-
-		crud++
-
-		// Line numbers passed to docCommentAbove are 1-indexed.
-		if containsMarker(docCommentAbove(lines, i+1)) {
-			preview = append(preview, name)
-		}
-	}
-
-	return crud, preview
-}
-
-// isItemCRUD reports whether method is a CRUD operation on the item itself,
-// e.g. GetNotebook, BeginCreateNotebook, ListNotebooks, UpdateNotebook.
-func isItemCRUD(method, item string) bool {
-	if !strings.Contains(strings.ToLower(method), strings.ToLower(item)) {
-		return false
-	}
-
-	for _, verb := range []string{"Get", "List", "Create", "Update", "Delete"} {
-		if strings.Contains(method, verb) {
-			return true
-		}
-	}
-
-	return false
 }
 
 func containsMarker(doc string) bool {
@@ -783,26 +398,6 @@ func containsMarker(doc string) bool {
 
 	for _, marker := range previewMarkers {
 		if strings.Contains(lower, marker) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// loadServicePackages loads all packages under the services directory with full
-// type information.
-func pkgName(pkg *packages.Package) string {
-	if pkg.Name != "" {
-		return pkg.Name
-	}
-
-	return filepath.Base(pkg.PkgPath)
-}
-
-func hasName(names []*ast.Ident, target string) bool {
-	for _, n := range names {
-		if n.Name == target {
 			return true
 		}
 	}
