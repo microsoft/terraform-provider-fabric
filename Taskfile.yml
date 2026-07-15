@@ -105,6 +105,11 @@ tasks:
     cmds:
       - go run ./tools/previewcheck {{.CLI_ARGS}}
 
+  check:spn:
+    desc: Verify each resource/data source IsSPNSupported flag matches the fabric-sdk-go API service principal support
+    cmds:
+      - go run ./tools/spncheck {{.CLI_ARGS}}
+
   check:gaps:
     desc: Detect SDK control-plane entities with no corresponding Terraform resource
     cmds:
@@ -301,9 +306,9 @@ tasks:
       # CGO_ENABLED: 1
 
   test:gaptools:
-    desc: Run unit tests for the gapcheck/previewcheck developer tools
+    desc: Run unit tests for the gapcheck/previewcheck/spncheck developer tools
     cmds:
-      - go test -count=1 -timeout 5m ./tools/gapcheck/... ./tools/previewcheck/... ./tools/internal/toolutil/...
+      - go test -count=1 -timeout 5m ./tools/gapcheck/... ./tools/previewcheck/... ./tools/spncheck/... ./tools/internal/toolutil/...
     env:
       # Fail loudly if the fabric-sdk-go module cannot be resolved instead of
       # silently skipping the SDK-backed guard tests.

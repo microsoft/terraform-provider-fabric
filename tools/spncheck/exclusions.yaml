@@ -1,0 +1,9 @@
+# Exclusions for spncheck — service packages whose service-principal support
+# should NOT be flagged, typically items whose called fabric-sdk-go APIs carry a
+# stale or overly conservative identity annotation in their doc comments.
+#
+# Format: service (the service package name) + reason.
+# When the SDK later corrects the annotation (so the service is no longer a
+# mismatch), spncheck reports the entry as STALE so it can be removed.
+
+exclusions: []
