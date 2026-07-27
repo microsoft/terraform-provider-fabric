@@ -4,14 +4,18 @@
 package itemjob_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"regexp"
 	"testing"
 
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -190,6 +194,64 @@ func TestUnit_ItemJobResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "invoke_type"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
 			),
+		},
+		// Update (in-place) - only the timeouts change, which does not force a replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"item_id":        itemID,
+					"job_type":       jobType,
+					"execution_data": `{"parameters":{"param_name":"param_value"}}`,
+					"timeouts": map[string]any{
+						"read": "30m",
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "timeouts.read", "30m"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "status"),
+			),
+		},
+		// Read - job instance no longer exists, resource is removed from state and re-planned
+		{
+			ResourceName: testResourceItemFQN,
+			PreConfig: func() {
+				for k := range fakeItemJobInstanceStore {
+					delete(fakeItemJobInstanceStore, k)
+				}
+			},
+			RefreshState:       true,
+			ExpectNonEmptyPlan: true,
+		},
+	}))
+}
+
+func TestUnit_ItemJobResource_MissingLocation(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	jobType := "Execute"
+
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.RunOnDemandItemJob = func(_ context.Context, _, _, _ string, _ *fabcore.JobSchedulerClientRunOnDemandItemJobOptions) (resp azfake.Responder[fabcore.JobSchedulerClientRunOnDemandItemJobResponse], errResp azfake.ErrorResponder) {
+		resp.SetResponse(http.StatusAccepted, fabcore.JobSchedulerClientRunOnDemandItemJobResponse{}, nil)
+
+		return resp, errResp
+	}
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"job_type":     jobType,
+				},
+			),
+			ExpectError: regexp.MustCompile("Missing job instance location"),
 		},
 	}))
 }

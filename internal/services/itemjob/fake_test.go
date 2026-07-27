@@ -96,3 +96,26 @@ func NewRandomItemJobInstance(workspaceID, itemID, jobType string) fabcore.ItemJ
 
 	return itemJobInstance
 }
+
+func NewRandomFailedItemJobInstance(workspaceID, itemID, jobType string) fabcore.ItemJobInstance {
+	jobInstanceID := testhelp.RandomUUID()
+
+	itemJobInstance := fabcore.ItemJobInstance{
+		ID:             new(jobInstanceID),
+		ItemID:         new(itemID),
+		JobType:        new(jobType),
+		InvokeType:     to.Ptr(fabcore.InvokeTypeManual),
+		Status:         to.Ptr(fabcore.ItemJobStatusFailed),
+		RootActivityID: new(testhelp.RandomUUID()),
+		StartTimeUTC:   new(time.Now().UTC().Format(time.RFC3339)),
+		EndTimeUTC:     new(time.Now().UTC().Add(time.Minute).Format(time.RFC3339)),
+		FailureReason: &fabcore.ErrorResponse{
+			ErrorCode: to.Ptr("SomeErrorCode"),
+			Message:   to.Ptr("Something went wrong"),
+		},
+	}
+
+	fakeItemJobInstanceStore[GenerateItemJobInstanceID(workspaceID, jobInstanceID)] = itemJobInstance
+
+	return itemJobInstance
+}

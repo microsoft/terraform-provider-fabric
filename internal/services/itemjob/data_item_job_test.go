@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -69,6 +70,54 @@ func TestUnit_ItemJobDataSource_Read(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "job_type", jobType),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "status"),
 			),
+		},
+	}))
+}
+
+func TestUnit_ItemJobDataSource_FailureReason(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	jobType := "Execute"
+	entity := NewRandomFailedItemJobInstance(workspaceID, itemID, jobType)
+
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.GetItemJobInstance = fakeGetItemJobInstanceFunc()
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"id":           *entity.ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "status", string(fabcore.ItemJobStatusFailed)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "failure_reason.error_code", *entity.FailureReason.ErrorCode),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "failure_reason.message", *entity.FailureReason.Message),
+			),
+		},
+	}))
+}
+
+func TestUnit_ItemJobDataSource_NotFound(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.GetItemJobInstance = fakeGetItemJobInstanceFunc()
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"id":           testhelp.RandomUUID(),
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
 	}))
 }
