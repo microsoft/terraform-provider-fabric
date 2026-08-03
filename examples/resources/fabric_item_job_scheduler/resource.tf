@@ -21,6 +21,9 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
     end_date_time   = "2025-11-12T10:00:00Z"
     type            = "Daily"
     times           = ["10:00"]
+
+    # Windows time zone identifier, defaults to "Central Standard Time"
+    local_time_zone_id = "W. Europe Standard Time"
   }
 }
 

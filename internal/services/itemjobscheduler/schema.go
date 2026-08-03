@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,6 +35,9 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
+
+// defaultLocalTimeZoneID is the default Windows time zone identifier used when not specified in the configuration.
+const defaultLocalTimeZoneID = "Central Standard Time"
 
 func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
@@ -223,6 +227,24 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 							regexp.MustCompile(`Z$`),
 							"The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"local_time_zone_id": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The time zone identifier used to interpret the schedule times. " +
+						"Use a Windows time zone identifier, like `Central Standard Time`, `UTC` or `W. Europe Standard Time`. " +
+						"See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the list of allowed values.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString(defaultLocalTimeZoneID),
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{

@@ -113,6 +113,7 @@ func TestUnit_ItemJobSchedulerDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", string(*entity.Configuration.GetScheduleConfig().Type)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.local_time_zone_id", *entity.Configuration.GetScheduleConfig().LocalTimeZoneID),
 			),
 		},
 		// read by id - not found
