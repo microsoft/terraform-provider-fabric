@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed an issue that prevented networking communication policy APIs from being called when workspace private links were enabled.
+time: 2026-08-04T14:31:15.352006357Z
+custom:
+    Issue: "1031"
