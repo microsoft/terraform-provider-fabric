@@ -53,7 +53,7 @@ Read-Only:
 - `load_balancing_setting` (String) The load balancing setting. Value must be one of : `DistributeEvenly`, `Failover`.
 - `number_of_member_gateways` (Number) The number of member gateways. Value must be between 1 and 9.
 - `public_key` (Attributes) The public key of the primary gateway member. Used to encrypt the credentials for creating and updating connections. (see [below for nested schema](#nestedatt--values--public_key))
-- `type` (String) The Gateway type. Value must be one of : `OnPremises`, `OnPremisesPersonal`, `VirtualNetwork`.
+- `type` (String) The Gateway type. Value must be one of : `OnPremises`, `OnPremisesPersonal`, `StreamingVirtualNetwork`, `VirtualNetwork`.
 - `version` (String) The Gateway version.
 - `virtual_network_azure_resource` (Attributes) The Azure virtual network resource. (see [below for nested schema](#nestedatt--values--virtual_network_azure_resource))
 
