@@ -117,6 +117,12 @@ func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGa
 	return fabcore.OnPremisesGatewayPersonal{}
 }
 
+func configureStreamingVirtualNetworkGateway(server *fakeServer) fabcore.StreamingVirtualNetworkGateway {
+	configureGateway(server)
+
+	return fabcore.StreamingVirtualNetworkGateway{}
+}
+
 func configureGateway(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
@@ -153,6 +159,8 @@ func NewRandomGateway() fabcore.GatewayClassification {
 		return NewRandomOnPremisesGatewayPersonal()
 	case fabcore.GatewayTypeVirtualNetwork:
 		return NewRandomVirtualNetworkGateway()
+	case fabcore.GatewayTypeStreamingVirtualNetwork:
+		return NewRandomStreamingVirtualNetworkGateway()
 	default:
 		panic("Unsupported Gateway type") // lintignore:R009
 	}
@@ -190,6 +198,15 @@ func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 		InactivityMinutesBeforeSleep: new(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
 		NumberOfMemberGateways:       new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
+	}
+}
+
+func NewRandomStreamingVirtualNetworkGateway() *fabcore.StreamingVirtualNetworkGateway {
+	return &fabcore.StreamingVirtualNetworkGateway{
+		ID:                          new(testhelp.RandomUUID()),
+		Type:                        to.Ptr(fabcore.GatewayTypeStreamingVirtualNetwork),
+		DisplayName:                 new(testhelp.RandomName()),
+		VirtualNetworkAzureResource: NewRandomVirtualNetworkAzureResource(),
 	}
 }
 

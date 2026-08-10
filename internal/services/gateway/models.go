@@ -75,6 +75,20 @@ func (to *baseGatewayModel) set(ctx context.Context, from fabcore.GatewayClassif
 
 		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
 
+	case *fabcore.StreamingVirtualNetworkGateway:
+		to.DisplayName = types.StringPointerValue(entity.DisplayName)
+
+		if entity.VirtualNetworkAzureResource != nil {
+			virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
+			virtualNetworkAzureResourceModel.set(*entity.VirtualNetworkAzureResource)
+
+			if diags := virtualNetworkAzureResource.Set(ctx, virtualNetworkAzureResourceModel); diags.HasError() {
+				return diags
+			}
+		}
+
+		to.VirtualNetworkAzureResource = virtualNetworkAzureResource
+
 	case *fabcore.OnPremisesGateway:
 		to.DisplayName = types.StringPointerValue(entity.DisplayName)
 		to.AllowCloudConnectionRefresh = types.BoolPointerValue(entity.AllowCloudConnectionRefresh)
