@@ -31,3 +31,15 @@ resource "fabric_gateway" "example_autoscale" {
   }
   capacity_id = "11111111-1111-1111-1111-111111111111"
 }
+
+# Streaming Virtual Network Gateway
+resource "fabric_gateway" "example_streaming" {
+  type         = "StreamingVirtualNetwork"
+  display_name = "example streaming"
+  virtual_network_azure_resource = {
+    resource_group_name  = "example resource group"
+    virtual_network_name = "example virtual network"
+    subnet_name          = "example subnet"
+    subscription_id      = "00000000-0000-0000-0000-000000000000"
+  }
+}

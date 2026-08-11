@@ -1,0 +1,5 @@
+kind: added
+body: Added `StreamingVirtualNetwork` gateway type support to the `fabric_gateway` resource
+time: 2026-08-10T16:04:55.397188+03:00
+custom:
+    Issue: "942"

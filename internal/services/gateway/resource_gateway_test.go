@@ -309,6 +309,117 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 	}))
 }
 
+func TestUnit_GatewayResource_StreamingVirtualNetworkAttributes(t *testing.T) {
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - missing required attributes - display_name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type": string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute display_name`),
+		},
+		// error - missing required attributes - virtual_network_azure_resource
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": "test",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute virtual_network_azure_resource`),
+		},
+		// error - unsupported attribute - capacity_id
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": "test",
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"capacity_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute capacity_id`),
+		},
+		// error - unsupported attribute - inactivity_minutes_before_sleep
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": "test",
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute inactivity_minutes_before_sleep`),
+		},
+		// error - unsupported attribute - number_of_member_gateways
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": "test",
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"number_of_member_gateways": (int)(gateway.MinNumberOfMemberGatewaysValues),
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute number_of_member_gateways`),
+		},
+		// error - unsupported attribute - min_member_gateway_count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": "test",
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"min_member_gateway_count": (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"max_member_gateway_count": (int)(gateway.MaxNumberOfMemberGatewaysValues),
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute (min|max)_member_gateway_count`),
+		},
+	}))
+}
+
 func TestUnit_GatewayResource_ImportState(t *testing.T) {
 	entity := fakes.NewRandomVirtualNetworkGateway()
 
@@ -484,6 +595,112 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", entityAfter.VirtualNetworkAzureResource.ResourceGroupName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", entityAfter.VirtualNetworkAzureResource.SubnetName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", entityAfter.VirtualNetworkAzureResource.SubscriptionID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", entityAfter.VirtualNetworkAzureResource.VirtualNetworkName),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+
+func TestUnit_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
+	entityExist := fakes.NewRandomStreamingVirtualNetworkGateway()
+	entityBefore := fakes.NewRandomStreamingVirtualNetworkGateway()
+	entityAfter := fakes.NewRandomStreamingVirtualNetworkGateway()
+
+	fakes.FakeServer.Upsert(fakes.NewRandomStreamingVirtualNetworkGateway())
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(fakes.NewRandomStreamingVirtualNetworkGateway())
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         string(fabcore.GatewayTypeStreamingVirtualNetwork),
+					"display_name": *entityExist.DisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         (string)(*entityBefore.Type),
+					"display_name": *entityBefore.DisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityBefore.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityBefore.VirtualNetworkAzureResource.SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "type", (*string)(entityBefore.Type)),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", entityBefore.VirtualNetworkAzureResource.ResourceGroupName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", entityBefore.VirtualNetworkAzureResource.SubnetName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", entityBefore.VirtualNetworkAzureResource.SubscriptionID),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", entityBefore.VirtualNetworkAzureResource.VirtualNetworkName),
+				// not part of the streaming virtual network gateway contract
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "number_of_member_gateways"),
+			),
+		},
+		// Update and Read - no replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         (string)(*entityBefore.Type),
+					"display_name": *entityAfter.DisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityBefore.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityBefore.VirtualNetworkAzureResource.SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", entityBefore.VirtualNetworkAzureResource.ResourceGroupName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", entityBefore.VirtualNetworkAzureResource.VirtualNetworkName),
+			),
+		},
+		// Update and Read - with replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         (string)(*entityBefore.Type),
+					"display_name": *entityAfter.DisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityAfter.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityAfter.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityAfter.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityAfter.VirtualNetworkAzureResource.SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", entityAfter.VirtualNetworkAzureResource.ResourceGroupName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", entityAfter.VirtualNetworkAzureResource.VirtualNetworkName),
 			),
 		},
@@ -793,6 +1010,105 @@ func TestAcc_GatewayResource_AutoScaleCRUD(t *testing.T) {
 			),
 		},
 		// Delete testing automatically occurs in TestCase
+	},
+	))
+}
+
+func TestAcc_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
+	entityType := string(fabcore.GatewayTypeStreamingVirtualNetwork)
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+
+	virtualNetworkAzureResource01 := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
+	vNET01VirtualNetworkName := virtualNetworkAzureResource01["name"].(string)
+	vNET01ResourceGroupName := virtualNetworkAzureResource01["resourceGroupName"].(string)
+	vNET01SubnetName := virtualNetworkAzureResource01["subnetName"].(string)
+	vNET01SubscriptionID := virtualNetworkAzureResource01["subscriptionId"].(string)
+
+	virtualNetworkAzureResource02 := testhelp.WellKnown()["VirtualNetwork02"].(map[string]any)
+	vNET02VirtualNetworkName := virtualNetworkAzureResource02["name"].(string)
+	vNET02ResourceGroupName := virtualNetworkAzureResource02["resourceGroupName"].(string)
+	vNET02SubnetName := virtualNetworkAzureResource02["subnetName"].(string)
+	vNET02SubscriptionID := virtualNetworkAzureResource02["subscriptionId"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         entityType,
+					"display_name": entityCreateDisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET01VirtualNetworkName,
+						"resource_group_name":  vNET01ResourceGroupName,
+						"subnet_name":          vNET01SubnetName,
+						"subscription_id":      vNET01SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET01ResourceGroupName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", vNET01SubscriptionID),
+				// not part of the streaming virtual network gateway contract
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "capacity_id"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "inactivity_minutes_before_sleep"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "number_of_member_gateways"),
+			),
+		},
+		// Update and Read - no replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         entityType,
+					"display_name": entityUpdateDisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET01VirtualNetworkName,
+						"resource_group_name":  vNET01ResourceGroupName,
+						"subnet_name":          vNET01SubnetName,
+						"subscription_id":      vNET01SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET01VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET01SubnetName),
+			),
+		},
+		// Update and Read - with replacement
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":         entityType,
+					"display_name": entityUpdateDisplayName,
+					"virtual_network_azure_resource": map[string]any{
+						"virtual_network_name": vNET02VirtualNetworkName,
+						"resource_group_name":  vNET02ResourceGroupName,
+						"subnet_name":          vNET02SubnetName,
+						"subscription_id":      vNET02SubscriptionID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "type", entityType),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.virtual_network_name", vNET02VirtualNetworkName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.resource_group_name", vNET02ResourceGroupName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subnet_name", vNET02SubnetName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "virtual_network_azure_resource.subscription_id", vNET02SubscriptionID),
+			),
+		},
 	},
 	))
 }
