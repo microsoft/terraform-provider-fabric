@@ -22,7 +22,7 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
     type            = "Daily"
     times           = ["10:00"]
 
-    # Windows time zone identifier, defaults to "Central Standard Time"
+    # Windows time zone identifier, defaults to the service-side default when omitted
     local_time_zone_id = "W. Europe Standard Time"
   }
 }

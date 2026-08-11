@@ -1,7 +1,7 @@
 kind: added
 body: |
   Added `configuration.local_time_zone_id` attribute to the `fabric_item_job_scheduler` resource and data-sources.
-  The attribute accepts a [Windows time zone identifier](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) and defaults to `Central Standard Time`.
+  The attribute accepts a [Windows time zone identifier](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones). When not set, the service-side default is used.
 time: 2026-08-03T08:15:00.000000000+00:00
 custom:
   Issue: "1052"

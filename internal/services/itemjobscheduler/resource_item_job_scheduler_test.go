@@ -625,7 +625,7 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeCron)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.interval", strconv.Itoa(int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval))),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.local_time_zone_id", "Central Standard Time"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration.local_time_zone_id"),
 			),
 		},
 		// Update and Read
@@ -703,7 +703,7 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.end_date_time", entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeCron)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.interval", strconv.Itoa(int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval))),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.local_time_zone_id", "Central Standard Time"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "configuration.local_time_zone_id"),
 			),
 		},
 		// Update and Read

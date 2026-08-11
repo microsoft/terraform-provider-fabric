@@ -255,7 +255,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneID := configuration.LocalTimeZoneID.ValueString()
+	localTimeZoneID := configuration.LocalTimeZoneID.ValueStringPointer()
 	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
@@ -273,7 +273,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Interval:        configuration.Interval.ValueInt32Pointer(),
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeDaily:
@@ -291,7 +291,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Times:           timesSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeWeekly:
@@ -320,7 +320,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Weekdays:        weekdaysSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeMonthly:
@@ -374,7 +374,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Occurrence:      occurrenceConfig,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 
@@ -405,7 +405,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneID := configuration.LocalTimeZoneID.ValueString()
+	localTimeZoneID := configuration.LocalTimeZoneID.ValueStringPointer()
 
 	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
@@ -424,7 +424,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Interval:        configuration.Interval.ValueInt32Pointer(),
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeDaily:
@@ -442,7 +442,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Times:           timesSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeWeekly:
@@ -471,7 +471,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Weekdays:        weekdaysSlice,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 	case fabcore.ScheduleTypeMonthly:
@@ -525,7 +525,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			Occurrence:      occurrenceConfig,
 			StartDateTime:   &startDateTime,
 			EndDateTime:     &endDateTime,
-			LocalTimeZoneID: &localTimeZoneID,
+			LocalTimeZoneID: localTimeZoneID,
 			Type:            &configurationType,
 		}
 

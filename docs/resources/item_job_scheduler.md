@@ -40,7 +40,7 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
     type            = "Daily"
     times           = ["10:00"]
 
-    # Windows time zone identifier, defaults to "Central Standard Time"
+    # Windows time zone identifier, defaults to the service-side default when omitted
     local_time_zone_id = "W. Europe Standard Time"
   }
 }
@@ -131,7 +131,7 @@ Required:
 Optional:
 
 - `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years). Value must be between 1 and 5270400. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Monthly` this attribute is **NULL**.
-- `local_time_zone_id` (String) The time zone identifier used to interpret the schedule times. Use a Windows time zone identifier, like `Central Standard Time`, `UTC` or `W. Europe Standard Time`. See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the list of allowed values. Value defaults to `Central Standard Time`. String length must be at least 1.
+- `local_time_zone_id` (String) The time zone identifier used to interpret the schedule times. Use a Windows time zone identifier, like `Central Standard Time`, `UTC` or `W. Europe Standard Time`. See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the list of allowed values. String length must be at least 1.
 - `occurrence` (Attributes) A date for triggering the job. If the value of [`configuration.type`](#configuration.type) attribute is `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Cron` this attribute is **NULL**. (see [below for nested schema](#nestedatt--configuration--occurrence))
 - `recurrence` (Number) Specifies the monthly job repeat interval. For example, when set to 1 the job is triggered every month. Value must be between 1 and 12. If the value of [`configuration.type`](#configuration.type) attribute is `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Cron` this attribute is **NULL**.
 - `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed. Set must contain at most 100 elements. Element value must satisfy all validations: Each time entry must be in hh:mm format. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **NULL**.
