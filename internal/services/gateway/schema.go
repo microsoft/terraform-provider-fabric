@@ -78,6 +78,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
 							[]attr.Value{
@@ -130,6 +131,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 					},
 				},
@@ -156,6 +158,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 					},
 				},
@@ -178,6 +181,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 						superint32validator.NullIfAttributeIsSet(path.MatchRoot("min_member_gateway_count")),
 						superint32validator.NullIfAttributeIsSet(path.MatchRoot("max_member_gateway_count")),
@@ -202,6 +206,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 						superint32validator.NullIfAttributeIsSet(path.MatchRoot("number_of_member_gateways")),
 						superint32validator.RequireIfAttributeIsSet(path.MatchRoot("max_member_gateway_count")),
@@ -226,6 +231,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 						superint32validator.NullIfAttributeIsSet(path.MatchRoot("number_of_member_gateways")),
 						superint32validator.RequireIfAttributeIsSet(path.MatchRoot("min_member_gateway_count")),
@@ -250,6 +256,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						superobjectvalidator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
+								types.StringValue(string(fabcore.GatewayTypeStreamingVirtualNetwork)),
 							}),
 						superobjectvalidator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
 							[]attr.Value{

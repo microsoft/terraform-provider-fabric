@@ -221,6 +221,23 @@ func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayMod
 
 		to.CreateGatewayRequestClassification = request
 
+	case fabcore.GatewayTypeStreamingVirtualNetwork:
+		virtualNetworkAzureResource, diags := from.VirtualNetworkAzureResource.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		to.CreateGatewayRequestClassification = &fabcore.CreateStreamingVirtualNetworkGatewayRequest{
+			Type:        &gatewayType,
+			DisplayName: from.DisplayName.ValueStringPointer(),
+			VirtualNetworkAzureResource: &fabcore.VirtualNetworkAzureResource{
+				SubscriptionID:     virtualNetworkAzureResource.SubscriptionID.ValueStringPointer(),
+				ResourceGroupName:  virtualNetworkAzureResource.ResourceGroupName.ValueStringPointer(),
+				VirtualNetworkName: virtualNetworkAzureResource.VirtualNetworkName.ValueStringPointer(),
+				SubnetName:         virtualNetworkAzureResource.SubnetName.ValueStringPointer(),
+			},
+		}
+
 	default:
 		var diags diag.Diagnostics
 
@@ -272,6 +289,12 @@ func (to *requestUpdateGateway) set(from, state resourceGatewayModel) diag.Diagn
 			AllowCloudConnectionRefresh: from.AllowCloudConnectionRefresh.ValueBoolPointer(),
 			AllowCustomConnectors:       from.AllowCustomConnectors.ValueBoolPointer(),
 			LoadBalancingSetting:        (*fabcore.LoadBalancingSetting)(from.LoadBalancingSetting.ValueStringPointer()),
+		}
+
+	case fabcore.GatewayTypeStreamingVirtualNetwork:
+		to.UpdateGatewayRequestClassification = &fabcore.UpdateStreamingVirtualNetworkGatewayRequest{
+			Type:        &gatewayType,
+			DisplayName: displayName,
 		}
 
 	default:

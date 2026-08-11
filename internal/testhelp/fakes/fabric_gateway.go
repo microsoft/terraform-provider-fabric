@@ -89,25 +89,52 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 		}
 
 		return base
+	case *fabcore.StreamingVirtualNetworkGateway:
+		request, ok := data.(*fabcore.UpdateStreamingVirtualNetworkGatewayRequest)
+		if !ok {
+			panic("Invalid update data for StreamingVirtualNetworkGateway") // lintignore:R009
+		}
+
+		if request.DisplayName != nil {
+			base.DisplayName = request.DisplayName
+		}
+
+		return base
 	default:
 		panic("Unsupported Gateway type") // lintignore:R009
 	}
 }
 
 func (o *operationsGateway) Validate(newEntity fabcore.GatewayClassification, existing []fabcore.GatewayClassification) (int, error) {
+	newDisplayName, ok := gatewayDisplayName(newEntity)
+	if !ok {
+		return http.StatusCreated, nil
+	}
+
 	for _, existingGateway := range existing {
 		if *(existingGateway.GetGateway().Type) != *(newEntity.GetGateway().Type) {
 			continue
 		}
 
-		if newVNG, ok := newEntity.(*fabcore.VirtualNetworkGateway); ok {
-			if existingVNG, ok := existingGateway.(*fabcore.VirtualNetworkGateway); ok && *existingVNG.DisplayName == *newVNG.DisplayName {
-				return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrGateway.DuplicateGatewayName.Error(), fabcore.ErrGateway.DuplicateGatewayName.Error())
-			}
+		if existingDisplayName, ok := gatewayDisplayName(existingGateway); ok && existingDisplayName == newDisplayName {
+			return http.StatusConflict, fabfake.SetResponseError(http.StatusConflict, fabcore.ErrGateway.DuplicateGatewayName.Error(), fabcore.ErrGateway.DuplicateGatewayName.Error())
 		}
 	}
 
 	return http.StatusCreated, nil
+}
+
+func gatewayDisplayName(entity fabcore.GatewayClassification) (string, bool) {
+	switch entity := entity.(type) {
+	case *fabcore.VirtualNetworkGateway:
+		return *entity.DisplayName, true
+	case *fabcore.StreamingVirtualNetworkGateway:
+		return *entity.DisplayName, true
+	case *fabcore.OnPremisesGateway:
+		return *entity.DisplayName, true
+	default:
+		return "", false
+	}
 }
 
 func (o *operationsGateway) GetID(entity fabcore.GatewayClassification) string {
