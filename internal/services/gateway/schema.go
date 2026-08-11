@@ -174,15 +174,62 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Optional: true,
 					Computed: true,
 					Validators: []validator.Int32{
-						superint32validator.RequireIfAttributeIsOneOf(path.MatchRoot("type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.GatewayTypeVirtualNetwork)),
-							}),
 						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
 							[]attr.Value{
 								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
 								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
 							}),
+						superint32validator.NullIfAttributeIsSet(path.MatchRoot("min_member_gateway_count")),
+						superint32validator.NullIfAttributeIsSet(path.MatchRoot("max_member_gateway_count")),
+					},
+				},
+				DataSource: &schemaD.Int32Attribute{
+					Computed: true,
+				},
+			},
+			"min_member_gateway_count": superschema.Int32Attribute{
+				Common: &schemaR.Int32Attribute{
+					MarkdownDescription: "The minimum number of member gateways to scale down to.",
+					Validators: []validator.Int32{
+						int32validator.Between(MinNumberOfMemberGatewaysValues, MaxNumberOfMemberGatewaysValues),
+					},
+				},
+				Resource: &schemaR.Int32Attribute{
+					Optional: true,
+					Computed: true,
+					Validators: []validator.Int32{
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+							}),
+						superint32validator.NullIfAttributeIsSet(path.MatchRoot("number_of_member_gateways")),
+						superint32validator.RequireIfAttributeIsSet(path.MatchRoot("max_member_gateway_count")),
+					},
+				},
+				DataSource: &schemaD.Int32Attribute{
+					Computed: true,
+				},
+			},
+			"max_member_gateway_count": superschema.Int32Attribute{
+				Common: &schemaR.Int32Attribute{
+					MarkdownDescription: "The maximum number of member gateways to scale up to.",
+					Validators: []validator.Int32{
+						int32validator.Between(MinNumberOfMemberGatewaysValues, MaxNumberOfMemberGatewaysValues),
+					},
+				},
+				Resource: &schemaR.Int32Attribute{
+					Optional: true,
+					Computed: true,
+					Validators: []validator.Int32{
+						superint32validator.NullIfAttributeIsOneOf(path.MatchRoot("type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.GatewayTypeOnPremises)),
+								types.StringValue(string(fabcore.GatewayTypeOnPremisesPersonal)),
+							}),
+						superint32validator.NullIfAttributeIsSet(path.MatchRoot("number_of_member_gateways")),
+						superint32validator.RequireIfAttributeIsSet(path.MatchRoot("min_member_gateway_count")),
+						int32validator.AtLeastSumOf(path.MatchRoot("min_member_gateway_count")),
 					},
 				},
 				DataSource: &schemaD.Int32Attribute{

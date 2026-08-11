@@ -28,6 +28,8 @@ type baseGatewayModel struct {
 	CapacityID                   customtypes.UUID                                                       `tfsdk:"capacity_id"`                     // VirtualNetwork
 	InactivityMinutesBeforeSleep types.Int32                                                            `tfsdk:"inactivity_minutes_before_sleep"` // VirtualNetwork
 	NumberOfMemberGateways       types.Int32                                                            `tfsdk:"number_of_member_gateways"`       // VirtualNetwork & OnPremises
+	MinMemberGatewayCount        types.Int32                                                            `tfsdk:"min_member_gateway_count"`        // VirtualNetwork
+	MaxMemberGatewayCount        types.Int32                                                            `tfsdk:"max_member_gateway_count"`        // VirtualNetwork
 	VirtualNetworkAzureResource  supertypes.SingleNestedObjectValueOf[virtualNetworkAzureResourceModel] `tfsdk:"virtual_network_azure_resource"`  // VirtualNetwork
 	AllowCloudConnectionRefresh  types.Bool                                                             `tfsdk:"allow_cloud_connection_refresh"`  // OnPremises
 	AllowCustomConnectors        types.Bool                                                             `tfsdk:"allow_custom_connectors"`         // OnPremises
@@ -48,6 +50,8 @@ func (to *baseGatewayModel) set(ctx context.Context, from fabcore.GatewayClassif
 	to.CapacityID = customtypes.NewUUIDNull()
 	to.InactivityMinutesBeforeSleep = types.Int32Null()
 	to.NumberOfMemberGateways = types.Int32Null()
+	to.MinMemberGatewayCount = types.Int32Null()
+	to.MaxMemberGatewayCount = types.Int32Null()
 
 	to.AllowCloudConnectionRefresh = types.BoolNull()
 	to.AllowCustomConnectors = types.BoolNull()
@@ -63,6 +67,8 @@ func (to *baseGatewayModel) set(ctx context.Context, from fabcore.GatewayClassif
 		to.CapacityID = customtypes.NewUUIDPointerValue(entity.CapacityID)
 		to.InactivityMinutesBeforeSleep = types.Int32PointerValue(entity.InactivityMinutesBeforeSleep)
 		to.NumberOfMemberGateways = types.Int32PointerValue(entity.NumberOfMemberGateways)
+		to.MinMemberGatewayCount = types.Int32PointerValue(entity.MinMemberGatewayCount)
+		to.MaxMemberGatewayCount = types.Int32PointerValue(entity.MaxMemberGatewayCount)
 
 		if entity.VirtualNetworkAzureResource != nil {
 			virtualNetworkAzureResourceModel := &virtualNetworkAzureResourceModel{}
@@ -195,12 +201,11 @@ func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayMod
 			return diags
 		}
 
-		to.CreateGatewayRequestClassification = &fabcore.CreateVirtualNetworkGatewayRequest{
+		request := &fabcore.CreateVirtualNetworkGatewayRequest{
 			Type:                         &gatewayType,
 			CapacityID:                   from.CapacityID.ValueStringPointer(),
 			DisplayName:                  from.DisplayName.ValueStringPointer(),
 			InactivityMinutesBeforeSleep: from.InactivityMinutesBeforeSleep.ValueInt32Pointer(),
-			NumberOfMemberGateways:       from.NumberOfMemberGateways.ValueInt32Pointer(),
 			VirtualNetworkAzureResource: &fabcore.VirtualNetworkAzureResource{
 				SubscriptionID:     virtualNetworkAzureResource.SubscriptionID.ValueStringPointer(),
 				ResourceGroupName:  virtualNetworkAzureResource.ResourceGroupName.ValueStringPointer(),
@@ -208,6 +213,14 @@ func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayMod
 				SubnetName:         virtualNetworkAzureResource.SubnetName.ValueStringPointer(),
 			},
 		}
+
+		counts := newMemberGatewayCounts(from)
+		request.NumberOfMemberGateways = counts.NumberOfMemberGateways
+		request.MinMemberGatewayCount = counts.MinMemberGatewayCount
+		request.MaxMemberGatewayCount = counts.MaxMemberGatewayCount
+
+		to.CreateGatewayRequestClassification = request
+
 	default:
 		var diags diag.Diagnostics
 
@@ -226,23 +239,36 @@ type requestUpdateGateway struct {
 	fabcore.UpdateGatewayRequestClassification
 }
 
-func (to *requestUpdateGateway) set(from resourceGatewayModel) diag.Diagnostics {
+// set builds the update request. DisplayName is only sent when it changes, because the API
+// rejects a gateway's own current name with DuplicateGatewayName.
+func (to *requestUpdateGateway) set(from, state resourceGatewayModel) diag.Diagnostics {
 	gatewayType := (fabcore.GatewayType)(from.Type.ValueString())
+
+	var displayName *string
+	if !from.DisplayName.Equal(state.DisplayName) {
+		displayName = from.DisplayName.ValueStringPointer()
+	}
 
 	switch gatewayType {
 	case fabcore.GatewayTypeVirtualNetwork:
-		to.UpdateGatewayRequestClassification = &fabcore.UpdateVirtualNetworkGatewayRequest{
+		request := &fabcore.UpdateVirtualNetworkGatewayRequest{
 			Type:                         &gatewayType,
-			DisplayName:                  from.DisplayName.ValueStringPointer(),
+			DisplayName:                  displayName,
 			CapacityID:                   from.CapacityID.ValueStringPointer(),
 			InactivityMinutesBeforeSleep: from.InactivityMinutesBeforeSleep.ValueInt32Pointer(),
-			NumberOfMemberGateways:       from.NumberOfMemberGateways.ValueInt32Pointer(),
 		}
+
+		counts := newMemberGatewayCounts(from)
+		request.NumberOfMemberGateways = counts.NumberOfMemberGateways
+		request.MinMemberGatewayCount = counts.MinMemberGatewayCount
+		request.MaxMemberGatewayCount = counts.MaxMemberGatewayCount
+
+		to.UpdateGatewayRequestClassification = request
 
 	case fabcore.GatewayTypeOnPremises:
 		to.UpdateGatewayRequestClassification = &fabcore.UpdateOnPremisesGatewayRequest{
 			Type:                        &gatewayType,
-			DisplayName:                 from.DisplayName.ValueStringPointer(),
+			DisplayName:                 displayName,
 			AllowCloudConnectionRefresh: from.AllowCloudConnectionRefresh.ValueBoolPointer(),
 			AllowCustomConnectors:       from.AllowCustomConnectors.ValueBoolPointer(),
 			LoadBalancingSetting:        (*fabcore.LoadBalancingSetting)(from.LoadBalancingSetting.ValueStringPointer()),
@@ -260,6 +286,31 @@ func (to *requestUpdateGateway) set(from resourceGatewayModel) diag.Diagnostics 
 	}
 
 	return nil
+}
+
+type memberGatewayCounts struct {
+	NumberOfMemberGateways *int32
+	MinMemberGatewayCount  *int32
+	MaxMemberGatewayCount  *int32
+}
+
+// newMemberGatewayCounts resolves the two mutually exclusive member gateway count modes,
+// treating null and unknown values as "not requested".
+func newMemberGatewayCounts(model resourceGatewayModel) memberGatewayCounts {
+	switch {
+	case (!model.MinMemberGatewayCount.IsNull() && !model.MinMemberGatewayCount.IsUnknown()) ||
+		(!model.MaxMemberGatewayCount.IsNull() && !model.MaxMemberGatewayCount.IsUnknown()):
+		return memberGatewayCounts{
+			MinMemberGatewayCount: model.MinMemberGatewayCount.ValueInt32Pointer(),
+			MaxMemberGatewayCount: model.MaxMemberGatewayCount.ValueInt32Pointer(),
+		}
+	case !model.NumberOfMemberGateways.IsNull() && !model.NumberOfMemberGateways.IsUnknown():
+		return memberGatewayCounts{
+			NumberOfMemberGateways: model.NumberOfMemberGateways.ValueInt32Pointer(),
+		}
+	default:
+		return memberGatewayCounts{}
+	}
 }
 
 /*
