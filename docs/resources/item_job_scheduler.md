@@ -35,12 +35,10 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
   job_type     = "Execute"
   enabled      = true #or false
   configuration = {
-    start_date_time = "2025-11-11T10:00:00Z"
-    end_date_time   = "2025-11-12T10:00:00Z"
-    type            = "Daily"
-    times           = ["10:00"]
-
-    # Windows time zone identifier, defaults to the service-side default when omitted
+    start_date_time    = "2025-11-11T10:00:00Z"
+    end_date_time      = "2025-11-12T10:00:00Z"
+    type               = "Daily"
+    times              = ["10:00"]
     local_time_zone_id = "W. Europe Standard Time"
   }
 }
