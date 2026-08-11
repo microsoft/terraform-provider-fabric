@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed `fabric_gateway` and `fabric_gateways` data sources failing with an `Unsupported Gateway type` error when a `StreamingVirtualNetwork` gateway was present
+time: 2026-08-10T16:04:18.9488241+03:00
+custom:
+    Issue: "1066"
