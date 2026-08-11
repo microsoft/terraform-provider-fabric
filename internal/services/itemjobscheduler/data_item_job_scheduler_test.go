@@ -159,6 +159,7 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", entity["configurationType"].(string)),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "configuration.local_time_zone_id"),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", createdDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", entity["ownerType"].(string)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", entity["ownerId"].(string)),
