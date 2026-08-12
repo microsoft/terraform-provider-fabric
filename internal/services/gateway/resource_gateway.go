@@ -166,9 +166,13 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 		"action": "start",
 	})
 
-	var plan resourceGatewayModel
+	var plan, state resourceGatewayModel
 
 	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(req.State.Get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -182,7 +186,7 @@ func (r *resourceGateway) Update(ctx context.Context, req resource.UpdateRequest
 
 	var reqUpdate requestUpdateGateway
 
-	if resp.Diagnostics.Append(reqUpdate.set(plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(reqUpdate.set(plan, state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
