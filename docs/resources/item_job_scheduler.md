@@ -42,6 +42,21 @@ resource "fabric_item_job_scheduler" "daily_configuration_example" {
   }
 }
 
+# Times are interpreted in the given Windows time zone. Defaults to "Central Standard Time" when omitted.
+resource "fabric_item_job_scheduler" "daily_configuration_time_zone_example" {
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  item_id      = "11111111-1111-1111-1111-111111111111"
+  job_type     = "Execute"
+  enabled      = true #or false
+  configuration = {
+    start_date_time    = "2025-11-11T10:00:00Z"
+    end_date_time      = "2025-11-12T10:00:00Z"
+    local_time_zone_id = "W. Europe Standard Time"
+    type               = "Daily"
+    times              = ["10:00"]
+  }
+}
+
 resource "fabric_item_job_scheduler" "weekly_configuration_example" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   item_id      = "11111111-1111-1111-1111-111111111111"
@@ -128,6 +143,7 @@ Required:
 Optional:
 
 - `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years). Value must be between 1 and 5270400. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Monthly` this attribute is **NULL**.
+- `local_time_zone_id` (String) The time zone identifier in which the schedule times are interpreted. Must be a Windows time zone identifier, for example `Central Standard Time`, `UTC` or `W. Europe Standard Time`. See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the full list. Value defaults to `Central Standard Time`. String length must be at least 1.
 - `occurrence` (Attributes) A date for triggering the job. If the value of [`configuration.type`](#configuration.type) attribute is `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Cron` this attribute is **NULL**. (see [below for nested schema](#nestedatt--configuration--occurrence))
 - `recurrence` (Number) Specifies the monthly job repeat interval. For example, when set to 1 the job is triggered every month. Value must be between 1 and 12. If the value of [`configuration.type`](#configuration.type) attribute is `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Cron` this attribute is **NULL**.
 - `times` (Set of String) A list of time slots in hh:mm format, at most 100 elements are allowed. Set must contain at most 100 elements. Element value must satisfy all validations: Each time entry must be in hh:mm format. If the value of [`configuration.type`](#configuration.type) attribute is one of `Daily`, `Weekly` or `Monthly` this attribute is **REQUIRED**. If the value of [`configuration.type`](#configuration.type) attribute is `Cron` this attribute is **NULL**.
