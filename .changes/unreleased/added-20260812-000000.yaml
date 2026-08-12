@@ -1,0 +1,6 @@
+kind: added
+body: Added `configuration.local_time_zone_id` to `fabric_item_job_scheduler` resource
+  and data sources. Defaults to `Central Standard Time` when not specified.
+time: 2026-08-12T00:00:00.000000000Z
+custom:
+    Issue: "1052"

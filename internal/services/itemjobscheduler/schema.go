@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -223,6 +224,24 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 							regexp.MustCompile(`Z$`),
 							"The time must be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.",
 						),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
+			"local_time_zone_id": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The time zone identifier in which the schedule times are interpreted. " +
+						"Must be a Windows time zone identifier, for example `Central Standard Time`, `UTC` or `W. Europe Standard Time`. " +
+						"See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the full list.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString(DefaultLocalTimeZoneID),
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
