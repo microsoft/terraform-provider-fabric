@@ -26,6 +26,15 @@ func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassificati
 		entity.CapacityID = data.CapacityID
 		entity.InactivityMinutesBeforeSleep = data.InactivityMinutesBeforeSleep
 		entity.NumberOfMemberGateways = data.NumberOfMemberGateways
+		entity.MinMemberGatewayCount = data.MinMemberGatewayCount
+		entity.MaxMemberGatewayCount = data.MaxMemberGatewayCount
+		entity.VirtualNetworkAzureResource = data.VirtualNetworkAzureResource
+
+		return entity
+	case *fabcore.CreateStreamingVirtualNetworkGatewayRequest:
+		entity := NewRandomStreamingVirtualNetworkGateway()
+		entity.Type = data.Type
+		entity.DisplayName = data.DisplayName
 		entity.VirtualNetworkAzureResource = data.VirtualNetworkAzureResource
 
 		return entity
@@ -69,9 +78,15 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 		}
 
 		base.CapacityID = request.CapacityID
-		base.DisplayName = request.DisplayName
 		base.InactivityMinutesBeforeSleep = request.InactivityMinutesBeforeSleep
 		base.NumberOfMemberGateways = request.NumberOfMemberGateways
+		base.MinMemberGatewayCount = request.MinMemberGatewayCount
+		base.MaxMemberGatewayCount = request.MaxMemberGatewayCount
+
+		// PATCH semantics: an omitted display name leaves the current one untouched.
+		if request.DisplayName != nil {
+			base.DisplayName = request.DisplayName
+		}
 
 		return base
 	default:
@@ -117,6 +132,12 @@ func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGa
 	return fabcore.OnPremisesGatewayPersonal{}
 }
 
+func configureStreamingVirtualNetworkGateway(server *fakeServer) fabcore.StreamingVirtualNetworkGateway {
+	configureGateway(server)
+
+	return fabcore.StreamingVirtualNetworkGateway{}
+}
+
 func configureGateway(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
@@ -153,6 +174,8 @@ func NewRandomGateway() fabcore.GatewayClassification {
 		return NewRandomOnPremisesGatewayPersonal()
 	case fabcore.GatewayTypeVirtualNetwork:
 		return NewRandomVirtualNetworkGateway()
+	case fabcore.GatewayTypeStreamingVirtualNetwork:
+		return NewRandomStreamingVirtualNetworkGateway()
 	default:
 		panic("Unsupported Gateway type") // lintignore:R009
 	}
@@ -190,6 +213,23 @@ func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 		InactivityMinutesBeforeSleep: new(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
 		NumberOfMemberGateways:       new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
+	}
+}
+
+func NewRandomVirtualNetworkGatewayAutoScale() *fabcore.VirtualNetworkGateway {
+	entity := NewRandomVirtualNetworkGateway()
+	entity.MinMemberGatewayCount = to.Ptr(gateway.MinNumberOfMemberGatewaysValues)
+	entity.MaxMemberGatewayCount = to.Ptr(gateway.MaxNumberOfMemberGatewaysValues)
+
+	return entity
+}
+
+func NewRandomStreamingVirtualNetworkGateway() *fabcore.StreamingVirtualNetworkGateway {
+	return &fabcore.StreamingVirtualNetworkGateway{
+		ID:                          new(testhelp.RandomUUID()),
+		Type:                        to.Ptr(fabcore.GatewayTypeStreamingVirtualNetwork),
+		DisplayName:                 new(testhelp.RandomName()),
+		VirtualNetworkAzureResource: NewRandomVirtualNetworkAzureResource(),
 	}
 }
 

@@ -153,6 +153,8 @@ func (d *dataSourceGateway) getByDisplayName(ctx context.Context, model *dataSou
 			switch gateway := entity.(type) {
 			case *fabcore.VirtualNetworkGateway:
 				entityDisplayName = *(gateway.DisplayName)
+			case *fabcore.StreamingVirtualNetworkGateway:
+				entityDisplayName = *(gateway.DisplayName)
 			case *fabcore.OnPremisesGateway:
 				entityDisplayName = *(gateway.DisplayName)
 			default:
