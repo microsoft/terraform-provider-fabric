@@ -44,6 +44,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureVirtualNetworkGateway)
 	handleEntity(server, configureOnPremisesGateway)
 	handleEntity(server, configureOnPremisesGatewayPersonal)
+	handleEntity(server, configureStreamingVirtualNetworkGateway)
 	handleEntity(server, configureKQLDatabase)
 	handleEntity(server, configureLakehouse)
 	handleEntity(server, configureMirroredCatalog)

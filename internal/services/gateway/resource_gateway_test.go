@@ -97,7 +97,7 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute inactivity_minutes_before_sleep`),
 		},
-		// error - missing required attributes - number_of_member_gateways
+		// error - conflicting member gateway count modes - number_of_member_gateways with min_member_gateway_count
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -106,6 +106,9 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
 					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"min_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"max_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -115,7 +118,71 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 					"capacity_id": "00000000-0000-0000-0000-000000000000",
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid configuration for attribute number_of_member_gateways`),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute (number_of_member_gateways|min_member_gateway_count|max_member_gateway_count)`),
+		},
+		// error - incomplete member gateway count range - min_member_gateway_count without max_member_gateway_count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
+					"display_name":                    "test",
+					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"min_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"capacity_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute max_member_gateway_count`),
+		},
+		// error - incomplete member gateway count range - max_member_gateway_count without min_member_gateway_count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
+					"display_name":                    "test",
+					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"max_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"capacity_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute min_member_gateway_count`),
+		},
+		// error - invalid member gateway count range - max_member_gateway_count lower than min_member_gateway_count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
+					"display_name":                    "test",
+					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"min_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
+					"max_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  "test",
+						"virtual_network_name": "test",
+						"subnet_name":          "test",
+						"subscription_id":      "00000000-0000-0000-0000-000000000000",
+					},
+					"capacity_id": "00000000-0000-0000-0000-000000000000",
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
 		},
 		// error - missing required attributes - virtual_network_azure_resource
 		{
@@ -424,6 +491,98 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_GatewayResource_AutoScaleCRUD(t *testing.T) {
+	entityBefore := fakes.NewRandomVirtualNetworkGatewayAutoScale()
+	entityAfter := fakes.NewRandomVirtualNetworkGatewayAutoScale()
+
+	minCount := (int)(gateway.MinNumberOfMemberGatewaysValues)
+	maxCount := (int)(gateway.MaxNumberOfMemberGatewaysValues)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read - autoscale mode
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            (string)(*entityBefore.Type),
+					"display_name":                    *entityBefore.DisplayName,
+					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"min_member_gateway_count":        minCount,
+					"max_member_gateway_count":        maxCount,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityBefore.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityBefore.VirtualNetworkAzureResource.SubscriptionID,
+					},
+					"capacity_id": *entityBefore.CapacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "min_member_gateway_count", strconv.Itoa(minCount)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "max_member_gateway_count", strconv.Itoa(maxCount)),
+				// the fixed member count mode is mutually exclusive with the autoscale range
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "number_of_member_gateways"),
+			),
+		},
+		// Update and Read - narrow the autoscale range
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            (string)(*entityBefore.Type),
+					"display_name":                    *entityAfter.DisplayName,
+					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"min_member_gateway_count":        minCount,
+					"max_member_gateway_count":        minCount + 1,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityBefore.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityBefore.VirtualNetworkAzureResource.SubscriptionID,
+					},
+					"capacity_id": *entityBefore.CapacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "min_member_gateway_count", strconv.Itoa(minCount)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "max_member_gateway_count", strconv.Itoa(minCount+1)),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "number_of_member_gateways"),
+			),
+		},
+		// Update and Read - switch from the autoscale range to a fixed member count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            (string)(*entityBefore.Type),
+					"display_name":                    *entityAfter.DisplayName,
+					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"number_of_member_gateways":       maxCount,
+					"virtual_network_azure_resource": map[string]any{
+						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
+						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
+						"subnet_name":          *entityBefore.VirtualNetworkAzureResource.SubnetName,
+						"subscription_id":      *entityBefore.VirtualNetworkAzureResource.SubscriptionID,
+					},
+					"capacity_id": *entityBefore.CapacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(maxCount)),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "min_member_gateway_count"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "max_member_gateway_count"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_GatewayResource_CRUD(t *testing.T) {
 	entityType := string(fabcore.GatewayTypeVirtualNetwork)
 	entityCreateDisplayName := testhelp.RandomName()
@@ -543,6 +702,97 @@ func TestAcc_GatewayResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "capacity_id", capacityID),
 			),
 		},
+	},
+	))
+}
+
+func TestAcc_GatewayResource_AutoScaleCRUD(t *testing.T) {
+	entityType := string(fabcore.GatewayTypeVirtualNetwork)
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityInactivityMinutesBeforeSleep := int(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues))
+
+	minCount := int(gateway.MinNumberOfMemberGatewaysValues)
+	maxCount := int(gateway.MaxNumberOfMemberGatewaysValues)
+
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	virtualNetworkAzureResource01 := testhelp.WellKnown()["VirtualNetwork01"].(map[string]any)
+	vNET01VirtualNetworkName := virtualNetworkAzureResource01["name"].(string)
+	vNET01ResourceGroupName := virtualNetworkAzureResource01["resourceGroupName"].(string)
+	vNET01SubnetName := virtualNetworkAzureResource01["subnetName"].(string)
+	vNET01SubscriptionID := virtualNetworkAzureResource01["subscriptionId"].(string)
+
+	virtualNetworkAzureResource := map[string]any{
+		"virtual_network_name": vNET01VirtualNetworkName,
+		"resource_group_name":  vNET01ResourceGroupName,
+		"subnet_name":          vNET01SubnetName,
+		"subscription_id":      vNET01SubscriptionID,
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read - autoscale mode
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityCreateDisplayName,
+					"inactivity_minutes_before_sleep": entityInactivityMinutesBeforeSleep,
+					"min_member_gateway_count":        minCount,
+					"max_member_gateway_count":        maxCount,
+					"virtual_network_azure_resource":  virtualNetworkAzureResource,
+					"capacity_id":                     capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "min_member_gateway_count", strconv.Itoa(minCount)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "max_member_gateway_count", strconv.Itoa(maxCount)),
+			),
+		},
+		// Update and Read - narrow the autoscale range
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityUpdateDisplayName,
+					"inactivity_minutes_before_sleep": entityInactivityMinutesBeforeSleep,
+					"min_member_gateway_count":        minCount,
+					"max_member_gateway_count":        minCount + 1,
+					"virtual_network_azure_resource":  virtualNetworkAzureResource,
+					"capacity_id":                     capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "min_member_gateway_count", strconv.Itoa(minCount)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "max_member_gateway_count", strconv.Itoa(minCount+1)),
+			),
+		},
+		// Update and Read - switch from the autoscale range to a fixed member count
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"type":                            entityType,
+					"display_name":                    entityUpdateDisplayName,
+					"inactivity_minutes_before_sleep": entityInactivityMinutesBeforeSleep,
+					"number_of_member_gateways":       minCount,
+					"virtual_network_azure_resource":  virtualNetworkAzureResource,
+					"capacity_id":                     capacityID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "number_of_member_gateways", strconv.Itoa(minCount)),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
 	},
 	))
 }

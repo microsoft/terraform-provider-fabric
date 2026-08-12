@@ -21,11 +21,15 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_GatewayDataSource(t *testing.T) {
 	virtualNetworkGateway := fakes.NewRandomVirtualNetworkGateway()
+	virtualNetworkGatewayAutoScale := fakes.NewRandomVirtualNetworkGatewayAutoScale()
+	streamingVirtualNetworkGateway := fakes.NewRandomStreamingVirtualNetworkGateway()
 	onPremisesGateway := fakes.NewRandomOnPremisesGateway()
 	onPremisesGatewayPersonalGateway := fakes.NewRandomOnPremisesGatewayPersonal()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
 	fakes.FakeServer.Upsert(virtualNetworkGateway)
+	fakes.FakeServer.Upsert(virtualNetworkGatewayAutoScale)
+	fakes.FakeServer.Upsert(streamingVirtualNetworkGateway)
 	fakes.FakeServer.Upsert(onPremisesGateway)
 	fakes.FakeServer.Upsert(onPremisesGatewayPersonalGateway)
 	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
@@ -100,6 +104,83 @@ func TestUnit_GatewayDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subnet_name", virtualNetworkGateway.VirtualNetworkAzureResource.SubnetName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subscription_id", virtualNetworkGateway.VirtualNetworkAzureResource.SubscriptionID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.virtual_network_name", virtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName),
+			),
+		},
+		// read by id - virtual network with autoscale member gateway counts
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": *virtualNetworkGatewayAutoScale.ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", virtualNetworkGatewayAutoScale.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(virtualNetworkGatewayAutoScale.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", virtualNetworkGatewayAutoScale.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "min_member_gateway_count", strconv.Itoa(int(*virtualNetworkGatewayAutoScale.MinMemberGatewayCount))),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "max_member_gateway_count", strconv.Itoa(int(*virtualNetworkGatewayAutoScale.MaxMemberGatewayCount))),
+				// the API reports the current member count alongside the autoscale range
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "number_of_member_gateways", strconv.Itoa(int(*virtualNetworkGatewayAutoScale.NumberOfMemberGateways))),
+			),
+		},
+		// read by id - streaming virtual network
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": *streamingVirtualNetworkGateway.ID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", streamingVirtualNetworkGateway.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(streamingVirtualNetworkGateway.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", streamingVirtualNetworkGateway.DisplayName),
+				resource.TestCheckResourceAttrPtr(
+					testDataSourceItemFQN,
+					"virtual_network_azure_resource.resource_group_name",
+					streamingVirtualNetworkGateway.VirtualNetworkAzureResource.ResourceGroupName,
+				),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subnet_name", streamingVirtualNetworkGateway.VirtualNetworkAzureResource.SubnetName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subscription_id", streamingVirtualNetworkGateway.VirtualNetworkAzureResource.SubscriptionID),
+				resource.TestCheckResourceAttrPtr(
+					testDataSourceItemFQN,
+					"virtual_network_azure_resource.virtual_network_name",
+					streamingVirtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName,
+				),
+				// not part of the streaming virtual network gateway contract
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "capacity_id"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "inactivity_minutes_before_sleep"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "number_of_member_gateways"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "version"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "public_key.exponent"),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "public_key.modulus"),
+			),
+		},
+		// read by name - streaming virtual network
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name": *streamingVirtualNetworkGateway.DisplayName,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", streamingVirtualNetworkGateway.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "type", (*string)(streamingVirtualNetworkGateway.Type)),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", streamingVirtualNetworkGateway.DisplayName),
+				resource.TestCheckResourceAttrPtr(
+					testDataSourceItemFQN,
+					"virtual_network_azure_resource.resource_group_name",
+					streamingVirtualNetworkGateway.VirtualNetworkAzureResource.ResourceGroupName,
+				),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subnet_name", streamingVirtualNetworkGateway.VirtualNetworkAzureResource.SubnetName),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "virtual_network_azure_resource.subscription_id", streamingVirtualNetworkGateway.VirtualNetworkAzureResource.SubscriptionID),
+				resource.TestCheckResourceAttrPtr(
+					testDataSourceItemFQN,
+					"virtual_network_azure_resource.virtual_network_name",
+					streamingVirtualNetworkGateway.VirtualNetworkAzureResource.VirtualNetworkName,
+				),
 			),
 		},
 		// read by id - on premises
