@@ -1,0 +1,5 @@
+kind: added
+body: New Resource `fabric_workspace_encryption` to manage Customer-Managed Key (CMK) encryption for a Workspace.
+time: 2026-08-13T15:45:00.0000000+03:00
+custom:
+    Issue: "1074"
