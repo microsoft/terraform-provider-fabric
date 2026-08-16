@@ -463,67 +463,6 @@ func attrValueFromJSONImplied(b []byte) (attr.Type, attr.Value, error) {
 	}
 }
 
-// IsFullyKnown returns true if `val` is known. If `val` is an aggregate type,
-// IsFullyKnown only returns true if all elements and attributes are known, as well.
-//
-//nolint:gocognit
-func IsFullyKnown(val attr.Value) bool {
-	if val == nil {
-		return true
-	}
-
-	if val.IsUnknown() {
-		return false
-	}
-
-	switch v := val.(type) {
-	case types.Dynamic:
-		return IsFullyKnown(v.UnderlyingValue())
-	case types.List:
-		for _, e := range v.Elements() {
-			if !IsFullyKnown(e) {
-				return false
-			}
-		}
-
-		return true
-	case types.Set:
-		for _, e := range v.Elements() {
-			if !IsFullyKnown(e) {
-				return false
-			}
-		}
-
-		return true
-	case types.Tuple:
-		for _, e := range v.Elements() {
-			if !IsFullyKnown(e) {
-				return false
-			}
-		}
-
-		return true
-	case types.Map:
-		for _, e := range v.Elements() {
-			if !IsFullyKnown(e) {
-				return false
-			}
-		}
-
-		return true
-	case types.Object:
-		for _, e := range v.Attributes() {
-			if !IsFullyKnown(e) {
-				return false
-			}
-		}
-
-		return true
-	default:
-		return true
-	}
-}
-
 func SemanticallyEqual(a, b types.Dynamic) bool {
 	aJSON, err := DynamicToJSON(a)
 	if err != nil {
