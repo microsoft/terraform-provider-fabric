@@ -117,7 +117,7 @@ Optional:
 Optional:
 
 - `name` (String) The name of the environment.
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`, `2.0`.
 
 <a id="nestedatt--high_concurrency"></a>
 
