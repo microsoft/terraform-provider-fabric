@@ -1233,6 +1233,7 @@ $itemNaming = @{
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
   'WorkspaceOAP'                    = 'wsoap'
+  'WorkspaceIAP'                    = 'wsiap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'DomainParent'                    = 'parent'
@@ -1318,6 +1319,22 @@ $wellKnown['WorkspaceOAP'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 # Set Outbound Network Policy to Deny
 Set-OutboundNetworkPolicy -WorkspaceId $workspace.id
+
+# Create WorkspaceIAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceIAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceIAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceIAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceIAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceIAP if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Create WorkspaceRS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
@@ -1901,6 +1918,16 @@ $wellKnown['AzureDataFactory'] = @{
   location          = $wellKnown['ResourceGroup'].location
   subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
+
+# Set Inbound Azure Resource Rules on WorkspaceIAP
+# Rules stay inert until the workspace inbound public access default action is set to Deny
+$inboundAzureResourceRule = @{
+  displayName = "$($itemNaming['AzureDataFactory']) - $($wellKnown['AzureDataFactory'].name)"
+  resourceId  = "/subscriptions/$($wellKnown['AzureDataFactory'].subscriptionId)/resourceGroups/$($wellKnown['AzureDataFactory'].resourceGroupName)/providers/Microsoft.DataFactory/factories/$($wellKnown['AzureDataFactory'].name)"
+}
+Write-Log -Message "Setting Inbound Azure Resource Rules for WorkspaceIAP ID: $($wellKnown['WorkspaceIAP'].id)" -Level 'WARN'
+Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$($wellKnown['WorkspaceIAP'].id)/networking/communicationPolicy/inbound/azureResources" -Payload @{ rules = @($inboundAzureResourceRule) } | Out-Null
+$wellKnown['WorkspaceIAP'].inboundAzureResourceRule = $inboundAzureResourceRule
 
 # Create the Mounted Data Factory if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
