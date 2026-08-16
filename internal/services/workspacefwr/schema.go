@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -91,7 +92,11 @@ func itemSchema() superschema.Schema {
 						Resource: &schemaR.StringAttribute{
 							Required: true,
 							Validators: []validator.String{
-								stringvalidator.LengthAtLeast(1),
+								superstringvalidator.IsNetwork([]superstringvalidator.NetworkValidatorType{
+									superstringvalidator.IPV4,
+									superstringvalidator.IPV4WithCIDR,
+									superstringvalidator.IPV4Range,
+								}, true),
 							},
 						},
 						DataSource: &schemaD.StringAttribute{

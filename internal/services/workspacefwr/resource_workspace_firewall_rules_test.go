@@ -117,6 +117,23 @@ func TestUnit_WorkspaceFirewallRulesResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`string length must be between 1 and\s+128`),
 		},
+		// error - rules - invalid value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"rules": []map[string]any{
+						{
+							"display_name": "test",
+							"value":        "not-an-ip",
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
+		},
 	}))
 }
 
