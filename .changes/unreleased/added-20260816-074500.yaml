@@ -1,0 +1,5 @@
+kind: added
+body: Added support for Spark runtime version `2.0` in the `fabric_spark_workspace_settings` resource and data-source.
+time: 2026-08-16T07:45:00.0000000+00:00
+custom:
+    Issue: "1076"
