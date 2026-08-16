@@ -60,7 +60,7 @@ resource "fabric_workspace_firewall_rules" "example" {
 
 ### Optional
 
-- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported; private ranges reserved by [RFC 1918](https://www.rfc-editor.org/rfc/rfc1918) are rejected by the service. Value defaults to `[]`. Set must contain at most 256 elements. (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported. Value defaults to `[]`. Set must contain at most 256 elements. (see [below for nested schema](#nestedatt--rules))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--rules"></a>
@@ -70,7 +70,10 @@ resource "fabric_workspace_firewall_rules" "example" {
 Required:
 
 - `display_name` (String) The name of the rule. Must be unique within the Workspace. String length must be between 1 and 128.
-- `value` (String) The IP range in start-end format (for example, `192.0.2.1-192.0.2.10`), CIDR notation (for example, `203.0.113.0/24`), or a single IP address. String length must be at least 1.
+- `value` (String) The IP range in start-end format (for example, `192.0.2.1-192.0.2.10`), CIDR notation (for example, `203.0.113.0/24`), or a single IP address. The value must be at least one of the following :
+  - a valid IPV4 address (Ex: `192.168.0.1`)
+  - a valid IPV4 address with CIDR (Ex: `192.168.0.1/24`)
+  - a valid IPV4 address range (Ex: `192.168.0.1-192.168.0.100`).
 
 <a id="nestedatt--timeouts"></a>
 

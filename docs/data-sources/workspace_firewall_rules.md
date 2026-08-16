@@ -37,7 +37,7 @@ data "fabric_workspace_firewall_rules" "example" {
 
 ### Read-Only
 
-- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported; private ranges reserved by [RFC 1918](https://www.rfc-editor.org/rfc/rfc1918) are rejected by the service. (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported. (see [below for nested schema](#nestedatt--rules))
 
 <a id="nestedatt--timeouts"></a>
 
