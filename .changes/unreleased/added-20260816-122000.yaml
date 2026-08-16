@@ -1,0 +1,5 @@
+kind: added
+body: New Resource `fabric_workspace_firewall_rules` and Data Source `fabric_workspace_firewall_rules` to manage workspace inbound IP firewall rules.
+time: 2026-08-16T12:20:00.0000000+03:00
+custom:
+    Issue: "1079"
