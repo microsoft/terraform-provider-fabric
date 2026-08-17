@@ -1,5 +1,0 @@
-kind: added
-body: Added virtual network gateway member autoscaling support via `min_member_gateway_count` and `max_member_gateway_count`.
-time: 2026-08-10T16:07:35.5503872+03:00
-custom:
-    Issue: "1065"
