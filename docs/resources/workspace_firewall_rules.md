@@ -56,11 +56,11 @@ resource "fabric_workspace_firewall_rules" "example" {
 
 ### Required
 
+- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported. Set must contain at most 256 elements. (see [below for nested schema](#nestedatt--rules))
 - `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
 
 ### Optional
 
-- `rules` (Attributes Set) A set of rules that define the IP addresses permitted for inbound access to the Workspace. Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. Only public IP addresses are supported. Value defaults to `[]`. Set must contain at most 256 elements. (see [below for nested schema](#nestedatt--rules))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 <a id="nestedatt--rules"></a>

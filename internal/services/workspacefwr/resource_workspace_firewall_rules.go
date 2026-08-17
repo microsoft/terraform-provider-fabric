@@ -222,7 +222,7 @@ func (r *resourceWorkspaceFirewallRules) Delete(ctx context.Context, req resourc
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Reset to defaults by sending an empty request body.
+	// Reset to defaults by sending an empty set of rules.
 	resp.Diagnostics.AddWarning(
 		"Resetting Firewall Rules to defaults",
 		fmt.Sprintf(
@@ -231,7 +231,10 @@ func (r *resourceWorkspaceFirewallRules) Delete(ctx context.Context, req resourc
 		),
 	)
 
-	reqDelete := fabcore.InboundFirewallConfiguration{}
+	// A nil slice is omitted from the payload entirely, so send an explicit empty list.
+	reqDelete := fabcore.InboundFirewallConfiguration{
+		Rules: []fabcore.FirewallRule{},
+	}
 
 	_, err := r.client.SetFirewallRules(ctx, state.WorkspaceID.ValueString(), reqDelete, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
