@@ -113,7 +113,7 @@ func fakeGetFirewallRulesReversed(
 
 		resp = azfake.Responder[fabcore.WorkspacesClientGetFirewallRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetFirewallRulesResponse{
-			InboundFirewallConfiguration: fabcore.InboundFirewallConfiguration{Rules: reversed},
+			Rules: reversed,
 		}, nil)
 
 		return resp, errResp

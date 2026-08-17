@@ -31,17 +31,13 @@ func (to *baseWorkspaceFirewallRulesModel) set(ctx context.Context, workspaceID 
 
 	slice := make([]*firewallRuleModel, 0, len(from.Rules))
 
-	for _, prop := range from.Rules {
-		firewallRule := &firewallRuleModel{}
-		firewallRule.set(prop)
-		slice = append(slice, firewallRule)
+	for _, entity := range from.Rules {
+		var entityModel firewallRuleModel
+		entityModel.set(entity)
+		slice = append(slice, &entityModel)
 	}
 
-	if diags := to.Rules.Set(ctx, slice); diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return to.Rules.Set(ctx, slice)
 }
 
 func (to *firewallRuleModel) set(from fabcore.FirewallRule) {

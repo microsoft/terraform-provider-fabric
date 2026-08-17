@@ -80,6 +80,12 @@ func TestUnit_WorkspaceFirewallRulesResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": "invalid-uuid",
+					"rules": []map[string]any{
+						{
+							"display_name": "test",
+							"value":        "203.0.113.0/24",
+						},
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -193,13 +199,14 @@ func TestUnit_WorkspaceFirewallRulesResource_CRUD(t *testing.T) {
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{"display_name": "single", "value": "192.0.2.42"}),
 			),
 		},
-		// update and read - set to default values
+		// update and read - clear all rules
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
+					"rules":        []map[string]any{},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

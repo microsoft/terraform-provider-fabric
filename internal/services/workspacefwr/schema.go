@@ -6,14 +6,11 @@ package workspacefwr
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
@@ -53,22 +50,15 @@ func itemSchema() superschema.Schema {
 					MarkdownDescription: "A set of rules that define the IP addresses permitted for inbound access to the Workspace. " +
 						"Rules are only enforced when `inbound.public_access_rules.default_action` of the `fabric_workspace_network_communication_policy` is set to `Deny`. " +
 						"Only public IP addresses are supported.",
-					Computed: true,
 				},
 				Resource: &schemaR.SetNestedAttribute{
-					Optional: true,
+					Required: true,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(maxRules),
 					},
-					Default: setdefault.StaticValue(types.SetValueMust(
-						types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"display_name": types.StringType,
-								"value":        types.StringType,
-							},
-						},
-						[]attr.Value{},
-					)),
+				},
+				DataSource: &schemaD.SetNestedAttribute{
+					Computed: true,
 				},
 				Attributes: superschema.Attributes{
 					"display_name": superschema.SuperStringAttribute{
