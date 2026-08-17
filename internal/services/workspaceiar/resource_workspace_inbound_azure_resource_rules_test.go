@@ -33,6 +33,15 @@ var (
 		"display_name": "databricks access connector",
 		"resource_id":  "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/testrg/providers/Microsoft.Databricks/accessConnectors/testdbx",
 	}
+	// ARM emits lowercase segment keywords in some IDs.
+	testRuleLowercaseSegments = map[string]string{
+		"display_name": "lowercase segments",
+		"resource_id":  "/subscriptions/11111111-1111-1111-1111-111111111111/resourcegroups/testrg/providers/Microsoft.Kusto/clusters/testadx",
+	} // an odd number of segments after the provider namespace is accepted rather than rejected at plan time
+	testRuleOddSegments = map[string]string{
+		"display_name": "odd segments",
+		"resource_id":  "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/testrg/providers/Microsoft.Sql/servers/testsql/databases",
+	}
 )
 
 func testResourceConfig(workspaceID string, rules ...map[string]string) string {
@@ -148,7 +157,7 @@ func TestUnit_WorkspaceInboundAzureResourceRulesResource_Attributes(t *testing.T
 			),
 			ExpectError: regexp.MustCompile(`must be a valid Azure Resource Manager \(ARM\) resource ID`),
 		},
-		// error - rules - resource_id missing the resource name segment
+		// error - rules - resource_id has a provider namespace but no resource type or name
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -159,6 +168,23 @@ func TestUnit_WorkspaceInboundAzureResourceRulesResource_Attributes(t *testing.T
 						{
 							"display_name": "test",
 							"resource_id":  "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/testrg/providers/Microsoft.DataFactory",
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`must be a valid Azure Resource Manager \(ARM\) resource ID`),
+		},
+		// error - rules - resource_id has a resource type but no resource name
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"rules": []map[string]any{
+						{
+							"display_name": "test",
+							"resource_id":  "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/testrg/providers/Microsoft.DataFactory/factories",
 						},
 					},
 				},
@@ -190,12 +216,14 @@ func TestUnit_WorkspaceInboundAzureResourceRulesResource_CRUD(t *testing.T) {
 		// update - add rules
 		{
 			ResourceName: testResourceItemFQN,
-			Config:       testResourceConfig(workspaceID, testRuleFactory, testRuleSQLServer, testRuleDatabricks),
+			Config:       testResourceConfig(workspaceID, testRuleFactory, testRuleSQLServer, testRuleDatabricks, testRuleLowercaseSegments, testRuleOddSegments),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "3"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "5"),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", testRuleFactory),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", testRuleSQLServer),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", testRuleDatabricks),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", testRuleLowercaseSegments),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", testRuleOddSegments),
 			),
 		},
 		// update - remove a rule
