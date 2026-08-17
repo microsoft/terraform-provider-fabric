@@ -22,8 +22,10 @@ import (
 // Service-side limit, see https://learn.microsoft.com/fabric/onelake/onelake-manage-inbound-access-trusted-resources
 const maxRules = 25
 
-// Azure Resource Manager resource ID of a resource instance within a subscription and resource group.
-var resourceIDRegex = regexp.MustCompile(`^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+(/[^/]+)+$`)
+// Azure Resource Manager resource ID of a resource instance: the provider namespace must be followed by at least a resource type and name.
+// Further segments are not required to come in type/name pairs, so uncommon ARM shapes are left for the API to reject rather than failing at plan time.
+// Matched case-insensitively because ARM treats segment keywords as case-insensitive and emits variants such as `/resourcegroups/`.
+var resourceIDRegex = regexp.MustCompile(`(?i)^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+(/[^/]+){2,}$`)
 
 func itemSchema() superschema.Schema {
 	return superschema.Schema{
