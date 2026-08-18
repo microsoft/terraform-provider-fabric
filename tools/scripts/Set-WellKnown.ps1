@@ -2085,14 +2085,15 @@ else {
     -Payload $itemJobSchedulerPayload
 
   $wellKnown['ItemJobScheduler'] = @{
-    id                = $itemJobScheduler.id
-    ownerType         = $itemJobScheduler.owner.type
-    ownerId           = $itemJobScheduler.owner.id
-    itemId            = $wellKnown['Dataflow'].id
-    enabled           = $itemJobScheduler.enabled
-    configurationType = $itemJobScheduler.configuration.type
-    createdDateTime   = $itemJobScheduler.createdDateTime
-    jobType           = $JOB_TYPE
+    id                           = $itemJobScheduler.id
+    ownerType                    = $itemJobScheduler.owner.type
+    ownerId                      = $itemJobScheduler.owner.id
+    itemId                       = $wellKnown['Dataflow'].id
+    enabled                      = $itemJobScheduler.enabled
+    configurationType            = $itemJobScheduler.configuration.type
+    configurationLocalTimeZoneId = $itemJobScheduler.configuration.localTimeZoneId
+    createdDateTime              = $itemJobScheduler.createdDateTime
+    jobType                      = $JOB_TYPE
   }
 }
 
