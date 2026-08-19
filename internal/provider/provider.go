@@ -101,6 +101,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceencryption"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
@@ -508,6 +509,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		warehousesnapshot.NewResourceWarehouseSnapshot,
 		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
+		workspaceencryption.NewResourceWorkspaceEncryption,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
@@ -633,6 +635,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		workspaceencryption.NewDataSourceWorkspaceEncryption,
 		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
