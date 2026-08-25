@@ -312,6 +312,9 @@ function Set-FabricItem {
     'OperationsAgent' {
       $itemEndpoint = 'operationsAgents'
     }
+    'PaginatedReport' {
+      $itemEndpoint = 'paginatedReports'
+    }
     'Reflex' {
       $itemEndpoint = 'reflexes'
     }
@@ -345,7 +348,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1497,6 +1500,24 @@ $wellKnown['Report'] = @{
   id          = $report.id
   displayName = $report.displayName
   description = $report.description
+}
+
+# Create Paginated Report if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['PaginatedReport'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "${displayNameTemp}.rdl"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/paginated_report/report.rdl'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$paginatedReport = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'PaginatedReport' -Definition $definition
+$wellKnown['PaginatedReport'] = @{
+  id          = $paginatedReport.id
+  displayName = $paginatedReport.displayName
+  description = $paginatedReport.description
 }
 
 # Create Deployment Pipeline if not exists
