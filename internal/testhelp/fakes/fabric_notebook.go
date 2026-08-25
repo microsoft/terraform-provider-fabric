@@ -146,7 +146,8 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 		&server.ServerFactory.Notebook.ItemsServer.UpdateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.BeginCreateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.NewListNotebooksPager,
-		&server.ServerFactory.Notebook.ItemsServer.DeleteNotebook)
+		&server.ServerFactory.Notebook.ItemsServer.DeleteNotebook,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +155,8 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 		definitionOperations,
 		&server.ServerFactory.Notebook.ItemsServer.BeginCreateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.BeginGetNotebookDefinition,
-		&server.ServerFactory.Notebook.ItemsServer.BeginUpdateNotebookDefinition)
+		&server.ServerFactory.Notebook.ItemsServer.BeginUpdateNotebookDefinition,
+	)
 
 	return fabnotebook.Notebook{}
 }

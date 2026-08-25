@@ -131,7 +131,8 @@ func configureEnvironment(server *fakeServer) fabenvironment.Environment {
 		&server.ServerFactory.Environment.ItemsServer.UpdateEnvironment,
 		&server.ServerFactory.Environment.ItemsServer.BeginCreateEnvironment,
 		&server.ServerFactory.Environment.ItemsServer.NewListEnvironmentsPager,
-		&server.ServerFactory.Environment.ItemsServer.DeleteEnvironment)
+		&server.ServerFactory.Environment.ItemsServer.DeleteEnvironment,
+	)
 
 	return fabenvironment.Environment{}
 }

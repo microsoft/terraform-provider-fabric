@@ -160,14 +160,16 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 		&server.ServerFactory.Lakehouse.ItemsServer.UpdateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.NewListLakehousesPager,
-		&server.ServerFactory.Lakehouse.ItemsServer.DeleteLakehouse)
+		&server.ServerFactory.Lakehouse.ItemsServer.DeleteLakehouse,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginGetLakehouseDefinition,
-		&server.ServerFactory.Lakehouse.ItemsServer.BeginUpdateLakehouseDefinition)
+		&server.ServerFactory.Lakehouse.ItemsServer.BeginUpdateLakehouseDefinition,
+	)
 
 	return fablakehouse.Lakehouse{}
 }

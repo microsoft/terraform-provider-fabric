@@ -164,14 +164,16 @@ func configureDigitalTwinBuilderFlow(server *fakeServer) fabdigitaltwinbuilderfl
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.UpdateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginCreateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.NewListDigitalTwinBuilderFlowsPager,
-		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.DeleteDigitalTwinBuilderFlow)
+		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.DeleteDigitalTwinBuilderFlow,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginCreateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginGetDigitalTwinBuilderFlowDefinition,
-		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginUpdateDigitalTwinBuilderFlowDefinition)
+		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginUpdateDigitalTwinBuilderFlowDefinition,
+	)
 
 	return fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow{}
 }

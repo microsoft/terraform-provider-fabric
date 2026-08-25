@@ -88,7 +88,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					Optional:            true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(
-							utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleShortcutConflictPolicyValues(), fabcore.ShortcutConflictPolicyGenerateUniqueName), true)...),
+							utils.ConvertEnumsToStringSlices(utils.RemoveSliceByValue(fabcore.PossibleShortcutConflictPolicyValues(), fabcore.ShortcutConflictPolicyGenerateUniqueName), true)...,
+						),
 					},
 				},
 			},

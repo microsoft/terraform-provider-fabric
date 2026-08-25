@@ -205,7 +205,8 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 		&server.ServerFactory.Core.FoldersServer.UpdateFolder,
 		&server.ServerFactory.Core.FoldersServer.CreateFolder,
 		&server.ServerFactory.Core.FoldersServer.NewListFoldersPager,
-		&server.ServerFactory.Core.FoldersServer.DeleteFolder)
+		&server.ServerFactory.Core.FoldersServer.DeleteFolder,
+	)
 
 	server.ServerFactory.Core.FoldersServer.NewListFoldersPager = FakeListFolders(handler)
 	server.ServerFactory.Core.FoldersServer.MoveFolder = FakeMoveFolder(handler)

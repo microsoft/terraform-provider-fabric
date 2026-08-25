@@ -132,7 +132,8 @@ func configureWarehouseSnapshot(server *fakeServer) fabwarehousesnapshot.Warehou
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.UpdateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.BeginCreateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.NewListWarehouseSnapshotsPager,
-		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot)
+		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot,
+	)
 
 	return fabwarehousesnapshot.WarehouseSnapshot{}
 }

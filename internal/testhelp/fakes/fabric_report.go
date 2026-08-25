@@ -146,7 +146,8 @@ func configureReport(server *fakeServer) fabreport.Report {
 		&server.ServerFactory.Report.ItemsServer.UpdateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.NewListReportsPager,
-		&server.ServerFactory.Report.ItemsServer.DeleteReport)
+		&server.ServerFactory.Report.ItemsServer.DeleteReport,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +155,8 @@ func configureReport(server *fakeServer) fabreport.Report {
 		definitionOperations,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginGetReportDefinition,
-		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition)
+		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition,
+	)
 
 	return fabreport.Report{}
 }

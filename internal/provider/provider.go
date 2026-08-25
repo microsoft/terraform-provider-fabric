@@ -972,13 +972,13 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 		}
 
 		if p.config.Auth.OIDC.AzureDevOpsServiceConnectionID == "" && (p.config.Auth.OIDC.Token == "" && (p.config.Auth.OIDC.RequestURL == "" || p.config.Auth.OIDC.RequestToken == "")) {
-			maskValue := (func(v string) string {
+			maskValue := func(v string) string {
 				if v != "" {
 					return "***"
 				}
 
 				return ""
-			})
+			}
 
 			resp.Diagnostics.AddError(
 				common.ErrorInvalidConfig,

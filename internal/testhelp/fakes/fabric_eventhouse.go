@@ -162,7 +162,8 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 		&server.ServerFactory.Eventhouse.ItemsServer.UpdateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.NewListEventhousesPager,
-		&server.ServerFactory.Eventhouse.ItemsServer.DeleteEventhouse)
+		&server.ServerFactory.Eventhouse.ItemsServer.DeleteEventhouse,
+	)
 
 	configureDefinitions(
 		handler,
@@ -170,7 +171,8 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 		definitionOperations,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginGetEventhouseDefinition,
-		&server.ServerFactory.Eventhouse.ItemsServer.BeginUpdateEventhouseDefinition)
+		&server.ServerFactory.Eventhouse.ItemsServer.BeginUpdateEventhouseDefinition,
+	)
 
 	return fabeventhouse.Eventhouse{}
 }

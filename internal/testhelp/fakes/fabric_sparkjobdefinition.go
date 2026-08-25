@@ -163,7 +163,8 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.UpdateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.NewListSparkJobDefinitionsPager,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition,
+	)
 
 	configureDefinitions(
 		handler,
@@ -171,7 +172,8 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		definitionOperations,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginGetSparkJobDefinitionDefinition,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition,
+	)
 
 	return fabsparkjobdefinition.SparkJobDefinition{}
 }

@@ -61,7 +61,8 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -78,7 +79,8 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 						"format":          "Default",
 						"definition":      testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -93,7 +95,8 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -108,7 +111,8 @@ func TestUnit_DataflowResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -132,7 +136,8 @@ func TestUnit_DataflowResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -210,7 +215,8 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -227,7 +233,8 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"folder_id":    *entityBefore.FolderID,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -249,7 +256,8 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"folder_id":    *entityAfter.FolderID,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -269,7 +277,8 @@ func TestUnit_DataflowResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -306,7 +315,8 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -330,7 +340,8 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -351,7 +362,8 @@ func TestAcc_DataflowResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -393,7 +405,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 						"display_name": testhelp.RandomName(),
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
@@ -414,7 +427,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
@@ -432,7 +446,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": testhelp.RandomName(),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
@@ -452,7 +467,8 @@ func TestAcc_DataflowWithFolderIdResource_CRUD(t *testing.T) {
 						"display_name": testhelp.RandomName(),
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN3, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN3, "id"),

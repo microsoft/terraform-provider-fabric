@@ -64,8 +64,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				testResourceItemHeader,
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -85,7 +85,7 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                      string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":              "test",
-					"number_of_member_gateways": (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"number_of_member_gateways": int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -105,10 +105,10 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
-					"min_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
-					"max_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
+					"min_member_gateway_count":        int(gateway.MinNumberOfMemberGatewaysValues),
+					"max_member_gateway_count":        int(gateway.MaxNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -128,8 +128,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"min_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"min_member_gateway_count":        int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -149,8 +149,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"max_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"max_member_gateway_count":        int(gateway.MaxNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -170,9 +170,9 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"min_member_gateway_count":        (int)(gateway.MaxNumberOfMemberGatewaysValues),
-					"max_member_gateway_count":        (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"min_member_gateway_count":        int(gateway.MaxNumberOfMemberGatewaysValues),
+					"max_member_gateway_count":        int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -192,8 +192,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"capacity_id":                     "00000000-0000-0000-0000-000000000000",
 				},
 			),
@@ -207,8 +207,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -227,8 +227,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]) - 1,
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]) - 1,
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -248,8 +248,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues) - 1,
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues) - 1,
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -271,8 +271,8 @@ func TestUnit_GatewayResource_Attributes(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    "test",
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -319,10 +319,10 @@ func TestUnit_GatewayResource_ImportState(t *testing.T) {
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
 		map[string]any{
-			"type":                            (string)(*entity.Type),
+			"type":                            string(*entity.Type),
 			"display_name":                    *entity.DisplayName,
-			"inactivity_minutes_before_sleep": (int)(*entity.InactivityMinutesBeforeSleep),
-			"number_of_member_gateways":       (int)(*entity.NumberOfMemberGateways),
+			"inactivity_minutes_before_sleep": int(*entity.InactivityMinutesBeforeSleep),
+			"number_of_member_gateways":       int(*entity.NumberOfMemberGateways),
 			"virtual_network_azure_resource": map[string]any{
 				"resource_group_name":  *entity.VirtualNetworkAzureResource.ResourceGroupName,
 				"virtual_network_name": *entity.VirtualNetworkAzureResource.VirtualNetworkName,
@@ -381,8 +381,8 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 				map[string]any{
 					"type":                            string(fabcore.GatewayTypeVirtualNetwork),
 					"display_name":                    *entityExist.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
-					"number_of_member_gateways":       (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"number_of_member_gateways":       int(gateway.MinNumberOfMemberGatewaysValues),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  "test",
 						"virtual_network_name": "test",
@@ -400,10 +400,10 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityBefore.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
-					"number_of_member_gateways":       (int)(*entityBefore.NumberOfMemberGateways),
+					"inactivity_minutes_before_sleep": int(*entityBefore.InactivityMinutesBeforeSleep),
+					"number_of_member_gateways":       int(*entityBefore.NumberOfMemberGateways),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
 						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
@@ -431,10 +431,10 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityAfter.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityAfter.InactivityMinutesBeforeSleep),
-					"number_of_member_gateways":       (int)(*entityAfter.NumberOfMemberGateways),
+					"inactivity_minutes_before_sleep": int(*entityAfter.InactivityMinutesBeforeSleep),
+					"number_of_member_gateways":       int(*entityAfter.NumberOfMemberGateways),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
 						"virtual_network_name": *entityBefore.VirtualNetworkAzureResource.VirtualNetworkName,
@@ -462,10 +462,10 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityAfter.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityAfter.InactivityMinutesBeforeSleep),
-					"number_of_member_gateways":       (int)(*entityAfter.NumberOfMemberGateways),
+					"inactivity_minutes_before_sleep": int(*entityAfter.InactivityMinutesBeforeSleep),
+					"number_of_member_gateways":       int(*entityAfter.NumberOfMemberGateways),
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityAfter.VirtualNetworkAzureResource.ResourceGroupName,
 						"virtual_network_name": *entityAfter.VirtualNetworkAzureResource.VirtualNetworkName,
@@ -495,8 +495,8 @@ func TestUnit_GatewayResource_AutoScaleCRUD(t *testing.T) {
 	entityBefore := fakes.NewRandomVirtualNetworkGatewayAutoScale()
 	entityAfter := fakes.NewRandomVirtualNetworkGatewayAutoScale()
 
-	minCount := (int)(gateway.MinNumberOfMemberGatewaysValues)
-	maxCount := (int)(gateway.MaxNumberOfMemberGatewaysValues)
+	minCount := int(gateway.MinNumberOfMemberGatewaysValues)
+	maxCount := int(gateway.MaxNumberOfMemberGatewaysValues)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read - autoscale mode
@@ -505,9 +505,9 @@ func TestUnit_GatewayResource_AutoScaleCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityBefore.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"inactivity_minutes_before_sleep": int(*entityBefore.InactivityMinutesBeforeSleep),
 					"min_member_gateway_count":        minCount,
 					"max_member_gateway_count":        maxCount,
 					"virtual_network_azure_resource": map[string]any{
@@ -533,9 +533,9 @@ func TestUnit_GatewayResource_AutoScaleCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityAfter.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"inactivity_minutes_before_sleep": int(*entityBefore.InactivityMinutesBeforeSleep),
 					"min_member_gateway_count":        minCount,
 					"max_member_gateway_count":        minCount + 1,
 					"virtual_network_azure_resource": map[string]any{
@@ -560,9 +560,9 @@ func TestUnit_GatewayResource_AutoScaleCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":                            (string)(*entityBefore.Type),
+					"type":                            string(*entityBefore.Type),
 					"display_name":                    *entityAfter.DisplayName,
-					"inactivity_minutes_before_sleep": (int)(*entityBefore.InactivityMinutesBeforeSleep),
+					"inactivity_minutes_before_sleep": int(*entityBefore.InactivityMinutesBeforeSleep),
 					"number_of_member_gateways":       maxCount,
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,

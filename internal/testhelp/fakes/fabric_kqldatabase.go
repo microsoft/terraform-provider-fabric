@@ -162,7 +162,8 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 		&server.ServerFactory.KQLDatabase.ItemsServer.UpdateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.NewListKQLDatabasesPager,
-		&server.ServerFactory.KQLDatabase.ItemsServer.DeleteKQLDatabase)
+		&server.ServerFactory.KQLDatabase.ItemsServer.DeleteKQLDatabase,
+	)
 
 	configureDefinitions(
 		handler,
@@ -170,7 +171,8 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 		definitionOperations,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginGetKQLDatabaseDefinition,
-		&server.ServerFactory.KQLDatabase.ItemsServer.BeginUpdateKQLDatabaseDefinition)
+		&server.ServerFactory.KQLDatabase.ItemsServer.BeginUpdateKQLDatabaseDefinition,
+	)
 
 	return fabkqldatabase.KQLDatabase{}
 }

@@ -160,14 +160,16 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 		&server.ServerFactory.VariableLibrary.ItemsServer.UpdateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.NewListVariableLibrariesPager,
-		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary)
+		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginGetVariableLibraryDefinition,
-		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition)
+		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition,
+	)
 
 	return fabvariablelibrary.VariableLibrary{}
 }

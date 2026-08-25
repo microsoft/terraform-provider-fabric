@@ -132,7 +132,8 @@ func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 		&server.ServerFactory.Warehouse.ItemsServer.UpdateWarehouse,
 		&server.ServerFactory.Warehouse.ItemsServer.BeginCreateWarehouse,
 		&server.ServerFactory.Warehouse.ItemsServer.NewListWarehousesPager,
-		&server.ServerFactory.Warehouse.ItemsServer.DeleteWarehouse)
+		&server.ServerFactory.Warehouse.ItemsServer.DeleteWarehouse,
+	)
 
 	return fabwarehouse.Warehouse{}
 }

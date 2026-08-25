@@ -237,7 +237,8 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 						"retention_days":           10,
 						"audit_actions_and_groups": []string{"BATCH_COMPLETED_GROUP"},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),
@@ -263,7 +264,8 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 							"BATCH_COMPLETED_GROUP",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateEnabled)),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),
@@ -284,7 +286,8 @@ func TestAcc_WarehouseSQLAuditSettingsResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"warehouse_id": testhelp.RefByFQN(warehouseResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "state", string(fabwarehouse.AuditSettingsStateDisabled)),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "warehouse_id", warehouseResourceFQN, "id"),

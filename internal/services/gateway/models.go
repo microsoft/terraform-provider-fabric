@@ -192,7 +192,7 @@ type requestCreateGateway struct {
 }
 
 func (to *requestCreateGateway) set(ctx context.Context, from resourceGatewayModel) diag.Diagnostics {
-	gatewayType := (fabcore.GatewayType)(from.Type.ValueString())
+	gatewayType := fabcore.GatewayType(from.Type.ValueString())
 
 	switch gatewayType {
 	case fabcore.GatewayTypeVirtualNetwork:
@@ -242,7 +242,7 @@ type requestUpdateGateway struct {
 // set builds the update request. DisplayName is only sent when it changes, because the API
 // rejects a gateway's own current name with DuplicateGatewayName.
 func (to *requestUpdateGateway) set(from, state resourceGatewayModel) diag.Diagnostics {
-	gatewayType := (fabcore.GatewayType)(from.Type.ValueString())
+	gatewayType := fabcore.GatewayType(from.Type.ValueString())
 
 	var displayName *string
 	if !from.DisplayName.Equal(state.DisplayName) {

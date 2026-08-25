@@ -96,7 +96,7 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 
 func (o *operationsGateway) Validate(newEntity fabcore.GatewayClassification, existing []fabcore.GatewayClassification) (int, error) {
 	for _, existingGateway := range existing {
-		if *(existingGateway.GetGateway().Type) != *(newEntity.GetGateway().Type) {
+		if *existingGateway.GetGateway().Type != *newEntity.GetGateway().Type {
 			continue
 		}
 
@@ -161,7 +161,8 @@ func configureGateway(server *fakeServer) {
 		&handler.ServerFactory.Core.GatewaysServer.UpdateGateway,
 		&handler.ServerFactory.Core.GatewaysServer.CreateGateway,
 		&handler.ServerFactory.Core.GatewaysServer.NewListGatewaysPager,
-		&handler.ServerFactory.Core.GatewaysServer.DeleteGateway)
+		&handler.ServerFactory.Core.GatewaysServer.DeleteGateway,
+	)
 }
 
 func NewRandomGateway() fabcore.GatewayClassification {

@@ -146,7 +146,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		&server.ServerFactory.Core.ItemsServer.UpdateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.NewListItemsPager,
-		&server.ServerFactory.Core.ItemsServer.DeleteItem)
+		&server.ServerFactory.Core.ItemsServer.DeleteItem,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +155,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		definitionOperations,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,
-		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition)
+		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition,
+	)
 	server.ServerFactory.Core.ItemsServer.MoveItem = FakeMoveItem(handler)
 
 	return fabcore.Item{}

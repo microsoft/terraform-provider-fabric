@@ -20,7 +20,7 @@ import (
 
 func NewResourceKQLDatabase() resource.Resource {
 	creationPayloadSetter := func(_ context.Context, from kqlDatabaseConfigurationModel) (*fabkqldatabase.CreationPayloadClassification, diag.Diagnostics) {
-		kqlDatabaseType := (fabkqldatabase.Type)(from.DatabaseType.ValueString())
+		kqlDatabaseType := fabkqldatabase.Type(from.DatabaseType.ValueString())
 
 		var cp fabkqldatabase.CreationPayloadClassification
 

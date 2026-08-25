@@ -70,7 +70,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 						"format":       "ipynb",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -87,7 +88,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 						"format":          "ipynb",
 						"definition":      testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -102,7 +104,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 						"format":       "ipynb",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -117,7 +120,8 @@ func TestUnit_NotebookResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -141,7 +145,8 @@ func TestUnit_NotebookResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinitionIPYNB,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -219,7 +224,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -236,7 +242,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -258,7 +265,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -281,7 +289,8 @@ func TestUnit_NotebookResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionR,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -316,7 +325,8 @@ func TestAcc_NotebookResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -337,7 +347,8 @@ func TestAcc_NotebookResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -370,7 +381,8 @@ func TestAcc_NotebookDefinitionIPYNBResource_CRUD(t *testing.T) {
 						"format":       "ipynb",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -391,7 +403,8 @@ func TestAcc_NotebookDefinitionIPYNBResource_CRUD(t *testing.T) {
 						"format":       "ipynb",
 						"definition":   testHelperDefinitionIPYNB,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -424,7 +437,8 @@ func TestAcc_NotebookDefinitionPYResource_CRUD(t *testing.T) {
 						"format":       "py",
 						"definition":   testHelperDefinitionPY,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -445,7 +459,8 @@ func TestAcc_NotebookDefinitionPYResource_CRUD(t *testing.T) {
 						"format":       "py",
 						"definition":   testHelperDefinitionPY,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

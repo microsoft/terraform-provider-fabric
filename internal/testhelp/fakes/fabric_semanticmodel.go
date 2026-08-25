@@ -146,7 +146,8 @@ func configureSemanticModel(server *fakeServer) fabsemanticmodel.SemanticModel {
 		&server.ServerFactory.SemanticModel.ItemsServer.UpdateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginCreateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.NewListSemanticModelsPager,
-		&server.ServerFactory.SemanticModel.ItemsServer.DeleteSemanticModel)
+		&server.ServerFactory.SemanticModel.ItemsServer.DeleteSemanticModel,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +155,8 @@ func configureSemanticModel(server *fakeServer) fabsemanticmodel.SemanticModel {
 		definitionOperations,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginCreateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginGetSemanticModelDefinition,
-		&server.ServerFactory.SemanticModel.ItemsServer.BeginUpdateSemanticModelDefinition)
+		&server.ServerFactory.SemanticModel.ItemsServer.BeginUpdateSemanticModelDefinition,
+	)
 
 	return fabsemanticmodel.SemanticModel{}
 }

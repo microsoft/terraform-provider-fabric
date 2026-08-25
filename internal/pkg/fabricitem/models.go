@@ -82,7 +82,7 @@ func getFieldStringValue(v reflect.Value, fieldName string) *string {
 	}
 
 	if field.IsValid() && field.Kind() == reflect.String {
-		if str, ok := field.Interface().(string); ok {
+		if str, ok := reflect.TypeAssert[string](field); ok {
 			return &str
 		}
 	}
@@ -97,7 +97,7 @@ func getFieldStructValue[Titemprop any](v reflect.Value, fieldName string) *Tite
 	}
 
 	if field.IsValid() && field.CanInterface() {
-		if value, ok := field.Interface().(Titemprop); ok {
+		if value, ok := reflect.TypeAssert[Titemprop](field); ok {
 			return &value
 		}
 	}
@@ -112,7 +112,7 @@ func getFieldSliceValue[T any](v reflect.Value, fieldName string) []T {
 	}
 
 	if field.IsValid() && field.CanInterface() {
-		if value, ok := field.Interface().([]T); ok {
+		if value, ok := reflect.TypeAssert[[]T](field); ok {
 			return value
 		}
 	}
@@ -129,7 +129,7 @@ func getFieldSliceValue[T any](v reflect.Value, fieldName string) []T {
 		}
 
 		if elem.Type().ConvertibleTo(targetType) {
-			converted, ok := elem.Convert(targetType).Interface().(T)
+			converted, ok := reflect.TypeAssert[T](elem.Convert(targetType))
 			if ok {
 				result = append(result, converted)
 			}

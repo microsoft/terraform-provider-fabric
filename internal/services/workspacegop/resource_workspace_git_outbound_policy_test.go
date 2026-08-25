@@ -139,7 +139,8 @@ func TestAcc_WorkspaceSetGitOutboundPolicy_CRUD(t *testing.T) {
 						"default_action": string(fabcore.NetworkAccessRuleDeny),
 						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.NetworkAccessRuleDeny)),
 			),
@@ -157,7 +158,8 @@ func TestAcc_WorkspaceSetGitOutboundPolicy_CRUD(t *testing.T) {
 						"default_action": string(fabcore.NetworkAccessRuleAllow),
 						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.NetworkAccessRuleAllow)),
 			),

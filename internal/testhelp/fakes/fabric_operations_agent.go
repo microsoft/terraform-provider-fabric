@@ -159,14 +159,16 @@ func configureOperationsAgent(server *fakeServer) faboperationsagent.OperationsA
 		&server.ServerFactory.OperationsAgent.ItemsServer.UpdateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginCreateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.NewListOperationsAgentsPager,
-		&server.ServerFactory.OperationsAgent.ItemsServer.DeleteOperationsAgent)
+		&server.ServerFactory.OperationsAgent.ItemsServer.DeleteOperationsAgent,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginCreateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginGetOperationsAgentDefinition,
-		&server.ServerFactory.OperationsAgent.ItemsServer.BeginUpdateOperationsAgentDefinition)
+		&server.ServerFactory.OperationsAgent.ItemsServer.BeginUpdateOperationsAgentDefinition,
+	)
 
 	return faboperationsagent.OperationsAgent{}
 }

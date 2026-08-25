@@ -119,7 +119,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Definition path must match`),
 		},
 		// error - sqlproj format with wrong definition path
@@ -139,7 +140,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Definition path must match`),
 		},
 		// error - configuration conflicts with format
@@ -162,7 +164,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							"creation_mode": "New",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 		},
 	}))
@@ -609,7 +612,8 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -633,7 +637,8 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -655,7 +660,8 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"description":  entityUpdateDescription,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -707,7 +713,8 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "sqlproj",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -730,7 +737,8 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "sqlproj",
 						"definition":   testhelperUpdateDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),

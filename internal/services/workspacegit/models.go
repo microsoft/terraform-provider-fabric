@@ -124,7 +124,7 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 	var reqGitProviderDetails fabcore.GitProviderDetailsClassification
 	var reqGitCredentials fabcore.GitCredentialsClassification
 
-	gitProviderType := (fabcore.GitProviderType)(gitProviderDetails.GitProviderType.ValueString())
+	gitProviderType := fabcore.GitProviderType(gitProviderDetails.GitProviderType.ValueString())
 
 	switch gitProviderType {
 	case fabcore.GitProviderTypeAzureDevOps:
@@ -145,7 +145,7 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 		// Default to Automatic if git_credentials or git_credentials.source are empty
 		gitGitCredentialsSource := fabcore.GitCredentialsSourceAutomatic
 		if gitGitCredentials != nil && !gitGitCredentials.Source.IsNull() && !gitGitCredentials.Source.IsUnknown() {
-			gitGitCredentialsSource = (fabcore.GitCredentialsSource)(gitGitCredentials.Source.ValueString())
+			gitGitCredentialsSource = fabcore.GitCredentialsSource(gitGitCredentials.Source.ValueString())
 		}
 
 		switch gitGitCredentialsSource {

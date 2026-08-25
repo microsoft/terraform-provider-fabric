@@ -71,7 +71,8 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -88,7 +89,8 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":          "Default",
 						"definition":      testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -103,7 +105,8 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -118,7 +121,8 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 		{
@@ -132,7 +136,8 @@ func TestUnit_MountedDataFactoryResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"display_name": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
@@ -157,7 +162,8 @@ func TestUnit_MountedDataFactoryResource_ImportState(t *testing.T) {
 				"definition":                testHelperDefinition,
 				"definition_update_enabled": true,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -235,7 +241,8 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -253,7 +260,8 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"definition":                testHelperDefinition,
 						"definition_update_enabled": true,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -275,7 +283,8 @@ func TestUnit_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -312,7 +321,8 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -333,7 +343,8 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 						"format":       "Default",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 		// Update and Read
@@ -352,7 +363,8 @@ func TestAcc_MountedDataFactoryResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

@@ -114,7 +114,8 @@ func configureDeploymentPipeline(server *fakeServer) fabcore.DeploymentPipelineE
 		&handler.ServerFactory.Core.DeploymentPipelinesServer.UpdateDeploymentPipeline,
 		&handler.ServerFactory.Core.DeploymentPipelinesServer.CreateDeploymentPipeline,
 		&handler.ServerFactory.Core.DeploymentPipelinesServer.NewListDeploymentPipelinesPager,
-		&handler.ServerFactory.Core.DeploymentPipelinesServer.DeleteDeploymentPipeline)
+		&handler.ServerFactory.Core.DeploymentPipelinesServer.DeleteDeploymentPipeline,
+	)
 
 	return fabcore.DeploymentPipelineExtendedInfo{}
 }

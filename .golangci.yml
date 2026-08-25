@@ -27,6 +27,7 @@ linters:
     - paralleltest
     - wrapcheck
     - wsl
+    - exhaustruct_v5
   settings:
     exhaustive:
       default-signifies-exhaustive: true

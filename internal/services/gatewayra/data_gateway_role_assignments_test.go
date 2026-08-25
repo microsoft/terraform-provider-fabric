@@ -58,10 +58,10 @@ func TestUnit_GatewayRoleAssignmentsDataSource(t *testing.T) {
 						knownvalue.ObjectPartial(map[string]knownvalue.Check{
 							"id":         knownvalue.StringExact(*entity.ID),
 							"gateway_id": knownvalue.StringExact(gatewayID),
-							"role":       knownvalue.StringExact((string)(*entity.Role)),
+							"role":       knownvalue.StringExact(string(*entity.Role)),
 							"principal": knownvalue.ObjectPartial(map[string]knownvalue.Check{
 								"id":   knownvalue.StringExact(*entity.Principal.GetPrincipal().ID),
-								"type": knownvalue.StringExact((string)(*entity.Principal.GetPrincipal().Type)),
+								"type": knownvalue.StringExact(string(*entity.Principal.GetPrincipal().Type)),
 							}),
 						}),
 					}),

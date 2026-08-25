@@ -129,7 +129,8 @@ func configureSQLDatabase(server *fakeServer) fabsqldatabase.SQLDatabase {
 		&server.ServerFactory.SQLDatabase.ItemsServer.UpdateSQLDatabase,
 		&server.ServerFactory.SQLDatabase.ItemsServer.BeginCreateSQLDatabase,
 		&server.ServerFactory.SQLDatabase.ItemsServer.NewListSQLDatabasesPager,
-		&server.ServerFactory.SQLDatabase.ItemsServer.DeleteSQLDatabase)
+		&server.ServerFactory.SQLDatabase.ItemsServer.DeleteSQLDatabase,
+	)
 
 	return fabsqldatabase.SQLDatabase{}
 }

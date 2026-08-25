@@ -56,7 +56,8 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 						"workspace_id": "invalid uuid",
 						"display_name": testhelp.RandomName(),
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -71,7 +72,8 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 						"display_name":    testhelp.RandomName(),
 						"unexpected_attr": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -84,7 +86,8 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 					map[string]any{
 						"display_name": testhelp.RandomName(),
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -97,7 +100,8 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": testhelp.RandomUUID(),
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 		// error - invalid format
@@ -113,7 +117,8 @@ func TestUnit_OperationsAgentResource_Attributes(t *testing.T) {
 						"format":       testhelp.RandomName(),
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Attribute format value must be one of: \["Default"\]`),
 		},
 	}))
@@ -137,7 +142,8 @@ func TestUnit_OperationsAgentResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -213,7 +219,8 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -228,7 +235,8 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 						"display_name": *entityBefore.DisplayName,
 						"folder_id":    *entityBefore.FolderID,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -249,7 +257,8 @@ func TestUnit_OperationsAgentResource_CRUD(t *testing.T) {
 						"description":  *entityAfter.Description,
 						"folder_id":    *entityBefore.FolderID,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -286,7 +295,8 @@ func TestUnit_OperationsAgentResourceDefinition_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -303,7 +313,8 @@ func TestUnit_OperationsAgentResourceDefinition_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -326,7 +337,8 @@ func TestUnit_OperationsAgentResourceDefinition_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -365,7 +377,8 @@ func TestAcc_OperationsAgentResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -386,7 +399,8 @@ func TestAcc_OperationsAgentResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -421,7 +435,8 @@ func TestAcc_OperationsAgentDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),

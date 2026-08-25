@@ -173,9 +173,9 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.UpdateConnectionRoleAssignment = fakeStatefulUpdateConnectionRoleAssignment(entityUpdate, state)
 
 	entityID := *entity.Principal.GetPrincipal().ID
-	entityType := (string)(*entity.Principal.GetPrincipal().Type)
-	role := (string)(*entity.Role)
-	updatedRole := (string)(*entityUpdate.Role)
+	entityType := string(*entity.Principal.GetPrincipal().Type)
+	role := string(*entity.Role)
+	updatedRole := string(*entityUpdate.Role)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read

@@ -39,7 +39,8 @@ func configureCapacity(server *fakeServer) fabcore.Capacity {
 	handleListPager(
 		handler,
 		entityOperations,
-		&handler.ServerFactory.Core.CapacitiesServer.NewListCapacitiesPager)
+		&handler.ServerFactory.Core.CapacitiesServer.NewListCapacitiesPager,
+	)
 
 	return fabcore.Capacity{}
 }

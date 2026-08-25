@@ -116,7 +116,8 @@ func configureDataPipeline(server *fakeServer) fabdatapipeline.DataPipeline {
 		&server.ServerFactory.DataPipeline.ItemsServer.UpdateDataPipeline,
 		&server.ServerFactory.DataPipeline.ItemsServer.BeginCreateDataPipeline,
 		&server.ServerFactory.DataPipeline.ItemsServer.NewListDataPipelinesPager,
-		&server.ServerFactory.DataPipeline.ItemsServer.DeleteDataPipeline)
+		&server.ServerFactory.DataPipeline.ItemsServer.DeleteDataPipeline,
+	)
 
 	return fabdatapipeline.DataPipeline{}
 }

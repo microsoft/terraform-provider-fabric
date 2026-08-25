@@ -284,7 +284,8 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"source": string(fabcore.GitCredentialsSourceAutomatic),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
@@ -313,7 +314,8 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"connection_id": adoConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			ConfigPlanChecks: resource.ConfigPlanChecks{
 				PreApply: []plancheck.PlanCheck{
 					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
@@ -363,7 +365,8 @@ func TestAcc_WorkspaceGitResource_AzDO_ConfiguredCredentials(t *testing.T) {
 							"connection_id": adoConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
@@ -696,7 +699,8 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 							"connection_id": ghConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
@@ -724,7 +728,8 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 							"connection_id": ghConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "options"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
