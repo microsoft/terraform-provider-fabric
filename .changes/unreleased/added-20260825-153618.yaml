@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_paginated_report` resource
+time: 2026-08-25T15:36:18.867508+03:00
+custom:
+    Issue: "1089"
