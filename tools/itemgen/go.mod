@@ -1,3 +1,3 @@
 module github.com/microsoft/terraform-provider-fabric/tools/itemgen
 
-go 1.26.5
+go 1.27.0
