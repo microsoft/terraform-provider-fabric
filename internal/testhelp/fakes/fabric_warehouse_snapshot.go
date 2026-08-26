@@ -62,9 +62,7 @@ func (o *operationsWarehouseSnapshot) TransformGet(entity fabwarehousesnapshot.W
 // TransformList implements ParentIDOperations.
 func (o *operationsWarehouseSnapshot) TransformList(entities []fabwarehousesnapshot.WarehouseSnapshot) fabwarehousesnapshot.ItemsClientListWarehouseSnapshotsResponse {
 	return fabwarehousesnapshot.ItemsClientListWarehouseSnapshotsResponse{
-		WarehouseSnapshots: fabwarehousesnapshot.WarehouseSnapshots{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -132,7 +130,8 @@ func configureWarehouseSnapshot(server *fakeServer) fabwarehousesnapshot.Warehou
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.UpdateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.BeginCreateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.NewListWarehouseSnapshotsPager,
-		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot)
+		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot,
+	)
 
 	return fabwarehousesnapshot.WarehouseSnapshot{}
 }

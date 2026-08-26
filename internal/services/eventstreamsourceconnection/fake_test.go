@@ -39,15 +39,13 @@ func fakeGetEventstreamSourceConnection(
 
 func NewRandomEventstreamSourceConnection() eventstream.TopologyClientGetEventstreamSourceConnectionResponse {
 	return eventstream.TopologyClientGetEventstreamSourceConnectionResponse{
-		SourceConnectionResponse: eventstream.SourceConnectionResponse{
-			EventHubName:            new(testhelp.RandomName()),
-			FullyQualifiedNamespace: new(testhelp.RandomName()),
-			AccessKeys: &eventstream.AccessKeys{
-				PrimaryConnectionString:   new(testhelp.RandomName()),
-				SecondaryConnectionString: new(testhelp.RandomName()),
-				PrimaryKey:                new(testhelp.RandomName()),
-				SecondaryKey:              new(testhelp.RandomName()),
-			},
+		EventHubName:            new(testhelp.RandomName()),
+		FullyQualifiedNamespace: new(testhelp.RandomName()),
+		AccessKeys: &eventstream.AccessKeys{
+			PrimaryConnectionString:   new(testhelp.RandomName()),
+			SecondaryConnectionString: new(testhelp.RandomName()),
+			PrimaryKey:                new(testhelp.RandomName()),
+			SecondaryKey:              new(testhelp.RandomName()),
 		},
 	}
 }

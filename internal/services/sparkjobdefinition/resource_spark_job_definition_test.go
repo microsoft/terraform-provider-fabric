@@ -104,7 +104,8 @@ func TestUnit_SparkJobDefinitionResource_Attributes(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -119,7 +120,8 @@ func TestUnit_SparkJobDefinitionResource_Attributes(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -143,7 +145,8 @@ func TestUnit_SparkJobDefinitionResource_ImportState(t *testing.T) {
 				"format":       "SparkJobDefinitionV1",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -226,7 +229,8 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read with definition
@@ -245,7 +249,8 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"tags":         []string{tag1ID, tag2ID},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
@@ -272,7 +277,8 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"tags":         []string{tag2ID, tag3ID},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
@@ -294,7 +300,8 @@ func TestUnit_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -335,7 +342,8 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityCreateDescription),
@@ -360,7 +368,8 @@ func TestAcc_SparkJobDefinitionResource_CRUD(t *testing.T) {
 						"format":       "SparkJobDefinitionV1",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

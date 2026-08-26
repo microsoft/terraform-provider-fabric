@@ -132,10 +132,12 @@ type FabricProvider struct {
 }
 
 func New(version string) pclient.ProviderWithFabricClient {
-	cfg := pconfig.ProviderConfig{}
-	cfg.Auth = &auth.Config{}
-	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg := pconfig.ProviderConfig{
+		Auth: &auth.Config{},
+		ProviderData: &pconfig.ProviderData{
+			Endpoint: pconfig.DefaultFabricEndpointURL,
+		},
+	}
 	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
 	cfg.Version = version
 
@@ -972,13 +974,13 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 		}
 
 		if p.config.Auth.OIDC.AzureDevOpsServiceConnectionID == "" && (p.config.Auth.OIDC.Token == "" && (p.config.Auth.OIDC.RequestURL == "" || p.config.Auth.OIDC.RequestToken == "")) {
-			maskValue := (func(v string) string {
+			maskValue := func(v string) string {
 				if v != "" {
 					return "***"
 				}
 
 				return ""
-			})
+			}
 
 			resp.Diagnostics.AddError(
 				common.ErrorInvalidConfig,

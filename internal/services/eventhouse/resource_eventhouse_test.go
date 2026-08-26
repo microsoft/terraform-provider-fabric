@@ -58,7 +58,8 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -75,7 +76,8 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 						"format":          "Default",
 						"definition":      testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -90,7 +92,8 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -105,7 +108,8 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -123,7 +127,8 @@ func TestUnit_EventhouseResource_Attributes(t *testing.T) {
 							"minimum_consumption_units": "2.25",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 		},
 	}))
@@ -147,7 +152,8 @@ func TestUnit_EventhouseResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -228,7 +234,8 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -246,7 +253,8 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"tags":         []string{tag1ID, tag2ID},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -275,7 +283,8 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"tags":         []string{tag2ID, tag3ID},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
@@ -297,7 +306,8 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -324,7 +334,8 @@ func TestUnit_EventhouseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -364,7 +375,8 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -389,7 +401,8 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -413,7 +426,8 @@ func TestAcc_EventhouseResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -455,7 +469,8 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -484,7 +499,8 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -511,7 +527,8 @@ func TestAcc_EventhouseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -555,7 +572,8 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 							"minimum_consumption_units": "2.25",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -586,7 +604,8 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 							"minimum_consumption_units": "2.25",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -615,7 +634,8 @@ func TestAcc_EventhouseConfigurationResource_CRUD(t *testing.T) {
 							"minimum_consumption_units": "2.25",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

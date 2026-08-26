@@ -177,7 +177,8 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 	}
 
 	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...,
+	); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -410,10 +411,8 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 	}
 
 	state := ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
-		},
+		ID:                      uuidFabricItemID,
+		WorkspaceID:             uuidWorkspaceID,
 		DefinitionUpdateEnabled: definitionUpdateEnabled,
 		Definition:              definition,
 		Timeouts:                timeout,

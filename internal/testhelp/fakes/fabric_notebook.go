@@ -24,9 +24,7 @@ func (o *operationsNotebook) CreateDefinition(data fabnotebook.CreateNotebookReq
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsNotebook) TransformDefinition(entity *fabnotebook.Definition) fabnotebook.ItemsClientGetNotebookDefinitionResponse {
 	return fabnotebook.ItemsClientGetNotebookDefinitionResponse{
-		DefinitionResponse: fabnotebook.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsNotebook) TransformGet(entity fabnotebook.Notebook) fabnotebo
 // TransformList implements concreteOperations.
 func (o *operationsNotebook) TransformList(entities []fabnotebook.Notebook) fabnotebook.ItemsClientListNotebooksResponse {
 	return fabnotebook.ItemsClientListNotebooksResponse{
-		Notebooks: fabnotebook.Notebooks{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -146,7 +142,8 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 		&server.ServerFactory.Notebook.ItemsServer.UpdateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.BeginCreateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.NewListNotebooksPager,
-		&server.ServerFactory.Notebook.ItemsServer.DeleteNotebook)
+		&server.ServerFactory.Notebook.ItemsServer.DeleteNotebook,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +151,8 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 		definitionOperations,
 		&server.ServerFactory.Notebook.ItemsServer.BeginCreateNotebook,
 		&server.ServerFactory.Notebook.ItemsServer.BeginGetNotebookDefinition,
-		&server.ServerFactory.Notebook.ItemsServer.BeginUpdateNotebookDefinition)
+		&server.ServerFactory.Notebook.ItemsServer.BeginUpdateNotebookDefinition,
+	)
 
 	return fabnotebook.Notebook{}
 }

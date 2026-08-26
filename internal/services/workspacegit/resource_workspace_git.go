@@ -187,7 +187,7 @@ func (r *resourceWorkspaceGit) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	if !state.GitConnectionState.IsNull() && !state.GitConnectionState.IsUnknown() && state.GitConnectionState.ValueString() != (string)(fabcore.GitConnectionStateConnectedAndInitialized) {
+	if !state.GitConnectionState.IsNull() && !state.GitConnectionState.IsUnknown() && state.GitConnectionState.ValueString() != string(fabcore.GitConnectionStateConnectedAndInitialized) {
 		resp.Diagnostics.AddWarning(
 			"Unexpected Git connection state",
 			fmt.Sprintf("Git connection state is '%s'.\nIt may have been deleted outside of Terraform. Removing object from state.", state.GitConnectionState.ValueString()),

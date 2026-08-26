@@ -251,7 +251,8 @@ func TestAcc_DataAgentResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -271,7 +272,8 @@ func TestAcc_DataAgentResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -302,7 +304,8 @@ func TestAcc_DataAgentDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),

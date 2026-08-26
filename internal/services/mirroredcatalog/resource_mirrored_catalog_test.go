@@ -96,7 +96,8 @@ func TestUnit_MirroredCatalogResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -111,7 +112,8 @@ func TestUnit_MirroredCatalogResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -135,7 +137,8 @@ func TestUnit_MirroredCatalogResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -213,7 +216,8 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// error - no required attributes
@@ -229,7 +233,8 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 						"folder_id":    *entityBefore.FolderID,
 						"format":       "Default",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 		// Create and Read with definition
@@ -247,7 +252,8 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
@@ -276,7 +282,8 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -304,7 +311,8 @@ func TestUnit_MirroredCatalogResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),

@@ -37,7 +37,7 @@ func (to *baseWorkspaceManagedPrivateEndpointModel) set(ctx context.Context, wor
 	to.Name = types.StringPointerValue(from.Name)
 	to.ProvisioningState = types.StringPointerValue((*string)(from.ProvisioningState))
 	to.TargetPrivateLinkResourceID = customtypes.NewCaseInsensitiveStringPointerValue(from.TargetPrivateLinkResourceID)
-	to.TargetSubresourceType = types.StringPointerValue((from.TargetSubresourceType))
+	to.TargetSubresourceType = types.StringPointerValue(from.TargetSubresourceType)
 
 	connectionState := supertypes.NewSingleNestedObjectValueOfNull[connectionStateModel](ctx)
 

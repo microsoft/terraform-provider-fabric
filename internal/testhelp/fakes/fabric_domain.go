@@ -49,9 +49,7 @@ func (o *operationsDomain) TransformGet(entity fabadmin.Domain) fabadmin.Domains
 // TransformList implements concreteOperations.
 func (o *operationsDomain) TransformList(entities []fabadmin.Domain) fabadmin.DomainsClientListDomainsResponse {
 	return fabadmin.DomainsClientListDomainsResponse{
-		DomainsResponse: fabadmin.DomainsResponse{
-			Domains: entities,
-		},
+		Domains: entities,
 	}
 }
 

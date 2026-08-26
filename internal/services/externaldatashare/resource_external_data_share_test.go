@@ -51,7 +51,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - item_id - invalid UUID
@@ -69,7 +70,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -88,7 +90,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -102,7 +105,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 						"item_id":      itemID,
 						"paths":        []string{"Files/MyFolder1"},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "recipient" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -119,7 +123,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "paths" is required, but no definition was found.`),
 		},
 		// error - invalid path
@@ -137,7 +142,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`A valid path must start with 'Files/'\s+or 'Tables/'`),
 		},
 		// error - recipient.type - invalid value
@@ -155,7 +161,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": "test@example.com",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Attribute recipient.type value must be one of`),
 		},
 		// error - recipient.user_principal_name - too long
@@ -173,7 +180,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"user_principal_name": strings.Repeat("a", 257),
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Attribute recipient.user_principal_name string length must be at most\s+256`),
 		},
 		// error - recipient.user_principal_name - required when type is User
@@ -190,7 +198,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"type": "User",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`(?i)user_principal_name`),
 		},
 		// error - recipient.user_principal_name - must be null when type is ServicePrincipal
@@ -209,7 +218,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"tenant_id":           "00000000-0000-0000-0000-000000000000",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`(?i)user_principal_name`),
 		},
 		// error - recipient.tenant_id - required when type is ServicePrincipal
@@ -227,7 +237,8 @@ func TestUnit_ExternalDataShareResource_Attributes(t *testing.T) {
 							"principal_id": "00000000-0000-0000-0000-000000000000",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`(?i)tenant_id`),
 		},
 	}))
@@ -296,7 +307,8 @@ func TestAcc_ExternalDataShareResource_CRUD(t *testing.T) {
 							"user_principal_name": userPrincipalName,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "recipient.user_principal_name", userPrincipalName),

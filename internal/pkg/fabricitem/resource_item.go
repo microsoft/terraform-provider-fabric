@@ -120,7 +120,8 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...,
+	); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -313,10 +314,11 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 		return
 	}
 
-	state := resourceFabricItemModel{}
-	state.ID = uuidFabricItemID
-	state.WorkspaceID = uuidWorkspaceID
-	state.Timeouts = timeout
+	state := resourceFabricItemModel{
+		ID:          uuidFabricItemID,
+		WorkspaceID: uuidWorkspaceID,
+		Timeouts:    timeout,
+	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return

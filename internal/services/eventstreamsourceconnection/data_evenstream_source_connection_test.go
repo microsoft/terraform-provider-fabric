@@ -28,7 +28,8 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 		fakeWorkspaceID,
 		fakeEventstreamID,
 		fakeSourceID,
-		entity)
+		entity,
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

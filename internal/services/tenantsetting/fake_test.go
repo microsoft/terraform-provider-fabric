@@ -21,7 +21,7 @@ var fakeTenantSettingsStore = map[string]fabadmin.TenantSetting{}
 func fakeTenantSettingFunc() func(options *fabadmin.TenantsClientListTenantSettingsOptions) (resp azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]) {
 	return func(_ *fabadmin.TenantsClientListTenantSettingsOptions) (resp azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]) {
 		resp = azfake.PagerResponder[fabadmin.TenantsClientListTenantSettingsResponse]{}
-		resp.AddPage(http.StatusOK, fabadmin.TenantsClientListTenantSettingsResponse{TenantSettings: fabadmin.TenantSettings{Value: GetAllStoredTenantSettings()}}, nil)
+		resp.AddPage(http.StatusOK, fabadmin.TenantsClientListTenantSettingsResponse{Value: GetAllStoredTenantSettings()}, nil)
 
 		return resp
 	}
@@ -127,7 +127,7 @@ func fakeUpdateTenantSettings() func(ctx context.Context, tenantSettingName stri
 
 		resp.SetResponse(
 			http.StatusOK,
-			fabadmin.TenantsClientUpdateTenantSettingResponse{UpdateTenantSettingResponse: fabadmin.UpdateTenantSettingResponse{TenantSettings: GetAllStoredTenantSettings()}},
+			fabadmin.TenantsClientUpdateTenantSettingResponse{TenantSettings: GetAllStoredTenantSettings()},
 			nil,
 		)
 

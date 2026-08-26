@@ -38,9 +38,7 @@ func (o *operationsLakehouse) CreateDefinition(data fablakehouse.CreateLakehouse
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsLakehouse) TransformDefinition(entity *fablakehouse.Definition) fablakehouse.ItemsClientGetLakehouseDefinitionResponse {
 	return fablakehouse.ItemsClientGetLakehouseDefinitionResponse{
-		DefinitionResponse: fablakehouse.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsLakehouse) TransformGet(entity fablakehouse.Lakehouse) fablak
 // TransformList implements concreteOperations.
 func (o *operationsLakehouse) TransformList(entities []fablakehouse.Lakehouse) fablakehouse.ItemsClientListLakehousesResponse {
 	return fablakehouse.ItemsClientListLakehousesResponse{
-		Lakehouses: fablakehouse.Lakehouses{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -160,14 +156,16 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 		&server.ServerFactory.Lakehouse.ItemsServer.UpdateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.NewListLakehousesPager,
-		&server.ServerFactory.Lakehouse.ItemsServer.DeleteLakehouse)
+		&server.ServerFactory.Lakehouse.ItemsServer.DeleteLakehouse,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginCreateLakehouse,
 		&server.ServerFactory.Lakehouse.ItemsServer.BeginGetLakehouseDefinition,
-		&server.ServerFactory.Lakehouse.ItemsServer.BeginUpdateLakehouseDefinition)
+		&server.ServerFactory.Lakehouse.ItemsServer.BeginUpdateLakehouseDefinition,
+	)
 
 	return fablakehouse.Lakehouse{}
 }

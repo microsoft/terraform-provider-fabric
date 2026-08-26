@@ -133,7 +133,8 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	if resp.Diagnostics.Append(
-		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...,
+	); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -182,7 +183,8 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	if resp.Diagnostics.Append(
-		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...); resp.Diagnostics.HasError() {
+		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...,
+	); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -304,13 +306,11 @@ func (r *resourceShortcut) ImportState(ctx context.Context, req resource.ImportS
 	}
 
 	state := resourceShortcutModel{
-		baseShortcutModel: baseShortcutModel{
-			ItemID:      uuitemID,
-			WorkspaceID: uuidWorkspaceID,
-			Name:        types.StringValue(name),
-			Path:        types.StringValue(shortcutPath),
-		},
-		Timeouts: timeout,
+		ItemID:      uuitemID,
+		WorkspaceID: uuidWorkspaceID,
+		Name:        types.StringValue(name),
+		Path:        types.StringValue(shortcutPath),
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

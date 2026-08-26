@@ -149,7 +149,8 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...,
+	); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -364,10 +365,8 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	state := ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
-		},
+		ID:            uuidFabricItemID,
+		WorkspaceID:   uuidWorkspaceID,
 		Configuration: configuration,
 		Timeouts:      timeout,
 	}

@@ -34,7 +34,8 @@ func TestUnit_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 		fakeWorkspaceID,
 		fakeEventstreamID,
 		fakeDestinationID,
-		entity)
+		entity,
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testEphemeralItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -172,7 +173,8 @@ func TestUnit_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 						"workspace_id":   fakeWorkspaceID,
 						"eventstream_id": fakeEventstreamID,
 						"destination_id": fakeDestinationID,
-					}),
+					},
+				),
 				testEphemeralItemEchoConfig,
 			),
 			ConfigStateChecks: []statecheck.StateCheck{
@@ -249,7 +251,8 @@ func TestAcc_EventstreamDestinationConnectionEphemeralResource(t *testing.T) {
 						"destination_id": destinationID,
 						"eventstream_id": eventstreamID,
 						"workspace_id":   workspaceID,
-					}),
+					},
+				),
 				testEphemeralItemEchoConfig,
 			),
 			ConfigStateChecks: []statecheck.StateCheck{

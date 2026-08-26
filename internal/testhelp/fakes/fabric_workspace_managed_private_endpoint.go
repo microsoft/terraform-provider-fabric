@@ -70,9 +70,7 @@ func (o *operationsWorkspaceManagedPrivateEndpoint) TransformGet(entity fabcore.
 // TransformList implements concreteOperations.
 func (o *operationsWorkspaceManagedPrivateEndpoint) TransformList(entities []fabcore.ManagedPrivateEndpoint) fabcore.ManagedPrivateEndpointsClientListWorkspaceManagedPrivateEndpointsResponse {
 	return fabcore.ManagedPrivateEndpointsClientListWorkspaceManagedPrivateEndpointsResponse{
-		ManagedPrivateEndpoints: fabcore.ManagedPrivateEndpoints{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

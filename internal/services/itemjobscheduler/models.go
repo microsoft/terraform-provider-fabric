@@ -254,7 +254,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
 	localTimeZoneID := "Central Standard Time"
-	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
+	configurationType := fabcore.ScheduleType(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
 
@@ -337,7 +337,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			return diags
 		}
 
-		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+		occurrenceType := fabcore.OccurrenceType(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
 
@@ -405,7 +405,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	var reqConfiguration fabcore.ScheduleConfigClassification
 	localTimeZoneID := "Central Standard Time"
 
-	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
+	configurationType := fabcore.ScheduleType(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
 
@@ -488,7 +488,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			return diags
 		}
 
-		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+		occurrenceType := fabcore.OccurrenceType(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
 

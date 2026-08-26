@@ -278,7 +278,8 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -299,7 +300,8 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -318,7 +320,8 @@ func TestAcc_GraphQLApiResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -441,7 +444,8 @@ func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 				"format":       "sqlproj",
 				"definition":   testHelperDefinitionSQLDatabase,
 			},
-		))
+		),
+	)
 
 	sqlDatabaseResourceFQN := testhelp.ResourceFQN("fabric", "sql_database", "test")
 
@@ -482,7 +486,8 @@ func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 						"definition":   testHelperDefinition,
 						"format":       "Default",
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -503,7 +508,8 @@ func TestAcc_GraphQLApiResource_CRUD_WithDefinition(t *testing.T) {
 						"definition":   testHelperDefinitionUpdate,
 						"format":       "Default",
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),

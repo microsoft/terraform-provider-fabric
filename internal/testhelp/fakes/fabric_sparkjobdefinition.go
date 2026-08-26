@@ -38,9 +38,7 @@ func (o *operationsSparkJobDefinition) CreateDefinition(data fabsparkjobdefiniti
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSparkJobDefinition) TransformDefinition(entity *fabsparkjobdefinition.PublicDefinition) fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse {
 	return fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse{
-		Response: fabsparkjobdefinition.Response{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -97,9 +95,7 @@ func (o *operationsSparkJobDefinition) TransformGet(entity fabsparkjobdefinition
 // TransformList implements concreteOperations.
 func (o *operationsSparkJobDefinition) TransformList(entities []fabsparkjobdefinition.SparkJobDefinition) fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse {
 	return fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse{
-		SparkJobDefinitions: fabsparkjobdefinition.SparkJobDefinitions{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -163,7 +159,8 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.UpdateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.NewListSparkJobDefinitionsPager,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition,
+	)
 
 	configureDefinitions(
 		handler,
@@ -171,7 +168,8 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		definitionOperations,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginGetSparkJobDefinitionDefinition,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition,
+	)
 
 	return fabsparkjobdefinition.SparkJobDefinition{}
 }

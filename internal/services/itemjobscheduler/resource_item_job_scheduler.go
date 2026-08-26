@@ -340,13 +340,11 @@ func (r *resourceItemJobScheduler) ImportState(ctx context.Context, req resource
 	}
 
 	state := resourceJobScheduleModel{
-		baseItemJobSchedulerModel: baseItemJobSchedulerModel{
-			ItemID:      uuiditemID,
-			WorkspaceID: uuidWorkspaceID,
-			JobType:     types.StringValue(jobType),
-			ID:          uuidScheduleID,
-		},
-		Timeouts: timeout,
+		ItemID:      uuiditemID,
+		WorkspaceID: uuidWorkspaceID,
+		JobType:     types.StringValue(jobType),
+		ID:          uuidScheduleID,
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

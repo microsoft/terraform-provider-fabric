@@ -73,12 +73,10 @@ func NewDataSourceLakehouse(ctx context.Context) datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[lakehousePropertiesModel, fablakehouse.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceLakehousePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

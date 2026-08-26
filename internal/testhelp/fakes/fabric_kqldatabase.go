@@ -38,9 +38,7 @@ func (o *operationsKQLDatabase) CreateDefinition(data fabkqldatabase.CreateKQLDa
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsKQLDatabase) TransformDefinition(entity *fabkqldatabase.Definition) fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse {
 	return fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse{
-		DefinitionResponse: fabkqldatabase.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsKQLDatabase) TransformGet(entity fabkqldatabase.KQLDatabase) 
 // TransformList implements concreteOperations.
 func (o *operationsKQLDatabase) TransformList(entities []fabkqldatabase.KQLDatabase) fabkqldatabase.ItemsClientListKQLDatabasesResponse {
 	return fabkqldatabase.ItemsClientListKQLDatabasesResponse{
-		KQLDatabases: fabkqldatabase.KQLDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -162,7 +158,8 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 		&server.ServerFactory.KQLDatabase.ItemsServer.UpdateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.NewListKQLDatabasesPager,
-		&server.ServerFactory.KQLDatabase.ItemsServer.DeleteKQLDatabase)
+		&server.ServerFactory.KQLDatabase.ItemsServer.DeleteKQLDatabase,
+	)
 
 	configureDefinitions(
 		handler,
@@ -170,7 +167,8 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 		definitionOperations,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginCreateKQLDatabase,
 		&server.ServerFactory.KQLDatabase.ItemsServer.BeginGetKQLDatabaseDefinition,
-		&server.ServerFactory.KQLDatabase.ItemsServer.BeginUpdateKQLDatabaseDefinition)
+		&server.ServerFactory.KQLDatabase.ItemsServer.BeginUpdateKQLDatabaseDefinition,
+	)
 
 	return fabkqldatabase.KQLDatabase{}
 }

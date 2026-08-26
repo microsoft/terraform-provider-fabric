@@ -122,8 +122,7 @@ func (h *ErrorHandler) getOperationErrorMessages(operation Operation) (summary, 
 // processError examines an error and returns appropriate diagnostic messages.
 func (h *ErrorHandler) processError(ctx context.Context, err, errIs error, defaultSummary, defaultDetail string) (summary, detail string) { //nolint:nonamedreturns
 	// Convert Azure Core error to Fabric error if needed
-	var errRespAzCore *azcore.ResponseError
-	if errors.As(err, &errRespAzCore) {
+	if errRespAzCore, ok := errors.AsType[*azcore.ResponseError](err); ok {
 		err = fabcore.NewResponseError(errRespAzCore.RawResponse)
 	}
 

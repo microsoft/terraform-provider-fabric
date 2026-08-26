@@ -24,9 +24,7 @@ func (o *operationsItem) CreateDefinition(data fabcore.CreateItemRequest) *fabco
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsItem) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsItem) TransformGet(entity fabcore.Item) fabcore.ItemsClientGe
 // TransformList implements concreteOperations.
 func (o *operationsItem) TransformList(entities []fabcore.Item) fabcore.ItemsClientListItemsResponse {
 	return fabcore.ItemsClientListItemsResponse{
-		Items: fabcore.Items{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -146,7 +142,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		&server.ServerFactory.Core.ItemsServer.UpdateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.NewListItemsPager,
-		&server.ServerFactory.Core.ItemsServer.DeleteItem)
+		&server.ServerFactory.Core.ItemsServer.DeleteItem,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +151,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		definitionOperations,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,
-		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition)
+		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition,
+	)
 	server.ServerFactory.Core.ItemsServer.MoveItem = FakeMoveItem(handler)
 
 	return fabcore.Item{}
@@ -164,10 +162,8 @@ type moveItemOperations struct{}
 
 func (m *moveItemOperations) TransformUpdate(entity fabcore.Item) fabcore.ItemsClientMoveItemResponse {
 	return fabcore.ItemsClientMoveItemResponse{
-		MovedItems: fabcore.MovedItems{
-			Value: []fabcore.Item{
-				entity,
-			},
+		Value: []fabcore.Item{
+			entity,
 		},
 	}
 }

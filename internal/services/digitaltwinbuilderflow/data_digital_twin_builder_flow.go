@@ -72,12 +72,10 @@ func NewDataSourceDigitalTwinBuilderFlow(ctx context.Context) datasource.DataSou
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[digitalTwinBuilderFlowConfigPropertiesModel, fabdigitaltwinbuilderflow.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceDigitalTwinBuilderFlowProperties(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

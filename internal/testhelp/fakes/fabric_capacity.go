@@ -16,9 +16,7 @@ type operationsCapacity struct{}
 // TransformList implements concreteOperations.
 func (o *operationsCapacity) TransformList(entities []fabcore.Capacity) fabcore.CapacitiesClientListCapacitiesResponse {
 	return fabcore.CapacitiesClientListCapacitiesResponse{
-		Capacities: fabcore.Capacities{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -39,7 +37,8 @@ func configureCapacity(server *fakeServer) fabcore.Capacity {
 	handleListPager(
 		handler,
 		entityOperations,
-		&handler.ServerFactory.Core.CapacitiesServer.NewListCapacitiesPager)
+		&handler.ServerFactory.Core.CapacitiesServer.NewListCapacitiesPager,
+	)
 
 	return fabcore.Capacity{}
 }

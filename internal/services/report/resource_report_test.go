@@ -71,7 +71,8 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -88,7 +89,8 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"format":          "PBIR-Legacy",
 						"definition":      testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -103,7 +105,8 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -118,7 +121,8 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -132,7 +136,8 @@ func TestUnit_ReportResource_Attributes(t *testing.T) {
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"display_name": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "definition" is required, but no definition was found.`),
 		},
 	}))
@@ -156,7 +161,8 @@ func TestUnit_ReportResource_ImportState(t *testing.T) {
 				"format":       "PBIR-Legacy",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -239,7 +245,8 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -256,7 +263,8 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -278,7 +286,8 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -318,7 +327,8 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -341,7 +351,8 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),

@@ -43,7 +43,8 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 							"session_timeout_in_minutes":         60,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "workspace_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "id"),
@@ -71,7 +72,8 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 							"enabled": true,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "automatic_log.enabled", "true"),
@@ -95,7 +97,8 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.name", "Starter Pool"),
@@ -121,7 +124,8 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.id", "00000000-0000-0000-0000-000000000000"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.name", "Starter Pool"),

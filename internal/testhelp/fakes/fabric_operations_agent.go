@@ -38,9 +38,7 @@ func (o *operationsOperationsAgent) CreateDefinition(data faboperationsagent.Cre
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsOperationsAgent) TransformDefinition(entity *faboperationsagent.PublicDefinition) faboperationsagent.ItemsClientGetOperationsAgentDefinitionResponse {
 	return faboperationsagent.ItemsClientGetOperationsAgentDefinitionResponse{
-		DefinitionResponse: faboperationsagent.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsOperationsAgent) TransformGet(entity faboperationsagent.Opera
 // TransformList implements concreteOperations.
 func (o *operationsOperationsAgent) TransformList(entities []faboperationsagent.OperationsAgent) faboperationsagent.ItemsClientListOperationsAgentsResponse {
 	return faboperationsagent.ItemsClientListOperationsAgentsResponse{
-		OperationsAgents: faboperationsagent.OperationsAgents{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -159,14 +155,16 @@ func configureOperationsAgent(server *fakeServer) faboperationsagent.OperationsA
 		&server.ServerFactory.OperationsAgent.ItemsServer.UpdateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginCreateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.NewListOperationsAgentsPager,
-		&server.ServerFactory.OperationsAgent.ItemsServer.DeleteOperationsAgent)
+		&server.ServerFactory.OperationsAgent.ItemsServer.DeleteOperationsAgent,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginCreateOperationsAgent,
 		&server.ServerFactory.OperationsAgent.ItemsServer.BeginGetOperationsAgentDefinition,
-		&server.ServerFactory.OperationsAgent.ItemsServer.BeginUpdateOperationsAgentDefinition)
+		&server.ServerFactory.OperationsAgent.ItemsServer.BeginUpdateOperationsAgentDefinition,
+	)
 
 	return faboperationsagent.OperationsAgent{}
 }

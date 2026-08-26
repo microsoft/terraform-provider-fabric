@@ -316,11 +316,9 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 	}
 
 	state := ResourceFabricItemPropertiesModel[Ttfprop, Titemprop]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
-		},
-		Timeouts: timeout,
+		ID:          uuidFabricItemID,
+		WorkspaceID: uuidWorkspaceID,
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

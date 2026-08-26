@@ -38,9 +38,7 @@ func (o *operationsVariableLibrary) CreateDefinition(data fabvariablelibrary.Cre
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsVariableLibrary) TransformDefinition(entity *fabvariablelibrary.PublicDefinition) fabvariablelibrary.ItemsClientGetVariableLibraryDefinitionResponse {
 	return fabvariablelibrary.ItemsClientGetVariableLibraryDefinitionResponse{
-		DefinitionResponse: fabvariablelibrary.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsVariableLibrary) TransformGet(entity fabvariablelibrary.Varia
 // TransformList implements concreteOperations.
 func (o *operationsVariableLibrary) TransformList(entities []fabvariablelibrary.VariableLibrary) fabvariablelibrary.ItemsClientListVariableLibrariesResponse {
 	return fabvariablelibrary.ItemsClientListVariableLibrariesResponse{
-		VariableLibraries: fabvariablelibrary.VariableLibraries{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -160,14 +156,16 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 		&server.ServerFactory.VariableLibrary.ItemsServer.UpdateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.NewListVariableLibrariesPager,
-		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary)
+		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginGetVariableLibraryDefinition,
-		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition)
+		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition,
+	)
 
 	return fabvariablelibrary.VariableLibrary{}
 }

@@ -301,7 +301,8 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -329,7 +330,8 @@ func TestAcc_WarehouseSnapshotResource_CRUD(t *testing.T) {
 							"snapshot_date_time":  testhelp.RefByFQN(warehouseResourceFQN, "properties.last_updated_time"),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),

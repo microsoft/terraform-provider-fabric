@@ -39,9 +39,7 @@ func (o *operationsMirroredCatalog) CreateDefinition(data fabcore.CreateItemRequ
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredCatalog) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -95,9 +93,7 @@ func (o *operationsMirroredCatalog) TransformGet(entity fabmirroredcatalog.Mirro
 // TransformList implements concreteOperations.
 func (o *operationsMirroredCatalog) TransformList(entities []fabmirroredcatalog.MirroredCatalog) fabmirroredcatalog.ItemsClientListMirroredCatalogsResponse {
 	return fabmirroredcatalog.ItemsClientListMirroredCatalogsResponse{
-		MirroredCatalogs: fabmirroredcatalog.MirroredCatalogs{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

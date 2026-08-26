@@ -299,7 +299,7 @@ func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.I
 		return nil
 	}
 
-	if tags, ok := propertyValue.Interface().([]fabcore.ItemTag); ok {
+	if tags, ok := reflect.TypeAssert[[]fabcore.ItemTag](propertyValue); ok {
 		return tags
 	}
 
@@ -354,7 +354,7 @@ func convertItemTags[T any](tags []fabcore.ItemTag) []T {
 			f.Set(reflect.ValueOf(tag.DisplayName))
 		}
 
-		converted, ok := newTag.Interface().(T)
+		converted, ok := reflect.TypeAssert[T](newTag)
 		if ok {
 			result = append(result, converted)
 		}
@@ -427,7 +427,7 @@ func (h *typedHandler[TEntity]) entityTypeCanBeConvertedToFabricItem() bool {
 	var entity TEntity
 
 	// if entity is an interface, return false
-	entityAsAny := (any)(entity)
+	entityAsAny := any(entity)
 	if entityAsAny == nil {
 		return false
 	}

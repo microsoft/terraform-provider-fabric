@@ -143,7 +143,7 @@ func (to *requestCreateConnection) set(
 	ctx context.Context,
 	plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
 ) diag.Diagnostics {
-	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
+	connectivityType := fabcore.ConnectivityType(plan.ConnectivityType.ValueString())
 
 	var requestCreateConnectionDetails requestCreateConnectionDetails
 	if diags := requestCreateConnectionDetails.set(ctx, plan.ConnectionDetails); diags.HasError() {
@@ -215,7 +215,7 @@ func (to *requestCreateConnectionDetails) set(ctx context.Context, from supertyp
 		for _, parameter := range parameters {
 			var requestParameter fabcore.ConnectionDetailsParameterClassification
 
-			dataType := (fabcore.DataType)(parameter.DataType.ValueString())
+			dataType := fabcore.DataType(parameter.DataType.ValueString())
 			name := parameter.Name.ValueString()
 			value := parameter.Value.ValueString()
 
@@ -361,7 +361,7 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	credentialType := (fabcore.CredentialType)(credentialDetails.CredentialType.ValueString())
+	credentialType := fabcore.CredentialType(credentialDetails.CredentialType.ValueString())
 
 	var requestCreateCredential fabcore.CredentialsClassification
 
@@ -488,7 +488,7 @@ func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertyp
 	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
-	credentialType := (fabcore.CredentialType)(credentialDetails.CredentialType.ValueString())
+	credentialType := fabcore.CredentialType(credentialDetails.CredentialType.ValueString())
 
 	var requestUpdateCredential fabcore.CredentialsClassification
 
@@ -609,7 +609,7 @@ func (to *requestUpdateConnection) set(
 	ctx context.Context,
 	plan, config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
 ) diag.Diagnostics {
-	connectivityType := (fabcore.ConnectivityType)(plan.ConnectivityType.ValueString())
+	connectivityType := fabcore.ConnectivityType(plan.ConnectivityType.ValueString())
 
 	var requestUpdateCredentialDetails requestUpdateCredentialDetails
 	if connectivityType == fabcore.ConnectivityTypeShareableCloud ||

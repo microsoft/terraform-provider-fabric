@@ -310,7 +310,8 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -336,7 +337,8 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -360,7 +362,8 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -411,7 +414,8 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 							"collation_type": collationType1,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -440,7 +444,8 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 							"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
@@ -467,7 +472,8 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 							"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),

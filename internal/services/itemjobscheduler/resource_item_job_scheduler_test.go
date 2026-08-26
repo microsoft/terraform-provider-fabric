@@ -690,7 +690,8 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 							"interval":        int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(true)),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),
@@ -726,7 +727,8 @@ func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "enabled", strconv.FormatBool(false)),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "created_date_time"),

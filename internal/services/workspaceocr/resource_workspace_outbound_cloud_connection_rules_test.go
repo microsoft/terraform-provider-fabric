@@ -357,7 +357,8 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 						},
 						"depends_on": []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "1"),
@@ -392,7 +393,8 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 						},
 						"depends_on": []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeDeny)),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
@@ -413,7 +415,8 @@ func TestAcc_WorkspaceSetOutboundCloudConnectionRules_CRUD(t *testing.T) {
 						"default_action": string(fabcore.ConnectionAccessActionTypeAllow),
 						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.ConnectionAccessActionTypeAllow)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "0"),
