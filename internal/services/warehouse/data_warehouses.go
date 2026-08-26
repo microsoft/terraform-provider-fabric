@@ -57,10 +57,8 @@ func NewDataSourceWarehouses() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[warehousePropertiesModel, fabwarehouse.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceWarehousePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

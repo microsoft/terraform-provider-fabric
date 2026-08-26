@@ -75,9 +75,7 @@ func (o *operationsSQLDatabase) TransformGet(entity fabsqldatabase.SQLDatabase) 
 // TransformList implements concreteOperations.
 func (o *operationsSQLDatabase) TransformList(entities []fabsqldatabase.SQLDatabase) fabsqldatabase.ItemsClientListSQLDatabasesResponse {
 	return fabsqldatabase.ItemsClientListSQLDatabasesResponse{
-		SQLDatabases: fabsqldatabase.SQLDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

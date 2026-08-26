@@ -57,10 +57,8 @@ func NewDataSourceSparkJobDefinitions() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[sparkJobDefinitionPropertiesModel, fabsparkjobdefinition.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceSparkJobDefinitionPropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

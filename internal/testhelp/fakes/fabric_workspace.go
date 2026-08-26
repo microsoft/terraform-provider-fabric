@@ -43,9 +43,7 @@ func (o *operationsWorkspace) TransformList(entities []fabcore.WorkspaceInfo) fa
 	}
 
 	return fabcore.WorkspacesClientListWorkspacesResponse{
-		Workspaces: fabcore.Workspaces{
-			Value: list,
-		},
+		Value: list,
 	}
 }
 

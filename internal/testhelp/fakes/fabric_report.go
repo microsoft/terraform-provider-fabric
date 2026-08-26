@@ -24,9 +24,7 @@ func (o *operationsReport) CreateDefinition(data fabreport.CreateReportRequest) 
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsReport) TransformDefinition(entity *fabreport.Definition) fabreport.ItemsClientGetReportDefinitionResponse {
 	return fabreport.ItemsClientGetReportDefinitionResponse{
-		DefinitionResponse: fabreport.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsReport) TransformGet(entity fabreport.Report) fabreport.Items
 // TransformList implements concreteOperations.
 func (o *operationsReport) TransformList(entities []fabreport.Report) fabreport.ItemsClientListReportsResponse {
 	return fabreport.ItemsClientListReportsResponse{
-		Reports: fabreport.Reports{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

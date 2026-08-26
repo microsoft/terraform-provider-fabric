@@ -61,9 +61,7 @@ func (o *operationsDataPipeline) TransformGet(entity fabdatapipeline.DataPipelin
 // TransformList implements concreteOperations.
 func (o *operationsDataPipeline) TransformList(entities []fabdatapipeline.DataPipeline) fabdatapipeline.ItemsClientListDataPipelinesResponse {
 	return fabdatapipeline.ItemsClientListDataPipelinesResponse{
-		DataPipelines: fabdatapipeline.DataPipelines{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

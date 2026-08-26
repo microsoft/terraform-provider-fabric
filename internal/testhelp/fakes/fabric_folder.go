@@ -52,9 +52,7 @@ func (o *operationsFolder) TransformGet(entity fabcore.Folder) fabcore.FoldersCl
 // TransformList implements concreteOperations.
 func (o *operationsFolder) TransformList(entities []fabcore.Folder) fabcore.FoldersClientListFoldersResponse {
 	return fabcore.FoldersClientListFoldersResponse{
-		Folders: fabcore.Folders{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

@@ -98,9 +98,7 @@ func (o *operationsConnection) TransformGet(entity fabcore.ConnectionClassificat
 // TransformList implements concreteOperations.
 func (o *operationsConnection) TransformList(entities []fabcore.ConnectionClassification) fabcore.ConnectionsClientListConnectionsResponse {
 	return fabcore.ConnectionsClientListConnectionsResponse{
-		ListConnectionsResponse: fabcore.ListConnectionsResponse{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -218,144 +216,142 @@ func FakeListSupportedConnectionTypes() func(options *fabcore.ConnectionsClientL
 
 		// Create the fake response data with comprehensive test parameters
 		response := fabcore.ConnectionsClientListSupportedConnectionTypesResponse{
-			ListSupportedConnectionTypesResponse: fabcore.ListSupportedConnectionTypesResponse{
-				Value: []fabcore.ConnectionCreationMetadata{
-					{
-						Type: new("FTP"),
-						CreationMethods: []fabcore.ConnectionCreationMethod{
-							{
-								Name: new("FTP.Contents"),
-								Parameters: []fabcore.ConnectionCreationParameter{
-									{
-										Name:     new("server"),
-										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: new(true),
-									},
-									{
-										Name:     new("database"),
-										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: new(false),
-									},
-									{
-										Name:     new("enable_ssl"),
-										DataType: to.Ptr(fabcore.DataTypeBoolean),
-										Required: new(false),
-									},
-									{
-										Name:     new("start_date"),
-										DataType: to.Ptr(fabcore.DataTypeDate),
-										Required: new(false),
-									},
-									{
-										Name:     new("created_at"),
-										DataType: to.Ptr(fabcore.DataTypeDateTime),
-										Required: new(false),
-									},
-									{
-										Name:     new("backup_time"),
-										DataType: to.Ptr(fabcore.DataTypeTime),
-										Required: new(false),
-									},
-									{
-										Name:     new("port"),
-										DataType: to.Ptr(fabcore.DataTypeNumber),
-										Required: new(false),
-									},
-									{
-										Name:     new("timeout"),
-										DataType: to.Ptr(fabcore.DataTypeDuration),
-										Required: new(false),
-									},
-									{
-										Name:          new("ssl_mode"),
-										DataType:      to.Ptr(fabcore.DataTypeText),
-										Required:      new(false),
-										AllowedValues: []string{"required", "optional", "disabled"},
-									},
+			Value: []fabcore.ConnectionCreationMetadata{
+				{
+					Type: new("FTP"),
+					CreationMethods: []fabcore.ConnectionCreationMethod{
+						{
+							Name: new("FTP.Contents"),
+							Parameters: []fabcore.ConnectionCreationParameter{
+								{
+									Name:     new("server"),
+									DataType: to.Ptr(fabcore.DataTypeText),
+									Required: new(true),
+								},
+								{
+									Name:     new("database"),
+									DataType: to.Ptr(fabcore.DataTypeText),
+									Required: new(false),
+								},
+								{
+									Name:     new("enable_ssl"),
+									DataType: to.Ptr(fabcore.DataTypeBoolean),
+									Required: new(false),
+								},
+								{
+									Name:     new("start_date"),
+									DataType: to.Ptr(fabcore.DataTypeDate),
+									Required: new(false),
+								},
+								{
+									Name:     new("created_at"),
+									DataType: to.Ptr(fabcore.DataTypeDateTime),
+									Required: new(false),
+								},
+								{
+									Name:     new("backup_time"),
+									DataType: to.Ptr(fabcore.DataTypeTime),
+									Required: new(false),
+								},
+								{
+									Name:     new("port"),
+									DataType: to.Ptr(fabcore.DataTypeNumber),
+									Required: new(false),
+								},
+								{
+									Name:     new("timeout"),
+									DataType: to.Ptr(fabcore.DataTypeDuration),
+									Required: new(false),
+								},
+								{
+									Name:          new("ssl_mode"),
+									DataType:      to.Ptr(fabcore.DataTypeText),
+									Required:      new(false),
+									AllowedValues: []string{"required", "optional", "disabled"},
 								},
 							},
 						},
-						SupportedCredentialTypes: []fabcore.CredentialType{
-							fabcore.CredentialTypeBasic,
-							fabcore.CredentialTypeOAuth2,
-							fabcore.CredentialTypeKey,
-							fabcore.CredentialTypeKeyPair,
-							fabcore.CredentialTypeAnonymous,
-						},
-						SupportedCredentialTypesForUsageInUserControlledCode: []fabcore.CredentialType{
-							fabcore.CredentialTypeBasic,
-							fabcore.CredentialTypeOAuth2,
-						},
-						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
-							fabcore.ConnectionEncryptionNotEncrypted,
-						},
-						SupportsSkipTestConnection: new(true),
 					},
-					{
-						Type: new("ConnectionWithEmptyParametersList"),
-						CreationMethods: []fabcore.ConnectionCreationMethod{
-							{
-								Name:       new("ConnectionWithEmptyParametersList.Actions"),
-								Parameters: []fabcore.ConnectionCreationParameter{},
-							},
-						},
-						SupportedCredentialTypes: []fabcore.CredentialType{
-							fabcore.CredentialTypeAnonymous,
-						},
-						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
-							fabcore.ConnectionEncryptionNotEncrypted,
-						},
-						SupportsSkipTestConnection: new(true),
+					SupportedCredentialTypes: []fabcore.CredentialType{
+						fabcore.CredentialTypeBasic,
+						fabcore.CredentialTypeOAuth2,
+						fabcore.CredentialTypeKey,
+						fabcore.CredentialTypeKeyPair,
+						fabcore.CredentialTypeAnonymous,
 					},
-					{
-						Type: new("Web"),
-						CreationMethods: []fabcore.ConnectionCreationMethod{
-							{
-								Name: new("Web"),
-								Parameters: []fabcore.ConnectionCreationParameter{
-									{
-										Name:     new("url"),
-										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: new(true),
-									},
+					SupportedCredentialTypesForUsageInUserControlledCode: []fabcore.CredentialType{
+						fabcore.CredentialTypeBasic,
+						fabcore.CredentialTypeOAuth2,
+					},
+					SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+						fabcore.ConnectionEncryptionNotEncrypted,
+					},
+					SupportsSkipTestConnection: new(true),
+				},
+				{
+					Type: new("ConnectionWithEmptyParametersList"),
+					CreationMethods: []fabcore.ConnectionCreationMethod{
+						{
+							Name:       new("ConnectionWithEmptyParametersList.Actions"),
+							Parameters: []fabcore.ConnectionCreationParameter{},
+						},
+					},
+					SupportedCredentialTypes: []fabcore.CredentialType{
+						fabcore.CredentialTypeAnonymous,
+					},
+					SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+						fabcore.ConnectionEncryptionNotEncrypted,
+					},
+					SupportsSkipTestConnection: new(true),
+				},
+				{
+					Type: new("Web"),
+					CreationMethods: []fabcore.ConnectionCreationMethod{
+						{
+							Name: new("Web"),
+							Parameters: []fabcore.ConnectionCreationParameter{
+								{
+									Name:     new("url"),
+									DataType: to.Ptr(fabcore.DataTypeText),
+									Required: new(true),
 								},
 							},
 						},
-						SupportedCredentialTypes: []fabcore.CredentialType{
-							fabcore.CredentialTypeAnonymous,
-							fabcore.CredentialTypeBasic,
-							fabcore.CredentialTypeServicePrincipal,
-							fabcore.CredentialTypeWorkspaceIdentity,
-						},
-						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
-							fabcore.ConnectionEncryptionNotEncrypted,
-						},
-						SupportsSkipTestConnection: new(true),
 					},
-					{
-						Type: new("SharePoint"),
-						CreationMethods: []fabcore.ConnectionCreationMethod{
-							{
-								Name: new("SharePointList"),
-								Parameters: []fabcore.ConnectionCreationParameter{
-									{
-										Name:     new("sharePointSiteUrl"),
-										DataType: to.Ptr(fabcore.DataTypeText),
-										Required: new(true),
-									},
+					SupportedCredentialTypes: []fabcore.CredentialType{
+						fabcore.CredentialTypeAnonymous,
+						fabcore.CredentialTypeBasic,
+						fabcore.CredentialTypeServicePrincipal,
+						fabcore.CredentialTypeWorkspaceIdentity,
+					},
+					SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+						fabcore.ConnectionEncryptionNotEncrypted,
+					},
+					SupportsSkipTestConnection: new(true),
+				},
+				{
+					Type: new("SharePoint"),
+					CreationMethods: []fabcore.ConnectionCreationMethod{
+						{
+							Name: new("SharePointList"),
+							Parameters: []fabcore.ConnectionCreationParameter{
+								{
+									Name:     new("sharePointSiteUrl"),
+									DataType: to.Ptr(fabcore.DataTypeText),
+									Required: new(true),
 								},
 							},
 						},
-						SupportedCredentialTypes: []fabcore.CredentialType{
-							fabcore.CredentialTypeAnonymous,
-							fabcore.CredentialTypeServicePrincipal,
-							fabcore.CredentialTypeWorkspaceIdentity,
-						},
-						SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
-							fabcore.ConnectionEncryptionNotEncrypted,
-						},
-						SupportsSkipTestConnection: new(false),
 					},
+					SupportedCredentialTypes: []fabcore.CredentialType{
+						fabcore.CredentialTypeAnonymous,
+						fabcore.CredentialTypeServicePrincipal,
+						fabcore.CredentialTypeWorkspaceIdentity,
+					},
+					SupportedConnectionEncryptionTypes: []fabcore.ConnectionEncryption{
+						fabcore.ConnectionEncryptionNotEncrypted,
+					},
+					SupportsSkipTestConnection: new(false),
 				},
 			},
 		}

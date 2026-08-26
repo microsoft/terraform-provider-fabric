@@ -41,19 +41,15 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 	case ManagedServiceIdentityUserAuth:
 		clientID := azidentity.ClientID(cfg.ClientID)
 		cred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
-			ID: clientID,
-			ClientOptions: azcore.ClientOptions{
-				Cloud: cfg.Environment,
-			},
+			ID:    clientID,
+			Cloud: cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err
 
 	case ManagedServiceIdentitySystemAuth:
 		cred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
-			ClientOptions: azcore.ClientOptions{
-				Cloud: cfg.Environment,
-			},
+			Cloud: cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err
@@ -69,9 +65,7 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 		o := cfg.OIDC
 		cred, err := azidentity.NewClientAssertionCredential(cfg.TenantID, cfg.ClientID, o.getAssertion, &azidentity.ClientAssertionCredentialOptions{
 			AdditionallyAllowedTenants: cfg.AuxiliaryTenantIDs,
-			ClientOptions: azcore.ClientOptions{
-				Cloud: cfg.Environment,
-			},
+			Cloud:                      cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err
@@ -79,9 +73,7 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 	case ServicePrincipalCertificateAuth:
 		cred, err := azidentity.NewClientCertificateCredential(cfg.TenantID, cfg.ClientID, cfg.ClientCertificate, cfg.ClientCertificateKey, &azidentity.ClientCertificateCredentialOptions{
 			AdditionallyAllowedTenants: cfg.AuxiliaryTenantIDs,
-			ClientOptions: azcore.ClientOptions{
-				Cloud: cfg.Environment,
-			},
+			Cloud:                      cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err
@@ -89,9 +81,7 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 	case ServicePrincipalSecretAuth:
 		cred, err := azidentity.NewClientSecretCredential(cfg.TenantID, cfg.ClientID, cfg.ClientSecret, &azidentity.ClientSecretCredentialOptions{
 			AdditionallyAllowedTenants: cfg.AuxiliaryTenantIDs,
-			ClientOptions: azcore.ClientOptions{
-				Cloud: cfg.Environment,
-			},
+			Cloud:                      cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err

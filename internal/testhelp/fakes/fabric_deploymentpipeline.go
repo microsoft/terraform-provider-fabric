@@ -50,9 +50,7 @@ func (o *operationsDeploymentPipeline) TransformList(entities []fabcore.Deployme
 	}
 
 	return fabcore.DeploymentPipelinesClientListDeploymentPipelinesResponse{
-		DeploymentPipelines: fabcore.DeploymentPipelines{
-			Value: list,
-		},
+		Value: list,
 	}
 }
 

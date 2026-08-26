@@ -38,9 +38,7 @@ func fakeListExternalDataSharesProvider() func(workspaceID, itemID string, optio
 	return func(_, _ string, _ *fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemOptions) (resp azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]) {
 		resp = azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse{
-			ExternalDataShares: fabcore.ExternalDataShares{
-				Value: GetAllStoredExternalDataShares(),
-			},
+			Value: GetAllStoredExternalDataShares(),
 		}, nil)
 
 		return resp

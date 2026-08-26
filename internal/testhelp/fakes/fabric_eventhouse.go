@@ -38,9 +38,7 @@ func (o *operationsEventhouse) CreateDefinition(data fabeventhouse.CreateEventho
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsEventhouse) TransformDefinition(entity *fabeventhouse.Definition) fabeventhouse.ItemsClientGetEventhouseDefinitionResponse {
 	return fabeventhouse.ItemsClientGetEventhouseDefinitionResponse{
-		DefinitionResponse: fabeventhouse.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsEventhouse) TransformGet(entity fabeventhouse.Eventhouse) fab
 // TransformList implements concreteOperations.
 func (o *operationsEventhouse) TransformList(entities []fabeventhouse.Eventhouse) fabeventhouse.ItemsClientListEventhousesResponse {
 	return fabeventhouse.ItemsClientListEventhousesResponse{
-		Eventhouses: fabeventhouse.Eventhouses{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

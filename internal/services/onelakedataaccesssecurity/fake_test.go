@@ -48,13 +48,11 @@ func fakeGetDataAccessRoleFunc() func(ctx context.Context, workspaceID, itemID, 
 
 		if role, ok := fakeOneLakeDataAccessRoleStore[id]; ok {
 			resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse{
-				DataAccessRoleBase: fabcore.DataAccessRoleBase{
-					Name:          role.Name,
-					Kind:          role.Kind,
-					DecisionRules: role.DecisionRules,
-					Members:       role.Members,
-				},
-				ETag: new(testhelp.RandomName()),
+				Name:          role.Name,
+				Kind:          role.Kind,
+				DecisionRules: role.DecisionRules,
+				Members:       role.Members,
+				ETag:          new(testhelp.RandomName()),
 			}, nil)
 		} else {
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errEntityNotFound, "Entity not found"))
@@ -115,8 +113,8 @@ func fakeListDataAccessRolesFunc() func(ctx context.Context, workspaceID, itemID
 	return func(_ context.Context, workspaceID, itemID string, _ *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{
-			DataAccessRoles: fabcore.DataAccessRoles{Value: GetAllStoredOneLakeDataAccessRoles(workspaceID, itemID)},
-			Etag:            new(testhelp.RandomName()),
+			Value: GetAllStoredOneLakeDataAccessRoles(workspaceID, itemID),
+			Etag:  new(testhelp.RandomName()),
 		}, nil)
 
 		return resp, errResp

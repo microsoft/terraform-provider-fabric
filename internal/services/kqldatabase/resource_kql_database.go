@@ -102,22 +102,20 @@ func NewResourceKQLDatabase() resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties, kqlDatabaseConfigurationModel, fabkqldatabase.CreationPayloadClassification]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionFormats:     itemDefinitionFormats,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtLeast(2),
-				mapvalidator.SizeAtMost(2),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    "",
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionFormats:     itemDefinitionFormats,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtLeast(2),
+			mapvalidator.SizeAtMost(2),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
+		DefinitionRequired:         false,
+		DefinitionEmpty:            "",
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: true,
 		ConfigAttributes:           getResourceKQLDatabaseConfigurationAttributes(),

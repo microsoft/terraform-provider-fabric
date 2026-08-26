@@ -70,12 +70,10 @@ func NewDataSourceKQLDatabase() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[kqlDatabasePropertiesModel, fabkqldatabase.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceKQLDatabasePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

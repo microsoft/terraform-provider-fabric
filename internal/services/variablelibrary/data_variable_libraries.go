@@ -57,10 +57,8 @@ func NewDataSourceVariableLibraries() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[variableLibraryPropertiesModel, fabvariablelibrary.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceVariableLibraryPropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

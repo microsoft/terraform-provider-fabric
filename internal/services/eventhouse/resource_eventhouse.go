@@ -59,20 +59,18 @@ func NewResourceEventhouse(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[eventhousePropertiesModel, fabeventhouse.Properties, eventhouseConfigurationModel, fabeventhouse.CreationPayload]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType, NameRenameAllowed: true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(1),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    ItemDefinitionEmpty,
-			DefinitionFormats:  itemDefinitionFormats,
+		TypeInfo:       ItemTypeInfo,
+		FabricItemType: FabricItemType, NameRenameAllowed: true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtMost(1),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
+		DefinitionRequired:         false,
+		DefinitionEmpty:            ItemDefinitionEmpty,
+		DefinitionFormats:          itemDefinitionFormats,
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: false,
 		ConfigAttributes:           getResourceEventhouseConfigurationAttributes(),

@@ -268,12 +268,10 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 	}
 
 	state := resourceOneLakeDataAccessSecurityModel{
-		baseOneLakeDataAccessSecurityModel: baseOneLakeDataAccessSecurityModel{
-			WorkspaceID: uuidWorkspaceID,
-			ItemID:      uuidItemID,
-			RoleName:    types.StringValue(roleName),
-		},
-		Timeouts: timeout,
+		WorkspaceID: uuidWorkspaceID,
+		ItemID:      uuidItemID,
+		RoleName:    types.StringValue(roleName),
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {

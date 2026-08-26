@@ -16,9 +16,7 @@ type operationsCapacity struct{}
 // TransformList implements concreteOperations.
 func (o *operationsCapacity) TransformList(entities []fabcore.Capacity) fabcore.CapacitiesClientListCapacitiesResponse {
 	return fabcore.CapacitiesClientListCapacitiesResponse{
-		Capacities: fabcore.Capacities{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

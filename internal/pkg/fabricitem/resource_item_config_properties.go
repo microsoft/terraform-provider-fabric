@@ -365,10 +365,8 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	state := ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		FabricItemPropertiesModel: FabricItemPropertiesModel[Ttfprop, Titemprop]{
-			ID:          uuidFabricItemID,
-			WorkspaceID: uuidWorkspaceID,
-		},
+		ID:            uuidFabricItemID,
+		WorkspaceID:   uuidWorkspaceID,
 		Configuration: configuration,
 		Timeouts:      timeout,
 	}

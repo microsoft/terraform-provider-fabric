@@ -132,10 +132,12 @@ type FabricProvider struct {
 }
 
 func New(version string) pclient.ProviderWithFabricClient {
-	cfg := pconfig.ProviderConfig{}
-	cfg.Auth = &auth.Config{}
-	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg := pconfig.ProviderConfig{
+		Auth: &auth.Config{},
+		ProviderData: &pconfig.ProviderData{
+			Endpoint: pconfig.DefaultFabricEndpointURL,
+		},
+	}
 	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
 	cfg.Version = version
 

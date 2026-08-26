@@ -66,13 +66,11 @@ func NewResourceWarehouseSnapshot() resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigProperties[warehouseSnapshotPropertiesModel, fabwarehousesnapshot.Properties, warehouseSnapshotConfigurationModel, fabwarehousesnapshot.CreationPayload]{
-		ResourceFabricItem: fabricitem.ResourceFabricItem{
-			TypeInfo:             ItemTypeInfo,
-			FabricItemType:       FabricItemType,
-			NameRenameAllowed:    true,
-			DisplayNameMaxLength: 123,
-			DescriptionMaxLength: 256,
-		},
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
 		ConfigRequired:        true,
 		ConfigAttributes:      getResourceWarehouseSnapshotConfigurationAttributes(),
 		CreationPayloadSetter: creationPayloadSetter,

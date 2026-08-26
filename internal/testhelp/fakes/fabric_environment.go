@@ -76,9 +76,7 @@ func (o *operationsEnvironment) TransformGet(entity fabenvironment.Environment) 
 // TransformList implements concreteOperations.
 func (o *operationsEnvironment) TransformList(entities []fabenvironment.Environment) fabenvironment.ItemsClientListEnvironmentsResponse {
 	return fabenvironment.ItemsClientListEnvironmentsResponse{
-		Environments: fabenvironment.Environments{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

@@ -62,9 +62,7 @@ func (o *operationsWarehouse) TransformGet(entity fabwarehouse.Warehouse) fabwar
 // TransformList implements ParentIDOperations.
 func (o *operationsWarehouse) TransformList(entities []fabwarehouse.Warehouse) fabwarehouse.ItemsClientListWarehousesResponse {
 	return fabwarehouse.ItemsClientListWarehousesResponse{
-		Warehouses: fabwarehouse.Warehouses{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

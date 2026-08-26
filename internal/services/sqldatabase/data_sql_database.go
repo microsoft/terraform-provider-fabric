@@ -70,12 +70,10 @@ func NewDataSourceSQLDatabase() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[sqlDatabasePropertiesModel, fabsqldatabase.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceSQLDatabasePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

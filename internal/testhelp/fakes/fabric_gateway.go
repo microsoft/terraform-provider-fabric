@@ -57,9 +57,7 @@ func (o *operationsGateway) TransformGet(entity fabcore.GatewayClassification) f
 
 func (o *operationsGateway) TransformList(list []fabcore.GatewayClassification) fabcore.GatewaysClientListGatewaysResponse {
 	return fabcore.GatewaysClientListGatewaysResponse{
-		ListGatewaysResponse: fabcore.ListGatewaysResponse{
-			Value: list,
-		},
+		Value: list,
 	}
 }
 

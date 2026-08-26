@@ -38,9 +38,7 @@ func (o *operationsKQLDatabase) CreateDefinition(data fabkqldatabase.CreateKQLDa
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsKQLDatabase) TransformDefinition(entity *fabkqldatabase.Definition) fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse {
 	return fabkqldatabase.ItemsClientGetKQLDatabaseDefinitionResponse{
-		DefinitionResponse: fabkqldatabase.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -94,9 +92,7 @@ func (o *operationsKQLDatabase) TransformGet(entity fabkqldatabase.KQLDatabase) 
 // TransformList implements concreteOperations.
 func (o *operationsKQLDatabase) TransformList(entities []fabkqldatabase.KQLDatabase) fabkqldatabase.ItemsClientListKQLDatabasesResponse {
 	return fabkqldatabase.ItemsClientListKQLDatabasesResponse{
-		KQLDatabases: fabkqldatabase.KQLDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

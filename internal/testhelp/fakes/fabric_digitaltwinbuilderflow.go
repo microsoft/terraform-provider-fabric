@@ -60,9 +60,7 @@ func (o *operationsDigitalTwinBuilderFlow) CreateDefinition(data fabdigitaltwinb
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsDigitalTwinBuilderFlow) TransformDefinition(entity *fabdigitaltwinbuilderflow.PublicDefinition) fabdigitaltwinbuilderflow.ItemsClientGetDigitalTwinBuilderFlowDefinitionResponse {
 	return fabdigitaltwinbuilderflow.ItemsClientGetDigitalTwinBuilderFlowDefinitionResponse{
-		DefinitionResponse: fabdigitaltwinbuilderflow.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -96,9 +94,7 @@ func (o *operationsDigitalTwinBuilderFlow) TransformGet(entity fabdigitaltwinbui
 // TransformList implements concreteOperations.
 func (o *operationsDigitalTwinBuilderFlow) TransformList(entities []fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow) fabdigitaltwinbuilderflow.ItemsClientListDigitalTwinBuilderFlowsResponse {
 	return fabdigitaltwinbuilderflow.ItemsClientListDigitalTwinBuilderFlowsResponse{
-		DigitalTwinBuilderFlows: fabdigitaltwinbuilderflow.DigitalTwinBuilderFlows{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

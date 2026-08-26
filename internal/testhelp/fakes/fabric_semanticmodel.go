@@ -24,9 +24,7 @@ func (o *operationsSemanticModel) CreateDefinition(data fabsemanticmodel.CreateS
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSemanticModel) TransformDefinition(entity *fabsemanticmodel.Definition) fabsemanticmodel.ItemsClientGetSemanticModelDefinitionResponse {
 	return fabsemanticmodel.ItemsClientGetSemanticModelDefinitionResponse{
-		DefinitionResponse: fabsemanticmodel.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsSemanticModel) TransformGet(entity fabsemanticmodel.SemanticM
 // TransformList implements concreteOperations.
 func (o *operationsSemanticModel) TransformList(entities []fabsemanticmodel.SemanticModel) fabsemanticmodel.ItemsClientListSemanticModelsResponse {
 	return fabsemanticmodel.ItemsClientListSemanticModelsResponse{
-		SemanticModels: fabsemanticmodel.SemanticModels{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

@@ -24,9 +24,7 @@ func (o *operationsItem) CreateDefinition(data fabcore.CreateItemRequest) *fabco
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsItem) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsItem) TransformGet(entity fabcore.Item) fabcore.ItemsClientGe
 // TransformList implements concreteOperations.
 func (o *operationsItem) TransformList(entities []fabcore.Item) fabcore.ItemsClientListItemsResponse {
 	return fabcore.ItemsClientListItemsResponse{
-		Items: fabcore.Items{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -166,10 +162,8 @@ type moveItemOperations struct{}
 
 func (m *moveItemOperations) TransformUpdate(entity fabcore.Item) fabcore.ItemsClientMoveItemResponse {
 	return fabcore.ItemsClientMoveItemResponse{
-		MovedItems: fabcore.MovedItems{
-			Value: []fabcore.Item{
-				entity,
-			},
+		Value: []fabcore.Item{
+			entity,
 		},
 	}
 }

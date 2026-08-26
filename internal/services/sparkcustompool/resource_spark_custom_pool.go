@@ -266,11 +266,9 @@ func (r *resourceSparkCustomPool) ImportState(ctx context.Context, req resource.
 	}
 
 	state := resourceSparkCustomPoolModel{
-		baseSparkCustomPoolModel: baseSparkCustomPoolModel{
-			ID:          uuidID,
-			WorkspaceID: uuidWorkspaceID,
-		},
-		Timeouts: timeout,
+		ID:          uuidID,
+		WorkspaceID: uuidWorkspaceID,
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

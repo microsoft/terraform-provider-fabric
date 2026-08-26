@@ -38,9 +38,7 @@ func (o *operationsSparkJobDefinition) CreateDefinition(data fabsparkjobdefiniti
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSparkJobDefinition) TransformDefinition(entity *fabsparkjobdefinition.PublicDefinition) fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse {
 	return fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse{
-		Response: fabsparkjobdefinition.Response{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -97,9 +95,7 @@ func (o *operationsSparkJobDefinition) TransformGet(entity fabsparkjobdefinition
 // TransformList implements concreteOperations.
 func (o *operationsSparkJobDefinition) TransformList(entities []fabsparkjobdefinition.SparkJobDefinition) fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse {
 	return fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse{
-		SparkJobDefinitions: fabsparkjobdefinition.SparkJobDefinitions{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

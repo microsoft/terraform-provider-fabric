@@ -24,9 +24,7 @@ func (o *operationsNotebook) CreateDefinition(data fabnotebook.CreateNotebookReq
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsNotebook) TransformDefinition(entity *fabnotebook.Definition) fabnotebook.ItemsClientGetNotebookDefinitionResponse {
 	return fabnotebook.ItemsClientGetNotebookDefinitionResponse{
-		DefinitionResponse: fabnotebook.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsNotebook) TransformGet(entity fabnotebook.Notebook) fabnotebo
 // TransformList implements concreteOperations.
 func (o *operationsNotebook) TransformList(entities []fabnotebook.Notebook) fabnotebook.ItemsClientListNotebooksResponse {
 	return fabnotebook.ItemsClientListNotebooksResponse{
-		Notebooks: fabnotebook.Notebooks{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

@@ -109,10 +109,8 @@ func fakeBeginPublishEnvironmentFunc() func(ctx context.Context, _, environmentI
 
 		if _, ok := fakeSparkComputeStagingStore[environmentID]; ok {
 			resp.SetTerminalResponse(http.StatusOK, fabenvironment.ItemsClientPublishEnvironmentResponse{
-				Properties: fabenvironment.Properties{
-					PublishDetails: &fabenvironment.PublishDetails{
-						State: to.Ptr(fabenvironment.PublishStateSuccess),
-					},
+				PublishDetails: &fabenvironment.PublishDetails{
+					State: to.Ptr(fabenvironment.PublishStateSuccess),
 				},
 			}, nil)
 

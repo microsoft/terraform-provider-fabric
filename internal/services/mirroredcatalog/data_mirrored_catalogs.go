@@ -58,10 +58,8 @@ func NewDataSourceMirroredCatalogs(ctx context.Context) datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[mirroredCatalogPropertiesModel, fabmirroredcatalog.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceMirroredCatalogPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,
