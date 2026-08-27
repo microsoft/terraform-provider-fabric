@@ -63,6 +63,67 @@ func itemSchema() superschema.Schema {
 					Computed:            true,
 				},
 			},
+			"previous_encryption_detail": superschema.SuperSingleNestedAttributeOf[encryptionDetailModel]{
+				Common: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "The previous workspace encryption detail.",
+					Computed:            true,
+				},
+				Attributes: superschema.Attributes{
+					"encryption_status": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The previous workspace encryption status.",
+							Computed:            true,
+						},
+					},
+					"key_identifier": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The previous key identifier.",
+							Computed:            true,
+						},
+					},
+				},
+			},
+			"workspace_encryption_items_details": superschema.SuperSetNestedAttributeOf[workspaceEncryptionItemsDetailModel]{
+				Common: &schemaR.SetNestedAttribute{
+					MarkdownDescription: "The encryption status of items in the workspace.",
+					Computed:            true,
+				},
+				Attributes: superschema.Attributes{
+					"encryption_status": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The encryption status for the items.",
+							Computed:            true,
+						},
+					},
+					"items": superschema.SuperSetNestedAttributeOf[workspaceEncryptionItemModel]{
+						Common: &schemaR.SetNestedAttribute{
+							MarkdownDescription: "The array of workspace item details.",
+							Computed:            true,
+						},
+						Attributes: superschema.Attributes{
+							"id": superschema.SuperStringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The item ID.",
+									CustomType:          customtypes.UUIDType{},
+									Computed:            true,
+								},
+							},
+							"display_name": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The item display name.",
+									Computed:            true,
+								},
+							},
+							"type": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The item type.",
+									Computed:            true,
+								},
+							},
+						},
+					},
+				},
+			},
 			"timeouts": superschema.TimeoutAttribute{
 				Resource: &superschema.ResourceTimeoutAttribute{
 					Create: true,
