@@ -1,5 +1,5 @@
 kind: added
-body: New Data-Source `fabric_workspace_encryption` to read the Customer-Managed Key (CMK) encryption settings of a Workspace.
+body: Added `fabric_workspace_encryption` data-source to read the Customer-Managed Key (CMK) encryption settings of a Workspace.
 time: 2026-08-13T15:45:10.0000000+03:00
 custom:
     Issue: "1075"

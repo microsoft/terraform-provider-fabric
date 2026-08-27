@@ -245,10 +245,8 @@ func (r *resourceWorkspaceEncryption) ImportState(ctx context.Context, req resou
 	}
 
 	state := resourceWorkspaceEncryptionModel{
-		baseWorkspaceEncryptionModel: baseWorkspaceEncryptionModel{
-			WorkspaceID: uuidWorkspaceID,
-		},
-		Timeouts: timeout,
+		WorkspaceID: uuidWorkspaceID,
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state.baseWorkspaceEncryptionModel)...); resp.Diagnostics.HasError() {
@@ -292,9 +290,7 @@ func (r *resourceWorkspaceEncryption) get(ctx context.Context, model *baseWorksp
 		return diags
 	}
 
-	model.set(model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
-
-	return nil
+	return model.set(ctx, model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
 }
 
 // waitForStatus polls the encryption status until it settles on want, because assign and reset are asynchronous.
@@ -324,7 +320,9 @@ func (r *resourceWorkspaceEncryption) waitForStatus(ctx context.Context, workspa
 
 		if status == want {
 			if model != nil {
-				model.set(workspaceID, respGet.WorkspaceEncryptionDetail)
+				if diags := model.set(ctx, workspaceID, respGet.WorkspaceEncryptionDetail); diags.HasError() {
+					return diags
+				}
 			}
 
 			return diags

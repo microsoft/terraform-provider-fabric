@@ -126,6 +126,7 @@ func TestUnit_WorkspaceEncryptionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "previous_encryption_detail"),
 			),
 		},
 		// update and read - rotate the key
@@ -142,6 +143,71 @@ func TestUnit_WorkspaceEncryptionResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifierUpdated),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+			),
+		},
+	}))
+}
+
+func TestUnit_WorkspaceEncryptionResource_ItemsDetails(t *testing.T) {
+	itemID := testhelp.RandomUUID()
+	itemName := testhelp.RandomName()
+	itemType := "Lakehouse"
+	previousKeyIdentifier := NewRandomKeyIdentifier()
+	keyIdentifier := NewRandomKeyIdentifier()
+
+	entity := fabcore.WorkspaceEncryptionDetail{
+		EncryptionDetail: &fabcore.EncryptionDetail{
+			KeyIdentifier:    &previousKeyIdentifier,
+			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
+		},
+		WorkspaceEncryptionItemsDetails: []fabcore.WorkspaceEncryptionItemsDetail{
+			{
+				EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
+				Items: []fabcore.WorkspaceEncryptionItem{
+					{
+						ID:          &itemID,
+						DisplayName: &itemName,
+						Type:        &itemType,
+					},
+				},
+			},
+		},
+	}
+	workspaceID := testhelp.RandomUUID()
+
+	fakeServer := fakes.NewFakeServer()
+	fakeServer.ServerFactory.Core.WorkspacesServer.GetWorkspaceEncryption = fakeGetWorkspaceEncryption(&entity)
+	fakeServer.ServerFactory.Core.WorkspacesServer.AssignWorkspaceEncryption = fakeAssignWorkspaceEncryption(&entity)
+	fakeServer.ServerFactory.Core.WorkspacesServer.ResetWorkspaceEncryption = fakeResetWorkspaceEncryption(&entity)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":   workspaceID,
+					"key_identifier": keyIdentifier,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.key_identifier", previousKeyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_encryption_items_details.#", "1"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "workspace_encryption_items_details.*", map[string]string{
+					"encryption_status": string(fabcore.WorkspaceEncryptionStatusActive),
+					"items.#":           "1",
+				}),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "workspace_encryption_items_details.*.items.*", map[string]string{
+					"id":           itemID,
+					"display_name": itemName,
+					"type":         itemType,
+				}),
 			),
 		},
 	}))

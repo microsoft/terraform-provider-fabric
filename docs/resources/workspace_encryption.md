@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Encryption resource allows you to manage a Fabric Workspace Encryption https://learn.microsoft.com/fabric/security/workspace-customer-managed-keys.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_encryption (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Encryption resource allows you to manage a Fabric [Workspace Encryption](https://learn.microsoft.com/fabric/security/workspace-customer-managed-keys).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -40,6 +37,8 @@ resource "fabric_workspace_encryption" "example" {
 ### Read-Only
 
 - `encryption_status` (String) The Workspace encryption status.
+- `previous_encryption_detail` (Attributes) The previous workspace encryption detail. (see [below for nested schema](#nestedatt--previous_encryption_detail))
+- `workspace_encryption_items_details` (Attributes Set) The encryption status of items in the workspace. (see [below for nested schema](#nestedatt--workspace_encryption_items_details))
 
 <a id="nestedatt--timeouts"></a>
 
@@ -51,6 +50,34 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--previous_encryption_detail"></a>
+
+### Nested Schema for `previous_encryption_detail`
+
+Read-Only:
+
+- `encryption_status` (String) The previous workspace encryption status.
+- `key_identifier` (String) The previous key identifier.
+
+<a id="nestedatt--workspace_encryption_items_details"></a>
+
+### Nested Schema for `workspace_encryption_items_details`
+
+Read-Only:
+
+- `encryption_status` (String) The encryption status for the items.
+- `items` (Attributes Set) The array of workspace item details. (see [below for nested schema](#nestedatt--workspace_encryption_items_details--items))
+
+<a id="nestedatt--workspace_encryption_items_details--items"></a>
+
+### Nested Schema for `workspace_encryption_items_details.items`
+
+Read-Only:
+
+- `display_name` (String) The item display name.
+- `id` (String) The item ID.
+- `type` (String) The item type.
 
 ## Import
 

@@ -103,7 +103,5 @@ func (d *dataSourceWorkspaceEncryption) get(ctx context.Context, model *dataSour
 		return diags
 	}
 
-	model.set(model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
-
-	return nil
+	return model.set(ctx, model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
 }

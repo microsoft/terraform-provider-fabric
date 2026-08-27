@@ -41,6 +41,10 @@ func fakeAssignWorkspaceEncryptionWithStatus(
 	status fabcore.WorkspaceEncryptionStatus,
 ) func(ctx context.Context, workspaceID string, assignWorkspaceEncryptionRequest fabcore.AssignWorkspaceEncryptionRequest, options *fabcore.WorkspacesClientAssignWorkspaceEncryptionOptions) (resp azfake.Responder[fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _ string, assignWorkspaceEncryptionRequest fabcore.AssignWorkspaceEncryptionRequest, _ *fabcore.WorkspacesClientAssignWorkspaceEncryptionOptions) (resp azfake.Responder[fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse], errResp azfake.ErrorResponder) {
+		if entity.EncryptionDetail != nil && entity.EncryptionDetail.KeyIdentifier != nil {
+			entity.PreviousEncryptionDetail = entity.EncryptionDetail
+		}
+
 		entity.EncryptionDetail = &fabcore.EncryptionDetail{
 			KeyIdentifier:    assignWorkspaceEncryptionRequest.KeyIdentifier,
 			EncryptionStatus: new(status),
@@ -57,6 +61,10 @@ func fakeResetWorkspaceEncryption(
 	entity *fabcore.WorkspaceEncryptionDetail,
 ) func(ctx context.Context, workspaceID string, options *fabcore.WorkspacesClientResetWorkspaceEncryptionOptions) (resp azfake.Responder[fabcore.WorkspacesClientResetWorkspaceEncryptionResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _ string, _ *fabcore.WorkspacesClientResetWorkspaceEncryptionOptions) (resp azfake.Responder[fabcore.WorkspacesClientResetWorkspaceEncryptionResponse], errResp azfake.ErrorResponder) {
+		if entity.EncryptionDetail != nil && entity.EncryptionDetail.KeyIdentifier != nil {
+			entity.PreviousEncryptionDetail = entity.EncryptionDetail
+		}
+
 		entity.EncryptionDetail = &fabcore.EncryptionDetail{
 			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusDisabled),
 		}
@@ -73,6 +81,18 @@ func NewRandomWorkspaceEncryptionDetail() fabcore.WorkspaceEncryptionDetail {
 		EncryptionDetail: &fabcore.EncryptionDetail{
 			KeyIdentifier:    new(NewRandomKeyIdentifier()),
 			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
+		},
+		WorkspaceEncryptionItemsDetails: []fabcore.WorkspaceEncryptionItemsDetail{
+			{
+				EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
+				Items: []fabcore.WorkspaceEncryptionItem{
+					{
+						ID:          new(testhelp.RandomUUID()),
+						DisplayName: new(testhelp.RandomName()),
+						Type:        new("Lakehouse"),
+					},
+				},
+			},
 		},
 	}
 }
