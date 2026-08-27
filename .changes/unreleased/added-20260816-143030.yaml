@@ -1,5 +1,5 @@
 kind: added
-body: New Data Source `fabric_workspace_inbound_azure_resource_rules`.
+body: Added `fabric_workspace_inbound_azure_resource_rules` data source.
 time: 2026-08-16T14:30:30.0000000+03:00
 custom:
     Issue: "1082"

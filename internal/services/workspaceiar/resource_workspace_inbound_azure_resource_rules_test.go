@@ -379,7 +379,8 @@ func TestAcc_WorkspaceInboundAzureResourceRulesResource_CRUD(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "1"),
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "rules.*", map[string]string{
@@ -399,7 +400,8 @@ func TestAcc_WorkspaceInboundAzureResourceRulesResource_CRUD(t *testing.T) {
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"rules":        []map[string]any{},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "rules.#", "0"),
 			),

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Inbound Azure Resource Rules resource allows you to manage a Fabric Workspace Inbound Azure Resource Rules https://learn.microsoft.com/fabric/onelake/onelake-manage-inbound-access-trusted-resources.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_inbound_azure_resource_rules (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Inbound Azure Resource Rules resource allows you to manage a Fabric [Workspace Inbound Azure Resource Rules](https://learn.microsoft.com/fabric/onelake/onelake-manage-inbound-access-trusted-resources).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -52,7 +49,7 @@ resource "fabric_workspace_inbound_azure_resource_rules" "example" {
 
 Required:
 
-- `display_name` (String) A user-friendly display name for the rule. Used for display purposes only and does not affect the rule's functionality. String length must be at least 1.
+- `display_name` (String) A user-friendly display name for the rule. Used for display purposes only and does not affect the rule's functionality.
 - `resource_id` (String) The full Azure Resource Manager (ARM) resource ID of the Azure resource instance within the rule, in the format `/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}`. The resource instance must be registered in the same Microsoft Entra tenant as the Workspace. Must be a valid Azure Resource Manager (ARM) resource ID.
 
 <a id="nestedatt--timeouts"></a>

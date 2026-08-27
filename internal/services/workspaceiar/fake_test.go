@@ -99,7 +99,7 @@ func fakeGetInboundAzureResourceRulesReversed(
 
 		resp = azfake.Responder[fabcore.WorkspacesClientGetInboundAzureResourceRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetInboundAzureResourceRulesResponse{
-			WorkspaceInboundAzureResourceRules: fabcore.WorkspaceInboundAzureResourceRules{Rules: reversed},
+			Rules: reversed,
 		}, nil)
 
 		return resp, errResp

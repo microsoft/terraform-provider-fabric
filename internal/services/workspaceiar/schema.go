@@ -69,9 +69,6 @@ func itemSchema() superschema.Schema {
 						},
 						Resource: &schemaR.StringAttribute{
 							Required: true,
-							Validators: []validator.String{
-								stringvalidator.LengthAtLeast(1),
-							},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,

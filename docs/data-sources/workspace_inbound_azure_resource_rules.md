@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Inbound Azure Resource Rules data-source allows you to retrieve details about a Fabric Workspace Inbound Azure Resource Rules https://learn.microsoft.com/fabric/onelake/onelake-manage-inbound-access-trusted-resources.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_inbound_azure_resource_rules (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Inbound Azure Resource Rules data-source allows you to retrieve details about a Fabric [Workspace Inbound Azure Resource Rules](https://learn.microsoft.com/fabric/onelake/onelake-manage-inbound-access-trusted-resources).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

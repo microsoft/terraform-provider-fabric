@@ -31,17 +31,13 @@ func (to *baseWorkspaceInboundAzureResourceRulesModel) set(ctx context.Context, 
 
 	slice := make([]*inboundAzureResourceRuleModel, 0, len(from.Rules))
 
-	for _, prop := range from.Rules {
-		inboundAzureResourceRule := &inboundAzureResourceRuleModel{}
-		inboundAzureResourceRule.set(prop)
-		slice = append(slice, inboundAzureResourceRule)
+	for _, entity := range from.Rules {
+		var entityModel inboundAzureResourceRuleModel
+		entityModel.set(entity)
+		slice = append(slice, &entityModel)
 	}
 
-	if diags := to.Rules.Set(ctx, slice); diags.HasError() {
-		return diags
-	}
-
-	return nil
+	return to.Rules.Set(ctx, slice)
 }
 
 func (to *inboundAzureResourceRuleModel) set(from fabcore.WorkspaceInboundAzureResourceRule) {
