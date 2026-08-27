@@ -16,6 +16,9 @@ The Paginated Report resource allows you to manage a Fabric [Paginated Report](h
 ## Example Usage
 
 ```terraform
+# The definition must contain exactly one RDL part whose key is "<display_name>.rdl".
+# When changing display_name, change the definition key in the same plan.
+
 # Example 1 - Paginated Report with required definition
 resource "fabric_paginated_report" "example" {
   display_name = "example"

@@ -110,5 +110,18 @@ func TestAcc_PaginatedReportDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 			),
 		},
+		{
+			Config: at.CompileConfig(testDataSourceItemHeader, map[string]any{
+				"workspace_id":      workspaceID,
+				"id":                entityID,
+				"format":            "Default",
+				"output_definition": true,
+			}),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition."+entityDisplayName+".rdl.content"),
+			),
+		},
 	}))
 }
