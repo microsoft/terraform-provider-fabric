@@ -14,6 +14,9 @@ import (
 
 var itemTypeInfo = itemjobscheduler.ItemTypeInfo
 
+// testLocalTimeZoneID is a non-default Windows time zone identifier used to verify the value is not hardcoded.
+const testLocalTimeZoneID = "W. Europe Standard Time"
+
 func dataflowResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()
 
