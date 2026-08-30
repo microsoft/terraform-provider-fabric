@@ -104,6 +104,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacefwr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceiar"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
@@ -517,6 +518,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewResourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
 		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
@@ -644,6 +646,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewDataSourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,

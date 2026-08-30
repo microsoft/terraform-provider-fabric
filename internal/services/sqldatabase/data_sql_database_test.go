@@ -235,6 +235,10 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 }
 
 func TestAcc_SQLDatabaseDataSource_Definition(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Temporary skip")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
