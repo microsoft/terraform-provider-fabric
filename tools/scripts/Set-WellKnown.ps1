@@ -1123,7 +1123,7 @@ function Set-ItemJobScheduler {
 
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Sql', 'SqlServer')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'Az.KeyVault', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Sql', 'SqlServer')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -1238,6 +1238,7 @@ $itemNaming = @{
   'WorkspaceOAP'                    = 'wsoap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
+  'WorkspaceCMK'                    = 'wscmk'
   'DomainParent'                    = 'parent'
   'DomainChild'                     = 'child'
   'EntraServicePrincipal'           = 'sp'
@@ -1251,6 +1252,7 @@ $itemNaming = @{
   'ManagedPrivateEndpoint'          = 'mpe'
   'StorageAccount'                  = 'st'
   'ResourceGroup'                   = 'rg'
+  'KeyVault'                        = 'kv'
   'FabricCapacity'                  = 'fc'
   'ShareableCloudConnection'        = 'scc'
   'VirtualNetworkGatewayConnection' = 'vngc'
@@ -1354,6 +1356,24 @@ $wellKnown['WorkspaceDS'] = @{
 }
 
 # Assign SPN to WorkspaceDS if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create WorkspaceCMK if not exists
+# Kept empty on purpose: CMK cannot be enabled on a workspace that contains items unsupported by customer-managed keys.
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceCMK'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceCMK to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceCMK - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceCMK'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+# Assign SPN to WorkspaceCMK if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
@@ -1676,6 +1696,96 @@ $wellKnown['ResourceGroup'] = @{
 $wellKnown['Azure'] = @{
   subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
   location       = $wellKnown['ResourceGroup'].location
+}
+
+# Create Key Vault if not exists
+# Fabric requires soft-delete and purge protection to be enabled on the vault holding the customer-managed key.
+$displayNameTemp = (("$($itemNaming['KeyVault'])-${displayName}").ToLower() -replace '[^a-z0-9-]', '')
+if ($displayNameTemp.Length -gt 24) {
+  $displayNameTemp = $displayNameTemp.Substring(0, 24).TrimEnd('-')
+}
+$keyVault = Get-AzKeyVault -ResourceGroupName $wellKnown['ResourceGroup'].name -VaultName $displayNameTemp -ErrorAction SilentlyContinue
+if (!$keyVault) {
+  Write-Log -Message "Creating Key Vault: $displayNameTemp" -Level 'WARN'
+  $keyVaultParams = @{
+    ResourceGroupName         = $wellKnown['ResourceGroup'].name
+    VaultName                 = $displayNameTemp
+    Location                  = $wellKnown['ResourceGroup'].location
+    Sku                       = 'Standard'
+    EnablePurgeProtection     = $true
+    SoftDeleteRetentionInDays = 7
+  }
+  # Az.KeyVault 6.x makes RBAC authorization the default and replaced the switch with -DisableRbacAuthorization
+  if ((Get-Command New-AzKeyVault).Parameters.ContainsKey('EnableRbacAuthorization')) {
+    $keyVaultParams['EnableRbacAuthorization'] = $true
+  }
+  $keyVault = New-AzKeyVault @keyVaultParams
+}
+Write-Log -Message "Key Vault - Name: $($keyVault.VaultName) / URI: $($keyVault.VaultUri)"
+
+# Grant the signed-in principal permission to manage keys in the RBAC-enabled vault
+$currentPrincipalId = (Get-AzADUser -SignedIn -ErrorAction SilentlyContinue).Id
+if (!$currentPrincipalId) {
+  $currentPrincipalId = (Get-AzADServicePrincipal -ApplicationId $azContext.Account.Id -ErrorAction SilentlyContinue).Id
+}
+if ($currentPrincipalId) {
+  if (!(Get-AzRoleAssignment -ObjectId $currentPrincipalId -RoleDefinitionName 'Key Vault Crypto Officer' -Scope $keyVault.ResourceId -ErrorAction SilentlyContinue)) {
+    Write-Log -Message 'Assigning Key Vault Crypto Officer to the current principal' -Level 'WARN'
+    New-AzRoleAssignment -ObjectId $currentPrincipalId -RoleDefinitionName 'Key Vault Crypto Officer' -Scope $keyVault.ResourceId | Out-Null
+  }
+}
+else {
+  Write-Log -Message 'Unable to resolve the signed-in principal object ID. Key Vault key creation may fail.' -Level 'WARN'
+}
+
+# Grant the 'Fabric Platform CMK' app access to wrap/unwrap the workspace data encryption key.
+# The service principal for this Microsoft multitenant app must be created by a Cloud Application Administrator:
+#   New-AzADServicePrincipal -ApplicationId 61d6811f-7544-4e75-a1e6-1c59c0383311
+$cmkAppId = '61d6811f-7544-4e75-a1e6-1c59c0383311'
+$cmkSp = Get-AzADServicePrincipal -ApplicationId $cmkAppId -ErrorAction SilentlyContinue
+if (!$cmkSp) {
+  Write-Log -Message "!!! The 'Fabric Platform CMK' service principal (AppId: $cmkAppId) does not exist in this tenant. A Cloud Application Administrator must create it, otherwise workspace encryption acceptance tests will fail with encryptionStatus 'Failed'. !!!" -Level 'ERROR' -Stop $false
+}
+else {
+  if (!(Get-AzRoleAssignment -ObjectId $cmkSp.Id -RoleDefinitionName 'Key Vault Crypto Service Encryption User' -Scope $keyVault.ResourceId -ErrorAction SilentlyContinue)) {
+    Write-Log -Message 'Assigning Key Vault Crypto Service Encryption User to the Fabric Platform CMK app' -Level 'WARN'
+    New-AzRoleAssignment -ObjectId $cmkSp.Id -RoleDefinitionName 'Key Vault Crypto Service Encryption User' -Scope $keyVault.ResourceId | Out-Null
+  }
+}
+
+# Create the customer-managed keys.
+# Two keys are required: the second one is the rotation target for the fabric_workspace_encryption update test.
+# RSA 3072 is used because 4096-bit keys are not supported for SQL Database in Fabric.
+$keyIdentifiers = @{}
+foreach ($keyName in @('cmk-key-01', 'cmk-key-02')) {
+  $key = Get-AzKeyVaultKey -VaultName $keyVault.VaultName -Name $keyName -ErrorAction SilentlyContinue
+  if (!$key) {
+    Write-Log -Message "Creating Key Vault key: $keyName" -Level 'WARN'
+    # Retry to absorb Azure RBAC propagation delay on a freshly created vault
+    foreach ($attempt in 1..10) {
+      $key = Add-AzKeyVaultKey -VaultName $keyVault.VaultName -Name $keyName -Destination 'Software' -KeyType 'RSA' -Size 3072 -ErrorAction SilentlyContinue
+      if ($key) {
+        break
+      }
+      Write-Log -Message "Waiting for Key Vault permissions to propagate (attempt $attempt/10)" -Level 'DEBUG'
+      Start-Sleep -Seconds 15
+    }
+  }
+  if (!$key) {
+    Write-Log -Message "Unable to create Key Vault key: $keyName" -Level 'ERROR'
+  }
+  # Fabric only accepts versionless key identifiers
+  $keyIdentifiers[$keyName] = "$($keyVault.VaultUri)keys/$keyName/"
+}
+Write-Log -Message "Key Vault Key - Identifier: $($keyIdentifiers['cmk-key-01'])"
+
+$wellKnown['KeyVault'] = @{
+  id                = $keyVault.ResourceId
+  name              = $keyVault.VaultName
+  uri               = $keyVault.VaultUri
+  resourceGroupName = $wellKnown['ResourceGroup'].name
+  keyIdentifier     = $keyIdentifiers['cmk-key-01']
+  keyIdentifierAlt  = $keyIdentifiers['cmk-key-02']
 }
 
 # Create Storage Account if not exists

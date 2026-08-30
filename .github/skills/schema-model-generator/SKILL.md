@@ -116,7 +116,7 @@ func (to *<nestedModel>) set(from fab<package>.<NestedDTO>) {
 }
 ```
 
-**Setter patterns by type:** Use the "Setter Pattern" column in the "SDK Type → Model Type Mapping" table in `schema-model-patterns.instructions.md`.
+**Setter patterns by type:** Use the "Setter Pattern" column in the "SDK Type → Model Type Mapping" table and collection iteration templates in `schema-model-patterns.instructions.md`.
 
 ### 3b. Request Builders — TF → SDK (Create/Update)
 
