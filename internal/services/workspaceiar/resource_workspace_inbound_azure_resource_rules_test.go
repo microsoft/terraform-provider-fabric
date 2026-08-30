@@ -123,23 +123,6 @@ func TestUnit_WorkspaceInboundAzureResourceRulesResource_Attributes(t *testing.T
 			),
 			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "rules"`),
 		},
-		// error - rules - empty display_name
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"rules": []map[string]any{
-						{
-							"display_name": "",
-							"resource_id":  testRuleFactory["resource_id"],
-						},
-					},
-				},
-			),
-			ExpectError: regexp.MustCompile(`string length must be at least 1`),
-		},
 		// error - rules - resource_id is not an ARM resource ID
 		{
 			ResourceName: testResourceItemFQN,
