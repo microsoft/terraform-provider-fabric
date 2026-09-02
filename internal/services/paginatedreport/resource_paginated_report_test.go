@@ -238,21 +238,23 @@ func TestUnit_PaginatedReportResource_CRUD(t *testing.T) {
 func TestAcc_PaginatedReportResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 	createName := testhelp.RandomName()
 	updateName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(testResourceItemHeader, map[string]any{
 					"workspace_id": workspaceID,
 					"display_name": createName,
-					"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					"folder_id":    folder1ID,
 					"format":       "Default",
 					"definition":   testDefinition(createName),
 				}),
@@ -260,7 +262,7 @@ func TestAcc_PaginatedReportResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", createName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "format", "Default"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
@@ -269,12 +271,11 @@ func TestAcc_PaginatedReportResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(testResourceItemHeader, map[string]any{
 					"workspace_id": workspaceID,
 					"display_name": updateName,
 					"description":  entityUpdateDescription,
-					"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+					"folder_id":    folder2ID,
 					"format":       "Default",
 					"definition":   testDefinition(updateName),
 				}),
@@ -282,7 +283,7 @@ func TestAcc_PaginatedReportResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", updateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 			),
 		},

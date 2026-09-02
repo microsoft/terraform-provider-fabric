@@ -450,13 +450,16 @@ func TestUnit_KQLDatabaseResource_CRUD(t *testing.T) {
 func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	eventhouseResourceHCL, eventhouseResourceFQN := eventhouseResource(t, workspaceID)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 	tagResourceHCL1, tagResourceFQN1 := testhelp.TagResource(t)
 	tagResourceHCL2, tagResourceFQN2 := testhelp.TagResource(t)
 	tagResourceHCL3, tagResourceFQN3 := testhelp.TagResource(t)
@@ -467,13 +470,12 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				eventhouseResourceHCL,
-				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder1ID,
 						"configuration": map[string]any{
 							"database_type": "ReadWrite",
 							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
@@ -484,7 +486,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
@@ -495,7 +497,6 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				eventhouseResourceHCL,
-				folderResourceHCL,
 				tagResourceHCL1,
 				tagResourceHCL2,
 				at.CompileConfig(
@@ -503,7 +504,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder1ID,
 						"configuration": map[string]any{
 							"database_type": "ReadWrite",
 							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
@@ -515,7 +516,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
@@ -528,7 +529,6 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				eventhouseResourceHCL,
-				folderResourceHCL,
 				tagResourceHCL1,
 				tagResourceHCL2,
 				tagResourceHCL3,
@@ -538,7 +538,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder2ID,
 						"configuration": map[string]any{
 							"database_type": "ReadWrite",
 							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
@@ -550,7 +550,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
@@ -563,7 +563,6 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				eventhouseResourceHCL,
-				folderResourceHCL,
 				tagResourceHCL1,
 				tagResourceHCL2,
 				tagResourceHCL3,
@@ -573,7 +572,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder2ID,
 						"configuration": map[string]any{
 							"database_type": "ReadWrite",
 							"eventhouse_id": testhelp.RefByFQN(eventhouseResourceFQN, "id"),
@@ -584,7 +583,7 @@ func TestAcc_KQLDatabaseConfigurationResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.eventhouse_id"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.query_service_uri"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),

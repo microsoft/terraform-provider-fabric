@@ -348,8 +348,12 @@ function Remove-WorkspaceRSItems {
     }
 
     # Sort folders by depth (deepest first) to ensure child folders are deleted before parents
-    # Exclude known bugged folder that cannot be deleted due to backend issues
-    $foldersToDelete = $foldersWithDepth | Where-Object { $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' } | Sort-Object -Property Depth -Descending
+    # Exclude known bugged folder that cannot be deleted due to backend issues and well-known WorkspaceRS folders
+    $foldersToDelete = $foldersWithDepth | Where-Object {
+      $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' -and
+      (-not $wellKnownContent.FolderRS1 -or $_.Id -ne $wellKnownContent.FolderRS1.id) -and
+      (-not $wellKnownContent.FolderRS2 -or $_.Id -ne $wellKnownContent.FolderRS2.id)
+    } | Sort-Object -Property Depth -Descending
   }
   else {
     $foldersToDelete = @()
