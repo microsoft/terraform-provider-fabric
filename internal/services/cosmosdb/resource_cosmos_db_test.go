@@ -245,30 +245,33 @@ func TestUnit_CosmosDBResource_CRUD(t *testing.T) {
 func TestAcc_CosmosDBResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
+
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder1ID,
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 			),
 		},
 		// Update and Read
@@ -276,18 +279,25 @@ func TestAcc_CosmosDBResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder2ID,
 					},
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
+			),
+		},
+	},
+	))
+}
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),

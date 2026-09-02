@@ -21,6 +21,7 @@ linters:
     - goconst
     - goheader
     - gomoddirectives
+    - gomodguard
     - ireturn
     - lll
     - mnd
@@ -127,7 +128,8 @@ formatters:
         - localmodule
     gofumpt:
       module-path: github.com/microsoft/terraform-provider-fabric
-      extra-rules: true
+      extra:
+        group-params: true
     goimports:
       local-prefixes:
         - github.com/microsoft/terraform-provider-fabric
