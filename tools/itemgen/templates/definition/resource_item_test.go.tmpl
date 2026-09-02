@@ -262,13 +262,13 @@ func TestAcc_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-					    "folder_id":    folder1ID,
-					},
-				),
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"folder_id":    folder1ID,
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -279,14 +279,14 @@ func TestAcc_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    folder2ID,
-					},
-				),
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName,
+					"description":  entityUpdateDescription,
+					"folder_id":    folder2ID,
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
