@@ -1,7 +1,7 @@
 #
 # Remove-WorkspaceRSItems.ps1
 #
-# This script deletes all items in the "WorkspaceRS" workspace except for:
+# This script hard-deletes all items and deletes all recoverable items and folders in the "WorkspaceRS" workspace except for:
 # 1. Any lakehouse named "lh"
 # 2. All SQLEndpoint items
 # 3. All KQLDatabase items
@@ -314,6 +314,34 @@ function Remove-WorkspaceRSItems {
     $allFolders = @()
   }
 
+  # Get all recoverable items in the WorkspaceRS
+  Write-Log -Message "Fetching all recoverable items in WorkspaceRS..." -Level 'INFO'
+  $recoverableItems = @()
+  try {
+    $recEndpoint = "workspaces/$workspaceId/recoverableItems"
+    do {
+      $recResponse = Invoke-FabricRest -Method 'GET' -Endpoint $recEndpoint
+      if ($recResponse.Response.value) {
+        $recoverableItems += $recResponse.Response.value
+      }
+      $continuationToken = $recResponse.Response.continuationToken
+      if ($continuationToken) {
+        $recEndpoint = "workspaces/$workspaceId/recoverableItems?continuationToken=$continuationToken"
+      }
+    } while ($continuationToken)
+
+    if ($recoverableItems -and $recoverableItems.Count -gt 0) {
+      Write-Log -Message "Found $($recoverableItems.Count) recoverable items in WorkspaceRS" -Level 'INFO'
+    }
+    else {
+      Write-Log -Message "No recoverable items found in WorkspaceRS" -Level 'INFO'
+    }
+  }
+  catch {
+    Write-Log -Message "Failed to fetch recoverable items from WorkspaceRS: $($_.Exception.Message)" -Level 'WARN' -Stop $false
+    $recoverableItems = @()
+  }
+
   # Filter out items to preserve:
   # 1. Any lakehouse named "lh"
   # 2. All SQLEndpoint items
@@ -356,23 +384,32 @@ function Remove-WorkspaceRSItems {
   }
 
   $totalItemsToDelete = $itemsToDelete.Count
+  $totalRecoverableItemsToDelete = $recoverableItems.Count
   $totalFoldersToDelete = $foldersToDelete.Count
-  $totalToDelete = $totalItemsToDelete + $totalFoldersToDelete
+  $totalToDelete = $totalItemsToDelete + $totalRecoverableItemsToDelete + $totalFoldersToDelete
 
   if ($totalToDelete -eq 0) {
-    Write-Log -Message "No items or folders to delete (only preserved items found)" -Level 'INFO'
+    Write-Log -Message "No items, recoverable items, or folders to delete (only preserved items found)" -Level 'INFO'
     return
   }
 
-  Write-Log -Message "Items to delete: $totalItemsToDelete" -Level 'INFO'
+  Write-Log -Message "Items to hard delete: $totalItemsToDelete" -Level 'INFO'
+  Write-Log -Message "Recoverable items to delete: $totalRecoverableItemsToDelete" -Level 'INFO'
   Write-Log -Message "Folders to delete: $totalFoldersToDelete" -Level 'INFO'
 
   if ($DryRun) {
-    Write-Log -Message "DRY RUN MODE - No items or folders will actually be deleted" -Level 'WARN' -Stop $false
+    Write-Log -Message "DRY RUN MODE - No items, recoverable items, or folders will actually be deleted" -Level 'WARN' -Stop $false
 
     if ($totalItemsToDelete -gt 0) {
-      Write-Log -Message "Items that would be deleted:" -Level 'INFO' -Stop $false
+      Write-Log -Message "Items that would be hard deleted:" -Level 'INFO' -Stop $false
       foreach ($item in $itemsToDelete) {
+        Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+      }
+    }
+
+    if ($totalRecoverableItemsToDelete -gt 0) {
+      Write-Log -Message "Recoverable items that would be deleted:" -Level 'INFO' -Stop $false
+      foreach ($item in $recoverableItems) {
         Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
       }
     }
@@ -386,7 +423,8 @@ function Remove-WorkspaceRSItems {
     }
 
     Write-Log -Message "=== DRY RUN SUMMARY ===" -Level 'INFO'
-    Write-Log -Message "Total items that would be deleted: $totalItemsToDelete" -Level 'INFO'
+    Write-Log -Message "Total items that would be hard deleted: $totalItemsToDelete" -Level 'INFO'
+    Write-Log -Message "Total recoverable items that would be deleted: $totalRecoverableItemsToDelete" -Level 'INFO'
     Write-Log -Message "Total folders that would be deleted: $totalFoldersToDelete" -Level 'INFO'
     Write-Log -Message "DRY RUN completed - no actual deletions performed" -Level 'INFO'
     return
@@ -394,11 +432,18 @@ function Remove-WorkspaceRSItems {
 
   # Confirm deletion with user (unless Force is specified)
   if (-not $Force) {
-    Write-Log -Message "About to delete $totalItemsToDelete items and $totalFoldersToDelete folders from WorkspaceRS:" -Level 'WARN' -Stop $false
+    Write-Log -Message "About to delete $totalItemsToDelete items (hard delete), $totalRecoverableItemsToDelete recoverable items, and $totalFoldersToDelete folders from WorkspaceRS:" -Level 'WARN' -Stop $false
 
     if ($totalItemsToDelete -gt 0) {
-      Write-Log -Message "Items:" -Level 'INFO' -Stop $false
+      Write-Log -Message "Items (Hard Delete):" -Level 'INFO' -Stop $false
       foreach ($item in $itemsToDelete) {
+        Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
+      }
+    }
+
+    if ($totalRecoverableItemsToDelete -gt 0) {
+      Write-Log -Message "Recoverable Items:" -Level 'INFO' -Stop $false
+      foreach ($item in $recoverableItems) {
         Write-Log -Message "  - $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO' -Stop $false
       }
     }
@@ -417,33 +462,33 @@ function Remove-WorkspaceRSItems {
     }
   }
   else {
-    Write-Log -Message "Force mode enabled - proceeding with deletion of $totalItemsToDelete items and $totalFoldersToDelete folders" -Level 'WARN' -Stop $false
+    Write-Log -Message "Force mode enabled - proceeding with deletion of $totalItemsToDelete items (hard delete), $totalRecoverableItemsToDelete recoverable items, and $totalFoldersToDelete folders" -Level 'WARN' -Stop $false
   }
 
-  # Delete items first
+  # 1. Delete active items first (hard delete)
   $deletedItemsCount = 0
   $failedItemsCount = 0
 
   if ($totalItemsToDelete -gt 0) {
-    Write-Log -Message "Starting deletion of $totalItemsToDelete items..." -Level 'INFO'
+    Write-Log -Message "Starting hard deletion of $totalItemsToDelete items..." -Level 'INFO'
 
     foreach ($item in $itemsToDelete) {
-      Write-Log -Message "Deleting item: $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO'
+      Write-Log -Message "Hard deleting item: $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO'
 
       try {
-        $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)"
+        $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/items/$($item.id)?hardDelete=true"
 
         if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
           if ($deleteResponse.StatusCode -eq 404) {
             Write-Log -Message "Item already deleted or not found: $($item.displayName)" -Level 'INFO'
           }
           else {
-            Write-Log -Message "Successfully deleted item: $($item.displayName)" -Level 'INFO'
+            Write-Log -Message "Successfully hard deleted item: $($item.displayName)" -Level 'INFO'
           }
           $deletedItemsCount++
         }
         else {
-          Write-Log -Message "Failed to delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
+          Write-Log -Message "Failed to hard delete item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
           $failedItemsCount++
         }
       }
@@ -455,7 +500,7 @@ function Remove-WorkspaceRSItems {
           $deletedItemsCount++
         }
         else {
-          Write-Log -Message "Error deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+          Write-Log -Message "Error hard deleting item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
           $failedItemsCount++
         }
       }
@@ -465,7 +510,52 @@ function Remove-WorkspaceRSItems {
     }
   }
 
-  # Delete folders (deepest first)
+  # 2. Delete recoverable items
+  $deletedRecoverableItemsCount = 0
+  $failedRecoverableItemsCount = 0
+
+  if ($totalRecoverableItemsToDelete -gt 0) {
+    Write-Log -Message "Starting deletion of $totalRecoverableItemsToDelete recoverable items..." -Level 'INFO'
+
+    foreach ($item in $recoverableItems) {
+      Write-Log -Message "Deleting recoverable item: $($item.displayName) (Type: $($item.type), ID: $($item.id))" -Level 'INFO'
+
+      try {
+        $deleteResponse = Invoke-FabricRest -Method 'DELETE' -Endpoint "workspaces/$workspaceId/recoverableItems/$($item.id)"
+
+        if ($deleteResponse.StatusCode -eq 200 -or $deleteResponse.StatusCode -eq 204 -or $deleteResponse.StatusCode -eq 404) {
+          if ($deleteResponse.StatusCode -eq 404) {
+            Write-Log -Message "Recoverable item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          }
+          else {
+            Write-Log -Message "Successfully deleted recoverable item: $($item.displayName)" -Level 'INFO'
+          }
+          $deletedRecoverableItemsCount++
+        }
+        else {
+          Write-Log -Message "Failed to delete recoverable item: $($item.displayName) - Status Code: $($deleteResponse.StatusCode)" -Level 'ERROR' -Stop $false
+          $failedRecoverableItemsCount++
+        }
+      }
+      catch {
+        # Check if the exception is a 404
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        if ($statusCode -eq 404) {
+          Write-Log -Message "Recoverable item already deleted or not found: $($item.displayName)" -Level 'INFO'
+          $deletedRecoverableItemsCount++
+        }
+        else {
+          Write-Log -Message "Error deleting recoverable item: $($item.displayName) - $($_.Exception.Message)" -Level 'ERROR' -Stop $false
+          $failedRecoverableItemsCount++
+        }
+      }
+
+      # Add a small delay between deletions to avoid rate limiting
+      Start-Sleep -Milliseconds 500
+    }
+  }
+
+  # 3. Delete folders (deepest first)
   $deletedFoldersCount = 0
   $failedFoldersCount = 0
 
@@ -500,16 +590,17 @@ function Remove-WorkspaceRSItems {
   # Summary
   Write-Log -Message "=== DELETION SUMMARY ===" -Level 'INFO'
   Write-Log -Message "Items - Total to delete: $totalItemsToDelete, Successfully deleted: $deletedItemsCount, Failed: $failedItemsCount" -Level 'INFO'
+  Write-Log -Message "Recoverable Items - Total to delete: $totalRecoverableItemsToDelete, Successfully deleted: $deletedRecoverableItemsCount, Failed: $failedRecoverableItemsCount" -Level 'INFO'
   Write-Log -Message "Folders - Total to delete: $totalFoldersToDelete, Successfully deleted: $deletedFoldersCount, Failed: $failedFoldersCount" -Level 'INFO'
 
-  $totalFailed = $failedItemsCount + $failedFoldersCount
-  $totalDeleted = $deletedItemsCount + $deletedFoldersCount
+  $totalFailed = $failedItemsCount + $failedRecoverableItemsCount + $failedFoldersCount
+  $totalDeleted = $deletedItemsCount + $deletedRecoverableItemsCount + $deletedFoldersCount
 
   if ($totalFailed -eq 0) {
-    Write-Log -Message "All items and folders deleted successfully!" -Level 'INFO'
+    Write-Log -Message "All items, recoverable items, and folders deleted successfully!" -Level 'INFO'
   }
   elseif ($totalDeleted -eq 0) {
-    Write-Log -Message "No items or folders were deleted due to errors." -Level 'ERROR' -Stop $false
+    Write-Log -Message "No items, recoverable items, or folders were deleted due to errors." -Level 'ERROR' -Stop $false
   }
   else {
     Write-Log -Message "Deletion completed with some failures." -Level 'WARN' -Stop $false
@@ -532,15 +623,29 @@ if (Test-Path -Path './wellknown.env') {
   Import-Dotenv -Path ./wellknown.env -AllowClobber
 }
 
-# Check if already logged in to Azure (e.g. via azure/login OIDC in CI). If not, login interactively.
+# Check if already logged in to Azure (e.g. via azure/login OIDC in CI). If not or if tenant/subscription mismatch, login.
 $azContext = Get-AzContext
+$needsLogin = $false
+
 if (!$azContext) {
+  $needsLogin = $true
+}
+elseif ($Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -and $azContext.Tenant.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID) {
+  Write-Log -Message "Current Az context tenant ($($azContext.Tenant.Id)) does not match expected tenant ($Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID)." -Level 'WARN' -Stop $false
+  $needsLogin = $true
+}
+elseif ($Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID -and $azContext.Subscription.Id -ne $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID) {
+  Write-Log -Message "Current Az context subscription ($($azContext.Subscription.Id)) does not match expected subscription ($Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID)." -Level 'WARN' -Stop $false
+  $needsLogin = $true
+}
+
+if ($needsLogin) {
   if (
     !$Env:FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID -or
     !$Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
   ) {
     Write-Log -Message @'
-  No existing Az PowerShell session found and the following environment variables are not set:
+  No existing matching Az PowerShell session found and the following environment variables are not set:
   FABRIC_TESTACC_WELLKNOWN_ENTRA_TENANT_ID,
   FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID.
   Either sign in beforehand (e.g. via Connect-AzAccount or azure/login) or provide these variables.
