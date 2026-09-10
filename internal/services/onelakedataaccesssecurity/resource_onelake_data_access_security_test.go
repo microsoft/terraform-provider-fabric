@@ -257,6 +257,68 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	}))
 }
 
+// TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_MissingObjectType is a
+// regression test for https://github.com/microsoft/terraform-provider-fabric/issues/1044,
+// where the Fabric API omits object_type for microsoft_entra_members on read, causing
+// "Provider produced inconsistent result after apply".
+func TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_MissingObjectType(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	objectID := testhelp.RandomUUID()
+	tenantID := testhelp.RandomUUID()
+
+	for key := range fakeOneLakeDataAccessRoleStore {
+		delete(fakeOneLakeDataAccessRoleStore, key)
+	}
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFuncWithoutEntraObjectType()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRoleFunc()
+
+	config := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"item_id":      itemID,
+			"role_name":    "example",
+			"decision_rules": []map[string]any{
+				{
+					"effect": "Permit",
+					"permission": []map[string]any{
+						{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+						{"attribute_name": "Action", "attribute_value_included_in": []string{"Read"}},
+					},
+				},
+			},
+			"members": map[string]any{
+				"microsoft_entra_members": []map[string]any{
+					{"object_id": objectID, "object_type": "User", "tenant_id": tenantID},
+				},
+			},
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create and Read - must not fail with "Provider produced inconsistent result after apply"
+		{
+			ResourceName: testResourceItemFQN,
+			Config:       config,
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "members.microsoft_entra_members.0.object_id", objectID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "members.microsoft_entra_members.0.object_type", "User"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "members.microsoft_entra_members.0.tenant_id", tenantID),
+			),
+		},
+		// Refresh-only plan must remain a no-op even though the API never returns object_type.
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             config,
+			PlanOnly:           true,
+			ExpectNonEmptyPlan: false,
+		},
+	}))
+}
+
 func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)

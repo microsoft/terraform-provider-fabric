@@ -311,6 +311,79 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 	return nil
 }
 
+// reconcileMicrosoftEntraMemberObjectTypes fills in the object_type of microsoft_entra_members
+// entries in `to.Members` that came back empty from the API (some Fabric APIs only return
+// object_id/tenant_id) using the values from `known` (the plan on create/update, or the prior
+// state on read), matched by object_id. This avoids a "Provider produced inconsistent result"
+// error, since object_type is a Required (non-Computed) attribute whose planned value must be
+// reflected as-is in the final state.
+// See: https://github.com/microsoft/terraform-provider-fabric/issues/1044
+func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjectTypes(ctx context.Context, known supertypes.SingleNestedObjectValueOf[memberModel]) diag.Diagnostics {
+	if known.IsNull() || known.IsUnknown() || to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	knownMembers, diags := known.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	knownEntraMembers, diags := knownMembers.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	knownObjectTypes := make(map[string]types.String, len(knownEntraMembers))
+
+	for _, m := range knownEntraMembers {
+		if m.ObjectID.IsNull() || m.ObjectType.IsNull() || m.ObjectType.ValueString() == "" {
+			continue
+		}
+
+		knownObjectTypes[m.ObjectID.ValueString()] = m.ObjectType
+	}
+
+	if len(knownObjectTypes) == 0 {
+		return nil
+	}
+
+	currentMembers, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	currentEntraMembers, diags := currentMembers.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	changed := false
+
+	for _, m := range currentEntraMembers {
+		if !m.ObjectType.IsNull() && m.ObjectType.ValueString() != "" {
+			continue
+		}
+
+		objectType, ok := knownObjectTypes[m.ObjectID.ValueString()]
+		if !ok {
+			continue
+		}
+
+		m.ObjectType = objectType
+		changed = true
+	}
+
+	if !changed {
+		return nil
+	}
+
+	if diags := currentMembers.MicrosoftEntraMembers.Set(ctx, currentEntraMembers); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, currentMembers)
+}
+
 /*
 DATA-SOURCE (single)
 */
@@ -441,26 +514,28 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		return diags
 	}
 
-	to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
+	if len(fabricItemMembers) > 0 {
+		to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
 
-	for _, fim := range fabricItemMembers {
-		member := fabcore.FabricItemMember{
-			SourcePath: fim.SourcePath.ValueStringPointer(),
-		}
-
-		itemAccess, diags := fim.ItemAccess.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		if len(itemAccess) > 0 {
-			member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
-			for _, access := range itemAccess {
-				member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+		for _, fim := range fabricItemMembers {
+			member := fabcore.FabricItemMember{
+				SourcePath: fim.SourcePath.ValueStringPointer(),
 			}
-		}
 
-		to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
+			itemAccess, diags := fim.ItemAccess.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			if len(itemAccess) > 0 {
+				member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
+				for _, access := range itemAccess {
+					member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+				}
+			}
+
+			to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
+		}
 	}
 
 	microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
