@@ -314,9 +314,9 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 // reconcileMicrosoftEntraMemberObjectTypes fills in the object_type of microsoft_entra_members
 // entries in `to.Members` that came back empty from the API (some Fabric APIs only return
 // object_id/tenant_id) using the values from `known` (the plan on create/update, or the prior
-// state on read), matched by object_id. This avoids a "Provider produced inconsistent result"
-// error, since object_type is a Required (non-Computed) attribute whose planned value must be
-// reflected as-is in the final state.
+// state on read), matched by the (tenant_id, object_id) pair — object IDs are only unique within
+// a tenant. This avoids a "Provider produced inconsistent result" error, since object_type is a
+// Required (non-Computed) attribute whose planned value must be reflected as-is in the final state.
 // See: https://github.com/microsoft/terraform-provider-fabric/issues/1044
 func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjectTypes(ctx context.Context, known supertypes.SingleNestedObjectValueOf[memberModel]) diag.Diagnostics {
 	if known.IsNull() || known.IsUnknown() || to.Members.IsNull() || to.Members.IsUnknown() {
@@ -336,11 +336,11 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjec
 	knownObjectTypes := make(map[string]types.String, len(knownEntraMembers))
 
 	for _, m := range knownEntraMembers {
-		if m.ObjectID.IsNull() || m.ObjectType.IsNull() || m.ObjectType.ValueString() == "" {
+		if m.ObjectID.IsNull() || m.TenantID.IsNull() || m.ObjectType.IsNull() || m.ObjectType.ValueString() == "" {
 			continue
 		}
 
-		knownObjectTypes[m.ObjectID.ValueString()] = m.ObjectType
+		knownObjectTypes[microsoftEntraMemberKey(m.TenantID.ValueString(), m.ObjectID.ValueString())] = m.ObjectType
 	}
 
 	if len(knownObjectTypes) == 0 {
@@ -364,7 +364,7 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjec
 			continue
 		}
 
-		objectType, ok := knownObjectTypes[m.ObjectID.ValueString()]
+		objectType, ok := knownObjectTypes[microsoftEntraMemberKey(m.TenantID.ValueString(), m.ObjectID.ValueString())]
 		if !ok {
 			continue
 		}
@@ -382,6 +382,13 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjec
 	}
 
 	return to.Members.Set(ctx, currentMembers)
+}
+
+// microsoftEntraMemberKey builds a lookup key for a microsoft_entra_members entry. Object IDs are
+// only guaranteed unique within a tenant, so both tenant_id and object_id are required to identify
+// a member unambiguously.
+func microsoftEntraMemberKey(tenantID, objectID string) string {
+	return tenantID + "/" + objectID
 }
 
 /*
@@ -509,12 +516,12 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 
 	to.Members = &fabcore.Members{}
 
-	fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
+	if !members.FabricItemMembers.IsNull() {
+		fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
 
-	if len(fabricItemMembers) > 0 {
 		to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
 
 		for _, fim := range fabricItemMembers {
@@ -538,12 +545,12 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		}
 	}
 
-	microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
+	if !members.MicrosoftEntraMembers.IsNull() {
+		microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
 
-	if len(microsoftEntraMembers) > 0 {
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
