@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -291,9 +292,10 @@ func TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_MissingObj
 				},
 			},
 			"members": map[string]any{
-				// Explicitly configured as an empty list (as opposed to omitted), matching the
-				// reproduction in the linked issue: this must be serialized as null/absent in the
-				// create/update request and not come back as a non-null empty set from the API.
+				// Explicitly configured as an empty list (as opposed to omitted). This must be
+				// serialized to a non-null, zero-length fabric_item_members set both in the
+				// create/update request and in the resulting state, so it round-trips as an empty
+				// set rather than being conflated with an omitted (null) attribute.
 				"fabric_item_members": []map[string]any{},
 				"microsoft_entra_members": []map[string]any{
 					{"object_id": objectID, "object_type": "User", "tenant_id": tenantID},
@@ -382,6 +384,64 @@ func TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_SameObject
 					"object_type": "Group",
 					"tenant_id":   tenantIDB,
 				}),
+			),
+		},
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             config,
+			PlanOnly:           true,
+			ExpectNonEmptyPlan: false,
+		},
+	}))
+}
+
+// TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_CasingMismatch ensures
+// object_type reconciliation matches microsoft_entra_members regardless of UUID casing: Fabric may
+// canonicalize (e.g. lowercase) object_id/tenant_id on read even when the configured value used
+// different casing, and customtypes.UUID treats such values as semantically equal.
+func TestUnit_OneLakeDataAccessSecurityResource_MicrosoftEntraMembers_CasingMismatch(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	objectID := strings.ToUpper(testhelp.RandomUUID())
+	tenantID := strings.ToUpper(testhelp.RandomUUID())
+
+	for key := range fakeOneLakeDataAccessRoleStore {
+		delete(fakeOneLakeDataAccessRoleStore, key)
+	}
+
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFuncWithoutEntraObjectTypeLowercased()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRoleFunc()
+
+	config := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id": workspaceID,
+			"item_id":      itemID,
+			"role_name":    "example",
+			"decision_rules": []map[string]any{
+				{
+					"effect": "Permit",
+					"permission": []map[string]any{
+						{"attribute_name": "Path", "attribute_value_included_in": []string{"*"}},
+						{"attribute_name": "Action", "attribute_value_included_in": []string{"Read"}},
+					},
+				},
+			},
+			"members": map[string]any{
+				"microsoft_entra_members": []map[string]any{
+					{"object_id": objectID, "object_type": "User", "tenant_id": tenantID},
+				},
+			},
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config:       config,
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "members.microsoft_entra_members.0.object_type", "User"),
 			),
 		},
 		{

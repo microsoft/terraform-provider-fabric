@@ -6,6 +6,7 @@ package onelakedataaccesssecurity
 import (
 	"context"
 
+	hcuuid "github.com/hashicorp/go-uuid"
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -386,9 +387,27 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjec
 
 // microsoftEntraMemberKey builds a lookup key for a microsoft_entra_members entry. Object IDs are
 // only guaranteed unique within a tenant, so both tenant_id and object_id are required to identify
-// a member unambiguously.
+// a member unambiguously. Both values are canonicalized so that UUIDs that differ only in casing
+// (e.g. an uppercase value in config vs. a lowercase value returned by the API) are still matched.
 func microsoftEntraMemberKey(tenantID, objectID string) string {
-	return tenantID + "/" + objectID
+	return canonicalUUID(tenantID) + "/" + canonicalUUID(objectID)
+}
+
+// canonicalUUID returns a lowercase, canonically formatted UUID string. If the input cannot be
+// parsed as a UUID (which should not happen for values already validated by customtypes.UUID), it
+// is returned unmodified so callers still get a best-effort, stable key.
+func canonicalUUID(id string) string {
+	parsed, err := hcuuid.ParseUUID(id)
+	if err != nil {
+		return id
+	}
+
+	formatted, err := hcuuid.FormatUUID(parsed)
+	if err != nil {
+		return id
+	}
+
+	return formatted
 }
 
 /*

@@ -106,6 +106,50 @@ func fakeGetDataAccessRoleFuncWithoutEntraObjectType() func(ctx context.Context,
 	}
 }
 
+// fakeGetDataAccessRoleFuncWithoutEntraObjectTypeLowercased behaves like
+// fakeGetDataAccessRoleFuncWithoutEntraObjectType, but additionally returns object_id/tenant_id
+// lowercased, mirroring a Fabric API that canonicalizes UUID casing on read even when the
+// configured/sent values used different casing.
+// See: https://github.com/microsoft/terraform-provider-fabric/issues/1044
+func fakeGetDataAccessRoleFuncWithoutEntraObjectTypeLowercased() func(ctx context.Context, workspaceID, itemID, roleName string, options *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, itemID, roleName string, _ *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse]{}
+		errEntityNotFound := fabcore.ErrCommon.EntityNotFound.Error()
+		id := GenerateOneLakeDataAccessRoleID(workspaceID, itemID, roleName)
+
+		if role, ok := fakeOneLakeDataAccessRoleStore[id]; ok {
+			members := role.Members
+
+			if members != nil && len(members.MicrosoftEntraMembers) > 0 {
+				strippedMembers := *members
+				strippedMembers.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, len(members.MicrosoftEntraMembers))
+
+				for i, m := range members.MicrosoftEntraMembers {
+					strippedMembers.MicrosoftEntraMembers[i] = fabcore.MicrosoftEntraMember{
+						ObjectID: new(strings.ToLower(*m.ObjectID)),
+						TenantID: new(strings.ToLower(*m.TenantID)),
+					}
+				}
+
+				members = &strippedMembers
+			}
+
+			resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse{
+				Name:          role.Name,
+				Kind:          role.Kind,
+				DecisionRules: role.DecisionRules,
+				Members:       members,
+				ETag:          new(testhelp.RandomName()),
+			}, nil)
+		} else {
+			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, errEntityNotFound, "Entity not found"))
+			resp.SetResponse(http.StatusNotFound, fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse{}, nil)
+		}
+
+		return resp, errResp
+	}
+}
+
 func fakeCreateOrUpdateSingleDataAccessRoleFunc() func(ctx context.Context, workspaceID, itemID string, body fabcore.DataAccessRoleBase, options *fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID string, body fabcore.DataAccessRoleBase, _ *fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientCreateOrUpdateSingleDataAccessRoleResponse]{}
