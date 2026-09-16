@@ -58,15 +58,6 @@ func (to *encryptionDetailsModel) set(from fabcore.EncryptionDetail) {
 	to.KeyIdentifier = types.StringPointerValue(from.KeyIdentifier)
 }
 
-// A workspace that never had a customer-managed key can omit the detail entirely, which is equivalent to Disabled.
-func encryptionStatus(from fabcore.WorkspaceEncryptionDetail) fabcore.WorkspaceEncryptionStatus {
-	if from.EncryptionDetail == nil || from.EncryptionDetail.EncryptionStatus == nil {
-		return fabcore.WorkspaceEncryptionStatusDisabled
-	}
-
-	return *from.EncryptionDetail.EncryptionStatus
-}
-
 /*
 DATA-SOURCE
 */

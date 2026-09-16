@@ -29,7 +29,7 @@ data "fabric_workspace_encryption" "example" {
 
 ### Required
 
-- `workspace_id` (String) The Workspace ID.
+- `workspace_id` (String) The workspace ID.
 
 ### Optional
 
@@ -54,7 +54,7 @@ Optional:
 
 Read-Only:
 
-- `encryption_status` (String) The Workspace encryption status.
+- `encryption_status` (String) The workspace encryption status. Value must be one of : `Active`, `DisableInProgress`, `Disabled`, `EnableInProgress`, `Failed`.
 - `key_identifier` (String) The Azure Key Vault key identifier. Changing this value rotates the customer-managed key.
 
 <a id="nestedatt--previous_encryption_details"></a>
@@ -63,5 +63,5 @@ Read-Only:
 
 Read-Only:
 
-- `encryption_status` (String) The previous workspace encryption status.
+- `encryption_status` (String) The previous workspace encryption status. Value must be one of : `Active`, `DisableInProgress`, `Disabled`, `EnableInProgress`, `Failed`.
 - `key_identifier` (String) The previous key identifier.

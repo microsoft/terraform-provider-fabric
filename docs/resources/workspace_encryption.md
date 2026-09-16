@@ -34,7 +34,7 @@ resource "fabric_workspace_encryption" "example" {
 ### Required
 
 - `encryption_details` (Attributes) The workspace encryption details. (see [below for nested schema](#nestedatt--encryption_details))
-- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Workspace ID.
+- `workspace_id` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The workspace ID.
 
 ### Optional
 
@@ -54,7 +54,7 @@ Required:
 
 Read-Only:
 
-- `encryption_status` (String) The Workspace encryption status.
+- `encryption_status` (String) The workspace encryption status. Value must be one of : `Active`, `DisableInProgress`, `Disabled`, `EnableInProgress`, `Failed`.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -73,7 +73,7 @@ Optional:
 
 Read-Only:
 
-- `encryption_status` (String) The previous workspace encryption status.
+- `encryption_status` (String) The previous workspace encryption status. Value must be one of : `Active`, `DisableInProgress`, `Disabled`, `EnableInProgress`, `Failed`.
 - `key_identifier` (String) The previous key identifier.
 
 ## Import

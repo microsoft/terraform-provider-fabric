@@ -165,7 +165,7 @@ func (r *resourceWorkspaceEncryption) Read(ctx context.Context, req resource.Rea
 		resp.Diagnostics.AddWarning(
 			r.TypeInfo.Name+" failed",
 			fmt.Sprintf(
-				"%s is in the Failed state for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it, then re-apply to retry.%s",
+				"%s is in the Failed state for Workspace ID: %s. Check Key Vault key availability and permissions.%s",
 				r.TypeInfo.Name,
 				state.WorkspaceID.ValueString(),
 				failedItemsMsg,
@@ -229,16 +229,13 @@ func (r *resourceWorkspaceEncryption) Delete(ctx context.Context, req resource.D
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var rawResp *http.Response
-	ctxCapture := policy.WithCaptureResponse(ctx, &rawResp)
-
 	// Resetting removes the customer-managed key, after which the workspace falls back to Microsoft-managed keys.
-	_, err := r.client.ResetWorkspaceEncryption(ctxCapture, state.WorkspaceID.ValueString(), nil)
+	_, err := r.client.ResetWorkspaceEncryption(ctx, state.WorkspaceID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(r.waitForStatus(ctx, state.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusDisabled, nil, getRetryAfter(rawResp))...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.waitForStatus(ctx, state.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusDisabled, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -303,15 +300,12 @@ func (r *resourceWorkspaceEncryption) assign(ctx context.Context, model *resourc
 		return diags
 	}
 
-	var rawResp *http.Response
-	ctxCapture := policy.WithCaptureResponse(ctx, &rawResp)
-
-	_, err := r.client.AssignWorkspaceEncryption(ctxCapture, model.WorkspaceID.ValueString(), reqAssign.AssignWorkspaceEncryptionRequest, nil)
+	_, err := r.client.AssignWorkspaceEncryption(ctx, model.WorkspaceID.ValueString(), reqAssign.AssignWorkspaceEncryptionRequest, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, operation, nil); diags.HasError() {
 		return diags
 	}
 
-	return r.waitForStatus(ctx, model.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusActive, &model.baseWorkspaceEncryptionModel, getRetryAfter(rawResp))
+	return r.waitForStatus(ctx, model.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusActive, &model.baseWorkspaceEncryptionModel)
 }
 
 func (r *resourceWorkspaceEncryption) get(ctx context.Context, model *baseWorkspaceEncryptionModel) (*fabcore.WorkspaceEncryptionDetail, diag.Diagnostics) {
@@ -331,14 +325,10 @@ func (r *resourceWorkspaceEncryption) waitForStatus(
 	workspaceID string,
 	want fabcore.WorkspaceEncryptionStatus,
 	model *baseWorkspaceEncryptionModel,
-	initialPollInterval time.Duration,
 ) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	pollInterval := initialPollInterval
-	if pollInterval <= 0 {
-		pollInterval = encryptionPollInterval
-	}
+	pollInterval := encryptionPollInterval
 
 	for {
 		tflog.Trace(ctx, fmt.Sprintf("waiting for %s of Workspace ID: %s to become %s (polling in %s)", r.TypeInfo.Name, workspaceID, want, pollInterval))
@@ -362,7 +352,10 @@ func (r *resourceWorkspaceEncryption) waitForStatus(
 			return diags
 		}
 
-		status := encryptionStatus(respGet.WorkspaceEncryptionDetail)
+		status := fabcore.WorkspaceEncryptionStatusDisabled
+		if respGet.EncryptionDetail != nil && respGet.EncryptionDetail.EncryptionStatus != nil {
+			status = *respGet.EncryptionDetail.EncryptionStatus
+		}
 
 		if status == fabcore.WorkspaceEncryptionStatusFailed {
 			var failedItemsMsg string
@@ -373,7 +366,7 @@ func (r *resourceWorkspaceEncryption) waitForStatus(
 			diags.AddError(
 				common.ErrorGenericUnexpected,
 				fmt.Sprintf(
-					"%s failed for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it.%s",
+					"%s failed for Workspace ID: %s. Check Key Vault key availability and permissions.%s",
 					r.TypeInfo.Name,
 					workspaceID,
 					failedItemsMsg,

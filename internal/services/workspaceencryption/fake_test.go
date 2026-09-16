@@ -50,13 +50,8 @@ func fakeAssignWorkspaceEncryptionWithStatus(
 			EncryptionStatus: new(status),
 		}
 
-		httpHeader := http.Header{}
-		httpHeader.Set("Retry-After", "1")
-
 		resp = azfake.Responder[fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse{}, &azfake.SetResponseOptions{
-			Header: httpHeader,
-		})
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse{}, nil)
 
 		return resp, errResp
 	}
@@ -74,13 +69,8 @@ func fakeResetWorkspaceEncryption(
 			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusDisabled),
 		}
 
-		httpHeader := http.Header{}
-		httpHeader.Set("Retry-After", "1")
-
 		resp = azfake.Responder[fabcore.WorkspacesClientResetWorkspaceEncryptionResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientResetWorkspaceEncryptionResponse{}, &azfake.SetResponseOptions{
-			Header: httpHeader,
-		})
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientResetWorkspaceEncryptionResponse{}, nil)
 
 		return resp, errResp
 	}
