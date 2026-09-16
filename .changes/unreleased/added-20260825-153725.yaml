@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_paginated_report` data source
+time: 2026-08-25T15:37:25.9931443+03:00
+custom:
+    Issue: "1090"

@@ -101,8 +101,10 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacefwr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceiar"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
@@ -497,6 +499,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
 		activator.NewResourceActivator,
+		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		sparkcustompool.NewResourceSparkCustomPool,
@@ -511,9 +514,11 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewResourceWorkspaceFirewallRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewResourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
 		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
@@ -605,9 +610,10 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
+		paginatedreport.NewDataSourcePaginatedReport,
+		paginatedreport.NewDataSourcePaginatedReports,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
-		paginatedreport.NewDataSourcePaginatedReports,
 		tags.NewDataSourceTags,
 		tags.NewDataSourceTag,
 		activator.NewDataSourceActivator,
@@ -636,9 +642,11 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
 		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewDataSourceWorkspaceFirewallRules,
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewDataSourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,
