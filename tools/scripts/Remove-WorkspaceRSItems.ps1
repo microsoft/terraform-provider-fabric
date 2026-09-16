@@ -5,6 +5,7 @@
 # 1. Any lakehouse named "lh"
 # 2. All SQLEndpoint items
 # 3. All KQLDatabase items
+# 4. FolderRS1 and FolderRS2 folders
 #
 # It reads the workspace ID from the .wellknown.json file.
 #
@@ -364,6 +365,17 @@ function Remove-WorkspaceRSItems {
 
   Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
 
+  # Folder IDs to preserve from well-known fixtures
+  $preservedFolderIds = @{}
+  if ($wellKnownContent.FolderRS1 -and $wellKnownContent.FolderRS1.id) {
+    $preservedFolderIds[$wellKnownContent.FolderRS1.id] = 'FolderRS1'
+    Write-Log -Message "Preserving FolderRS1 ($($wellKnownContent.FolderRS1.id))" -Level 'INFO' -Stop $false
+  }
+  if ($wellKnownContent.FolderRS2 -and $wellKnownContent.FolderRS2.id) {
+    $preservedFolderIds[$wellKnownContent.FolderRS2.id] = 'FolderRS2'
+    Write-Log -Message "Preserving FolderRS2 ($($wellKnownContent.FolderRS2.id))" -Level 'INFO' -Stop $false
+  }
+
   # Build folder hierarchy map and calculate depths
   $folderMap = @{}
   $foldersWithDepth = @()
@@ -386,8 +398,11 @@ function Remove-WorkspaceRSItems {
     }
 
     # Sort folders by depth (deepest first) to ensure child folders are deleted before parents
-    # Exclude known bugged folder that cannot be deleted due to backend issues
-    $foldersToDelete = $foldersWithDepth | Where-Object { $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' } | Sort-Object -Property Depth -Descending
+    # Exclude known bugged folder that cannot be deleted due to backend issues as well as preserved well-known folders (FolderRS1, FolderRS2)
+    $foldersToDelete = $foldersWithDepth | Where-Object {
+      $_.Id -ne '9f2ceaa6-50b6-4cc8-bc6a-225fa5187c0e' -and
+      -not $preservedFolderIds.ContainsKey($_.Id)
+    } | Sort-Object -Property Depth -Descending
   }
   else {
     $foldersToDelete = @()
