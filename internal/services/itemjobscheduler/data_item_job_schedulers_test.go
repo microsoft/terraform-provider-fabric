@@ -93,6 +93,7 @@ func TestUnit_ItemJobSchedulersDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.enabled"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.local_time_zone_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.created_date_time"),
@@ -126,7 +127,7 @@ func TestAcc_ItemJobSchedulersDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.configuration.type"),
+				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.0.configuration.local_time_zone_id", entity["configurationLocalTimeZoneId"].(string)),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.created_date_time"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.type"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.owner.id"),

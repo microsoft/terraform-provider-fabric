@@ -1,0 +1,5 @@
+kind: added
+body: Added fabric_workspace_inbound_azure_resource_rules resource
+time: 2026-08-16T14:30:00.0000000+03:00
+custom:
+    Issue: "1051"

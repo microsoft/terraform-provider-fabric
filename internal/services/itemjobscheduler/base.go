@@ -22,3 +22,6 @@ var AllowedJobTypesByItemType = map[string][]string{ //nolint:gochecknoglobals
 	"datapipeline": {"Execute"},
 	"lakehouse":    {"RefreshMaterializedLakeViews"},
 }
+
+// DefaultLocalTimeZoneID is the Windows time zone identifier used when the schedule configuration does not specify one.
+const DefaultLocalTimeZoneID = "Central Standard Time"

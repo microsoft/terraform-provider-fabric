@@ -1,0 +1,5 @@
+kind: added
+body: 'Added `configuration.local_time_zone_id` to `fabric_item_job_scheduler` resource.'
+time: 2026-08-30T09:57:02.5971873+03:00
+custom:
+    Issue: "1052"

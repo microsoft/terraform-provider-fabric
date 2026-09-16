@@ -312,6 +312,9 @@ function Set-FabricItem {
     'OperationsAgent' {
       $itemEndpoint = 'operationsAgents'
     }
+    'PaginatedReport' {
+      $itemEndpoint = 'paginatedReports'
+    }
     'Reflex' {
       $itemEndpoint = 'reflexes'
     }
@@ -345,7 +348,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1207,6 +1210,8 @@ $itemNaming = @{
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
   'Folder'                          = 'fld'
+  'FolderRS1'                       = 'fldrs1'
+  'FolderRS2'                       = 'fldrs2'
   'GraphQLApi'                      = 'gql'
   'KQLDashboard'                    = 'kqldash'
   'KQLDatabase'                     = 'kqldb'
@@ -1233,6 +1238,7 @@ $itemNaming = @{
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
   'WorkspaceOAP'                    = 'wsoap'
+  'WorkspaceIAP'                    = 'wsiap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'DomainParent'                    = 'parent'
@@ -1318,6 +1324,22 @@ $wellKnown['WorkspaceOAP'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 # Set Outbound Network Policy to Deny
 Set-OutboundNetworkPolicy -WorkspaceId $workspace.id
+
+# Create WorkspaceIAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceIAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceIAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceIAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceIAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceIAP if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Create WorkspaceRS if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['WorkspaceRS'])"
@@ -1497,6 +1519,24 @@ $wellKnown['Report'] = @{
   id          = $report.id
   displayName = $report.displayName
   description = $report.description
+}
+
+# Create Paginated Report if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['PaginatedReport'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "${displayNameTemp}.rdl"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/paginated_report/report.rdl'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$paginatedReport = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'PaginatedReport' -Definition $definition
+$wellKnown['PaginatedReport'] = @{
+  id          = $paginatedReport.id
+  displayName = $paginatedReport.displayName
+  description = $paginatedReport.description
 }
 
 # Create Deployment Pipeline if not exists
@@ -1902,6 +1942,16 @@ $wellKnown['AzureDataFactory'] = @{
   subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
+# Set Inbound Azure Resource Rules on WorkspaceIAP
+# Rules stay inert until the workspace inbound public access default action is set to Deny
+$inboundAzureResourceRule = @{
+  displayName = "$($itemNaming['AzureDataFactory']) - $($wellKnown['AzureDataFactory'].name)"
+  resourceId  = "/subscriptions/$($wellKnown['AzureDataFactory'].subscriptionId)/resourceGroups/$($wellKnown['AzureDataFactory'].resourceGroupName)/providers/Microsoft.DataFactory/factories/$($wellKnown['AzureDataFactory'].name)"
+}
+Write-Log -Message "Setting Inbound Azure Resource Rules for WorkspaceIAP ID: $($wellKnown['WorkspaceIAP'].id)" -Level 'WARN'
+Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$($wellKnown['WorkspaceIAP'].id)/networking/communicationPolicy/inbound/azureResources" -Payload @{ rules = @($inboundAzureResourceRule) } | Out-Null
+$wellKnown['WorkspaceIAP'].inboundAzureResourceRule = $inboundAzureResourceRule
+
 # Create the Mounted Data Factory if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
 $definition = @{
@@ -2041,6 +2091,27 @@ $wellKnown['Subfolder'] = @{
   parentFolderId = $subFolder.parentFolderId
 }
 
+# Create Folders in WorkspaceRS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS1'])"
+$folderRS1 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS1'] = @{
+  id          = $folderRS1.id
+  displayName = $folderRS1.displayName
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS2'])"
+$folderRS2 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS2'] = @{
+  id          = $folderRS2.id
+  displayName = $folderRS2.displayName
+}
+
 # Create Warehouse Snapshot if not exists
 if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
   Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
@@ -2085,14 +2156,15 @@ else {
     -Payload $itemJobSchedulerPayload
 
   $wellKnown['ItemJobScheduler'] = @{
-    id                = $itemJobScheduler.id
-    ownerType         = $itemJobScheduler.owner.type
-    ownerId           = $itemJobScheduler.owner.id
-    itemId            = $wellKnown['Dataflow'].id
-    enabled           = $itemJobScheduler.enabled
-    configurationType = $itemJobScheduler.configuration.type
-    createdDateTime   = $itemJobScheduler.createdDateTime
-    jobType           = $JOB_TYPE
+    id                           = $itemJobScheduler.id
+    ownerType                    = $itemJobScheduler.owner.type
+    ownerId                      = $itemJobScheduler.owner.id
+    itemId                       = $wellKnown['Dataflow'].id
+    enabled                      = $itemJobScheduler.enabled
+    configurationType            = $itemJobScheduler.configuration.type
+    configurationLocalTimeZoneId = $itemJobScheduler.configuration.localTimeZoneId
+    createdDateTime              = $itemJobScheduler.createdDateTime
+    jobType                      = $JOB_TYPE
   }
 }
 

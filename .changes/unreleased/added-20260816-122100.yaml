@@ -1,0 +1,5 @@
+kind: added
+body: 'Added `fabric_workspace_firewall_rules` data source to read inbound IP firewall rules of a Workspace.'
+time: 2026-08-16T12:21:00.0000000+03:00
+custom:
+    Issue: "1080"
