@@ -50,8 +50,13 @@ func fakeAssignWorkspaceEncryptionWithStatus(
 			EncryptionStatus: new(status),
 		}
 
+		httpHeader := http.Header{}
+		httpHeader.Set("Retry-After", "1")
+
 		resp = azfake.Responder[fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse{}, nil)
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientAssignWorkspaceEncryptionResponse{}, &azfake.SetResponseOptions{
+			Header: httpHeader,
+		})
 
 		return resp, errResp
 	}
@@ -69,8 +74,13 @@ func fakeResetWorkspaceEncryption(
 			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusDisabled),
 		}
 
+		httpHeader := http.Header{}
+		httpHeader.Set("Retry-After", "1")
+
 		resp = azfake.Responder[fabcore.WorkspacesClientResetWorkspaceEncryptionResponse]{}
-		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientResetWorkspaceEncryptionResponse{}, nil)
+		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientResetWorkspaceEncryptionResponse{}, &azfake.SetResponseOptions{
+			Header: httpHeader,
+		})
 
 		return resp, errResp
 	}
@@ -81,18 +91,6 @@ func NewRandomWorkspaceEncryptionDetail() fabcore.WorkspaceEncryptionDetail {
 		EncryptionDetail: &fabcore.EncryptionDetail{
 			KeyIdentifier:    new(NewRandomKeyIdentifier()),
 			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
-		},
-		WorkspaceEncryptionItemsDetails: []fabcore.WorkspaceEncryptionItemsDetail{
-			{
-				EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
-				Items: []fabcore.WorkspaceEncryptionItem{
-					{
-						ID:          new(testhelp.RandomUUID()),
-						DisplayName: new(testhelp.RandomName()),
-						Type:        new("Lakehouse"),
-					},
-				},
-			},
 		},
 	}
 }
@@ -122,6 +120,18 @@ func fakeGetWorkspaceEncryptionInProgress(
 					EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusEnableInProgress),
 				},
 			}
+
+			httpHeader := http.Header{}
+			httpHeader.Set("Retry-After", "1")
+
+			resp = azfake.Responder[fabcore.WorkspacesClientGetWorkspaceEncryptionResponse]{}
+			resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetWorkspaceEncryptionResponse{
+				WorkspaceEncryptionDetail: current,
+			}, &azfake.SetResponseOptions{
+				Header: httpHeader,
+			})
+
+			return resp, errResp
 		}
 
 		resp = azfake.Responder[fabcore.WorkspacesClientGetWorkspaceEncryptionResponse]{}

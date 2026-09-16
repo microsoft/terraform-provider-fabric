@@ -6,8 +6,12 @@ package workspaceencryption
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -122,7 +126,7 @@ func (r *resourceWorkspaceEncryption) Read(ctx context.Context, req resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state.baseWorkspaceEncryptionModel)
+	wsDetail, diags := r.get(ctx, &state.baseWorkspaceEncryptionModel)
 	if utils.IsErrNotFound(state.WorkspaceID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -135,8 +139,13 @@ func (r *resourceWorkspaceEncryption) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
+	detail, diagsGet := state.EncryptionDetails.Get(ctx)
+	if resp.Diagnostics.Append(diagsGet...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	// A workspace without a customer-managed key reports Disabled, which is the absence of this resource.
-	if state.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusDisabled) {
+	if detail == nil || detail.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusDisabled) {
 		resp.State.RemoveResource(ctx)
 
 		return
@@ -144,13 +153,22 @@ func (r *resourceWorkspaceEncryption) Read(ctx context.Context, req resource.Rea
 
 	// Encryption can fail outside of Terraform, for example when the key is revoked. Without this warning the
 	// plan would be empty and the broken workspace would go unnoticed.
-	if state.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusFailed) {
+	if detail.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusFailed) {
+		var failedItemsMsg string
+
+		if wsDetail != nil {
+			if failedItems := formatFailedItems(*wsDetail); failedItems != "" {
+				failedItemsMsg = "\n\nFailed items:\n" + failedItems
+			}
+		}
+
 		resp.Diagnostics.AddWarning(
 			r.TypeInfo.Name+" failed",
 			fmt.Sprintf(
-				"%s is in the Failed state for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it, then re-apply to retry.",
+				"%s is in the Failed state for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it, then re-apply to retry.%s",
 				r.TypeInfo.Name,
 				state.WorkspaceID.ValueString(),
+				failedItemsMsg,
 			),
 		)
 	}
@@ -211,13 +229,16 @@ func (r *resourceWorkspaceEncryption) Delete(ctx context.Context, req resource.D
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	var rawResp *http.Response
+	ctxCapture := policy.WithCaptureResponse(ctx, &rawResp)
+
 	// Resetting removes the customer-managed key, after which the workspace falls back to Microsoft-managed keys.
-	_, err := r.client.ResetWorkspaceEncryption(ctx, state.WorkspaceID.ValueString(), nil)
+	_, err := r.client.ResetWorkspaceEncryption(ctxCapture, state.WorkspaceID.ValueString(), nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.Append(r.waitForStatus(ctx, state.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusDisabled, nil)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.waitForStatus(ctx, state.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusDisabled, nil, getRetryAfter(rawResp))...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -249,11 +270,17 @@ func (r *resourceWorkspaceEncryption) ImportState(ctx context.Context, req resou
 		Timeouts:    timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state.baseWorkspaceEncryptionModel)...); resp.Diagnostics.HasError() {
+	_, diags = r.get(ctx, &state.baseWorkspaceEncryptionModel)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	if state.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusDisabled) {
+	detail, diagsGet := state.EncryptionDetails.Get(ctx)
+	if resp.Diagnostics.Append(diagsGet...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if detail == nil || detail.EncryptionStatus.ValueString() == string(fabcore.WorkspaceEncryptionStatusDisabled) {
 		resp.Diagnostics.AddError(
 			common.ErrorImportHeader,
 			fmt.Sprintf("%s is not enabled for Workspace ID: %s", r.TypeInfo.Name, req.ID),
@@ -272,33 +299,65 @@ func (r *resourceWorkspaceEncryption) ImportState(ctx context.Context, req resou
 func (r *resourceWorkspaceEncryption) assign(ctx context.Context, model *resourceWorkspaceEncryptionModel, operation utils.Operation) diag.Diagnostics {
 	var reqAssign requestAssignWorkspaceEncryption
 
-	reqAssign.set(*model)
+	if diags := reqAssign.set(ctx, *model); diags.HasError() {
+		return diags
+	}
 
-	_, err := r.client.AssignWorkspaceEncryption(ctx, model.WorkspaceID.ValueString(), reqAssign.AssignWorkspaceEncryptionRequest, nil)
+	var rawResp *http.Response
+	ctxCapture := policy.WithCaptureResponse(ctx, &rawResp)
+
+	_, err := r.client.AssignWorkspaceEncryption(ctxCapture, model.WorkspaceID.ValueString(), reqAssign.AssignWorkspaceEncryptionRequest, nil)
 	if diags := utils.GetDiagsFromError(ctx, err, operation, nil); diags.HasError() {
 		return diags
 	}
 
-	return r.waitForStatus(ctx, model.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusActive, &model.baseWorkspaceEncryptionModel)
+	return r.waitForStatus(ctx, model.WorkspaceID.ValueString(), fabcore.WorkspaceEncryptionStatusActive, &model.baseWorkspaceEncryptionModel, getRetryAfter(rawResp))
 }
 
-func (r *resourceWorkspaceEncryption) get(ctx context.Context, model *baseWorkspaceEncryptionModel) diag.Diagnostics {
+func (r *resourceWorkspaceEncryption) get(ctx context.Context, model *baseWorkspaceEncryptionModel) (*fabcore.WorkspaceEncryptionDetail, diag.Diagnostics) {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s for Workspace ID: %s", r.TypeInfo.Name, model.WorkspaceID.ValueString()))
 
 	respGet, err := r.client.GetWorkspaceEncryption(ctx, model.WorkspaceID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
+	return &respGet.WorkspaceEncryptionDetail, model.set(ctx, model.WorkspaceID.ValueString(), respGet.WorkspaceEncryptionDetail)
 }
 
 // waitForStatus polls the encryption status until it settles on want, because assign and reset are asynchronous.
-func (r *resourceWorkspaceEncryption) waitForStatus(ctx context.Context, workspaceID string, want fabcore.WorkspaceEncryptionStatus, model *baseWorkspaceEncryptionModel) diag.Diagnostics {
+func (r *resourceWorkspaceEncryption) waitForStatus(
+	ctx context.Context,
+	workspaceID string,
+	want fabcore.WorkspaceEncryptionStatus,
+	model *baseWorkspaceEncryptionModel,
+	initialPollInterval time.Duration,
+) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	pollInterval := initialPollInterval
+	if pollInterval <= 0 {
+		pollInterval = encryptionPollInterval
+	}
+
 	for {
-		respGet, err := r.client.GetWorkspaceEncryption(ctx, workspaceID, nil)
+		tflog.Trace(ctx, fmt.Sprintf("waiting for %s of Workspace ID: %s to become %s (polling in %s)", r.TypeInfo.Name, workspaceID, want, pollInterval))
+
+		select {
+		case <-ctx.Done():
+			diags.AddError(
+				common.ErrorGenericUnexpected,
+				fmt.Sprintf("Timeout waiting for %s of Workspace ID: %s to become %s", r.TypeInfo.Name, workspaceID, want),
+			)
+
+			return diags
+		case <-time.After(pollInterval):
+		}
+
+		var rawResp *http.Response
+		ctxCapture := policy.WithCaptureResponse(ctx, &rawResp)
+
+		respGet, err := r.client.GetWorkspaceEncryption(ctxCapture, workspaceID, nil)
 		if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 			return diags
 		}
@@ -306,12 +365,18 @@ func (r *resourceWorkspaceEncryption) waitForStatus(ctx context.Context, workspa
 		status := encryptionStatus(respGet.WorkspaceEncryptionDetail)
 
 		if status == fabcore.WorkspaceEncryptionStatusFailed {
+			var failedItemsMsg string
+			if failedItems := formatFailedItems(respGet.WorkspaceEncryptionDetail); failedItems != "" {
+				failedItemsMsg = "\n\nFailed items:\n" + failedItems
+			}
+
 			diags.AddError(
 				common.ErrorGenericUnexpected,
 				fmt.Sprintf(
-					"%s failed for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it.",
+					"%s failed for Workspace ID: %s. Verify that the key exists, is enabled, and that the 'Fabric Platform CMK' application can wrap and unwrap it.%s",
 					r.TypeInfo.Name,
 					workspaceID,
+					failedItemsMsg,
 				),
 			)
 
@@ -328,17 +393,72 @@ func (r *resourceWorkspaceEncryption) waitForStatus(ctx context.Context, workspa
 			return diags
 		}
 
-		tflog.Trace(ctx, fmt.Sprintf("waiting for %s of Workspace ID: %s to become %s, current status: %s", r.TypeInfo.Name, workspaceID, want, status))
+		pollInterval = getRetryAfter(rawResp)
+	}
+}
 
-		select {
-		case <-ctx.Done():
-			diags.AddError(
-				common.ErrorGenericUnexpected,
-				fmt.Sprintf("Timeout waiting for %s of Workspace ID: %s to become %s, last known status: %s", r.TypeInfo.Name, workspaceID, want, status),
-			)
+func getRetryAfter(resp *http.Response) time.Duration {
+	if resp == nil || resp.Header == nil {
+		return encryptionPollInterval
+	}
 
-			return diags
-		case <-time.After(encryptionPollInterval):
+	val := resp.Header.Get("Retry-After")
+	if val == "" {
+		return encryptionPollInterval
+	}
+
+	seconds, err := strconv.Atoi(val)
+	if err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+
+	return encryptionPollInterval
+}
+
+func formatFailedItems(detail fabcore.WorkspaceEncryptionDetail) string {
+	var failedItems []string
+
+	for _, itemsDetail := range detail.WorkspaceEncryptionItemsDetails {
+		if itemsDetail.EncryptionStatus == nil || *itemsDetail.EncryptionStatus != fabcore.WorkspaceEncryptionStatusFailed {
+			continue
+		}
+
+		for _, item := range itemsDetail.Items {
+			if itemStr := formatFailedItem(item); itemStr != "" {
+				failedItems = append(failedItems, itemStr)
+			}
 		}
 	}
+
+	return strings.Join(failedItems, "\n")
+}
+
+func formatFailedItem(item fabcore.WorkspaceEncryptionItem) string {
+	var label string
+	if item.DisplayName != nil && *item.DisplayName != "" {
+		label = *item.DisplayName
+	}
+
+	var details []string
+	if item.Type != nil && *item.Type != "" {
+		details = append(details, "Type: "+*item.Type)
+	}
+
+	if item.ID != nil && *item.ID != "" {
+		details = append(details, "ID: "+*item.ID)
+	}
+
+	if len(details) > 0 {
+		if label != "" {
+			return fmt.Sprintf("- %s (%s)", label, strings.Join(details, ", "))
+		}
+
+		return "- " + strings.Join(details, ", ")
+	}
+
+	if label != "" {
+		return "- " + label
+	}
+
+	return ""
 }

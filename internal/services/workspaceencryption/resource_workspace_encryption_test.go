@@ -37,7 +37,7 @@ func TestUnit_WorkspaceEncryptionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
-		// error - missing key_identifier
+		// error - missing encryption_details
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -48,14 +48,28 @@ func TestUnit_WorkspaceEncryptionResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing required argument`),
 		},
+		// error - missing key_identifier in encryption_details
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":       workspaceID,
+					"encryption_details": map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`(?s)attribute.*"key_identifier" is required`),
+		},
 		// error - invalid workspace_id
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   "invalid-uuid",
-					"key_identifier": NewRandomKeyIdentifier(),
+					"workspace_id": "invalid-uuid",
+					"encryption_details": map[string]any{
+						"key_identifier": NewRandomKeyIdentifier(),
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
@@ -66,8 +80,10 @@ func TestUnit_WorkspaceEncryptionResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":    workspaceID,
-					"key_identifier":  NewRandomKeyIdentifier(),
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": NewRandomKeyIdentifier(),
+					},
 					"unexpected_attr": "test",
 				},
 			),
@@ -79,8 +95,10 @@ func TestUnit_WorkspaceEncryptionResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": "not-a-key-identifier",
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": "not-a-key-identifier",
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
@@ -91,8 +109,10 @@ func TestUnit_WorkspaceEncryptionResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": "https://example.vault.azure.net/keys/example/example-version",
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": "https://example.vault.azure.net/keys/example/example-version",
+					},
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
@@ -118,15 +138,17 @@ func TestUnit_WorkspaceEncryptionResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifier,
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": keyIdentifier,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "previous_encryption_detail"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "previous_encryption_details"),
 			),
 		},
 		// update and read - rotate the key
@@ -135,41 +157,37 @@ func TestUnit_WorkspaceEncryptionResource_CRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifierUpdated,
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": keyIdentifierUpdated,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifierUpdated),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.key_identifier", keyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.key_identifier", keyIdentifierUpdated),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_details.key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 	}))
 }
 
-func TestUnit_WorkspaceEncryptionResource_ItemsDetails(t *testing.T) {
-	itemID := testhelp.RandomUUID()
-	itemName := testhelp.RandomName()
-	itemType := "Lakehouse"
-	previousKeyIdentifier := NewRandomKeyIdentifier()
-	keyIdentifier := NewRandomKeyIdentifier()
+func TestUnit_WorkspaceEncryptionResource_Failed(t *testing.T) {
+	failedItemID := testhelp.RandomUUID()
+	failedItemName := "FailedLakehouse"
+	failedItemType := "Lakehouse"
 
 	entity := fabcore.WorkspaceEncryptionDetail{
-		EncryptionDetail: &fabcore.EncryptionDetail{
-			KeyIdentifier:    &previousKeyIdentifier,
-			EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
-		},
 		WorkspaceEncryptionItemsDetails: []fabcore.WorkspaceEncryptionItemsDetail{
 			{
-				EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusActive),
+				EncryptionStatus: azto.Ptr(fabcore.WorkspaceEncryptionStatusFailed),
 				Items: []fabcore.WorkspaceEncryptionItem{
 					{
-						ID:          &itemID,
-						DisplayName: &itemName,
-						Type:        &itemType,
+						ID:          &failedItemID,
+						DisplayName: &failedItemName,
+						Type:        &failedItemType,
 					},
 				},
 			},
@@ -179,60 +197,22 @@ func TestUnit_WorkspaceEncryptionResource_ItemsDetails(t *testing.T) {
 
 	fakeServer := fakes.NewFakeServer()
 	fakeServer.ServerFactory.Core.WorkspacesServer.GetWorkspaceEncryption = fakeGetWorkspaceEncryption(&entity)
-	fakeServer.ServerFactory.Core.WorkspacesServer.AssignWorkspaceEncryption = fakeAssignWorkspaceEncryption(&entity)
-	fakeServer.ServerFactory.Core.WorkspacesServer.ResetWorkspaceEncryption = fakeResetWorkspaceEncryption(&entity)
-
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifier,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.key_identifier", previousKeyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "previous_encryption_detail.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_encryption_items_details.#", "1"),
-				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "workspace_encryption_items_details.*", map[string]string{
-					"encryption_status": string(fabcore.WorkspaceEncryptionStatusActive),
-					"items.#":           "1",
-				}),
-				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "workspace_encryption_items_details.*.items.*", map[string]string{
-					"id":           itemID,
-					"display_name": itemName,
-					"type":         itemType,
-				}),
-			),
-		},
-	}))
-}
-
-func TestUnit_WorkspaceEncryptionResource_Failed(t *testing.T) {
-	entity := fabcore.WorkspaceEncryptionDetail{}
-	workspaceID := testhelp.RandomUUID()
-
-	fakeServer := fakes.NewFakeServer()
-	fakeServer.ServerFactory.Core.WorkspacesServer.GetWorkspaceEncryption = fakeGetWorkspaceEncryption(&entity)
 	fakeServer.ServerFactory.Core.WorkspacesServer.AssignWorkspaceEncryption = fakeAssignWorkspaceEncryptionWithStatus(&entity, fabcore.WorkspaceEncryptionStatusFailed)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
-		// error - encryption settles on Failed
+		// error - encryption settles on Failed and prints failed items
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": NewRandomKeyIdentifier(),
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": NewRandomKeyIdentifier(),
+					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Workspace Encryption failed for Workspace ID`),
+			ExpectError: regexp.MustCompile(fmt.Sprintf(`(?s)Workspace Encryption failed for Workspace ID.*Failed items:.*- %s \(Type: %s, ID: %s\)`, failedItemName, failedItemType, failedItemID)),
 		},
 	}))
 }
@@ -252,8 +232,10 @@ func TestUnit_WorkspaceEncryptionResource_Timeout(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": NewRandomKeyIdentifier(),
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": NewRandomKeyIdentifier(),
+					},
 					"timeouts": map[string]any{
 						"create": "10s",
 					},
@@ -282,14 +264,16 @@ func TestUnit_WorkspaceEncryptionResource_EventuallyActive(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifier,
+					"workspace_id": workspaceID,
+					"encryption_details": map[string]any{
+						"key_identifier": keyIdentifier,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 	}))
@@ -309,8 +293,10 @@ func TestUnit_WorkspaceEncryptionResource_Disabled(t *testing.T) {
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
 		map[string]any{
-			"workspace_id":   workspaceID,
-			"key_identifier": keyIdentifier,
+			"workspace_id": workspaceID,
+			"encryption_details": map[string]any{
+				"key_identifier": keyIdentifier,
+			},
 		},
 	)
 
@@ -328,7 +314,7 @@ func TestUnit_WorkspaceEncryptionResource_Disabled(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config:       testCase,
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 		// the key was removed outside of Terraform, so the resource must be dropped from state
@@ -356,8 +342,10 @@ func TestUnit_WorkspaceEncryptionResource_ImportState(t *testing.T) {
 	testCase := at.CompileConfig(
 		testResourceItemHeader,
 		map[string]any{
-			"workspace_id":   workspaceID,
-			"key_identifier": *entity.EncryptionDetail.KeyIdentifier,
+			"workspace_id": workspaceID,
+			"encryption_details": map[string]any{
+				"key_identifier": *entity.EncryptionDetail.KeyIdentifier,
+			},
 		},
 	)
 
@@ -383,8 +371,8 @@ func TestUnit_WorkspaceEncryptionResource_ImportState(t *testing.T) {
 					return fmt.Errorf("%s: unexpected workspace_id — got %q, want %q", testResourceItemFQN, got, workspaceID)
 				}
 
-				if got, want := is[0].Attributes["key_identifier"], *entity.EncryptionDetail.KeyIdentifier; got != want {
-					return fmt.Errorf("%s: unexpected key_identifier — got %q, want %q", testResourceItemFQN, got, want)
+				if got, want := is[0].Attributes["encryption_details.key_identifier"], *entity.EncryptionDetail.KeyIdentifier; got != want {
+					return fmt.Errorf("%s: unexpected encryption_details.key_identifier — got %q, want %q", testResourceItemFQN, got, want)
 				}
 
 				return nil
@@ -394,8 +382,10 @@ func TestUnit_WorkspaceEncryptionResource_ImportState(t *testing.T) {
 }
 
 func TestAcc_WorkspaceEncryptionResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceCMK"].(map[string]any)
-	workspaceID := workspace["id"].(string)
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
 	keyVault := testhelp.WellKnown()["KeyVault"].(map[string]any)
 	keyIdentifier := keyVault["keyIdentifier"].(string)
@@ -405,32 +395,43 @@ func TestAcc_WorkspaceEncryptionResource_CRUD(t *testing.T) {
 		// create and read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifier,
-				},
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"encryption_details": map[string]any{
+							"key_identifier": keyIdentifier,
+						},
+					},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifier),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "workspace_id", workspaceResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.key_identifier", keyIdentifier),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 		// update and read - rotate the key
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id":   workspaceID,
-					"key_identifier": keyIdentifierUpdated,
-				},
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"encryption_details": map[string]any{
+							"key_identifier": keyIdentifierUpdated,
+						},
+					},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "key_identifier", keyIdentifierUpdated),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "workspace_id", workspaceResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.key_identifier", keyIdentifierUpdated),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 	}))

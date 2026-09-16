@@ -17,102 +17,45 @@ import (
 )
 
 type baseWorkspaceEncryptionModel struct {
-	WorkspaceID                     customtypes.UUID                                                       `tfsdk:"workspace_id"`
-	KeyIdentifier                   types.String                                                           `tfsdk:"key_identifier"`
-	EncryptionStatus                types.String                                                           `tfsdk:"encryption_status"`
-	PreviousEncryptionDetail        supertypes.SingleNestedObjectValueOf[encryptionDetailModel]            `tfsdk:"previous_encryption_detail"`
-	WorkspaceEncryptionItemsDetails supertypes.SetNestedObjectValueOf[workspaceEncryptionItemsDetailModel] `tfsdk:"workspace_encryption_items_details"`
+	WorkspaceID               customtypes.UUID                                             `tfsdk:"workspace_id"`
+	EncryptionDetails         supertypes.SingleNestedObjectValueOf[encryptionDetailsModel] `tfsdk:"encryption_details"`
+	PreviousEncryptionDetails supertypes.SingleNestedObjectValueOf[encryptionDetailsModel] `tfsdk:"previous_encryption_details"`
 }
 
-type encryptionDetailModel struct {
+type encryptionDetailsModel struct {
 	EncryptionStatus types.String `tfsdk:"encryption_status"`
 	KeyIdentifier    types.String `tfsdk:"key_identifier"`
 }
 
-type workspaceEncryptionItemsDetailModel struct {
-	EncryptionStatus types.String                                                    `tfsdk:"encryption_status"`
-	Items            supertypes.SetNestedObjectValueOf[workspaceEncryptionItemModel] `tfsdk:"items"`
-}
-
-type workspaceEncryptionItemModel struct {
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Type        types.String     `tfsdk:"type"`
-}
-
 func (to *baseWorkspaceEncryptionModel) set(ctx context.Context, workspaceID string, from fabcore.WorkspaceEncryptionDetail) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
-	to.KeyIdentifier = types.StringNull()
-	to.EncryptionStatus = types.StringValue(string(encryptionStatus(from)))
-	to.PreviousEncryptionDetail = supertypes.NewSingleNestedObjectValueOfNull[encryptionDetailModel](ctx)
+	to.EncryptionDetails = supertypes.NewSingleNestedObjectValueOfNull[encryptionDetailsModel](ctx)
+	to.PreviousEncryptionDetails = supertypes.NewSingleNestedObjectValueOfNull[encryptionDetailsModel](ctx)
 
 	if from.EncryptionDetail != nil {
-		to.KeyIdentifier = types.StringPointerValue(from.EncryptionDetail.KeyIdentifier)
+		detail := &encryptionDetailsModel{}
+		detail.set(*from.EncryptionDetail)
+
+		if diags := to.EncryptionDetails.Set(ctx, detail); diags.HasError() {
+			return diags
+		}
 	}
 
 	if from.PreviousEncryptionDetail != nil {
-		previousDetail := &encryptionDetailModel{}
+		previousDetail := &encryptionDetailsModel{}
 		previousDetail.set(*from.PreviousEncryptionDetail)
 
-		if diags := to.PreviousEncryptionDetail.Set(ctx, previousDetail); diags.HasError() {
+		if diags := to.PreviousEncryptionDetails.Set(ctx, previousDetail); diags.HasError() {
 			return diags
 		}
 	}
 
-	return to.setWorkspaceEncryptionItemsDetails(ctx, from.WorkspaceEncryptionItemsDetails)
+	return nil
 }
 
-func (to *encryptionDetailModel) set(from fabcore.EncryptionDetail) {
+func (to *encryptionDetailsModel) set(from fabcore.EncryptionDetail) {
 	to.EncryptionStatus = types.StringPointerValue((*string)(from.EncryptionStatus))
 	to.KeyIdentifier = types.StringPointerValue(from.KeyIdentifier)
-}
-
-func (to *baseWorkspaceEncryptionModel) setWorkspaceEncryptionItemsDetails(ctx context.Context, from []fabcore.WorkspaceEncryptionItemsDetail) diag.Diagnostics {
-	to.WorkspaceEncryptionItemsDetails = supertypes.NewSetNestedObjectValueOfNull[workspaceEncryptionItemsDetailModel](ctx)
-
-	if from == nil {
-		return nil
-	}
-
-	details := make([]*workspaceEncryptionItemsDetailModel, 0, len(from))
-
-	for _, detail := range from {
-		var detailModel workspaceEncryptionItemsDetailModel
-
-		if diags := detailModel.set(ctx, detail); diags.HasError() {
-			return diags
-		}
-
-		details = append(details, &detailModel)
-	}
-
-	return to.WorkspaceEncryptionItemsDetails.Set(ctx, details)
-}
-
-func (to *workspaceEncryptionItemsDetailModel) set(ctx context.Context, from fabcore.WorkspaceEncryptionItemsDetail) diag.Diagnostics {
-	to.EncryptionStatus = types.StringPointerValue((*string)(from.EncryptionStatus))
-	to.Items = supertypes.NewSetNestedObjectValueOfNull[workspaceEncryptionItemModel](ctx)
-
-	if from.Items == nil {
-		return nil
-	}
-
-	items := make([]*workspaceEncryptionItemModel, 0, len(from.Items))
-
-	for _, item := range from.Items {
-		var itemModel workspaceEncryptionItemModel
-
-		itemModel.set(item)
-		items = append(items, &itemModel)
-	}
-
-	return to.Items.Set(ctx, items)
-}
-
-func (to *workspaceEncryptionItemModel) set(from fabcore.WorkspaceEncryptionItem) {
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Type = types.StringPointerValue(from.Type)
 }
 
 // A workspace that never had a customer-managed key can omit the detail entirely, which is equivalent to Disabled.
@@ -148,6 +91,15 @@ type requestAssignWorkspaceEncryption struct {
 	fabcore.AssignWorkspaceEncryptionRequest
 }
 
-func (to *requestAssignWorkspaceEncryption) set(from resourceWorkspaceEncryptionModel) {
-	to.KeyIdentifier = from.KeyIdentifier.ValueStringPointer()
+func (to *requestAssignWorkspaceEncryption) set(ctx context.Context, from resourceWorkspaceEncryptionModel) diag.Diagnostics {
+	detail, diags := from.EncryptionDetails.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if detail != nil {
+		to.KeyIdentifier = detail.KeyIdentifier.ValueStringPointer()
+	}
+
+	return nil
 }

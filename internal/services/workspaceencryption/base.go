@@ -13,7 +13,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Name:           "Workspace Encryption",
 	Type:           "workspace_encryption",
 	DocsURL:        "https://learn.microsoft.com/fabric/security/workspace-customer-managed-keys",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: true,
 }
 

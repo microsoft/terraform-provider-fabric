@@ -68,19 +68,9 @@ func TestUnit_WorkspaceEncryptionDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "key_identifier", *entity.EncryptionDetail.KeyIdentifier),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_status", string(*entity.EncryptionDetail.EncryptionStatus)),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "previous_encryption_detail"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_encryption_items_details.#", "1"),
-				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "workspace_encryption_items_details.*", map[string]string{
-					"encryption_status": string(*entity.WorkspaceEncryptionItemsDetails[0].EncryptionStatus),
-					"items.#":           "1",
-				}),
-				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "workspace_encryption_items_details.*.items.*", map[string]string{
-					"id":           *entity.WorkspaceEncryptionItemsDetails[0].Items[0].ID,
-					"display_name": *entity.WorkspaceEncryptionItemsDetails[0].Items[0].DisplayName,
-					"type":         *entity.WorkspaceEncryptionItemsDetails[0].Items[0].Type,
-				}),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_details.key_identifier", *entity.EncryptionDetail.KeyIdentifier),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_details.encryption_status", string(*entity.EncryptionDetail.EncryptionStatus)),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "previous_encryption_details"),
 			),
 		},
 	}))
@@ -115,10 +105,10 @@ func TestUnit_WorkspaceEncryptionDataSource_WithPreviousEncryptionDetail(t *test
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "key_identifier", *entity.EncryptionDetail.KeyIdentifier),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_status", string(*entity.EncryptionDetail.EncryptionStatus)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "previous_encryption_detail.key_identifier", previousKeyIdentifier),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "previous_encryption_detail.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_details.key_identifier", *entity.EncryptionDetail.KeyIdentifier),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_details.encryption_status", string(*entity.EncryptionDetail.EncryptionStatus)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "previous_encryption_details.key_identifier", previousKeyIdentifier),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "previous_encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusActive)),
 			),
 		},
 	}))
@@ -146,8 +136,8 @@ func TestUnit_WorkspaceEncryptionDataSource_Disabled(t *testing.T) {
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_status", string(fabcore.WorkspaceEncryptionStatusDisabled)),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "key_identifier"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "encryption_details.encryption_status", string(fabcore.WorkspaceEncryptionStatusDisabled)),
+				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "encryption_details.key_identifier"),
 			),
 		},
 	}))
@@ -169,7 +159,7 @@ func TestAcc_WorkspaceEncryptionDataSource(t *testing.T) {
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "encryption_status"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "encryption_details.encryption_status"),
 			),
 		},
 	}))

@@ -43,29 +43,41 @@ func itemSchema() superschema.Schema {
 					},
 				},
 			},
-			"key_identifier": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The Azure Key Vault key identifier. Changing this value rotates the customer-managed key.",
+			"encryption_details": superschema.SuperSingleNestedAttributeOf[encryptionDetailsModel]{
+				Resource: &schemaR.SingleNestedAttribute{
+					MarkdownDescription: "The workspace encryption details.",
+					Required:            true,
 				},
-				Resource: &schemaR.StringAttribute{
-					Required: true,
-					Validators: []validator.String{
-						stringvalidator.RegexMatches(keyIdentifierRegex, "must be a versionless key identifier, for example: https://myvault.vault.azure.net/keys/mykey/"),
-					},
-				},
-				DataSource: &schemaD.StringAttribute{
-					Computed: true,
-				},
-			},
-			"encryption_status": superschema.StringAttribute{
-				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "The Workspace encryption status.",
+				DataSource: &schemaD.SingleNestedAttribute{
+					MarkdownDescription: "The workspace encryption details.",
 					Computed:            true,
 				},
+				Attributes: superschema.Attributes{
+					"encryption_status": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The Workspace encryption status.",
+							Computed:            true,
+						},
+					},
+					"key_identifier": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The Azure Key Vault key identifier. Changing this value rotates the customer-managed key.",
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(keyIdentifierRegex, "must be a versionless key identifier, for example: https://myvault.vault.azure.net/keys/mykey/"),
+							},
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
+						},
+					},
+				},
 			},
-			"previous_encryption_detail": superschema.SuperSingleNestedAttributeOf[encryptionDetailModel]{
+			"previous_encryption_details": superschema.SuperSingleNestedAttributeOf[encryptionDetailsModel]{
 				Common: &schemaR.SingleNestedAttribute{
-					MarkdownDescription: "The previous workspace encryption detail.",
+					MarkdownDescription: "The previous workspace encryption details.",
 					Computed:            true,
 				},
 				Attributes: superschema.Attributes{
@@ -79,47 +91,6 @@ func itemSchema() superschema.Schema {
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The previous key identifier.",
 							Computed:            true,
-						},
-					},
-				},
-			},
-			"workspace_encryption_items_details": superschema.SuperSetNestedAttributeOf[workspaceEncryptionItemsDetailModel]{
-				Common: &schemaR.SetNestedAttribute{
-					MarkdownDescription: "The encryption status of items in the workspace.",
-					Computed:            true,
-				},
-				Attributes: superschema.Attributes{
-					"encryption_status": superschema.StringAttribute{
-						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The encryption status for the items.",
-							Computed:            true,
-						},
-					},
-					"items": superschema.SuperSetNestedAttributeOf[workspaceEncryptionItemModel]{
-						Common: &schemaR.SetNestedAttribute{
-							MarkdownDescription: "The array of workspace item details.",
-							Computed:            true,
-						},
-						Attributes: superschema.Attributes{
-							"id": superschema.SuperStringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The item ID.",
-									CustomType:          customtypes.UUIDType{},
-									Computed:            true,
-								},
-							},
-							"display_name": superschema.StringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The item display name.",
-									Computed:            true,
-								},
-							},
-							"type": superschema.StringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The item type.",
-									Computed:            true,
-								},
-							},
 						},
 					},
 				},
