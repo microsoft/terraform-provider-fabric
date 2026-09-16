@@ -1210,6 +1210,8 @@ $itemNaming = @{
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
   'Folder'                          = 'fld'
+  'FolderRS1'                       = 'fldrs1'
+  'FolderRS2'                       = 'fldrs2'
   'GraphQLApi'                      = 'gql'
   'KQLDashboard'                    = 'kqldash'
   'KQLDatabase'                     = 'kqldb'
@@ -2087,6 +2089,27 @@ $wellKnown['Subfolder'] = @{
   id             = $subFolder.id
   displayName    = $subFolder.displayName
   parentFolderId = $subFolder.parentFolderId
+}
+
+# Create Folders in WorkspaceRS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS1'])"
+$folderRS1 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS1'] = @{
+  id          = $folderRS1.id
+  displayName = $folderRS1.displayName
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS2'])"
+$folderRS2 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS2'] = @{
+  id          = $folderRS2.id
+  displayName = $folderRS2.displayName
 }
 
 # Create Warehouse Snapshot if not exists
