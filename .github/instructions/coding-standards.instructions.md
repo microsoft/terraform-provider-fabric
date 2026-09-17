@@ -22,7 +22,7 @@ Never use `Description` in schema attributes — lint fails.
 
 ## Error Constants
 
-Use `common.Err*` from `internal/common/errors.go`: `ErrCreate`, `ErrRead`, `ErrUpdate`, `ErrDelete` for CRUD operation summaries; `ErrConfigRead` for provider config errors.
+Use the `common.Error*` constants from `internal/common/errors.go`: `ErrorCreateHeader`, `ErrorReadHeader`, `ErrorUpdateHeader`, `ErrorDeleteHeader`, `ErrorListHeader` (and their `*Details` counterparts) for CRUD operation summaries; `ErrorInvalidConfig` for provider config errors.
 
 ## Constructor Naming
 
