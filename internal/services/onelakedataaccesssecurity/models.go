@@ -6,6 +6,7 @@ package onelakedataaccesssecurity
 import (
 	"context"
 
+	hcuuid "github.com/hashicorp/go-uuid"
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -311,6 +312,104 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 	return nil
 }
 
+// reconcileMicrosoftEntraMemberObjectTypes fills in the object_type of microsoft_entra_members
+// entries in `to.Members` that came back empty from the API (some Fabric APIs only return
+// object_id/tenant_id) using the values from `known` (the plan on create/update, or the prior
+// state on read), matched by the (tenant_id, object_id) pair — object IDs are only unique within
+// a tenant. This avoids a "Provider produced inconsistent result" error, since object_type is a
+// Required (non-Computed) attribute whose planned value must be reflected as-is in the final state.
+// See: https://github.com/microsoft/terraform-provider-fabric/issues/1044
+func (to *baseOneLakeDataAccessSecurityModel) reconcileMicrosoftEntraMemberObjectTypes(ctx context.Context, known supertypes.SingleNestedObjectValueOf[memberModel]) diag.Diagnostics {
+	if known.IsNull() || known.IsUnknown() || to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	knownMembers, diags := known.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	knownEntraMembers, diags := knownMembers.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	knownObjectTypes := make(map[string]types.String, len(knownEntraMembers))
+
+	for _, m := range knownEntraMembers {
+		if m.ObjectID.IsNull() || m.TenantID.IsNull() || m.ObjectType.IsNull() || m.ObjectType.ValueString() == "" {
+			continue
+		}
+
+		knownObjectTypes[microsoftEntraMemberKey(m.TenantID.ValueString(), m.ObjectID.ValueString())] = m.ObjectType
+	}
+
+	if len(knownObjectTypes) == 0 {
+		return nil
+	}
+
+	currentMembers, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	currentEntraMembers, diags := currentMembers.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	changed := false
+
+	for _, m := range currentEntraMembers {
+		if !m.ObjectType.IsNull() && m.ObjectType.ValueString() != "" {
+			continue
+		}
+
+		objectType, ok := knownObjectTypes[microsoftEntraMemberKey(m.TenantID.ValueString(), m.ObjectID.ValueString())]
+		if !ok {
+			continue
+		}
+
+		m.ObjectType = objectType
+		changed = true
+	}
+
+	if !changed {
+		return nil
+	}
+
+	if diags := currentMembers.MicrosoftEntraMembers.Set(ctx, currentEntraMembers); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, currentMembers)
+}
+
+// microsoftEntraMemberKey builds a lookup key for a microsoft_entra_members entry. Object IDs are
+// only guaranteed unique within a tenant, so both tenant_id and object_id are required to identify
+// a member unambiguously. Both values are canonicalized so that UUIDs that differ only in casing
+// (e.g. an uppercase value in config vs. a lowercase value returned by the API) are still matched.
+func microsoftEntraMemberKey(tenantID, objectID string) string {
+	return canonicalUUID(tenantID) + "/" + canonicalUUID(objectID)
+}
+
+// canonicalUUID returns a lowercase, canonically formatted UUID string. If the input cannot be
+// parsed as a UUID (which should not happen for values already validated by customtypes.UUID), it
+// is returned unmodified so callers still get a best-effort, stable key.
+func canonicalUUID(id string) string {
+	parsed, err := hcuuid.ParseUUID(id)
+	if err != nil {
+		return id
+	}
+
+	formatted, err := hcuuid.FormatUUID(parsed)
+	if err != nil {
+		return id
+	}
+
+	return formatted
+}
+
 /*
 DATA-SOURCE (single)
 */
@@ -436,39 +535,41 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 
 	to.Members = &fabcore.Members{}
 
-	fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
-
-	for _, fim := range fabricItemMembers {
-		member := fabcore.FabricItemMember{
-			SourcePath: fim.SourcePath.ValueStringPointer(),
-		}
-
-		itemAccess, diags := fim.ItemAccess.Get(ctx)
+	if !members.FabricItemMembers.IsNull() {
+		fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
 		if diags.HasError() {
 			return diags
 		}
 
-		if len(itemAccess) > 0 {
-			member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
-			for _, access := range itemAccess {
-				member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+		to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
+
+		for _, fim := range fabricItemMembers {
+			member := fabcore.FabricItemMember{
+				SourcePath: fim.SourcePath.ValueStringPointer(),
 			}
+
+			itemAccess, diags := fim.ItemAccess.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			if len(itemAccess) > 0 {
+				member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
+				for _, access := range itemAccess {
+					member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+				}
+			}
+
+			to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
+		}
+	}
+
+	if !members.MicrosoftEntraMembers.IsNull() {
+		microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
 		}
 
-		to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
-	}
-
-	microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	if len(microsoftEntraMembers) > 0 {
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
