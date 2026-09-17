@@ -109,6 +109,38 @@ Every field needs a `tfsdk:"snake_case"` tag.
 
 Every model must have `set()` mapping SDK DTO → TF model. Models with nested objects take `(ctx, from) diag.Diagnostics`; leaf models can omit `ctx` and return nothing. For nested sub-models: create `Null` value, check nil, create sub-model, call `sub.set()`, wrap with `.Set(ctx, sub)`.
 
+#### Collection / Slice Iteration Pattern in `set()`
+
+When iterating over a slice of structs to build a `supertypes.SetNestedObjectValueOf` or `supertypes.ListNestedObjectValueOf`:
+
+- Always declare the item model using `var <name>Model <Type>Model` inside the loop.
+- Call `.set()` on the value instance.
+- Append its address (`&<name>Model`) to the slice.
+
+```go
+func (to *<parent>Model) set<Items>(ctx context.Context, from []fab<pkg>.<ItemDTO>) diag.Diagnostics {
+    to.<Items> = supertypes.NewSetNestedObjectValueOfNull[<item>Model](ctx)
+
+    if from == nil {
+        return nil
+    }
+
+    items := make([]*<item>Model, 0, len(from))
+
+    for _, entity := range from {
+        var entityModel <item>Model
+
+        if diags := entityModel.set(ctx, entity); diags.HasError() {
+            return diags
+        }
+
+        items = append(items, &entityModel)
+    }
+
+    return to.<Items>.Set(ctx, items)
+}
+```
+
 Reference: `internal/services/lakehouse/models.go`
 
 ---
