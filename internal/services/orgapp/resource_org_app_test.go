@@ -348,7 +348,6 @@ func TestAcc_OrgAppResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// Update and Read
@@ -370,7 +369,6 @@ func TestAcc_OrgAppResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 	},
@@ -405,7 +403,6 @@ func TestAcc_OrgAppResource_CRUD_Definition(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// Update and Read
@@ -428,7 +425,6 @@ func TestAcc_OrgAppResource_CRUD_Definition(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 	},

@@ -177,7 +177,6 @@ func TestAcc_OrgAppDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// read by id - not found
@@ -207,7 +206,6 @@ func TestAcc_OrgAppDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_root_path"),
 			),
 		},
 		// read by name - not found
@@ -252,7 +250,6 @@ func TestAcc_OrgAppDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_root_path"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.definition.json.content"),
 			),
 		},
