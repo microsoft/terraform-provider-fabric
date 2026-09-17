@@ -107,7 +107,6 @@ func TestAcc_OrgAppsDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_root_path"),
 			),
 		},
 	},

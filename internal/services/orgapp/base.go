@@ -30,7 +30,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
 		Type:  "JSON",
-		API:   "JSON",
+		API:   "",
 		Paths: []string{"definition.json", ".platform"},
 	},
 }
