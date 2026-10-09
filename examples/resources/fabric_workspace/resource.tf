@@ -35,3 +35,19 @@ resource "fabric_workspace" "example4" {
     type = "SystemAssigned"
   }
 }
+
+# Workspace with Tags
+resource "fabric_tag" "example" {
+  display_name = "example"
+  scope = {
+    type = "Tenant"
+  }
+}
+
+resource "fabric_workspace" "example5" {
+  display_name = "example5"
+  description  = "Example Workspace 5"
+  tags = [
+    fabric_tag.example.id,
+  ]
+}
