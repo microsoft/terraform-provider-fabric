@@ -22,6 +22,10 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_WorkspaceDataSource_Capacity(t *testing.T) {
 	capacity := fakes.NewRandomCapacity()
 	entity := fakes.NewRandomWorkspaceInfo(capacity.ID)
+	entity.Tags = []fabcore.WorkspaceAppliedTag{
+		{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+		{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+	}
 	entityTypePersonal := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypePersonal, nil)
 	entityTypeAdmin := fakes.NewRandomWorkspaceInfoWithType(fabcore.WorkspaceTypeAdminWorkspace, nil)
 
@@ -105,6 +109,9 @@ func TestUnit_WorkspaceDataSource_Capacity(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[0].ID),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[1].ID),
 			),
 		},
 		// read by id - not found

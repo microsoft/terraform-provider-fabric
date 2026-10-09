@@ -44,6 +44,7 @@ type baseWorkspaceInfoModel struct {
 	SkipCapacityStateValidation types.Bool                                                   `tfsdk:"skip_capacity_state_validation"`
 	OneLakeEndpoints            supertypes.SingleNestedObjectValueOf[oneLakeEndpointsModel]  `tfsdk:"onelake_endpoints"`
 	Identity                    supertypes.SingleNestedObjectValueOf[workspaceIdentityModel] `tfsdk:"identity"`
+	Tags                        supertypes.SetValueOf[customtypes.UUID]                      `tfsdk:"tags"`
 }
 
 func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.WorkspaceInfo) diag.Diagnostics {
@@ -80,6 +81,24 @@ func (to *baseWorkspaceInfoModel) set(ctx context.Context, from fabcore.Workspac
 	}
 
 	to.Identity = workspaceIdentity
+
+	return to.setTags(ctx, from.Tags)
+}
+
+func (to *baseWorkspaceInfoModel) setTags(ctx context.Context, from []fabcore.WorkspaceAppliedTag) diag.Diagnostics {
+	elements := make([]customtypes.UUID, 0, len(from))
+
+	for _, tag := range from {
+		elements = append(elements, customtypes.NewUUIDPointerValue(tag.ID))
+	}
+
+	tags := supertypes.NewSetValueOfNull[customtypes.UUID](ctx)
+
+	if diags := tags.Set(ctx, elements); diags.HasError() {
+		return diags
+	}
+
+	to.Tags = tags
 
 	return nil
 }

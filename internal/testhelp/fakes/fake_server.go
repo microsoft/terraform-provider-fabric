@@ -61,6 +61,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
 
 	configureItemTags(server)
+	configureWorkspaceTags(server)
 
 	return server
 }
