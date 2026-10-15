@@ -38,7 +38,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 
 	possibleGatewayTypeValues := utils.RemoveSlicesByValues(
 		fabcore.PossibleGatewayTypeValues(),
-		[]fabcore.GatewayType{fabcore.GatewayTypeOnPremises, fabcore.GatewayTypeOnPremisesPersonal, fabcore.GatewayTypeStreamingVirtualNetwork},
+		[]fabcore.GatewayType{fabcore.GatewayTypeOnPremises, fabcore.GatewayTypeOnPremisesPersonal},
 	)
 
 	return superschema.Schema{
