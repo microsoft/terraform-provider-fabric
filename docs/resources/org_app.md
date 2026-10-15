@@ -108,7 +108,7 @@ resource "fabric_org_app" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Org App definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/orgapp-definition). Accepted path keys: **JSON** format: `.platform`, `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Org App definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/orgapp-definition). Accepted path keys: **JSON** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Org App description.
 - `folder_id` (String) The Folder ID.

@@ -31,6 +31,6 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 	{
 		Type:  "JSON",
 		API:   "",
-		Paths: []string{"definition.json", ".platform"},
+		Paths: []string{"definition.json"},
 	},
 }
