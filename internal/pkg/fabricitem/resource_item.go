@@ -119,9 +119,7 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...,
-	); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plannedTags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 		return
 	}
 
