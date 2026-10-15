@@ -278,6 +278,90 @@ func TestUnit_WorkspaceResource_SkipCapacityStateValidation(t *testing.T) {
 	}))
 }
 
+func TestUnit_WorkspaceResource_Tags_CRUD(t *testing.T) {
+	entityBefore := fakes.NewRandomWorkspaceInfo(nil)
+	entityAfter := fakes.NewRandomWorkspaceInfo(nil)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - too many tags
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityBefore.DisplayName,
+					"tags": []string{
+						testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(),
+						testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(),
+						testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`set must contain at most 10 elements`),
+		},
+		// Create with tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityBefore.DisplayName,
+					"tags":         []string{tag1ID, tag2ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+			),
+		},
+		// Import includes applied tags
+		{
+			ResourceName:            testResourceItemFQN,
+			ImportState:             true,
+			ImportStateVerify:       true,
+			ImportStateVerifyIgnore: []string{"timeouts", "skip_capacity_state_validation"},
+		},
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityBefore.DisplayName,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Remove all tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"display_name": *entityAfter.DisplayName,
+					"description":  *entityAfter.Description,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_WorkspaceResource_CRUD(t *testing.T) {
 	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
 	capacityID := capacity["id"].(string)
@@ -507,6 +591,83 @@ func TestAcc_WorkspaceResource_Identity_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "identity.application_id"),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_WorkspaceResource_Tags_CRUD(t *testing.T) {
+	capacity := testhelp.WellKnown()["Capacity"].(map[string]any)
+	capacityID := capacity["id"].(string)
+
+	entityDisplayName := testhelp.RandomName()
+	tagResourceHCL1, tagResourceFQN1 := testhelp.TagResource(t)
+	tagResourceHCL2, tagResourceFQN2 := testhelp.TagResource(t)
+	tagResourceHCL3, tagResourceFQN3 := testhelp.TagResource(t)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create with tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				tagResourceHCL1,
+				tagResourceHCL2,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityDisplayName,
+						"capacity_id":  capacityID,
+						"tags":         []string{testhelp.RefByFQN(tagResourceFQN1, "id"), testhelp.RefByFQN(tagResourceFQN2, "id")},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN1, "id"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN2, "id"),
+			),
+		},
+		// Remove and add tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				tagResourceHCL1,
+				tagResourceHCL2,
+				tagResourceHCL3,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityDisplayName,
+						"capacity_id":  capacityID,
+						"tags":         []string{testhelp.RefByFQN(tagResourceFQN1, "id"), testhelp.RefByFQN(tagResourceFQN3, "id")},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN1, "id"),
+				resource.TestCheckTypeSetElemAttrPair(testResourceItemFQN, "tags.*", tagResourceFQN3, "id"),
+			),
+		},
+		// Remove all tags and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				tagResourceHCL1,
+				tagResourceHCL2,
+				tagResourceHCL3,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": entityDisplayName,
+						"capacity_id":  capacityID,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 	},

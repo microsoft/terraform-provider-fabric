@@ -1,0 +1,5 @@
+kind: added
+body: Enhanced `fabric_workspace` data-source by adding `tags` attribute
+time: 2026-10-09T06:47:48.000000000Z
+custom:
+    Issue: "1114"
