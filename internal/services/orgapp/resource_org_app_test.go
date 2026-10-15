@@ -112,27 +112,6 @@ func TestUnit_OrgAppResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
-		// error - definition.json is required when a definition is configured
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": "00000000-0000-0000-0000-000000000000",
-						"display_name": "test",
-						"format":       "JSON",
-						"definition": map[string]any{
-							`".platform"`: map[string]any{
-								"source": "${local.path}/.platform",
-							},
-						},
-					},
-				),
-			),
-			ExpectError: regexp.MustCompile(`map must contain required keys: definition.json`),
-		},
 	}))
 }
 

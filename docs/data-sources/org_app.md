@@ -75,7 +75,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **JSON** format: `.platform`, `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **JSON** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Org App description.
 - `folder_id` (String) The Org App Folder ID.
 - `properties` (Attributes) The Org App properties. (see [below for nested schema](#nestedatt--properties))

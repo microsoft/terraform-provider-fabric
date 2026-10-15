@@ -14,7 +14,6 @@ import (
 	faborgapp "github.com/microsoft/fabric-sdk-go/fabric/orgapp"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
-	fwvalidators "github.com/microsoft/terraform-provider-fabric/internal/framework/validators"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 )
 
@@ -57,9 +56,8 @@ func NewResourceOrgApp() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
-			mapvalidator.SizeBetween(1, 2),
+			mapvalidator.SizeBetween(1, 1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			fwvalidators.RequiredMapKeys("definition.json"),
 		},
 		DefinitionRequired:   false,
 		DefinitionEmpty:      ItemDefinitionEmpty,
