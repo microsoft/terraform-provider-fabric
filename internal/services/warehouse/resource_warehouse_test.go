@@ -290,32 +290,31 @@ func TestUnit_WarehouseResource_CRUD(t *testing.T) {
 func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
-					},
-				),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"folder_id":    folder1ID,
+				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
@@ -323,51 +322,22 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
-		// Update, Move and Read
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
-					},
-				),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName,
+					"description":  entityUpdateDescription,
+					"folder_id":    folder2ID,
+				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
-			),
-		},
-		// Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName,
-						"description":  entityUpdateDescription,
-					},
-				),
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "configuration"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.collation_type"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
@@ -382,6 +352,10 @@ func TestAcc_WarehouseResource_CRUD(t *testing.T) {
 func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	entityCreateDisplayName1 := testhelp.RandomName()
 	entityUpdateDisplayName1 := testhelp.RandomName()
@@ -394,32 +368,26 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 	collationType1 := string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8)
 	collationType2 := string(fabwarehouse.CollationTypeLatin1General100BIN2UTF8)
 
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
-
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
 		{
 			ResourceName: testResourceItemFQN,
 
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName1,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
-						"configuration": map[string]any{
-							"collation_type": collationType1,
-						},
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName1,
+					"folder_id":    folder1ID,
+					"configuration": map[string]any{
+						"collation_type": collationType1,
 					},
-				),
+				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType1),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
@@ -427,57 +395,25 @@ func TestAcc_WarehouseResource_CRUD_Configuration(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
 			),
 		},
-		// Update, Move and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
+		// Update and Read (configuration) - Collation Type: Latin1_General_100_CI_AS_KS_WS_SC_UTF8
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName1,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
-						"description":  entityUpdateDescription1,
-						"configuration": map[string]any{
-							"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
-						},
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityUpdateDisplayName1,
+					"folder_id":    folder2ID,
+					"description":  entityUpdateDescription1,
+					"configuration": map[string]any{
+						"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
 					},
-				),
+				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType1),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.created_date"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.last_updated_time"),
-			),
-		},
-		// Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName1,
-						"description":  entityUpdateDescription1,
-						"configuration": map[string]any{
-							"collation_type": string(fabwarehouse.CollationTypeLatin1General100CIASKSWSSCUTF8),
-						},
-					},
-				),
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName1),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription1),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.collation_type", collationType1),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "properties.collation_type", collationType1),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),

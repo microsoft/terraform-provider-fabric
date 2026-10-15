@@ -301,13 +301,16 @@ func TestUnit_ReportResource_CRUD(t *testing.T) {
 func TestAcc_ReportResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	semanticModel := testhelp.WellKnown()["SemanticModel"].(map[string]any)
 	semanticModelID := semanticModel["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
-	folderResourceHCL, folderResourceFQN := testhelp.FolderResource(t, workspaceID)
 
 	testHelperDefinition[`"definition.pbir"`].(map[string]any)["tokens"].(map[string]any)["SemanticModelID"] = semanticModelID
 
@@ -317,13 +320,12 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder1ID,
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
@@ -333,7 +335,7 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 			),
 		},
 		// Update and Read
@@ -341,13 +343,12 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
 				testHelperLocals,
-				folderResourceHCL,
 				at.CompileConfig(
 					testResourceItemHeader,
 					map[string]any{
 						"workspace_id": workspaceID,
 						"display_name": entityUpdateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN, "id"),
+						"folder_id":    folder2ID,
 						"format":       "PBIR-Legacy",
 						"definition":   testHelperDefinition,
 					},
@@ -356,7 +357,7 @@ func TestAcc_ReportResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 			),
 		},
 	},
