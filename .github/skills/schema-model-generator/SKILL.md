@@ -1,6 +1,7 @@
 ---
 name: schema-model-generator
-description: Given a Go SDK contract (DTOs), generate the corresponding Terraform schema attributes and model structs with high fidelity. USE FOR: creating schema_*.go and models.go files from SDK DTOs, mapping Go types to Terraform attribute types and custom types.
+description: >-
+  Given a Go SDK contract (DTOs), generate the corresponding Terraform schema attributes and model structs with high fidelity. USE FOR: creating schema_*.go and models.go files from SDK DTOs, mapping Go types to Terraform attribute types and custom types.
 ---
 
 # Skill: Schema & Model Generator
