@@ -42,9 +42,7 @@ func (o *operationsMirroredAzureDatabricksCatalog) TransformDefinition(
 	entity *fabmirroredazuredatabrickscatalog.PublicDefinition,
 ) fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse {
 	return fabmirroredazuredatabrickscatalog.ItemsClientGetMirroredAzureDatabricksCatalogDefinitionResponse{
-		DefinitionResponse: fabmirroredazuredatabrickscatalog.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -112,9 +110,7 @@ func (o *operationsMirroredAzureDatabricksCatalog) TransformList(
 	entities []fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog,
 ) fabmirroredazuredatabrickscatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse {
 	return fabmirroredazuredatabrickscatalog.ItemsClientListMirroredAzureDatabricksCatalogsResponse{
-		MirroredAzureDatabricksCatalogs: fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalogs{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -188,7 +184,8 @@ func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabmirroredazur
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.UpdateMirroredAzureDatabricksCatalog,
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginCreateMirroredAzureDatabricksCatalog,
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.NewListMirroredAzureDatabricksCatalogsPager,
-		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.DeleteMirroredAzureDatabricksCatalog)
+		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.DeleteMirroredAzureDatabricksCatalog,
+	)
 
 	configureDefinitions(
 		handler,
@@ -196,33 +193,34 @@ func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabmirroredazur
 		definitionOperations,
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginCreateMirroredAzureDatabricksCatalog,
 		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginGetMirroredAzureDatabricksCatalogDefinition,
-		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginUpdateMirroredAzureDatabricksCatalogDefinition)
+		&server.ServerFactory.MirroredAzureDatabricksCatalog.ItemsServer.BeginUpdateMirroredAzureDatabricksCatalogDefinition,
+	)
 
 	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{}
 }
 
 func NewRandomMirroredAzureDatabricksCatalog() fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
 		Properties: &fabmirroredazuredatabrickscatalog.Properties{
 			AutoSync:                        to.Ptr(fabmirroredazuredatabrickscatalog.AutoSyncEnabled),
-			CatalogName:                     to.Ptr(testhelp.RandomName()),
-			DatabricksWorkspaceConnectionID: to.Ptr(testhelp.RandomUUID()),
+			CatalogName:                     new(testhelp.RandomName()),
+			DatabricksWorkspaceConnectionID: new(testhelp.RandomUUID()),
 			MirrorStatus:                    to.Ptr(fabmirroredazuredatabrickscatalog.MirrorStatusMirrored),
 			MirroringMode:                   to.Ptr(fabmirroredazuredatabrickscatalog.MirroringModesFull),
-			OneLakeTablesPath:               to.Ptr(testhelp.RandomURI()),
+			OneLakeTablesPath:               new(testhelp.RandomURI()),
 			SQLEndpointProperties: &fabmirroredazuredatabrickscatalog.SQLEndpointProperties{
-				ID:               to.Ptr(testhelp.RandomUUID()),
-				ConnectionString: to.Ptr(testhelp.RandomURI()),
+				ID:               new(testhelp.RandomUUID()),
+				ConnectionString: new(testhelp.RandomURI()),
 			},
-			StorageConnectionID: to.Ptr(testhelp.RandomUUID()),
+			StorageConnectionID: new(testhelp.RandomUUID()),
 			SyncDetails: &fabmirroredazuredatabrickscatalog.SyncDetails{
-				LastSyncDateTime: to.Ptr(time.Now()),
+				LastSyncDateTime: new(time.Now()),
 				Status:           to.Ptr(fabmirroredazuredatabrickscatalog.StatusSuccess),
 			},
 		},
@@ -239,11 +237,11 @@ func NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID string) fa
 func NewRandomMirroredAzureDatabricksCatalogDefinition() fabmirroredazuredatabrickscatalog.PublicDefinition {
 	defPart := fabmirroredazuredatabrickscatalog.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabmirroredazuredatabrickscatalog.PayloadTypeInlineBase64),
-		Path:        to.Ptr("mirroringAzureDatabricksCatalog.json"),
-		Payload:     to.Ptr("e30="),
+		Path:        new("mirroringAzureDatabricksCatalog.json"),
+		Payload:     new("e30="),
 	}
 
-	var defParts []fabmirroredazuredatabrickscatalog.PublicDefinitionPart
+	defParts := make([]fabmirroredazuredatabrickscatalog.PublicDefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 
