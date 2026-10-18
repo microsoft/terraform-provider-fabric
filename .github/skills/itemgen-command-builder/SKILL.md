@@ -1,6 +1,7 @@
 ---
 name: itemgen-command-builder
-description: Given SDK analysis results, automatically determine the correct itemgen archetype and build the full go run tools/itemgen/main.go command. USE FOR: scaffolding new Fabric Item resources using the itemgen code generator. Only applies to Fabric Item resources (not bespoke resources like Connection, Gateway, Workspace).
+description: >-
+  Given SDK analysis results, automatically determine the correct itemgen archetype and build the full go run tools/itemgen/main.go command. USE FOR: scaffolding new Fabric Item resources using the itemgen code generator. Only applies to Fabric Item resources (not bespoke resources like Connection, Gateway, Workspace).
 ---
 
 # Skill: Itemgen Command Builder
