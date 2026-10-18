@@ -1,7 +1,12 @@
-# Example 1 - Item without definition
+# Example 1 - Item with a creation payload
 resource "fabric_mirrored_azure_databricks_catalog" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  configuration = {
+    catalog_name                       = "MyCatalogName"
+    mirroring_mode                     = "Partial"
+    databricks_workspace_connection_id = "00000000-0000-0000-0000-000000000000"
+  }
 }
 
 # Example 2 - Item with definition bootstrapping only

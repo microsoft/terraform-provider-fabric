@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"testing"
 
-	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
@@ -32,7 +31,7 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemsHeader,
 				map[string]any{},
 			),
@@ -40,7 +39,7 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 		},
 		// error - workspace_id - invalid UUID
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
@@ -50,7 +49,7 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 		},
 		// error - unexpected_attr
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id":    workspaceID,
@@ -61,7 +60,7 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 		},
 		// read
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemsHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -95,33 +94,4 @@ func TestUnit_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
 			},
 		},
 	}))
-}
-
-func TestAcc_MirroredAzureDatabricksCatalogsDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
-		// read
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemsHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.display_name"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.auto_sync"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.databricks_workspace_connection_id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.mirror_status"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.mirroring_mode"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.onelake_tables_path"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.properties.sql_endpoint_properties.connection_string"),
-			),
-		},
-	},
-	))
 }

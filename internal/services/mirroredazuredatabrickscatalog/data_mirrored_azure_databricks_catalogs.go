@@ -60,10 +60,8 @@ func NewDataSourceMirroredAzureDatabricksCatalogs(ctx context.Context) datasourc
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[mirroredAzureDatabricksCatalogPropertiesModel, fabmirroredazuredatabrickscatalog.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

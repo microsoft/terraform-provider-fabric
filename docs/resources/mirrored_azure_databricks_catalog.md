@@ -16,13 +16,20 @@ The Mirrored Azure Databricks Catalog resource allows you to manage a Fabric [Mi
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
+When creating this resource, specify exactly one of `configuration` (the creation payload) or `definition`. They cannot be used together.
+
 ## Example Usage
 
 ```terraform
-# Example 1 - Item without definition
+# Example 1 - Item with a creation payload
 resource "fabric_mirrored_azure_databricks_catalog" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
+  configuration = {
+    catalog_name                       = "MyCatalogName"
+    mirroring_mode                     = "Partial"
+    databricks_workspace_connection_id = "00000000-0000-0000-0000-000000000000"
+  }
 }
 
 # Example 2 - Item with definition bootstrapping only

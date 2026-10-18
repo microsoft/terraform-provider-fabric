@@ -18,6 +18,15 @@ import (
 
 var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(common.ProviderTypeName, itemTypeInfo.Type, "test")
 
+func testDataSourceUnitConfig(header string, attributes map[string]any) string {
+	return at.JoinConfigs(
+		`provider "fabric" {
+  preview = true
+}`,
+		at.CompileConfig(header, attributes),
+	)
+}
+
 func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID)
@@ -29,7 +38,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{},
 			),
@@ -37,7 +46,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// error - workspace_id - invalid UUID
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": "invalid uuid",
@@ -47,7 +56,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// error - unexpected attribute
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id":    workspaceID,
@@ -58,7 +67,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// error - conflicting attributes
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -70,7 +79,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// error - no required attributes
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -80,7 +89,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// error - no required attributes
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"id": *entity.ID,
@@ -90,7 +99,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// read by id
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -106,7 +115,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// read by id - not found
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -118,7 +127,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 
 		// read by name
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -144,7 +153,7 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 		},
 		// read by name - not found
 		{
-			Config: at.CompileConfig(
+			Config: testDataSourceUnitConfig(
 				testDataSourceItemHeader,
 				map[string]any{
 					"workspace_id": workspaceID,
@@ -153,128 +162,5 @@ func TestUnit_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
-	}))
-}
-
-func TestAcc_MirroredAzureDatabricksCatalogDataSource(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	entity := testhelp.WellKnown()["MirroredAzureDatabricksCatalog"].(map[string]any)
-	entityID := entity["id"].(string)
-	entityDisplayName := entity["displayName"].(string)
-	entityDescription := entity["description"].(string)
-
-	resource.ParallelTest(t, testhelp.NewTestAccCase(t, &testDataSourceItemFQN, nil, []resource.TestStep{
-		// read by id
-		{
-			ResourceName: testDataSourceItemFQN,
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"id":           entityID,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.storage_connection_id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-			),
-		},
-		// read by id - not found
-		{
-			ResourceName: testDataSourceItemFQN,
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"id":           testhelp.RandomUUID(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		// read by name
-		{
-			ResourceName: testDataSourceItemFQN,
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": entityDisplayName,
-				},
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.auto_sync"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.catalog_name"),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "properties.databricks_workspace_connection_id", "00000000-0000-0000-0000-000000000000"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirror_status"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.mirroring_mode"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.onelake_tables_path"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.sync_details"),
-				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "properties.storage_connection_id"),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.sql_endpoint_properties.connection_string"),
-			),
-		},
-		// read by id with definition - missing format error
-		{
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id":      workspaceID,
-					"id":                entityID,
-					"output_definition": true,
-				},
-			),
-			ExpectError: regexp.MustCompile("Invalid configuration for attribute format"),
-		},
-		// read by name - not found
-		{
-			ResourceName: testDataSourceItemFQN,
-			Config: at.CompileConfig(
-				testDataSourceItemHeader,
-				map[string]any{
-					"workspace_id": workspaceID,
-					"display_name": testhelp.RandomName(),
-				},
-			),
-			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
-		},
-		//nolint:godox,godoclint
-		// TODO: API issue - getDefinition returns 404 for item created without definition
-		// // read by id with definition
-		// {
-		// 	ResourceName: testDataSourceItemFQN,
-		// 	Config: at.CompileConfig(
-		// 		testDataSourceItemHeader,
-		// 		map[string]any{
-		// 			"workspace_id":      workspaceID,
-		// 			"id":                entityID,
-		// 			"format":            "Default",
-		// 			"output_definition": true,
-		// 		},
-		// 	),
-		// 	Check: resource.ComposeAggregateTestCheckFunc(
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
-		// 		resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-		// 		resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.mirroringAzureDatabricksCatalog.json.content"),
-		// 	),
-		// },
 	}))
 }

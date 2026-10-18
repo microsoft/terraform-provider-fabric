@@ -64,23 +64,21 @@ func NewResourceMirroredAzureDatabricksCatalog(ctx context.Context) resource.Res
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[mirroredAzureDatabricksCatalogPropertiesModel, fabmirroredazuredatabrickscatalog.Properties, mirroredAzureDatabricksCatalogConfigurationModel, fabmirroredazuredatabrickscatalog.CreationPayload]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
-				mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    ItemDefinitionEmpty,
-			DefinitionFormats:  itemDefinitionFormats,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
+			mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
 		},
+		DefinitionRequired:         false,
+		DefinitionEmpty:            ItemDefinitionEmpty,
+		DefinitionFormats:          itemDefinitionFormats,
 		ConfigRequired:             false,
-		ConfigOrDefinitionRequired: false,
+		ConfigOrDefinitionRequired: true,
 		ConfigAttributes:           getResourceMirroredAzureDatabricksCatalogConfigurationAttributes(),
 		CreationPayloadSetter:      creationPayloadSetter,
 		PropertiesAttributes:       getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx),
