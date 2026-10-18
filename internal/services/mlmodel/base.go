@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package mlmodel
@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "ML Models",
 	Types:          "ml_models",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-science/machine-learning-model",
-	IsPreview:      true,
-	IsSPNSupported: false,
+	IsPreview:      false,
+	IsSPNSupported: true,
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -24,9 +24,7 @@ func (o *operationsSemanticModel) CreateDefinition(data fabsemanticmodel.CreateS
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSemanticModel) TransformDefinition(entity *fabsemanticmodel.Definition) fabsemanticmodel.ItemsClientGetSemanticModelDefinitionResponse {
 	return fabsemanticmodel.ItemsClientGetSemanticModelDefinitionResponse{
-		DefinitionResponse: fabsemanticmodel.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsSemanticModel) TransformGet(entity fabsemanticmodel.SemanticM
 // TransformList implements concreteOperations.
 func (o *operationsSemanticModel) TransformList(entities []fabsemanticmodel.SemanticModel) fabsemanticmodel.ItemsClientListSemanticModelsResponse {
 	return fabsemanticmodel.ItemsClientListSemanticModelsResponse{
-		SemanticModels: fabsemanticmodel.SemanticModels{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -146,7 +142,8 @@ func configureSemanticModel(server *fakeServer) fabsemanticmodel.SemanticModel {
 		&server.ServerFactory.SemanticModel.ItemsServer.UpdateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginCreateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.NewListSemanticModelsPager,
-		&server.ServerFactory.SemanticModel.ItemsServer.DeleteSemanticModel)
+		&server.ServerFactory.SemanticModel.ItemsServer.DeleteSemanticModel,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,18 +151,19 @@ func configureSemanticModel(server *fakeServer) fabsemanticmodel.SemanticModel {
 		definitionOperations,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginCreateSemanticModel,
 		&server.ServerFactory.SemanticModel.ItemsServer.BeginGetSemanticModelDefinition,
-		&server.ServerFactory.SemanticModel.ItemsServer.BeginUpdateSemanticModelDefinition)
+		&server.ServerFactory.SemanticModel.ItemsServer.BeginUpdateSemanticModelDefinition,
+	)
 
 	return fabsemanticmodel.SemanticModel{}
 }
 
 func NewRandomSemanticModel() fabsemanticmodel.SemanticModel {
 	return fabsemanticmodel.SemanticModel{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsemanticmodel.ItemTypeSemanticModel),
 	}
 }

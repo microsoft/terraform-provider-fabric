@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacempe
@@ -37,7 +37,7 @@ func (to *baseWorkspaceManagedPrivateEndpointModel) set(ctx context.Context, wor
 	to.Name = types.StringPointerValue(from.Name)
 	to.ProvisioningState = types.StringPointerValue((*string)(from.ProvisioningState))
 	to.TargetPrivateLinkResourceID = customtypes.NewCaseInsensitiveStringPointerValue(from.TargetPrivateLinkResourceID)
-	to.TargetSubresourceType = types.StringPointerValue((from.TargetSubresourceType))
+	to.TargetSubresourceType = types.StringPointerValue(from.TargetSubresourceType)
 
 	connectionState := supertypes.NewSingleNestedObjectValueOfNull[connectionStateModel](ctx)
 

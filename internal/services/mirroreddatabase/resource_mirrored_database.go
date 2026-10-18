@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package mirroreddatabase
@@ -63,11 +63,11 @@ func NewResourceMirroredDatabase(ctx context.Context) resource.Resource {
 			switch *respGet.Properties.SQLEndpointProperties.ProvisioningStatus {
 			case fabmirroreddatabase.SQLEndpointProvisioningStatusFailed:
 				return &fabcore.ResponseError{
-					ErrorCode:  (string)(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed),
+					ErrorCode:  string(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed),
 					StatusCode: http.StatusBadRequest,
 					ErrorResponse: &fabcore.ErrorResponse{
-						ErrorCode: azto.Ptr((string)(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed)),
-						Message:   azto.Ptr("Mirrored Database SQL endpoint provisioning failed"),
+						ErrorCode: azto.Ptr(string(fabmirroreddatabase.SQLEndpointProvisioningStatusFailed)),
+						Message:   new("Mirrored Database SQL endpoint provisioning failed"),
 					},
 				}
 
@@ -83,21 +83,19 @@ func NewResourceMirroredDatabase(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(1),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			},
-			DefinitionRequired: true,
-			DefinitionEmpty:    ItemDefinitionEmpty,
-			DefinitionFormats:  itemDefinitionFormats,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtMost(1),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
+		DefinitionRequired:   true,
+		DefinitionEmpty:      ItemDefinitionEmpty,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getResourceMirroredDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

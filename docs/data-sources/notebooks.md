@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Notebook display name.
 - `folder_id` (String) The Notebook Folder ID.
 - `id` (String) The Notebook ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Notebook.
 - `workspace_id` (String) The Workspace ID.

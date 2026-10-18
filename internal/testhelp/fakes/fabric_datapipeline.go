@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -61,9 +61,7 @@ func (o *operationsDataPipeline) TransformGet(entity fabdatapipeline.DataPipelin
 // TransformList implements concreteOperations.
 func (o *operationsDataPipeline) TransformList(entities []fabdatapipeline.DataPipeline) fabdatapipeline.ItemsClientListDataPipelinesResponse {
 	return fabdatapipeline.ItemsClientListDataPipelinesResponse{
-		DataPipelines: fabdatapipeline.DataPipelines{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -116,18 +114,19 @@ func configureDataPipeline(server *fakeServer) fabdatapipeline.DataPipeline {
 		&server.ServerFactory.DataPipeline.ItemsServer.UpdateDataPipeline,
 		&server.ServerFactory.DataPipeline.ItemsServer.BeginCreateDataPipeline,
 		&server.ServerFactory.DataPipeline.ItemsServer.NewListDataPipelinesPager,
-		&server.ServerFactory.DataPipeline.ItemsServer.DeleteDataPipeline)
+		&server.ServerFactory.DataPipeline.ItemsServer.DeleteDataPipeline,
+	)
 
 	return fabdatapipeline.DataPipeline{}
 }
 
 func NewRandomDataPipeline() fabdatapipeline.DataPipeline {
 	return fabdatapipeline.DataPipeline{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabdatapipeline.ItemTypeDataPipeline),
 	}
 }

@@ -44,7 +44,7 @@ resource "fabric_notebook" "example_custom_delimiter" {
   definition = {
     "notebook-content.ipynb" = {
       source           = "${local.path}/notebook.ipynb.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MESSAGE" = "World"
         "MyValue" = "Lorem Ipsum"

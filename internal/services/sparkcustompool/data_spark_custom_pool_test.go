@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkcustompool_test
@@ -54,7 +54,8 @@ func TestAcc_SparkCustomPoolDataSource(t *testing.T) {
 						"workspace_id": testhelp.RefByFQN(workspaceResourceFQN, "id"),
 						"id":           testhelp.RefByFQN(testResourceItemFQN, "id"),
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "workspace_id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "id"),

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkjobdefinition
@@ -31,5 +31,16 @@ var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglo
 		Type:  "SparkJobDefinitionV1",
 		API:   "SparkJobDefinitionV1",
 		Paths: []string{"SparkJobDefinitionV1.json"},
+	},
+	{
+		Type: "SparkJobDefinitionV2",
+		API:  "SparkJobDefinitionV2",
+		Paths: []string{
+			"SparkJobDefinitionV1.json",
+			"Main/*.py",
+			"Main/*.r",
+			"Libs/*.py",
+			"Libs/*.r",
+		},
 	},
 }

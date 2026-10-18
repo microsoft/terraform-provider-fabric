@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package utils //revive:disable-line:var-naming
+package utils //revive:disable-line:package-naming
 
 import (
 	"crypto/sha256"
@@ -93,6 +93,8 @@ func Sha256[T string | []byte](content T) string {
 		hash = sha256.Sum256([]byte(v))
 	case []byte:
 		hash = sha256.Sum256(v)
+	default:
+		return ""
 	}
 
 	return hex.EncodeToString(hash[:])

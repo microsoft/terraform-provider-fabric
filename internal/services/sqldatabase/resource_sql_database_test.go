@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sqldatabase_test
@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	fabsqldatabase "github.com/microsoft/fabric-sdk-go/fabric/sqldatabase"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -20,6 +22,10 @@ import (
 )
 
 var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("sql_database"),
+})
 
 func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -50,7 +56,7 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id":    "00000000-0000-0000-0000-000000000000",
+					"workspace_id":    testhelp.RandomUUID(),
 					"unexpected_attr": "test",
 				},
 			),
@@ -73,10 +79,268 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"workspace_id": testhelp.RandomUUID(),
 				},
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		// error - invalid format value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"format":       "invalid",
+					"definition": map[string]any{
+						`"test.dacpac"`: map[string]any{
+							"source": "test.dacpac",
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error - dacpac format with wrong definition path
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": testhelp.RandomUUID(),
+						"display_name": "test",
+						"format":       "dacpac",
+						"definition": map[string]any{
+							`"definition.sqlproj"`: map[string]any{
+								"source": "${local.path}/definition.sqlproj",
+							},
+						},
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`Definition path must match`),
+		},
+		// error - sqlproj format with wrong definition path
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": testhelp.RandomUUID(),
+						"display_name": "test",
+						"format":       "sqlproj",
+						"definition": map[string]any{
+							`"test.dacpac"`: map[string]any{
+								"source": "${local.path}/definition.sqlproj",
+							},
+						},
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`Definition path must match`),
+		},
+		// error - configuration conflicts with format
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": testhelp.RandomUUID(),
+						"display_name": "test",
+						"format":       "sqlproj",
+						"definition": map[string]any{
+							`"definition.sqlproj"`: map[string]any{
+								"source": "${local.path}/definition.sqlproj",
+							},
+						},
+						"configuration": map[string]any{
+							"creation_mode": "New",
+						},
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
+	}))
+}
+
+func TestUnit_SQLDatabaseResource_ConfigurationAttributes(t *testing.T) {
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - configuration - empty
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":  testhelp.RandomUUID(),
+					"display_name":  "test",
+					"configuration": map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Inappropriate value for attribute "configuration"`),
+		},
+		// error - creation_mode - invalid value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode": "Invalid",
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
+		},
+		// error - New mode with restore_point_in_time (should be null)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "New",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
+		},
+		// error - New mode with source_database_reference (should be null)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode": "New",
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
+		},
+		// error - Restore mode with backup_retention_days (should be null)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "Restore",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"backup_retention_days": 7,
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.backup_retention_days`),
+		},
+		// error - Restore mode with collation (should be null)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "Restore",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"collation":             testhelp.RandomName(),
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid configuration for attribute configuration.collation`),
+		},
+		// error - ById reference_type without item_id (required)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "Restore",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"workspace_id":   testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`"source_database_reference": attribute "item_id" is required`),
+		},
+		// error - ById reference_type without workspace_id (required)
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "Restore",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"item_id":        testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(`"source_database_reference": attribute "workspace_id" is required`),
+		},
+		// error - invalid reference_type value
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": testhelp.RandomUUID(),
+					"display_name": "test",
+					"configuration": map[string]any{
+						"creation_mode":         "Restore",
+						"restore_point_in_time": time.Now().UTC().Format(time.RFC3339),
+						"source_database_reference": map[string]any{
+							"reference_type": "Invalid",
+							"item_id":        testhelp.RandomUUID(),
+							"workspace_id":   testhelp.RandomUUID(),
+						},
+					},
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorAttValueMatch),
 		},
 	}))
 }
@@ -153,6 +417,9 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -181,6 +448,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -190,9 +458,30 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update, Move and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update, Move and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -211,6 +500,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Move and Read
@@ -237,80 +527,116 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_SQLDatabaseResource_CRUD_Configuration(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityBefore := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	sourceDB := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+
+	fakes.FakeServer.Upsert(sourceDB)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create with New configuration and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"configuration": map[string]any{
+						"creation_mode":         string(fabsqldatabase.CreationModeNew),
+						"backup_retention_days": 7,
+						"collation":             "SQL_Latin1_General_CP1_CI_AS",
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			),
+		},
+		// Create with Restore configuration and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"configuration": map[string]any{
+						"creation_mode":         string(fabsqldatabase.CreationModeRestore),
+						"restore_point_in_time": time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+						"source_database_reference": map[string]any{
+							"reference_type": "ById",
+							"item_id":        *sourceDB.ID,
+							"workspace_id":   *sourceDB.WorkspaceID,
+						},
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
 func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
-					},
-				)),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"folder_id":    folder1ID,
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
-		// Update, Move and Read
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"description":  entityUpdateDescription,
+					"folder_id":    folder2ID,
+				},
 			),
-		},
-		//	Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"description":  entityUpdateDescription,
-					},
-				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
@@ -318,4 +644,113 @@ func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 		},
 	},
 	))
+}
+
+func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityDisplayName := testhelp.RandomName()
+
+	testHelperDefinition := map[string]any{
+		`"definition.sqlproj"`: map[string]any{
+			"source": "${local.path}/definition.sqlproj.tmpl",
+		},
+	}
+
+	testhelperUpdateDefinition := map[string]any{
+		`"definition.sqlproj"`: map[string]any{
+			"source": "${local.path}/definition.sqlproj.tmpl",
+		},
+		`"dbo/Tables/TestTable.sql"`: map[string]any{
+			"source": "${local.path}/dbo/Tables/TestTable.sql.tmpl",
+		},
+		`".sharedqueries/SQL query 1.sql"`: map[string]any{
+			"source": "${local.path}/.sharedqueries/SQL query 1.sql.tmpl",
+		},
+	}
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityDisplayName,
+						"format":       "sqlproj",
+						"definition":   testHelperDefinition,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityDisplayName,
+						"format":       "sqlproj",
+						"definition":   testhelperUpdateDefinition,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.dbo/Tables/TestTable.sql.source_content_sha256"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition..sharedqueries/SQL query 1.sql.source_content_sha256"),
+			),
+		},
+	}))
+}
+
+func TestAcc_SQLDatabaseConfigurationResource(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	entityCreateDisplayName := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create with New creation mode
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"configuration": map[string]any{
+						"creation_mode":         string(fabsqldatabase.CreationModeNew),
+						"backup_retention_days": 7,
+						"collation":             "SQL_Latin1_General_CP1_CI_AS",
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			),
+		},
+	}))
 }

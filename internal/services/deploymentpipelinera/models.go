@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package deploymentpipelinera
@@ -35,7 +35,7 @@ func (to *baseDeploymentPipelineRoleAssignmentModel) set(ctx context.Context, de
 	if from.Principal != nil {
 		principalModel := &principalModel{}
 
-		principalModel.set(*from.Principal)
+		principalModel.set(*from.Principal.GetPrincipal())
 
 		if diags := to.Principal.Set(ctx, principalModel); diags.HasError() {
 			return diags

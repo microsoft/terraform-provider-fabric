@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacegit
@@ -102,8 +102,13 @@ RESOURCE
 type resourceWorkspaceGitModel struct {
 	baseWorkspaceGitModel
 
-	InitializationStrategy types.String    `tfsdk:"initialization_strategy"`
-	Timeouts               timeoutsR.Value `tfsdk:"timeouts"`
+	InitializationStrategy types.String                                       `tfsdk:"initialization_strategy"`
+	Options                supertypes.SingleNestedObjectValueOf[optionsModel] `tfsdk:"options"`
+	Timeouts               timeoutsR.Value                                    `tfsdk:"timeouts"`
+}
+
+type optionsModel struct {
+	AllowOverrideItems types.Bool `tfsdk:"allow_override_items"`
 }
 
 type requestGitConnect struct {
@@ -119,7 +124,7 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 	var reqGitProviderDetails fabcore.GitProviderDetailsClassification
 	var reqGitCredentials fabcore.GitCredentialsClassification
 
-	gitProviderType := (fabcore.GitProviderType)(gitProviderDetails.GitProviderType.ValueString())
+	gitProviderType := fabcore.GitProviderType(gitProviderDetails.GitProviderType.ValueString())
 
 	switch gitProviderType {
 	case fabcore.GitProviderTypeAzureDevOps:
@@ -140,7 +145,7 @@ func (to *requestGitConnect) set(ctx context.Context, from resourceWorkspaceGitM
 		// Default to Automatic if git_credentials or git_credentials.source are empty
 		gitGitCredentialsSource := fabcore.GitCredentialsSourceAutomatic
 		if gitGitCredentials != nil && !gitGitCredentials.Source.IsNull() && !gitGitCredentials.Source.IsUnknown() {
-			gitGitCredentialsSource = (fabcore.GitCredentialsSource)(gitGitCredentials.Source.ValueString())
+			gitGitCredentialsSource = fabcore.GitCredentialsSource(gitGitCredentials.Source.ValueString())
 		}
 
 		switch gitGitCredentialsSource {
@@ -211,18 +216,35 @@ type requestGitUpdateFrom struct {
 	fabcore.UpdateFromGitRequest
 }
 
-func (to *requestGitUpdateFrom) set(remoteCommitHash, conflictResolutionPolicy *string) {
+func (to *requestGitUpdateFrom) set(ctx context.Context, from resourceWorkspaceGitModel, remoteCommitHash, conflictResolutionPolicy *string) diag.Diagnostics {
 	policy := fabcore.ConflictResolutionPolicyPreferWorkspace
 	if *conflictResolutionPolicy != "None" {
 		policy = fabcore.ConflictResolutionPolicy(*conflictResolutionPolicy)
 	}
+	var allowOverrideItems *bool
+
+	if !from.Options.IsNull() && !from.Options.IsUnknown() {
+		options, diags := from.Options.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if !options.AllowOverrideItems.IsNull() && !options.AllowOverrideItems.IsUnknown() {
+			allowOverrideItems = options.AllowOverrideItems.ValueBoolPointer()
+		}
+	}
 
 	to.RemoteCommitHash = remoteCommitHash
-	to.Options = &fabcore.UpdateOptions{}
+	to.Options = &fabcore.UpdateOptions{
+		AllowOverrideItems: allowOverrideItems,
+	}
+
 	to.ConflictResolution = &fabcore.WorkspaceConflictResolution{
-		ConflictResolutionPolicy: azto.Ptr(policy),
+		ConflictResolutionPolicy: new(policy),
 		ConflictResolutionType:   azto.Ptr(fabcore.ConflictResolutionTypeWorkspace),
 	}
+
+	return nil
 }
 
 type requestGitInitialize struct {
@@ -329,13 +351,13 @@ func (to *gitCredentialsModel) set(from fabcore.GitCredentialsConfigurationRespo
 }
 
 type gitProviderDetailsModel struct {
-	GitProviderType  types.String `tfsdk:"git_provider_type"`
-	OrganizationName types.String `tfsdk:"organization_name"`
-	ProjectName      types.String `tfsdk:"project_name"`
-	OwnerName        types.String `tfsdk:"owner_name"`
-	RepositoryName   types.String `tfsdk:"repository_name"`
-	BranchName       types.String `tfsdk:"branch_name"`
-	DirectoryName    types.String `tfsdk:"directory_name"`
+	GitProviderType  types.String                      `tfsdk:"git_provider_type"`
+	OrganizationName customtypes.CaseInsensitiveString `tfsdk:"organization_name"`
+	ProjectName      customtypes.CaseInsensitiveString `tfsdk:"project_name"`
+	OwnerName        types.String                      `tfsdk:"owner_name"`
+	RepositoryName   customtypes.CaseInsensitiveString `tfsdk:"repository_name"`
+	BranchName       types.String                      `tfsdk:"branch_name"`
+	DirectoryName    types.String                      `tfsdk:"directory_name"`
 }
 
 func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassification) diag.Diagnostics {
@@ -345,9 +367,9 @@ func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassifica
 		to.OwnerName = types.StringNull()
 
 		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
-		to.OrganizationName = types.StringPointerValue(gitProviderDetails.OrganizationName)
-		to.ProjectName = types.StringPointerValue(gitProviderDetails.ProjectName)
-		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
+		to.OrganizationName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.OrganizationName)
+		to.ProjectName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.ProjectName)
+		to.RepositoryName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.RepositoryName)
 		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
 		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
 
@@ -355,12 +377,12 @@ func (to *gitProviderDetailsModel) set(from fabcore.GitProviderDetailsClassifica
 
 	case *fabcore.GitHubDetails:
 		// GitHub does not have an organization name or project name
-		to.OrganizationName = types.StringNull()
-		to.ProjectName = types.StringNull()
+		to.OrganizationName = customtypes.NewCaseInsensitiveStringNull()
+		to.ProjectName = customtypes.NewCaseInsensitiveStringNull()
 
 		to.GitProviderType = types.StringPointerValue((*string)(gitProviderDetails.GitProviderType))
 		to.OwnerName = types.StringPointerValue(gitProviderDetails.OwnerName)
-		to.RepositoryName = types.StringPointerValue(gitProviderDetails.RepositoryName)
+		to.RepositoryName = customtypes.NewCaseInsensitiveStringPointerValue(gitProviderDetails.RepositoryName)
 		to.BranchName = types.StringPointerValue(gitProviderDetails.BranchName)
 		to.DirectoryName = types.StringPointerValue(gitProviderDetails.DirectoryName)
 

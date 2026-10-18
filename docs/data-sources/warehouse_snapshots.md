@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `id` (String) The Warehouse Snapshot ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Warehouse Snapshot.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

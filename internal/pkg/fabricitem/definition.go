@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -57,11 +57,11 @@ func getDefinitionFormatsPathsDocs(values []DefinitionFormat) string {
 
 	var resultsSb57 strings.Builder
 	for _, k := range slices.Sorted(maps.Keys(elements)) {
-		resultsSb57.WriteString("**" + k + "** format: ")
-		resultsSb57.WriteString(utils.ConvertStringSlicesToString(elements[k], true, true))
+		_, _ = resultsSb57.WriteString("**" + k + "** format: ")
+		_, _ = resultsSb57.WriteString(utils.ConvertStringSlicesToString(elements[k], true, true))
 
 		if i != len(elements)-1 {
-			resultsSb57.WriteString(" ")
+			_, _ = resultsSb57.WriteString(" ")
 		}
 
 		i++
@@ -96,7 +96,7 @@ func DefinitionPathKeysValidator(values []DefinitionFormat) []validator.String {
 	results := make([]validator.String, 0, len(values))
 
 	for _, value := range values {
-		paths := []superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{}
+		paths := make([]superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues, 0, len(value.Paths))
 
 		for _, p := range value.Paths {
 			paths = append(paths, superstringvalidator.OneOfWithDescriptionIfAttributeIsOneOfValues{

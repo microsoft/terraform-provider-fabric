@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package gatewayra
@@ -266,11 +266,9 @@ func (r *resourceGatewayRoleAssignment) ImportState(ctx context.Context, req res
 	}
 
 	state := resourceGatewayRoleAssignmentModel{
-		baseGatewayRoleAssignmentModel: baseGatewayRoleAssignmentModel{
-			ID:        uuidGatewayRoleAssignmentID,
-			GatewayID: uuidGatewayID,
-		},
-		Timeouts: timeout,
+		ID:        uuidGatewayRoleAssignmentID,
+		GatewayID: uuidGatewayID,
+		Timeouts:  timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

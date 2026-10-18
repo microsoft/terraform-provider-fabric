@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Environment Settings resource allows you to manage a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Spark Environment Settings resource allows you to manage a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -45,6 +42,7 @@ resource "fabric_spark_environment_settings" "example" {
   }
 
   spark_properties = {
+    "spark.acls.enable" = "true"
     /*
    your settings here
    */
@@ -64,16 +62,16 @@ resource "fabric_spark_environment_settings" "example" {
 ### Optional
 
 - `driver_cores` (Number) Publication status. Value must be one of : `4`, `8`, `16`, `32`, `64`.
-- `driver_memory` (String) Spark driver memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `driver_memory` (String) Spark driver memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `dynamic_executor_allocation` (Attributes) Dynamic Executor Allocation properties. (see [below for nested schema](#nestedatt--dynamic_executor_allocation))
 - `executor_cores` (Number) Spark executor core. Value must be one of : `4`, `8`, `16`, `32`, `64`.
-- `executor_memory` (String) Spark executor memory. Value must be one of : `28g`, `56g`, `112g`, `224g`, `400g`.
+- `executor_memory` (String) Spark executor memory. Value must be one of : `112g`, `224g`, `28g`, `400g`, `56g`.
 - `pool` (Attributes) Environment pool. (see [below for nested schema](#nestedatt--pool))
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version.
 - `spark_properties` (Map of String) A map of key/value pairs of Spark properties. Key must satisfy all validations: Spark properties:
 - must starts with 'spark.'
 - cannot contains any white spaces
-- dot '.' is allowed but not at the start or end of the property key.
+- dot '.' is allowed but not at the start or end of the property key. All values in the map must be configured.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -26,6 +26,7 @@ func (o *operationsVariableLibrary) ConvertItemToEntity(item fabcore.Item) fabva
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties:  NewRandomVariableLibrary().Properties,
+		Tags:        convertItemTags[fabvariablelibrary.ItemTag](item.Tags),
 	}
 }
 
@@ -37,9 +38,7 @@ func (o *operationsVariableLibrary) CreateDefinition(data fabvariablelibrary.Cre
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsVariableLibrary) TransformDefinition(entity *fabvariablelibrary.PublicDefinition) fabvariablelibrary.ItemsClientGetVariableLibraryDefinitionResponse {
 	return fabvariablelibrary.ItemsClientGetVariableLibraryDefinitionResponse{
-		DefinitionResponse: fabvariablelibrary.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -93,9 +92,7 @@ func (o *operationsVariableLibrary) TransformGet(entity fabvariablelibrary.Varia
 // TransformList implements concreteOperations.
 func (o *operationsVariableLibrary) TransformList(entities []fabvariablelibrary.VariableLibrary) fabvariablelibrary.ItemsClientListVariableLibrariesResponse {
 	return fabvariablelibrary.ItemsClientListVariableLibrariesResponse{
-		VariableLibraries: fabvariablelibrary.VariableLibraries{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -159,28 +156,30 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 		&server.ServerFactory.VariableLibrary.ItemsServer.UpdateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.NewListVariableLibrariesPager,
-		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary)
+		&server.ServerFactory.VariableLibrary.ItemsServer.DeleteVariableLibrary,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginCreateVariableLibrary,
 		&server.ServerFactory.VariableLibrary.ItemsServer.BeginGetVariableLibraryDefinition,
-		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition)
+		&server.ServerFactory.VariableLibrary.ItemsServer.BeginUpdateVariableLibraryDefinition,
+	)
 
 	return fabvariablelibrary.VariableLibrary{}
 }
 
 func NewRandomVariableLibrary() fabvariablelibrary.VariableLibrary {
 	return fabvariablelibrary.VariableLibrary{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties: &fabvariablelibrary.Properties{
-			ActiveValueSetName: to.Ptr(testhelp.RandomName()),
+			ActiveValueSetName: new(testhelp.RandomName()),
 		},
 	}
 }
@@ -195,37 +194,37 @@ func NewRandomVariableLibraryWithWorkspace(workspaceID string) fabvariablelibrar
 func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 	defPart1 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("variables.json"),
-		Payload: to.Ptr(
+		Path:        new("variables.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart2 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("valueSet/valueSet1.json"),
-		Payload: to.Ptr(
+		Path:        new("valueSet/valueSet1.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart3 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("valueSet/valueSet2.json"),
-		Payload: to.Ptr(
+		Path:        new("valueSet/valueSet2.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
 	defPart4 := fabvariablelibrary.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabvariablelibrary.PayloadTypeInlineBase64),
-		Path:        to.Ptr("settings.json"),
-		Payload: to.Ptr(
+		Path:        new("settings.json"),
+		Payload: new(
 			"eyJjb250ZW50IjoiSGVsbG8gV29ybGQifQ==",
 		),
 	}
 
-	var defParts []fabvariablelibrary.PublicDefinitionPart
+	defParts := make([]fabvariablelibrary.PublicDefinitionPart, 0, 4)
 
 	defParts = append(defParts, defPart1)
 	defParts = append(defParts, defPart2)
@@ -233,7 +232,7 @@ func NewRandomVariableLibraryDefinition() fabvariablelibrary.PublicDefinition {
 	defParts = append(defParts, defPart4)
 
 	return fabvariablelibrary.PublicDefinition{
-		Format: to.Ptr("json"),
+		Format: new("json"),
 		Parts:  defParts,
 	}
 }

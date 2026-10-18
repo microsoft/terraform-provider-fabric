@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package itemjobscheduler
@@ -13,11 +13,15 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Item Job Schedulers",
 	Types:          "item_job_schedulers",
 	DocsURL:        "https://learn.microsoft.com/fabric/fundamentals/job-scheduler",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
 
 var AllowedJobTypesByItemType = map[string][]string{ //nolint:gochecknoglobals
-	"dataflow":  {"Execute", "ApplyChanges"},
-	"lakehouse": {"RefreshMaterializedLakeViews"},
+	"dataflow":     {"Execute", "ApplyChanges"},
+	"datapipeline": {"Execute"},
+	"lakehouse":    {"RefreshMaterializedLakeViews"},
 }
+
+// DefaultLocalTimeZoneID is the Windows time zone identifier used when the schedule configuration does not specify one.
+const DefaultLocalTimeZoneID = "Central Standard Time"

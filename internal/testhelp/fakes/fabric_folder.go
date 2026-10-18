@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -53,9 +52,7 @@ func (o *operationsFolder) TransformGet(entity fabcore.Folder) fabcore.FoldersCl
 // TransformList implements concreteOperations.
 func (o *operationsFolder) TransformList(entities []fabcore.Folder) fabcore.FoldersClientListFoldersResponse {
 	return fabcore.FoldersClientListFoldersResponse{
-		Folders: fabcore.Folders{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -170,7 +167,7 @@ func (o *operationsFolder) getChildren(parentID string, folders []fabcore.Folder
 }
 
 func (o *operationsFolder) getDescendants(parentID string, folders []fabcore.Folder) []fabcore.Folder {
-	result := make([]fabcore.Folder, 0)
+	result := make([]fabcore.Folder, 0, len(folders))
 	children := o.getChildren(parentID, folders)
 
 	result = append(result, children...)
@@ -206,7 +203,8 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 		&server.ServerFactory.Core.FoldersServer.UpdateFolder,
 		&server.ServerFactory.Core.FoldersServer.CreateFolder,
 		&server.ServerFactory.Core.FoldersServer.NewListFoldersPager,
-		&server.ServerFactory.Core.FoldersServer.DeleteFolder)
+		&server.ServerFactory.Core.FoldersServer.DeleteFolder,
+	)
 
 	server.ServerFactory.Core.FoldersServer.NewListFoldersPager = FakeListFolders(handler)
 	server.ServerFactory.Core.FoldersServer.MoveFolder = FakeMoveFolder(handler)
@@ -216,8 +214,8 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 
 func NewRandomFolder() fabcore.Folder {
 	return fabcore.Folder{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
 		// no parent folder id, only for subfolders
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package deploymentpipelinera
@@ -243,11 +243,9 @@ func (r *resourceDeploymentPipelineRoleAssignment) ImportState(ctx context.Conte
 	}
 
 	state := resourceDeploymentPipelineRoleAssignmentModel{
-		baseDeploymentPipelineRoleAssignmentModel: baseDeploymentPipelineRoleAssignmentModel{
-			ID:                   uuidDeploymentPipelineRoleAssignmentID,
-			DeploymentPipelineID: uuidDeploymentPipelineID,
-		},
-		Timeouts: timeout,
+		ID:                   uuidDeploymentPipelineRoleAssignmentID,
+		DeploymentPipelineID: uuidDeploymentPipelineID,
+		Timeouts:             timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

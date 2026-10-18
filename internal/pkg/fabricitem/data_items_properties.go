@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -66,6 +66,12 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			MarkdownDescription: fmt.Sprintf("The %s Folder ID.", d.TypeInfo.Name),
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
+		},
+		"tags": schema.SetAttribute{
+			MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
+			Computed:            true,
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
+			ElementType:         customtypes.UUIDType{},
 		},
 	}
 

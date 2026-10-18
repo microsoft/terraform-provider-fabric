@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacera_test
@@ -27,13 +27,13 @@ func fakeWorkspaceRoleAssignment(
 
 func NewRandomWorkspaceRoleAssignment() fabcore.WorkspaceRoleAssignment {
 	return fabcore.WorkspaceRoleAssignment{
-		ID: azto.Ptr(testhelp.RandomUUID()),
-		Principal: &fabcore.Principal{
-			ID:          azto.Ptr(testhelp.RandomUUID()),
+		ID: new(testhelp.RandomUUID()),
+		Principal: &fabcore.UserPrincipal{
+			ID:          new(testhelp.RandomUUID()),
 			Type:        azto.Ptr(fabcore.PrincipalTypeUser),
-			DisplayName: azto.Ptr(testhelp.RandomName()),
-			UserDetails: &fabcore.PrincipalUserDetails{
-				UserPrincipalName: azto.Ptr(testhelp.RandomName()),
+			DisplayName: new(testhelp.RandomName()),
+			UserDetails: &fabcore.UserPrincipalUserDetails{
+				UserPrincipalName: new(testhelp.RandomName()),
 			},
 		},
 		Role: azto.Ptr(fabcore.WorkspaceRoleAdmin),
@@ -60,55 +60,55 @@ func NewRandomWorkspaceRoleAssignments() fabcore.WorkspaceRoleAssignments {
 	return fabcore.WorkspaceRoleAssignments{
 		Value: []fabcore.WorkspaceRoleAssignment{
 			{
-				ID:   azto.Ptr(principal0ID),
+				ID:   new(principal0ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleAdmin),
-				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal0ID),
+				Principal: &fabcore.GroupPrincipal{
+					ID:          new(principal0ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeGroup),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
-					GroupDetails: &fabcore.PrincipalGroupDetails{
+					DisplayName: new(testhelp.RandomName()),
+					GroupDetails: &fabcore.GroupPrincipalGroupDetails{
 						GroupType: azto.Ptr(fabcore.GroupTypeSecurityGroup),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal1ID),
+				ID:   new(principal1ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
-				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal1ID),
+				Principal: &fabcore.UserPrincipal{
+					ID:          new(principal1ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeUser),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
-					UserDetails: &fabcore.PrincipalUserDetails{
-						UserPrincipalName: azto.Ptr(testhelp.RandomName()),
+					DisplayName: new(testhelp.RandomName()),
+					UserDetails: &fabcore.UserPrincipalUserDetails{
+						UserPrincipalName: new(testhelp.RandomName()),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal2ID),
+				ID:   new(principal2ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleMember),
-				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal2ID),
+				Principal: &fabcore.ServicePrincipal{
+					ID:          new(principal2ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
-					ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
-						AADAppID: azto.Ptr(testhelp.RandomUUID()),
+					DisplayName: new(testhelp.RandomName()),
+					ServicePrincipalDetails: &fabcore.ServicePrincipalDetails{
+						AADAppID: new(testhelp.RandomUUID()),
 					},
 				},
 			},
 			{
-				ID:   azto.Ptr(principal3ID),
+				ID:   new(principal3ID),
 				Role: azto.Ptr(fabcore.WorkspaceRoleViewer),
-				Principal: &fabcore.Principal{
-					ID:          azto.Ptr(principal3ID),
+				Principal: &fabcore.ServicePrincipalProfilePrincipal{
+					ID:          new(principal3ID),
 					Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipalProfile),
-					DisplayName: azto.Ptr(testhelp.RandomName()),
-					ServicePrincipalProfileDetails: &fabcore.PrincipalServicePrincipalProfileDetails{
-						ParentPrincipal: &fabcore.Principal{
-							ID:          azto.Ptr(principal2ID),
+					DisplayName: new(testhelp.RandomName()),
+					ServicePrincipalProfileDetails: &fabcore.ServicePrincipalProfilePrincipalServicePrincipalProfileDetails{
+						ParentPrincipal: &fabcore.ServicePrincipal{
+							ID:          new(principal2ID),
 							Type:        azto.Ptr(fabcore.PrincipalTypeServicePrincipal),
-							DisplayName: azto.Ptr(testhelp.RandomName()),
-							ServicePrincipalDetails: &fabcore.PrincipalServicePrincipalDetails{
-								AADAppID: azto.Ptr(testhelp.RandomUUID()),
+							DisplayName: new(testhelp.RandomName()),
+							ServicePrincipalDetails: &fabcore.ServicePrincipalDetails{
+								AADAppID: new(testhelp.RandomUUID()),
 							},
 						},
 					},

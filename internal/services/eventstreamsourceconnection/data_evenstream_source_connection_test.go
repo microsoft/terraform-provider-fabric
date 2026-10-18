@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package eventstreamsourceconnection_test
@@ -28,7 +28,8 @@ func TestUnit_EventstreamSourceConnectionDataSource(t *testing.T) {
 		fakeWorkspaceID,
 		fakeEventstreamID,
 		fakeSourceID,
-		entity)
+		entity,
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

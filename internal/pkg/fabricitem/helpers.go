@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -47,6 +47,14 @@ func NewResourceMarkdownDescription(typeInfo tftypeinfo.TFTypeInfo, plural bool)
 
 	if typeInfo.IsPreview {
 		md += PreviewResource
+	}
+
+	if typeInfo.IsAdmin {
+		md += IsAdminNote
+	}
+
+	if typeInfo.IsAdmin && typeInfo.IsSPNSupported {
+		md += TenantPermissionBlocksAPINote
 	}
 
 	return md

@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Mounted Data Factory display name.
 - `folder_id` (String) The Mounted Data Factory Folder ID.
 - `id` (String) The Mounted Data Factory ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Mounted Data Factory.
 - `workspace_id` (String) The Workspace ID.

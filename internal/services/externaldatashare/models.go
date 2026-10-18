@@ -1,0 +1,212 @@
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package externaldatashare
+
+import (
+	"context"
+	"fmt"
+
+	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
+	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+)
+
+/*
+BASE MODEL
+*/
+
+type baseExternalDataShareModel struct {
+	Paths              supertypes.SetValueOf[types.String]                         `tfsdk:"paths"`
+	Status             types.String                                                `tfsdk:"status"`
+	Recipient          supertypes.SingleNestedObjectValueOf[recipientModel]        `tfsdk:"recipient"`
+	ExpirationTime     timetypes.RFC3339                                           `tfsdk:"expiration_time"`
+	PrincipalModel     supertypes.SingleNestedObjectValueOf[common.PrincipalModel] `tfsdk:"principal_model"`
+	WorkspaceID        customtypes.UUID                                            `tfsdk:"workspace_id"`
+	ItemID             customtypes.UUID                                            `tfsdk:"item_id"`
+	ID                 customtypes.UUID                                            `tfsdk:"id"`
+	InvitationURL      customtypes.URL                                             `tfsdk:"invitation_url"`
+	AcceptedByTenantID customtypes.UUID                                            `tfsdk:"accepted_by_tenant_id"`
+}
+
+type recipientModel struct {
+	Type              types.String     `tfsdk:"type"`
+	UserPrincipalName types.String     `tfsdk:"user_principal_name"`
+	TenantID          customtypes.UUID `tfsdk:"tenant_id"`
+}
+
+/*
+DATA-SOURCE
+*/
+
+type dataSourceExternalDataShareModel struct {
+	baseExternalDataShareModel
+
+	Timeouts timeoutsD.Value `tfsdk:"timeouts"`
+}
+
+/*
+DATA-SOURCE (list)
+*/
+
+type dataSourceExternalDataSharesModel struct {
+	WorkspaceID customtypes.UUID                                              `tfsdk:"workspace_id"`
+	ItemID      customtypes.UUID                                              `tfsdk:"item_id"`
+	Values      supertypes.SetNestedObjectValueOf[baseExternalDataShareModel] `tfsdk:"values"`
+	Timeouts    timeoutsD.Value                                               `tfsdk:"timeouts"`
+}
+
+/*
+RESOURCE
+*/
+
+type resourceExternalDataSharesModel struct {
+	baseExternalDataShareModel
+
+	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+type requestCreateExternalDataShare struct {
+	fabcore.CreateExternalDataShareRequest
+}
+
+func (to *baseExternalDataShareModel) set(ctx context.Context, workspaceID, itemID string, from *fabcore.ExternalDataShare) diag.Diagnostics {
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.Status = types.StringPointerValue((*string)(from.Status))
+	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
+	to.ItemID = customtypes.NewUUIDValue(itemID)
+	to.InvitationURL = customtypes.NewURLPointerValue(from.InvitationURL)
+	to.AcceptedByTenantID = customtypes.NewUUIDPointerValue(from.AcceptedByTenantID)
+	to.ExpirationTime = timetypes.NewRFC3339TimePointerValue(from.ExpirationTimeUTC)
+	to.PrincipalModel = supertypes.NewSingleNestedObjectValueOfNull[common.PrincipalModel](ctx)
+	to.Recipient = supertypes.NewSingleNestedObjectValueOfNull[recipientModel](ctx)
+	to.Paths = supertypes.NewSetValueOfNull[types.String](ctx)
+
+	if from.Paths != nil {
+		values := make([]types.String, 0, len(from.Paths))
+		for _, value := range from.Paths {
+			values = append(values, types.StringValue(value))
+		}
+
+		if diags := to.Paths.Set(ctx, values); diags.HasError() {
+			return diags
+		}
+	}
+
+	if from.Recipient != nil {
+		recipient := &recipientModel{}
+		if diags := recipient.set(from.Recipient); diags.HasError() {
+			return diags
+		}
+
+		if diags := to.Recipient.Set(ctx, recipient); diags.HasError() {
+			return diags
+		}
+	}
+
+	if from.CreatorPrincipal != nil {
+		creatorPrincipalModel := &common.PrincipalModel{}
+		creatorPrincipalModel.Set(*from.CreatorPrincipal.GetPrincipal())
+
+		if diags := to.PrincipalModel.Set(ctx, creatorPrincipalModel); diags.HasError() {
+			return diags
+		}
+	}
+
+	return nil
+}
+
+func (to *dataSourceExternalDataSharesModel) set(ctx context.Context, workspaceID, itemID string, from []fabcore.ExternalDataShare) diag.Diagnostics {
+	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
+	to.ItemID = customtypes.NewUUIDValue(itemID)
+
+	slice := make([]*baseExternalDataShareModel, 0, len(from))
+	for _, entity := range from {
+		var entityModel baseExternalDataShareModel
+		if diags := entityModel.set(ctx, workspaceID, itemID, &entity); diags.HasError() {
+			return diags
+		}
+
+		slice = append(slice, &entityModel)
+	}
+
+	return to.Values.Set(ctx, slice)
+}
+
+func (to *recipientModel) set(from fabcore.BaseExternalDataShareRecipientClassification) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	switch entity := from.(type) {
+	case *fabcore.ExternalDataShareUserRecipient:
+		to.Type = types.StringPointerValue((*string)(entity.Type))
+		to.UserPrincipalName = types.StringPointerValue(entity.UserPrincipalName)
+		to.TenantID = customtypes.NewUUIDPointerValue(entity.TenantID)
+	case *fabcore.ExternalDataShareSPRecipient:
+		to.Type = types.StringPointerValue((*string)(entity.Type))
+		to.UserPrincipalName = types.StringNull()
+		to.TenantID = customtypes.NewUUIDPointerValue(entity.TenantID)
+	default:
+		diags.AddError(
+			"Unsupported External Data Share recipient type",
+			fmt.Sprintf("The External Data Share recipient type '%T' is not supported.", entity),
+		)
+
+		return diags
+	}
+
+	return diags
+}
+
+func (to *requestCreateExternalDataShare) set(ctx context.Context, from resourceExternalDataSharesModel) diag.Diagnostics {
+	paths, diags := from.Paths.Get(ctx)
+
+	if diags.HasError() {
+		return diags
+	}
+
+	values := make([]string, 0, len(paths))
+
+	for _, path := range paths {
+		values = append(values, path.ValueString())
+	}
+
+	to.Paths = values
+
+	recipientModel, diags := from.Recipient.Get(ctx)
+
+	if diags.HasError() {
+		return diags
+	}
+
+	recipientType := fabcore.ExternalDataShareRecipientType(recipientModel.Type.ValueString())
+
+	switch recipientType {
+	case fabcore.ExternalDataShareRecipientTypeUser:
+		to.Recipient = &fabcore.ExternalDataShareUserRecipient{
+			Type:              &recipientType,
+			UserPrincipalName: recipientModel.UserPrincipalName.ValueStringPointer(),
+			TenantID:          recipientModel.TenantID.ValueStringPointer(),
+		}
+	case fabcore.ExternalDataShareRecipientTypeServicePrincipal:
+		to.Recipient = &fabcore.ExternalDataShareSPRecipient{
+			Type:     &recipientType,
+			TenantID: recipientModel.TenantID.ValueStringPointer(),
+		}
+	default:
+		diags.AddError(
+			"Unsupported External Data Share recipient type",
+			fmt.Sprintf("The External Data Share recipient type '%s' is not supported.", string(recipientType)),
+		)
+
+		return diags
+	}
+
+	return nil
+}

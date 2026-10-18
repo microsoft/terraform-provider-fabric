@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package itemjobscheduler
@@ -6,7 +6,7 @@ package itemjobscheduler
 import (
 	"fmt"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -18,11 +18,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	superint32validator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/int32validator"
 	superobjectvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/objectvalidator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
@@ -227,6 +230,24 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 					Computed: true,
 				},
 			},
+			"local_time_zone_id": superschema.StringAttribute{
+				Common: &schemaR.StringAttribute{
+					MarkdownDescription: "The time zone identifier in which the schedule times are interpreted. " +
+						"Must be a Windows time zone identifier, for example `Central Standard Time`, `UTC` or `W. Europe Standard Time`. " +
+						"See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the full list.",
+				},
+				Resource: &schemaR.StringAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString(DefaultLocalTimeZoneID),
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
+					},
+				},
+				DataSource: &schemaD.StringAttribute{
+					Computed: true,
+				},
+			},
 			"type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "A string represents the type of the plan.",
@@ -268,11 +289,15 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 			"times": superschema.SuperSetAttribute{
 				Common: &schemaR.SetAttribute{
 					MarkdownDescription: "A list of time slots in hh:mm format, at most 100 elements are allowed.",
-					ElementType:         types.StringType,
+					CustomType: supertypes.SetTypeOf[types.String]{
+						SetType: basetypes.SetType{
+							ElemType: types.StringType,
+						},
+					},
+					ElementType: types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
-					Optional:    true,
-					ElementType: types.StringType,
+					Optional: true,
 					Validators: []validator.Set{
 						setvalidator.SizeAtMost(100),
 						setvalidator.ValueStringsAre(
@@ -300,7 +325,12 @@ func configurationSchema() superschema.SuperSingleNestedAttributeOf[configuratio
 			"weekdays": superschema.SuperSetAttribute{
 				Common: &schemaR.SetAttribute{
 					MarkdownDescription: "A list of weekdays, at most seven elements are allowed.",
-					ElementType:         types.StringType,
+					CustomType: supertypes.SetTypeOf[types.String]{
+						SetType: basetypes.SetType{
+							ElemType: types.StringType,
+						},
+					},
+					ElementType: types.StringType,
 				},
 				Resource: &schemaR.SetAttribute{
 					Optional: true,
@@ -472,12 +502,12 @@ func allowedJobTypesMarkdownDescription() string {
 		keys = append(keys, k)
 	}
 
-	sort.Strings(keys)
+	slices.Sort(keys)
 
 	for i, k := range keys {
 		vals := append([]string(nil), AllowedJobTypesByItemType[k]...)
-		sort.Strings(vals)
-		_, _ = b.WriteString(fmt.Sprintf("%s: {%s}", k, strings.Join(vals, ", ")))
+		slices.Sort(vals)
+		_, _ = fmt.Fprintf(&b, "%s: {%s}", k, strings.Join(vals, ", "))
 
 		if i < len(keys)-1 {
 			_, _ = b.WriteString("; ")

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/map/definition/1.0.0/schema.json",
+  "basemap": {
+    "options": "{\"renderWorldCopies\":true}",
+    "controls": {
+      "zoom": true,
+      "pitch": true,
+      "compass": true,
+      "scale": true,
+      "traffic": true
+    },
+    "backgroundColor": null,
+    "theme": null
+  },
+  "dataSources": {
+    "lakehouses": [{{ .LAKEHOUSES | default "" }}],
+    "kqlDataBases": [
+    ]
+  },
+  "layerSources": [
+  ],
+  "layerSettings": [
+  ]
+}

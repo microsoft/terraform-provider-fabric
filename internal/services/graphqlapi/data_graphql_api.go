@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package graphqlapi
@@ -10,11 +10,12 @@ import (
 )
 
 func NewDataSourceGraphQLApi() datasource.DataSource {
-	config := fabricitem.DataSourceFabricItem{
+	config := fabricitem.DataSourceFabricItemDefinition{
 		TypeInfo:            ItemTypeInfo,
 		FabricItemType:      FabricItemType,
 		IsDisplayNameUnique: true,
+		DefinitionFormats:   itemDefinitionFormats,
 	}
 
-	return fabricitem.NewDataSourceFabricItem(config)
+	return fabricitem.NewDataSourceFabricItemDefinition(config)
 }

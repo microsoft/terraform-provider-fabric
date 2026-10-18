@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Connections data-source allows you to retrieve a list of Fabric Connections https://learn.microsoft.com/fabric/data-factory/data-source-management.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_connections (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Connections data-source allows you to retrieve a list of Fabric [Connections](https://learn.microsoft.com/fabric/data-factory/data-source-management).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -48,6 +45,7 @@ Optional:
 Optional:
 
 - `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways.
+- `allow_usage_in_user_controlled_code` (Boolean) Allow this connection to be used with items that allow user-controlled code such as Notebook.
 - `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
 
 Read-Only:
@@ -75,6 +73,6 @@ Read-Only:
 Read-Only:
 
 - `connection_encryption` (String) The connection encryption type. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
-- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
+- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `KeyPair`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
 - `single_sign_on_type` (String) The single sign-on type. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
 - `skip_test_connection` (Boolean) Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.

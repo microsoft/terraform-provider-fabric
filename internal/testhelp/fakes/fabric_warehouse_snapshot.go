@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -62,9 +62,7 @@ func (o *operationsWarehouseSnapshot) TransformGet(entity fabwarehousesnapshot.W
 // TransformList implements ParentIDOperations.
 func (o *operationsWarehouseSnapshot) TransformList(entities []fabwarehousesnapshot.WarehouseSnapshot) fabwarehousesnapshot.ItemsClientListWarehouseSnapshotsResponse {
 	return fabwarehousesnapshot.ItemsClientListWarehouseSnapshotsResponse{
-		WarehouseSnapshots: fabwarehousesnapshot.WarehouseSnapshots{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -104,6 +102,7 @@ func (o *operationsWarehouseSnapshot) ConvertItemToEntity(entity fabcore.Item) f
 		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties:  NewRandomWarehouseSnapshot().Properties,
+		Tags:        convertItemTags[fabwarehousesnapshot.ItemTag](entity.Tags),
 	}
 }
 
@@ -131,23 +130,24 @@ func configureWarehouseSnapshot(server *fakeServer) fabwarehousesnapshot.Warehou
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.UpdateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.BeginCreateWarehouseSnapshot,
 		&server.ServerFactory.WarehouseSnapshot.ItemsServer.NewListWarehouseSnapshotsPager,
-		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot)
+		&server.ServerFactory.WarehouseSnapshot.ItemsServer.DeleteWarehouseSnapshot,
+	)
 
 	return fabwarehousesnapshot.WarehouseSnapshot{}
 }
 
 func NewRandomWarehouseSnapshot() fabwarehousesnapshot.WarehouseSnapshot {
 	return fabwarehousesnapshot.WarehouseSnapshot{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabwarehousesnapshot.ItemTypeWarehouseSnapshot),
 		Properties: &fabwarehousesnapshot.Properties{
-			ConnectionString:  to.Ptr(testhelp.RandomURI()),
-			ParentWarehouseID: to.Ptr(testhelp.RandomUUID()),
-			SnapshotDateTime:  to.Ptr(time.Now()),
+			ConnectionString:  new(testhelp.RandomURI()),
+			ParentWarehouseID: new(testhelp.RandomUUID()),
+			SnapshotDateTime:  new(time.Now()),
 		},
 	}
 }

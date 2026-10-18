@@ -47,9 +47,9 @@ resource "fabric_variable_library" "example_custom_delimiter" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
   definition = {
-    "variablelibrary-content.json" = {
-      source           = "${local.path}/variablelibrary-content.json"
-      tokens_delimiter = "##"
+    "variables.json" = {
+      source           = "${local.path}/variables.json"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"
@@ -65,8 +65,8 @@ resource "fabric_variable_library" "example_parameters" {
   workspace_id = "00000000-0000-0000-0000-000000000000"
   format       = "Default"
   definition = {
-    "variablelibrary-content.json" = {
-      source          = "${local.path}/variablelibrary-content.json"
+    "variables.json" = {
+      source          = "${local.path}/variables.json"
       processing_mode = "parameters"
       parameters = [
         {

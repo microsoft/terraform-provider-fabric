@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacera
@@ -262,11 +262,9 @@ func (r *resourceWorkspaceRoleAssignment) ImportState(ctx context.Context, req r
 	}
 
 	state := resourceWorkspaceRoleAssignmentModel{
-		baseWorkspaceRoleAssignmentModel: baseWorkspaceRoleAssignmentModel{
-			ID:          uuidWorkspaceRoleAssignmentID,
-			WorkspaceID: uuidWorkspaceID,
-		},
-		Timeouts: timeout,
+		ID:          uuidWorkspaceRoleAssignmentID,
+		WorkspaceID: uuidWorkspaceID,
+		Timeouts:    timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

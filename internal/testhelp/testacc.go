@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package testhelp
@@ -150,7 +150,7 @@ func GetFixturesDirPath(fixtureDir ...string) string {
 	_, filename, _, _ := runtime.Caller(0) //nolint:dogsled
 	testHelpDir := filepath.Dir(filename)
 
-	var tempPath []string
+	tempPath := make([]string, 0, 2+len(fixtureDir))
 
 	tempPath = append(tempPath, testHelpDir)
 	tempPath = append(tempPath, "fixtures")
@@ -173,6 +173,53 @@ func FolderResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN 
 	)
 
 	resourceFQN = ResourceFQN("fabric", "folder", resourceName)
+
+	return resourceHCL, resourceFQN
+}
+
+func WorkspaceNetworkCommunicationPolicyResource(t *testing.T, workspaceID, inboundRule, outboundRule string) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+	t.Helper()
+
+	resourceName := RandomName()
+
+	resourceHCL = at.CompileConfig(
+		at.ResourceHeader(TypeName("fabric", "workspace_network_communication_policy"), resourceName),
+		map[string]any{
+			"workspace_id": workspaceID,
+			"outbound": map[string]any{
+				"public_access_rules": map[string]any{
+					"default_action": outboundRule,
+				},
+			},
+			"inbound": map[string]any{
+				"public_access_rules": map[string]any{
+					"default_action": inboundRule,
+				},
+			},
+		},
+	)
+
+	resourceFQN = ResourceFQN("fabric", "workspace_network_communication_policy", resourceName)
+
+	return resourceHCL, resourceFQN
+}
+
+func TagResource(t *testing.T) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+	t.Helper()
+
+	resourceName := RandomName()
+
+	resourceHCL = at.CompileConfig(
+		at.ResourceHeader(TypeName("fabric", "tag"), resourceName),
+		map[string]any{
+			"display_name": RandomName(),
+			"scope": map[string]any{
+				"type": "Tenant",
+			},
+		},
+	)
+
+	resourceFQN = ResourceFQN("fabric", "tag", resourceName)
 
 	return resourceHCL, resourceFQN
 }

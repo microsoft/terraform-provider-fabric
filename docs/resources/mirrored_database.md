@@ -55,7 +55,7 @@ resource "fabric_mirrored_database" "example_custom_delimiter" {
   definition = {
     "mirroring.json" = {
       source           = "${local.path}/mirroring.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DEFAULT_SCHEMA" = "my_schema"
       }
@@ -105,6 +105,7 @@ resource "fabric_mirrored_database" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Database description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

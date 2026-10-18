@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package itemjobscheduler_test
@@ -13,6 +13,9 @@ import (
 )
 
 var itemTypeInfo = itemjobscheduler.ItemTypeInfo
+
+// testLocalTimeZoneID is a non-default Windows time zone identifier used to verify the value is not hardcoded.
+const testLocalTimeZoneID = "W. Europe Standard Time"
 
 func dataflowResource(t *testing.T, workspaceID string) (resourceHCL, resourceFQN string) {
 	t.Helper()

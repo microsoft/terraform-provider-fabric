@@ -60,10 +60,11 @@ output "example_definition_bim_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **TMDL** format: `definition.pbism`, `definition/cultures/*.tmdl`, `definition/dataSources.tmdl`, `definition/database.tmdl`, `definition/expressions.tmdl`, `definition/model.tmdl`, `definition/perspectives/*.tmdl`, `definition/relationships.tmdl`, `definition/roles/*.tmdl`, `definition/tables/*.tmdl`, `diagramLayout.json` **TMSL** format: `definition.pbism`, `diagramLayout.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **TMDL** format: `definition.pbism`, `definition/**`, `diagramLayout.json` **TMSL** format: `definition.pbism`, `diagramLayout.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Semantic Model description.
 - `display_name` (String) The Semantic Model display name.
 - `folder_id` (String) The Semantic Model Folder ID.
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

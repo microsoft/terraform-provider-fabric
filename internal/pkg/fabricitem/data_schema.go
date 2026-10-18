@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -80,6 +80,12 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 			MarkdownDescription: fmt.Sprintf("The %s Folder ID.", itemName),
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
+		},
+		"tags": schema.SetAttribute{
+			MarkdownDescription: "A set of tag IDs applied to the item.",
+			Computed:            true,
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
+			ElementType:         customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.Attributes(ctx),
 	}

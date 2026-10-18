@@ -57,4 +57,5 @@ Read-Only:
 - `display_name` (String) The Mirrored Warehouse display name.
 - `folder_id` (String) The Mirrored Warehouse Folder ID.
 - `id` (String) The Mirrored Warehouse ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Mirrored Warehouse.
 - `workspace_id` (String) The Workspace ID.

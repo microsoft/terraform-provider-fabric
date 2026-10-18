@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package shortcut_test
@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -21,7 +20,7 @@ var fakeShortcutStore = map[string]fabcore.Shortcut{}
 func fakeShortcutsFunc() func(workspaceID, itemID string, options *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 	return func(_, _ string, _ *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 		resp = azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]{}
-		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Shortcuts: fabcore.Shortcuts{Value: GetAllStoredShortcuts()}}, nil)
+		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Value: GetAllStoredShortcuts()}, nil)
 
 		return resp
 	}
@@ -103,8 +102,8 @@ func fakeDeleteShortcutFunc() func(ctx context.Context, workspaceID, itemID, sho
 
 func NewRandomShortcut() fabcore.Shortcut {
 	return fabcore.Shortcut{
-		Name:   to.Ptr(testhelp.RandomName()),
-		Path:   to.Ptr(testhelp.RandomName()),
+		Name:   new(testhelp.RandomName()),
+		Path:   new(testhelp.RandomName() + "/" + testhelp.RandomName() + "/" + testhelp.RandomName()),
 		Target: NewRandomShortcutTarget(),
 	}
 }
@@ -117,9 +116,9 @@ func NewRandomShortcutTarget() *fabcore.Target {
 
 func NewRandomShortcutTargetOneLake() *fabcore.OneLake {
 	return &fabcore.OneLake{
-		ItemID:      to.Ptr(testhelp.RandomUUID()),
-		Path:        to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		ItemID:      new(testhelp.RandomUUID()),
+		Path:        new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
 	}
 }
 

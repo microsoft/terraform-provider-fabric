@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -25,9 +24,7 @@ func (o *operationsItem) CreateDefinition(data fabcore.CreateItemRequest) *fabco
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsItem) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -81,9 +78,7 @@ func (o *operationsItem) TransformGet(entity fabcore.Item) fabcore.ItemsClientGe
 // TransformList implements concreteOperations.
 func (o *operationsItem) TransformList(entities []fabcore.Item) fabcore.ItemsClientListItemsResponse {
 	return fabcore.ItemsClientListItemsResponse{
-		Items: fabcore.Items{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -147,7 +142,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		&server.ServerFactory.Core.ItemsServer.UpdateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.NewListItemsPager,
-		&server.ServerFactory.Core.ItemsServer.DeleteItem)
+		&server.ServerFactory.Core.ItemsServer.DeleteItem,
+	)
 
 	configureDefinitions(
 		handler,
@@ -155,7 +151,8 @@ func configureItem(server *fakeServer) fabcore.Item {
 		definitionOperations,
 		&server.ServerFactory.Core.ItemsServer.BeginCreateItem,
 		&server.ServerFactory.Core.ItemsServer.BeginGetItemDefinition,
-		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition)
+		&server.ServerFactory.Core.ItemsServer.BeginUpdateItemDefinition,
+	)
 	server.ServerFactory.Core.ItemsServer.MoveItem = FakeMoveItem(handler)
 
 	return fabcore.Item{}
@@ -165,10 +162,8 @@ type moveItemOperations struct{}
 
 func (m *moveItemOperations) TransformUpdate(entity fabcore.Item) fabcore.ItemsClientMoveItemResponse {
 	return fabcore.ItemsClientMoveItemResponse{
-		MovedItems: fabcore.MovedItems{
-			Value: []fabcore.Item{
-				entity,
-			},
+		Value: []fabcore.Item{
+			entity,
 		},
 	}
 }
@@ -196,11 +191,11 @@ func FakeMoveItem(
 func NewRandomItem(itemType fabcore.ItemType) fabcore.Item {
 	return fabcore.Item{
 		Type:        &itemType,
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Tags:        []fabcore.ItemTag{},
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tftypeinfo
@@ -18,6 +18,7 @@ type TFTypeInfo struct {
 	DocsURL          string
 	IsPreview        bool
 	IsSPNSupported   bool
+	IsAdmin          bool
 }
 
 func (t TFTypeInfo) FullTypeName(plural bool) string { //revive:disable-line:flag-parameter

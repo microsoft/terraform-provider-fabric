@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -30,6 +30,7 @@ func (o *operationsMirroredDatabase) ConvertItemToEntity(item fabcore.Item) fabm
 		// Set the type to mirrored database.
 		Type:       to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: NewRandomMirroredDatabase().Properties,
+		Tags:       convertItemTags[fabmirroreddatabase.ItemTag](item.Tags),
 	}
 }
 
@@ -41,9 +42,7 @@ func (o *operationsMirroredDatabase) CreateDefinition(data fabcore.CreateItemReq
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredDatabase) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -101,9 +100,7 @@ func (o *operationsMirroredDatabase) TransformGet(entity fabmirroreddatabase.Mir
 // It wraps a list of entities into the List response.
 func (o *operationsMirroredDatabase) TransformList(entities []fabmirroreddatabase.MirroredDatabase) fabmirroreddatabase.ItemsClientListMirroredDatabasesResponse {
 	return fabmirroreddatabase.ItemsClientListMirroredDatabasesResponse{
-		MirroredDatabases: fabmirroreddatabase.MirroredDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -194,19 +191,19 @@ func configureMirroredDatabase(server *fakeServer) fabmirroreddatabase.MirroredD
 // NewRandomMirroredDatabase returns a random Mirrored Database entity.
 func NewRandomMirroredDatabase() fabmirroreddatabase.MirroredDatabase {
 	return fabmirroreddatabase.MirroredDatabase{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: &fabmirroreddatabase.Properties{
-			DefaultSchema:     to.Ptr(testhelp.RandomName()),
-			OneLakeTablesPath: to.Ptr(testhelp.RandomURI()),
+			DefaultSchema:     new(testhelp.RandomName()),
+			OneLakeTablesPath: new(testhelp.RandomURI()),
 			SQLEndpointProperties: &fabmirroreddatabase.SQLEndpointProperties{
 				ProvisioningStatus: to.Ptr(fabmirroreddatabase.SQLEndpointProvisioningStatusSuccess),
-				ConnectionString:   to.Ptr(testhelp.RandomURI()),
-				ID:                 to.Ptr(testhelp.RandomUUID()),
+				ConnectionString:   new(testhelp.RandomURI()),
+				ID:                 new(testhelp.RandomUUID()),
 			},
 		},
 	}
@@ -215,7 +212,7 @@ func NewRandomMirroredDatabase() fabmirroreddatabase.MirroredDatabase {
 // NewRandomMirroredDatabaseWithWorkspace returns a random Mirrored Database entity with a given workspaceID.
 func NewRandomMirroredDatabaseWithWorkspace(workspaceID string) fabmirroreddatabase.MirroredDatabase {
 	db := NewRandomMirroredDatabase()
-	db.WorkspaceID = to.Ptr(workspaceID)
+	db.WorkspaceID = new(workspaceID)
 
 	return db
 }

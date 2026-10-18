@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package warehouse
@@ -70,11 +70,9 @@ func NewDataSourceWarehouse() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemProperties[warehousePropertiesModel, fabwarehouse.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
 		PropertiesAttributes: getDataSourceWarehousePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

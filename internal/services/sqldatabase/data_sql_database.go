@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sqldatabase
@@ -17,7 +17,7 @@ import (
 )
 
 func NewDataSourceSQLDatabase() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabsqldatabase.Properties, to *fabricitem.DataSourceFabricItemPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabsqldatabase.Properties, to *fabricitem.DataSourceFabricItemDefinitionPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[sqlDatabasePropertiesModel](ctx)
 
 		if from != nil {
@@ -34,7 +34,7 @@ func NewDataSourceSQLDatabase() datasource.DataSource {
 		return nil
 	}
 
-	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabsqldatabase.Properties]) error {
+	itemGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties], fabricItem *fabricitem.FabricItemProperties[fabsqldatabase.Properties]) error {
 		client := fabsqldatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		respGet, err := client.GetSQLDatabase(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
@@ -47,7 +47,7 @@ func NewDataSourceSQLDatabase() datasource.DataSource {
 		return nil
 	}
 
-	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabsqldatabase.Properties]) error {
+	itemListGetter := func(ctx context.Context, fabricClient fabric.Client, model fabricitem.DataSourceFabricItemDefinitionPropertiesModel[sqlDatabasePropertiesModel, fabsqldatabase.Properties], errNotFound fabcore.ResponseError, fabricItem *fabricitem.FabricItemProperties[fabsqldatabase.Properties]) error {
 		client := fabsqldatabase.NewClientFactoryWithClient(fabricClient).NewItemsClient()
 
 		pager := client.NewListSQLDatabasesPager(model.WorkspaceID.ValueString(), nil)
@@ -69,17 +69,16 @@ func NewDataSourceSQLDatabase() datasource.DataSource {
 		return &errNotFound
 	}
 
-	config := fabricitem.DataSourceFabricItemProperties[sqlDatabasePropertiesModel, fabsqldatabase.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-		},
+	config := fabricitem.DataSourceFabricItemDefinitionProperties[sqlDatabasePropertiesModel, fabsqldatabase.Properties]{
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceSQLDatabasePropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,
 		ItemListGetter:       itemListGetter,
 	}
 
-	return fabricitem.NewDataSourceFabricItemProperties(config)
+	return fabricitem.NewDataSourceFabricItemDefinitionProperties(config)
 }

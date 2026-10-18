@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -26,6 +26,15 @@ func (o *operationsGateway) Create(data fabcore.CreateGatewayRequestClassificati
 		entity.CapacityID = data.CapacityID
 		entity.InactivityMinutesBeforeSleep = data.InactivityMinutesBeforeSleep
 		entity.NumberOfMemberGateways = data.NumberOfMemberGateways
+		entity.MinMemberGatewayCount = data.MinMemberGatewayCount
+		entity.MaxMemberGatewayCount = data.MaxMemberGatewayCount
+		entity.VirtualNetworkAzureResource = data.VirtualNetworkAzureResource
+
+		return entity
+	case *fabcore.CreateStreamingVirtualNetworkGatewayRequest:
+		entity := NewRandomStreamingVirtualNetworkGateway()
+		entity.Type = data.Type
+		entity.DisplayName = data.DisplayName
 		entity.VirtualNetworkAzureResource = data.VirtualNetworkAzureResource
 
 		return entity
@@ -48,9 +57,7 @@ func (o *operationsGateway) TransformGet(entity fabcore.GatewayClassification) f
 
 func (o *operationsGateway) TransformList(list []fabcore.GatewayClassification) fabcore.GatewaysClientListGatewaysResponse {
 	return fabcore.GatewaysClientListGatewaysResponse{
-		ListGatewaysResponse: fabcore.ListGatewaysResponse{
-			Value: list,
-		},
+		Value: list,
 	}
 }
 
@@ -69,9 +76,15 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 		}
 
 		base.CapacityID = request.CapacityID
-		base.DisplayName = request.DisplayName
 		base.InactivityMinutesBeforeSleep = request.InactivityMinutesBeforeSleep
 		base.NumberOfMemberGateways = request.NumberOfMemberGateways
+		base.MinMemberGatewayCount = request.MinMemberGatewayCount
+		base.MaxMemberGatewayCount = request.MaxMemberGatewayCount
+
+		// PATCH semantics: an omitted display name leaves the current one untouched.
+		if request.DisplayName != nil {
+			base.DisplayName = request.DisplayName
+		}
 
 		return base
 	default:
@@ -81,7 +94,7 @@ func (o *operationsGateway) Update(base fabcore.GatewayClassification, data fabc
 
 func (o *operationsGateway) Validate(newEntity fabcore.GatewayClassification, existing []fabcore.GatewayClassification) (int, error) {
 	for _, existingGateway := range existing {
-		if *(existingGateway.GetGateway().Type) != *(newEntity.GetGateway().Type) {
+		if *existingGateway.GetGateway().Type != *newEntity.GetGateway().Type {
 			continue
 		}
 
@@ -117,6 +130,12 @@ func configureOnPremisesGatewayPersonal(server *fakeServer) fabcore.OnPremisesGa
 	return fabcore.OnPremisesGatewayPersonal{}
 }
 
+func configureStreamingVirtualNetworkGateway(server *fakeServer) fabcore.StreamingVirtualNetworkGateway {
+	configureGateway(server)
+
+	return fabcore.StreamingVirtualNetworkGateway{}
+}
+
 func configureGateway(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[
@@ -140,7 +159,8 @@ func configureGateway(server *fakeServer) {
 		&handler.ServerFactory.Core.GatewaysServer.UpdateGateway,
 		&handler.ServerFactory.Core.GatewaysServer.CreateGateway,
 		&handler.ServerFactory.Core.GatewaysServer.NewListGatewaysPager,
-		&handler.ServerFactory.Core.GatewaysServer.DeleteGateway)
+		&handler.ServerFactory.Core.GatewaysServer.DeleteGateway,
+	)
 }
 
 func NewRandomGateway() fabcore.GatewayClassification {
@@ -153,6 +173,8 @@ func NewRandomGateway() fabcore.GatewayClassification {
 		return NewRandomOnPremisesGatewayPersonal()
 	case fabcore.GatewayTypeVirtualNetwork:
 		return NewRandomVirtualNetworkGateway()
+	case fabcore.GatewayTypeStreamingVirtualNetwork:
+		return NewRandomStreamingVirtualNetworkGateway()
 	default:
 		panic("Unsupported Gateway type") // lintignore:R009
 	}
@@ -160,51 +182,68 @@ func NewRandomGateway() fabcore.GatewayClassification {
 
 func NewRandomOnPremisesGateway() *fabcore.OnPremisesGateway {
 	return &fabcore.OnPremisesGateway{
-		ID:                          to.Ptr(testhelp.RandomUUID()),
+		ID:                          new(testhelp.RandomUUID()),
 		Type:                        to.Ptr(fabcore.GatewayTypeOnPremises),
-		DisplayName:                 to.Ptr(testhelp.RandomName()),
-		AllowCloudConnectionRefresh: to.Ptr(testhelp.RandomBool()),
-		AllowCustomConnectors:       to.Ptr(testhelp.RandomBool()),
-		NumberOfMemberGateways:      to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
-		LoadBalancingSetting:        to.Ptr(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
-		Version:                     to.Ptr(testhelp.RandomName()),
+		DisplayName:                 new(testhelp.RandomName()),
+		AllowCloudConnectionRefresh: new(testhelp.RandomBool()),
+		AllowCustomConnectors:       new(testhelp.RandomBool()),
+		NumberOfMemberGateways:      new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
+		LoadBalancingSetting:        new(testhelp.RandomElement(fabcore.PossibleLoadBalancingSettingValues())),
+		Version:                     new(testhelp.RandomName()),
 		PublicKey:                   NewRadomPublicKey(),
 	}
 }
 
 func NewRandomOnPremisesGatewayPersonal() *fabcore.OnPremisesGatewayPersonal {
 	return &fabcore.OnPremisesGatewayPersonal{
-		ID:        to.Ptr(testhelp.RandomUUID()),
+		ID:        new(testhelp.RandomUUID()),
 		Type:      to.Ptr(fabcore.GatewayTypeOnPremisesPersonal),
-		Version:   to.Ptr(testhelp.RandomName()),
+		Version:   new(testhelp.RandomName()),
 		PublicKey: NewRadomPublicKey(),
 	}
 }
 
 func NewRandomVirtualNetworkGateway() *fabcore.VirtualNetworkGateway {
 	return &fabcore.VirtualNetworkGateway{
-		ID:                           to.Ptr(testhelp.RandomUUID()),
+		ID:                           new(testhelp.RandomUUID()),
 		Type:                         to.Ptr(fabcore.GatewayTypeVirtualNetwork),
-		DisplayName:                  to.Ptr(testhelp.RandomName()),
-		CapacityID:                   to.Ptr(testhelp.RandomUUID()),
-		InactivityMinutesBeforeSleep: to.Ptr(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
-		NumberOfMemberGateways:       to.Ptr(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
+		DisplayName:                  new(testhelp.RandomName()),
+		CapacityID:                   new(testhelp.RandomUUID()),
+		InactivityMinutesBeforeSleep: new(testhelp.RandomElement(gateway.PossibleInactivityMinutesBeforeSleepValues)),
+		NumberOfMemberGateways:       new(testhelp.RandomIntRange(gateway.MinNumberOfMemberGatewaysValues, gateway.MaxNumberOfMemberGatewaysValues)),
 		VirtualNetworkAzureResource:  NewRandomVirtualNetworkAzureResource(),
+	}
+}
+
+func NewRandomVirtualNetworkGatewayAutoScale() *fabcore.VirtualNetworkGateway {
+	entity := NewRandomVirtualNetworkGateway()
+	entity.MinMemberGatewayCount = to.Ptr(gateway.MinNumberOfMemberGatewaysValues)
+	entity.MaxMemberGatewayCount = to.Ptr(gateway.MaxNumberOfMemberGatewaysValues)
+
+	return entity
+}
+
+func NewRandomStreamingVirtualNetworkGateway() *fabcore.StreamingVirtualNetworkGateway {
+	return &fabcore.StreamingVirtualNetworkGateway{
+		ID:                          new(testhelp.RandomUUID()),
+		Type:                        to.Ptr(fabcore.GatewayTypeStreamingVirtualNetwork),
+		DisplayName:                 new(testhelp.RandomName()),
+		VirtualNetworkAzureResource: NewRandomVirtualNetworkAzureResource(),
 	}
 }
 
 func NewRadomPublicKey() *fabcore.PublicKey {
 	return &fabcore.PublicKey{
-		Exponent: to.Ptr(testhelp.RandomName()),
-		Modulus:  to.Ptr(testhelp.RandomName()),
+		Exponent: new(testhelp.RandomName()),
+		Modulus:  new(testhelp.RandomName()),
 	}
 }
 
 func NewRandomVirtualNetworkAzureResource() *fabcore.VirtualNetworkAzureResource {
 	return &fabcore.VirtualNetworkAzureResource{
-		ResourceGroupName:  to.Ptr(testhelp.RandomName()),
-		SubnetName:         to.Ptr(testhelp.RandomName()),
-		SubscriptionID:     to.Ptr(testhelp.RandomUUID()),
-		VirtualNetworkName: to.Ptr(testhelp.RandomName()),
+		ResourceGroupName:  new(testhelp.RandomName()),
+		SubnetName:         new(testhelp.RandomName()),
+		SubscriptionID:     new(testhelp.RandomUUID()),
+		VirtualNetworkName: new(testhelp.RandomName()),
 	}
 }

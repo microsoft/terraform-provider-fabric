@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package warehouse_test
@@ -108,6 +108,9 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[0].ID),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[1].ID),
 			),
 		},
 		// read by id - not found
@@ -142,6 +145,7 @@ func TestUnit_WarehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.created_date"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.last_updated_time"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.collation_type"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
 			),
 		},
 		// read by name - not found

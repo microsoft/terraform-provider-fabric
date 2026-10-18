@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Spark Job Definition Folder ID.
 - `id` (String) The Spark Job Definition ID.
 - `properties` (Attributes) The Spark Job Definition properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Spark Job Definition.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

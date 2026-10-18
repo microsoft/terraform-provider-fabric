@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Environment resource allows you to manage a Fabric Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_environment (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Environment resource allows you to manage a Fabric [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -37,6 +34,7 @@ resource "fabric_environment" "example" {
 
 - `description` (String) The Environment description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

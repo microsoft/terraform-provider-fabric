@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sparkcustompool_test
@@ -48,7 +48,8 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 							"max_executors": 2,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "auto_scale.enabled", "true"),
@@ -81,7 +82,8 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 							"enabled": false,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityUpdateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "auto_scale.enabled", "false"),

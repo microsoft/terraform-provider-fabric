@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacempe
@@ -11,6 +11,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Workspace Managed Private Endpoints",
 	Types:          "workspace_managed_private_endpoints",
 	DocsURL:        "https://learn.microsoft.com/fabric/security/security-managed-private-endpoints-overview",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

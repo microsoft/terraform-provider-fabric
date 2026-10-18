@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -136,6 +136,10 @@ func fabricItemCheckMove(planFolderID, stateFolderID customtypes.UUID, reqMovePl
 	reqMoveState.setTargetFolderID(stateFolderID)
 
 	return !reflect.DeepEqual(reqMovePlan.MoveItemRequest, reqMoveState.MoveItemRequest)
+}
+
+func fabricItemCheckSyncTags(planTags, stateTags supertypes.SetValueOf[customtypes.UUID]) bool {
+	return !planTags.Equal(stateTags)
 }
 
 func fabricItemCheckUpdateDefinition(

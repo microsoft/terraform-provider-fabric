@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package deploymentpipelinera_test
@@ -31,11 +31,11 @@ func fakeCreateDeploymentPipelineRoleAssignment() func(ctx context.Context, depl
 	return func(_ context.Context, _ string, body fabcore.AddDeploymentPipelineRoleAssignmentRequest, _ *fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentOptions) (resp azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse], errResp azfake.ErrorResponder) {
 		// Return a response that matches the request
 		response := fabcore.DeploymentPipelineRoleAssignment{
-			ID:   body.Principal.ID,
+			ID:   body.Principal.GetPrincipal().ID,
 			Role: body.Role,
 			Principal: &fabcore.Principal{
-				ID:   body.Principal.ID,
-				Type: body.Principal.Type,
+				ID:   body.Principal.GetPrincipal().ID,
+				Type: body.Principal.GetPrincipal().Type,
 			},
 		}
 		resp = azfake.Responder[fabcore.DeploymentPipelinesClientAddDeploymentPipelineRoleAssignmentResponse]{}
@@ -61,10 +61,10 @@ func NewRandomDeploymentPipelineRoleAssignments() fabcore.DeploymentPipelineRole
 	return fabcore.DeploymentPipelineRoleAssignments{
 		Value: []fabcore.DeploymentPipelineRoleAssignment{
 			{
-				ID:   azto.Ptr(entityID),
+				ID:   new(entityID),
 				Role: azto.Ptr(fabcore.DeploymentPipelineRoleAdmin),
 				Principal: &fabcore.Principal{
-					ID:   azto.Ptr(entityID),
+					ID:   new(entityID),
 					Type: azto.Ptr(fabcore.PrincipalTypeGroup),
 				},
 			},

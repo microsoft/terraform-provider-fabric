@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Eventhouse Folder ID.
 - `id` (String) The Eventhouse ID.
 - `properties` (Attributes) The Eventhouse properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Eventhouse.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

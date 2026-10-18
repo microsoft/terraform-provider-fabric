@@ -1,5 +1,5 @@
-// // Copyright (c) Microsoft Corporation
-// // SPDX-License-Identifier: MPL-2.0
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
 
 package eventstreamsourceconnection_test
 
@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
@@ -40,15 +39,13 @@ func fakeGetEventstreamSourceConnection(
 
 func NewRandomEventstreamSourceConnection() eventstream.TopologyClientGetEventstreamSourceConnectionResponse {
 	return eventstream.TopologyClientGetEventstreamSourceConnectionResponse{
-		SourceConnectionResponse: eventstream.SourceConnectionResponse{
-			EventHubName:            to.Ptr(testhelp.RandomName()),
-			FullyQualifiedNamespace: to.Ptr(testhelp.RandomName()),
-			AccessKeys: &eventstream.AccessKeys{
-				PrimaryConnectionString:   to.Ptr(testhelp.RandomName()),
-				SecondaryConnectionString: to.Ptr(testhelp.RandomName()),
-				PrimaryKey:                to.Ptr(testhelp.RandomName()),
-				SecondaryKey:              to.Ptr(testhelp.RandomName()),
-			},
+		EventHubName:            new(testhelp.RandomName()),
+		FullyQualifiedNamespace: new(testhelp.RandomName()),
+		AccessKeys: &eventstream.AccessKeys{
+			PrimaryConnectionString:   new(testhelp.RandomName()),
+			SecondaryConnectionString: new(testhelp.RandomName()),
+			PrimaryKey:                new(testhelp.RandomName()),
+			SecondaryKey:              new(testhelp.RandomName()),
 		},
 	}
 }

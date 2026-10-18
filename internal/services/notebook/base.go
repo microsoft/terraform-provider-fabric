@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package notebook
@@ -28,13 +28,28 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type:  "ipynb",
-		API:   "ipynb",
-		Paths: []string{"notebook-content.ipynb"},
+		Type: "ipynb",
+		API:  "ipynb",
+		Paths: []string{
+			"*.ipynb",
+		},
 	},
 	{
-		Type:  "py",
-		API:   "",
-		Paths: []string{"notebook-content.py"},
+		Type: "py",
+		API:  "",
+		Paths: []string{
+			"notebook-content.py",
+		},
+	},
+	{
+		Type: fabricitem.DefinitionFormatDefault,
+		API:  "",
+		Paths: []string{
+			"*.ipynb",
+			"notebook-content.py",
+			"notebook-content.sql",
+			"notebook-content.scala",
+			"notebook-content.r",
+		},
 	},
 }

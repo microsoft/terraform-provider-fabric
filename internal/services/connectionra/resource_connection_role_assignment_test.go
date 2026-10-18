@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connectionra_test
@@ -172,10 +172,10 @@ func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.DeleteConnectionRoleAssignment = fakeDeleteConnectionRoleAssignment()
 	fakes.FakeServer.ServerFactory.Core.ConnectionsServer.UpdateConnectionRoleAssignment = fakeStatefulUpdateConnectionRoleAssignment(entityUpdate, state)
 
-	entityID := *entity.Principal.ID
-	entityType := (string)(*entity.Principal.Type)
-	role := (string)(*entity.Role)
-	updatedRole := (string)(*entityUpdate.Role)
+	entityID := *entity.Principal.GetPrincipal().ID
+	entityType := string(*entity.Principal.GetPrincipal().Type)
+	role := string(*entity.Role)
+	updatedRole := string(*entityUpdate.Role)
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// Create and Read

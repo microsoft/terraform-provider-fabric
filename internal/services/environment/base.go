@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package environment
@@ -17,6 +17,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Environments",
 	Types:          "environments",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

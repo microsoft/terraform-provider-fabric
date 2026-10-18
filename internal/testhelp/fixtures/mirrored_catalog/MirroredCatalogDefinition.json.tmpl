@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/mirroredCatalog/definition/mirroredCatalogDefinition/1.0.0/schema.json",
+  "properties": {
+    "source": {
+      "type": "DremioIcebergCatalog",
+      "typeProperties": {
+        "connectionId": "{{ .CONNECTION_ID }}",
+        "scope": ["Accounting", "US"]
+      }
+    },
+    "mountedTables": [
+      {
+        "source": {
+          "typeProperties": {
+            "fullyQualifiedScope": ["Accounting", "US", "Taxes"],
+            "tableName": "TaxInfo"
+          }
+        }
+      },
+      {
+        "source": {
+          "typeProperties": {
+            "fullyQualifiedScope": ["Accounting", "US", "Receivable"],
+            "tableName": "Invoices"
+          }
+        }
+      }
+    ]
+  }
+}

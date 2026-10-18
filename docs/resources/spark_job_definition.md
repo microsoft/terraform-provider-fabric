@@ -62,7 +62,7 @@ resource "fabric_spark_job_definition" "example_custom_delimiter" {
   definition = {
     "SparkJobDefinitionV1.json" = {
       source           = "${local.path}/SparkJobDefinitionV1.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "{{}}"
       tokens = {
         "DefaultLakehouseID"     = "11111111-1111-1111-1111-111111111111"
         "AdditionalLakehouseIDs" = "\"22222222-2222-2222-2222-222222222222\",\"33333333-3333-3333-3333-333333333333\""
@@ -108,11 +108,12 @@ resource "fabric_spark_job_definition" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). Accepted path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Spark Job Definition definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/spark-job-definition). Accepted path keys: **SparkJobDefinitionV1** format: `SparkJobDefinitionV1.json` **SparkJobDefinitionV2** format: `Libs/*.py`, `Libs/*.r`, `Main/*.py`, `Main/*.r`, `SparkJobDefinitionV1.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Folder ID.
-- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`
+- `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`, `SparkJobDefinitionV2`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

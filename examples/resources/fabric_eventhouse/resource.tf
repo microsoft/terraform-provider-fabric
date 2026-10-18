@@ -43,7 +43,7 @@ resource "fabric_eventhouse" "example_custom_delimiter" {
   definition = {
     "EventhouseProperties.json" = {
       source           = "${local.path}/EventhouseProperties.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Item Job Schedulers data-source allows you to retrieve a list of Fabric Item Job Schedulers https://learn.microsoft.com/fabric/fundamentals/job-scheduler.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_item_job_schedulers (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Item Job Schedulers data-source allows you to retrieve a list of Fabric [Item Job Schedulers](https://learn.microsoft.com/fabric/fundamentals/job-scheduler).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -58,7 +55,7 @@ Optional:
 Required:
 
 - `item_id` (String) The item ID.
-- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; lakehouse: {RefreshMaterializedLakeViews}.
+- `job_type` (String) The job type. Allowed job types per item type: dataflow: {ApplyChanges, Execute}; datapipeline: {Execute}; lakehouse: {RefreshMaterializedLakeViews}.
 - `workspace_id` (String) The Workspace ID.
 
 Read-Only:
@@ -77,6 +74,7 @@ Read-Only:
 
 - `end_date_time` (String) The end time for this schedule. The end time must be later than the start time. It has to be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
 - `interval` (Number) The time interval in minutes. A number between 1 and 5270400 (10 years).
+- `local_time_zone_id` (String) The time zone identifier in which the schedule times are interpreted. Must be a Windows time zone identifier, for example `Central Standard Time`, `UTC` or `W. Europe Standard Time`. See [Default Time Zones](https://learn.microsoft.com/windows-hardware/manufacture/desktop/default-time-zones) for the full list.
 - `occurrence` (Attributes) A date for triggering the job. (see [below for nested schema](#nestedatt--values--configuration--occurrence))
 - `recurrence` (Number) Specifies the monthly job repeat interval. For example, when set to 1 the job is triggered every month.
 - `start_date_time` (String) The start time for this schedule. If the start time is in the past, it will trigger a job instantly. The time is in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.

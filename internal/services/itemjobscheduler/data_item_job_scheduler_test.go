@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package itemjobscheduler_test
@@ -108,10 +108,11 @@ func TestUnit_ItemJobSchedulerDataSource(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "enabled", strconv.FormatBool(*entity.Enabled)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", entity.CreatedDateTime.Format(time.RFC3339)),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.ID),
-				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.Type)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", *entity.Owner.GetPrincipal().ID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", string(*entity.Owner.GetPrincipal().Type)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.start_date_time", entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.local_time_zone_id", *entity.Configuration.GetScheduleConfig().LocalTimeZoneID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", string(*entity.Configuration.GetScheduleConfig().Type)),
 			),
 		},
@@ -158,6 +159,7 @@ func TestAcc_ItemJobSchedulerDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.type", entity["configurationType"].(string)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "configuration.local_time_zone_id", entity["configurationLocalTimeZoneId"].(string)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "created_date_time", createdDateTime.Format(time.RFC3339)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.type", entity["ownerType"].(string)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "owner.id", entity["ownerId"].(string)),

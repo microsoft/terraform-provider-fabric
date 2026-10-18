@@ -4,17 +4,14 @@ page_title: "fabric_ml_model Resource - terraform-provider-fabric"
 subcategory: ""
 description: |-
   The ML Model resource allows you to manage a Fabric ML Model https://learn.microsoft.com/fabric/data-science/machine-learning-model.
-  -> This resource does not support Service Principal. Please use a User context authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  -> This resource supports Service Principal authentication.
 ---
 
 # fabric_ml_model (Resource)
 
 The ML Model resource allows you to manage a Fabric [ML Model](https://learn.microsoft.com/fabric/data-science/machine-learning-model).
 
--> This resource does not support Service Principal. Please use a User context authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This resource supports Service Principal authentication.
 
 ## Example Usage
 
@@ -37,6 +34,7 @@ resource "fabric_ml_model" "example" {
 
 - `description` (String) The ML Model description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

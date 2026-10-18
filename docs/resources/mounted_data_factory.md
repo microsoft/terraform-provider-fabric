@@ -57,7 +57,7 @@ resource "fabric_mounted_data_factory" "example_custom_delimiter" {
   definition = {
     "mountedDataFactory-content.json" = {
       source           = "${local.path}/mountedDataFactory-content.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "SUBSCRIPTION_ID"     = "00000000-0000-0000-0000-000000000000"
         "RESOURCE_GROUP_NAME" = "MyResourceGroupName"
@@ -109,6 +109,7 @@ resource "fabric_mounted_data_factory" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mounted Data Factory description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

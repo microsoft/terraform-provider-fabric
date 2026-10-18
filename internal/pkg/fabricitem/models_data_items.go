@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -25,7 +25,11 @@ func (to *dataSourceFabricItemsModel) setValues(ctx context.Context, from []fabc
 
 	for _, entity := range from {
 		var entityModel fabricItemModel
-		entityModel.set(entity)
+
+		if diags := entityModel.set(ctx, entity); diags.HasError() {
+			return diags
+		}
+
 		slice = append(slice, &entityModel)
 	}
 

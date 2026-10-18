@@ -69,6 +69,36 @@ function Import-ModuleIfNotImported {
   }
 }
 
+function Set-ExternalDataShare {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ItemId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$RecipientUserPrincipalName
+  )
+
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares"
+  $result = $results.Response.value | Where-Object { $_.recipient.userPrincipalName -eq $RecipientUserPrincipalName } | Select-Object -First 1
+  if (!$result) {
+    Write-Log -Message "Creating External Data Share for Lakehouse: $ItemId" -Level 'WARN'
+    $TABLES_PATH = "Tables"
+    $payload = @{
+      paths     = @(
+        $TABLES_PATH + "/" + $wellKnown['Lakehouse'].tableName
+      )
+      recipient = @{
+        userPrincipalName = $RecipientUserPrincipalName
+      }
+    }
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/items/$ItemId/externalDataShares" -Payload $payload).Response
+  }
+  return $result
+}
+
 function Invoke-FabricRest {
   param (
     [Parameter(Mandatory = $false)]
@@ -207,11 +237,20 @@ function Set-FabricItem {
   )
 
   switch ($Type) {
+    'AnomalyDetector' {
+      $itemEndpoint = 'anomalyDetectors'
+    }
     'ApacheAirflowJob' {
       $itemEndpoint = 'apacheAirflowJobs'
     }
     'CopyJob' {
       $itemEndpoint = 'copyJobs'
+    }
+    'CosmosDB' {
+      $itemEndpoint = 'cosmosDbDatabases'
+    }
+    'DataAgent' {
+      $itemEndpoint = 'dataAgents'
     }
     'Dataflow' {
       $itemEndpoint = 'dataflows'
@@ -221,6 +260,9 @@ function Set-FabricItem {
     }
     'DigitalTwinBuilder' {
       $itemEndpoint = 'digitalTwinBuilders'
+    }
+    'DigitalTwinBuilderFlow' {
+      $itemEndpoint = 'digitalTwinBuilderFlows'
     }
     'Environment' {
       $itemEndpoint = 'environments'
@@ -246,6 +288,9 @@ function Set-FabricItem {
     'Lakehouse' {
       $itemEndpoint = 'lakehouses'
     }
+    'Map' {
+      $itemEndpoint = 'maps'
+    }
     'MirroredDatabase' {
       $itemEndpoint = 'mirroredDatabases'
     }
@@ -260,6 +305,15 @@ function Set-FabricItem {
     }
     'Notebook' {
       $itemEndpoint = 'notebooks'
+    }
+    'Ontology' {
+      $itemEndpoint = 'ontologies'
+    }
+    'OperationsAgent' {
+      $itemEndpoint = 'operationsAgents'
+    }
+    'PaginatedReport' {
+      $itemEndpoint = 'paginatedReports'
     }
     'Reflex' {
       $itemEndpoint = 'reflexes'
@@ -294,7 +348,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -392,6 +446,15 @@ function Set-DeploymentPipeline {
   Write-Log -Message "Deployment Pipeline - Name: $($result.displayName) / ID: $($result.id)"
 
   return $result
+}
+
+function Get-TenantSettings {
+  param(
+    [Parameter(Mandatory = $false)]
+    [string]$TenantSettingName = "DiscoverDatasetsSettingsPromoted"
+  )
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint 'admin/tenantSettings'
+  return $results.Response.value | Where-Object { $_.settingName -eq $TenantSettingName }
 }
 
 function Set-DeploymentPipelineRoleAssignment {
@@ -572,6 +635,34 @@ function Set-FabricWorkspaceRoleAssignment {
       role      = 'Admin'
     }
     $result = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/roleAssignments" -Payload $payload).Response
+  }
+}
+
+function Set-OutboundNetworkPolicy {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId
+  )
+
+  $result = Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy"
+  if ($result.Response.outbound.publicAccessRules.defaultAction -eq 'Allow') {
+    Write-Log -Message "Setting Outbound Network Policy to Deny for Workspace ID: $WorkspaceId" -Level 'WARN'
+    $payload = @{
+      outbound = @{
+        publicAccessRules = @{
+          defaultAction = 'Deny'
+        }
+      }
+    }
+
+    $outboundNetworkTenantSettings = Get-TenantSettings -TenantSettingName 'WorkspaceBlockOutboundAccess'
+
+    if ($outboundNetworkTenantSettings.enabled -eq $false) {
+      Write-Log -Message "Configure workspace-level outbound network rules tenant setting is disabled. Please enable the 'Configure workspace-level outbound network rules' tenant setting manually in the Fabric Admin Portal." -Level 'WARN'
+    }
+    else {
+      $result = (Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$WorkspaceId/networking/communicationPolicy" -Payload $payload).Response
+    }
   }
 }
 
@@ -1032,7 +1123,7 @@ function Set-ItemJobScheduler {
 
 
 # Define an array of modules to install
-$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory')
+$modules = @('Az.Accounts', 'Az.Resources', 'Az.Storage', 'Az.Fabric', 'Az.KeyVault', 'pwsh-dotenv', 'ADOPS', 'Az.Network', 'Az.DataFactory', 'Az.Sql', 'SqlServer')
 
 # Loop through each module and install if not installed
 foreach ($module in $modules) {
@@ -1101,30 +1192,40 @@ $wellKnown['Capacity'] = @{
 }
 
 $itemNaming = @{
+  'AnomalyDetector'                 = 'ad'
   'ApacheAirflowJob'                = 'aaj'
   'AzureDataFactory'                = 'adf'
+  'AzureSqlServer'                  = 'sql'
   'CopyJob'                         = 'cj'
+  'CosmosDB'                        = 'cdb'
   'Dashboard'                       = 'dash'
+  'DataAgent'                       = 'da'
   'Dataflow'                        = 'df'
   'Datamart'                        = 'dm'
   'DataPipeline'                    = 'dp'
   'DeploymentPipeline'              = 'deployp'
   'DigitalTwinBuilder'              = 'dtb'
+  'DigitalTwinBuilderFlow'          = 'dtbf'
   'Environment'                     = 'env'
   'Eventhouse'                      = 'eh'
   'Eventstream'                     = 'es'
   'Folder'                          = 'fld'
+  'FolderRS1'                       = 'fldrs1'
+  'FolderRS2'                       = 'fldrs2'
   'GraphQLApi'                      = 'gql'
   'KQLDashboard'                    = 'kqldash'
   'KQLDatabase'                     = 'kqldb'
   'KQLQueryset'                     = 'kqlqs'
   'Lakehouse'                       = 'lh'
+  'Map'                             = 'map'
   'MirroredDatabase'                = 'mdb'
   'MirroredWarehouse'               = 'mwh'
   'MLExperiment'                    = 'mle'
   'MLModel'                         = 'mlm'
   'MountedDataFactory'              = 'mdf'
   'Notebook'                        = 'nb'
+  'Ontology'                        = 'ont'
+  'OperationsAgent'                 = 'oa'
   'Shortcut'                        = 'srt'
   'PaginatedReport'                 = 'prpt'
   'Reflex'                          = 'rx'
@@ -1136,8 +1237,11 @@ $itemNaming = @{
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
+  'WorkspaceOAP'                    = 'wsoap'
+  'WorkspaceIAP'                    = 'wsiap'
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
+  'WorkspaceCMK'                    = 'wscmk'
   'DomainParent'                    = 'parent'
   'DomainChild'                     = 'child'
   'EntraServicePrincipal'           = 'sp'
@@ -1151,6 +1255,7 @@ $itemNaming = @{
   'ManagedPrivateEndpoint'          = 'mpe'
   'StorageAccount'                  = 'st'
   'ResourceGroup'                   = 'rg'
+  'KeyVault'                        = 'kv'
   'FabricCapacity'                  = 'fc'
   'ShareableCloudConnection'        = 'scc'
   'VirtualNetworkGatewayConnection' = 'vngc'
@@ -1173,6 +1278,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_SPN_NAME',
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
   'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
+  'FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1201,6 +1307,40 @@ $wellKnown['WorkspaceMPE'] = @{
   description = $workspace.description
 }
 # Assign SPN to WorkspaceMPE if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create WorkspaceOAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceOAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceOAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceOAP if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+# Set Outbound Network Policy to Deny
+Set-OutboundNetworkPolicy -WorkspaceId $workspace.id
+
+# Create WorkspaceIAP if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceIAP'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceIAP to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceIAP - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceIAP'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+# Assign SPN to WorkspaceIAP if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Create WorkspaceRS if not exists
@@ -1237,8 +1377,26 @@ $wellKnown['WorkspaceDS'] = @{
 # Assign SPN to WorkspaceDS if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
+# Create WorkspaceCMK if not exists
+# Kept empty on purpose: CMK cannot be enabled on a workspace that contains items unsupported by customer-managed keys.
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceCMK'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceCMK to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceCMK - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceCMK'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+# Assign SPN to WorkspaceCMK if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
 # Define an array of item types to create
-$itemTypes = @('ApacheAirflowJob', 'CopyJob', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'MLExperiment', 'MLModel', 'Notebook', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1246,6 +1404,31 @@ foreach ($itemType in $itemTypes) {
   $displayNameTemp = "${displayName}_$($itemNaming[$itemType])"
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType
   $wellKnown[$itemType] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+# Create DigitalTwinBuilderFlow if not exists
+
+if (-not $wellKnown.ContainsKey('DigitalTwinBuilder') -or
+  -not $wellKnown['DigitalTwinBuilder'] -or
+  -not $wellKnown['DigitalTwinBuilder'].id) {
+  Write-Log -Message "DigitalTwinBuilder was not created successfully. Cannot create DigitalTwinBuilderFlow without a valid DigitalTwinBuilder id." -Level 'ERROR'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['DigitalTwinBuilderFlow'])"
+  $creationPayload = @{
+    digitalTwinBuilderItemReference = @{
+      workspaceID   = $wellKnown['WorkspaceDS'].id
+      referenceType = 'ById'
+      itemID        = $wellKnown['DigitalTwinBuilder'].id
+    }
+  }
+
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
+  $wellKnown['DigitalTwinBuilderFlow'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description
@@ -1358,6 +1541,24 @@ $wellKnown['Report'] = @{
   description = $report.description
 }
 
+# Create Paginated Report if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['PaginatedReport'])"
+$definition = @{
+  parts = @(
+    @{
+      path        = "${displayNameTemp}.rdl"
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/paginated_report/report.rdl'
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$paginatedReport = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'PaginatedReport' -Definition $definition
+$wellKnown['PaginatedReport'] = @{
+  id          = $paginatedReport.id
+  displayName = $paginatedReport.displayName
+  description = $paginatedReport.description
+}
+
 # Create Deployment Pipeline if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DeploymentPipeline'])"
 $deploymentPipeline = Set-DeploymentPipeline -DisplayName $displayNameTemp
@@ -1369,6 +1570,21 @@ $wellKnown['DeploymentPipeline'] = @{
 }
 
 Set-DeploymentPipelineRoleAssignment -DeploymentPipelineID $deploymentPipeline.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Admin'
+
+$tenantSettings = Get-TenantSettings
+
+$wellKnown['TenantSettings'] = @{
+  settingName              = $tenantSettings.settingName
+  title                    = $tenantSettings.title
+  enabled                  = $tenantSettings.enabled
+  canSpecifySecurityGroups = $tenantSettings.canSpecifySecurityGroups
+  tenantSettingGroup       = $tenantSettings.tenantSettingGroup
+  delegateToCapacity       = $tenantSettings.delegateToCapacity
+  delegateToDomain         = $tenantSettings.delegateToDomain
+  delegateToWorkspace      = $tenantSettings.delegateToWorkspace
+  securityGroupName        = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_NAME
+  securityGroupId          = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SPNS_SG_ID
+}
 
 # Create Eventstream if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['Eventstream'])"
@@ -1395,6 +1611,8 @@ $wellKnown['Eventstream'] = @{
 $eventstreamTopology = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/topology").Response
 $eventstreamSource = $eventstreamTopology.sources | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
 $eventstreamSourceId = $eventstreamSource.id
+$eventstreamDestination = $eventstreamTopology.destinations | Where-Object { $_.type -eq 'CustomEndpoint' } | Select-Object -First 1
+$eventstreamDestinationId = $eventstreamDestination.id
 
 $eventstreamConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/sources/$($eventstreamSourceId)/connection").Response
 $wellKnown['Eventstream']['sourceConnection'] = @{
@@ -1403,7 +1621,12 @@ $wellKnown['Eventstream']['sourceConnection'] = @{
   fullyQualifiedNamespace = $eventstreamConnection.fullyQualifiedNamespace
 }
 
-
+$eventstreamDestinationConnection = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/eventstreams/$($eventstream.id)/destinations/$($eventstreamDestinationId)/connection").Response
+$wellKnown['Eventstream']['destinationConnection'] = @{
+  destinationId           = $eventstreamDestinationId
+  eventHubName            = $eventstreamDestinationConnection.eventHubName
+  fullyQualifiedNamespace = $eventstreamDestinationConnection.fullyQualifiedNamespace
+}
 
 # Create Parent Domain if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['DomainParent'])"
@@ -1462,6 +1685,18 @@ $wellKnown['Datamart'] = @{
   description = if ($result) { $result.description } else { '' }
 }
 
+if (-not $wellKnown.ContainsKey('Lakehouse') -or -not $wellKnown['Lakehouse'].id) {
+  Write-Log -Message "Lakehouse not found or missing 'id'. Cannot create External Data Share." -Level 'WARN'
+}
+else {
+  $externalDataShare = Set-ExternalDataShare -WorkspaceId $wellKnown['WorkspaceDS'].id -ItemId $wellKnown['Lakehouse'].id -RecipientUserPrincipalName $azContext.Account.Id
+  $wellKnown['ExternalDataShare'] = @{
+    id          = $externalDataShare.id
+    workspaceId = $externalDataShare.workspaceId
+    itemId      = $externalDataShare.itemId
+  }
+}
+
 # Create Resource Group if not exists
 $displayNameTemp = "$($itemNaming['ResourceGroup'])-${displayName}"
 $resourceGroup = Get-AzResourceGroup -Name $displayNameTemp
@@ -1480,6 +1715,96 @@ $wellKnown['ResourceGroup'] = @{
 $wellKnown['Azure'] = @{
   subscriptionId = $Env:FABRIC_TESTACC_WELLKNOWN_AZURE_SUBSCRIPTION_ID
   location       = $wellKnown['ResourceGroup'].location
+}
+
+# Create Key Vault if not exists
+# Fabric requires soft-delete and purge protection to be enabled on the vault holding the customer-managed key.
+$displayNameTemp = (("$($itemNaming['KeyVault'])-${displayName}").ToLower() -replace '[^a-z0-9-]', '')
+if ($displayNameTemp.Length -gt 24) {
+  $displayNameTemp = $displayNameTemp.Substring(0, 24).TrimEnd('-')
+}
+$keyVault = Get-AzKeyVault -ResourceGroupName $wellKnown['ResourceGroup'].name -VaultName $displayNameTemp -ErrorAction SilentlyContinue
+if (!$keyVault) {
+  Write-Log -Message "Creating Key Vault: $displayNameTemp" -Level 'WARN'
+  $keyVaultParams = @{
+    ResourceGroupName         = $wellKnown['ResourceGroup'].name
+    VaultName                 = $displayNameTemp
+    Location                  = $wellKnown['ResourceGroup'].location
+    Sku                       = 'Standard'
+    EnablePurgeProtection     = $true
+    SoftDeleteRetentionInDays = 7
+  }
+  # Az.KeyVault 6.x makes RBAC authorization the default and replaced the switch with -DisableRbacAuthorization
+  if ((Get-Command New-AzKeyVault).Parameters.ContainsKey('EnableRbacAuthorization')) {
+    $keyVaultParams['EnableRbacAuthorization'] = $true
+  }
+  $keyVault = New-AzKeyVault @keyVaultParams
+}
+Write-Log -Message "Key Vault - Name: $($keyVault.VaultName) / URI: $($keyVault.VaultUri)"
+
+# Grant the signed-in principal permission to manage keys in the RBAC-enabled vault
+$currentPrincipalId = (Get-AzADUser -SignedIn -ErrorAction SilentlyContinue).Id
+if (!$currentPrincipalId) {
+  $currentPrincipalId = (Get-AzADServicePrincipal -ApplicationId $azContext.Account.Id -ErrorAction SilentlyContinue).Id
+}
+if ($currentPrincipalId) {
+  if (!(Get-AzRoleAssignment -ObjectId $currentPrincipalId -RoleDefinitionName 'Key Vault Crypto Officer' -Scope $keyVault.ResourceId -ErrorAction SilentlyContinue)) {
+    Write-Log -Message 'Assigning Key Vault Crypto Officer to the current principal' -Level 'WARN'
+    New-AzRoleAssignment -ObjectId $currentPrincipalId -RoleDefinitionName 'Key Vault Crypto Officer' -Scope $keyVault.ResourceId | Out-Null
+  }
+}
+else {
+  Write-Log -Message 'Unable to resolve the signed-in principal object ID. Key Vault key creation may fail.' -Level 'WARN'
+}
+
+# Grant the 'Fabric Platform CMK' app access to wrap/unwrap the workspace data encryption key.
+# The service principal for this Microsoft multitenant app must be created by a Cloud Application Administrator:
+#   New-AzADServicePrincipal -ApplicationId 61d6811f-7544-4e75-a1e6-1c59c0383311
+$cmkAppId = '61d6811f-7544-4e75-a1e6-1c59c0383311'
+$cmkSp = Get-AzADServicePrincipal -ApplicationId $cmkAppId -ErrorAction SilentlyContinue
+if (!$cmkSp) {
+  Write-Log -Message "!!! The 'Fabric Platform CMK' service principal (AppId: $cmkAppId) does not exist in this tenant. A Cloud Application Administrator must create it, otherwise workspace encryption acceptance tests will fail with encryptionStatus 'Failed'. !!!" -Level 'ERROR' -Stop $false
+}
+else {
+  if (!(Get-AzRoleAssignment -ObjectId $cmkSp.Id -RoleDefinitionName 'Key Vault Crypto Service Encryption User' -Scope $keyVault.ResourceId -ErrorAction SilentlyContinue)) {
+    Write-Log -Message 'Assigning Key Vault Crypto Service Encryption User to the Fabric Platform CMK app' -Level 'WARN'
+    New-AzRoleAssignment -ObjectId $cmkSp.Id -RoleDefinitionName 'Key Vault Crypto Service Encryption User' -Scope $keyVault.ResourceId | Out-Null
+  }
+}
+
+# Create the customer-managed keys.
+# Two keys are required: the second one is the rotation target for the fabric_workspace_encryption update test.
+# RSA 3072 is used because 4096-bit keys are not supported for SQL Database in Fabric.
+$keyIdentifiers = @{}
+foreach ($keyName in @('cmk-key-01', 'cmk-key-02')) {
+  $key = Get-AzKeyVaultKey -VaultName $keyVault.VaultName -Name $keyName -ErrorAction SilentlyContinue
+  if (!$key) {
+    Write-Log -Message "Creating Key Vault key: $keyName" -Level 'WARN'
+    # Retry to absorb Azure RBAC propagation delay on a freshly created vault
+    foreach ($attempt in 1..10) {
+      $key = Add-AzKeyVaultKey -VaultName $keyVault.VaultName -Name $keyName -Destination 'Software' -KeyType 'RSA' -Size 3072 -ErrorAction SilentlyContinue
+      if ($key) {
+        break
+      }
+      Write-Log -Message "Waiting for Key Vault permissions to propagate (attempt $attempt/10)" -Level 'DEBUG'
+      Start-Sleep -Seconds 15
+    }
+  }
+  if (!$key) {
+    Write-Log -Message "Unable to create Key Vault key: $keyName" -Level 'ERROR'
+  }
+  # Fabric only accepts versionless key identifiers
+  $keyIdentifiers[$keyName] = "$($keyVault.VaultUri)keys/$keyName/"
+}
+Write-Log -Message "Key Vault Key - Identifier: $($keyIdentifiers['cmk-key-01'])"
+
+$wellKnown['KeyVault'] = @{
+  id                = $keyVault.ResourceId
+  name              = $keyVault.VaultName
+  uri               = $keyVault.VaultUri
+  resourceGroupName = $wellKnown['ResourceGroup'].name
+  keyIdentifier     = $keyIdentifiers['cmk-key-01']
+  keyIdentifierAlt  = $keyIdentifiers['cmk-key-02']
 }
 
 # Create Storage Account if not exists
@@ -1727,6 +2052,16 @@ $wellKnown['AzureDataFactory'] = @{
   subscriptionId    = $wellKnown['Azure'].subscriptionId
 }
 
+# Set Inbound Azure Resource Rules on WorkspaceIAP
+# Rules stay inert until the workspace inbound public access default action is set to Deny
+$inboundAzureResourceRule = @{
+  displayName = "$($itemNaming['AzureDataFactory']) - $($wellKnown['AzureDataFactory'].name)"
+  resourceId  = "/subscriptions/$($wellKnown['AzureDataFactory'].subscriptionId)/resourceGroups/$($wellKnown['AzureDataFactory'].resourceGroupName)/providers/Microsoft.DataFactory/factories/$($wellKnown['AzureDataFactory'].name)"
+}
+Write-Log -Message "Setting Inbound Azure Resource Rules for WorkspaceIAP ID: $($wellKnown['WorkspaceIAP'].id)" -Level 'WARN'
+Invoke-FabricRest -Method 'PUT' -Endpoint "workspaces/$($wellKnown['WorkspaceIAP'].id)/networking/communicationPolicy/inbound/azureResources" -Payload @{ rules = @($inboundAzureResourceRule) } | Out-Null
+$wellKnown['WorkspaceIAP'].inboundAzureResourceRule = $inboundAzureResourceRule
+
 # Create the Mounted Data Factory if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['MountedDataFactory'])"
 $definition = @{
@@ -1743,6 +2078,31 @@ $definition = @{
   )
 }
 
+function Set-Tags {
+  $tagDisplayName = "Test Tag"
+  $results = Invoke-FabricRest -Method 'GET' -Endpoint "admin/tags"
+  $result = $results.Response.value | Where-Object { $_.displayName -eq $tagDisplayName -and $_.scope.type -eq 'Tenant' } | Select-Object -First 1
+  if (-not $result) {
+    $payload = @{
+      createTagsRequest = @(
+        @{ displayName = $tagDisplayName }
+      )
+    }
+    Write-Log -Message "Creating Tag: $tagDisplayName" -Level 'WARN'
+
+    $result = (Invoke-FabricRest -Method 'POST' -Endpoint "admin/tags/bulkCreateTags" -Payload $payload).Response.tags[0]
+  }
+  Write-Log -Message "Tag - Name: $($result.displayName) / ID: $($result.id)"
+  return $result
+}
+
+$tags = Set-Tags
+$wellKnown['Tags'] = @{
+  id          = $tags.id
+  displayName = $tags.displayName
+  scopeType   = $tags.scope.type
+}
+
 $mountedDataFactory = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'MountedDataFactory' -Definition $definition
 
 $wellKnown['MountedDataFactory'] = @{
@@ -1750,6 +2110,32 @@ $wellKnown['MountedDataFactory'] = @{
   displayName = $mountedDataFactory.displayName
   description = $mountedDataFactory.description
 }
+
+# Ensure only the expected tag is applied to Mounted Data Factory
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+
+# Unapply all existing tags
+if ($itemDetails.tags -and $itemDetails.tags.Count -gt 0) {
+  $existingTagIds = $itemDetails.tags | ForEach-Object { $_.id }
+  $unapplyPayload = @{ tags = @($existingTagIds) }
+  Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/unapplyTags" -Payload $unapplyPayload | Out-Null
+  Write-Log -Message "ItemTags - Unapplied $($existingTagIds.Count) existing tag(s) from Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+}
+
+# Apply the desired tag
+$applyTagsPayload = @{ tags = @($wellKnown['Tags'].id) }
+Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)/applyTags" -Payload $applyTagsPayload | Out-Null
+Write-Log -Message "ItemTags - Applied tag '$($wellKnown['Tags'].displayName)' to Mounted Data Factory '$($wellKnown['MountedDataFactory'].id)'"
+
+# Read back to confirm
+$itemDetails = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$($wellKnown['WorkspaceDS'].id)/items/$($wellKnown['MountedDataFactory'].id)").Response
+$actualTag = $itemDetails.tags | Select-Object -First 1
+if (-not $actualTag -or $actualTag.id -ne $wellKnown['Tags'].id) {
+  Write-Log -Message "ItemTags - Expected tag '$($wellKnown['Tags'].id)' not found on Mounted Data Factory after apply." -Level 'ERROR'
+}
+
+$wellKnown['MountedDataFactory']['tagId'] = $actualTag.id
+$wellKnown['MountedDataFactory']['tagName'] = $actualTag.displayName
 
 $displayNameTemp = "${displayName}_$($itemNaming['Shortcut'])"
 if ($IS_LAKEHOUSE_POPULATED -eq $false) {
@@ -1815,6 +2201,27 @@ $wellKnown['Subfolder'] = @{
   parentFolderId = $subFolder.parentFolderId
 }
 
+# Create Folders in WorkspaceRS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS1'])"
+$folderRS1 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS1'] = @{
+  id          = $folderRS1.id
+  displayName = $folderRS1.displayName
+}
+
+$displayNameTemp = "${displayName}_$($itemNaming['FolderRS2'])"
+$folderRS2 = Set-FabricFolder `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -DisplayName $displayNameTemp
+
+$wellKnown['FolderRS2'] = @{
+  id          = $folderRS2.id
+  displayName = $folderRS2.displayName
+}
+
 # Create Warehouse Snapshot if not exists
 if (-not $wellKnown.ContainsKey('Warehouse') -or -not $wellKnown['Warehouse'] -or -not $wellKnown['Warehouse'].id) {
   Write-Log -Message "Warehouse not found or missing 'id'. Cannot create Warehouse Snapshot." -Level 'WARN'
@@ -1859,14 +2266,15 @@ else {
     -Payload $itemJobSchedulerPayload
 
   $wellKnown['ItemJobScheduler'] = @{
-    id                = $itemJobScheduler.id
-    ownerType         = $itemJobScheduler.owner.type
-    ownerId           = $itemJobScheduler.owner.id
-    itemId            = $wellKnown['Dataflow'].id
-    enabled           = $itemJobScheduler.enabled
-    configurationType = $itemJobScheduler.configuration.type
-    createdDateTime   = $itemJobScheduler.createdDateTime
-    jobType           = $JOB_TYPE
+    id                           = $itemJobScheduler.id
+    ownerType                    = $itemJobScheduler.owner.type
+    ownerId                      = $itemJobScheduler.owner.id
+    itemId                       = $wellKnown['Dataflow'].id
+    enabled                      = $itemJobScheduler.enabled
+    configurationType            = $itemJobScheduler.configuration.type
+    configurationLocalTimeZoneId = $itemJobScheduler.configuration.localTimeZoneId
+    createdDateTime              = $itemJobScheduler.createdDateTime
+    jobType                      = $JOB_TYPE
   }
 }
 

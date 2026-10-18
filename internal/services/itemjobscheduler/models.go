@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package itemjobscheduler
@@ -34,14 +34,15 @@ type baseItemJobSchedulerModel struct {
 }
 
 type configurationModel struct {
-	StartDateTime timetypes.RFC3339                                     `tfsdk:"start_date_time"`
-	EndDateTime   timetypes.RFC3339                                     `tfsdk:"end_date_time"`
-	Type          types.String                                          `tfsdk:"type"`
-	Interval      types.Int32                                           `tfsdk:"interval"`   // Cron
-	Times         supertypes.SetValueOf[types.String]                   `tfsdk:"times"`      // Daily, Weekly and Monthly
-	Weekdays      supertypes.SetValueOf[types.String]                   `tfsdk:"weekdays"`   // Weekly
-	Occurrence    supertypes.SingleNestedObjectValueOf[occurrenceModel] `tfsdk:"occurrence"` // Monthly
-	Recurrence    types.Int32                                           `tfsdk:"recurrence"` // Monthly
+	StartDateTime   timetypes.RFC3339                                     `tfsdk:"start_date_time"`
+	EndDateTime     timetypes.RFC3339                                     `tfsdk:"end_date_time"`
+	LocalTimeZoneID types.String                                          `tfsdk:"local_time_zone_id"`
+	Type            types.String                                          `tfsdk:"type"`
+	Interval        types.Int32                                           `tfsdk:"interval"`   // Cron
+	Times           supertypes.SetValueOf[types.String]                   `tfsdk:"times"`      // Daily, Weekly and Monthly
+	Weekdays        supertypes.SetValueOf[types.String]                   `tfsdk:"weekdays"`   // Weekly
+	Occurrence      supertypes.SingleNestedObjectValueOf[occurrenceModel] `tfsdk:"occurrence"` // Monthly
+	Recurrence      types.Int32                                           `tfsdk:"recurrence"` // Monthly
 }
 
 type occurrenceModel struct {
@@ -65,7 +66,7 @@ func (to *baseItemJobSchedulerModel) set(ctx context.Context, workspaceID, itemI
 	if from.Owner != nil {
 		principalModel := &principalModel{}
 
-		principalModel.set(*from.Owner)
+		principalModel.set(*from.Owner.GetPrincipal())
 
 		if diags := principal.Set(ctx, principalModel); diags.HasError() {
 			return diags
@@ -94,6 +95,7 @@ func (to *configurationModel) set(ctx context.Context, from fabcore.ScheduleConf
 	schConfig := from.GetScheduleConfig()
 	to.StartDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.StartDateTime)
 	to.EndDateTime = timetypes.NewRFC3339TimePointerValue(schConfig.EndDateTime)
+	to.LocalTimeZoneID = types.StringPointerValue(schConfig.LocalTimeZoneID)
 	to.Type = types.StringPointerValue((*string)(schConfig.Type))
 	to.Times = supertypes.NewSetValueOfNull[types.String](ctx)
 	to.Weekdays = supertypes.NewSetValueOfNull[types.String](ctx)
@@ -253,8 +255,9 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneID := "Central Standard Time"
-	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
+
+	localTimeZoneID := configuration.LocalTimeZoneID.ValueString()
+	configurationType := fabcore.ScheduleType(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
 
@@ -337,7 +340,7 @@ func (to *requestCreateJobSchedule) set(ctx context.Context, from resourceJobSch
 			return diags
 		}
 
-		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+		occurrenceType := fabcore.OccurrenceType(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
 
@@ -403,9 +406,9 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 	}
 
 	var reqConfiguration fabcore.ScheduleConfigClassification
-	localTimeZoneID := "Central Standard Time"
 
-	configurationType := (fabcore.ScheduleType)(configuration.Type.ValueString())
+	localTimeZoneID := configuration.LocalTimeZoneID.ValueString()
+	configurationType := fabcore.ScheduleType(configuration.Type.ValueString())
 	startDateTime, startDiags := configuration.StartDateTime.ValueRFC3339Time()
 	endDateTime, endDiags := configuration.EndDateTime.ValueRFC3339Time()
 
@@ -488,7 +491,7 @@ func (to *requestUpdateJobSchedule) set(ctx context.Context, from resourceJobSch
 			return diags
 		}
 
-		occurrenceType := (fabcore.OccurrenceType)(occurrence.OccurrenceType.ValueString())
+		occurrenceType := fabcore.OccurrenceType(occurrence.OccurrenceType.ValueString())
 
 		var occurrenceConfig fabcore.MonthlyOccurrenceClassification
 

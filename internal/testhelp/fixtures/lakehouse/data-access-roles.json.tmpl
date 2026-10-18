@@ -1,0 +1,73 @@
+[
+    {
+        "name": "dimensionrulerename",
+        "kind": "Policy",
+        "decisionRules": [
+          {
+            "effect": "Permit",
+            "permission": [
+              {
+                "attributeName": "Path",
+                "attributeValueIncludedIn": [
+                  "/Tables/dbo/dimension_city",
+                  "/Tables/dbo/dimension_customer",
+                  "/Tables/dbo/dimension_date",
+                  "/Tables/dbo/dimension_employee",
+                  "/Tables/dbo/dimension_stock_item",
+                  "/Tables/bronze"
+                ]
+              },
+              {
+                "attributeName": "Action",
+                "attributeValueIncludedIn": [
+                  "Read"
+                ]
+              }
+            ],
+            "constraints": {}
+          }
+        ],
+        "members": {
+          "fabricItemMembers": [],
+            "microsoftEntraMembers": [
+            {
+              "tenantId": "1e85000e-ee35-4112-bd46-2f00b3d94154",
+              "objectId": "5f3efd37-a6d2-432f-99fa-6adc2848a40a"
+            }
+          ]
+        }
+      },
+      {
+        "name": "DefaultReader",
+        "kind": "Policy",
+        "decisionRules": [
+          {
+            "effect": "Permit",
+            "permission": [
+              {
+                "attributeName": "Action",
+                "attributeValueIncludedIn": [
+                  "Read"
+                ]
+              },
+              {
+                "attributeName": "Path",
+                "attributeValueIncludedIn": [
+                  "*"
+                ]
+              }
+            ]
+          }
+        ],
+        "members": {
+          "fabricItemMembers": [
+            {
+              "itemAccess": [
+                "ReadAll"
+              ],
+              "sourcePath": "00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000"
+            }
+          ]
+        }
+      }
+    ]

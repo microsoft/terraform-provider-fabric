@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package gatewayra
@@ -37,7 +37,7 @@ func (to *baseGatewayRoleAssignmentModel) set(ctx context.Context, gatewayID str
 	if from.Principal != nil {
 		principalModel := &principalModel{}
 
-		principalModel.set(*from.Principal)
+		principalModel.set(*from.Principal.GetPrincipal())
 
 		if diags := principal.Set(ctx, principalModel); diags.HasError() {
 			return diags

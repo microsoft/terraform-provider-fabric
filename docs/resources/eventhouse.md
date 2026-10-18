@@ -61,7 +61,7 @@ resource "fabric_eventhouse" "example_custom_delimiter" {
   definition = {
     "EventhouseProperties.json" = {
       source           = "${local.path}/EventhouseProperties.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }
@@ -125,6 +125,7 @@ Any changes to this configuration will result in recreation of the Eventhouse. (
 - `description` (String) The Eventhouse description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Eventhouse format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

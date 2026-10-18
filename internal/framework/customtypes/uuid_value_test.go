@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package customtypes_test
@@ -217,7 +217,7 @@ func TestUnit_UUIDValueUUID(t *testing.T) {
 			uuidValue, diags := testCase.uuidValue.ValueUUID()
 			expectedUUID, _ := uuid.ParseUUID(testCase.expectedUUID)
 
-			if uuidValue != (string)(expectedUUID) {
+			if uuidValue != string(expectedUUID) {
 				t.Errorf("Unexpected difference in UUID, got: %s, expected: %s", uuidValue, testCase.expectedUUID)
 			}
 

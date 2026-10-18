@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Environment data-source allows you to retrieve details about a Fabric Environment https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_environment (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Environment data-source allows you to retrieve details about a Fabric [Environment](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -56,6 +53,7 @@ data "fabric_environment" "example_by_name" {
 - `description` (String) The Environment description.
 - `folder_id` (String) The Environment Folder ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The KQL Queryset display name.
 - `folder_id` (String) The KQL Queryset Folder ID.
 - `id` (String) The KQL Queryset ID.
+- `tags` (Set of String) A set of tag IDs assigned to the KQL Queryset.
 - `workspace_id` (String) The Workspace ID.

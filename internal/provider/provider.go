@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package provider
@@ -38,25 +38,32 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/anomalydetector"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connectionra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/copyjob"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/cosmosdb"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dashboard"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/dataagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/dataflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datamart"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/datapipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipeline"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/deploymentpipelinera"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilder"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/digitaltwinbuilderflow"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domain"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainra"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/domainwa"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/environment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventhouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstream"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamdestinationconnection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/eventstreamsourceconnection"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/externaldatashare"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/fabricmap"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/folder"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gateway"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/gatewayra"
@@ -68,12 +75,16 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredazuredatabrickscatalog"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredcatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -84,12 +95,22 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkwssettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqldatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tags"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceencryption"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacefwr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceiar"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
@@ -115,10 +136,12 @@ type FabricProvider struct {
 }
 
 func New(version string) pclient.ProviderWithFabricClient {
-	cfg := pconfig.ProviderConfig{}
-	cfg.Auth = &auth.Config{}
-	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg := pconfig.ProviderConfig{
+		Auth: &auth.Config{},
+		ProviderData: &pconfig.ProviderData{
+			Endpoint: pconfig.DefaultFabricEndpointURL,
+		},
+	}
 	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
 	cfg.Version = version
 
@@ -183,7 +206,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 		})
 	}
 
-	perCallPolicies := make([]policy.Policy, 0)
+	perCallPolicies := make([]policy.Policy, 0, 1)
 	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
 	fabricClientOpt.PerCallPolicies = perCallPolicies
 
@@ -436,11 +459,15 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		anomalydetector.NewResourceAnomalyDetector,
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
+		cosmosdb.NewResourceCosmosDB,
+		dataagent.NewResourceDataAgent,
 		dataflow.NewResourceDataflow,
 		datapipeline.NewResourceDataPipeline,
 		digitaltwinbuilder.NewResourceDigitalTwinBuilder,
+		func() resource.Resource { return digitaltwinbuilderflow.NewResourceDigitalTwinBuilderFlow(ctx) },
 		domain.NewResourceDomain,
 		domainra.NewResourceDomainRoleAssignments,
 		domainwa.NewResourceDomainWorkspaceAssignments,
@@ -451,6 +478,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return environment.NewResourceEnvironment(ctx) },
 		func() resource.Resource { return eventhouse.NewResourceEventhouse(ctx) },
 		eventstream.NewResourceEventstream,
+		externaldatashare.NewResourceExternalDataShares,
+		fabricmap.NewResourceMap,
 		folder.NewResourceFolder,
 		gateway.NewResourceGateway,
 		gatewayra.NewResourceGatewayRoleAssignment,
@@ -463,24 +492,39 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource {
 			return mirroredazuredatabrickscatalog.NewResourceMirroredAzureDatabricksCatalog(ctx)
 		},
+		func() resource.Resource { return mirroredcatalog.NewResourceMirroredCatalog(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
+		ontology.NewResourceOntology,
+		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
+		operationsagent.NewResourceOperationsAgent,
 		activator.NewResourceActivator,
+		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		sparkcustompool.NewResourceSparkCustomPool,
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
-		sqldatabase.NewResourceSQLDatabase,
+		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
+		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
+		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
+		workspaceencryption.NewResourceWorkspaceEncryption,
+		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewResourceWorkspaceFirewallRules,
+		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
+		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
+		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewResourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
 		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
@@ -489,6 +533,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		anomalydetector.NewDataSourceAnomalyDetector,
+		anomalydetector.NewDataSourceAnomalyDetectors,
 		apacheairflowjob.NewDataSourceApacheAirflowJob,
 		apacheairflowjob.NewDataSourceApacheAirflowJobs,
 		capacity.NewDataSourceCapacity,
@@ -499,6 +545,10 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		connectionra.NewDataSourceConnectionRoleAssignments,
 		copyjob.NewDataSourceCopyJob,
 		copyjob.NewDataSourceCopyJobs,
+		cosmosdb.NewDataSourceCosmosDB,
+		cosmosdb.NewDataSourceCosmosDBs,
+		dataagent.NewDataSourceDataAgent,
+		dataagent.NewDataSourceDataAgents,
 		dashboard.NewDataSourceDashboards,
 		dataflow.NewDataSourceDataflow,
 		dataflow.NewDataSourceDataflows,
@@ -507,6 +557,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		datamart.NewDataSourceDatamarts,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilder,
 		digitaltwinbuilder.NewDataSourceDigitalTwinBuilders,
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlow(ctx) },
+		func() datasource.DataSource { return digitaltwinbuilderflow.NewDataSourceDigitalTwinBuilderFlows(ctx) },
 		deploymentpipeline.NewDataSourceDeploymentPipeline,
 		deploymentpipeline.NewDataSourceDeploymentPipelines,
 		deploymentpipelinera.NewDataSourceDeploymentPipelineRoleAssignments,
@@ -519,7 +571,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return eventhouse.NewDataSourceEventhouses(ctx) },
 		eventstream.NewDataSourceEventstream,
 		eventstream.NewDataSourceEventstreams,
+		eventstreamdestinationconnection.NewDataSourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewDataSourceEventstreamSourceConnection,
+		externaldatashare.NewDataSourceExternalDataShare,
+		externaldatashare.NewDataSourceExternalDataShares,
+		fabricmap.NewDataSourceMap,
+		fabricmap.NewDataSourceMaps,
 		folder.NewDataSourceFolder,
 		folder.NewDataSourceFolders,
 		gateway.NewDataSourceGateway,
@@ -546,6 +603,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource {
 			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalogs(ctx)
 		},
+		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalog(ctx) },
+		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalogs(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
@@ -557,9 +616,18 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mounteddatafactory.NewDataSourceMountedDataFactories,
 		notebook.NewDataSourceNotebook,
 		notebook.NewDataSourceNotebooks,
+		operationsagent.NewDataSourceOperationsAgent,
+		operationsagent.NewDataSourceOperationsAgents,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
+		ontology.NewDataSourceOntology,
+		ontology.NewDataSourceOntologies,
+		paginatedreport.NewDataSourcePaginatedReport,
+		paginatedreport.NewDataSourcePaginatedReports,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
-		paginatedreport.NewDataSourcePaginatedReports,
+		tags.NewDataSourceTags,
+		tags.NewDataSourceTag,
 		activator.NewDataSourceActivator,
 		activator.NewDataSourceActivators,
 		report.NewDataSourceReport,
@@ -574,14 +642,24 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
+		tenantsetting.NewDataSourceTenantSetting,
+		tenantsetting.NewDataSourceTenantSettings,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
 		warehouse.NewDataSourceWarehouses,
+		warehousesqlauditsetting.NewDataSourceWarehouseSQLAuditSettings,
 		warehousesnapshot.NewDataSourceWarehouseSnapshot,
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		workspaceencryption.NewDataSourceWorkspaceEncryption,
+		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewDataSourceWorkspaceFirewallRules,
+		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
+		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
+		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewDataSourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,
@@ -592,6 +670,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 
 func (p *FabricProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
+		eventstreamdestinationconnection.NewEphemeralResourceEventstreamDestinationConnection,
 		eventstreamsourceconnection.NewEphemeralResourceEventstreamSourceConnection,
 	}
 }
@@ -916,13 +995,13 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 		}
 
 		if p.config.Auth.OIDC.AzureDevOpsServiceConnectionID == "" && (p.config.Auth.OIDC.Token == "" && (p.config.Auth.OIDC.RequestURL == "" || p.config.Auth.OIDC.RequestToken == "")) {
-			maskValue := (func(v string) string {
+			maskValue := func(v string) string {
 				if v != "" {
 					return "***"
 				}
 
 				return ""
-			})
+			}
 
 			resp.Diagnostics.AddError(
 				common.ErrorInvalidConfig,

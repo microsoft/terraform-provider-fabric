@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package deploymentpipeline_test
@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -335,7 +334,7 @@ func TestUnit_DeploymentPipelineResource_CRUD_Stage_WorkspaceAssignment(t *testi
 	entityBefore := fakes.NewRandomDeploymentPipelineWithStages()
 
 	entityWithWorkspaceAssigned := entityBefore
-	entityWithWorkspaceAssigned.Stages[0].WorkspaceID = to.Ptr(workspaceID)
+	entityWithWorkspaceAssigned.Stages[0].WorkspaceID = new(workspaceID)
 
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.AssignWorkspaceToStage = fakeWorkspaceAssignmentStage()
 	fakes.FakeServer.ServerFactory.Core.DeploymentPipelinesServer.UnassignWorkspaceFromStage = fakeWorkspaceUnassignmentStage()
@@ -606,7 +605,8 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 								"is_public":    entityStage3IsPublicRandom,
 							},
 						},
-					}),
+					},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),

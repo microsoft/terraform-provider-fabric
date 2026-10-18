@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspacegit_test
@@ -284,7 +284,8 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"source": string(fabcore.GitCredentialsSourceAutomatic),
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
@@ -313,7 +314,8 @@ func TestAcc_WorkspaceGitResource_AzDO_Automatic(t *testing.T) {
 							"connection_id": adoConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			ConfigPlanChecks: resource.ConfigPlanChecks{
 				PreApply: []plancheck.PlanCheck{
 					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
@@ -363,7 +365,8 @@ func TestAcc_WorkspaceGitResource_AzDO_ConfiguredCredentials(t *testing.T) {
 							"connection_id": adoConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
@@ -671,7 +674,39 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 	workspaceResourceHCL, workspaceResourceFQN := testhelp.TestAccWorkspaceResource(t, capacityID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
+		// Create and Read - with allow_override_items
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				workspaceResourceHCL,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":            testhelp.RefByFQN(workspaceResourceFQN, "id"),
+						"initialization_strategy": "PreferWorkspace",
+						"options": map[string]any{
+							"allow_override_items": true,
+						},
+						"git_provider_details": map[string]any{
+							"git_provider_type": "GitHub",
+							"owner_name":        ghOwner,
+							"repository_name":   ghRepository,
+							"branch_name":       "main",
+							"directory_name":    "/",
+						},
+						"git_credentials": map[string]any{
+							"source":        string(fabcore.GitCredentialsSourceConfiguredConnection),
+							"connection_id": ghConnectionID,
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
+			),
+		},
+		// Recreate and Read - without allow_override_items
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -693,8 +728,10 @@ func TestAcc_WorkspaceGitResource_GitHub_ConfiguredCredentials(t *testing.T) {
 							"connection_id": ghConnectionID,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "options"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "git_sync_details.head"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "git_connection_state", string(fabcore.GitConnectionStateConnectedAndInitialized)),
 			),

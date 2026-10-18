@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -26,6 +26,7 @@ func (o *operationsSQLDatabase) ConvertItemToEntity(item fabcore.Item) fabsqldat
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties:  NewRandomSQLDatabase().Properties,
+		Tags:        convertItemTags[fabsqldatabase.ItemTag](item.Tags),
 	}
 }
 
@@ -74,9 +75,7 @@ func (o *operationsSQLDatabase) TransformGet(entity fabsqldatabase.SQLDatabase) 
 // TransformList implements concreteOperations.
 func (o *operationsSQLDatabase) TransformList(entities []fabsqldatabase.SQLDatabase) fabsqldatabase.ItemsClientListSQLDatabasesResponse {
 	return fabsqldatabase.ItemsClientListSQLDatabasesResponse{
-		SQLDatabases: fabsqldatabase.SQLDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -128,23 +127,28 @@ func configureSQLDatabase(server *fakeServer) fabsqldatabase.SQLDatabase {
 		&server.ServerFactory.SQLDatabase.ItemsServer.UpdateSQLDatabase,
 		&server.ServerFactory.SQLDatabase.ItemsServer.BeginCreateSQLDatabase,
 		&server.ServerFactory.SQLDatabase.ItemsServer.NewListSQLDatabasesPager,
-		&server.ServerFactory.SQLDatabase.ItemsServer.DeleteSQLDatabase)
+		&server.ServerFactory.SQLDatabase.ItemsServer.DeleteSQLDatabase,
+	)
 
 	return fabsqldatabase.SQLDatabase{}
 }
 
 func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 	return fabsqldatabase.SQLDatabase{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties: &fabsqldatabase.Properties{
-			ConnectionString: to.Ptr(testhelp.RandomName()),
-			DatabaseName:     to.Ptr(testhelp.RandomName()),
-			ServerFqdn:       to.Ptr(testhelp.RandomName()),
+			ConnectionString: new(testhelp.RandomName()),
+			DatabaseName:     new(testhelp.RandomName()),
+			ServerFqdn:       new(testhelp.RandomName()),
+		},
+		Tags: []fabsqldatabase.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

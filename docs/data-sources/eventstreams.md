@@ -54,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Eventstream display name.
 - `folder_id` (String) The Eventstream Folder ID.
 - `id` (String) The Eventstream ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Eventstream.
 - `workspace_id` (String) The Workspace ID.

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package workspace_test
@@ -205,6 +205,57 @@ func TestUnit_WorkspaceDataSource_NoCapacity(t *testing.T) {
 				},
 			),
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+	}))
+}
+
+func TestUnit_WorkspaceDataSource_SkipCapacityStateValidation(t *testing.T) {
+	// Workspace has a capacity_id but the capacity is NOT registered in the fake server,
+	// simulating a user who lacks permission to list capacities.
+	unknownCapacityID := testhelp.RandomUUID()
+	entity := fakes.NewRandomWorkspaceInfo(&unknownCapacityID)
+
+	fakes.FakeServer.Upsert(entity)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - capacity not found without skip
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id": *entity.ID,
+				},
+			),
+			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
+		},
+		// success - skip_capacity_state_validation = true
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"id":                             *entity.ID,
+					"skip_capacity_state_validation": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "id", entity.ID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "skip_capacity_state_validation", "true"),
+			),
+		},
+		// success by display_name - skip_capacity_state_validation = true
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"display_name":                   *entity.DisplayName,
+					"skip_capacity_state_validation": true,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "skip_capacity_state_validation", "true"),
+			),
 		},
 	}))
 }

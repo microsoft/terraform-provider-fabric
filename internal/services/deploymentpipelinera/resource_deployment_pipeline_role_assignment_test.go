@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package deploymentpipelinera_test
@@ -211,7 +211,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 							"id":   entityID,
 							"type": entityType,
 						},
-						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+						"role": string(fabcore.DeploymentPipelineRoleAdmin),
 					},
 				),
 			),
@@ -234,7 +234,7 @@ func TestUnit_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 							"id":   groupEntityID,
 							"type": groupEntityType,
 						},
-						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+						"role": string(fabcore.DeploymentPipelineRoleAdmin),
 					},
 				),
 			),
@@ -292,7 +292,7 @@ func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 							"id":   entityID,
 							"type": entityType,
 						},
-						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+						"role": string(fabcore.DeploymentPipelineRoleAdmin),
 					},
 				),
 			),
@@ -315,7 +315,7 @@ func TestAcc_DeploymentPipelineRoleAssignmentResource_CRUD(t *testing.T) {
 							"id":   groupEntityID,
 							"type": groupEntityType,
 						},
-						"role": (string)(fabcore.DeploymentPipelineRoleAdmin),
+						"role": string(fabcore.DeploymentPipelineRoleAdmin),
 					},
 				),
 			),

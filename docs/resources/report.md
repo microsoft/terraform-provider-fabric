@@ -127,7 +127,7 @@ resource "fabric_report" "example_custom_delimiter" {
     }
     "definition.pbir" = {
       source           = "${local.path}/definition.pbir.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "SemanticModelID" = "00000000-0000-0000-0000-000000000000"
       }
@@ -175,7 +175,7 @@ resource "fabric_report" "example_parameters" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). Accepted path keys: **PBIR** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `definition/bookmarks/*.json`, `definition/pages/*.json`, `definition/report.json`, `definition/version.json` **PBIR-Legacy** format: `StaticResources/RegisteredResources/*`, `StaticResources/SharedResources/*`, `definition.pbir`, `report.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Report definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/report-definition). Accepted path keys: **PBIR** format: `StaticResources/**`, `definition.pbir`, `definition/**`, `semanticModelDiagramLayout.json` **PBIR-Legacy** format: `StaticResources/**`, `definition.pbir`, `report.json`, `semanticModelDiagramLayout.json` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Report display name.
 - `format` (String) The Report format. Possible values: `PBIR`, `PBIR-Legacy`
 - `workspace_id` (String) The Workspace ID.
@@ -185,6 +185,7 @@ resource "fabric_report" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Report description.
 - `folder_id` (String) The Folder ID.
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

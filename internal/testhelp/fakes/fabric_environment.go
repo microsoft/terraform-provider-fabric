@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -27,6 +27,7 @@ func (o *operationsEnvironment) ConvertItemToEntity(item fabcore.Item) fabenviro
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
 		Properties:  NewRandomEnvironment().Properties,
+		Tags:        convertItemTags[fabenvironment.ItemTag](item.Tags),
 	}
 }
 
@@ -75,9 +76,7 @@ func (o *operationsEnvironment) TransformGet(entity fabenvironment.Environment) 
 // TransformList implements concreteOperations.
 func (o *operationsEnvironment) TransformList(entities []fabenvironment.Environment) fabenvironment.ItemsClientListEnvironmentsResponse {
 	return fabenvironment.ItemsClientListEnvironmentsResponse{
-		Environments: fabenvironment.Environments{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -130,25 +129,26 @@ func configureEnvironment(server *fakeServer) fabenvironment.Environment {
 		&server.ServerFactory.Environment.ItemsServer.UpdateEnvironment,
 		&server.ServerFactory.Environment.ItemsServer.BeginCreateEnvironment,
 		&server.ServerFactory.Environment.ItemsServer.NewListEnvironmentsPager,
-		&server.ServerFactory.Environment.ItemsServer.DeleteEnvironment)
+		&server.ServerFactory.Environment.ItemsServer.DeleteEnvironment,
+	)
 
 	return fabenvironment.Environment{}
 }
 
 func NewRandomEnvironment() fabenvironment.Environment {
 	return fabenvironment.Environment{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Properties: &fabenvironment.Properties{
 			PublishDetails: &fabenvironment.PublishDetails{
 				State:         to.Ptr(fabenvironment.PublishStateSuccess),
-				TargetVersion: to.Ptr(testhelp.RandomUUID()),
-				StartTime:     to.Ptr(time.Now()),
-				EndTime:       to.Ptr(time.Now()),
+				TargetVersion: new(testhelp.RandomUUID()),
+				StartTime:     new(time.Now()),
+				EndTime:       new(time.Now()),
 				ComponentPublishInfo: &fabenvironment.ComponentPublishInfo{
 					SparkLibraries: &fabenvironment.SparkLibraries{
 						State: to.Ptr(fabenvironment.PublishStateSuccess),

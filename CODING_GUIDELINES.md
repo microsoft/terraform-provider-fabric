@@ -53,6 +53,6 @@
 - Each .go file must start with header:
 
 ```go
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 ```

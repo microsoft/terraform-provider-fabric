@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: 🧹 Cleanup
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+    # Shared concurrency group with test workflow.
+    # cancel-in-progress: false = if tests are running, cleanup queues until they finish.
+concurrency:
+  group: fabric-testacc-environment
+  cancel-in-progress: false
+
+env:
+  FABRIC_TESTACC_WELLKNOWN: ${{ vars.FABRIC_TESTACC_WELLKNOWN }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cleanup-workspace:
+    name: 🧹 Cleanup WorkspaceRS
+    environment:
+      name: development
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 🔐 Azure Login (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ secrets.TESTACC_SPN_OIDC_CLIENT_ID }}
+          tenant-id: ${{ secrets.TESTACC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: 🧹 Run Remove-WorkspaceRSItems.ps1
+        shell: pwsh
+        run: |
+          ./tools/scripts/Remove-WorkspaceRSItems.ps1 -Force

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fabricitem
@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -81,6 +80,12 @@ func (d *DataSourceFabricItems) Schema(ctx context.Context, _ datasource.SchemaR
 							Computed:            true,
 							CustomType:          customtypes.UUIDType{},
 						},
+						"tags": schema.SetAttribute{
+							MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
+							Computed:            true,
+							CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
+							ElementType:         customtypes.UUIDType{},
+						},
 					},
 				},
 			},
@@ -150,7 +155,7 @@ func (d *DataSourceFabricItems) list(ctx context.Context, model *dataSourceFabri
 	tflog.Trace(ctx, fmt.Sprintf("getting %ss", d.TypeInfo.Name))
 
 	opts := &fabcore.ItemsClientListItemsOptions{
-		Type: azto.Ptr(string(d.FabricItemType)),
+		Type: new(string(d.FabricItemType)),
 	}
 
 	respList, err := d.client.ListItems(ctx, model.WorkspaceID.ValueString(), opts)

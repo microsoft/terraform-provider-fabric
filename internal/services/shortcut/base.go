@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package shortcut
@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Shortcuts",
 	Types:          "shortcuts",
 	DocsURL:        "https://learn.microsoft.com/fabric/onelake/onelake-shortcuts",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

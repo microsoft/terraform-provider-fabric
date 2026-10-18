@@ -3,18 +3,15 @@
 page_title: "fabric_paginated_reports Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Paginated Reports data-source allows you to retrieve a list of Fabric Paginated Reports https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table.
-  -> This data-source does not support Service Principal. Please use a User context authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
+  The Paginated Reports data-source allows you to retrieve a list of Fabric Paginated Reports https://learn.microsoft.com/rest/api/fabric/paginatedreport/items.
+  -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_paginated_reports (Data Source)
 
-The Paginated Reports data-source allows you to retrieve a list of Fabric [Paginated Reports](https://learn.microsoft.com/power-bi/paginated-reports/web-authoring/get-started-paginated-formatted-table).
+The Paginated Reports data-source allows you to retrieve a list of Fabric [Paginated Reports](https://learn.microsoft.com/rest/api/fabric/paginatedreport/items).
 
--> This data-source does not support Service Principal. Please use a User context authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
+-> This data-source supports Service Principal authentication.
 
 ## Example Usage
 
@@ -57,4 +54,5 @@ Read-Only:
 - `display_name` (String) The Paginated Report display name.
 - `folder_id` (String) The Paginated Report Folder ID.
 - `id` (String) The Paginated Report ID.
+- `tags` (Set of String) A set of tag IDs assigned to the Paginated Report.
 - `workspace_id` (String) The Workspace ID.

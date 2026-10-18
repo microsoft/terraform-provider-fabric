@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package environment
@@ -50,13 +50,11 @@ func NewResourceEnvironment(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemProperties[environmentPropertiesModel, fabenvironment.Properties]{
-		ResourceFabricItem: fabricitem.ResourceFabricItem{
-			TypeInfo:             ItemTypeInfo,
-			FabricItemType:       FabricItemType,
-			NameRenameAllowed:    true,
-			DisplayNameMaxLength: 123,
-			DescriptionMaxLength: 256,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		NameRenameAllowed:    true,
+		DisplayNameMaxLength: 123,
+		DescriptionMaxLength: 256,
 		PropertiesAttributes: getResourceEnvironmentPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

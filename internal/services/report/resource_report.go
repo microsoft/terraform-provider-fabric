@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package report
@@ -25,7 +25,7 @@ func NewResourceReport() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
-			mapvalidator.SizeAtLeast(3),
+			mapvalidator.SizeAtLeast(2),
 			mapvalidator.KeysAre(
 				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),

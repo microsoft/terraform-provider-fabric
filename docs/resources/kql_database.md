@@ -121,7 +121,7 @@ resource "fabric_kql_database" "example8" {
   definition = {
     "DatabaseProperties.json" = {
       source           = "${local.path}/DatabaseProperties.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }
@@ -175,6 +175,7 @@ Any changes to this configuration will result in recreation of the KQL Database.
 - `description` (String) The KQL Database description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Database format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package lakehouse_test
@@ -164,8 +164,10 @@ func TestAcc_LakehouseDataSource(t *testing.T) {
 			Config: at.CompileConfig(
 				testDataSourceItemHeader,
 				map[string]any{
-					"workspace_id": workspaceID,
-					"id":           entityID,
+					"workspace_id":      workspaceID,
+					"id":                entityID,
+					"format":            "Default",
+					"output_definition": true,
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

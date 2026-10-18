@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -24,9 +24,7 @@ func (o *operationsReport) CreateDefinition(data fabreport.CreateReportRequest) 
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsReport) TransformDefinition(entity *fabreport.Definition) fabreport.ItemsClientGetReportDefinitionResponse {
 	return fabreport.ItemsClientGetReportDefinitionResponse{
-		DefinitionResponse: fabreport.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsReport) TransformGet(entity fabreport.Report) fabreport.Items
 // TransformList implements concreteOperations.
 func (o *operationsReport) TransformList(entities []fabreport.Report) fabreport.ItemsClientListReportsResponse {
 	return fabreport.ItemsClientListReportsResponse{
-		Reports: fabreport.Reports{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -146,7 +142,8 @@ func configureReport(server *fakeServer) fabreport.Report {
 		&server.ServerFactory.Report.ItemsServer.UpdateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.NewListReportsPager,
-		&server.ServerFactory.Report.ItemsServer.DeleteReport)
+		&server.ServerFactory.Report.ItemsServer.DeleteReport,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,18 +151,19 @@ func configureReport(server *fakeServer) fabreport.Report {
 		definitionOperations,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginGetReportDefinition,
-		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition)
+		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition,
+	)
 
 	return fabreport.Report{}
 }
 
 func NewRandomReport() fabreport.Report {
 	return fabreport.Report{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabreport.ItemTypeReport),
 	}
 }

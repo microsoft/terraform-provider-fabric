@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package connectionra
@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Connection Role Assignments",
 	Types:          "connection_role_assignments",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-factory/data-source-management",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package fakes
@@ -26,6 +26,7 @@ func (o *operationsSparkJobDefinition) ConvertItemToEntity(item fabcore.Item) fa
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties:  NewRandomSparkJobDefinition().Properties,
+		Tags:        convertItemTags[fabsparkjobdefinition.ItemTag](item.Tags),
 	}
 }
 
@@ -37,9 +38,7 @@ func (o *operationsSparkJobDefinition) CreateDefinition(data fabsparkjobdefiniti
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSparkJobDefinition) TransformDefinition(entity *fabsparkjobdefinition.PublicDefinition) fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse {
 	return fabsparkjobdefinition.ItemsClientGetSparkJobDefinitionDefinitionResponse{
-		Response: fabsparkjobdefinition.Response{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -96,9 +95,7 @@ func (o *operationsSparkJobDefinition) TransformGet(entity fabsparkjobdefinition
 // TransformList implements concreteOperations.
 func (o *operationsSparkJobDefinition) TransformList(entities []fabsparkjobdefinition.SparkJobDefinition) fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse {
 	return fabsparkjobdefinition.ItemsClientListSparkJobDefinitionsResponse{
-		SparkJobDefinitions: fabsparkjobdefinition.SparkJobDefinitions{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -162,7 +159,8 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.UpdateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.NewListSparkJobDefinitionsPager,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.DeleteSparkJobDefinition,
+	)
 
 	configureDefinitions(
 		handler,
@@ -170,21 +168,22 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 		definitionOperations,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginCreateSparkJobDefinition,
 		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginGetSparkJobDefinitionDefinition,
-		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition)
+		&server.ServerFactory.SparkJobDefinition.ItemsServer.BeginUpdateSparkJobDefinitionDefinition,
+	)
 
 	return fabsparkjobdefinition.SparkJobDefinition{}
 }
 
 func NewRandomSparkJobDefinition() fabsparkjobdefinition.SparkJobDefinition {
 	return fabsparkjobdefinition.SparkJobDefinition{
-		ID:          to.Ptr(testhelp.RandomUUID()),
-		DisplayName: to.Ptr(testhelp.RandomName()),
-		Description: to.Ptr(testhelp.RandomName()),
-		WorkspaceID: to.Ptr(testhelp.RandomUUID()),
-		FolderID:    to.Ptr(testhelp.RandomUUID()),
+		ID:          new(testhelp.RandomUUID()),
+		DisplayName: new(testhelp.RandomName()),
+		Description: new(testhelp.RandomName()),
+		WorkspaceID: new(testhelp.RandomUUID()),
+		FolderID:    new(testhelp.RandomUUID()),
 		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties: &fabsparkjobdefinition.Properties{
-			OneLakeRootPath: to.Ptr(testhelp.RandomURI()),
+			OneLakeRootPath: new(testhelp.RandomURI()),
 		},
 	}
 }
@@ -199,13 +198,13 @@ func NewRandomSparkJobDefinitionWithWorkspace(workspaceID string) fabsparkjobdef
 func NewRandomSparkJobDefinitionDefinition() fabsparkjobdefinition.PublicDefinition {
 	defPart := fabsparkjobdefinition.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabsparkjobdefinition.PayloadTypeInlineBase64),
-		Path:        to.Ptr("SparkJobDefinitionV1.json"),
-		Payload: to.Ptr(
+		Path:        new("SparkJobDefinitionV1.json"),
+		Payload: new(
 			"ew0KICAiZXhlY3V0YWJsZUZpbGUiOiBudWxsLA0KICAiZGVmYXVsdExha2Vob3VzZUFydGlmYWN0SWQiOiBudWxsLA0KICAibWFpbkNsYXNzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMYWtlaG91c2VJZHMiOiBbXSwNCiAgInJldHJ5UG9saWN5IjogbnVsbCwNCiAgImNvbW1hbmRMaW5lQXJndW1lbnRzIjogbnVsbCwNCiAgImFkZGl0aW9uYWxMaWJyYXJ5VXJpcyI6IG51bGwsDQogICJsYW5ndWFnZSI6IG51bGwsDQogICJlbnZpcm9ubWVudEFydGlmYWN0SWQiOiBudWxsDQp9",
 		),
 	}
 
-	var defParts []fabsparkjobdefinition.PublicDefinitionPart
+	defParts := make([]fabsparkjobdefinition.PublicDefinitionPart, 0, 1)
 
 	defParts = append(defParts, defPart)
 

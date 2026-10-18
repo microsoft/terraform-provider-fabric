@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation
+// Copyright Microsoft Corporation 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package warehouse
@@ -55,13 +55,11 @@ func NewResourceWarehouse() resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigProperties[warehousePropertiesModel, fabwarehouse.Properties, warehouseConfigurationModel, fabwarehouse.CreationPayload]{
-		ResourceFabricItem: fabricitem.ResourceFabricItem{
-			TypeInfo:             ItemTypeInfo,
-			FabricItemType:       FabricItemType,
-			NameRenameAllowed:    true,
-			DisplayNameMaxLength: 123,
-			DescriptionMaxLength: 256,
-		},
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
 		PropertiesAttributes:  getResourceWarehousePropertiesAttributes(),
 		PropertiesSetter:      propertiesSetter,
 		ItemGetter:            itemGetter,

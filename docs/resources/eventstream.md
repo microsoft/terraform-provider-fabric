@@ -62,7 +62,7 @@ resource "fabric_eventstream" "example_custom_delimiter" {
   definition = {
     "eventstream.json" = {
       source           = "${local.path}/eventstream.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "LakehouseWorkspaceID" = "11111111-1111-1111-1111-111111111111"
         "LakehouseID"          = "22222222-2222-2222-2222-222222222222"
@@ -113,6 +113,7 @@ resource "fabric_eventstream" "example_parameters" {
 - `description` (String) The Eventstream description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Eventstream format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
