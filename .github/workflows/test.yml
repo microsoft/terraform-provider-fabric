@@ -52,7 +52,6 @@ jobs:
               - '**.go'
               - 'go.mod'
               - 'go.sum'
-              - 'tools/scripts/Remove-WorkspaceRSItems.ps1'
               - '.github/workflows/test.yml'
 
   cleanup-workspace:
