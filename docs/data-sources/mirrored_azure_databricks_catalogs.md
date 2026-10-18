@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `id` (String) The Mirrored Azure Databricks Catalog ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--values--properties))
+- `tags` (Set of String) A set of tag IDs assigned to the Mirrored Azure Databricks Catalog.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

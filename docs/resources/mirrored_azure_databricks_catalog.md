@@ -16,8 +16,6 @@ The Mirrored Azure Databricks Catalog resource allows you to manage a Fabric [Mi
 
 ~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
-When creating this resource, specify exactly one of `configuration` (the creation payload) or `definition`. They cannot be used together.
-
 ## Example Usage
 
 ```terraform
@@ -140,6 +138,7 @@ Any changes to this configuration will result in recreation of the Mirrored Azur
 - `description` (String) The Mirrored Azure Databricks Catalog description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Mirrored Azure Databricks Catalog format. Possible values: `Default`
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The Mirrored Azure Databricks Catalog description.
 - `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
