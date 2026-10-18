@@ -37,9 +37,7 @@ func (o *operationsSnowflakeDatabase) CreateDefinition(data fabsnowflakedatabase
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsSnowflakeDatabase) TransformDefinition(entity *fabsnowflakedatabase.Definition) fabsnowflakedatabase.ItemsClientGetSnowflakeDatabaseDefinitionResponse {
 	return fabsnowflakedatabase.ItemsClientGetSnowflakeDatabaseDefinitionResponse{
-		DefinitionResponse: fabsnowflakedatabase.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -92,9 +90,7 @@ func (o *operationsSnowflakeDatabase) TransformGet(entity fabsnowflakedatabase.S
 // TransformList implements concreteOperations.
 func (o *operationsSnowflakeDatabase) TransformList(entities []fabsnowflakedatabase.SnowflakeDatabase) fabsnowflakedatabase.ItemsClientListSnowflakeDatabasesResponse {
 	return fabsnowflakedatabase.ItemsClientListSnowflakeDatabasesResponse{
-		SnowflakeDatabases: fabsnowflakedatabase.SnowflakeDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -160,7 +156,8 @@ func configureSnowflakeDatabase(server *fakeServer) fabsnowflakedatabase.Snowfla
 		&server.ServerFactory.SnowflakeDatabase.ItemsServer.UpdateSnowflakeDatabase,
 		&server.ServerFactory.SnowflakeDatabase.ItemsServer.BeginCreateSnowflakeDatabase,
 		&server.ServerFactory.SnowflakeDatabase.ItemsServer.NewListSnowflakeDatabasesPager,
-		&server.ServerFactory.SnowflakeDatabase.ItemsServer.DeleteSnowflakeDatabase)
+		&server.ServerFactory.SnowflakeDatabase.ItemsServer.DeleteSnowflakeDatabase,
+	)
 
 	configureDefinitions(
 		handler,
@@ -168,7 +165,8 @@ func configureSnowflakeDatabase(server *fakeServer) fabsnowflakedatabase.Snowfla
 		definitionOperations,
 		&server.ServerFactory.SnowflakeDatabase.ItemsServer.BeginCreateSnowflakeDatabase,
 		&server.ServerFactory.SnowflakeDatabase.ItemsServer.BeginGetSnowflakeDatabaseDefinition,
-		&server.ServerFactory.SnowflakeDatabase.ItemsServer.BeginUpdateSnowflakeDatabaseDefinition)
+		&server.ServerFactory.SnowflakeDatabase.ItemsServer.BeginUpdateSnowflakeDatabaseDefinition,
+	)
 
 	return fabsnowflakedatabase.SnowflakeDatabase{}
 }

@@ -61,21 +61,19 @@ func NewResourceSnowflakeDatabase(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[snowflakeDatabasePropertiesModel, fabsnowflakedatabase.Properties, snowflakeDatabaseConfigurationModel, fabsnowflakedatabase.CreationPayload]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(1),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    ItemDefinitionEmpty,
-			DefinitionFormats:  itemDefinitionFormats,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtMost(1),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
+		DefinitionRequired:         false,
+		DefinitionEmpty:            ItemDefinitionEmpty,
+		DefinitionFormats:          itemDefinitionFormats,
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: true,
 		ConfigAttributes:           getResourceSnowflakeDatabaseConfigurationAttributes(),

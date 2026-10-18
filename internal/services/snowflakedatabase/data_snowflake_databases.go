@@ -60,10 +60,8 @@ func NewDataSourceSnowflakeDatabases(ctx context.Context) datasource.DataSource 
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[snowflakeDatabasePropertiesModel, fabsnowflakedatabase.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceSnowflakeDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

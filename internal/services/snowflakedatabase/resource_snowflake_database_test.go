@@ -101,6 +101,23 @@ func TestUnit_SnowflakeDatabaseResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Missing Attribute Configuration`),
 		},
+		// error - both configuration and definition are set
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+					"configuration": map[string]any{
+						"connection_id":           testhelp.RandomUUID(),
+						"snowflake_database_name": "ExampleDatabase",
+					},
+					"definition": map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+		},
 		// error - missing required configuration attribute
 		{
 			ResourceName: testResourceItemFQN,
@@ -135,7 +152,8 @@ func TestUnit_SnowflakeDatabaseResource_ImportState(t *testing.T) {
 				"format":       "Default",
 				"definition":   testHelperDefinition,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -213,7 +231,8 @@ func TestUnit_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -229,7 +248,8 @@ func TestUnit_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -252,7 +272,8 @@ func TestUnit_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityBefore.Description),
@@ -314,7 +335,8 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -335,7 +357,8 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -344,4 +367,48 @@ func TestAcc_SnowflakeDatabaseResource_CRUD(t *testing.T) {
 		},
 	},
 	))
+}
+
+func TestAcc_SnowflakeDatabaseResource_CRUD_Configuration(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	dataSourceWorkspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	dataSourceWorkspaceID := dataSourceWorkspace["id"].(string)
+	snowflakeDatabase := testhelp.WellKnown()["SnowflakeDatabase"].(map[string]any)
+	snowflakeDatabaseID := snowflakeDatabase["id"].(string)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				at.CompileConfig(
+					testDataSourceItemHeader,
+					map[string]any{
+						"workspace_id": dataSourceWorkspaceID,
+						"id":           snowflakeDatabaseID,
+					},
+				),
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": testhelp.RandomName(),
+						"configuration": map[string]any{
+							"connection_id": testhelp.RefByFQN(testDataSourceItemFQN, "properties.connection_id"),
+							"snowflake_database_name": testhelp.RefByFQN(
+								testDataSourceItemFQN,
+								"properties.snowflake_database_name",
+							),
+						},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.connection_id", testDataSourceItemFQN, "properties.connection_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "properties.snowflake_database_name", testDataSourceItemFQN, "properties.snowflake_database_name"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "configuration.connection_id", testDataSourceItemFQN, "properties.connection_id"),
+				resource.TestCheckResourceAttrPair(testResourceItemFQN, "configuration.snowflake_database_name", testDataSourceItemFQN, "properties.snowflake_database_name"),
+			),
+		},
+	}))
 }

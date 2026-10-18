@@ -73,12 +73,10 @@ func NewDataSourceSnowflakeDatabase(ctx context.Context) datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[snowflakeDatabasePropertiesModel, fabsnowflakedatabase.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceSnowflakeDatabasePropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

@@ -1,10 +1,6 @@
-# Example 1 - Item without configuration or definition (empty database)
-resource "fabric_snowflake_database" "example" {
-  display_name = "example1"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-}
+# Exactly one of configuration or definition must be set.
 
-# Example 2 - Item with configuration (binds to an existing Snowflake connection)
+# Example 1 - Item with configuration (binds to an existing Snowflake connection)
 resource "fabric_snowflake_database" "example_configuration" {
   display_name = "example2"
   description  = "example with configuration"
@@ -15,7 +11,7 @@ resource "fabric_snowflake_database" "example_configuration" {
   }
 }
 
-# Example 3 - Item with definition bootstrapping only
+# Example 2 - Item with definition bootstrapping only
 resource "fabric_snowflake_database" "example_definition_bootstrap" {
   display_name              = "example3"
   description               = "example with definition bootstrapping"
@@ -29,7 +25,7 @@ resource "fabric_snowflake_database" "example_definition_bootstrap" {
   }
 }
 
-# Example 4 - Item with definition update when source or tokens changed
+# Example 3 - Item with definition update when source or tokens changed
 resource "fabric_snowflake_database" "example_definition_update" {
   display_name = "example4"
   description  = "example with definition update when source or tokens changed"
@@ -46,7 +42,7 @@ resource "fabric_snowflake_database" "example_definition_update" {
 }
 
 
-# Example 5 - Item with custom tokens delimiter
+# Example 4 - Item with custom tokens delimiter
 resource "fabric_snowflake_database" "example_custom_delimiter" {
   display_name = "example"
   description  = "example with custom tokens delimiter"
@@ -63,7 +59,7 @@ resource "fabric_snowflake_database" "example_custom_delimiter" {
   }
 }
 
-# Example 6 - Item with parameters processing mode
+# Example 5 - Item with parameters processing mode
 resource "fabric_snowflake_database" "example_parameters" {
   display_name = "example"
   description  = "example with parameters processing mode"

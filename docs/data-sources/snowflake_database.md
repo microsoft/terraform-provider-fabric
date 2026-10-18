@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `description` (String) The Snowflake Database description.
 - `folder_id` (String) The Snowflake Database Folder ID.
 - `properties` (Attributes) The Snowflake Database properties. (see [below for nested schema](#nestedatt--properties))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
