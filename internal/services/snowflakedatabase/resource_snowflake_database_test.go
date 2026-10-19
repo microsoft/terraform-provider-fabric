@@ -114,7 +114,9 @@ func TestUnit_SnowflakeDatabaseDefinitionTemplates(t *testing.T) {
 				SnowflakeDatabaseName string `json:"snowflakeDatabaseName"`
 				ConnectionID          string `json:"connectionId"`
 			}
-			if err := json.Unmarshal([]byte(content), &definition); err != nil {
+
+			err = json.Unmarshal([]byte(content), &definition)
+			if err != nil {
 				t.Fatalf("failed to decode Snowflake Database definition: %v", err)
 			}
 
