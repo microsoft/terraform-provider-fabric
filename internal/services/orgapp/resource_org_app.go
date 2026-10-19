@@ -56,7 +56,7 @@ func NewResourceOrgApp() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
-			mapvalidator.SizeBetween(1, 1),
+			mapvalidator.SizeAtMost(1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
 		DefinitionRequired:   false,

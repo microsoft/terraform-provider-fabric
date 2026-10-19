@@ -242,7 +242,7 @@ func TestAcc_OrgAppDataSource(t *testing.T) {
 					"workspace_id":      workspaceID,
 					"id":                entityID,
 					"output_definition": true,
-					"format":            "JSON",
+					"format":            "Default",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
