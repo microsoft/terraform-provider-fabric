@@ -237,8 +237,10 @@ func NewRandomMirroredAzureDatabricksCatalogWithWorkspace(workspaceID string) fa
 func NewRandomMirroredAzureDatabricksCatalogDefinition() fabmirroredazuredatabrickscatalog.PublicDefinition {
 	defPart := fabmirroredazuredatabrickscatalog.PublicDefinitionPart{
 		PayloadType: to.Ptr(fabmirroredazuredatabrickscatalog.PayloadTypeInlineBase64),
-		Path:        new("mirroringAzureDatabricksCatalog.json"),
-		Payload:     new("e30="),
+		Path:        new("definition.json"),
+		Payload: new(
+			"eyIkc2NoZW1hIjoiaHR0cHM6Ly9kZXZlbG9wZXIubWljcm9zb2Z0LmNvbS9qc29uLXNjaGVtYXMvZmFicmljL2l0ZW0vbWlycm9yZWRBenVyZURhdGFicmlja3NDYXRhbG9nL2RlZmluaXRpb24vbWlycm9yZWRBenVyZURhdGFicmlja3NDYXRhbG9nRGVmaW5pdGlvbi8xLjAuMC9zY2hlbWEuanNvbiIsImNhdGFsb2dOYW1lIjoidGVzdF9jYXRhbG9nIiwiZGF0YWJyaWNrc1dvcmtzcGFjZUNvbm5lY3Rpb25JZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm1pcnJvcmluZ01vZGUiOiJQYXJ0aWFsIn0=",
+		),
 	}
 
 	defParts := make([]fabmirroredazuredatabrickscatalog.PublicDefinitionPart, 0, 1)

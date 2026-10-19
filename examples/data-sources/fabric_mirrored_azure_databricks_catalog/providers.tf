@@ -8,4 +8,6 @@ terraform {
   }
 }
 
-provider "fabric" {}
+provider "fabric" {
+  preview = true
+}

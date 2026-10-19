@@ -77,7 +77,9 @@ func (to *mirroredAzureDatabricksCatalogPropertiesModel) set(ctx context.Context
 	if from.SyncDetails != nil {
 		syncDetailsModel := &syncDetailsModel{}
 
-		syncDetailsModel.set(ctx, *from.SyncDetails)
+		if diags := syncDetailsModel.set(ctx, *from.SyncDetails); diags.HasError() {
+			return diags
+		}
 
 		if diags := syncDetails.Set(ctx, syncDetailsModel); diags.HasError() {
 			return diags
@@ -94,7 +96,7 @@ func (to *sqlEndpointPropertiesModel) set(from fabmirroredazuredatabrickscatalog
 	to.ConnectionString = types.StringPointerValue(from.ConnectionString)
 }
 
-func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabrickscatalog.SyncDetails) {
+func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabrickscatalog.SyncDetails) diag.Diagnostics {
 	to.LastSyncDateTime = timetypes.NewRFC3339TimePointerValue(from.LastSyncDateTime)
 	to.Status = types.StringPointerValue((*string)(from.Status))
 	errorInfo := supertypes.NewSingleNestedObjectValueOfNull[errorInfoModel](ctx)
@@ -105,11 +107,13 @@ func (to *syncDetailsModel) set(ctx context.Context, from fabmirroredazuredatabr
 		errorInfoModel.set(*from.ErrorInfo)
 
 		if diags := errorInfo.Set(ctx, errorInfoModel); diags.HasError() {
-			return
+			return diags
 		}
 	}
 
 	to.ErrorInfo = errorInfo
+
+	return nil
 }
 
 func (to *errorInfoModel) set(from fabmirroredazuredatabrickscatalog.ErrorInfo) {

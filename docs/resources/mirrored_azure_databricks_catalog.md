@@ -40,6 +40,11 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_definition_bootstra
   definition = {
     "definition.json" = {
       source = "${local.path}/definition.json.tmpl"
+      tokens = {
+        "CATALOG_NAME"                       = "MyCatalogName"
+        "DATABRICKS_WORKSPACE_CONNECTION_ID" = "00000000-0000-0000-0000-000000000000"
+        "MIRRORING_MODE"                     = "Partial"
+      }
     }
   }
 }
@@ -56,6 +61,7 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_definition_update" 
       tokens = {
         "CATALOG_NAME"                       = "MyCatalogName"
         "DATABRICKS_WORKSPACE_CONNECTION_ID" = "00000000-0000-0000-0000-000000000000"
+        "MIRRORING_MODE"                     = "Partial"
       }
     }
   }
@@ -69,11 +75,12 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_custom_delimiter" {
   format       = "Default"
   definition = {
     "definition.json" = {
-      source           = "${local.path}/definition.json.tmpl"
-      tokens_delimiter = "##"
+      source           = "${local.path}/definition_custom_delimiter.json.tmpl"
+      tokens_delimiter = "<<>>"
       tokens = {
         "CATALOG_NAME"                       = "MyCatalogName"
         "DATABRICKS_WORKSPACE_CONNECTION_ID" = "00000000-0000-0000-0000-000000000000"
+        "MIRRORING_MODE"                     = "Partial"
       }
     }
   }
@@ -97,8 +104,13 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_parameters" {
         },
         {
           type  = "TextReplace"
-          find  = "OldValue"
-          value = "NewValue"
+          find  = "{{ .DATABRICKS_WORKSPACE_CONNECTION_ID }}"
+          value = "00000000-0000-0000-0000-000000000000"
+        },
+        {
+          type  = "TextReplace"
+          find  = "{{ .MIRRORING_MODE }}"
+          value = "Partial"
         }
       ]
     }

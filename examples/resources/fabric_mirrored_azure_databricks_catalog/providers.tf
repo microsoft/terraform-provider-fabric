@@ -8,7 +8,9 @@ terraform {
   }
 }
 
-provider "fabric" {}
+provider "fabric" {
+  preview = true
+}
 
 locals {
   path = abspath(join("/", [path.root, "..", "..", "..", "internal", "testhelp", "fixtures", "mirrored_azure_databricks_catalog"]))
