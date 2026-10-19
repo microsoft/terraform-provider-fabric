@@ -105,10 +105,10 @@ Read-Only:
 
 - `connection_id` (String) The connection ID for the Snowflake Database.
 - `default_schema` (String) The default schema name for the Snowflake Database.
-- `onelake_tables_path` (String) OneLake path to the Snowflake Database tables directory.
+- `onelake_tables_path` (String) OneLake URL to the Snowflake Database tables directory.
 - `snowflake_account_url` (String) The Snowflake account URL.
 - `snowflake_database_name` (String) The Snowflake database name.
-- `snowflake_volume_path` (String) OneLake path to the Snowflake Database files directory.
+- `snowflake_volume_path` (String) OneLake URL to the Snowflake Database files directory.
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--properties--sql_endpoint_properties))
 
 <a id="nestedatt--properties--sql_endpoint_properties"></a>

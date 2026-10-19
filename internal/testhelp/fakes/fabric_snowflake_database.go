@@ -182,10 +182,10 @@ func NewRandomSnowflakeDatabase() fabsnowflakedatabase.SnowflakeDatabase {
 		Properties: &fabsnowflakedatabase.Properties{
 			ConnectionID:          new(testhelp.RandomUUID()),
 			DefaultSchema:         new("PUBLIC"),
-			OnelakeTablesPath:     new(testhelp.RandomName()),
+			OnelakeTablesPath:     new(testhelp.RandomURI()),
 			SnowflakeAccountURL:   new(testhelp.RandomURI()),
 			SnowflakeDatabaseName: new(testhelp.RandomName()),
-			SnowflakeVolumePath:   new(testhelp.RandomName()),
+			SnowflakeVolumePath:   new(testhelp.RandomURI()),
 			SQLEndpointProperties: &fabsnowflakedatabase.SQLEndpointProperties{
 				ID:                 new(testhelp.RandomUUID()),
 				ProvisioningStatus: to.Ptr(fabsnowflakedatabase.ProvisioningStatusSuccess),

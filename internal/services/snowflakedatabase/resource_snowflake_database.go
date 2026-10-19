@@ -68,6 +68,7 @@ func NewResourceSnowflakeDatabase(ctx context.Context) resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
 			mapvalidator.SizeAtMost(1),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},

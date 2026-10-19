@@ -21,10 +21,16 @@ resource "fabric_snowflake_database" "example_definition_bootstrap" {
   definition = {
     "SnowflakeDatabaseProperties.json" = {
       source = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
+      tokens = {
+        "DATABASE_NAME" = ""
+        "CONNECTION_ID" = ""
+      }
     }
   }
 }
 
+# Examples 3-5 show definition updates after creation. For a new item, keep both
+# values empty as in the bootstrap example.
 # Example 3 - Item with definition update when source or tokens changed
 resource "fabric_snowflake_database" "example_definition_update" {
   display_name = "example4"
@@ -36,6 +42,7 @@ resource "fabric_snowflake_database" "example_definition_update" {
       source = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
       tokens = {
         "DATABASE_NAME" = "ExampleDatabase"
+        "CONNECTION_ID" = "11111111-1111-1111-1111-111111111111"
       }
     }
   }
@@ -50,10 +57,11 @@ resource "fabric_snowflake_database" "example_custom_delimiter" {
   format       = "Default"
   definition = {
     "SnowflakeDatabaseProperties.json" = {
-      source           = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
-      tokens_delimiter = "{{}}"
+      source           = "${local.path}/SnowflakeDatabasePropertiesCustomDelimiter.json.tmpl"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DATABASE_NAME" = "ExampleDatabase"
+        "CONNECTION_ID" = "11111111-1111-1111-1111-111111111111"
       }
     }
   }
@@ -67,13 +75,18 @@ resource "fabric_snowflake_database" "example_parameters" {
   format       = "Default"
   definition = {
     "SnowflakeDatabaseProperties.json" = {
-      source          = "${local.path}/SnowflakeDatabaseProperties.json.tmpl"
+      source          = "${local.path}/SnowflakeDatabasePropertiesParameters.json"
       processing_mode = "Parameters"
       parameters = [
         {
-          type  = "TextReplace"
-          find  = "OldDatabaseName"
+          type  = "JsonPathReplace"
+          find  = "$.snowflakeDatabaseName"
           value = "NewDatabaseName"
+        },
+        {
+          type  = "JsonPathReplace"
+          find  = "$.connectionId"
+          value = "11111111-1111-1111-1111-111111111111"
         }
       ]
     }

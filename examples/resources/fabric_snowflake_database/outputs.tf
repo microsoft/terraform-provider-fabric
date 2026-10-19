@@ -1,7 +1,3 @@
-output "example" {
-  value = fabric_snowflake_database.example
-}
-
 output "example_configuration" {
   value = fabric_snowflake_database.example_configuration
 }

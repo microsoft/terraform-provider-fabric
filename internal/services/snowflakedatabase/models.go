@@ -17,10 +17,10 @@ import (
 type snowflakeDatabasePropertiesModel struct {
 	ConnectionID          customtypes.UUID                                                                  `tfsdk:"connection_id"`
 	DefaultSchema         types.String                                                                      `tfsdk:"default_schema"`
-	OnelakeTablesPath     types.String                                                                      `tfsdk:"onelake_tables_path"`
-	SnowflakeAccountURL   types.String                                                                      `tfsdk:"snowflake_account_url"`
+	OnelakeTablesPath     customtypes.URL                                                                   `tfsdk:"onelake_tables_path"`
+	SnowflakeAccountURL   customtypes.URL                                                                   `tfsdk:"snowflake_account_url"`
 	SnowflakeDatabaseName types.String                                                                      `tfsdk:"snowflake_database_name"`
-	SnowflakeVolumePath   types.String                                                                      `tfsdk:"snowflake_volume_path"`
+	SnowflakeVolumePath   customtypes.URL                                                                   `tfsdk:"snowflake_volume_path"`
 	SQLEndpointProperties supertypes.SingleNestedObjectValueOf[snowflakeDatabaseSQLEndpointPropertiesModel] `tfsdk:"sql_endpoint_properties"`
 }
 
@@ -38,10 +38,10 @@ func (to *snowflakeDatabasePropertiesModel) set(ctx context.Context, from fabsno
 
 	to.ConnectionID = customtypes.NewUUIDPointerValue(from.ConnectionID)
 	to.DefaultSchema = types.StringPointerValue(from.DefaultSchema)
-	to.OnelakeTablesPath = types.StringPointerValue(from.OnelakeTablesPath)
-	to.SnowflakeAccountURL = types.StringPointerValue(from.SnowflakeAccountURL)
+	to.OnelakeTablesPath = customtypes.NewURLPointerValue(from.OnelakeTablesPath)
+	to.SnowflakeAccountURL = customtypes.NewURLPointerValue(from.SnowflakeAccountURL)
 	to.SnowflakeDatabaseName = types.StringPointerValue(from.SnowflakeDatabaseName)
-	to.SnowflakeVolumePath = types.StringPointerValue(from.SnowflakeVolumePath)
+	to.SnowflakeVolumePath = customtypes.NewURLPointerValue(from.SnowflakeVolumePath)
 	to.SQLEndpointProperties = sqlEndpointProperties
 
 	return nil

@@ -26,20 +26,23 @@ func getResourceSnowflakeDatabasePropertiesAttributes(ctx context.Context) map[s
 			Computed:            true,
 		},
 		"onelake_tables_path": schema.StringAttribute{
-			MarkdownDescription: "OneLake path to the Snowflake Database tables directory.",
+			MarkdownDescription: "OneLake URL to the Snowflake Database tables directory.",
 			Computed:            true,
+			CustomType:          customtypes.URLType{},
 		},
 		"snowflake_account_url": schema.StringAttribute{
 			MarkdownDescription: "The Snowflake account URL.",
 			Computed:            true,
+			CustomType:          customtypes.URLType{},
 		},
 		"snowflake_database_name": schema.StringAttribute{
 			MarkdownDescription: "The Snowflake database name.",
 			Computed:            true,
 		},
 		"snowflake_volume_path": schema.StringAttribute{
-			MarkdownDescription: "OneLake path to the Snowflake Database files directory.",
+			MarkdownDescription: "OneLake URL to the Snowflake Database files directory.",
 			Computed:            true,
+			CustomType:          customtypes.URLType{},
 		},
 		"sql_endpoint_properties": schema.SingleNestedAttribute{
 			MarkdownDescription: "An object containing the properties of the SQL endpoint.",
