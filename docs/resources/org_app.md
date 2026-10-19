@@ -28,7 +28,7 @@ resource "fabric_org_app" "example_definition_bootstrap" {
   description               = "example with definition bootstrapping"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
-  format                    = "JSON"
+  format                    = "Default"
   definition = {
     "definition.json" = {
       source = "${local.path}/definition.json"
@@ -41,7 +41,7 @@ resource "fabric_org_app" "example_definition_update" {
   display_name = "example3"
   description  = "example with definition update when source or tokens changed"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "JSON"
+  format       = "Default"
   definition = {
     "definition.json" = {
       source = "${local.path}/definition.json.tmpl"
@@ -58,7 +58,7 @@ resource "fabric_org_app" "example_custom_delimiter" {
   display_name = "example4"
   description  = "example with custom tokens delimiter"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "JSON"
+  format       = "Default"
   definition = {
     "definition.json" = {
       source           = "${local.path}/definition-custom-delimiter.json.tmpl"
@@ -76,7 +76,7 @@ resource "fabric_org_app" "example_parameters" {
   display_name = "example5"
   description  = "example with parameters processing mode"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "JSON"
+  format       = "Default"
   definition = {
     "definition.json" = {
       source          = "${local.path}/definition.json"
@@ -108,11 +108,11 @@ resource "fabric_org_app" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Org App definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/orgapp-definition). Accepted path keys: **JSON** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Org App definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/orgapp-definition). Accepted path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Org App description.
 - `folder_id` (String) The Folder ID.
-- `format` (String) The Org App format. Possible values: `JSON`
+- `format` (String) The Org App format. Possible values: `Default`
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

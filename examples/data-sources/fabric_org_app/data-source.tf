@@ -14,7 +14,7 @@ data "fabric_org_app" "example_by_id" {
 data "fabric_org_app" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
-  format            = "JSON"
+  format            = "Default"
   output_definition = true
 }
 

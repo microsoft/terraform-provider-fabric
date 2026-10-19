@@ -3,13 +3,18 @@
 
 package orgapp
 
-import "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+)
 
 func getDataSourceOrgAppPropertiesAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"onelake_root_path": schema.StringAttribute{
 			MarkdownDescription: "OneLake path to the Org App root directory.",
 			Computed:            true,
+			CustomType:          customtypes.URLType{},
 		},
 	}
 }

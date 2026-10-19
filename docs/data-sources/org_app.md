@@ -32,7 +32,7 @@ data "fabric_org_app" "example_by_id" {
 data "fabric_org_app" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
-  format            = "JSON"
+  format            = "Default"
   output_definition = true
 }
 
@@ -65,7 +65,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Org App display name.
-- `format` (String) The Org App format. Possible values: `JSON`
+- `format` (String) The Org App format. Possible values: `Default`
 - `id` (String) The Org App ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -75,7 +75,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **JSON** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Org App description.
 - `folder_id` (String) The Org App Folder ID.
 - `properties` (Attributes) The Org App properties. (see [below for nested schema](#nestedatt--properties))
