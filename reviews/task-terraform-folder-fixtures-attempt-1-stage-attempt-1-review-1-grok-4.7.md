@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 1
 - **Theme**: Broad sweep
 - **Mode**: resolved-plan
@@ -8,6 +9,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Inspected the isolated public diff and untracked tests: `.github/workflows/test.yml`, `DEVELOPER.md`, `internal/services/mlmodel/resource_ml_model_test.go`, `internal/services/mlexperiment/resource_ml_experiment_test.go`, `internal/services/mlmodel/folder_fixtures_test.go`, `internal/services/mlexperiment/folder_fixtures_test.go`, and `internal/testhelp/folder_fixtures_test.go`. No other tracked or untracked source changes.
 - [x] Shared cleanup exclusion: both `.github/workflows/test.yml` and `.github/workflows/cleanup-script.yml` use the workflow-level group `fabric-testacc-environment` with `cancel-in-progress: false`. The `test` matrix job has no job-level `concurrency` key. Other workflows use different groups, and only the cleanup workflow invokes the workspace cleanup script. A workflow-level group holds the lock for every matrix leg and its Terraform destroy before another run in that group can start. A per-job lock would be the wrong shape because GitHub keeps only one pending job per group.
 - [x] Queued-run semantics match the stated contract and `DEVELOPER.md`: `cancel-in-progress: false` leaves the active run, including teardown, running. GitHub keeps at most one pending run and may replace it. That can skip a queued cleanup or required check. It does not cancel an in-progress matrix. The constant group also serializes non-acceptance jobs in those two workflows. That blast radius is the documented workflow-level lock, not a separate per-matrix lock.

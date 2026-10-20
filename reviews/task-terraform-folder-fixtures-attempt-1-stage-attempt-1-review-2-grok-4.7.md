@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 2
 - **Stage**: 2
 - **Attempt**: 1
@@ -11,6 +12,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Frozen diff reviewed for `.github/workflows/test.yml`, `DEVELOPER.md`, `go.mod`, both ML resource tests, both `folder_fixtures_test.go` files, and `internal/testhelp/folder_fixtures_test.go`. Checkout status matches that file set; no product runtime files are modified.
 - [x] Existing helper seam inspected: `FolderResource` in `internal/testhelp/testacc.go` (line 162) and `RefByFQN` in `internal/testhelp/utils.go` (line 190). Both ML CRUD builders call those helpers plus `at.JoinConfigs`. No new folder-construction API was added.
 - [x] Move-versus-replace contract checked in `internal/pkg/fabricitem/resource_schema.go` (`folder_id` has no `RequiresReplace`) and `internal/pkg/fabricitem/resource_item.go` (`Update` calls `MoveItem` only when `fabricItemCheckMove` is true). The two-step config change follows that existing item abstraction.
@@ -73,6 +75,7 @@ Copyright headers, MPL-2.0 lines, and `package *_test` match coding standards. `
 ## Tests
 
 ### Actually run
+
 - Local `actionlint` v1.7.12 on `.github/workflows/test.yml` and `.github/workflows/cleanup-script.yml`: exit 0, no findings.
 - `go test -count=1 -run TestUnit_FolderFixtures_ ./internal/services/mlexperiment ./internal/services/mlmodel ./internal/testhelp` with `TF_ACC=0` and no preview flag: `internal/testhelp` passed; both lifecycle tests failed closed in plan because `fabric_folder` requires preview mode. HCL contract tests in those packages were not the failing tests.
 - Same command with `FABRIC_PREVIEW=true` and `TF_ACC=0`, using the existing local Go toolchain and an existing local Terraform CLI: all three packages passed. This covers the five new tests (two lifecycle, two HCL contract, one workflow isolation).
@@ -80,12 +83,14 @@ Copyright headers, MPL-2.0 lines, and `package *_test` match coding standards. `
 - `go mod tidy -diff` with modules readonly and proxy disabled: exit 0, no diff.
 
 ### Reported and not re-executed here
+
 - Earlier full ML package runs and the five new tests were reported passing before this review. The unit portion of that claim was independently re-run as listed above.
 - Actionlint and tidy were reported clean. Both were independently re-run and were clean.
 - Live acceptance and any cloud or GitHub-hosted workflow execution were not run. The workflow concurrency behavior is verified by source inspection, the YAML contract test, and actionlint, not by a queued GitHub run.
 - The full provider suite, OpenTofu matrix, and auth-method acceptance jobs were not run.
 
 ### Limitations
+
 - No live acceptance, cloud calls, or external writes. `TF_ACC` stayed unset for every command.
 - GitHub's one-pending replacement and cross-run queueing were not executed on a hosted runner. The static contract matches the documented GitHub concurrency rule, but hosted scheduling was not observed.
 - Direct `go test` is not the documented entrypoint. The passing rerun reproduced the Taskfile preview variable without invoking `task testacc`.

@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 1
 - **Theme**: Broad sweep
 - **Mode**: resolved-plan — High, stage 1, attempt 1
@@ -8,6 +9,7 @@
 - **Verdict**: ISSUES_FOUND
 
 ## Evidence Checklist
+
 - [x] Read the complete generated lens prompt and applicable repository instructions; inspected the live tracked diff and all three untracked test sources. Did not inspect prior reviews or private RCA.
 - [x] Traced `modelCRUDSteps`, `experimentCRUDSteps`, `FolderResource`, and `RefByFQN`: each run generates two owned folders once, retains both across steps, changes the item’s dependency from the first folder to the second, and preserves the existing resource-test teardown mechanism.
 - [x] Parsed both workflows with Python/PyYAML and independently asserted matching constant workflow-level groups, disabled active-run cancellation, matching environments, no job-level concurrency locks, and four matrix legs with fail-fast disabled.
@@ -20,6 +22,7 @@
 ## Issues
 
 ### Issue: New direct test dependencies cause the dependency-tidiness gate to fail
+
 **File:** `internal/services/mlmodel/folder_fixtures_test.go:11–12`
 **Severity:** Medium
 **Classification:** Required fix
@@ -27,6 +30,7 @@
 **Problem:** The new service tests directly import `github.com/hashicorp/hcl/v2`, and the workflow-isolation test directly imports `gopkg.in/yaml.v3`. Both modules are still declared with `// indirect` in the module manifest. Tidying the module therefore changes that manifest. The Check Build job runs the dependency task and immediately rejects module-manifest differences, so this change fails that validation even when its unit tests pass.
 
 **Evidence:**
+
 - Both service fixture tests introduce direct HCL imports; the workflow-isolation test introduces the direct YAML import. An independent `HEAD` search found no existing direct imports of either module.
 - The existing requirements remain `github.com/hashicorp/hcl/v2 v2.24.0 // indirect` and `gopkg.in/yaml.v3 v3.0.1 // indirect`.
 - The dependency task executes `go mod tidy`; Check Build then executes `git diff --exit-code -- go.mod go.sum`.
@@ -37,6 +41,7 @@
 ## Resolution Log
 
 ### Issue 1
+
 - **Status**: Open at review time.
 - **What changed**: Pending; no changes made during review.
 - **Why**: The newly direct test dependencies must be reflected in module metadata to satisfy the existing validation gate.

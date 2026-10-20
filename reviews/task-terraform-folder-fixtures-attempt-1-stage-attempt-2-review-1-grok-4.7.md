@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 1
 - **Theme**: Broad sweep
 - **Mode**: resolved-plan
@@ -8,6 +9,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Working tree inspected against the public fixture-fix repository. Changed source is limited to `.github/workflows/test.yml`, `DEVELOPER.md`, `go.mod`, `internal/services/mlexperiment/resource_ml_experiment_test.go`, `internal/services/mlmodel/resource_ml_model_test.go`, and the three new `folder_fixtures_test.go` files. No Fabric API, retry, or classification product files are in the diff.
 - [x] CRUD steps in `internal/services/mlexperiment/resource_ml_experiment_test.go` and `internal/services/mlmodel/resource_ml_model_test.go` call existing `testhelp.FolderResource` twice, join both folder configs into both steps, and set `folder_id` with `testhelp.RefByFQN`. They no longer read `FolderRS1` or `FolderRS2`. Acceptance entry points still take `WorkspaceRS` from `testhelp.WellKnown`.
 - [x] `internal/testhelp/testacc.go` `FolderResource` emits a `fabric_folder` with `display_name` and `workspace_id`. `internal/testhelp/utils.go` `RefByFQN` builds `${<fqn>.id}`. Dependency `CompileConfig` quotes string values, so the emitted `folder_id` is a Terraform interpolation and a graph dependency, not a static fixture ID. `JoinConfigs` only concatenates the three configs.

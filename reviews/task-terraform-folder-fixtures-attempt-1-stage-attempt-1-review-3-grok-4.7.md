@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 3
 - **Theme**: Edge cases & robustness
 - **Mode**: resolved-plan
@@ -10,6 +11,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Workflow lock is a shared constant with cancellation disabled: `.github/workflows/test.yml:21-27` and `.github/workflows/cleanup-script.yml:12-14` both use `fabric-testacc-environment` and `cancel-in-progress: false`.
 - [x] The acceptance matrix stays inside that workflow lock and is not given its own cancelling lock: `.github/workflows/test.yml:311-326` (`test` job, `environment: development`, `fail-fast: false`, no job `concurrency`). Commented MSI job is inactive.
 - [x] Other repository workflows do not join that group. `development` is used only by the test auth job (`.github/workflows/test.yml:63`), the test matrix (`.github/workflows/test.yml:315`), and cleanup (`.github/workflows/cleanup-script.yml:26`). Pages and release workflows use different environment names.

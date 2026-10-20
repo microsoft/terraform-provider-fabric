@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 4
 - **Stage**: 4
 - **Attempt**: 1
@@ -10,6 +11,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Diff inspected against the public checkout: workflow lock, developer notes, direct module requires, MLExperiment/MLModel acceptance step builders, and the three new unit files.
 - [x] Folder data flow traced from `internal/testhelp/testacc.go` `FolderResource` (162-174) and `internal/testhelp/utils.go` `RefByFQN` (190-192) through `experimentCRUDSteps` (`internal/services/mlexperiment/resource_ml_experiment_test.go` 220-265) and `modelCRUDSteps` (`internal/services/mlmodel/resource_ml_model_test.go` 246-291). `JoinConfigs` keeps both folder blocks in both steps; `folder_id` is `${fabric_folder.<name>.id}`, which remains an HCL reference after quoted compilation.
 - [x] Move versus replace checked in `internal/pkg/fabricitem/resource_schema.go` 204-209 (`folder_id` has no `RequiresReplace`), `resource_item.go` 222-225 (`MoveItem` on folder change), and `models_resource_item.go` 132-136. Experiment rename is allowed (`internal/services/mlexperiment/resource_ml_experiment.go` 16); the model step keeps `display_name` unchanged despite `NameRenameAllowed: false` (`internal/services/mlmodel/resource_ml_model.go` 16, model steps 264-282).
@@ -22,6 +24,7 @@
 - [ ] Full ML package suites, actionlint, and live acceptance were not re-run. Reported package statement coverage is not product-wide coverage. See limitations.
 
 ## Verified Assessment
+
 1. Acceptance CRUD no longer reads static `FolderRS1`/`FolderRS2`. Each call to `FolderResource` allocates a new alpha resource name and display name, emits a literal `workspace_id`, and returns `fabric_folder.<name>`. Both generated blocks are concatenated into step 1 and step 2, so a folder-id change cannot drop the previous folder from configuration.
 2. `RefByFQN` formats `${fabric_folder.<name>.id}`. Quoted compilation still yields one three-element traversal rooted at `fabric_folder` and ending at `id`. That is a real dependency, so Terraform orders folder create before item create and item destroy before folder destroy. `TestCheckResourceAttrPair` compares the item `folder_id` to the addressed folder `id` after apply, not to a baked-in fixture string.
 3. The second experiment step changes display name, description, and folder. Rename is allowed, and `folder_id` is not force-new, so the provider update path calls item update and then `MoveItem`. The model step changes description and folder only, so its force-new display name is not triggered. Fake `MoveItem` assigns `FolderID` from `TargetFolderID` and does not delete folders.
@@ -31,6 +34,7 @@
 7. No type or conversion defect was found in the changed steps, fake transport, YAML struct tags, or direct module promotion. Pre-existing helpers used by the new tests behave consistently with this data flow.
 
 ## Actually Run Versus Reported
+
 Reported checks were not treated as coverage. This review ran only `task testunit` with `TF_ACC=0` and local module resolution:
 
 - `FolderFixtures` / `internal/testhelp`: 1 passed.
@@ -42,6 +46,7 @@ Reported checks were not treated as coverage. This review ran only `task testuni
 Those runs compile the changed tests and execute the fake Terraform lifecycle for the new folder steps. They do not execute the acceptance tests, a live API, cleanup, or actionlint. The reported full-package count and actionlint result were not reproduced here.
 
 ## Limitations
+
 - No live acceptance, cloud call, or cleanup was run. Acceptance ordering and destroy against a real workspace remain unverified.
 - Statement-coverage percentages from these filters are package-local. They do not cover the shared item implementation, other services, or GitHub execution.
 - Lifecycle checks do not assert that the item id is unchanged. Current schema and step attributes make the second step an in-place update plus move; the tests alone would not catch a future force-new regression.

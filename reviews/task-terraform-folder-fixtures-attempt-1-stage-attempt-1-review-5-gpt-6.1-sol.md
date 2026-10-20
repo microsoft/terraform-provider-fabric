@@ -1,6 +1,7 @@
 # Terraform folder fixtures — testing and coverage review
 
 ## Review Summary
+
 - **Round**: 5
 - **Stage**: 5
 - **Theme**: Testing & coverage
@@ -16,6 +17,7 @@
 This verdict covers this reviewer and this stage only. The supplied High plan's two-slot override and normal maximum of two stage attempts remain unchanged; this review neither advances the aggregate gate nor requests an exception.
 
 ## Evidence Checklist
+
 - [x] Read the supplied current-stage scope and diff, then independently inspected all eight changed/new source and documentation files. No earlier review artifacts or private investigation evidence were consulted.
 - [x] Traced the acceptance entrypoints and shared builders in `internal\services\mlmodel\resource_ml_model_test.go:240` and `internal\services\mlexperiment\resource_ml_experiment_test.go:214`. The corresponding new lifecycle tests execute those same builders, rather than separate approximations.
 - [x] Inspected both new `folder_fixtures_test.go` files, including their HCL traversal assertions, repeated-builder isolation checks, actual Terraform test execution, and serialized fake transports.

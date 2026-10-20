@@ -3,6 +3,7 @@
 Independent current-source review. Prior review artifacts were not read and no earlier clean verdict was carried forward.
 
 ## Review Summary
+
 - **Stage**: 6
 - **Attempt**: 2
 - **Round**: 6
@@ -14,6 +15,7 @@ Independent current-source review. Prior review artifacts were not read and no e
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Full final scope, not only the three lint-touched tests: `.github/workflows/test.yml`, `DEVELOPER.md`, `go.mod`, `internal/services/mlmodel/resource_ml_model_test.go`, `internal/services/mlexperiment/resource_ml_experiment_test.go`, plus `internal/services/mlmodel/folder_fixtures_test.go`, `internal/services/mlexperiment/folder_fixtures_test.go`, and `internal/testhelp/folder_fixtures_test.go`. No product service files are in the diff.
 - [x] Shared lock: `test.yml` lines 23-27 set group `fabric-testacc-environment` and `cancel-in-progress: false`, with a comment that a per-job lock would drop matrix legs. `cleanup-script.yml` lines 12-14 use the same group and `cancel-in-progress: false`. The `test` job (around lines 309-316) still uses environment `development` and has no job-level `concurrency` key. Other workflows do not use that environment name (`release` uses `release`; pages uses `github-pages`).
 - [x] Docs match helpers: `DEVELOPER.md` lines 318-322 and 353-367. Setup writes `internal/testhelp/fixtures/.wellknown.json` (`tools/scripts/Set-WellKnown.ps1` line 2312) and does not publish the Actions variable. `WellKnown()` (`internal/testhelp/wellknown.go` lines 40-52) returns a set `FABRIC_TESTACC_WELLKNOWN` value before the file. Cleanup treats whitespace as unset and logs which source it used (`tools/scripts/Remove-WorkspaceRSItems.ps1` lines 246-259).
@@ -43,6 +45,7 @@ Considered and not filed. A docs-only Test run still holds the shared group unti
 Reported: pinned golangci-lint 2.14.0 has 0 issues; Task 15 tests, actionlint, tidy diff, and whitespace pass.
 
 Actually run this attempt:
+
 - golangci-lint 2.14.0 `--fix=false` on `internal/testhelp`, `internal/services/mlmodel`, and `internal/services/mlexperiment`: confirmed version 2.14.0, output `0 issues.`, exit 0. Two pre-existing config warnings (deprecated formatter extra-rules key, deprecated gomodguard name) did not produce issues.
 - actionlint on `.github/workflows/test.yml` and `.github/workflows/cleanup-script.yml`: exit 0, no findings.
 - `go mod tidy -diff`: exit 0, no diff. `git diff --check`: exit 0. Changed and new files are LF with no trailing whitespace.

@@ -1,4 +1,5 @@
 ## Review Summary
+
 - **Round**: 6
 - **Stage**: 6
 - **Attempt**: 1
@@ -11,6 +12,7 @@
 - **Verdict**: CLEAN
 
 ## Evidence Checklist
+
 - [x] Inspected current source independently. No prior review artifacts were used as evidence.
 - [x] Workflow lock is a shared constant with cancellation disabled, and the acceptance matrix job has no per-job lock: `.github/workflows/test.yml:23-27`, `.github/workflows/test.yml:310-329`, `.github/workflows/cleanup-script.yml:12-14`.
 - [x] Developer docs match the fixture and lock contract: `DEVELOPER.md:318-321`, `DEVELOPER.md:353-367`.
