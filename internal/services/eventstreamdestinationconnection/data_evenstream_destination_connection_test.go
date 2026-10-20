@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabeventstream "github.com/microsoft/fabric-sdk-go/fabric/eventstream"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -182,6 +183,68 @@ func TestUnit_EventstreamDestinationDataSource(t *testing.T) {
 			),
 		},
 	}))
+}
+
+func TestUnit_EventstreamDestinationConnectionDataSource_EndpointTypes(t *testing.T) {
+	testCases := map[string]struct {
+		entity      fabeventstream.EndpointConnectionClassification
+		expectError *regexp.Regexp
+	}{
+		"custom endpoint without access keys": {
+			entity: &fabeventstream.CustomEndpointConnection{
+				Type:                    new(fabeventstream.EndpointConnectionTypeCustomEndpoint),
+				EventHubName:            new("event-hub"),
+				FullyQualifiedNamespace: new("namespace"),
+				ConsumerGroupName:       new("consumer-group"),
+			},
+		},
+		"kafka endpoint": {
+			entity: &fabeventstream.KafkaEndpointConnection{
+				Type: new(fabeventstream.EndpointConnectionTypeKafkaEndpoint),
+			},
+			expectError: regexp.MustCompile("Unsupported Eventstream destination connection type"),
+		},
+		"unknown endpoint": {
+			entity: &fabeventstream.EndpointConnection{
+				Type: new(fabeventstream.EndpointConnectionType("Unknown")),
+			},
+			expectError: regexp.MustCompile("Unsupported Eventstream destination connection type"),
+		},
+		"nil endpoint": {
+			expectError: regexp.MustCompile("Unsupported Eventstream destination connection type"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			workspaceID := testhelp.RandomUUID()
+			eventstreamID := testhelp.RandomUUID()
+			destinationID := testhelp.RandomUUID()
+
+			fakes.FakeServer.ServerFactory.Eventstream.TopologyServer.GetEventstreamDestinationConnection = fakeGetEventstreamDestinationConnection(
+				workspaceID, eventstreamID, destinationID, testCase.entity,
+			)
+
+			step := resource.TestStep{
+				Config: at.CompileConfig(testDataSourceItemHeader, map[string]any{
+					"workspace_id":   workspaceID,
+					"eventstream_id": eventstreamID,
+					"destination_id": destinationID,
+				}),
+				ExpectError: testCase.expectError,
+			}
+			if testCase.expectError == nil {
+				step.Check = resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(testDataSourceItemFQN, "event_hub_name", "event-hub"),
+					resource.TestCheckResourceAttr(testDataSourceItemFQN, "fully_qualified_namespace", "namespace"),
+					resource.TestCheckResourceAttr(testDataSourceItemFQN, "consumer_group_name", "consumer-group"),
+					resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "access_keys"),
+				)
+			}
+
+			resource.Test(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{step}))
+		})
+	}
 }
 
 func TestAcc_EventstreamDestinationConnectionDataSource(t *testing.T) {

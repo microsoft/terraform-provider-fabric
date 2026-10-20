@@ -172,5 +172,5 @@ func (d *dataSourceEventstreamDestinationConnection) get(ctx context.Context, mo
 		return diags
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.DestinationID.ValueString(), respGet.DestinationConnectionResponse)
+	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.DestinationID.ValueString(), respGet.EndpointConnectionClassification)
 }
