@@ -106,11 +106,11 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 
 Read-Only:
 
-- `auto_sync` (String) Auto sync the catalog.
+- `auto_sync` (String) Auto sync the catalog. Possible values: `Disabled`, `Enabled`.
 - `catalog_name` (String) Azure databricks catalog name.
 - `databricks_workspace_connection_id` (String) The Azure databricks workspace connection id.
-- `mirror_status` (String) The MirroredAzureDatabricksCatalog sync status.
-- `mirroring_mode` (String) Mirroring mode.
+- `mirror_status` (String) The MirroredAzureDatabricksCatalog sync status. Possible values: `Mirrored`, `NotMirrored`.
+- `mirroring_mode` (String) The mirroring mode. Possible values: `Full`, `Partial`.
 - `onelake_tables_path` (String) OneLake path to the MirroredAzureDatabricksCatalog tables directory.
 - `sql_endpoint_properties` (Attributes) An object containing the properties of the SQL endpoint. (see [below for nested schema](#nestedatt--properties--sql_endpoint_properties))
 - `storage_connection_id` (String) The storage connection id.
@@ -133,7 +133,7 @@ Read-Only:
 
 - `error_info` (Attributes) The error information. (see [below for nested schema](#nestedatt--properties--sync_details--error_info))
 - `last_sync_date_time` (String) The last sync date time in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
-- `status` (String) The sync status.
+- `status` (String) The sync status. Possible values: `Failed`, `InProgress`, `NotStarted`, `Success`.
 
 <a id="nestedatt--properties--sync_details--error_info"></a>
 
