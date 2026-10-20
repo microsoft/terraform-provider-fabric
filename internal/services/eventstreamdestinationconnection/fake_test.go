@@ -9,7 +9,7 @@ import (
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
+	fabeventstream "github.com/microsoft/fabric-sdk-go/fabric/eventstream"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -17,32 +17,35 @@ import (
 
 func fakeGetEventstreamDestinationConnection(
 	fakeWorkspaceID, fakeEventstreamID, fakeDestinationID string,
-	entity eventstream.TopologyClientGetEventstreamDestinationConnectionResponse,
+	entity fabeventstream.EndpointConnectionClassification,
 ) func(
 	ctx context.Context,
 	workspaceID, eventstreamID, destinationID string,
-	options *eventstream.TopologyClientGetEventstreamDestinationConnectionOptions,
-) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamDestinationConnectionResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, eventstreamID, destinationID string, _ *eventstream.TopologyClientGetEventstreamDestinationConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamDestinationConnectionResponse], errResp azfake.ErrorResponder) {
-		resp = azfake.Responder[eventstream.TopologyClientGetEventstreamDestinationConnectionResponse]{}
+	options *fabeventstream.TopologyClientGetEventstreamDestinationConnectionOptions,
+) (resp azfake.Responder[fabeventstream.TopologyClientGetEventstreamDestinationConnectionResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, eventstreamID, destinationID string, _ *fabeventstream.TopologyClientGetEventstreamDestinationConnectionOptions) (resp azfake.Responder[fabeventstream.TopologyClientGetEventstreamDestinationConnectionResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabeventstream.TopologyClientGetEventstreamDestinationConnectionResponse]{}
 
 		if destinationID != fakeDestinationID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
-			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamDestinationConnectionResponse{}, nil)
+			resp.SetResponse(http.StatusNotFound, fabeventstream.TopologyClientGetEventstreamDestinationConnectionResponse{}, nil)
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
 		} else {
-			resp.SetResponse(http.StatusOK, entity, nil)
+			resp.SetResponse(http.StatusOK, fabeventstream.TopologyClientGetEventstreamDestinationConnectionResponse{
+				EndpointConnectionClassification: entity,
+			}, nil)
 		}
 
 		return resp, errResp
 	}
 }
 
-func NewRandomEventstreamDestinationConnection() eventstream.TopologyClientGetEventstreamDestinationConnectionResponse {
-	return eventstream.TopologyClientGetEventstreamDestinationConnectionResponse{
+func NewRandomEventstreamDestinationConnection() *fabeventstream.CustomEndpointConnection {
+	return &fabeventstream.CustomEndpointConnection{
+		Type:                    new(fabeventstream.EndpointConnectionTypeCustomEndpoint),
 		EventHubName:            new(testhelp.RandomName()),
 		FullyQualifiedNamespace: new(testhelp.RandomName()),
 		ConsumerGroupName:       new(testhelp.RandomName()),
-		AccessKeys: &eventstream.AccessKeys{
+		AccessKeys: &fabeventstream.AccessKeys{
 			PrimaryConnectionString:   new(testhelp.RandomName()),
 			SecondaryConnectionString: new(testhelp.RandomName()),
 			PrimaryKey:                new(testhelp.RandomName()),

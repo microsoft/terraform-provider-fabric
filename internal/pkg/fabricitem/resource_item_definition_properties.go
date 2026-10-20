@@ -176,9 +176,7 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) Create(ctx 
 		return
 	}
 
-	if resp.Diagnostics.Append(
-		SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...,
-	); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(SyncTags(ctx, r.client, r.tagsClient, plan.Tags, plan.WorkspaceID.ValueString(), plan.ID.ValueString())...); resp.Diagnostics.HasError() {
 		return
 	}
 
