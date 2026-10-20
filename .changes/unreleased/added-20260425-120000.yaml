@@ -1,5 +1,5 @@
 kind: added
-body: Added `fabric_snowflake_database` resource, requiring exactly one of `configuration` or `definition` on creation.
+body: Added `fabric_snowflake_database` resource
 time: 2026-04-25T12:00:00.000000000Z
 custom:
     Issue: "945"

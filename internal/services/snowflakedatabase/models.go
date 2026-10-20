@@ -25,6 +25,13 @@ type snowflakeDatabasePropertiesModel struct {
 }
 
 func (to *snowflakeDatabasePropertiesModel) set(ctx context.Context, from fabsnowflakedatabase.Properties) diag.Diagnostics {
+	to.ConnectionID = customtypes.NewUUIDPointerValue(from.ConnectionID)
+	to.DefaultSchema = types.StringPointerValue(from.DefaultSchema)
+	to.OnelakeTablesPath = customtypes.NewURLPointerValue(from.OnelakeTablesPath)
+	to.SnowflakeAccountURL = customtypes.NewURLPointerValue(from.SnowflakeAccountURL)
+	to.SnowflakeDatabaseName = types.StringPointerValue(from.SnowflakeDatabaseName)
+	to.SnowflakeVolumePath = customtypes.NewURLPointerValue(from.SnowflakeVolumePath)
+
 	sqlEndpointProperties := supertypes.NewSingleNestedObjectValueOfNull[snowflakeDatabaseSQLEndpointPropertiesModel](ctx)
 
 	if from.SQLEndpointProperties != nil {
@@ -36,12 +43,6 @@ func (to *snowflakeDatabasePropertiesModel) set(ctx context.Context, from fabsno
 		}
 	}
 
-	to.ConnectionID = customtypes.NewUUIDPointerValue(from.ConnectionID)
-	to.DefaultSchema = types.StringPointerValue(from.DefaultSchema)
-	to.OnelakeTablesPath = customtypes.NewURLPointerValue(from.OnelakeTablesPath)
-	to.SnowflakeAccountURL = customtypes.NewURLPointerValue(from.SnowflakeAccountURL)
-	to.SnowflakeDatabaseName = types.StringPointerValue(from.SnowflakeDatabaseName)
-	to.SnowflakeVolumePath = customtypes.NewURLPointerValue(from.SnowflakeVolumePath)
 	to.SQLEndpointProperties = sqlEndpointProperties
 
 	return nil

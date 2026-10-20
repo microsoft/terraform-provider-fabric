@@ -6,10 +6,14 @@ package snowflakedatabase
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	fabsnowflakedatabase "github.com/microsoft/fabric-sdk-go/fabric/snowflakedatabase"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/utils"
 )
 
 func getDataSourceSnowflakeDatabasePropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
@@ -50,6 +54,9 @@ func getDataSourceSnowflakeDatabasePropertiesAttributes(ctx context.Context) map
 				"provisioning_status": schema.StringAttribute{
 					MarkdownDescription: "The SQL endpoint provisioning status.",
 					Computed:            true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabsnowflakedatabase.PossibleProvisioningStatusValues(), true)...),
+					},
 				},
 				"connection_string": schema.StringAttribute{
 					MarkdownDescription: "SQL endpoint connection string.",
