@@ -117,11 +117,11 @@ func TestUnit_OrgAppResource_Attributes(t *testing.T) {
 
 func TestUnit_OrgAppResource_ImportState(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	testCase := at.JoinConfigs(
 		testHelperLocals,
@@ -189,17 +189,17 @@ func TestUnit_OrgAppResource_ImportState(t *testing.T) {
 
 func TestUnit_OrgAppResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entityExist := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
-	entityBefore := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
-	entityAfter := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	tag1ID := testhelp.RandomUUID()
 	tag2ID := testhelp.RandomUUID()
 	tag3ID := testhelp.RandomUUID()
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
 	fakes.FakeServer.Upsert(entityAfter)
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - create - existing entity
@@ -240,7 +240,6 @@ func TestUnit_OrgAppResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
@@ -291,7 +290,6 @@ func TestUnit_OrgAppResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_root_path"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},

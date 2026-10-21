@@ -16,7 +16,7 @@ The Org App resource allows you to manage a Fabric [Org App](https://learn.micro
 ## Example Usage
 
 ```terraform
-# Example 1 - Item without definition properties
+# Example 1 - Org App without definition
 resource "fabric_org_app" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
@@ -119,7 +119,6 @@ resource "fabric_org_app" "example_parameters" {
 ### Read-Only
 
 - `id` (String) The Org App ID.
-- `properties` (Attributes) The Org App properties. (see [below for nested schema](#nestedatt--properties))
 
 <a id="nestedatt--definition"></a>
 
@@ -162,14 +161,6 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-<a id="nestedatt--properties"></a>
-
-### Nested Schema for `properties`
-
-Read-Only:
-
-- `onelake_root_path` (String) OneLake path to the Org App root directory.
 
 ## Import
 

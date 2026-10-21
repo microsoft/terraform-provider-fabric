@@ -23,11 +23,11 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_OrgAppsDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -80,9 +80,6 @@ func TestUnit_OrgAppsDataSource(t *testing.T) {
 							"display_name": knownvalue.StringExact(*entity.DisplayName),
 							"description":  knownvalue.StringExact(*entity.Description),
 							"folder_id":    knownvalue.StringExact(*entity.FolderID),
-							"properties": knownvalue.ObjectPartial(map[string]knownvalue.Check{
-								"onelake_root_path": knownvalue.StringExact(*entity.Properties.OneLakeRootPath),
-							}),
 						}),
 					}),
 				),

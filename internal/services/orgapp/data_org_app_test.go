@@ -20,11 +20,11 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 
 func TestUnit_OrgAppDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
-	entity := fakes.NewRandomOrgAppWithWorkspace(workspaceID)
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 	fakes.FakeServer.Upsert(entity)
-	fakes.FakeServer.Upsert(fakes.NewRandomOrgAppWithWorkspace(workspaceID))
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes
@@ -103,7 +103,6 @@ func TestUnit_OrgAppDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "properties.onelake_root_path", entity.Properties.OneLakeRootPath),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
@@ -134,7 +133,6 @@ func TestUnit_OrgAppDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
-				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "properties.onelake_root_path", entity.Properties.OneLakeRootPath),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},

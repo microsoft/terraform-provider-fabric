@@ -78,7 +78,6 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Org App description.
 - `folder_id` (String) The Org App Folder ID.
-- `properties` (Attributes) The Org App properties. (see [below for nested schema](#nestedatt--properties))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -97,11 +96,3 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
-
-<a id="nestedatt--properties"></a>
-
-### Nested Schema for `properties`
-
-Read-Only:
-
-- `onelake_root_path` (String) OneLake path to the Org App root directory.

@@ -1,4 +1,4 @@
-# Example 1 - Item without definition properties
+# Example 1 - Org App without definition
 resource "fabric_org_app" "example" {
   display_name = "example1"
   workspace_id = "00000000-0000-0000-0000-000000000000"
