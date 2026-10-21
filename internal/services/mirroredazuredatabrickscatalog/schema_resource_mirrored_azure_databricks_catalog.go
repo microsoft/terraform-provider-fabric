@@ -20,7 +20,7 @@ import (
 func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.Context) map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"auto_sync": schema.StringAttribute{
-			MarkdownDescription: "Auto sync the catalog. Possible values: " + utils.ConvertStringSlicesToString(fabmirroredazuredatabrickscatalog.PossibleAutoSyncValues(), true, true) + ".",
+			MarkdownDescription: "Auto sync the catalog.",
 			Computed:            true,
 		},
 		"catalog_name": schema.StringAttribute{
@@ -33,15 +33,11 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 			CustomType:          customtypes.UUIDType{},
 		},
 		"mirror_status": schema.StringAttribute{
-			MarkdownDescription: "The MirroredAzureDatabricksCatalog sync status. Possible values: " + utils.ConvertStringSlicesToString(
-				fabmirroredazuredatabrickscatalog.PossibleMirrorStatusValues(),
-				true,
-				true,
-			) + ".",
-			Computed: true,
+			MarkdownDescription: "The MirroredAzureDatabricksCatalog sync status.",
+			Computed:            true,
 		},
 		"mirroring_mode": schema.StringAttribute{
-			MarkdownDescription: "The mirroring mode. Possible values: " + utils.ConvertStringSlicesToString(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true, true) + ".",
+			MarkdownDescription: "The mirroring mode.",
 			Computed:            true,
 		},
 		"onelake_tables_path": schema.StringAttribute{
@@ -100,7 +96,7 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 					CustomType:          timetypes.RFC3339Type{},
 				},
 				"status": schema.StringAttribute{
-					MarkdownDescription: "The sync status. Possible values: " + utils.ConvertStringSlicesToString(fabmirroredazuredatabrickscatalog.PossibleStatusValues(), true, true) + ".",
+					MarkdownDescription: "The sync status.",
 					Computed:            true,
 				},
 			},
@@ -120,7 +116,7 @@ func getResourceMirroredAzureDatabricksCatalogConfigurationAttributes() map[stri
 			CustomType:          customtypes.UUIDType{},
 		},
 		"mirroring_mode": schema.StringAttribute{
-			MarkdownDescription: "The mirroring mode. Possible values: " + utils.ConvertStringSlicesToString(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true, true) + ".",
+			MarkdownDescription: "The mirroring mode.",
 			Required:            true,
 			Validators: []validator.String{
 				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true)...),
