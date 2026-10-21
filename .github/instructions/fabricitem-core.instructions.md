@@ -68,6 +68,10 @@ This avoids requiring all SDK item types to implement a shared interface. The `g
 
 `CreateItem` and `UpdateItem` wrap SDK calls with `RetryOperationWithResult[T]`, which retries indefinitely on `ItemDisplayNameNotAvailableYet` errors (a transient Fabric API issue when display names haven't propagated). Default retry interval: 2 minutes.
 
+## Resource Read Results
+
+Internal resource `get` methods return `itemReadResult`, separating diagnostics from the `CapacityNotActive` classification. Inactive capacity responses remain error diagnostics for create, update, and import callers. Only resource `Read` converts this outcome to a warning and retains the previous state; other not-found responses continue to remove the item from state.
+
 ## Schema Generation
 
 Schema functions (`resource_schema.go`, `data_schema.go`) compose base attributes (`workspace_id`, `id`, `display_name`, `description`, `folder_id`, `timeouts`) with archetype-specific additions (`properties` nested object, `configuration` nested object with `RequiresReplace`, `definition` map + `format` + `definition_update_enabled`). Service packages pass their custom attributes via `PropertiesAttributes` and `ConfigAttributes` maps.
