@@ -22,6 +22,9 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 		"auto_sync": schema.StringAttribute{
 			MarkdownDescription: "Auto sync the catalog.",
 			Computed:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleAutoSyncValues(), true)...),
+			},
 		},
 		"catalog_name": schema.StringAttribute{
 			MarkdownDescription: "Azure databricks catalog name.",
@@ -35,10 +38,16 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 		"mirror_status": schema.StringAttribute{
 			MarkdownDescription: "The MirroredAzureDatabricksCatalog sync status.",
 			Computed:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirrorStatusValues(), true)...),
+			},
 		},
 		"mirroring_mode": schema.StringAttribute{
 			MarkdownDescription: "The mirroring mode.",
 			Computed:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleMirroringModesValues(), true)...),
+			},
 		},
 		"onelake_tables_path": schema.StringAttribute{
 			MarkdownDescription: "OneLake path to the MirroredAzureDatabricksCatalog tables directory.",
@@ -98,6 +107,9 @@ func getResourceMirroredAzureDatabricksCatalogPropertiesAttributes(ctx context.C
 				"status": schema.StringAttribute{
 					MarkdownDescription: "The sync status.",
 					Computed:            true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabmirroredazuredatabrickscatalog.PossibleStatusValues(), true)...),
+					},
 				},
 			},
 		},
