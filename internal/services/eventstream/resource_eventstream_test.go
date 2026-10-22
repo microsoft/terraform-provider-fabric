@@ -300,6 +300,46 @@ func TestAcc_EventstreamResource_CRUD(t *testing.T) {
 	))
 }
 
+func TestUnit_EventstreamDefinitionResource_CRUD(t *testing.T) {
+	for _, paths := range [][]string{
+		{"eventstream.json"},
+		{"eventstream.json", "eventstreamProperties.json"},
+	} {
+		t.Run(fmt.Sprintf("%d_parts", len(paths)), func(t *testing.T) {
+			definition := make(map[string]any, len(paths))
+			checks := []resource.TestCheckFunc{
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.%", fmt.Sprint(len(paths))),
+			}
+
+			for _, path := range paths {
+				source := testhelp.GetFixturesDirPath("eventstream", path)
+				definition[fmt.Sprintf("%q", path)] = map[string]any{
+					"source": source,
+				}
+				checks = append(checks,
+					resource.TestCheckResourceAttr(testResourceItemFQN, "definition."+path+".source", source),
+				)
+			}
+
+			resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+				{
+					ResourceName: testResourceItemFQN,
+					Config: at.CompileConfig(
+						testResourceItemHeader,
+						map[string]any{
+							"workspace_id": testhelp.RandomUUID(),
+							"display_name": testhelp.RandomName(),
+							"format":       "Default",
+							"definition":   definition,
+						},
+					),
+					Check: resource.ComposeAggregateTestCheckFunc(checks...),
+				},
+			}))
+		})
+	}
+}
+
 func TestAcc_EventstreamDefinitionResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
