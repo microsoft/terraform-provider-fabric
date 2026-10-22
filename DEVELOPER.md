@@ -315,6 +315,11 @@ Then run:
 task testacc:setup
 ```
 
+Setup writes `internal/testhelp/fixtures/.wellknown.json`. A populated
+`FABRIC_TESTACC_WELLKNOWN` environment variable takes precedence over that file.
+GitHub workflows use the `FABRIC_TESTACC_WELLKNOWN` Actions variable; a local
+setup run does not publish or refresh that variable.
+
 ### Unit Tests
 
 > [!NOTE]
@@ -344,6 +349,22 @@ sudo chown -R vscode /go/pkg
 
 > [!NOTE]
 > Acceptance tests will create the actual resources since they will be run against real APIs.
+
+The MLModel and MLExperiment CRUD tests create their own folders in `WorkspaceRS`,
+use Terraform references to order item creation and moves, and destroy their owned
+resources afterwards. They do not require pre-created `FolderRS1`/`FolderRS2`.
+
+The Test and Cleanup workflows share a **workflow-level** concurrency group for
+the development environment. Active runs are not automatically cancelled: the
+whole test matrix, including teardown, must finish before cleanup can run.
+This deliberately serializes workflow runs using that environment rather than
+cancelling an active run when a newer commit arrives. GitHub retains at most one
+pending run per concurrency group and may replace it with a newer run; it is not
+a FIFO queue. Re-run a superseded required check when needed.
+
+The GitHub lock does not cover local commands, forks, other repositories or manual
+cleanup. Coordinate with the environment owner before using those paths against
+the same workspace. Do not run cleanup alongside acceptance tests.
 
 To run all acceptance tests
 
