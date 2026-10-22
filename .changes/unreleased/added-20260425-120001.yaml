@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_snowflake_database` Data Source
+time: 2026-04-25T12:00:01.000000000Z
+custom:
+    Issue: "946"

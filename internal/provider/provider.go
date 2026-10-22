@@ -74,6 +74,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredazuredatabrickscatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredcatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
@@ -89,6 +90,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/snowflakedatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -489,6 +491,9 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		func() resource.Resource {
+			return mirroredazuredatabrickscatalog.NewResourceMirroredAzureDatabricksCatalog(ctx)
+		},
 		func() resource.Resource { return mirroredcatalog.NewResourceMirroredCatalog(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
@@ -509,6 +514,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
+		func() resource.Resource { return snowflakedatabase.NewResourceSnowflakeDatabase(ctx) },
 		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
@@ -595,6 +601,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalog(ctx)
+		},
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalogs(ctx)
+		},
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalog(ctx) },
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalogs(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
@@ -633,6 +645,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabase(ctx) },
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabases(ctx) },
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
