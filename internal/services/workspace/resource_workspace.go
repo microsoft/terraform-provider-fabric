@@ -137,6 +137,12 @@ func (r *resourceWorkspace) Create(ctx context.Context, req resource.CreateReque
 		})
 	}
 
+	if len(plan.Tags.Elements()) > 0 {
+		if resp.Diagnostics.Append(syncTags(ctx, r.client, plan.Tags, plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -339,6 +345,12 @@ func (r *resourceWorkspace) Update(ctx context.Context, req resource.UpdateReque
 			if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 				return
 			}
+		}
+	}
+
+	if !plan.Tags.Equal(state.Tags) {
+		if resp.Diagnostics.Append(syncTags(ctx, r.client, plan.Tags, plan.ID.ValueString())...); resp.Diagnostics.HasError() {
+			return
 		}
 	}
 
