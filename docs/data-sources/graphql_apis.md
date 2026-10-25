@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The GraphQL API Folder ID.
 - `id` (String) The GraphQL API ID.
 - `sensitivity_label` (Attributes) The GraphQL API sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the GraphQL API.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

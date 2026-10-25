@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Custom Pool resource allows you to manage a Fabric Spark Custom Pool https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_custom_pool (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Spark Custom Pool resource allows you to manage a Fabric [Spark Custom Pool](https://learn.microsoft.com/fabric/data-engineering/create-custom-spark-pools).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

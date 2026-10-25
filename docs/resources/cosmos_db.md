@@ -107,6 +107,7 @@ resource "fabric_cosmos_db" "example_parameters" {
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Cosmos DB format. Possible values: `Default`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

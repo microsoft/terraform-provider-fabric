@@ -24,13 +24,19 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Types:          "digital_twin_builders",
 	DocsURL:        "https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview",
 	IsPreview:      true,
-	IsSPNSupported: true,
+	IsSPNSupported: false,
 }
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type:  fabricitem.DefinitionFormatDefault,
-		API:   "",
-		Paths: []string{"definition.json"},
+		Type: fabricitem.DefinitionFormatDefault,
+		API:  "",
+		Paths: []string{
+			"definition.json",
+			"EntityTypes/*",
+			"EntityTypeRelationships/*",
+			"ContextualizationOperations/*",
+			"MappingOperations/*",
+		},
 	},
 }

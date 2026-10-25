@@ -50,6 +50,7 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Folder ID.
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Environment Settings data-source allows you to retrieve details about a Fabric Spark Environment Settings https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_environment_settings (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Spark Environment Settings data-source allows you to retrieve details about a Fabric [Spark Environment Settings](https://learn.microsoft.com/fabric/data-engineering/environment-manage-compute).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

@@ -4,7 +4,7 @@ page_title: "fabric_digital_twin_builders Data Source - terraform-provider-fabri
 subcategory: ""
 description: |-
   The Digital Twin Builders data-source allows you to retrieve a list of Fabric Digital Twin Builders https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview.
-  -> This data-source supports Service Principal authentication.
+  -> This data-source does not support Service Principal. Please use a User context authentication.
   ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 The Digital Twin Builders data-source allows you to retrieve a list of Fabric [Digital Twin Builders](https://learn.microsoft.com/fabric/real-time-intelligence/digital-twin-builder/overview).
 
--> This data-source supports Service Principal authentication.
+-> This data-source does not support Service Principal. Please use a User context authentication.
 
 ~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Digital Twin Builder Folder ID.
 - `id` (String) The Digital Twin Builder ID.
 - `sensitivity_label` (Attributes) The Digital Twin Builder sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Digital Twin Builder.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

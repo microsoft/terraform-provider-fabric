@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -56,14 +56,14 @@ func itemSchema() superschema.Schema {
 					Computed: true,
 				},
 			},
-			"allowed_gateways": superschema.SuperListNestedAttributeOf[gatewayAccessRuleMetadataModel]{
-				Common: &schemaR.ListNestedAttribute{
-					MarkdownDescription: "A list of rules that define outbound access behavior for gateways.",
+			"allowed_gateways": superschema.SuperSetNestedAttributeOf[gatewayAccessRuleMetadataModel]{
+				Common: &schemaR.SetNestedAttribute{
+					MarkdownDescription: "A set of rules that define outbound access behavior for gateways.",
 					Computed:            true,
 				},
-				Resource: &schemaR.ListNestedAttribute{
+				Resource: &schemaR.SetNestedAttribute{
 					Optional: true,
-					Default: listdefault.StaticValue(types.ListValueMust(
+					Default: setdefault.StaticValue(types.SetValueMust(
 						types.ObjectType{
 							AttrTypes: map[string]attr.Type{
 								"id": customtypes.UUIDType{},

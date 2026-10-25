@@ -48,7 +48,8 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 							"max_executors": 2,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityCreateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "auto_scale.enabled", "true"),
@@ -81,7 +82,8 @@ func TestAcc_SparkCustomPoolResource_CRUD(t *testing.T) {
 							"enabled": false,
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "name", entityUpdateName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "auto_scale.enabled", "false"),

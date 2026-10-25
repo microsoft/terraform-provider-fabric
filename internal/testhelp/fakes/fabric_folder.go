@@ -52,9 +52,7 @@ func (o *operationsFolder) TransformGet(entity fabcore.Folder) fabcore.FoldersCl
 // TransformList implements concreteOperations.
 func (o *operationsFolder) TransformList(entities []fabcore.Folder) fabcore.FoldersClientListFoldersResponse {
 	return fabcore.FoldersClientListFoldersResponse{
-		Folders: fabcore.Folders{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -205,7 +203,8 @@ func configureFolder(server *fakeServer) fabcore.Folder {
 		&server.ServerFactory.Core.FoldersServer.UpdateFolder,
 		&server.ServerFactory.Core.FoldersServer.CreateFolder,
 		&server.ServerFactory.Core.FoldersServer.NewListFoldersPager,
-		&server.ServerFactory.Core.FoldersServer.DeleteFolder)
+		&server.ServerFactory.Core.FoldersServer.DeleteFolder,
+	)
 
 	server.ServerFactory.Core.FoldersServer.NewListFoldersPager = FakeListFolders(handler)
 	server.ServerFactory.Core.FoldersServer.MoveFolder = FakeMoveFolder(handler)

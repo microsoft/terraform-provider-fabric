@@ -37,7 +37,7 @@ resource "fabric_mirrored_database" "example_custom_delimiter" {
   definition = {
     "mirroring.json" = {
       source           = "${local.path}/mirroring.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DEFAULT_SCHEMA" = "my_schema"
       }

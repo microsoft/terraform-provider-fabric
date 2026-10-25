@@ -5,6 +5,7 @@ package eventstreamsourceconnection
 
 import (
 	"context"
+	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsE "github.com/hashicorp/terraform-plugin-framework-timeouts/ephemeral/timeouts"  //revive:disable-line:import-alias-naming
@@ -37,22 +38,35 @@ type baseEventstreamSourceConnectionModel struct {
 	AccessKeys              supertypes.SingleNestedObjectValueOf[accessKeysModel] `tfsdk:"access_keys"`
 }
 
-func (to *baseEventstreamSourceConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, sourceID string, from fabeventstream.SourceConnectionResponse) diag.Diagnostics {
+func (to *baseEventstreamSourceConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, sourceID string, from fabeventstream.EndpointConnectionClassification) diag.Diagnostics {
 	to.SourceID = customtypes.NewUUIDValue(sourceID)
 	to.EventstreamID = customtypes.NewUUIDValue(eventstreamID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
-	to.EventHubName = types.StringPointerValue(from.EventHubName)
-	to.FullyQualifiedNamespace = types.StringPointerValue(from.FullyQualifiedNamespace)
 
 	accessKeys := supertypes.NewSingleNestedObjectValueOfNull[accessKeysModel](ctx)
 
-	if from.AccessKeys != nil {
-		accessKeysModel := &accessKeysModel{}
-		accessKeysModel.set(*from.AccessKeys)
+	switch entity := from.(type) {
+	case *fabeventstream.CustomEndpointConnection:
+		to.EventHubName = types.StringPointerValue(entity.EventHubName)
+		to.FullyQualifiedNamespace = types.StringPointerValue(entity.FullyQualifiedNamespace)
 
-		if diags := accessKeys.Set(ctx, accessKeysModel); diags.HasError() {
-			return diags
+		if entity.AccessKeys != nil {
+			accessKeysModel := &accessKeysModel{}
+			accessKeysModel.set(*entity.AccessKeys)
+
+			if diags := accessKeys.Set(ctx, accessKeysModel); diags.HasError() {
+				return diags
+			}
 		}
+	default:
+		var diags diag.Diagnostics
+
+		diags.AddError(
+			"Unsupported Eventstream source connection type",
+			fmt.Sprintf("The Eventstream source connection type '%T' is not supported.", entity),
+		)
+
+		return diags
 	}
 
 	to.AccessKeys = accessKeys

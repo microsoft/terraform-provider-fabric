@@ -109,12 +109,13 @@ resource "fabric_map" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Map definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/map-definition). Accepted path keys: **Default** format: `map.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Map definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/map-definition). Accepted path keys: **Default** format: `map.json`, `queries/layerSource-*.kql` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Map description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Map format. Possible values: `Default`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

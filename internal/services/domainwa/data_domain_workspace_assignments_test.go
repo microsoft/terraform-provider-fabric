@@ -38,9 +38,7 @@ func TestUnit_DomainWorkspaceAssignmentsDataSource_Attributes(t *testing.T) {
 
 	fakes.FakeServer.ServerFactory.Admin.DomainsServer.NewListDomainWorkspacesPager = func(_ string, _ *admin.DomainsClientListDomainWorkspacesOptions) (resp fake.PagerResponder[admin.DomainsClientListDomainWorkspacesResponse]) {
 		resp.AddPage(http.StatusOK, admin.DomainsClientListDomainWorkspacesResponse{
-			DomainWorkspaces: admin.DomainWorkspaces{
-				Value: []admin.DomainWorkspace{dw1, dw2, dw3},
-			},
+			Value: []admin.DomainWorkspace{dw1, dw2, dw3},
 		}, nil)
 
 		return resp

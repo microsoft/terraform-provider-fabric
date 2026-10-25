@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Notebook Folder ID.
 - `id` (String) The Notebook ID.
 - `sensitivity_label` (Attributes) The Notebook sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Notebook.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

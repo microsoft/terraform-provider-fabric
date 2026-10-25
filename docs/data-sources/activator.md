@@ -83,6 +83,7 @@ output "example_definition_content_object" {
 - `description` (String) The Activator description.
 - `folder_id` (String) The Activator Folder ID.
 - `sensitivity_label` (Attributes) The Activator sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

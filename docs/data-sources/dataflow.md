@@ -81,6 +81,7 @@ output "example_definition_pq_object" {
 - `description` (String) The Dataflow description.
 - `folder_id` (String) The Dataflow Folder ID.
 - `sensitivity_label` (Attributes) The Dataflow sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

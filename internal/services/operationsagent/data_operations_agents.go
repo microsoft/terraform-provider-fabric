@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceOperationsAgents() datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *faboperationsagent.Properties, to *fabricitem.FabricItemPropertiesModel[operationsAgentPropertiesModel, faboperationsagent.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *faboperationsagent.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[operationsAgentPropertiesModel, faboperationsagent.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[operationsAgentPropertiesModel](ctx)
 
 		if from != nil {
@@ -57,10 +57,8 @@ func NewDataSourceOperationsAgents() datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemsProperties[operationsAgentPropertiesModel, faboperationsagent.Properties]{
-		DataSourceFabricItems: fabricitem.DataSourceFabricItems{
-			TypeInfo:       ItemTypeInfo,
-			FabricItemType: FabricItemType,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
 		PropertiesAttributes: getDataSourceOperationsAgentPropertiesAttributes(),
 		PropertiesSetter:     propertiesSetter,
 		ItemListGetter:       itemListGetter,

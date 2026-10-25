@@ -191,6 +191,10 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
+	labelID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -219,6 +223,10 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
+					"sensitivity_label_settings": map[string]any{
+						"label_id": labelID,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -228,9 +236,36 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.sensitivity_label_apply_strategy", "ApplyOrFail"),
 			),
 		},
-		// Update and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+					"sensitivity_label_settings": map[string]any{
+						"label_id": labelID,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
+			),
+		},
+		// Update and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -239,6 +274,9 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"description":  *entityBefore.Description,
+					"sensitivity_label_settings": map[string]any{
+						"label_id": labelID,
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -247,6 +285,8 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_files_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase
@@ -419,6 +459,10 @@ func TestAcc_LakehouseResource_CRUD_Configuration(t *testing.T) {
 }
 
 func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("API issue")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
@@ -438,7 +482,8 @@ func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -458,7 +503,8 @@ func TestAcc_LakehouseResource_CRUD_Definition(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinitionUpdate,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),

@@ -59,6 +59,7 @@ data "fabric_data_pipeline" "example_by_name" {
 - `description` (String) The Data Pipeline description.
 - `folder_id` (String) The Data Pipeline Folder ID.
 - `sensitivity_label` (Attributes) The Data Pipeline sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

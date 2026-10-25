@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Git data-source allows you to retrieve details about a Fabric Workspace Git https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration.
   -> This data-source supports Service Principal authentication only when git_credentials.source is "ConfiguredConnection".
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_git (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Git data-source allows you to retrieve details about a Fabric [Workspace Git](https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration).
 
 -> This data-source supports Service Principal authentication only when `git_credentials.source` is "ConfiguredConnection".
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

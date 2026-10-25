@@ -74,10 +74,10 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 			switch *respGet.Properties.SQLEndpointProperties.ProvisioningStatus {
 			case fablakehouse.SQLEndpointProvisioningStatusFailed:
 				return &fabcore.ResponseError{
-					ErrorCode:  (string)(fablakehouse.SQLEndpointProvisioningStatusFailed),
+					ErrorCode:  string(fablakehouse.SQLEndpointProvisioningStatusFailed),
 					StatusCode: http.StatusBadRequest,
 					ErrorResponse: &fabcore.ErrorResponse{
-						ErrorCode: azto.Ptr((string)(fablakehouse.SQLEndpointProvisioningStatusFailed)),
+						ErrorCode: azto.Ptr(string(fablakehouse.SQLEndpointProvisioningStatusFailed)),
 						Message:   new("Lakehouse SQL endpoint provisioning failed"),
 					},
 				}
@@ -94,21 +94,19 @@ func NewResourceLakehouse(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[lakehousePropertiesModel, fablakehouse.Properties, lakehouseConfigurationModel, fablakehouse.CreationPayload]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtMost(4),
-				mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    ItemDefinitionEmpty,
-			DefinitionFormats:  itemDefinitionFormats,
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtMost(4),
+			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
+		DefinitionRequired:    false,
+		DefinitionEmpty:       ItemDefinitionEmpty,
+		DefinitionFormats:     itemDefinitionFormats,
 		ConfigRequired:        false,
 		ConfigAttributes:      getResourceLakehouseConfigurationAttributes(),
 		CreationPayloadSetter: creationPayloadSetter,

@@ -79,6 +79,7 @@ output "example_definition_content_object" {
 - `description` (String) The Cosmos DB description.
 - `folder_id` (String) The Cosmos DB Folder ID.
 - `sensitivity_label` (Attributes) The Cosmos DB sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

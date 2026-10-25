@@ -266,11 +266,9 @@ func (r *resourceGatewayRoleAssignment) ImportState(ctx context.Context, req res
 	}
 
 	state := resourceGatewayRoleAssignmentModel{
-		baseGatewayRoleAssignmentModel: baseGatewayRoleAssignmentModel{
-			ID:        uuidGatewayRoleAssignmentID,
-			GatewayID: uuidGatewayID,
-		},
-		Timeouts: timeout,
+		ID:        uuidGatewayRoleAssignmentID,
+		GatewayID: uuidGatewayID,
+		Timeouts:  timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

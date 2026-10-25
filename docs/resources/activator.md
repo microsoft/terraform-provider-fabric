@@ -65,7 +65,7 @@ resource "fabric_activator" "example_custom_delimiter" {
   definition = {
     "ReflexEntities.json" = {
       source           = "${local.path}/ReflexEntities.json"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"
@@ -117,6 +117,7 @@ resource "fabric_activator" "example_parameters" {
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Activator format. Possible values: `Default`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

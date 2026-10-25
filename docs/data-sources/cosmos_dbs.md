@@ -56,6 +56,7 @@ Read-Only:
 - `folder_id` (String) The Cosmos DB Folder ID.
 - `id` (String) The Cosmos DB ID.
 - `sensitivity_label` (Attributes) The Cosmos DB sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Cosmos DB.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

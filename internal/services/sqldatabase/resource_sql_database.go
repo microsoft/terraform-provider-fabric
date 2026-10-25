@@ -64,34 +64,32 @@ func NewResourceSQLDatabase(ctx context.Context) resource.Resource {
 	}
 
 	config := fabricitem.ResourceFabricItemConfigDefinitionProperties[sqlDatabasePropertiesModel, fabsqldatabase.Properties, sqlDatabaseConfigurationModel, fabsqldatabase.CreationPayloadClassification]{
-		ResourceFabricItemDefinition: fabricitem.ResourceFabricItemDefinition{
-			TypeInfo:              ItemTypeInfo,
-			FabricItemType:        FabricItemType,
-			NameRenameAllowed:     true,
-			DisplayNameMaxLength:  123,
-			DescriptionMaxLength:  256,
-			DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
-			DefinitionFormats:     itemDefinitionFormats,
-			DefinitionPathKeysValidator: []validator.Map{
-				mapvalidator.SizeAtLeast(1),
-				mapvalidator.KeysAre(
-					fwvalidators.PatternsIfAttributeIsOneOf(
-						path.MatchRoot("format"),
-						[]attr.Value{types.StringValue("dacpac")},
-						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "dacpac"),
-						"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "dacpac"), true, false),
-					),
-					fwvalidators.PatternsIfAttributeIsOneOf(
-						path.MatchRoot("format"),
-						[]attr.Value{types.StringValue("sqlproj")},
-						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "sqlproj"),
-						"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "sqlproj"), true, false),
-					),
+		TypeInfo:              ItemTypeInfo,
+		FabricItemType:        FabricItemType,
+		NameRenameAllowed:     true,
+		DisplayNameMaxLength:  123,
+		DescriptionMaxLength:  256,
+		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
+		DefinitionFormats:     itemDefinitionFormats,
+		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+			mapvalidator.KeysAre(
+				fwvalidators.PatternsIfAttributeIsOneOf(
+					path.MatchRoot("format"),
+					[]attr.Value{types.StringValue("dacpac")},
+					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "dacpac"),
+					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "dacpac"), true, false),
 				),
-			},
-			DefinitionRequired: false,
-			DefinitionEmpty:    "",
+				fwvalidators.PatternsIfAttributeIsOneOf(
+					path.MatchRoot("format"),
+					[]attr.Value{types.StringValue("sqlproj")},
+					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "sqlproj"),
+					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "sqlproj"), true, false),
+				),
+			),
 		},
+		DefinitionRequired:         false,
+		DefinitionEmpty:            "",
 		ConfigRequired:             false,
 		ConfigOrDefinitionRequired: false,
 		ConfigAttributes:           getResourceSQLDatabaseConfigurationAttributes(ctx),

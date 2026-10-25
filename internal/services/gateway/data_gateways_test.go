@@ -19,11 +19,13 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 
 func TestUnit_GatewaysDataSource(t *testing.T) {
 	virtualNetworkGateway := fakes.NewRandomVirtualNetworkGateway()
+	streamingVirtualNetworkGateway := fakes.NewRandomStreamingVirtualNetworkGateway()
 	onPremisesGateway := fakes.NewRandomOnPremisesGateway()
 	onPremisesGatewayPersonalGateway := fakes.NewRandomOnPremisesGatewayPersonal()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
 	fakes.FakeServer.Upsert(virtualNetworkGateway)
+	fakes.FakeServer.Upsert(streamingVirtualNetworkGateway)
 	fakes.FakeServer.Upsert(onPremisesGateway)
 	fakes.FakeServer.Upsert(onPremisesGatewayPersonalGateway)
 	fakes.FakeServer.Upsert(fakes.NewRandomGateway())
@@ -49,6 +51,7 @@ func TestUnit_GatewaysDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.1.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.2.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.3.id"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.4.id"),
 			),
 		},
 	}))

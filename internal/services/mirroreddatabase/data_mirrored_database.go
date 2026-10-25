@@ -73,12 +73,10 @@ func NewDataSourceMirroredDatabase(ctx context.Context) datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemDefinitionProperties[mirroredDatabasePropertiesModel, fabmirroreddatabase.Properties]{
-		DataSourceFabricItemDefinition: fabricitem.DataSourceFabricItemDefinition{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-			DefinitionFormats:   itemDefinitionFormats,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
+		DefinitionFormats:    itemDefinitionFormats,
 		PropertiesAttributes: getDataSourceMirroredDatabasePropertiesAttributes(ctx), // define this function to return schema attributes
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

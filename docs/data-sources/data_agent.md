@@ -75,6 +75,8 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `Files/Config/data_agent.json`, `Files/Config/draft/*/datasource.json`, `Files/Config/draft/*/fewshots.json`, `Files/Config/draft/stage_config.json`, `Files/Config/publish_info.json`, `Files/Config/published/*/datasource.json`, `Files/Config/published/*/fewshots.json`, `Files/Config/published/stage_config.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Data Agent description.
 - `folder_id` (String) The Data Agent Folder ID.
+- `sensitivity_label` (Attributes) The Data Agent sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 
@@ -92,3 +94,11 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

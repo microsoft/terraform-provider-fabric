@@ -38,6 +38,7 @@ import (
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 	putils "github.com/microsoft/terraform-provider-fabric/internal/provider/utils"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/activator"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/anomalydetector"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/apacheairflowjob"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/capacity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/connection"
@@ -73,18 +74,23 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredazuredatabrickscatalog"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredcatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/snowflakedatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -98,8 +104,11 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesqlauditsetting"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspace"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceencryption"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacefwr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegit"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacegop"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceiar"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacempe"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
@@ -129,10 +138,12 @@ type FabricProvider struct {
 }
 
 func New(version string) pclient.ProviderWithFabricClient {
-	cfg := pconfig.ProviderConfig{}
-	cfg.Auth = &auth.Config{}
-	cfg.ProviderData = &pconfig.ProviderData{}
-	cfg.Endpoint = pconfig.DefaultFabricEndpointURL
+	cfg := pconfig.ProviderConfig{
+		Auth: &auth.Config{},
+		ProviderData: &pconfig.ProviderData{
+			Endpoint: pconfig.DefaultFabricEndpointURL,
+		},
+	}
 	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
 	cfg.Version = version
 
@@ -450,6 +461,7 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		anomalydetector.NewResourceAnomalyDetector,
 		apacheairflowjob.NewResourceApacheAirflowJob,
 		copyjob.NewResourceCopyJob,
 		cosmosdb.NewResourceCosmosDB,
@@ -479,22 +491,30 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		func() resource.Resource {
+			return mirroredazuredatabrickscatalog.NewResourceMirroredAzureDatabricksCatalog(ctx)
+		},
+		func() resource.Resource { return mirroredcatalog.NewResourceMirroredCatalog(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
 		mlmodel.NewResourceMLModel,
+		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
 		ontology.NewResourceOntology,
 		tenantsetting.NewResourceTenantSettings,
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
+		orgapp.NewResourceOrgApp,
 		activator.NewResourceActivator,
+		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		sparkcustompool.NewResourceSparkCustomPool,
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
+		func() resource.Resource { return snowflakedatabase.NewResourceSnowflakeDatabase(ctx) },
 		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
 		variablelibrary.NewResourceVariableLibrary,
@@ -502,10 +522,13 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		warehousesnapshot.NewResourceWarehouseSnapshot,
 		warehousesqlauditsetting.NewResourceWarehouseSQLAuditSettings,
 		workspace.NewResourceWorkspace,
+		workspaceencryption.NewResourceWorkspaceEncryption,
 		workspaceocr.NewResourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewResourceWorkspaceFirewallRules,
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewResourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
 		workspacempe.NewResourceWorkspaceManagedPrivateEndpoint,
@@ -514,6 +537,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		anomalydetector.NewDataSourceAnomalyDetector,
+		anomalydetector.NewDataSourceAnomalyDetectors,
 		apacheairflowjob.NewDataSourceApacheAirflowJob,
 		apacheairflowjob.NewDataSourceApacheAirflowJobs,
 		capacity.NewDataSourceCapacity,
@@ -576,6 +601,14 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalog(ctx)
+		},
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalogs(ctx)
+		},
+		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalog(ctx) },
+		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalogs(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabases(ctx) },
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
@@ -589,11 +622,16 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebooks,
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
+		orgapp.NewDataSourceOrgApp,
+		orgapp.NewDataSourceOrgApps,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
+		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
+		paginatedreport.NewDataSourcePaginatedReport,
+		paginatedreport.NewDataSourcePaginatedReports,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
-		paginatedreport.NewDataSourcePaginatedReports,
 		tags.NewDataSourceTags,
 		tags.NewDataSourceTag,
 		activator.NewDataSourceActivator,
@@ -607,6 +645,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabase(ctx) },
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabases(ctx) },
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
@@ -621,10 +661,13 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		warehousesnapshot.NewDataSourceWarehouseSnapshots,
 		workspace.NewDataSourceWorkspace,
 		workspace.NewDataSourceWorkspaces,
+		workspaceencryption.NewDataSourceWorkspaceEncryption,
 		workspaceocr.NewDataSourceWorkspaceOutboundCloudConnectionRules,
+		workspacefwr.NewDataSourceWorkspaceFirewallRules,
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
+		workspaceiar.NewDataSourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
 		workspacegit.NewDataSourceWorkspaceGit,
@@ -960,13 +1003,13 @@ func (p *FabricProvider) validateConfigAuthOIDC(resp *provider.ConfigureResponse
 		}
 
 		if p.config.Auth.OIDC.AzureDevOpsServiceConnectionID == "" && (p.config.Auth.OIDC.Token == "" && (p.config.Auth.OIDC.RequestURL == "" || p.config.Auth.OIDC.RequestToken == "")) {
-			maskValue := (func(v string) string {
+			maskValue := func(v string) string {
 				if v != "" {
 					return "***"
 				}
 
 				return ""
-			})
+			}
 
 			resp.Diagnostics.AddError(
 				common.ErrorInvalidConfig,

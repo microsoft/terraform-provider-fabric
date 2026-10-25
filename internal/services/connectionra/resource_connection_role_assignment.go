@@ -266,11 +266,9 @@ func (r *resourceConnectionRoleAssignment) ImportState(ctx context.Context, req 
 	}
 
 	state := resourceConnectionRoleAssignmentModel{
-		baseConnectionRoleAssignmentModel: baseConnectionRoleAssignmentModel{
-			ConnectionID: uuidConnectionID,
-			ID:           uuidConnectionRoleAssignmentID,
-		},
-		Timeouts: timeout,
+		ConnectionID: uuidConnectionID,
+		ID:           uuidConnectionRoleAssignmentID,
+		Timeouts:     timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

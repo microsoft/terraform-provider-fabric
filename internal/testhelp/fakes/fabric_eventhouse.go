@@ -26,6 +26,7 @@ func (o *operationsEventhouse) ConvertItemToEntity(item fabcore.Item) fabeventho
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties:  NewRandomEventhouse().Properties,
+		Tags:        convertItemTags[fabeventhouse.ItemTag](item.Tags),
 	}
 }
 
@@ -37,9 +38,7 @@ func (o *operationsEventhouse) CreateDefinition(data fabeventhouse.CreateEventho
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsEventhouse) TransformDefinition(entity *fabeventhouse.Definition) fabeventhouse.ItemsClientGetEventhouseDefinitionResponse {
 	return fabeventhouse.ItemsClientGetEventhouseDefinitionResponse{
-		DefinitionResponse: fabeventhouse.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -93,9 +92,7 @@ func (o *operationsEventhouse) TransformGet(entity fabeventhouse.Eventhouse) fab
 // TransformList implements concreteOperations.
 func (o *operationsEventhouse) TransformList(entities []fabeventhouse.Eventhouse) fabeventhouse.ItemsClientListEventhousesResponse {
 	return fabeventhouse.ItemsClientListEventhousesResponse{
-		Eventhouses: fabeventhouse.Eventhouses{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -161,7 +158,8 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 		&server.ServerFactory.Eventhouse.ItemsServer.UpdateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.NewListEventhousesPager,
-		&server.ServerFactory.Eventhouse.ItemsServer.DeleteEventhouse)
+		&server.ServerFactory.Eventhouse.ItemsServer.DeleteEventhouse,
+	)
 
 	configureDefinitions(
 		handler,
@@ -169,7 +167,8 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 		definitionOperations,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginCreateEventhouse,
 		&server.ServerFactory.Eventhouse.ItemsServer.BeginGetEventhouseDefinition,
-		&server.ServerFactory.Eventhouse.ItemsServer.BeginUpdateEventhouseDefinition)
+		&server.ServerFactory.Eventhouse.ItemsServer.BeginUpdateEventhouseDefinition,
+	)
 
 	return fabeventhouse.Eventhouse{}
 }
@@ -187,6 +186,10 @@ func NewRandomEventhouse() fabeventhouse.Eventhouse {
 			QueryServiceURI:         new(testhelp.RandomURI()),
 			DatabasesItemIDs:        []string{testhelp.RandomUUID()},
 			MinimumConsumptionUnits: new(0.0),
+		},
+		Tags: []fabeventhouse.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

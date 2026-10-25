@@ -9,6 +9,7 @@ import (
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fablakehouse "github.com/microsoft/fabric-sdk-go/fabric/lakehouse"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -21,6 +22,10 @@ var testDataSourceItemFQN, testDataSourceItemHeader = testhelp.TFDataSource(comm
 func TestUnit_LakehouseDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+	labelID := testhelp.RandomUUID()
+	tagID := testhelp.RandomUUID()
+	entity.SensitivityLabel = &fablakehouse.SensitivityLabel{ID: &labelID}
+	entity.Tags = []fablakehouse.ItemTag{{ID: &tagID, DisplayName: new(testhelp.RandomName())}}
 
 	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
@@ -103,6 +108,9 @@ func TestUnit_LakehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "sensitivity_label.label_id", labelID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "1"),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", tagID),
 			),
 		},
 		// read by id - not found
@@ -132,6 +140,9 @@ func TestUnit_LakehouseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "sensitivity_label.label_id", labelID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "1"),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", tagID),
 			),
 		},
 		// read by name - not found

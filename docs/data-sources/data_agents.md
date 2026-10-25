@@ -54,4 +54,14 @@ Read-Only:
 - `display_name` (String) The Data Agent display name.
 - `folder_id` (String) The Data Agent Folder ID.
 - `id` (String) The Data Agent ID.
+- `sensitivity_label` (Attributes) The Data Agent sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Data Agent.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `label_id` (String) The sensitivity label ID.

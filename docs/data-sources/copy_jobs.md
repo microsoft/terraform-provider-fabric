@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Copy Job Folder ID.
 - `id` (String) The Copy Job ID.
 - `sensitivity_label` (Attributes) The Copy Job sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Copy Job.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

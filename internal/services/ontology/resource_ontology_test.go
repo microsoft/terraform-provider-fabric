@@ -50,7 +50,8 @@ func TestUnit_OntologyResource_Attributes(t *testing.T) {
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
 		},
 		// error - unexpected attribute
@@ -64,7 +65,8 @@ func TestUnit_OntologyResource_Attributes(t *testing.T) {
 						"workspace_id":    "00000000-0000-0000-0000-000000000000",
 						"unexpected_attr": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
 		},
 		// error - no required attributes
@@ -77,7 +79,8 @@ func TestUnit_OntologyResource_Attributes(t *testing.T) {
 					map[string]any{
 						"display_name": "test",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
 		},
 		// error - no required attributes
@@ -90,7 +93,8 @@ func TestUnit_OntologyResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
 	}))
@@ -112,7 +116,8 @@ func TestUnit_OntologyResource_ImportState(t *testing.T) {
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
 			},
-		))
+		),
+	)
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -188,7 +193,8 @@ func TestUnit_OntologyResource_CRUD(t *testing.T) {
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
 		},
 		// Create and Read
@@ -202,7 +208,8 @@ func TestUnit_OntologyResource_CRUD(t *testing.T) {
 						"workspace_id": *entityBefore.WorkspaceID,
 						"display_name": *entityBefore.DisplayName,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -220,7 +227,8 @@ func TestUnit_OntologyResource_CRUD(t *testing.T) {
 						"display_name": *entityAfter.DisplayName,
 						"description":  *entityAfter.Description,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
 				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
@@ -249,7 +257,8 @@ func TestAcc_OntologyResource_CRUD(t *testing.T) {
 						"workspace_id": workspaceID,
 						"display_name": entityCreateDisplayName,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -267,7 +276,8 @@ func TestAcc_OntologyResource_CRUD(t *testing.T) {
 						"display_name": entityUpdateDisplayName,
 						"description":  entityUpdateDescription,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
@@ -303,7 +313,8 @@ func TestAcc_OntologyDefinitionResource_CRUD(t *testing.T) {
 						"format":       "Default",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),

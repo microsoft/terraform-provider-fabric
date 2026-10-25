@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	fablakehouse "github.com/microsoft/fabric-sdk-go/fabric/lakehouse"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -24,6 +25,10 @@ var testDataSourceItemsFQN, testDataSourceItemsHeader = testhelp.TFDataSource(co
 func TestUnit_LakehousesDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	entity := fakes.NewRandomLakehouseWithWorkspace(workspaceID)
+	labelID := testhelp.RandomUUID()
+	tagID := testhelp.RandomUUID()
+	entity.SensitivityLabel = &fablakehouse.SensitivityLabel{ID: &labelID}
+	entity.Tags = []fablakehouse.ItemTag{{ID: &tagID, DisplayName: new(testhelp.RandomName())}}
 
 	fakes.FakeServer.Upsert(fakes.NewRandomLakehouseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entity)
@@ -80,6 +85,10 @@ func TestUnit_LakehousesDataSource(t *testing.T) {
 							"display_name": knownvalue.StringExact(*entity.DisplayName),
 							"description":  knownvalue.StringExact(*entity.Description),
 							"folder_id":    knownvalue.StringExact(*entity.FolderID),
+							"sensitivity_label": knownvalue.ObjectExact(map[string]knownvalue.Check{
+								"label_id": knownvalue.StringExact(labelID),
+							}),
+							"tags": knownvalue.SetExact([]knownvalue.Check{knownvalue.StringExact(tagID)}),
 						}),
 					}),
 				),

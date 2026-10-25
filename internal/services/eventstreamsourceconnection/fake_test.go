@@ -9,7 +9,7 @@ import (
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
-	"github.com/microsoft/fabric-sdk-go/fabric/eventstream"
+	fabeventstream "github.com/microsoft/fabric-sdk-go/fabric/eventstream"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
@@ -17,37 +17,38 @@ import (
 
 func fakeGetEventstreamSourceConnection(
 	fakeWorkspaceID, fakeEventstreamID, fakeSourceID string,
-	entity eventstream.TopologyClientGetEventstreamSourceConnectionResponse,
+	entity fabeventstream.EndpointConnectionClassification,
 ) func(
 	ctx context.Context,
 	workspaceID, eventstreamID, sourceID string,
-	options *eventstream.TopologyClientGetEventstreamSourceConnectionOptions,
-) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-	return func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *eventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
-		resp = azfake.Responder[eventstream.TopologyClientGetEventstreamSourceConnectionResponse]{}
+	options *fabeventstream.TopologyClientGetEventstreamSourceConnectionOptions,
+) (resp azfake.Responder[fabeventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
+	return func(_ context.Context, workspaceID, eventstreamID, sourceID string, _ *fabeventstream.TopologyClientGetEventstreamSourceConnectionOptions) (resp azfake.Responder[fabeventstream.TopologyClientGetEventstreamSourceConnectionResponse], errResp azfake.ErrorResponder) {
+		resp = azfake.Responder[fabeventstream.TopologyClientGetEventstreamSourceConnectionResponse]{}
 
 		if sourceID != fakeSourceID || workspaceID != fakeWorkspaceID || eventstreamID != fakeEventstreamID {
-			resp.SetResponse(http.StatusNotFound, eventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
+			resp.SetResponse(http.StatusNotFound, fabeventstream.TopologyClientGetEventstreamSourceConnectionResponse{}, nil)
 			errResp.SetError(fabfake.SetResponseError(http.StatusNotFound, fabcore.ErrItem.ItemNotFound.Error(), "Item not found"))
 		} else {
-			resp.SetResponse(http.StatusOK, entity, nil)
+			resp.SetResponse(http.StatusOK, fabeventstream.TopologyClientGetEventstreamSourceConnectionResponse{
+				EndpointConnectionClassification: entity,
+			}, nil)
 		}
 
 		return resp, errResp
 	}
 }
 
-func NewRandomEventstreamSourceConnection() eventstream.TopologyClientGetEventstreamSourceConnectionResponse {
-	return eventstream.TopologyClientGetEventstreamSourceConnectionResponse{
-		SourceConnectionResponse: eventstream.SourceConnectionResponse{
-			EventHubName:            new(testhelp.RandomName()),
-			FullyQualifiedNamespace: new(testhelp.RandomName()),
-			AccessKeys: &eventstream.AccessKeys{
-				PrimaryConnectionString:   new(testhelp.RandomName()),
-				SecondaryConnectionString: new(testhelp.RandomName()),
-				PrimaryKey:                new(testhelp.RandomName()),
-				SecondaryKey:              new(testhelp.RandomName()),
-			},
+func NewRandomEventstreamSourceConnection() *fabeventstream.CustomEndpointConnection {
+	return &fabeventstream.CustomEndpointConnection{
+		Type:                    new(fabeventstream.EndpointConnectionTypeCustomEndpoint),
+		EventHubName:            new(testhelp.RandomName()),
+		FullyQualifiedNamespace: new(testhelp.RandomName()),
+		AccessKeys: &fabeventstream.AccessKeys{
+			PrimaryConnectionString:   new(testhelp.RandomName()),
+			SecondaryConnectionString: new(testhelp.RandomName()),
+			PrimaryKey:                new(testhelp.RandomName()),
+			SecondaryKey:              new(testhelp.RandomName()),
 		},
 	}
 }

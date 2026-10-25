@@ -21,7 +21,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.ResourceWithConfigure = (*resourceWorkspaceOutboundCloudConnectionRules)(nil)
+	_ resource.ResourceWithConfigure      = (*resourceWorkspaceOutboundCloudConnectionRules)(nil)
+	_ resource.ResourceWithValidateConfig = (*resourceWorkspaceOutboundCloudConnectionRules)(nil)
 )
 
 type resourceWorkspaceOutboundCloudConnectionRules struct {
@@ -42,6 +43,44 @@ func (r *resourceWorkspaceOutboundCloudConnectionRules) Metadata(_ context.Conte
 
 func (r *resourceWorkspaceOutboundCloudConnectionRules) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema().GetResource(ctx)
+}
+
+func (r *resourceWorkspaceOutboundCloudConnectionRules) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var model resourceWorkspaceOutboundCloudConnectionRulesModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &model)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if model.Rules.IsNull() || model.Rules.IsUnknown() {
+		return
+	}
+
+	rules, diags := model.Rules.Get(ctx)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for _, rule := range rules {
+		if !rule.AllowedEndpoints.IsNull() && !rule.AllowedEndpoints.IsUnknown() && !rule.AllowedWorkspaces.IsNull() && !rule.AllowedWorkspaces.IsUnknown() {
+			endpoints, d := rule.AllowedEndpoints.Get(ctx)
+			resp.Diagnostics.Append(d...)
+
+			workspaces, d := rule.AllowedWorkspaces.Get(ctx)
+			resp.Diagnostics.Append(d...)
+
+			if len(endpoints) > 0 && len(workspaces) > 0 {
+				resp.Diagnostics.AddError(
+					"Invalid Attribute Combination",
+					"Attribute \"allowed_endpoints\" cannot be specified when \"allowed_workspaces\" is specified.",
+				)
+			}
+		}
+	}
 }
 
 func (r *resourceWorkspaceOutboundCloudConnectionRules) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

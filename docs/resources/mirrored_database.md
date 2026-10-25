@@ -55,7 +55,7 @@ resource "fabric_mirrored_database" "example_custom_delimiter" {
   definition = {
     "mirroring.json" = {
       source           = "${local.path}/mirroring.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "DEFAULT_SCHEMA" = "my_schema"
       }
@@ -106,6 +106,7 @@ resource "fabric_mirrored_database" "example_parameters" {
 - `description` (String) The Mirrored Database description.
 - `folder_id` (String) The Folder ID.
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

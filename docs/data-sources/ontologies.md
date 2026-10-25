@@ -59,6 +59,7 @@ Read-Only:
 - `folder_id` (String) The Ontology Folder ID.
 - `id` (String) The Ontology ID.
 - `sensitivity_label` (Attributes) The Ontology sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Ontology.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

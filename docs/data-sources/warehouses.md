@@ -56,6 +56,7 @@ Read-Only:
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
 - `sensitivity_label` (Attributes) The Warehouse sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Warehouse.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

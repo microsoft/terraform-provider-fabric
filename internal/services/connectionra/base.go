@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Connection Role Assignments",
 	Types:          "connection_role_assignments",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-factory/data-source-management",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

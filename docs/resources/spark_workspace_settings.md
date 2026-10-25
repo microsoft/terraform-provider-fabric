@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Spark Workspace Settings resource allows you to manage a Fabric Spark Workspace Settings https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_spark_workspace_settings (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Spark Workspace Settings resource allows you to manage a Fabric [Spark Workspace Settings](https://learn.microsoft.com/fabric/data-engineering/workspace-admin-settings).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -120,7 +117,7 @@ Optional:
 Optional:
 
 - `name` (String) The name of the environment.
-- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`.
+- `runtime_version` (String) [Runtime](https://review.learn.microsoft.com/fabric/data-engineering/runtime) version. Value must be one of : `1.1`, `1.2`, `1.3`, `2.0`.
 
 <a id="nestedatt--high_concurrency"></a>
 

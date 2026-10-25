@@ -13,6 +13,6 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Tags",
 	Types:          "tags",
 	DocsURL:        "https://learn.microsoft.com/fabric/governance/tags-overview",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }

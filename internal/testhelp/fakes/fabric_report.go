@@ -24,9 +24,7 @@ func (o *operationsReport) CreateDefinition(data fabreport.CreateReportRequest) 
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsReport) TransformDefinition(entity *fabreport.Definition) fabreport.ItemsClientGetReportDefinitionResponse {
 	return fabreport.ItemsClientGetReportDefinitionResponse{
-		DefinitionResponse: fabreport.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -80,9 +78,7 @@ func (o *operationsReport) TransformGet(entity fabreport.Report) fabreport.Items
 // TransformList implements concreteOperations.
 func (o *operationsReport) TransformList(entities []fabreport.Report) fabreport.ItemsClientListReportsResponse {
 	return fabreport.ItemsClientListReportsResponse{
-		Reports: fabreport.Reports{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -146,7 +142,8 @@ func configureReport(server *fakeServer) fabreport.Report {
 		&server.ServerFactory.Report.ItemsServer.UpdateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.NewListReportsPager,
-		&server.ServerFactory.Report.ItemsServer.DeleteReport)
+		&server.ServerFactory.Report.ItemsServer.DeleteReport,
+	)
 
 	configureDefinitions(
 		handler,
@@ -154,7 +151,8 @@ func configureReport(server *fakeServer) fabreport.Report {
 		definitionOperations,
 		&server.ServerFactory.Report.ItemsServer.BeginCreateReport,
 		&server.ServerFactory.Report.ItemsServer.BeginGetReportDefinition,
-		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition)
+		&server.ServerFactory.Report.ItemsServer.BeginUpdateReportDefinition,
+	)
 
 	return fabreport.Report{}
 }

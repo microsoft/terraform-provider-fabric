@@ -250,7 +250,8 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 						"publication_status": "Published",
 						"driver_cores":       4,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "4"),
@@ -270,7 +271,8 @@ func TestAcc_SparkEnvironmentSettingsResource_CRUD(t *testing.T) {
 						"publication_status": "Published",
 						"driver_cores":       8,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
@@ -306,7 +308,8 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 							`"spark.admin.acls.groups"`: "test",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
@@ -332,7 +335,8 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 							`"spark.cores.max"`: "12",
 						},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),
@@ -354,7 +358,8 @@ func TestAcc_SparkEnvironmentSettingsSparkPropertiesResource_CRUD(t *testing.T) 
 						"publication_status": "Published",
 						"driver_cores":       8,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "driver_cores", "8"),

@@ -57,6 +57,7 @@ data "fabric_warehouse_snapshot" "example_by_name" {
 - `folder_id` (String) The Warehouse Snapshot Folder ID.
 - `properties` (Attributes) The Warehouse Snapshot properties. (see [below for nested schema](#nestedatt--properties))
 - `sensitivity_label` (Attributes) The Warehouse Snapshot sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

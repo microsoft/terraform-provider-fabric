@@ -119,7 +119,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Definition path must match`),
 		},
 		// error - sqlproj format with wrong definition path
@@ -139,7 +140,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							},
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Definition path must match`),
 		},
 		// error - configuration conflicts with format
@@ -162,7 +164,8 @@ func TestUnit_SQLDatabaseResource_Attributes(t *testing.T) {
 							"creation_mode": "New",
 						},
 					},
-				)),
+				),
+			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 		},
 	}))
@@ -414,6 +417,9 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 	entityExist := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityBefore := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
 	entityAfter := fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
 
 	fakes.FakeServer.Upsert(fakes.NewRandomSQLDatabaseWithWorkspace(workspaceID))
 	fakes.FakeServer.Upsert(entityExist)
@@ -442,6 +448,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag1ID, tag2ID},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -451,9 +458,30 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 			),
 		},
-		// Update, Move and Read
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": *entityBefore.WorkspaceID,
+					"display_name": *entityBefore.DisplayName,
+					"folder_id":    *entityBefore.FolderID,
+					"tags":         []string{tag2ID, tag3ID},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update, Move and Remove all tags and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -472,6 +500,7 @@ func TestUnit_SQLDatabaseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
 		// Move and Read
@@ -563,77 +592,51 @@ func TestUnit_SQLDatabaseResource_CRUD_Configuration(t *testing.T) {
 func TestAcc_SQLDatabaseResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDescription := testhelp.RandomName()
-
-	folderResourceHCL1, folderResourceFQN1 := testhelp.FolderResource(t, workspaceID)
-	folderResourceHCL2, folderResourceFQN2 := testhelp.FolderResource(t, workspaceID)
 
 	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		// Create and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN1, "id"),
-					},
-				)),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"folder_id":    folder1ID,
+				},
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN1, "id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
 			),
 		},
-		// Update, Move and Read
+		// Update and Read
 		{
 			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL1,
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    testhelp.RefByFQN(folderResourceFQN2, "id"),
-					},
-				)),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttrPair(testResourceItemFQN, "folder_id", folderResourceFQN2, "id"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
-				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": entityCreateDisplayName,
+					"description":  entityUpdateDescription,
+					"folder_id":    folder2ID,
+				},
 			),
-		},
-		//	Move and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				folderResourceHCL2,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"description":  entityUpdateDescription,
-					},
-				)),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckNoResourceAttr(testResourceItemFQN, "folder_id"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.server_fqdn"),
@@ -681,7 +684,8 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "sqlproj",
 						"definition":   testHelperDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
@@ -704,7 +708,8 @@ func TestAcc_SQLDatabaseDefinitionResource_CRUD(t *testing.T) {
 						"format":       "sqlproj",
 						"definition":   testhelperUpdateDefinition,
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),

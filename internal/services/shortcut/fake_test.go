@@ -20,7 +20,7 @@ var fakeShortcutStore = map[string]fabcore.Shortcut{}
 func fakeShortcutsFunc() func(workspaceID, itemID string, options *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 	return func(_, _ string, _ *fabcore.OneLakeShortcutsClientListShortcutsOptions) (resp azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]) {
 		resp = azfake.PagerResponder[fabcore.OneLakeShortcutsClientListShortcutsResponse]{}
-		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Shortcuts: fabcore.Shortcuts{Value: GetAllStoredShortcuts()}}, nil)
+		resp.AddPage(http.StatusOK, fabcore.OneLakeShortcutsClientListShortcutsResponse{Value: GetAllStoredShortcuts()}, nil)
 
 		return resp
 	}

@@ -104,12 +104,13 @@ resource "fabric_ontology" "example_parameters" {
 
 ### Optional
 
-- `definition` (Attributes Map) Definition parts. Read more about [Ontology definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/ontology-definition). Accepted path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Ontology definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/ontology-definition). Accepted path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `EntityTypes/*/ResourceLinks`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Ontology description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Ontology format. Possible values: `Default`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

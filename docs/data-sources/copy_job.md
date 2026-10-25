@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The Copy Job description.
 - `folder_id` (String) The Copy Job Folder ID.
 - `sensitivity_label` (Attributes) The Copy Job sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

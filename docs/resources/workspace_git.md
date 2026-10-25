@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Workspace Git resource allows you to manage a Fabric Workspace Git https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration.
   -> This resource supports Service Principal authentication only when git_credentials.source is "ConfiguredConnection".
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_workspace_git (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Workspace Git resource allows you to manage a Fabric [Workspace Git](https://learn.microsoft.com/fabric/cicd/git-integration/intro-to-git-integration).
 
 -> This resource supports Service Principal authentication only when `git_credentials.source` is "ConfiguredConnection".
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

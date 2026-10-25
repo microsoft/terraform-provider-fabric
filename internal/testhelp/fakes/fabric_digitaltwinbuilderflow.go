@@ -26,6 +26,7 @@ func (o *operationsDigitalTwinBuilderFlow) ConvertItemToEntity(item fabcore.Item
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties:  NewRandomDigitalTwinBuilderFlow().Properties,
+		Tags:        convertItemTags[fabdigitaltwinbuilderflow.ItemTag](item.Tags),
 	}
 }
 
@@ -59,9 +60,7 @@ func (o *operationsDigitalTwinBuilderFlow) CreateDefinition(data fabdigitaltwinb
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsDigitalTwinBuilderFlow) TransformDefinition(entity *fabdigitaltwinbuilderflow.PublicDefinition) fabdigitaltwinbuilderflow.ItemsClientGetDigitalTwinBuilderFlowDefinitionResponse {
 	return fabdigitaltwinbuilderflow.ItemsClientGetDigitalTwinBuilderFlowDefinitionResponse{
-		DefinitionResponse: fabdigitaltwinbuilderflow.DefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -95,9 +94,7 @@ func (o *operationsDigitalTwinBuilderFlow) TransformGet(entity fabdigitaltwinbui
 // TransformList implements concreteOperations.
 func (o *operationsDigitalTwinBuilderFlow) TransformList(entities []fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow) fabdigitaltwinbuilderflow.ItemsClientListDigitalTwinBuilderFlowsResponse {
 	return fabdigitaltwinbuilderflow.ItemsClientListDigitalTwinBuilderFlowsResponse{
-		DigitalTwinBuilderFlows: fabdigitaltwinbuilderflow.DigitalTwinBuilderFlows{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -163,14 +160,16 @@ func configureDigitalTwinBuilderFlow(server *fakeServer) fabdigitaltwinbuilderfl
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.UpdateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginCreateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.NewListDigitalTwinBuilderFlowsPager,
-		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.DeleteDigitalTwinBuilderFlow)
+		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.DeleteDigitalTwinBuilderFlow,
+	)
 	configureDefinitions(
 		handler,
 		entityOperations,
 		definitionOperations,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginCreateDigitalTwinBuilderFlow,
 		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginGetDigitalTwinBuilderFlowDefinition,
-		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginUpdateDigitalTwinBuilderFlowDefinition)
+		&server.ServerFactory.DigitalTwinBuilderFlow.ItemsServer.BeginUpdateDigitalTwinBuilderFlowDefinition,
+	)
 
 	return fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow{}
 }

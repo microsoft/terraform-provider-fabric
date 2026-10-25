@@ -44,7 +44,7 @@ resource "fabric_activator" "example_custom_delimiter" {
   definition = {
     "ReflexEntities.json" = {
       source           = "${local.path}/ReflexEntities.json"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

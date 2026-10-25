@@ -62,9 +62,7 @@ func (o *operationsWarehouse) TransformGet(entity fabwarehouse.Warehouse) fabwar
 // TransformList implements ParentIDOperations.
 func (o *operationsWarehouse) TransformList(entities []fabwarehouse.Warehouse) fabwarehouse.ItemsClientListWarehousesResponse {
 	return fabwarehouse.ItemsClientListWarehousesResponse{
-		Warehouses: fabwarehouse.Warehouses{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 
@@ -104,6 +102,7 @@ func (o *operationsWarehouse) ConvertItemToEntity(entity fabcore.Item) fabwareho
 		FolderID:    entity.FolderID,
 		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties:  NewRandomWarehouse().Properties,
+		Tags:        convertItemTags[fabwarehouse.ItemTag](entity.Tags),
 	}
 }
 
@@ -131,7 +130,8 @@ func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 		&server.ServerFactory.Warehouse.ItemsServer.UpdateWarehouse,
 		&server.ServerFactory.Warehouse.ItemsServer.BeginCreateWarehouse,
 		&server.ServerFactory.Warehouse.ItemsServer.NewListWarehousesPager,
-		&server.ServerFactory.Warehouse.ItemsServer.DeleteWarehouse)
+		&server.ServerFactory.Warehouse.ItemsServer.DeleteWarehouse,
+	)
 
 	return fabwarehouse.Warehouse{}
 }
@@ -149,6 +149,10 @@ func NewRandomWarehouse() fabwarehouse.Warehouse {
 			ConnectionString: new(testhelp.RandomURI()),
 			CreatedDate:      new(time.Now()),
 			LastUpdatedTime:  new(time.Now()),
+		},
+		Tags: []fabwarehouse.ItemTag{
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
+			{ID: new(testhelp.RandomUUID()), DisplayName: new(testhelp.RandomName())},
 		},
 	}
 }

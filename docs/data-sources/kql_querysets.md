@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The KQL Queryset Folder ID.
 - `id` (String) The KQL Queryset ID.
 - `sensitivity_label` (Attributes) The KQL Queryset sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the KQL Queryset.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--sensitivity_label"></a>

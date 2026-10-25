@@ -38,9 +38,7 @@ func fakeListExternalDataSharesProvider() func(workspaceID, itemID string, optio
 	return func(_, _ string, _ *fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemOptions) (resp azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]) {
 		resp = azfake.PagerResponder[fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse]{}
 		resp.AddPage(http.StatusOK, fabcore.ExternalDataSharesProviderClientListExternalDataSharesInItemResponse{
-			ExternalDataShares: fabcore.ExternalDataShares{
-				Value: GetAllStoredExternalDataShares(),
-			},
+			Value: GetAllStoredExternalDataShares(),
 		}, nil)
 
 		return resp
@@ -95,7 +93,8 @@ func NewRandomExternalDataShare(workspaceID string) fabcore.ExternalDataShare {
 		ID:          new(testhelp.RandomUUID()),
 		Paths:       []string{"Files/MyFile1"},
 		WorkspaceID: new(workspaceID),
-		Recipient: &fabcore.ExternalDataShareRecipient{
+		Recipient: &fabcore.ExternalDataShareUserRecipient{
+			Type:              to.Ptr(fabcore.ExternalDataShareRecipientTypeUser),
 			UserPrincipalName: new(testhelp.RandomName()),
 		},
 		CreatorPrincipal: &fabcore.UserPrincipal{

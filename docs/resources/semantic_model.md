@@ -58,7 +58,7 @@ resource "fabric_semantic_model" "example_custom_delimiter" {
   definition = {
     "model.bim" = {
       source           = "${local.path}/model.bim.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "ColumnName" = "Hello"
       }
@@ -103,7 +103,7 @@ resource "fabric_semantic_model" "example_parameters" {
 
 ### Required
 
-- `definition` (Attributes Map) Definition parts. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). Accepted path keys: **TMDL** format: `definition.pbism`, `definition/cultures/*.tmdl`, `definition/dataSources.tmdl`, `definition/database.tmdl`, `definition/expressions.tmdl`, `definition/model.tmdl`, `definition/perspectives/*.tmdl`, `definition/relationships.tmdl`, `definition/roles/*.tmdl`, `definition/tables/*.tmdl`, `diagramLayout.json` **TMSL** format: `definition.pbism`, `diagramLayout.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Read more about [Semantic Model definition part paths](https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/semantic-model-definition). Accepted path keys: **TMDL** format: `definition.pbism`, `definition/**`, `diagramLayout.json` **TMSL** format: `definition.pbism`, `diagramLayout.json`, `model.bim` (see [below for nested schema](#nestedatt--definition))
 - `display_name` (String) The Semantic Model display name.
 - `format` (String) The Semantic Model format. Possible values: `TMDL`, `TMSL`
 - `workspace_id` (String) The Workspace ID.
@@ -114,6 +114,7 @@ resource "fabric_semantic_model" "example_parameters" {
 - `description` (String) The Semantic Model description.
 - `folder_id` (String) The Folder ID.
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

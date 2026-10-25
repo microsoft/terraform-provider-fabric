@@ -203,3 +203,23 @@ func WorkspaceNetworkCommunicationPolicyResource(t *testing.T, workspaceID, inbo
 
 	return resourceHCL, resourceFQN
 }
+
+func TagResource(t *testing.T) (resourceHCL, resourceFQN string) { //nolint:nonamedreturns
+	t.Helper()
+
+	resourceName := RandomName()
+
+	resourceHCL = at.CompileConfig(
+		at.ResourceHeader(TypeName("fabric", "tag"), resourceName),
+		map[string]any{
+			"display_name": RandomName(),
+			"scope": map[string]any{
+				"type": "Tenant",
+			},
+		},
+	)
+
+	resourceFQN = ResourceFQN("fabric", "tag", resourceName)
+
+	return resourceHCL, resourceFQN
+}

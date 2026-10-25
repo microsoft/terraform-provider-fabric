@@ -243,11 +243,9 @@ func (r *resourceDeploymentPipelineRoleAssignment) ImportState(ctx context.Conte
 	}
 
 	state := resourceDeploymentPipelineRoleAssignmentModel{
-		baseDeploymentPipelineRoleAssignmentModel: baseDeploymentPipelineRoleAssignmentModel{
-			ID:                   uuidDeploymentPipelineRoleAssignmentID,
-			DeploymentPipelineID: uuidDeploymentPipelineID,
-		},
-		Timeouts: timeout,
+		ID:                   uuidDeploymentPipelineRoleAssignmentID,
+		DeploymentPipelineID: uuidDeploymentPipelineID,
+		Timeouts:             timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

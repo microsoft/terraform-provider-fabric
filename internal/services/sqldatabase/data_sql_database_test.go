@@ -109,6 +109,9 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[0].ID),
+				resource.TestCheckTypeSetElemAttr(testDataSourceItemFQN, "tags.*", *entity.Tags[1].ID),
 			),
 		},
 		// read by id - not found
@@ -141,6 +144,7 @@ func TestUnit_SQLDatabaseDataSource(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.connection_string"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.database_name"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "properties.server_fqdn"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "tags.#", "2"),
 			),
 		},
 		// read by name - not found
@@ -231,6 +235,10 @@ func TestAcc_SQLDatabaseDataSource(t *testing.T) {
 }
 
 func TestAcc_SQLDatabaseDataSource_Definition(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Temporary skip")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 

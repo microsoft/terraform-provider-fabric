@@ -30,6 +30,7 @@ func (o *operationsMirroredDatabase) ConvertItemToEntity(item fabcore.Item) fabm
 		// Set the type to mirrored database.
 		Type:       to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: NewRandomMirroredDatabase().Properties,
+		Tags:       convertItemTags[fabmirroreddatabase.ItemTag](item.Tags),
 	}
 }
 
@@ -41,9 +42,7 @@ func (o *operationsMirroredDatabase) CreateDefinition(data fabcore.CreateItemReq
 // TransformDefinition implements concreteDefinitionOperations.
 func (o *operationsMirroredDatabase) TransformDefinition(entity *fabcore.ItemDefinition) fabcore.ItemsClientGetItemDefinitionResponse {
 	return fabcore.ItemsClientGetItemDefinitionResponse{
-		ItemDefinitionResponse: fabcore.ItemDefinitionResponse{
-			Definition: entity,
-		},
+		Definition: entity,
 	}
 }
 
@@ -101,9 +100,7 @@ func (o *operationsMirroredDatabase) TransformGet(entity fabmirroreddatabase.Mir
 // It wraps a list of entities into the List response.
 func (o *operationsMirroredDatabase) TransformList(entities []fabmirroreddatabase.MirroredDatabase) fabmirroreddatabase.ItemsClientListMirroredDatabasesResponse {
 	return fabmirroreddatabase.ItemsClientListMirroredDatabasesResponse{
-		MirroredDatabases: fabmirroreddatabase.MirroredDatabases{
-			Value: entities,
-		},
+		Value: entities,
 	}
 }
 

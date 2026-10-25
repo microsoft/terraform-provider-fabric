@@ -44,7 +44,7 @@ resource "fabric_kql_dashboard" "example_custom_delimiter" {
   definition = {
     "RealTimeDashboard.json" = {
       source           = "${local.path}/RealTimeDashboard.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
         "MyValue2" = "my value 2"

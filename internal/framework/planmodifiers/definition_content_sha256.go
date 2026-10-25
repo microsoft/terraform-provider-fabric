@@ -44,6 +44,14 @@ func (pm *definitionContentSha256) MarkdownDescription(ctx context.Context) stri
 }
 
 func (pm *definitionContentSha256) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) { //nolint:gocognit,gocyclo
+	// An unknown config value defers this resource, so the file at `source` may still be
+	// rewritten by another resource before the plan is re-evaluated during apply.
+	if !req.Config.Raw.IsFullyKnown() {
+		resp.PlanValue = types.StringUnknown()
+
+		return
+	}
+
 	sourcePlanPaths, diags := req.Plan.PathMatches(ctx, req.PathExpression.Merge(pm.source))
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return

@@ -29,30 +29,40 @@ func (to *sensitivityLabelModel) set(from fabcore.SensitivityLabel) {
 }
 
 type fabricItemModel struct {
-	WorkspaceID customtypes.UUID `tfsdk:"workspace_id"`
-	ID          customtypes.UUID `tfsdk:"id"`
-	DisplayName types.String     `tfsdk:"display_name"`
-	Description types.String     `tfsdk:"description"`
-	FolderID    customtypes.UUID `tfsdk:"folder_id"`
+	WorkspaceID customtypes.UUID                        `tfsdk:"workspace_id"`
+	ID          customtypes.UUID                        `tfsdk:"id"`
+	DisplayName types.String                            `tfsdk:"display_name"`
+	Description types.String                            `tfsdk:"description"`
+	FolderID    customtypes.UUID                        `tfsdk:"folder_id"`
+	Tags        supertypes.SetValueOf[customtypes.UUID] `tfsdk:"tags"`
 }
 
-func (to *fabricItemModel) set(from fabcore.Item) {
+func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
+
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type dataSourceFabricItemBaseModel struct {
-	fabricItemModel
-
+	WorkspaceID      customtypes.UUID                                            `tfsdk:"workspace_id"`
+	ID               customtypes.UUID                                            `tfsdk:"id"`
+	DisplayName      types.String                                                `tfsdk:"display_name"`
+	Description      types.String                                                `tfsdk:"description"`
+	FolderID         customtypes.UUID                                            `tfsdk:"folder_id"`
+	Tags             supertypes.SetValueOf[customtypes.UUID]                     `tfsdk:"tags"`
 	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
 }
 
 func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
-	to.fabricItemModel.set(from)
-
+	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+	to.Description = types.StringPointerValue(from.Description)
+	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
 	if from.SensitivityLabel != nil {
@@ -64,7 +74,7 @@ func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.I
 		}
 	}
 
-	return nil
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type resourceFabricItemBaseModel struct {
@@ -80,25 +90,36 @@ type fabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
 	Description types.String                                  `tfsdk:"description"`
 	FolderID    customtypes.UUID                              `tfsdk:"folder_id"`
 	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop] `tfsdk:"properties"`
+	Tags        supertypes.SetValueOf[customtypes.UUID]       `tfsdk:"tags"`
 }
 
-func (to *fabricItemPropertiesModel[Ttfprop, Titemprop]) set(from FabricItemProperties[Titemprop]) {
+func (to *fabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
 	to.Description = types.StringPointerValue(from.Description)
 	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
+
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
-	fabricItemPropertiesModel[Ttfprop, Titemprop]
-
+	WorkspaceID      customtypes.UUID                                            `tfsdk:"workspace_id"`
+	ID               customtypes.UUID                                            `tfsdk:"id"`
+	DisplayName      types.String                                                `tfsdk:"display_name"`
+	Description      types.String                                                `tfsdk:"description"`
+	FolderID         customtypes.UUID                                            `tfsdk:"folder_id"`
+	Properties       supertypes.SingleNestedObjectValueOf[Ttfprop]               `tfsdk:"properties"`
+	Tags             supertypes.SetValueOf[customtypes.UUID]                     `tfsdk:"tags"`
 	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
 }
 
 func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
-	to.fabricItemPropertiesModel.set(from)
-
+	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
+	to.DisplayName = types.StringPointerValue(from.DisplayName)
+	to.Description = types.StringPointerValue(from.Description)
+	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
 	to.SensitivityLabel = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelModel](ctx)
 
 	if from.SensitivityLabel != nil {
@@ -110,7 +131,7 @@ func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx c
 		}
 	}
 
-	return nil
+	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
 type resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct {
@@ -138,6 +159,7 @@ func (to *FabricItemProperties[Titemprop]) Set(from any) {
 	to.FolderID = getFieldStringValue(fromValue, "FolderID")
 	to.SensitivityLabel = getFieldStructValue[fabcore.SensitivityLabel](fromValue, "SensitivityLabel")
 	to.Properties = getFieldStructValue[Titemprop](fromValue, "Properties")
+	to.Tags = getFieldSliceValue[fabcore.ItemTag](fromValue, "Tags")
 }
 
 func getFieldStringValue(v reflect.Value, fieldName string) *string {
@@ -147,7 +169,7 @@ func getFieldStringValue(v reflect.Value, fieldName string) *string {
 	}
 
 	if field.IsValid() && field.Kind() == reflect.String {
-		if str, ok := field.Interface().(string); ok {
+		if str, ok := reflect.TypeAssert[string](field); ok {
 			return &str
 		}
 	}
@@ -162,10 +184,51 @@ func getFieldStructValue[Titemprop any](v reflect.Value, fieldName string) *Tite
 	}
 
 	if field.IsValid() && field.CanInterface() {
-		if value, ok := field.Interface().(Titemprop); ok {
-			return &value
+		targetType := reflect.TypeFor[Titemprop]()
+		if field.Type().ConvertibleTo(targetType) {
+			if value, ok := reflect.TypeAssert[Titemprop](field.Convert(targetType)); ok {
+				return &value
+			}
 		}
 	}
 
 	return nil
+}
+
+func getFieldSliceValue[T any](v reflect.Value, fieldName string) []T {
+	field := v.FieldByName(fieldName)
+	if field.Kind() == reflect.Pointer {
+		field = field.Elem()
+	}
+
+	if field.IsValid() && field.CanInterface() {
+		if value, ok := reflect.TypeAssert[[]T](field); ok {
+			return value
+		}
+	}
+
+	// Convert element-by-element for structurally identical but differently-named types
+	// (e.g., fabwarehouse.ItemTag → fabcore.ItemTag)
+	targetType := reflect.TypeFor[T]()
+	result := make([]T, 0, field.Len())
+
+	for i := range field.Len() {
+		elem := field.Index(i)
+		if elem.Kind() == reflect.Pointer {
+			elem = elem.Elem()
+		}
+
+		if elem.Type().ConvertibleTo(targetType) {
+			converted, ok := reflect.TypeAssert[T](elem.Convert(targetType))
+			if ok {
+				result = append(result, converted)
+			}
+		}
+	}
+
+	if len(result) == 0 {
+		return nil
+	}
+
+	return result
 }

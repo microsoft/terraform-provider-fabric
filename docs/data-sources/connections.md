@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Connections data-source allows you to retrieve a list of Fabric Connections https://learn.microsoft.com/fabric/data-factory/data-source-management.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_connections (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Connections data-source allows you to retrieve a list of Fabric [Connections](https://learn.microsoft.com/fabric/data-factory/data-source-management).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

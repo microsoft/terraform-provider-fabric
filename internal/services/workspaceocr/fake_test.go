@@ -6,6 +6,7 @@ package workspaceocr_test
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	azto "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -43,9 +44,15 @@ func fakeGetOutboundCloudConnectionRules(
 	entity *fabcore.WorkspaceOutboundConnections,
 ) func(ctx context.Context, workspaceID string, options *fabcore.WorkspacesClientGetOutboundCloudConnectionRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundCloudConnectionRulesResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, _ string, _ *fabcore.WorkspacesClientGetOutboundCloudConnectionRulesOptions) (resp azfake.Responder[fabcore.WorkspacesClientGetOutboundCloudConnectionRulesResponse], errResp azfake.ErrorResponder) {
+		// Return rules in reversed order to simulate the API returning rules
+		// in a different order than submitted.
+		reversed := *entity
+		reversed.Rules = slices.Clone(entity.Rules)
+		slices.Reverse(reversed.Rules)
+
 		resp = azfake.Responder[fabcore.WorkspacesClientGetOutboundCloudConnectionRulesResponse]{}
 		resp.SetResponse(http.StatusOK, fabcore.WorkspacesClientGetOutboundCloudConnectionRulesResponse{
-			WorkspaceOutboundConnections: *entity,
+			WorkspaceOutboundConnections: reversed,
 			ETag:                         new("fake-etag"),
 		}, nil)
 

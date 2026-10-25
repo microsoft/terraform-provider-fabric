@@ -605,7 +605,8 @@ func TestAcc_DeploymentPipelineResource_CRUD_Stages(t *testing.T) {
 								"is_public":    entityStage3IsPublicRandom,
 							},
 						},
-					}),
+					},
+				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),

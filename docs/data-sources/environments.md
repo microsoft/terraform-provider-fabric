@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Environments data-source allows you to retrieve a list of Fabric Environments https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_environments (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Environments data-source allows you to retrieve a list of Fabric [Environments](https://learn.microsoft.com/fabric/data-engineering/create-and-use-environment).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -59,6 +56,7 @@ Read-Only:
 - `id` (String) The Environment ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--values--properties))
 - `sensitivity_label` (Attributes) The Environment sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs assigned to the Environment.
 - `workspace_id` (String) The Workspace ID.
 
 <a id="nestedatt--values--properties"></a>

@@ -43,9 +43,7 @@ func (o *operationsWorkspace) TransformList(entities []fabcore.WorkspaceInfo) fa
 	}
 
 	return fabcore.WorkspacesClientListWorkspacesResponse{
-		Workspaces: fabcore.Workspaces{
-			Value: list,
-		},
+		Value: list,
 	}
 }
 
@@ -109,7 +107,8 @@ func configureWorkspace(server *fakeServer) fabcore.WorkspaceInfo {
 		&handler.ServerFactory.Core.WorkspacesServer.UpdateWorkspace,
 		&handler.ServerFactory.Core.WorkspacesServer.CreateWorkspace,
 		&handler.ServerFactory.Core.WorkspacesServer.NewListWorkspacesPager,
-		&handler.ServerFactory.Core.WorkspacesServer.DeleteWorkspace)
+		&handler.ServerFactory.Core.WorkspacesServer.DeleteWorkspace,
+	)
 
 	return fabcore.WorkspaceInfo{}
 }

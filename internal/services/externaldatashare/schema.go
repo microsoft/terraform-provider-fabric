@@ -9,11 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
-	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema" //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -21,6 +24,7 @@ import (
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+	superstringvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -161,17 +165,44 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 				Attributes: superschema.Attributes{
-					"user_principal_name": superschema.SuperStringAttribute{
+					"type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The user principal name of the recipient.",
+							MarkdownDescription: "The type of the recipient. Defaults to `" + string(fabcore.ExternalDataShareRecipientTypeUser) + "`.",
+							Validators: []validator.String{
+								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleExternalDataShareRecipientTypeValues(), true)...),
+							},
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
 						},
 						Resource: &schemaR.StringAttribute{
-							Required: true,
+							Optional: true,
+							Computed: true,
+							Default:  stringdefault.StaticString(string(fabcore.ExternalDataShareRecipientTypeUser)),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.RequiresReplace(),
+							},
+						},
+					},
+					"user_principal_name": superschema.StringAttribute{
+						Common: &schemaR.StringAttribute{
+							MarkdownDescription: "The user principal name of the recipient. Required when `type` is `" + string(fabcore.ExternalDataShareRecipientTypeUser) + "`.",
+						},
+						DataSource: &schemaD.StringAttribute{
+							Computed: true,
+						},
+						Resource: &schemaR.StringAttribute{
+							Optional: true,
 							Validators: []validator.String{
 								stringvalidator.LengthAtMost(256),
+								superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.ExternalDataShareRecipientTypeUser)),
+									}),
+								superstringvalidator.NullIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.ExternalDataShareRecipientTypeServicePrincipal)),
+									}),
 							},
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.RequiresReplace(),
@@ -180,7 +211,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 					"tenant_id": superschema.SuperStringAttribute{
 						Common: &schemaR.StringAttribute{
-							MarkdownDescription: "The tenant ID of the recipient.",
+							MarkdownDescription: "The tenant ID of the recipient. Required when `type` is `" + string(fabcore.ExternalDataShareRecipientTypeServicePrincipal) + "`.",
 							CustomType:          customtypes.UUIDType{},
 						},
 						DataSource: &schemaD.StringAttribute{
@@ -188,6 +219,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						Resource: &schemaR.StringAttribute{
 							Optional: true,
+							Validators: []validator.String{
+								superstringvalidator.RequireIfAttributeIsOneOf(path.MatchRelative().AtParent().AtName("type"),
+									[]attr.Value{
+										types.StringValue(string(fabcore.ExternalDataShareRecipientTypeServicePrincipal)),
+									}),
+							},
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.RequiresReplace(),
 							},

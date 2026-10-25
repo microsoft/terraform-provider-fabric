@@ -78,10 +78,11 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `EntityTypes/*/ResourceLinks`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Ontology description.
 - `folder_id` (String) The Ontology Folder ID.
 - `sensitivity_label` (Attributes) The Ontology sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

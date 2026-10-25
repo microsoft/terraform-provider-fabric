@@ -217,7 +217,7 @@ func TestUnit_UUIDValueUUID(t *testing.T) {
 			uuidValue, diags := testCase.uuidValue.ValueUUID()
 			expectedUUID, _ := uuid.ParseUUID(testCase.expectedUUID)
 
-			if uuidValue != (string)(expectedUUID) {
+			if uuidValue != string(expectedUUID) {
 				t.Errorf("Unexpected difference in UUID, got: %s, expected: %s", uuidValue, testCase.expectedUUID)
 			}
 

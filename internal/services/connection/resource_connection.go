@@ -32,6 +32,7 @@ var (
 	_ resource.ResourceWithConfigure        = (*resourceConnection)(nil)
 	_ resource.ResourceWithModifyPlan       = (*resourceConnection)(nil)
 	_ resource.ResourceWithConfigValidators = (*resourceConnection)(nil)
+	_ resource.ResourceWithImportState      = (*resourceConnection)(nil)
 )
 
 type resourceConnection struct {
@@ -337,6 +338,30 @@ func (r *resourceConnection) Delete(ctx context.Context, req resource.DeleteRequ
 	resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationDelete, nil)...)
 
 	tflog.Debug(ctx, "DELETE", map[string]any{
+		"action": "end",
+	})
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (r *resourceConnection) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tflog.Debug(ctx, "IMPORT", map[string]any{
+		"action": "start",
+	})
+	tflog.Trace(ctx, "IMPORT", map[string]any{
+		"id": req.ID,
+	})
+
+	_, diags := customtypes.NewUUIDValueMust(req.ID)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+
+	tflog.Debug(ctx, "IMPORT", map[string]any{
 		"action": "end",
 	})
 

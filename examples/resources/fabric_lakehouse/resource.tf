@@ -61,7 +61,7 @@ resource "fabric_lakehouse" "example_custom_delimiter" {
   definition = {
     "lakehouse.metadata.json" = {
       source           = "${local.path}/lakehouse.metadata.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }

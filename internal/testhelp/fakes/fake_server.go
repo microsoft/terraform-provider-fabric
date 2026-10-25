@@ -44,19 +44,25 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureVirtualNetworkGateway)
 	handleEntity(server, configureOnPremisesGateway)
 	handleEntity(server, configureOnPremisesGatewayPersonal)
+	handleEntity(server, configureStreamingVirtualNetworkGateway)
 	handleEntity(server, configureKQLDatabase)
 	handleEntity(server, configureLakehouse)
+	handleEntity(server, configureMirroredCatalog)
 	handleEntity(server, configureMirroredDatabase)
 	handleEntity(server, configureNotebook)
 	handleEntity(server, configureOperationsAgent)
 	handleEntity(server, configureReport)
 	handleEntity(server, configureSemanticModel)
+	handleEntity(server, configureSnowflakeDatabase)
 	handleEntity(server, configureSparkJobDefinition)
 	handleEntity(server, configureSQLDatabase)
 	handleEntity(server, configureWarehouse)
 	handleEntity(server, configureWarehouseSnapshot)
 	handleEntity(server, configureWorkspace)
 	handleEntity(server, configureWorkspaceManagedPrivateEndpoint)
+	handleEntity(server, configureMirroredAzureDatabricksCatalog)
+
+	configureItemTags(server)
 
 	return server
 }
@@ -73,7 +79,7 @@ func handleEntity[TEntity any](server *fakeServer, configureFunction func(server
 func (s *fakeServer) Upsert(element any) {
 	elementType := reflect.TypeOf(element)
 	// if elementType is a pointer, get the underlying type
-	if elementType.Kind() == reflect.Ptr {
+	if elementType.Kind() == reflect.Pointer {
 		elementType = elementType.Elem()
 	}
 

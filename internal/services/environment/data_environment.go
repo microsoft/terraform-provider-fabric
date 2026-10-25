@@ -73,11 +73,9 @@ func NewDataSourceEnvironment(ctx context.Context) datasource.DataSource {
 	}
 
 	config := fabricitem.DataSourceFabricItemProperties[environmentPropertiesModel, fabenvironment.Properties]{
-		DataSourceFabricItem: fabricitem.DataSourceFabricItem{
-			TypeInfo:            ItemTypeInfo,
-			FabricItemType:      FabricItemType,
-			IsDisplayNameUnique: true,
-		},
+		TypeInfo:             ItemTypeInfo,
+		FabricItemType:       FabricItemType,
+		IsDisplayNameUnique:  true,
 		PropertiesAttributes: getDataSourceEnvironmentPropertiesAttributes(ctx),
 		PropertiesSetter:     propertiesSetter,
 		ItemGetter:           itemGetter,

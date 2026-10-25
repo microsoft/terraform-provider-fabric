@@ -79,7 +79,7 @@ resource "fabric_lakehouse" "example_custom_delimiter" {
   definition = {
     "lakehouse.metadata.json" = {
       source           = "${local.path}/lakehouse.metadata.json.tmpl"
-      tokens_delimiter = "##"
+      tokens_delimiter = "<<>>"
       tokens = {
         "MyKey" = "MyValue"
       }
@@ -140,6 +140,7 @@ Any changes to this configuration will result in recreation of the Lakehouse. (s
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Lakehouse format. Possible values: `Default`
 - `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

@@ -124,10 +124,10 @@ func itemSchema(dsList bool) superschema.Schema { //revive:disable-line:flag-par
 			},
 			"target_subresource_type": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
-					MarkdownDescription: "Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource).",
+					MarkdownDescription: "Sub-resource pointing to [Private-link resource](https://learn.microsoft.com/azure/private-link/private-endpoint-overview#private-link-resource). Leave unset when the target is a Private Link Service, which does not expose sub-resources.",
 				},
 				Resource: &schemaR.StringAttribute{
-					Required: true,
+					Optional: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 					},

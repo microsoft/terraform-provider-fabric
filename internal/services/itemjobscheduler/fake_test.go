@@ -22,7 +22,7 @@ var fakeItemScheduleStore = map[string]fabcore.ItemSchedule{}
 func fakeItemSchedulesFunc() func(workspaceID, itemID, jobType string, options *fabcore.JobSchedulerClientListItemSchedulesOptions) (resp azfake.PagerResponder[fabcore.JobSchedulerClientListItemSchedulesResponse]) {
 	return func(_, _, _ string, _ *fabcore.JobSchedulerClientListItemSchedulesOptions) (resp azfake.PagerResponder[fabcore.JobSchedulerClientListItemSchedulesResponse]) {
 		resp = azfake.PagerResponder[fabcore.JobSchedulerClientListItemSchedulesResponse]{}
-		resp.AddPage(http.StatusOK, fabcore.JobSchedulerClientListItemSchedulesResponse{ItemSchedules: fabcore.ItemSchedules{Value: GetAllStoredItemSchedules()}}, nil)
+		resp.AddPage(http.StatusOK, fabcore.JobSchedulerClientListItemSchedulesResponse{Value: GetAllStoredItemSchedules()}, nil)
 
 		return resp
 	}

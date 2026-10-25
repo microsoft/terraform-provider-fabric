@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -233,6 +234,14 @@ func getResourceFabricItemBaseAttributes(
 					},
 				},
 			},
+		},
+		"tags": schema.SetAttribute{
+			MarkdownDescription: "The set of tag IDs.",
+			Optional:            true,
+			Computed:            true,
+			Default:             setdefault.StaticValue(types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})),
+			CustomType:          supertypes.NewSetTypeOf[customtypes.UUID](ctx),
+			ElementType:         customtypes.UUIDType{},
 		},
 		"timeouts": timeouts.AttributesAll(ctx),
 	}

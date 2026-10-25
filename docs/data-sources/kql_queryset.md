@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The KQL Queryset description.
 - `folder_id` (String) The KQL Queryset Folder ID.
 - `sensitivity_label` (Attributes) The KQL Queryset sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
 

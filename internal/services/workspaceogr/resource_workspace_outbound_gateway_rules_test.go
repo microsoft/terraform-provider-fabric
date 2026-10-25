@@ -91,7 +91,8 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_Attributes(t *testing.T) {
 
 func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 	entity := NewRandomWorkspaceOutboundGateways()
-	gatewayID := testhelp.RandomUUID()
+	gatewayID1 := testhelp.RandomUUID()
+	gatewayID2 := testhelp.RandomUUID()
 	workspaceID := testhelp.RandomUUID()
 
 	fakeServer := fakes.NewFakeServer()
@@ -109,7 +110,10 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 					"default_action": string(fabcore.GatewayAccessActionTypeDeny),
 					"allowed_gateways": []map[string]any{
 						{
-							"id": gatewayID,
+							"id": gatewayID1,
+						},
+						{
+							"id": gatewayID2,
 						},
 					},
 				},
@@ -117,8 +121,9 @@ func TestUnit_WorkspaceOutboundGatewayRulesResource_CRUD(t *testing.T) {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.0.id", gatewayID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "2"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "allowed_gateways.*", map[string]string{"id": gatewayID1}),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "allowed_gateways.*", map[string]string{"id": gatewayID2}),
 			),
 		},
 		// update and read - set to default values
@@ -173,7 +178,8 @@ func TestAcc_WorkspaceSetOutboundGatewayRules_CRUD(t *testing.T) {
 						},
 						"depends_on": []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "1"),
@@ -193,7 +199,8 @@ func TestAcc_WorkspaceSetOutboundGatewayRules_CRUD(t *testing.T) {
 						"default_action": string(fabcore.GatewayAccessActionTypeDeny),
 						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeDeny)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "0"),
@@ -212,7 +219,8 @@ func TestAcc_WorkspaceSetOutboundGatewayRules_CRUD(t *testing.T) {
 						"default_action": string(fabcore.GatewayAccessActionTypeAllow),
 						"depends_on":     []string{workspaceNetworkCommunicationPolicyFQN},
 					},
-				)),
+				),
+			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "default_action", string(fabcore.GatewayAccessActionTypeAllow)),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "allowed_gateways.#", "0"),

@@ -21,7 +21,7 @@ var fakeTagStore = map[string]fabadmin.TagInfo{}
 func fakeTagsFunc() func(options *fabadmin.TagsClientListTagsOptions) (resp azfake.PagerResponder[fabadmin.TagsClientListTagsResponse]) {
 	return func(_ *fabadmin.TagsClientListTagsOptions) (resp azfake.PagerResponder[fabadmin.TagsClientListTagsResponse]) {
 		resp = azfake.PagerResponder[fabadmin.TagsClientListTagsResponse]{}
-		resp.AddPage(http.StatusOK, fabadmin.TagsClientListTagsResponse{TagsInfo: fabadmin.TagsInfo{Value: GetAllStoredTags()}}, nil)
+		resp.AddPage(http.StatusOK, fabadmin.TagsClientListTagsResponse{Value: GetAllStoredTags()}, nil)
 
 		return resp
 	}
@@ -122,7 +122,7 @@ func fakeBulkCreateTagsFunc() func(_ context.Context, body fabadmin.CreateTagsRe
 			outputTags = append(outputTags, outputTag)
 		}
 
-		resp.SetResponse(http.StatusCreated, fabadmin.TagsClientBulkCreateTagsResponse{CreateTagsResponse: fabadmin.CreateTagsResponse{Tags: outputTags}}, nil)
+		resp.SetResponse(http.StatusCreated, fabadmin.TagsClientBulkCreateTagsResponse{Tags: outputTags}, nil)
 
 		return resp, err
 	}
