@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"text/template"
 	"unicode/utf8"
@@ -30,24 +31,10 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 	regexRegistry := sproutregex.NewRegistry()
 	stringRegistry := sproutstrings.NewRegistry()
 
-	funcs["get"] = templateCompatV1MapFunction("get", mapRegistry.Get)
-	funcs["hasKey"] = templateCompatV1MapFunction("hasKey", mapRegistry.HasKey)
-	funcs["unset"] = templateCompatV1MapFunction("unset", mapRegistry.Unset)
-	funcs["set"] = func(keyArg, value, mapArg any) (map[string]any, error) {
-		// Historical calls use (dict, key, value); normalize to (key, value, dict).
-		if _, mapFirst := keyArg.(map[string]any); mapFirst {
-			keyArg, value, mapArg = value, mapArg, keyArg
-		}
-
-		key, keyOK := keyArg.(string)
-
-		dict, dictOK := mapArg.(map[string]any)
-		if !keyOK || !dictOK || dict == nil {
-			return nil, errors.New("set requires a string key and a non-nil map[string]any")
-		}
-
-		return mapRegistry.Set(key, value, dict)
-	}
+	funcs["get"] = templateCompatV1MapFunction2("get", mapRegistry.Get)
+	funcs["hasKey"] = templateCompatV1MapFunction2("hasKey", mapRegistry.HasKey)
+	funcs["unset"] = templateCompatV1MapFunction2("unset", mapRegistry.Unset)
+	funcs["set"] = templateCompatV1MapFunction3("set", mapRegistry.Set)
 	// These variadic methods already validate their arguments after reordering.
 	funcs["pick"] = func(args ...any) (map[string]any, error) {
 		mapLastArgs := templateCompatV1MapArgs(args)
@@ -105,13 +92,15 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 	}
 
 	funcs["ellipsisBoth"] = func(offset, maxWidth int, value string) string {
+		// Match Sprout's minimum widths: a trailing ellipsis plus one rune needs
+		// 4 runes; ellipses on both ends plus one rune need 7 when offset > 0.
 		if maxWidth < 4 || offset > 0 && maxWidth < 7 {
 			return value
 		}
 
-		// Preserve byte offsets in the old non-truncating branch without restoring
-		// its out-of-range panic. The truncating branch already used rune offsets.
 		runeCount := utf8.RuneCountInString(value)
+		// Sprout v1.0.3 chose this branch by rune count but sliced by byte offset.
+		// Keep that behavior for safe indices, including offsets that split a rune.
 		if offset >= 0 && offset <= len(value) && (runeCount <= maxWidth || runeCount <= offset) {
 			return value[offset:]
 		}
@@ -157,18 +146,16 @@ func templateCompatV1MapArgs(args []any) []any {
 // templateCompatV1MoveFirstArgLast copies the arguments so normalization never
 // overwrites the caller's slice. Callers supply at least two arguments.
 func templateCompatV1MoveFirstArgLast(args []any) []any {
-	reordered := make([]any, len(args))
-	copy(reordered, args[1:])
-	reordered[len(reordered)-1] = args[0]
+	remainingArgs := slices.Clone(args[1:])
 
-	return reordered
+	return append(remainingArgs, args[0])
 }
 
-// templateCompatV1MapFunction creates a wrapper for get, hasKey, and unset.
+// templateCompatV1MapFunction2 wraps fixed-arity map functions with two operands:
 // They share the typed (key, dict) signature; T accommodates their different
 // results. The returned function validates template arguments before delegation.
 // The template engine enforces the fixed argument count.
-func templateCompatV1MapFunction[T any](name string, call func(string, map[string]any) (T, error)) func(any, any) (T, error) {
+func templateCompatV1MapFunction2[T any](name string, call func(string, map[string]any) (T, error)) func(any, any) (T, error) {
 	return func(keyArg, mapArg any) (T, error) {
 		if _, mapFirst := keyArg.(map[string]any); mapFirst {
 			keyArg, mapArg = mapArg, keyArg
@@ -184,6 +171,27 @@ func templateCompatV1MapFunction[T any](name string, call func(string, map[strin
 		}
 
 		return call(key, dict)
+	}
+}
+
+// templateCompatV1MapFunction3 wraps map functions with a key, value, and map.
+// It supports legacy map-first calls and delegates normalized arguments.
+func templateCompatV1MapFunction3[T any](name string, call func(string, any, map[string]any) (T, error)) func(any, any, any) (T, error) {
+	return func(keyArg, value, mapArg any) (T, error) {
+		if _, mapFirst := keyArg.(map[string]any); mapFirst {
+			keyArg, value, mapArg = value, mapArg, keyArg
+		}
+
+		key, keyOK := keyArg.(string)
+
+		dict, dictOK := mapArg.(map[string]any)
+		if !keyOK || !dictOK || dict == nil {
+			var zero T
+
+			return zero, fmt.Errorf("%s requires a string key and a non-nil map[string]any", name)
+		}
+
+		return call(key, value, dict)
 	}
 }
 
