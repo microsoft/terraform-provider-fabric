@@ -1,0 +1,1017 @@
+[
+  {
+    "name": "toCamelCase_00",
+    "template": "{{ toCamelCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toCamelCase_01",
+    "template": "{{ toCamelCase \"hello\" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toCamelCase_02",
+    "template": "{{ toCamelCase \"hello world\" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "toCamelCase_03",
+    "template": "{{ toCamelCase \" hello \" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toCamelCase_04",
+    "template": "{{ toCamelCase \"hello-world\" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "toCamelCase_05",
+    "template": "{{ toCamelCase \"hello_world\" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "toCamelCase_06",
+    "template": "{{ toCamelCase \"firstName\" }}",
+    "want": "firstname"
+  },
+  {
+    "name": "toCamelCase_07",
+    "template": "{{ toCamelCase \"HTMLParser\" }}",
+    "want": "htmlparser"
+  },
+  {
+    "name": "toCamelCase_08",
+    "template": "{{ toCamelCase \"NoHTTPS\" }}",
+    "want": "nohttps"
+  },
+  {
+    "name": "toCamelCase_09",
+    "template": "{{ toCamelCase \"FOO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toCamelCase_10",
+    "template": "{{ toCamelCase \"FoO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toCamelCase_11",
+    "template": "{{ toCamelCase \"hELLO world\" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "toCamelCase_12",
+    "template": "{{ toCamelCase \"123abc\" }}",
+    "want": "123abc"
+  },
+  {
+    "name": "toCamelCase_13",
+    "template": "{{ toCamelCase \"2FOo\" }}",
+    "want": "2foo"
+  },
+  {
+    "name": "toCamelCase_14",
+    "template": "{{ toCamelCase \"foo2Bar\" }}",
+    "want": "foo2bar"
+  },
+  {
+    "name": "toCamelCase_15",
+    "template": "{{ toCamelCase \"fooBAR\" }}",
+    "want": "foobar"
+  },
+  {
+    "name": "toCamelCase_16",
+    "template": "{{ toCamelCase \"fooA\" }}",
+    "want": "fooa"
+  },
+  {
+    "name": "toCamelCase_17",
+    "template": "{{ toCamelCase \"aB\" }}",
+    "want": "ab"
+  },
+  {
+    "name": "toCamelCase_18",
+    "template": "{{ toCamelCase \"__hello--world \" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "toCamelCase_19",
+    "template": "{{ toCamelCase \"école Déjà\" }}",
+    "want": "écoleDéjà"
+  },
+  {
+    "name": "toCamelCase_20",
+    "template": "{{ toCamelCase \"αΒγ\" }}",
+    "want": "αβγ"
+  },
+  {
+    "name": "toCamelCase_21",
+    "template": "{{ toCamelCase \"ǅelta\" }}",
+    "want": "ǆelta"
+  },
+  {
+    "name": "toCamelCase_22",
+    "template": "{{ toCamelCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "toCamelCase_23",
+    "template": "{{ toCamelCase \"---\" }}",
+    "want": ""
+  },
+  {
+    "name": "toCamelCase_24",
+    "template": "{{ toCamelCase \"0\" }}",
+    "want": "0"
+  },
+  {
+    "name": "toCamelCase_25",
+    "template": "{{ toCamelCase \"HELLO123_WORLD\" }}",
+    "want": "hello123World"
+  },
+  {
+    "name": "toCamelCase_26",
+    "template": "{{ toCamelCase \"aB2C\" }}",
+    "want": "ab2c"
+  },
+  {
+    "name": "toCamelCase_27",
+    "template": "{{ toCamelCase \"CamelCase\" }}",
+    "want": "camelcase"
+  },
+  {
+    "name": "toCamelCase_28",
+    "template": "{{ toCamelCase \"A_B_C\" }}",
+    "want": "aBC"
+  },
+  {
+    "name": "toPascalCase_00",
+    "template": "{{ toPascalCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toPascalCase_01",
+    "template": "{{ toPascalCase \"hello\" }}",
+    "want": "Hello"
+  },
+  {
+    "name": "toPascalCase_02",
+    "template": "{{ toPascalCase \"hello world\" }}",
+    "want": "HelloWorld"
+  },
+  {
+    "name": "toPascalCase_03",
+    "template": "{{ toPascalCase \" hello \" }}",
+    "want": "Hello"
+  },
+  {
+    "name": "toPascalCase_04",
+    "template": "{{ toPascalCase \"hello-world\" }}",
+    "want": "HelloWorld"
+  },
+  {
+    "name": "toPascalCase_05",
+    "template": "{{ toPascalCase \"hello_world\" }}",
+    "want": "HelloWorld"
+  },
+  {
+    "name": "toPascalCase_06",
+    "template": "{{ toPascalCase \"firstName\" }}",
+    "want": "FirstName"
+  },
+  {
+    "name": "toPascalCase_07",
+    "template": "{{ toPascalCase \"HTMLParser\" }}",
+    "want": "HTMLParser"
+  },
+  {
+    "name": "toPascalCase_08",
+    "template": "{{ toPascalCase \"NoHTTPS\" }}",
+    "want": "NoHTTPS"
+  },
+  {
+    "name": "toPascalCase_09",
+    "template": "{{ toPascalCase \"FOO\" }}",
+    "want": "FOO"
+  },
+  {
+    "name": "toPascalCase_10",
+    "template": "{{ toPascalCase \"FoO\" }}",
+    "want": "FoO"
+  },
+  {
+    "name": "toPascalCase_11",
+    "template": "{{ toPascalCase \"hELLO world\" }}",
+    "want": "HELLOWorld"
+  },
+  {
+    "name": "toPascalCase_12",
+    "template": "{{ toPascalCase \"123abc\" }}",
+    "want": "123abc"
+  },
+  {
+    "name": "toPascalCase_13",
+    "template": "{{ toPascalCase \"2FOo\" }}",
+    "want": "2FOo"
+  },
+  {
+    "name": "toPascalCase_14",
+    "template": "{{ toPascalCase \"foo2Bar\" }}",
+    "want": "Foo2Bar"
+  },
+  {
+    "name": "toPascalCase_15",
+    "template": "{{ toPascalCase \"fooBAR\" }}",
+    "want": "FooBAR"
+  },
+  {
+    "name": "toPascalCase_16",
+    "template": "{{ toPascalCase \"fooA\" }}",
+    "want": "FooA"
+  },
+  {
+    "name": "toPascalCase_17",
+    "template": "{{ toPascalCase \"aB\" }}",
+    "want": "AB"
+  },
+  {
+    "name": "toPascalCase_18",
+    "template": "{{ toPascalCase \"__hello--world \" }}",
+    "want": "HelloWorld"
+  },
+  {
+    "name": "toPascalCase_19",
+    "template": "{{ toPascalCase \"école Déjà\" }}",
+    "want": "ÉcoleDéjà"
+  },
+  {
+    "name": "toPascalCase_20",
+    "template": "{{ toPascalCase \"αΒγ\" }}",
+    "want": "ΑΒγ"
+  },
+  {
+    "name": "toPascalCase_21",
+    "template": "{{ toPascalCase \"ǅelta\" }}",
+    "want": "Ǆelta"
+  },
+  {
+    "name": "toPascalCase_22",
+    "template": "{{ toPascalCase \"a.b/c\" }}",
+    "want": "A.b/c"
+  },
+  {
+    "name": "toPascalCase_23",
+    "template": "{{ toPascalCase \"---\" }}",
+    "want": ""
+  },
+  {
+    "name": "toPascalCase_24",
+    "template": "{{ toPascalCase \"0\" }}",
+    "want": "0"
+  },
+  {
+    "name": "toPascalCase_25",
+    "template": "{{ toPascalCase \"HELLO123_WORLD\" }}",
+    "want": "HELLO123WORLD"
+  },
+  {
+    "name": "toPascalCase_26",
+    "template": "{{ toPascalCase \"aB2C\" }}",
+    "want": "AB2C"
+  },
+  {
+    "name": "toPascalCase_27",
+    "template": "{{ toPascalCase \"CamelCase\" }}",
+    "want": "CamelCase"
+  },
+  {
+    "name": "toPascalCase_28",
+    "template": "{{ toPascalCase \"A_B_C\" }}",
+    "want": "ABC"
+  },
+  {
+    "name": "toSnakeCase_00",
+    "template": "{{ toSnakeCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toSnakeCase_01",
+    "template": "{{ toSnakeCase \"hello\" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toSnakeCase_02",
+    "template": "{{ toSnakeCase \"hello world\" }}",
+    "want": "hello_world"
+  },
+  {
+    "name": "toSnakeCase_03",
+    "template": "{{ toSnakeCase \" hello \" }}",
+    "want": "_hello_"
+  },
+  {
+    "name": "toSnakeCase_04",
+    "template": "{{ toSnakeCase \"hello-world\" }}",
+    "want": "hello_world"
+  },
+  {
+    "name": "toSnakeCase_05",
+    "template": "{{ toSnakeCase \"hello_world\" }}",
+    "want": "hello_world"
+  },
+  {
+    "name": "toSnakeCase_06",
+    "template": "{{ toSnakeCase \"firstName\" }}",
+    "want": "first_name"
+  },
+  {
+    "name": "toSnakeCase_07",
+    "template": "{{ toSnakeCase \"HTMLParser\" }}",
+    "want": "html_parser"
+  },
+  {
+    "name": "toSnakeCase_08",
+    "template": "{{ toSnakeCase \"NoHTTPS\" }}",
+    "want": "no_https"
+  },
+  {
+    "name": "toSnakeCase_09",
+    "template": "{{ toSnakeCase \"FOO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toSnakeCase_10",
+    "template": "{{ toSnakeCase \"FoO\" }}",
+    "want": "fo_o"
+  },
+  {
+    "name": "toSnakeCase_11",
+    "template": "{{ toSnakeCase \"hELLO world\" }}",
+    "want": "h_ello_world"
+  },
+  {
+    "name": "toSnakeCase_12",
+    "template": "{{ toSnakeCase \"123abc\" }}",
+    "want": "_123abc"
+  },
+  {
+    "name": "toSnakeCase_13",
+    "template": "{{ toSnakeCase \"2FOo\" }}",
+    "want": "_2f_oo"
+  },
+  {
+    "name": "toSnakeCase_14",
+    "template": "{{ toSnakeCase \"foo2Bar\" }}",
+    "want": "foo_2bar"
+  },
+  {
+    "name": "toSnakeCase_15",
+    "template": "{{ toSnakeCase \"fooBAR\" }}",
+    "want": "foo_bar"
+  },
+  {
+    "name": "toSnakeCase_16",
+    "template": "{{ toSnakeCase \"fooA\" }}",
+    "want": "foo_a"
+  },
+  {
+    "name": "toSnakeCase_17",
+    "template": "{{ toSnakeCase \"aB\" }}",
+    "want": "a_b"
+  },
+  {
+    "name": "toSnakeCase_18",
+    "template": "{{ toSnakeCase \"__hello--world \" }}",
+    "want": "_hello_world_"
+  },
+  {
+    "name": "toSnakeCase_19",
+    "template": "{{ toSnakeCase \"école Déjà\" }}",
+    "want": "école_déjà"
+  },
+  {
+    "name": "toSnakeCase_20",
+    "template": "{{ toSnakeCase \"αΒγ\" }}",
+    "want": "α_βγ"
+  },
+  {
+    "name": "toSnakeCase_21",
+    "template": "{{ toSnakeCase \"ǅelta\" }}",
+    "want": "ǆelta"
+  },
+  {
+    "name": "toSnakeCase_22",
+    "template": "{{ toSnakeCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "toSnakeCase_23",
+    "template": "{{ toSnakeCase \"---\" }}",
+    "want": "_"
+  },
+  {
+    "name": "toSnakeCase_24",
+    "template": "{{ toSnakeCase \"0\" }}",
+    "want": "_0"
+  },
+  {
+    "name": "toSnakeCase_25",
+    "template": "{{ toSnakeCase \"HELLO123_WORLD\" }}",
+    "want": "hello_123_world"
+  },
+  {
+    "name": "toSnakeCase_26",
+    "template": "{{ toSnakeCase \"aB2C\" }}",
+    "want": "a_b_2c"
+  },
+  {
+    "name": "toSnakeCase_27",
+    "template": "{{ toSnakeCase \"CamelCase\" }}",
+    "want": "camel_case"
+  },
+  {
+    "name": "toSnakeCase_28",
+    "template": "{{ toSnakeCase \"A_B_C\" }}",
+    "want": "a_b_c"
+  },
+  {
+    "name": "toKebabCase_00",
+    "template": "{{ toKebabCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toKebabCase_01",
+    "template": "{{ toKebabCase \"hello\" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toKebabCase_02",
+    "template": "{{ toKebabCase \"hello world\" }}",
+    "want": "hello-world"
+  },
+  {
+    "name": "toKebabCase_03",
+    "template": "{{ toKebabCase \" hello \" }}",
+    "want": "-hello-"
+  },
+  {
+    "name": "toKebabCase_04",
+    "template": "{{ toKebabCase \"hello-world\" }}",
+    "want": "hello-world"
+  },
+  {
+    "name": "toKebabCase_05",
+    "template": "{{ toKebabCase \"hello_world\" }}",
+    "want": "hello-world"
+  },
+  {
+    "name": "toKebabCase_06",
+    "template": "{{ toKebabCase \"firstName\" }}",
+    "want": "first-name"
+  },
+  {
+    "name": "toKebabCase_07",
+    "template": "{{ toKebabCase \"HTMLParser\" }}",
+    "want": "html-parser"
+  },
+  {
+    "name": "toKebabCase_08",
+    "template": "{{ toKebabCase \"NoHTTPS\" }}",
+    "want": "no-https"
+  },
+  {
+    "name": "toKebabCase_09",
+    "template": "{{ toKebabCase \"FOO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toKebabCase_10",
+    "template": "{{ toKebabCase \"FoO\" }}",
+    "want": "fo-o"
+  },
+  {
+    "name": "toKebabCase_11",
+    "template": "{{ toKebabCase \"hELLO world\" }}",
+    "want": "h-ello-world"
+  },
+  {
+    "name": "toKebabCase_12",
+    "template": "{{ toKebabCase \"123abc\" }}",
+    "want": "-123abc"
+  },
+  {
+    "name": "toKebabCase_13",
+    "template": "{{ toKebabCase \"2FOo\" }}",
+    "want": "-2f-oo"
+  },
+  {
+    "name": "toKebabCase_14",
+    "template": "{{ toKebabCase \"foo2Bar\" }}",
+    "want": "foo-2bar"
+  },
+  {
+    "name": "toKebabCase_15",
+    "template": "{{ toKebabCase \"fooBAR\" }}",
+    "want": "foo-bar"
+  },
+  {
+    "name": "toKebabCase_16",
+    "template": "{{ toKebabCase \"fooA\" }}",
+    "want": "foo-a"
+  },
+  {
+    "name": "toKebabCase_17",
+    "template": "{{ toKebabCase \"aB\" }}",
+    "want": "a-b"
+  },
+  {
+    "name": "toKebabCase_18",
+    "template": "{{ toKebabCase \"__hello--world \" }}",
+    "want": "-hello-world-"
+  },
+  {
+    "name": "toKebabCase_19",
+    "template": "{{ toKebabCase \"école Déjà\" }}",
+    "want": "école-déjà"
+  },
+  {
+    "name": "toKebabCase_20",
+    "template": "{{ toKebabCase \"αΒγ\" }}",
+    "want": "α-βγ"
+  },
+  {
+    "name": "toKebabCase_21",
+    "template": "{{ toKebabCase \"ǅelta\" }}",
+    "want": "ǆelta"
+  },
+  {
+    "name": "toKebabCase_22",
+    "template": "{{ toKebabCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "toKebabCase_23",
+    "template": "{{ toKebabCase \"---\" }}",
+    "want": "-"
+  },
+  {
+    "name": "toKebabCase_24",
+    "template": "{{ toKebabCase \"0\" }}",
+    "want": "-0"
+  },
+  {
+    "name": "toKebabCase_25",
+    "template": "{{ toKebabCase \"HELLO123_WORLD\" }}",
+    "want": "hello-123-world"
+  },
+  {
+    "name": "toKebabCase_26",
+    "template": "{{ toKebabCase \"aB2C\" }}",
+    "want": "a-b-2c"
+  },
+  {
+    "name": "toKebabCase_27",
+    "template": "{{ toKebabCase \"CamelCase\" }}",
+    "want": "camel-case"
+  },
+  {
+    "name": "toKebabCase_28",
+    "template": "{{ toKebabCase \"A_B_C\" }}",
+    "want": "a-b-c"
+  },
+  {
+    "name": "toDotCase_00",
+    "template": "{{ toDotCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toDotCase_01",
+    "template": "{{ toDotCase \"hello\" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toDotCase_02",
+    "template": "{{ toDotCase \"hello world\" }}",
+    "want": "hello.world"
+  },
+  {
+    "name": "toDotCase_03",
+    "template": "{{ toDotCase \" hello \" }}",
+    "want": ".hello."
+  },
+  {
+    "name": "toDotCase_04",
+    "template": "{{ toDotCase \"hello-world\" }}",
+    "want": "hello.world"
+  },
+  {
+    "name": "toDotCase_05",
+    "template": "{{ toDotCase \"hello_world\" }}",
+    "want": "hello.world"
+  },
+  {
+    "name": "toDotCase_06",
+    "template": "{{ toDotCase \"firstName\" }}",
+    "want": "first.name"
+  },
+  {
+    "name": "toDotCase_07",
+    "template": "{{ toDotCase \"HTMLParser\" }}",
+    "want": "html.parser"
+  },
+  {
+    "name": "toDotCase_08",
+    "template": "{{ toDotCase \"NoHTTPS\" }}",
+    "want": "no.https"
+  },
+  {
+    "name": "toDotCase_09",
+    "template": "{{ toDotCase \"FOO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toDotCase_10",
+    "template": "{{ toDotCase \"FoO\" }}",
+    "want": "fo.o"
+  },
+  {
+    "name": "toDotCase_11",
+    "template": "{{ toDotCase \"hELLO world\" }}",
+    "want": "h.ello.world"
+  },
+  {
+    "name": "toDotCase_12",
+    "template": "{{ toDotCase \"123abc\" }}",
+    "want": ".123abc"
+  },
+  {
+    "name": "toDotCase_13",
+    "template": "{{ toDotCase \"2FOo\" }}",
+    "want": ".2f.oo"
+  },
+  {
+    "name": "toDotCase_14",
+    "template": "{{ toDotCase \"foo2Bar\" }}",
+    "want": "foo.2bar"
+  },
+  {
+    "name": "toDotCase_15",
+    "template": "{{ toDotCase \"fooBAR\" }}",
+    "want": "foo.bar"
+  },
+  {
+    "name": "toDotCase_16",
+    "template": "{{ toDotCase \"fooA\" }}",
+    "want": "foo.a"
+  },
+  {
+    "name": "toDotCase_17",
+    "template": "{{ toDotCase \"aB\" }}",
+    "want": "a.b"
+  },
+  {
+    "name": "toDotCase_18",
+    "template": "{{ toDotCase \"__hello--world \" }}",
+    "want": ".hello.world."
+  },
+  {
+    "name": "toDotCase_19",
+    "template": "{{ toDotCase \"école Déjà\" }}",
+    "want": "école.déjà"
+  },
+  {
+    "name": "toDotCase_20",
+    "template": "{{ toDotCase \"αΒγ\" }}",
+    "want": "α.βγ"
+  },
+  {
+    "name": "toDotCase_21",
+    "template": "{{ toDotCase \"ǅelta\" }}",
+    "want": "ǆelta"
+  },
+  {
+    "name": "toDotCase_22",
+    "template": "{{ toDotCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "toDotCase_23",
+    "template": "{{ toDotCase \"---\" }}",
+    "want": "."
+  },
+  {
+    "name": "toDotCase_24",
+    "template": "{{ toDotCase \"0\" }}",
+    "want": ".0"
+  },
+  {
+    "name": "toDotCase_25",
+    "template": "{{ toDotCase \"HELLO123_WORLD\" }}",
+    "want": "hello.123.world"
+  },
+  {
+    "name": "toDotCase_26",
+    "template": "{{ toDotCase \"aB2C\" }}",
+    "want": "a.b.2c"
+  },
+  {
+    "name": "toDotCase_27",
+    "template": "{{ toDotCase \"CamelCase\" }}",
+    "want": "camel.case"
+  },
+  {
+    "name": "toDotCase_28",
+    "template": "{{ toDotCase \"A_B_C\" }}",
+    "want": "a.b.c"
+  },
+  {
+    "name": "toPathCase_00",
+    "template": "{{ toPathCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toPathCase_01",
+    "template": "{{ toPathCase \"hello\" }}",
+    "want": "hello"
+  },
+  {
+    "name": "toPathCase_02",
+    "template": "{{ toPathCase \"hello world\" }}",
+    "want": "hello/world"
+  },
+  {
+    "name": "toPathCase_03",
+    "template": "{{ toPathCase \" hello \" }}",
+    "want": "/hello/"
+  },
+  {
+    "name": "toPathCase_04",
+    "template": "{{ toPathCase \"hello-world\" }}",
+    "want": "hello/world"
+  },
+  {
+    "name": "toPathCase_05",
+    "template": "{{ toPathCase \"hello_world\" }}",
+    "want": "hello/world"
+  },
+  {
+    "name": "toPathCase_06",
+    "template": "{{ toPathCase \"firstName\" }}",
+    "want": "first/name"
+  },
+  {
+    "name": "toPathCase_07",
+    "template": "{{ toPathCase \"HTMLParser\" }}",
+    "want": "html/parser"
+  },
+  {
+    "name": "toPathCase_08",
+    "template": "{{ toPathCase \"NoHTTPS\" }}",
+    "want": "no/https"
+  },
+  {
+    "name": "toPathCase_09",
+    "template": "{{ toPathCase \"FOO\" }}",
+    "want": "foo"
+  },
+  {
+    "name": "toPathCase_10",
+    "template": "{{ toPathCase \"FoO\" }}",
+    "want": "fo/o"
+  },
+  {
+    "name": "toPathCase_11",
+    "template": "{{ toPathCase \"hELLO world\" }}",
+    "want": "h/ello/world"
+  },
+  {
+    "name": "toPathCase_12",
+    "template": "{{ toPathCase \"123abc\" }}",
+    "want": "/123abc"
+  },
+  {
+    "name": "toPathCase_13",
+    "template": "{{ toPathCase \"2FOo\" }}",
+    "want": "/2f/oo"
+  },
+  {
+    "name": "toPathCase_14",
+    "template": "{{ toPathCase \"foo2Bar\" }}",
+    "want": "foo/2bar"
+  },
+  {
+    "name": "toPathCase_15",
+    "template": "{{ toPathCase \"fooBAR\" }}",
+    "want": "foo/bar"
+  },
+  {
+    "name": "toPathCase_16",
+    "template": "{{ toPathCase \"fooA\" }}",
+    "want": "foo/a"
+  },
+  {
+    "name": "toPathCase_17",
+    "template": "{{ toPathCase \"aB\" }}",
+    "want": "a/b"
+  },
+  {
+    "name": "toPathCase_18",
+    "template": "{{ toPathCase \"__hello--world \" }}",
+    "want": "/hello/world/"
+  },
+  {
+    "name": "toPathCase_19",
+    "template": "{{ toPathCase \"école Déjà\" }}",
+    "want": "école/déjà"
+  },
+  {
+    "name": "toPathCase_20",
+    "template": "{{ toPathCase \"αΒγ\" }}",
+    "want": "α/βγ"
+  },
+  {
+    "name": "toPathCase_21",
+    "template": "{{ toPathCase \"ǅelta\" }}",
+    "want": "ǆelta"
+  },
+  {
+    "name": "toPathCase_22",
+    "template": "{{ toPathCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "toPathCase_23",
+    "template": "{{ toPathCase \"---\" }}",
+    "want": "/"
+  },
+  {
+    "name": "toPathCase_24",
+    "template": "{{ toPathCase \"0\" }}",
+    "want": "/0"
+  },
+  {
+    "name": "toPathCase_25",
+    "template": "{{ toPathCase \"HELLO123_WORLD\" }}",
+    "want": "hello/123/world"
+  },
+  {
+    "name": "toPathCase_26",
+    "template": "{{ toPathCase \"aB2C\" }}",
+    "want": "a/b/2c"
+  },
+  {
+    "name": "toPathCase_27",
+    "template": "{{ toPathCase \"CamelCase\" }}",
+    "want": "camel/case"
+  },
+  {
+    "name": "toPathCase_28",
+    "template": "{{ toPathCase \"A_B_C\" }}",
+    "want": "a/b/c"
+  },
+  {
+    "name": "toConstantCase_00",
+    "template": "{{ toConstantCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "toConstantCase_01",
+    "template": "{{ toConstantCase \"hello\" }}",
+    "want": "HELLO"
+  },
+  {
+    "name": "toConstantCase_02",
+    "template": "{{ toConstantCase \"hello world\" }}",
+    "want": "HELLO_WORLD"
+  },
+  {
+    "name": "toConstantCase_03",
+    "template": "{{ toConstantCase \" hello \" }}",
+    "want": "_HELLO_"
+  },
+  {
+    "name": "toConstantCase_04",
+    "template": "{{ toConstantCase \"hello-world\" }}",
+    "want": "HELLO_WORLD"
+  },
+  {
+    "name": "toConstantCase_05",
+    "template": "{{ toConstantCase \"hello_world\" }}",
+    "want": "HELLO_WORLD"
+  },
+  {
+    "name": "toConstantCase_06",
+    "template": "{{ toConstantCase \"firstName\" }}",
+    "want": "FIRST_NAME"
+  },
+  {
+    "name": "toConstantCase_07",
+    "template": "{{ toConstantCase \"HTMLParser\" }}",
+    "want": "HTML_PARSER"
+  },
+  {
+    "name": "toConstantCase_08",
+    "template": "{{ toConstantCase \"NoHTTPS\" }}",
+    "want": "NO_HTTPS"
+  },
+  {
+    "name": "toConstantCase_09",
+    "template": "{{ toConstantCase \"FOO\" }}",
+    "want": "FOO"
+  },
+  {
+    "name": "toConstantCase_10",
+    "template": "{{ toConstantCase \"FoO\" }}",
+    "want": "FO_O"
+  },
+  {
+    "name": "toConstantCase_11",
+    "template": "{{ toConstantCase \"hELLO world\" }}",
+    "want": "H_ELLO_WORLD"
+  },
+  {
+    "name": "toConstantCase_12",
+    "template": "{{ toConstantCase \"123abc\" }}",
+    "want": "_123ABC"
+  },
+  {
+    "name": "toConstantCase_13",
+    "template": "{{ toConstantCase \"2FOo\" }}",
+    "want": "_2F_OO"
+  },
+  {
+    "name": "toConstantCase_14",
+    "template": "{{ toConstantCase \"foo2Bar\" }}",
+    "want": "FOO_2BAR"
+  },
+  {
+    "name": "toConstantCase_15",
+    "template": "{{ toConstantCase \"fooBAR\" }}",
+    "want": "FOO_BAR"
+  },
+  {
+    "name": "toConstantCase_16",
+    "template": "{{ toConstantCase \"fooA\" }}",
+    "want": "FOO_A"
+  },
+  {
+    "name": "toConstantCase_17",
+    "template": "{{ toConstantCase \"aB\" }}",
+    "want": "A_B"
+  },
+  {
+    "name": "toConstantCase_18",
+    "template": "{{ toConstantCase \"__hello--world \" }}",
+    "want": "_HELLO_WORLD_"
+  },
+  {
+    "name": "toConstantCase_19",
+    "template": "{{ toConstantCase \"école Déjà\" }}",
+    "want": "ÉCOLE_DÉJÀ"
+  },
+  {
+    "name": "toConstantCase_20",
+    "template": "{{ toConstantCase \"αΒγ\" }}",
+    "want": "Α_ΒΓ"
+  },
+  {
+    "name": "toConstantCase_21",
+    "template": "{{ toConstantCase \"ǅelta\" }}",
+    "want": "ǄELTA"
+  },
+  {
+    "name": "toConstantCase_22",
+    "template": "{{ toConstantCase \"a.b/c\" }}",
+    "want": "A.B/C"
+  },
+  {
+    "name": "toConstantCase_23",
+    "template": "{{ toConstantCase \"---\" }}",
+    "want": "_"
+  },
+  {
+    "name": "toConstantCase_24",
+    "template": "{{ toConstantCase \"0\" }}",
+    "want": "_0"
+  },
+  {
+    "name": "toConstantCase_25",
+    "template": "{{ toConstantCase \"HELLO123_WORLD\" }}",
+    "want": "HELLO_123_WORLD"
+  },
+  {
+    "name": "toConstantCase_26",
+    "template": "{{ toConstantCase \"aB2C\" }}",
+    "want": "A_B_2C"
+  },
+  {
+    "name": "toConstantCase_27",
+    "template": "{{ toConstantCase \"CamelCase\" }}",
+    "want": "CAMEL_CASE"
+  },
+  {
+    "name": "toConstantCase_28",
+    "template": "{{ toConstantCase \"A_B_C\" }}",
+    "want": "A_B_C"
+  }
+]

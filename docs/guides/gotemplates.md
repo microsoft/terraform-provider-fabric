@@ -57,3 +57,66 @@ The Provider includes multiple helper functions offered by the [sprout](https://
 - [Uniqueid](https://docs.atom.codes/sprout/registries/uniqueid) - The Uniqueid offers functions to generate unique identifiers, such as UUIDs, which are essential for creating distinct and traceable entities in your applications.
 
 Unsupported function groups in the provider what are available in sprout: [Crypto](https://docs.atom.codes/sprout/registries/crypto), [Env](https://docs.atom.codes/sprout/registries/env), [Filesystem](https://docs.atom.codes/sprout/registries/filesystem), [Reflect](https://docs.atom.codes/sprout/registries/reflect).
+
+## Template compatibility in provider 1.x
+
+Provider 1.x preserves the template behavior of Sprout v1.0.3 when upgrading to
+Sprout v1.1.2. Existing supported templates do not need to change for this update.
+This is compatibility with the provider's existing Sprout functions, not with all
+Sprig functions. Functions from unsupported registries remain unavailable.
+
+The compatibility layer is planned for removal in provider 2.0. Update your
+templates together with that major upgrade, using the migration examples below.
+In particular, do not use the new regex argument order with provider 1.x: the
+replacement and input arguments are both strings, so the provider cannot
+distinguish the two orders reliably.
+
+| Functions | Provider 1.x behavior | Planned provider 2.x behavior |
+| --------- | --------------------- | ---------------------------- |
+| `get`, `set`, `unset`, `hasKey`, `pick`, `omit` | Accept both map-first and map-last calls | Map-last calls only |
+| `append`, `prepend`, `slice`, `without` | Accept both list-first and list-last calls | List-last calls only |
+| `regexFindAll`, `regexSplit` | Pattern, input string, limit | Pattern, limit, input string |
+| `regexReplaceAll`, `regexReplaceAllLiteral` | Pattern, input string, replacement | Pattern, replacement, input string |
+| `dig` | Split keys on every dot; backslashes are literal and empty path segments are allowed | Interpret backslash escapes and reject empty dotted path segments |
+| `substr` | End index `0` selects an empty substring | End index `0` selects through the end of the string |
+| `ellipsisBoth` | Preserve byte offsets when no truncation is needed; keep out-of-range safety fixes | Use rune offsets consistently |
+| Case conversions | Preserve Sprout v1.0.3 capitalization and word boundaries | Use the new Sprout case-conversion rules |
+| `mustRegexFind`, `mustRegexFindAll`, `mustRegexMatch`, `mustRegexSplit`, `mustRegexReplaceAll`, `mustRegexReplaceAllLiteral` | Keep existing aliases | Use the corresponding function without the `must` prefix |
+
+Existing aliases such as `mustAppend`, `mustSlice`, and `mustRegexReplaceAll` keep
+the same behavior as their corresponding functions. Other regex functions retain
+their argument order, including `regexFindAllGroups` and `regexFindAllNamed`.
+
+For example, map and list calls can already use the pipeline forms in provider 1.x:
+
+```gotemplate
+{{/* Existing calls, supported in provider 1.x */}}
+{{ get $dict "name" }}
+{{ append $list "value" }}
+
+{{/* Pipeline forms, supported in 1.x and planned for 2.x */}}
+{{ $dict | get "name" }}
+{{ $list | append "value" }}
+```
+
+Regex changes must accompany the provider 2.0 upgrade:
+
+```gotemplate
+{{/* Provider 1.x */}}
+{{ regexFindAll "[a-z]+" "ab12cd" -1 }}
+{{ regexReplaceAll "[0-9]+" "item123" "X" }}
+
+{{/* Planned provider 2.x */}}
+{{ "ab12cd" | regexFindAll "[a-z]+" -1 }}
+{{ "item123" | regexReplaceAll "[0-9]+" "X" }}
+```
+
+Check generated names and definition content when migrating case conversions.
+For example, `toCamelCase "firstName"` produces `firstname` in provider 1.x but
+`firstName` with Sprout's new rules. `toPascalCase "hELLO world"` changes from
+`HELLOWorld` to `HelloWorld`. These differences can change content hashes.
+
+Library fixes for crashes, concurrent random shuffling, and division by zero are
+retained. Compatibility does not restore crashes or invalid arithmetic results.
+Invalid template calls continue to produce provider error diagnostics rather than
+silently returning a successful payload.
