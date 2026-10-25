@@ -367,15 +367,11 @@ func (r *ResourceFabricItemConfigProperties[Ttfprop, Titemprop, Ttfconfig, Titem
 	}
 
 	state := ResourceFabricItemConfigPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig]{
-		resourceFabricItemPropertiesBaseModel: resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
-			fabricItemPropertiesModel: fabricItemPropertiesModel[Ttfprop, Titemprop]{
-				ID:          uuidFabricItemID,
-				WorkspaceID: uuidWorkspaceID,
-			},
-			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
-		},
-		Configuration: configuration,
-		Timeouts:      timeout,
+		ID:                       uuidFabricItemID,
+		WorkspaceID:              uuidWorkspaceID,
+		SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
+		Configuration:            configuration,
+		Timeouts:                 timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

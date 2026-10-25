@@ -413,16 +413,12 @@ func (r *ResourceFabricItemDefinitionProperties[Ttfprop, Titemprop]) ImportState
 	}
 
 	state := ResourceFabricItemDefinitionPropertiesModel[Ttfprop, Titemprop]{
-		resourceFabricItemPropertiesBaseModel: resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]{
-			fabricItemPropertiesModel: fabricItemPropertiesModel[Ttfprop, Titemprop]{
-				ID:          uuidFabricItemID,
-				WorkspaceID: uuidWorkspaceID,
-			},
-			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
-		},
-		DefinitionUpdateEnabled: definitionUpdateEnabled,
-		Definition:              definition,
-		Timeouts:                timeout,
+		ID:                       uuidFabricItemID,
+		WorkspaceID:              uuidWorkspaceID,
+		SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
+		DefinitionUpdateEnabled:  definitionUpdateEnabled,
+		Definition:               definition,
+		Timeouts:                 timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

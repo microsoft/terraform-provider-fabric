@@ -413,16 +413,12 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 	}
 
 	state := resourceFabricItemDefinitionModel{
-		resourceFabricItemBaseModel: resourceFabricItemBaseModel{
-			fabricItemModel: fabricItemModel{
-				ID:          uuidFabricItemID,
-				WorkspaceID: uuidWorkspaceID,
-			},
-			SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
-		},
-		DefinitionUpdateEnabled: definitionUpdateEnabled,
-		Definition:              definition,
-		Timeouts:                timeout,
+		ID:                       uuidFabricItemID,
+		WorkspaceID:              uuidWorkspaceID,
+		SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
+		DefinitionUpdateEnabled:  definitionUpdateEnabled,
+		Definition:               definition,
+		Timeouts:                 timeout,
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {

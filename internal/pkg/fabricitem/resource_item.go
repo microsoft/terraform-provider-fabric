@@ -321,11 +321,12 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 		return
 	}
 
-	state := resourceFabricItemModel{}
-	state.ID = uuidFabricItemID
-	state.WorkspaceID = uuidWorkspaceID
-	state.SensitivityLabelSettings = supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx)
-	state.Timeouts = timeout
+	state := resourceFabricItemModel{
+		ID:                       uuidFabricItemID,
+		WorkspaceID:              uuidWorkspaceID,
+		SensitivityLabelSettings: supertypes.NewSingleNestedObjectValueOfNull[sensitivityLabelSettingsModel](ctx),
+		Timeouts:                 timeout,
+	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
