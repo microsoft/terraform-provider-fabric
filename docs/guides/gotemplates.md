@@ -74,7 +74,7 @@ distinguish the two orders reliably.
 | Functions | Provider 1.x behavior | Planned provider 2.x behavior |
 | --------- | --------------------- | ---------------------------- |
 | `get`, `set`, `unset`, `hasKey`, `pick`, `omit` | Accept both map-first and map-last calls | Map-last calls only |
-| `append`, `prepend`, `slice`, `without` | Accept both list-first and list-last calls | List-last calls only |
+| `append`, `prepend`, `slice`, `without` | Accept both orders when types are unambiguous; a list-like first argument is treated as the target | List-last calls only |
 | `regexFindAll`, `regexSplit` | Pattern, input string, limit | Pattern, limit, input string |
 | `regexReplaceAll`, `regexReplaceAllLiteral` | Pattern, input string, replacement | Pattern, replacement, input string |
 | `dig` | Split keys on every dot; backslashes are literal and empty path segments are allowed | Interpret backslash escapes and reject empty dotted path segments |
@@ -94,10 +94,20 @@ For example, map and list calls can already use the pipeline forms in provider 1
 {{ get $dict "name" }}
 {{ append $list "value" }}
 
+{{/* Direct map-last and list-last forms also work for unambiguous arguments */}}
+{{ get "name" $dict }}
+{{ append "value" $list }}
+
 {{/* Pipeline forms, supported in 1.x and planned for 2.x */}}
 {{ $dict | get "name" }}
 {{ $list | append "value" }}
 ```
+
+When both arguments to `append` or `prepend` are lists, provider 1.x treats the
+first argument as the target. For example, `append (list "a") (list "b")`
+produces `["a",["b"]]`, but `list "a" | append (list "b")` produces
+`["b",["a"]]`. A pipeline does not select the new interpretation for ambiguous
+arguments. The same rules apply to the corresponding `must*` aliases.
 
 Regex changes must accompany the provider 2.0 upgrade:
 

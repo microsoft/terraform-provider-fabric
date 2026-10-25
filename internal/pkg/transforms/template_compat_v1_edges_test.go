@@ -20,7 +20,10 @@ import (
 )
 
 // Golden results were captured with the provider's Sprout v1.0.3 registries.
-// These cases exclude process-crashing inputs, which belong in safety tests.
+// Retain distinct rules not already covered by the shared compatibility cases;
+// avoid repeating every boundary for every string. Expected values must not be
+// regenerated from the compatibility implementation under test.
+// Process-crashing inputs belong in the separate safety tests.
 func TestUnit_TemplateCompatV1Edges(t *testing.T) {
 	t.Parallel()
 

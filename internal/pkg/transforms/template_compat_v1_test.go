@@ -69,11 +69,19 @@ func TestUnit_TemplateFunctions(t *testing.T) {
 	tests := []testhelp.TemplateCompatV1Case{
 		{Name: "append_nested_list", Template: `{{ append (list "a") (list "b") | toJson }}`, Want: `["a",["b"]]`},
 		{Name: "prepend_nested_list", Template: `{{ prepend (list "a") (list "b") | toJson }}`, Want: `[["b"],"a"]`},
+		// Two lists cannot identify the target by type: provider 1.x uses list-first,
+		// even when the call is written as a pipeline with an intended list value.
+		{Name: "ambiguous/append_pipeline_is_list_first", Template: `{{ list "a" | append (list "b") | toJson }}`, Want: `["b",["a"]]`},
+		{Name: "ambiguous/prepend_pipeline_is_list_first", Template: `{{ list "a" | prepend (list "b") | toJson }}`, Want: `[["a"],"b"]`},
+		// Both replacement arguments are strings, so a new-order call executes with
+		// legacy meaning rather than failing validation or selecting new semantics.
+		{Name: "legacy_only/regex_replace_new_order", Template: `{{ regexReplaceAll "a" "x" "abc" }}`, Want: "x"},
+		{Name: "legacy_only/regex_literal_new_order", Template: `{{ regexReplaceAllLiteral "a" "x" "abc" }}`, Want: "x"},
+		{Name: "legacy_only/must_regex_replace_new_order", Template: `{{ mustRegexReplaceAll "a" "x" "abc" }}`, Want: "x"},
+		{Name: "legacy_only/must_regex_literal_new_order", Template: `{{ mustRegexReplaceAllLiteral "a" "x" "abc" }}`, Want: "x"},
 		{Name: "new_escape_function", Template: `{{ escape "." "a.b" }}`, Want: `a\.b`},
 		{Name: "new_uuid_function", Template: `{{ uuidNil }}`, Want: "00000000-0000-0000-0000-000000000000"},
 		{Name: "repeat_negative", Template: `{{ repeat -1 "a" }}`, Want: ""},
-		{Name: "indent_negative", Template: `{{ indent -1 "a" }}`, Want: "a"},
-		{Name: "nindent_negative", Template: `{{ nindent -1 "a" }}`, Want: "\na"},
 		{Name: "ellipsis_offset", Template: `{{ ellipsisBoth 99 10 "abc" }}`, Want: ""},
 		{Name: "safety/append_nil_element", Template: `v={{ append (list "a") nil | toJson }}`, Want: `v=["a",null]`},
 		{Name: "safety/prepend_nil_element", Template: `v={{ prepend (list "a") nil | toJson }}`, Want: `v=[null,"a"]`},
@@ -81,7 +89,6 @@ func TestUnit_TemplateFunctions(t *testing.T) {
 		{Name: "safety/must_prepend_nested_list", Template: `v={{ mustPrepend (list "a") (list "b") | toJson }}`, Want: `v=[["b"],"a"]`},
 		{Name: "safety/empty_nested_lists", Template: `v={{ append (list) (list) | toJson }}`, Want: `v=[[]]`},
 		{Name: "safety/unicode_offset_outside_bytes", Template: `v={{ ellipsisBoth 99 10 "\u00e9abc" }}`, Want: "v="},
-		{Name: "safety/negative_repeat_empty", Template: `v={{ repeat -1 "" }}`, Want: "v="},
 		{Name: "safety/negative_indent_multiline", Template: `v={{ indent -1 "a\nb" | printf "%q" }}`, Want: `v="a\nb"`},
 		{Name: "safety/negative_nindent_multiline", Template: `v={{ nindent -1 "a\nb" | printf "%q" }}`, Want: `v="\na\nb"`},
 	}
