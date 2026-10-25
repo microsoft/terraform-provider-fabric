@@ -1,0 +1,1311 @@
+[
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_102",
+    "template": "v={{ toCamelCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_109",
+    "template": "v={{ toCamelCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_116",
+    "template": "v={{ toCamelCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"a\\nb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_123",
+    "template": "v={{ toCamelCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_130",
+    "template": "v={{ toCamelCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀ab\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_137",
+    "template": "v={{ toCamelCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"1a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_144",
+    "template": "v={{ toCamelCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"a1b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_151",
+    "template": "v={{ toCamelCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ßİΣ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_158",
+    "template": "v={{ toCamelCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"1a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toCamelCase_165",
+    "template": "v={{ toCamelCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_108",
+    "template": "v={{ toConstantCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"A\\x00B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_115",
+    "template": "v={{ toConstantCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"A\\tB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_122",
+    "template": "v={{ toConstantCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"A\\nB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_129",
+    "template": "v={{ toConstantCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́A_B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_136",
+    "template": "v={{ toConstantCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀_A_B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_143",
+    "template": "v={{ toConstantCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"_1_A\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_150",
+    "template": "v={{ toConstantCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"A_1B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_157",
+    "template": "v={{ toConstantCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß_İ_Σ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_164",
+    "template": "v={{ toConstantCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"_1_A\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toConstantCase_171",
+    "template": "v={{ toConstantCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"A_B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_106",
+    "template": "v={{ toDotCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_113",
+    "template": "v={{ toDotCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_120",
+    "template": "v={{ toDotCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"a\\nb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_127",
+    "template": "v={{ toDotCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́a.b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_134",
+    "template": "v={{ toDotCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀.a.b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_141",
+    "template": "v={{ toDotCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\".1.a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_148",
+    "template": "v={{ toDotCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"a.1b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_155",
+    "template": "v={{ toDotCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß.i.σ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_162",
+    "template": "v={{ toDotCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\".1.a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toDotCase_169",
+    "template": "v={{ toDotCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"a.b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_105",
+    "template": "v={{ toKebabCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_112",
+    "template": "v={{ toKebabCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_119",
+    "template": "v={{ toKebabCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"a\\nb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_126",
+    "template": "v={{ toKebabCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́a-b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_133",
+    "template": "v={{ toKebabCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀-a-b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_140",
+    "template": "v={{ toKebabCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"-1-a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_147",
+    "template": "v={{ toKebabCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"a-1b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_154",
+    "template": "v={{ toKebabCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß-i-σ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_161",
+    "template": "v={{ toKebabCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"-1-a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toKebabCase_168",
+    "template": "v={{ toKebabCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"a-b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_103",
+    "template": "v={{ toPascalCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"A\\x00B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_110",
+    "template": "v={{ toPascalCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"A\\tB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_117",
+    "template": "v={{ toPascalCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"A\\nB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_124",
+    "template": "v={{ toPascalCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_131",
+    "template": "v={{ toPascalCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_138",
+    "template": "v={{ toPascalCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"1a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_145",
+    "template": "v={{ toPascalCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"A1B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_152",
+    "template": "v={{ toPascalCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ßİΣ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_159",
+    "template": "v={{ toPascalCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"1a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPascalCase_166",
+    "template": "v={{ toPascalCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"AB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_107",
+    "template": "v={{ toPathCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_114",
+    "template": "v={{ toPathCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_121",
+    "template": "v={{ toPathCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"a\\nb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_128",
+    "template": "v={{ toPathCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́a/b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_135",
+    "template": "v={{ toPathCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀/a/b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_142",
+    "template": "v={{ toPathCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"/1/a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_149",
+    "template": "v={{ toPathCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"a/1b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_156",
+    "template": "v={{ toPathCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß/i/σ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_163",
+    "template": "v={{ toPathCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"/1/a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toPathCase_170",
+    "template": "v={{ toPathCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"a/b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_104",
+    "template": "v={{ toSnakeCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_111",
+    "template": "v={{ toSnakeCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_118",
+    "template": "v={{ toSnakeCase \"a\\nB\" | printf \"%q\" }}",
+    "want": "v=\"a\\nb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_125",
+    "template": "v={{ toSnakeCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́a_b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_132",
+    "template": "v={{ toSnakeCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀_a_b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_139",
+    "template": "v={{ toSnakeCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"_1_a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_146",
+    "template": "v={{ toSnakeCase \"A1B\" | printf \"%q\" }}",
+    "want": "v=\"a_1b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_153",
+    "template": "v={{ toSnakeCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß_i_σ\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_160",
+    "template": "v={{ toSnakeCase \"--1_a\" | printf \"%q\" }}",
+    "want": "v=\"_1_a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "toSnakeCase_167",
+    "template": "v={{ toSnakeCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"a_b\"",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "dot_only",
+    "template": "v={{ dict \"\" (dict \"\" \"yes\") | dig \".\" }}",
+    "want": "v=yes",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "empty_key",
+    "template": "v={{ dict \"\" \"yes\" | dig \"\" }}",
+    "want": "v=yes",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "escaped_dot_not_literal",
+    "template": "v={{ dict \"a.b\" \"literal\" | dig \"a\\\\.b\" | default \"missing\" }}",
+    "want": "v=missing",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "false_leaf",
+    "template": "v={{ dict \"a\" false | dig \"a\" | toJson }}",
+    "want": "v=false",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "list_intermediate",
+    "template": "{{ dict \"a\" (list \"b\") | dig \"a.0\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "literal_dot_vs_path",
+    "template": "v={{ dict \"a.b\" \"literal\" \"a\" (dict \"b\" \"nested\") | dig \"a.b\" }}",
+    "want": "v=nested",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "missing_intermediate",
+    "template": "v={{ dict | dig \"a.b.c\" | default \"fallback\" }}",
+    "want": "v=fallback",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "multiple_empty_keys",
+    "template": "v={{ dict \"\" (dict \"\" (dict \"\" \"yes\")) | dig \"..\" }}",
+    "want": "v=yes",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "nil_intermediate",
+    "template": "{{ dict \"a\" nil | dig \"a.b\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "nil_leaf",
+    "template": "v={{ dict \"a\" nil | dig \"a\" | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "trailing_backslash",
+    "template": "v={{ dict \"a\\\\\" 1 | dig \"a\\\\\" }}",
+    "want": "v=1",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_172",
+    "template": "v={{ ellipsisBoth 0 4 \"abcdef\" | printf \"%q\" }}",
+    "want": "v=\"a...\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_173",
+    "template": "v={{ ellipsisBoth 1 7 \"abcdefghij\" | printf \"%q\" }}",
+    "want": "v=\"...b...\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_174",
+    "template": "v={{ ellipsisBoth 2 7 \"éabcdefghi\" | printf \"%q\" }}",
+    "want": "v=\"...b...\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_175",
+    "template": "v={{ ellipsisBoth 1 10 \"éabc\" | printf \"%q\" }}",
+    "want": "v=\"\\xa9abc\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_176",
+    "template": "v={{ ellipsisBoth 2 10 \"éabc\" | printf \"%q\" }}",
+    "want": "v=\"abc\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_177",
+    "template": "v={{ ellipsisBoth 4 10 \"ééa\" | printf \"%q\" }}",
+    "want": "v=\"a\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_178",
+    "template": "v={{ ellipsisBoth -1 10 \"abc\" | printf \"%q\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_179",
+    "template": "v={{ ellipsisBoth 99 3 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"abc\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_byte_and_rune_offsets",
+    "name": "case_180",
+    "template": "v={{ ellipsisBoth 2 6 \"abcdefghij\" | printf \"%q\" }}",
+    "want": "v=\"abcdefghij\"",
+    "error": false
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_00",
+    "template": "prefix{{ base64Decode \"!\" }}suffix",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_01",
+    "template": "prefix{{ base32Decode \"!\" }}suffix",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_02",
+    "template": "{{ dict \"a\" 1 | dig 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_03",
+    "template": "{{ set (dict) 1 \"x\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_04",
+    "template": "{{ pick (dict) \"a\" 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "case_05",
+    "template": "{{ omit (dict) \"a\" 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "empty_append",
+    "template": "v={{ append (list) false | toJson }}",
+    "want": "v=[false]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "empty_prepend",
+    "template": "v={{ prepend 0 (list) | toJson }}",
+    "want": "v=[0]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "extra_append",
+    "template": "{{ mustAppend (list) 1 2 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "nil_append",
+    "template": "{{ append nil \"a\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "nil_without",
+    "template": "{{ without nil 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "remove_absent",
+    "template": "v={{ without \"z\" (list \"a\") | toJson }}",
+    "want": "v=[\"a\"]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "remove_duplicates",
+    "template": "v={{ without (list 1 1 2 1) 1 | toJson }}",
+    "want": "v=[2]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_at_end",
+    "template": "v={{ slice 2 (list 1 2) | toJson }}",
+    "want": "v=[]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_empty",
+    "template": "v={{ slice (list) 0 0 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_negative",
+    "template": "{{ slice (list 1 2) -1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_nil_passthrough",
+    "template": "v={{ slice nil | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_reversed",
+    "template": "{{ slice (list 1 2) 2 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_scalar_passthrough",
+    "template": "v={{ slice \"abc\" }}",
+    "want": "v=abc",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_string_index",
+    "template": "v={{ slice (list \"a\" \"b\") \"1\" | toJson }}",
+    "want": "v=[\"b\"]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "string_and_integer",
+    "template": "v={{ without (list 1 \"1\" false nil) \"1\" | toJson }}",
+    "want": "v=[1,false,null]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "without_nested_legacy",
+    "template": "v={{ without (list (list \"a\") \"x\") (list \"a\") \"x\" | toJson }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "without_nested_pipeline",
+    "template": "v={{ list (list \"a\") \"x\" | without (list \"a\") \"x\" | toJson }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "duplicate_selection",
+    "template": "v={{ pick (dict \"a\" 1) \"a\" \"a\" | toJson }}",
+    "want": "v={\"a\":1}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "empty_key",
+    "template": "{{ $d := dict \"\" 0 }}v={{ get $d \"\" }};exists={{ hasKey $d \"\" }}",
+    "want": "v=0;exists=true",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "empty_selection",
+    "template": "v={{ pick \"missing\" (dict \"a\" 1) | toJson }}",
+    "want": "v={}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "extra_argument",
+    "template": "{{ get \"a\" (dict) \"extra\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "map_value_pipeline",
+    "template": "{{ $d := dict }}{{ $_ := $d | set \"a\" (dict \"b\" 0) }}v={{ $d | toJson }}",
+    "want": "v={\"a\":{\"b\":0}}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "missing_unset",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $_ := unset $d \"missing\" }}v={{ $d | toJson }}",
+    "want": "v={\"a\":1}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "nil_target",
+    "template": "{{ get \"a\" nil }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "nil_value",
+    "template": "{{ $d := dict \"a\" nil }}v={{ get $d \"a\" | toJson }};exists={{ hasKey $d \"a\" }}",
+    "want": "v=null;exists=true",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "omit_no_mutation",
+    "template": "{{ $d := dict \"a\" 1 \"b\" 2 }}{{ $p := omit $d \"b\" }}{{ $_ := unset $p \"a\" }}v={{ $d | toJson }}",
+    "want": "v={\"a\":1,\"b\":2}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "pick_no_mutation",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $p := pick $d \"a\" }}{{ $_ := set $p \"a\" 2 }}v={{ get $d \"a\" }}",
+    "want": "v=1",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "shared_mutation",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $alias := $d }}{{ $_ := set $alias \"a\" 2 }}v={{ get $d \"a\" }}",
+    "want": "v=2",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "empty_input",
+    "template": "v={{ regexFindAll \".\" \"\" -1 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "empty_pattern",
+    "template": "v={{ regexFindAll \"\" \"ab\" -1 | toJson }}",
+    "want": "v=[\"\",\"\",\"\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "literal_dollar",
+    "template": "v={{ regexReplaceAllLiteral \"(a)\" \"aba\" \"${1}$$\" }}",
+    "want": "v=${1}$$b${1}$$",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "missing_capture",
+    "template": "v={{ regexReplaceAll \"(a)\" \"aba\" \"${2}\" }}",
+    "want": "v=b",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "named_replacement",
+    "template": "v={{ regexReplaceAll \"(?P\u003cword\u003e[a-z]+)\" \"ab12cd\" \"${word}X\" }}",
+    "want": "v=abX12cdX",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "no_match",
+    "template": "v={{ regexFindAll \"x\" \"abc\" -1 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "partial_output_error",
+    "template": "prefix{{ regexReplaceAll \"[\" \"abc\" \"x\" }}suffix",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "split_empty_pattern",
+    "template": "v={{ regexSplit \"\" \"abc\" -1 | toJson }}",
+    "want": "v=[\"a\",\"b\",\"c\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "split_one",
+    "template": "v={{ regexSplit \",\" \"a,b\" 1 | toJson }}",
+    "want": "v=[\"a,b\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "split_zero",
+    "template": "v={{ regexSplit \",\" \"a,b\" 0 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "unicode",
+    "template": "v={{ regexFindAll \"\\\\p{L}+\" \"\\u00e9 12 \\u03b1\" -1 | toJson }}",
+    "want": "v=[\"é\",\"α\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "wrong_limit_type",
+    "template": "{{ mustRegexSplit \",\" \"a,b\" \"all\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "wrong_order_find",
+    "template": "{{ regexFindAll \".\" -1 \"abc\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_100",
+    "template": "v={{ substr -2 -1 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\\x80\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_101",
+    "template": "v={{ substr 1 2 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\\x9f\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_52",
+    "template": "v={{ substr 0 0 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_53",
+    "template": "v={{ substr 1 0 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_54",
+    "template": "v={{ substr -1 0 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_55",
+    "template": "v={{ substr 0 0 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_56",
+    "template": "v={{ substr -99 99 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_57",
+    "template": "v={{ substr 99 99 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_58",
+    "template": "v={{ substr 0 -99 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_59",
+    "template": "v={{ substr 2 1 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_60",
+    "template": "v={{ substr -2 -1 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_61",
+    "template": "v={{ substr 1 2 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_62",
+    "template": "v={{ substr 0 0 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_63",
+    "template": "v={{ substr 1 0 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_64",
+    "template": "v={{ substr -1 0 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_65",
+    "template": "v={{ substr 0 -3 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_66",
+    "template": "v={{ substr -99 99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"abc\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_67",
+    "template": "v={{ substr 99 99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_68",
+    "template": "v={{ substr 0 -99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_69",
+    "template": "v={{ substr 2 1 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_70",
+    "template": "v={{ substr -2 -1 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"b\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_71",
+    "template": "v={{ substr 1 2 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"b\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_72",
+    "template": "v={{ substr 0 0 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_73",
+    "template": "v={{ substr 1 0 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_74",
+    "template": "v={{ substr -1 0 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_75",
+    "template": "v={{ substr 0 -3 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_76",
+    "template": "v={{ substr -99 99 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"éa\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_77",
+    "template": "v={{ substr 99 99 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_78",
+    "template": "v={{ substr 0 -99 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_79",
+    "template": "v={{ substr 2 1 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_80",
+    "template": "v={{ substr -2 -1 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\\xa9\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_81",
+    "template": "v={{ substr 1 2 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\\xa9\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_82",
+    "template": "v={{ substr 0 0 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_83",
+    "template": "v={{ substr 1 0 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_84",
+    "template": "v={{ substr -1 0 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_85",
+    "template": "v={{ substr 0 -3 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_86",
+    "template": "v={{ substr -99 99 \"á\" | printf \"%q\" }}",
+    "want": "v=\"á\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_87",
+    "template": "v={{ substr 99 99 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_88",
+    "template": "v={{ substr 0 -99 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_89",
+    "template": "v={{ substr 2 1 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_90",
+    "template": "v={{ substr -2 -1 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\\xcc\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_91",
+    "template": "v={{ substr 1 2 \"á\" | printf \"%q\" }}",
+    "want": "v=\"\\xcc\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_92",
+    "template": "v={{ substr 0 0 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_93",
+    "template": "v={{ substr 1 0 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_94",
+    "template": "v={{ substr -1 0 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_95",
+    "template": "v={{ substr 0 -5 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_96",
+    "template": "v={{ substr -99 99 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"😀x\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_97",
+    "template": "v={{ substr 99 99 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_98",
+    "template": "v={{ substr 0 -99 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "case_99",
+    "template": "v={{ substr 2 1 \"😀x\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  }
+]

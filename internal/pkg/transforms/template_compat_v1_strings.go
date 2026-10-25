@@ -10,6 +10,9 @@ import (
 
 // templateCompatV1Case keeps v1.0.3's capitalization and word-boundary rules,
 // including leading digit separators and the byte-based lookahead.
+// Do not replace this with the current Sprout converters: their output changes
+// definition content and hashes. Captured v1.0.3 expectations live in
+// template_compat_v1_case.json and template_compat_v1_edges.json.
 func templateCompatV1Case(name, value string) string {
 	separator := map[string]rune{
 		"toSnakeCase": '_', "toKebabCase": '-', "toDotCase": '.',
@@ -22,6 +25,8 @@ func templateCompatV1Case(name, value string) string {
 	var output strings.Builder
 
 	for offset, letter := range value {
+		// Byte lookahead and retaining it at EOF are intentional legacy behavior,
+		// even though iteration over value itself yields Unicode runes.
 		if offset+1 < len(value) {
 			lookahead = rune(value[offset+1])
 		}

@@ -19,67 +19,81 @@ import (
 
 // applyTemplateCompatV1 preserves the Sprout v1.0.3 contract, not Sprig's
 // different behavior. Remove this call and the compatibility files in provider 2.0.
+//
+// Funcs is the name-to-function lookup built by the provider's Sprout handler.
+// Replacing its entries installs wrappers; template arguments arrive only when
+// a template executes. The registry instances below provide implementation
+// methods, not additional registrations or access to unsupported function groups.
 func applyTemplateCompatV1(funcs template.FuncMap) {
-	maps := sproutmaps.NewRegistry()
-	lists := sproutslices.NewRegistry()
-	regex := sproutregex.NewRegistry()
-	text := sproutstrings.NewRegistry()
+	mapRegistry := sproutmaps.NewRegistry()
+	sliceRegistry := sproutslices.NewRegistry()
+	regexRegistry := sproutregex.NewRegistry()
+	stringRegistry := sproutstrings.NewRegistry()
 
-	funcs["get"] = templateCompatV1MapFunction("get", maps.Get)
-	funcs["hasKey"] = templateCompatV1MapFunction("hasKey", maps.HasKey)
-	funcs["unset"] = templateCompatV1MapFunction("unset", maps.Unset)
-	funcs["set"] = func(args ...any) (map[string]any, error) {
-		args = templateCompatV1MapArgs(args)
-		if len(args) != 3 {
-			return nil, errors.New("set requires exactly three arguments")
+	funcs["get"] = templateCompatV1MapFunction("get", mapRegistry.Get)
+	funcs["hasKey"] = templateCompatV1MapFunction("hasKey", mapRegistry.HasKey)
+	funcs["unset"] = templateCompatV1MapFunction("unset", mapRegistry.Unset)
+	funcs["set"] = func(keyArg, value, mapArg any) (map[string]any, error) {
+		// Historical calls use (dict, key, value); normalize to (key, value, dict).
+		if _, mapFirst := keyArg.(map[string]any); mapFirst {
+			keyArg, value, mapArg = value, mapArg, keyArg
 		}
 
-		key, keyOK := args[0].(string)
+		key, keyOK := keyArg.(string)
 
-		dict, dictOK := args[2].(map[string]any)
+		dict, dictOK := mapArg.(map[string]any)
 		if !keyOK || !dictOK || dict == nil {
 			return nil, errors.New("set requires a string key and a non-nil map[string]any")
 		}
 
-		return maps.Set(key, args[1], dict)
+		return mapRegistry.Set(key, value, dict)
 	}
+	// These variadic methods already validate their arguments after reordering.
 	funcs["pick"] = func(args ...any) (map[string]any, error) {
-		return maps.Pick(templateCompatV1MapArgs(args)...)
+		mapLastArgs := templateCompatV1MapArgs(args)
+
+		return mapRegistry.Pick(mapLastArgs...)
 	}
 	funcs["omit"] = func(args ...any) (map[string]any, error) {
-		return maps.Omit(templateCompatV1MapArgs(args)...)
+		mapLastArgs := templateCompatV1MapArgs(args)
+
+		return mapRegistry.Omit(mapLastArgs...)
 	}
 	funcs["dig"] = templateCompatV1Dig
 
-	funcs["append"] = templateCompatV1ListFunction("append", lists.Append)
-	funcs["prepend"] = templateCompatV1ListFunction("prepend", lists.Prepend)
+	funcs["append"] = templateCompatV1ListFunction(sliceRegistry.Append)
+	funcs["prepend"] = templateCompatV1ListFunction(sliceRegistry.Prepend)
 	funcs["slice"] = func(args ...any) (any, error) {
 		if len(args) == 1 {
 			return args[0], nil
 		}
 
-		return lists.Slice(templateCompatV1ListArgs(args)...)
+		listLastArgs := templateCompatV1ListArgs(args)
+
+		return sliceRegistry.Slice(listLastArgs...)
 	}
 	funcs["without"] = func(args ...any) ([]any, error) {
 		if len(args) < 2 {
 			return nil, errors.New("without requires at least two arguments")
 		}
 
-		return lists.Without(templateCompatV1ListArgs(args)...)
+		listLastArgs := templateCompatV1ListArgs(args)
+
+		return sliceRegistry.Without(listLastArgs...)
 	}
 
 	// These all-string signatures are ambiguous: keep only the old order in 1.x.
 	funcs["regexFindAll"] = func(pattern, value string, limit int) ([]string, error) {
-		return regex.RegexFindAll(pattern, limit, value)
+		return regexRegistry.RegexFindAll(pattern, limit, value)
 	}
 	funcs["regexSplit"] = func(pattern, value string, limit int) ([]string, error) {
-		return regex.RegexSplit(pattern, limit, value)
+		return regexRegistry.RegexSplit(pattern, limit, value)
 	}
 	funcs["regexReplaceAll"] = func(pattern, value, replacement string) (string, error) {
-		return regex.RegexReplaceAll(pattern, replacement, value)
+		return regexRegistry.RegexReplaceAll(pattern, replacement, value)
 	}
 	funcs["regexReplaceAllLiteral"] = func(pattern, value, replacement string) (string, error) {
-		return regex.RegexReplaceAllLiteral(pattern, replacement, value)
+		return regexRegistry.RegexReplaceAllLiteral(pattern, replacement, value)
 	}
 
 	funcs["substr"] = func(start, end int, value string) string {
@@ -87,7 +101,7 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 			return ""
 		}
 
-		return text.Substring(start, end, value)
+		return stringRegistry.Substring(start, end, value)
 	}
 
 	funcs["ellipsisBoth"] = func(offset, maxWidth int, value string) string {
@@ -102,7 +116,7 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 			return value[offset:]
 		}
 
-		return text.EllipsisBoth(offset, maxWidth, value)
+		return stringRegistry.EllipsisBoth(offset, maxWidth, value)
 	}
 	for _, name := range []string{"toCamelCase", "toPascalCase", "toSnakeCase", "toKebabCase", "toDotCase", "toPathCase", "toConstantCase"} {
 		funcs[name] = func(value string) string {
@@ -127,29 +141,45 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 	}
 }
 
+// templateCompatV1MapArgs normalizes variadic map-first calls to map-last order:
+// [dict, key1, key2] becomes [key1, key2, dict]. Map-last calls are unchanged.
+// Argument validation belongs to the caller or the delegated registry method.
 func templateCompatV1MapArgs(args []any) []any {
 	if len(args) > 1 {
 		if _, ok := args[0].(map[string]any); ok {
-			return append(append([]any{}, args[1:]...), args[0])
+			return templateCompatV1MoveFirstArgLast(args)
 		}
 	}
 
 	return args
 }
 
-func templateCompatV1MapFunction[T any](name string, call func(string, map[string]any) (T, error)) func(...any) (T, error) {
-	return func(args ...any) (T, error) {
-		var zero T
+// templateCompatV1MoveFirstArgLast copies the arguments so normalization never
+// overwrites the caller's slice. Callers supply at least two arguments.
+func templateCompatV1MoveFirstArgLast(args []any) []any {
+	reordered := make([]any, len(args))
+	copy(reordered, args[1:])
+	reordered[len(reordered)-1] = args[0]
 
-		args = templateCompatV1MapArgs(args)
-		if len(args) != 2 {
-			return zero, fmt.Errorf("%s requires exactly two arguments", name)
+	return reordered
+}
+
+// templateCompatV1MapFunction creates a wrapper for get, hasKey, and unset.
+// They share the typed (key, dict) signature; T accommodates their different
+// results. The returned function validates template arguments before delegation.
+// The template engine enforces the fixed argument count.
+func templateCompatV1MapFunction[T any](name string, call func(string, map[string]any) (T, error)) func(any, any) (T, error) {
+	return func(keyArg, mapArg any) (T, error) {
+		if _, mapFirst := keyArg.(map[string]any); mapFirst {
+			keyArg, mapArg = mapArg, keyArg
 		}
 
-		key, keyOK := args[0].(string)
+		key, keyOK := keyArg.(string)
 
-		dict, dictOK := args[1].(map[string]any)
+		dict, dictOK := mapArg.(map[string]any)
 		if !keyOK || !dictOK {
+			var zero T
+
 			return zero, fmt.Errorf("%s requires a string key and a map[string]any", name)
 		}
 
@@ -157,11 +187,14 @@ func templateCompatV1MapFunction[T any](name string, call func(string, map[strin
 	}
 }
 
+// templateCompatV1ListArgs preserves v1.0.3's first-argument type detection,
+// including nil. A list-like first argument moves to the end exactly once;
+// already list-last calls with a scalar first argument are unchanged.
 func templateCompatV1ListArgs(args []any) []any {
 	if len(args) > 1 {
 		switch reflect.ValueOf(args[0]).Kind() {
 		case reflect.Array, reflect.Slice, reflect.Invalid:
-			return append(append([]any{}, args[1:]...), args[0])
+			return templateCompatV1MoveFirstArgLast(args)
 		default:
 		}
 	}
@@ -169,19 +202,23 @@ func templateCompatV1ListArgs(args []any) []any {
 	return args
 }
 
-func templateCompatV1ListFunction(name string, call func(any, any) ([]any, error)) func(...any) ([]any, error) {
-	return func(args ...any) ([]any, error) {
-		if len(args) != 2 {
-			return nil, fmt.Errorf("%s requires exactly two arguments", name)
+// templateCompatV1ListFunction wraps append and prepend. Both take (value, list)
+// in new Sprout, but provider 1.x also accepts the historical (list, value).
+func templateCompatV1ListFunction(call func(any, any) ([]any, error)) func(any, any) ([]any, error) {
+	return func(value, list any) ([]any, error) {
+		// Reorder once rather than recursively: two lists used to overflow the stack.
+		switch reflect.ValueOf(value).Kind() {
+		case reflect.Array, reflect.Slice, reflect.Invalid:
+			value, list = list, value
+		default:
 		}
 
-		// Reorder once rather than recursively: two lists used to overflow the stack.
-		args = templateCompatV1ListArgs(args)
-
-		return call(args[0], args[1])
+		return call(value, list)
 	}
 }
 
+// templateCompatV1Dig retains dotted-path splitting, empty segments, and literal
+// backslashes. Unlike Sprig's dig, it has no positional default-value argument.
 func templateCompatV1Dig(args ...any) (any, error) {
 	if len(args) < 2 {
 		return nil, errors.New("dig requires at least two arguments: a sequence of keys and a dictionary")

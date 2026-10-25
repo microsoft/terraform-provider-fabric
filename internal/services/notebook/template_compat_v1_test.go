@@ -45,16 +45,21 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 	t.Helper()
 
 	directory := t.TempDir()
+	root, err := os.OpenRoot(directory)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, root.Close())
+	})
+
 	displayName := testhelp.RandomName()
-	header := "# Fabric notebook source\n\n# METADATA ********************\n\n" +
-		"# META {\n# META   \"kernel_info\": {\"name\": \"synapse_pyspark\"},\n" +
-		"# META   \"dependencies\": {}\n# META }\n\n# CELL ********************\n\n"
-	footer := "\n# METADATA ********************\n\n# META {\n" +
-		"# META   \"language\": \"python\",\n# META   \"language_group\": \"synapse_pyspark\"\n# META }\n"
+	scaffold, err := os.ReadFile(testhelp.GetFixturesDirPath("notebook", "template_compat_v1.py.tmpl"))
+	require.NoError(t, err)
+
+	notebookScaffold := strings.ReplaceAll(string(scaffold), "\r\n", "\n")
+	const bodyMarker = "# TEMPLATE_COMPAT_V1_BODY\n"
+	require.Equal(t, 1, strings.Count(notebookScaffold, bodyMarker))
 
 	var source, expected strings.Builder
-	_, _ = source.WriteString(header)
-	_, _ = expected.WriteString(header)
 
 	tests := append(testhelp.TemplateCompatV1Cases(), testhelp.TemplateCompatV1CaseConversions(t)...)
 	for _, test := range tests {
@@ -63,14 +68,15 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 	}
 
 	_, _ = source.WriteString("print(\"{{ .Message }}\")\n")
-	_, _ = source.WriteString(footer)
+	templateSource := strings.Replace(notebookScaffold, bodyMarker, source.String(), 1)
 
 	legacyPath := filepath.Join(directory, "legacy.py.tmpl")
-	require.NoError(t, os.WriteFile(legacyPath, []byte(source.String()), 0o600))
+
+	require.NoError(t, root.WriteFile("legacy.py.tmpl", []byte(templateSource), 0o600))
 
 	customPath := filepath.Join(directory, "custom.py.tmpl")
-	customSource := strings.ReplaceAll(strings.ReplaceAll(source.String(), "{{", "<<"), "}}", ">>")
-	require.NoError(t, os.WriteFile(customPath, []byte(customSource), 0o600))
+	customSource := strings.ReplaceAll(strings.ReplaceAll(templateSource, "{{", "<<"), "}}", ">>")
+	require.NoError(t, root.WriteFile("custom.py.tmpl", []byte(customSource), 0o600))
 
 	config := func(path, message, delimiter string) string {
 		return at.CompileConfig(testResourceItemHeader, map[string]any{
@@ -87,7 +93,8 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 		})
 	}
 	check := func(message string) resource.TestCheckFunc {
-		content := expected.String() + fmt.Sprintf("print(%q)\n", message) + footer
+		body := expected.String() + fmt.Sprintf("print(%q)\n", message)
+		content := strings.Replace(notebookScaffold, bodyMarker, body, 1)
 		hash := fmt.Sprintf("%x", sha256.Sum256([]byte(content)))
 
 		return resource.ComposeAggregateTestCheckFunc(
@@ -101,7 +108,7 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 	steps := make([]resource.TestStep, 0, len(failures)+4)
 	for _, name := range slices.Sorted(maps.Keys(failures)) {
 		path := filepath.Join(directory, name+".py.tmpl")
-		require.NoError(t, os.WriteFile(path, []byte(header+failures[name]+footer), 0o600))
+		require.NoError(t, root.WriteFile(name+".py.tmpl", []byte(failures[name]), 0o600))
 
 		summary := common.ErrorTmplParseHeader
 		if strings.HasPrefix(name, "unsupported_") || name == "parse_error" {
