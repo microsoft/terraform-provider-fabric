@@ -67,9 +67,6 @@ Sprig functions. Functions from unsupported registries remain unavailable.
 
 The compatibility layer is planned for removal in provider 2.0. Update your
 templates together with that major upgrade, using the migration examples below.
-In particular, do not use the new regex argument order with provider 1.x: the
-replacement and input arguments are both strings, so the provider cannot
-distinguish the two orders reliably.
 
 | Functions | Provider 1.x behavior | Planned provider 2.x behavior |
 | --------- | --------------------- | ---------------------------- |
@@ -82,6 +79,13 @@ distinguish the two orders reliably.
 | `ellipsisBoth` | Preserve byte offsets when no truncation is needed; keep out-of-range safety fixes | Use rune offsets consistently |
 | Case conversions | Preserve Sprout v1.0.3 capitalization and word boundaries | Use the new Sprout case-conversion rules |
 | `mustRegexFind`, `mustRegexFindAll`, `mustRegexMatch`, `mustRegexSplit`, `mustRegexReplaceAll`, `mustRegexReplaceAllLiteral` | Keep existing aliases | Use the corresponding function without the `must` prefix |
+
+Do not use the planned 2.x regex argument order with provider 1.x.
+`regexFindAll` and `regexSplit` return an argument-type error when called in
+the 2.x order. The replacement functions take only strings, so a 2.x-order call
+can succeed but be interpreted using the 1.x order. For example,
+`regexReplaceAll "a" "x" "abc"` renders as `"x"` in 1.x, not the intended
+`"xbc"`.
 
 Existing aliases such as `mustAppend`, `mustSlice`, and `mustRegexReplaceAll` keep
 the same behavior as their corresponding functions. Other regex functions retain
@@ -106,8 +110,18 @@ For example, map and list calls can already use the pipeline forms in provider 1
 When both arguments to `append` or `prepend` are lists, provider 1.x treats the
 first argument as the target. For example, `append (list "a") (list "b")`
 produces `["a",["b"]]`, but `list "a" | append (list "b")` produces
-`["b",["a"]]`. A pipeline does not select the new interpretation for ambiguous
-arguments. The same rules apply to the corresponding `must*` aliases.
+`["b",["a"]]`. This type-based rule applies to `append`, `prepend`, `slice`,
+and `without`, including their `must*` aliases. A pipeline does not select the
+new interpretation when the first argument is itself a list; in that case,
+provider 1.x treats it as the legacy list-first target.
+
+In provider 1.x, `dig` takes one or more string keys followed by a dictionary;
+it has no positional default-value argument. Pipe its result to `default` when
+you need a fallback:
+
+```gotemplate
+{{ $dict | dig "name" | default "unknown" }}
+```
 
 Regex changes must accompany the provider 2.0 upgrade:
 
