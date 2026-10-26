@@ -315,6 +315,9 @@ function Set-FabricItem {
     'OrgApp' {
       $itemEndpoint = 'orgApps'
     }
+    'OrgAppAudience' {
+      $itemEndpoint = 'orgAppAudiences'
+    }
     'PaginatedReport' {
       $itemEndpoint = 'paginatedReports'
     }
@@ -351,7 +354,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport', 'OrgAppAudience')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1230,6 +1233,7 @@ $itemNaming = @{
   'Ontology'                        = 'ont'
   'OperationsAgent'                 = 'oa'
   'OrgApp'                          = 'orgapp'
+  'OrgAppAudience'                  = 'orgappaud'
   'Shortcut'                        = 'srt'
   'PaginatedReport'                 = 'prpt'
   'Reflex'                          = 'rx'
@@ -1433,6 +1437,34 @@ else {
 
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
   $wellKnown['DigitalTwinBuilderFlow'] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+# Create OrgAppAudience if not exists (requires OrgApp in the same workspace)
+if (-not $wellKnown.ContainsKey('OrgApp') -or
+  -not $wellKnown['OrgApp'] -or
+  -not $wellKnown['OrgApp'].id) {
+  Write-Log -Message "OrgApp was not created successfully. Cannot create OrgAppAudience without a valid OrgApp id." -Level 'ERROR'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['OrgAppAudience'])"
+  $definition = @{
+    parts = @(
+      @{
+        path        = 'definition.json'
+        payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/org_app_audience/definition-wellknown.json.tmpl' -Values @(
+          @{ key = '{{ .ParentAppId }}'; value = $wellKnown['OrgApp'].id }
+        )
+        payloadType = 'InlineBase64'
+      }
+    )
+  }
+
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'OrgAppAudience' -Definition $definition
+  $wellKnown['OrgAppAudience'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description

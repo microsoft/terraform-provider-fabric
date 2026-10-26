@@ -52,6 +52,14 @@ func getResourceFabricItemDefinitionSchema(ctx context.Context, r ResourceFabric
 
 	maps.Copy(attributes, getResourceFabricItemDefinitionAttributes(ctx, r.TypeInfo.Name, r.DefinitionPathDocsURL, r.DefinitionFormats, r.DefinitionPathKeysValidator, r.DefinitionRequired, false))
 
+	if r.FolderIDRequiresReplace {
+		if attrFolderID, ok := attributes["folder_id"].(schema.StringAttribute); ok {
+			attrFolderID.MarkdownDescription += " Changing this forces a new resource to be created."
+			attrFolderID.PlanModifiers = append(attrFolderID.PlanModifiers, stringplanmodifier.RequiresReplace())
+			attributes["folder_id"] = attrFolderID
+		}
+	}
+
 	return schema.Schema{
 		MarkdownDescription: NewResourceMarkdownDescription(r.TypeInfo, false),
 		Attributes:          attributes,
