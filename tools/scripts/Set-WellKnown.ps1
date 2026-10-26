@@ -333,6 +333,9 @@ function Set-FabricItem {
     'SQLDatabase' {
       $itemEndpoint = 'sqlDatabases'
     }
+    'UserDataFunction' {
+      $itemEndpoint = 'userDataFunctions'
+    }
     'VariableLibrary' {
       $itemEndpoint = 'variableLibraries'
     }
@@ -1238,6 +1241,7 @@ $itemNaming = @{
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
+  'UserDataFunction'                = 'udf'
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
@@ -1400,7 +1404,7 @@ $wellKnown['WorkspaceCMK'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'UserDataFunction', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
