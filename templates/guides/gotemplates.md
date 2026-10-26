@@ -71,21 +71,57 @@ templates together with that major upgrade, using the migration examples below.
 | Functions | Provider 1.x behavior | Planned provider 2.x behavior |
 | --------- | --------------------- | ---------------------------- |
 | `get`, `set`, `unset`, `hasKey`, `pick`, `omit` | Accept both map-first and map-last calls | Map-last calls only |
-| `append`, `prepend`, `slice`, `without` | Accept both orders when types are unambiguous; a list-like first argument is treated as the target | List-last calls only |
+| `append`, `prepend`, `slice`, `without` | Accept both orders when types are unambiguous; a list-like first argument uses the legacy list-first interpretation | List-last calls only |
 | `regexFindAll`, `regexSplit` | Pattern, input string, limit | Pattern, limit, input string |
 | `regexReplaceAll`, `regexReplaceAllLiteral` | Pattern, input string, replacement | Pattern, replacement, input string |
 | `dig` | Split keys on every dot; backslashes are literal and empty path segments are allowed | Interpret backslash escapes and reject empty dotted path segments |
 | `substr` | End index `0` selects an empty substring | End index `0` selects through the end of the string |
-| `ellipsisBoth` | Preserve byte offsets when no truncation is needed; keep out-of-range safety fixes | Use rune offsets consistently |
-| Case conversions | Preserve Sprout v1.0.3 capitalization and word boundaries | Use the new Sprout case-conversion rules |
+| `ellipsisBoth` | Preserve safe byte slicing when no truncation is needed; otherwise use Sprout v1.1.2 behavior | Use rune offsets consistently |
+| `toCamelCase`, `toPascalCase`, `toSnakeCase`, `toKebabCase`, `toDotCase`, `toPathCase`, `toConstantCase` | Preserve Sprout v1.0.3 capitalization and word boundaries | Use the new Sprout case-conversion rules |
 | `mustRegexFind`, `mustRegexFindAll`, `mustRegexMatch`, `mustRegexSplit`, `mustRegexReplaceAll`, `mustRegexReplaceAllLiteral` | Keep existing aliases | Use the corresponding function without the `must` prefix |
 
-Do not use the planned 2.x regex argument order with provider 1.x.
-`regexFindAll` and `regexSplit` return an argument-type error when called in
-the 2.x order. The replacement functions take only strings, so a 2.x-order call
-can succeed but be interpreted using the 1.x order. For example,
-`regexReplaceAll "a" "x" "abc"` renders as `"x"` in 1.x, not the intended
-`"xbc"`.
+There is no per-template switch between the old and new behavior. For map and
+list functions, provider 1.x accepts both argument orders when the types make
+the target clear. The regex functions below are pinned to the 1.x argument
+order. Where the same call can mean two things, provider 1.x preserves the
+established meaning; the new interpretation is unavailable until provider 2.0.
+
+In particular, keep these limitations in mind:
+
+- **List functions:** `append`, `prepend`, `slice`, and `without`, including
+  their `must*` aliases, treat a list-like first argument as the legacy target.
+  If the value to append or prepend is itself a list, use the legacy target-first
+  form. For example, `append (list "a") (list "b")` appends the second list as
+  one value to the first, producing `["a",["b"]]`. Do not use
+  `append (list "b") (list "a")` expecting the new value-first interpretation;
+  provider 1.x treats the first list as the target. A pipeline does not
+  disambiguate them either:
+  `list "a" | append (list "b")` produces `["b",["a"]]`.
+- **`regexFindAll` and `regexSplit`:** use the 1.x order—pattern, input, limit.
+  The planned 2.x order—pattern, limit, input—fails with an argument-type
+  error in 1.x. This also applies to their `must*` aliases.
+- **`regexReplaceAll` and `regexReplaceAllLiteral`:** use the 1.x
+  pattern, input, replacement order. All three arguments are strings, so a
+  2.x-order call can be accepted but interpreted using the 1.x order, producing
+  an unintended result. For example, `regexReplaceAll "a" "x" "abc"` renders
+  `"x"` in 1.x, not `"xbc"`. The same limitation applies to the `must*` aliases.
+- **`dig`:** provider 1.x splits keys on every dot; backslashes do not escape
+  dots, and empty path segments are allowed. The new escape syntax is not
+  available. Use `get` to look up a literal key containing a dot. `dig` also
+  has no positional default argument; pipe its result to `default` instead.
+- **`substr`:** an end index of `0` (or a negative end equal to the string's
+  byte length, which resolves to index `0`) returns an empty string in 1.x.
+  The new meaning, “through the end of the string,” is not selectable until 2.0.
+- **Case conversions:** the seven functions listed in the table use the old
+  output for every call in 1.x; there is no alternate syntax for the new rules.
+  The compatibility adapter does not override `toTitleCase`.
+- **`ellipsisBoth`:** the old byte-offset behavior is retained in its
+  non-truncating branch only when the byte offset is within the string. Because
+  it is byte-based, an in-range offset can split a multi-byte rune. After the
+  minimum-width checks, positive offsets beyond the string use Sprout v1.1.2's
+  bounds handling rather than restoring the old out-of-range slice panic.
+  Negative offsets remain invalid and can produce an execution error. The new
+  consistent rune-offset behavior is not selectable in 1.x.
 
 Existing aliases such as `mustAppend`, `mustSlice`, and `mustRegexReplaceAll` keep
 the same behavior as their corresponding functions. Other regex functions retain
@@ -107,23 +143,13 @@ For example, map and list calls can already use the pipeline forms in provider 1
 {{ $list | append "value" }}
 ```
 
-When both arguments to `append` or `prepend` are lists, provider 1.x treats the
-first argument as the target. For example, `append (list "a") (list "b")`
-produces `["a",["b"]]`, but `list "a" | append (list "b")` produces
-`["b",["a"]]`. This type-based rule applies to `append`, `prepend`, `slice`,
-and `without`, including their `must*` aliases. A pipeline does not select the
-new interpretation when the first argument is itself a list; in that case,
-provider 1.x treats it as the legacy list-first target.
-
-In provider 1.x, `dig` takes one or more string keys followed by a dictionary;
-it has no positional default-value argument. Pipe its result to `default` when
-you need a fallback:
+For a fallback from `dig`, pipe its result to `default`:
 
 ```gotemplate
 {{ $dict | dig "name" | default "unknown" }}
 ```
 
-Regex changes must accompany the provider 2.0 upgrade:
+Regex argument-order changes must accompany the provider 2.0 upgrade:
 
 ```gotemplate
 {{/* Provider 1.x */}}
