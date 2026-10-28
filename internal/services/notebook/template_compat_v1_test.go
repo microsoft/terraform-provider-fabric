@@ -6,11 +6,9 @@ package notebook_test
 import (
 	"crypto/sha256"
 	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 	"testing"
 
@@ -105,8 +103,22 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 
 	failures := testhelp.TemplateCompatV1Errors()
 
-	steps := make([]resource.TestStep, 0, len(failures)+4)
-	for _, name := range slices.Sorted(maps.Keys(failures)) {
+	// The renderer tests cover every failure; resource planning needs only
+	// representative validation, execution, and parse errors.
+	failureNames := []string{
+		"get_type",
+		"must_slice_single_scalar",
+		"dig_invalid_escape",
+		"must_regex_replace",
+		"regex_find_all_new_order",
+		"unsupported_env",
+		"parse_error",
+	}
+
+	steps := make([]resource.TestStep, 0, len(failureNames)+4)
+	for _, name := range failureNames {
+		require.Contains(t, failures, name)
+
 		path := filepath.Join(directory, name+".py.tmpl")
 		require.NoError(t, root.WriteFile(name+".py.tmpl", []byte(failures[name]), 0o600))
 

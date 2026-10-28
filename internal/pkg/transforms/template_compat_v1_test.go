@@ -57,6 +57,22 @@ func TestUnit_TemplateCompatV1Errors(t *testing.T) {
 			}
 
 			require.Equal(t, summary, diags.Errors()[0].Summary())
+
+			switch name {
+			case "slice_nil_first", "slice_single_nil", "must_slice_single_nil":
+				require.Contains(t, diags.Errors()[0].Detail(), "cannot slice nil")
+			case "slice_single_scalar", "must_slice_single_scalar":
+				require.Contains(t, diags.Errors()[0].Detail(), "last argument must be a slice but got string")
+			case "append_nil_first":
+				require.Contains(t, diags.Errors()[0].Detail(), "cannot append to nil")
+			case "prepend_nil_first":
+				require.Contains(t, diags.Errors()[0].Detail(), "cannot prepend to nil")
+			case "without_nil_first":
+				require.Contains(t, diags.Errors()[0].Detail(), "cannot without nil")
+			case "without_count", "without_single", "must_without_count", "must_without_single":
+				require.Contains(t, diags.Errors()[0].Detail(), "without requires at least two arguments")
+			}
+
 			require.Empty(t, payload)
 			require.Empty(t, hash)
 		})
@@ -82,13 +98,14 @@ func TestUnit_TemplateFunctions(t *testing.T) {
 		{Name: "new_escape_function", Template: `{{ escape "." "a.b" }}`, Want: `a\.b`},
 		{Name: "new_uuid_function", Template: `{{ uuidNil }}`, Want: "00000000-0000-0000-0000-000000000000"},
 		{Name: "repeat_negative", Template: `{{ repeat -1 "a" }}`, Want: ""},
+		{Name: "ellipsis_ascii_offset", Template: `{{ ellipsisBoth 1 10 "abc" }}`, Want: "bc"},
 		{Name: "ellipsis_offset", Template: `{{ ellipsisBoth 99 10 "abc" }}`, Want: ""},
 		{Name: "safety/append_nil_element", Template: `v={{ append (list "a") nil | toJson }}`, Want: `v=["a",null]`},
 		{Name: "safety/prepend_nil_element", Template: `v={{ prepend (list "a") nil | toJson }}`, Want: `v=[null,"a"]`},
 		{Name: "safety/must_append_nested_list", Template: `v={{ mustAppend (list "a") (list "b") | toJson }}`, Want: `v=["a",["b"]]`},
 		{Name: "safety/must_prepend_nested_list", Template: `v={{ mustPrepend (list "a") (list "b") | toJson }}`, Want: `v=[["b"],"a"]`},
 		{Name: "safety/empty_nested_lists", Template: `v={{ append (list) (list) | toJson }}`, Want: `v=[[]]`},
-		{Name: "safety/unicode_offset_outside_bytes", Template: `v={{ ellipsisBoth 99 10 "\u00e9abc" }}`, Want: "v="},
+		{Name: "safety/unicode_offset_outside_runes", Template: `v={{ ellipsisBoth 99 10 "\u00e9abc" }}`, Want: "v="},
 		{Name: "safety/negative_indent_multiline", Template: `v={{ indent -1 "a\nb" | printf "%q" }}`, Want: `v="a\nb"`},
 		{Name: "safety/negative_nindent_multiline", Template: `v={{ nindent -1 "a\nb" | printf "%q" }}`, Want: `v="\na\nb"`},
 	}

@@ -10,32 +10,37 @@ import (
 	"testing"
 )
 
-// TemplateCompatV1Case describes the provider's Sprout v1.0.3 template contract.
+// TemplateCompatV1Case describes a supported provider 1.x template result.
 type TemplateCompatV1Case struct {
 	Name     string `json:"name"`
 	Template string `json:"template"`
 	Want     string `json:"want"`
 }
 
-// TemplateCompatV1CaseConversions loads representative Sprout v1.0.3 goldens:
-// capitalization boundaries, digit/acronym handling, separators, and Unicode.
-// Keep one case per rule and converter, rather than a string cross-product.
+// TemplateCompatV1CaseConversions loads frozen Sprout v1.0.3 camel- and
+// Pascal-case results, including separators, acronyms, digits, and Unicode.
 func TemplateCompatV1CaseConversions(t *testing.T) []TemplateCompatV1Case {
 	t.Helper()
 
-	data, err := os.ReadFile(GetFixturesDirPath("template_compat_v1_case.json"))
-	if err != nil {
-		t.Fatal(err)
+	load := func(file string) []TemplateCompatV1Case {
+		t.Helper()
+
+		data, err := os.ReadFile(GetFixturesDirPath(file))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var cases []TemplateCompatV1Case
+
+		err = json.Unmarshal(data, &cases)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return cases
 	}
 
-	var cases []TemplateCompatV1Case
-
-	err = json.Unmarshal(data, &cases)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return cases
+	return append(load("template_compat_v1_camel.json"), load("template_compat_v1_pascal.json")...)
 }
 
 // TemplateCompatV1Errors exercises invalid calls and the existing registry restrictions.
@@ -58,18 +63,32 @@ func TemplateCompatV1Errors() map[string]string {
 		"omit_key_type":                 `{{ omit (dict) 1 }}`,
 		"append_count":                  `{{ append }}`,
 		"append_type":                   `{{ append 1 2 }}`,
+		"append_nil_first":              `{{ append nil (list "a") }}`,
 		"prepend_count":                 `{{ prepend }}`,
 		"prepend_type":                  `{{ prepend 1 2 }}`,
+		"prepend_nil_first":             `{{ prepend nil (list "a") }}`,
 		"slice_count":                   `{{ slice }}`,
 		"slice_type":                    `{{ slice 0 1 }}`,
 		"slice_bounds":                  `{{ slice (list "a") 9 }}`,
+		"slice_nil_first":               `{{ slice nil (list "a") }}`,
+		"slice_single_scalar":           `{{ slice "abc" }}`,
+		"slice_single_nil":              `{{ slice nil }}`,
+		"must_slice_single_scalar":      `{{ mustSlice "abc" }}`,
+		"must_slice_single_nil":         `{{ mustSlice nil }}`,
 		"without_count":                 `{{ without }}`,
+		"without_single":                `{{ without (list) }}`,
 		"without_type":                  `{{ without 1 2 }}`,
+		"without_nil_first":             `{{ without nil (list "a" nil) }}`,
 		"dig_count":                     `{{ dig }}`,
 		"dig_type":                      `{{ dig "a" 1 }}`,
 		"dig_key_type":                  `{{ dig 1 (dict) }}`,
 		"dig_scalar":                    `{{ dict "a" 1 | dig "a.b" }}`,
 		"dig_no_default_argument":       `{{ dict "a" "value" | dig "a" "fallback" }}`,
+		"dig_empty_segment":             `{{ dict "a" (dict "" (dict "b" "value")) | dig "a..b" }}`,
+		"dig_leading_dot":               `{{ dict "" (dict "a" "value") | dig ".a" }}`,
+		"dig_trailing_dot":              `{{ dict "a" (dict "" "value") | dig "a." }}`,
+		"dig_invalid_escape":            `{{ dict "a\\b" "value" | dig "a\\b" }}`,
+		"dig_trailing_backslash":        `{{ dict "a\\" "value" | dig "a\\" }}`,
 		"regex_find":                    `{{ regexFind "[" "abc" }}`,
 		"regex_find_all":                `{{ regexFindAll "[" "abc" -1 }}`,
 		"regex_match":                   `{{ regexMatch "[" "abc" }}`,
@@ -83,6 +102,8 @@ func TemplateCompatV1Errors() map[string]string {
 		"must_append":                   `{{ mustAppend 1 2 }}`,
 		"must_prepend":                  `{{ mustPrepend 1 2 }}`,
 		"must_slice":                    `{{ mustSlice 0 1 }}`,
+		"must_without_count":            `{{ mustWithout }}`,
+		"must_without_single":           `{{ mustWithout (list) }}`,
 		"must_without":                  `{{ mustWithout 1 2 }}`,
 		"must_regex_find":               `{{ mustRegexFind "[" "abc" }}`,
 		"must_regex_find_all":           `{{ mustRegexFindAll "[" "abc" -1 }}`,
@@ -108,7 +129,8 @@ func TemplateCompatV1Errors() map[string]string {
 	}
 }
 
-// TemplateCompatV1Cases is shared by renderer and Notebook lifecycle tests.
+// TemplateCompatV1Cases is shared by renderer and Notebook lifecycle tests,
+// including intentional library fixes documented in the template guide.
 func TemplateCompatV1Cases() []TemplateCompatV1Case {
 	cases := []TemplateCompatV1Case{
 		{"get_missing", `{{ get (dict) "missing" }}`, ""},
@@ -116,15 +138,31 @@ func TemplateCompatV1Cases() []TemplateCompatV1Case {
 		{"has_key_missing", `{{ dict | hasKey "a" }}`, "false"},
 		{"append_accumulation", `{{ $l := list }}{{ range list "a" "b" }}{{ $l = append $l . }}{{ end }}{{ $l | join "," }}`, "a,b"},
 		{"append_no_mutation", `{{ $l := list "a" }}{{ $_ := append $l "b" }}{{ $l | join "," }}`, "a"},
+		{"without_nil_element", `{{ without (list "a" nil) nil | toJson }}`, `["a"]`},
 		{"slice_one_index", `{{ slice (list "a" "b") 1 | join "," }}`, "b"},
 		{"slice_no_index", `{{ slice (list "a" "b") | join "," }}`, "a,b"},
+		{"must_slice_no_index", `{{ mustSlice (list "a" "b") | join "," }}`, "a,b"},
+		{"slice_empty_no_index", `{{ slice (list) | toJson }}`, "[]"},
+		{"must_slice_empty_no_index", `{{ mustSlice (list) | toJson }}`, "[]"},
+		{"slice_empty_no_index_pipeline", `{{ list | slice | toJson }}`, "[]"},
+		{"must_slice_empty_no_index_pipeline", `{{ list | mustSlice | toJson }}`, "[]"},
+		{"slice_empty_compacted_list", `{{ slice (compact (list nil)) | toJson }}`, "[]"},
+		{"must_slice_empty_compacted_list", `{{ mustSlice (compact (list nil)) | toJson }}`, "[]"},
+		{"slice_empty_integer_list_type", `{{ slice (until 0) | printf "%T" }}`, "[]int"},
+		{"must_slice_empty_integer_list_type", `{{ mustSlice (until 0) | printf "%T" }}`, "[]int"},
+		{"slice_nil_typed_list", `{{ slice (regexFindAll "z" "abc" -1) | toJson }}`, "null"},
+		{"must_slice_nil_typed_list", `{{ mustSlice (regexFindAll "z" "abc" -1) | toJson }}`, "null"},
+		{"slice_empty_index", `{{ slice (list) 0 | toJson }}`, "null"},
+		{"must_slice_empty_index", `{{ mustSlice (list) 0 | toJson }}`, "null"},
+		{"slice_empty_index_list_last", `{{ slice 0 (list) | toJson }}`, "null"},
+		{"must_slice_empty_index_list_last", `{{ mustSlice 0 (list) | toJson }}`, "null"},
 		{"dig_nested", `{{ dict "a" (dict "b" "value") | dig "a.b" }}`, "value"},
 		{"dig_separate_keys", `{{ dict "a" (dict "b" "value") | dig "a" "b" }}`, "value"},
-		{"dig_empty_segment", `{{ dict "a" (dict "" (dict "b" "value")) | dig "a..b" }}`, "value"},
-		{"dig_leading_dot", `{{ dict "" (dict "a" "value") | dig ".a" }}`, "value"},
-		{"dig_trailing_dot", `{{ dict "a" (dict "" "value") | dig "a." }}`, "value"},
-		{"dig_literal_backslash", `{{ dict "a\\b" "value" | dig "a\\b" }}`, "value"},
-		{"dig_backslash_before_dot", `{{ dict "a\\" (dict "b" "value") | dig "a\\.b" }}`, "value"},
+		// Intentional 1.x exception: use Sprout's native path parsing and validation.
+		{"dig_escaped_dot", `{{ dict "a.b" "value" | dig "a\\.b" }}`, "value"},
+		{"dig_escaped_dot_nested", `{{ dict "a.b" (dict "c" "value") | dig "a\\.b.c" }}`, "value"},
+		{"dig_escaped_backslash", `{{ dict "a\\b" "value" | dig "a\\\\b" }}`, "value"},
+		{"dig_separate_empty_key", `{{ dict "a" (dict "" (dict "b" "value")) | dig "a" "" "b" }}`, "value"},
 		{"dig_missing", `{{ dict | dig "a" | default "fallback" }}`, "fallback"},
 		{"regex_find", `{{ regexFind "[a-z]+" "ab12cd" }}`, "ab"},
 		{"regex_find_all", `{{ regexFindAll "[a-z]+" "ab12cd" -1 | join "," }}`, "ab,cd"},
@@ -150,18 +188,28 @@ func TemplateCompatV1Cases() []TemplateCompatV1Case {
 		{"substr_empty_range", `{{ substr 2 0 "hello" }}`, ""},
 		{"substr_negative_end_zero", `{{ substr 0 -5 "hello" }}`, ""},
 		{"substr_bounds", `{{ substr -1 99 "hello" }}`, "o"},
-		{"ellipsis_unicode_byte_offset", `{{ ellipsisBoth 2 10 "\u00e9abc" }}`, "abc"},
-		{"ellipsis_unicode_past_rune_count", `{{ ellipsisBoth 4 10 "\u00e9\u00e9a" }}`, "a"},
+		// Intentional 1.x exception: retain Sprout's Unicode ellipsis fix.
+		{"ellipsis_unicode_rune_offset", `{{ ellipsisBoth 2 10 "\u00e9abc" }}`, "bc"},
+		{"ellipsis_unicode_keeps_complete_runes", `{{ ellipsisBoth 1 10 "\u00e9abc" }}`, "abc"},
+		{"ellipsis_unicode_past_rune_count", `{{ ellipsisBoth 4 10 "\u00e9\u00e9a" }}`, ""},
 		{"ellipsis_short_width", `{{ ellipsisBoth 2 3 "\u00e9abc" }}`, "\u00e9abc"},
 		{"ellipsis_short_both_width", `{{ ellipsisBoth 2 6 "\u00e9abc" }}`, "\u00e9abc"},
 		{"ellipsis_truncated", `{{ ellipsisBoth 2 7 "abcdefghij" }}`, "...c..."},
-		{"camel_case", `{{ toCamelCase "firstName" }}`, "firstname"},
 		{"pascal_case", `{{ toPascalCase "hELLO world" }}`, "HELLOWorld"},
-		{"snake_case", `{{ toSnakeCase "2FOo" }}`, "_2f_oo"},
-		{"kebab_case", `{{ toKebabCase "2FOo" }}`, "-2f-oo"},
-		{"dot_case", `{{ toDotCase "2FOo" }}`, ".2f.oo"},
-		{"path_case", `{{ toPathCase "2FOo" }}`, "/2f/oo"},
-		{"constant_case", `{{ toConstantCase "2FOo" }}`, "_2F_OO"},
+		{"pascal_case_acronym", `{{ toPascalCase "HTMLParser" }}`, "HTMLParser"},
+		{"camel_case", `{{ toCamelCase "firstName" }}`, "firstname"},
+		{"camel_case_acronym", `{{ toCamelCase "fooBAR" }}`, "foobar"},
+		// Other case converters use native Sprout rules in provider 1.x.
+		{"snake_case", `{{ toSnakeCase "2FOo" }}`, "2f_oo"},
+		{"kebab_case", `{{ toKebabCase "2FOo" }}`, "2f-oo"},
+		{"dot_case", `{{ toDotCase "2FOo" }}`, "2f.oo"},
+		{"path_case", `{{ toPathCase "2FOo" }}`, "2f/oo"},
+		{"constant_case", `{{ toConstantCase "2FOo" }}`, "2F_OO"},
+		{"snake_case_zero", `{{ toSnakeCase "0" }}`, "0"},
+		{"kebab_case_zero", `{{ toKebabCase "0" }}`, "0"},
+		{"dot_case_zero", `{{ toDotCase "0" }}`, "0"},
+		{"path_case_zero", `{{ toPathCase "0" }}`, "0"},
+		{"constant_case_zero", `{{ toConstantCase "0" }}`, "0"},
 		{"title_case", `{{ toTitleCase "HELLO it's" }}`, "Hello It's"},
 		{"base64_decode", `{{ base64Decode "aGVsbG8=" }}`, "hello"},
 		{"base32_decode", `{{ base32Decode "NBSWY3DP" }}`, "hello"},

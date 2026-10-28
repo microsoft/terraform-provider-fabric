@@ -4,13 +4,10 @@
 package transforms
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"slices"
-	"strings"
 	"text/template"
-	"unicode/utf8"
 
 	sproutmaps "github.com/go-sprout/sprout/registry/maps"
 	sproutregex "github.com/go-sprout/sprout/registry/regex"
@@ -18,8 +15,8 @@ import (
 	sproutstrings "github.com/go-sprout/sprout/registry/strings"
 )
 
-// applyTemplateCompatV1 preserves the Sprout v1.0.3 contract, not Sprig's
-// different behavior. Remove this call and the compatibility files in provider 2.0.
+// applyTemplateCompatV1 preserves selected Sprout v1.0.3 call forms and results,
+// not full Sprig compatibility. Remove this call and the compatibility files in provider 2.0.
 //
 // Funcs is the name-to-function lookup built by the provider's Sprout handler.
 // Replacing its entries installs wrappers; template arguments arrive only when
@@ -46,36 +43,36 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 
 		return mapRegistry.Omit(mapLastArgs...)
 	}
-	funcs["dig"] = templateCompatV1Dig
-
 	funcs["append"] = templateCompatV1ListFunction(sliceRegistry.Append)
 	funcs["prepend"] = templateCompatV1ListFunction(sliceRegistry.Prepend)
 	funcs["slice"] = func(args ...any) (any, error) {
-		if len(args) == 1 {
-			return args[0], nil
-		}
-
 		listLastArgs := templateCompatV1ListArgs(args)
 
-		return sliceRegistry.Slice(listLastArgs...)
-	}
-	funcs["without"] = func(args ...any) ([]any, error) {
-		if len(args) < 2 {
-			return nil, errors.New("without requires at least two arguments")
+		result, err := sliceRegistry.Slice(listLastArgs...)
+		if err == nil && result == nil && len(args) == 1 {
+			list := reflect.ValueOf(args[0])
+			if (list.Kind() == reflect.Slice || list.Kind() == reflect.Array) && list.Len() == 0 {
+				// Preserve the original empty list without bypassing Sprout's validation.
+				return args[0], nil
+			}
 		}
 
+		return result, err
+	}
+	funcs["without"] = func(args ...any) ([]any, error) {
 		listLastArgs := templateCompatV1ListArgs(args)
 
 		return sliceRegistry.Without(listLastArgs...)
 	}
 
-	// These all-string signatures are ambiguous: keep only the old order in 1.x.
+	// Preserve the legacy pattern, input, limit order in provider 1.x.
 	funcs["regexFindAll"] = func(pattern, value string, limit int) ([]string, error) {
 		return regexRegistry.RegexFindAll(pattern, limit, value)
 	}
 	funcs["regexSplit"] = func(pattern, value string, limit int) ([]string, error) {
 		return regexRegistry.RegexSplit(pattern, limit, value)
 	}
+	// Replacement arguments are both strings, so their two orders are ambiguous.
 	funcs["regexReplaceAll"] = func(pattern, value, replacement string) (string, error) {
 		return regexRegistry.RegexReplaceAll(pattern, replacement, value)
 	}
@@ -84,6 +81,7 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 	}
 
 	funcs["substr"] = func(start, end int, value string) string {
+		// In v1.0.3 a resolved end index of zero selects an empty substring.
 		if end == 0 || end == -len(value) {
 			return ""
 		}
@@ -91,27 +89,8 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 		return stringRegistry.Substring(start, end, value)
 	}
 
-	funcs["ellipsisBoth"] = func(offset, maxWidth int, value string) string {
-		// Match Sprout's minimum widths: a trailing ellipsis plus one rune needs
-		// 4 runes; ellipses on both ends plus one rune need 7 when offset > 0.
-		if maxWidth < 4 || offset > 0 && maxWidth < 7 {
-			return value
-		}
-
-		runeCount := utf8.RuneCountInString(value)
-		// Sprout v1.0.3 chose this branch by rune count but sliced by byte offset.
-		// Keep that behavior for safe indices, including offsets that split a rune.
-		if offset >= 0 && offset <= len(value) && (runeCount <= maxWidth || runeCount <= offset) {
-			return value[offset:]
-		}
-
-		return stringRegistry.EllipsisBoth(offset, maxWidth, value)
-	}
-	for _, name := range []string{"toCamelCase", "toPascalCase", "toSnakeCase", "toKebabCase", "toDotCase", "toPathCase", "toConstantCase"} {
-		funcs[name] = func(value string) string {
-			return templateCompatV1Case(name, value)
-		}
-	}
+	funcs["toCamelCase"] = templateCompatV1CamelCase
+	funcs["toPascalCase"] = templateCompatV1PascalCase
 
 	// Build resolves aliases before these overrides; regex also omits the old must* aliases.
 	for alias, name := range map[string]string{
@@ -223,42 +202,4 @@ func templateCompatV1ListFunction(call func(any, any) ([]any, error)) func(any, 
 
 		return call(value, list)
 	}
-}
-
-// templateCompatV1Dig retains dotted-path splitting, empty segments, and literal
-// backslashes. Unlike Sprig's dig, it has no positional default-value argument.
-func templateCompatV1Dig(args ...any) (any, error) {
-	if len(args) < 2 {
-		return nil, errors.New("dig requires at least two arguments: a sequence of keys and a dictionary")
-	}
-
-	dict, ok := args[len(args)-1].(map[string]any)
-	if !ok {
-		return nil, errors.New("last argument must be a map[string]any")
-	}
-
-	var keys []string
-
-	for i, arg := range args[:len(args)-1] {
-		key, ok := arg.(string)
-		if !ok {
-			return nil, fmt.Errorf("cannot parse keys: all keys must be strings, got %T at position %d", arg, i)
-		}
-
-		keys = append(keys, strings.Split(key, ".")...)
-	}
-
-	for i, key := range keys {
-		value, exists := dict[key]
-		if !exists || i == len(keys)-1 {
-			return value, nil
-		}
-
-		dict, ok = value.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("value at key %q is not a nested dictionary but %T", key, value)
-		}
-	}
-
-	return nil, errors.New("unexpected termination of key traversal")
 }

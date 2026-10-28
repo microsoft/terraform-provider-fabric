@@ -8,69 +8,49 @@ import (
 	"unicode"
 )
 
-// templateCompatV1Case keeps v1.0.3's capitalization and word-boundary rules,
-// including leading digit separators and the byte-based lookahead.
-// Do not replace this with the current Sprout converters: their output changes
-// definition content and hashes. Captured v1.0.3 expectations live in
-// template_compat_v1_case.json and template_compat_v1_edges.json.
-func templateCompatV1Case(name, value string) string {
-	separator := map[string]rune{
-		"toSnakeCase": '_', "toKebabCase": '-', "toDotCase": '.',
-		"toPathCase": '/', "toConstantCase": '_',
-	}[name]
-	capitalizing := separator == 0
-	upperNext := name == "toPascalCase"
+type templateCompatV1CaseStyle uint8
+
+const (
+	templateCompatV1CamelStyle templateCompatV1CaseStyle = iota
+	templateCompatV1PascalStyle
+)
+
+// Camel and Pascal case preserve v1.0.3 capitalization to keep generated names
+// and hashes stable; the other case converters use native Sprout behavior.
+// Captured expectations live in template_compat_v1_{camel,pascal}.json.
+func templateCompatV1CamelCase(value string) string {
+	return templateCompatV1CapitalizedCase(value, templateCompatV1CamelStyle)
+}
+
+func templateCompatV1PascalCase(value string) string {
+	return templateCompatV1CapitalizedCase(value, templateCompatV1PascalStyle)
+}
+
+func templateCompatV1CapitalizedCase(value string, style templateCompatV1CaseStyle) string {
+	upperNext := style == templateCompatV1PascalStyle
 	seenLetter := false
-	var previous, lookahead rune
 	var output strings.Builder
 
-	for offset, letter := range value {
-		// Byte lookahead and retaining it at EOF are intentional legacy behavior,
-		// even though iteration over value itself yields Unicode runes.
-		if offset+1 < len(value) {
-			lookahead = rune(value[offset+1])
-		}
-
+	for _, letter := range value {
 		if strings.ContainsRune(" -_", letter) {
-			if separator != 0 && previous != separator {
-				_, _ = output.WriteRune(separator)
-			}
-
+			// Legacy conversion starts a new word only after a letter was seen.
 			if seenLetter {
 				upperNext = true
 			}
 
-			previous = separator
-
 			continue
 		}
 
-		if separator != 0 && previous != separator {
-			wordBoundary := unicode.IsUpper(letter) && output.Len() > 0 &&
-				(unicode.IsLower(previous) || unicode.IsUpper(previous) && unicode.IsLower(lookahead))
-
-			digitBoundary := unicode.IsDigit(letter) && !unicode.IsDigit(previous)
-			if wordBoundary || digitBoundary {
-				_, _ = output.WriteRune(separator)
-			}
-		}
-
 		converted := letter
-
-		switch {
-		case capitalizing && upperNext:
+		if upperNext {
 			converted = unicode.ToUpper(letter)
 			upperNext = false
-		case name == "toConstantCase":
-			converted = unicode.ToUpper(letter)
-		case name != "toPascalCase":
+		} else if style == templateCompatV1CamelStyle {
 			converted = unicode.ToLower(letter)
-		default:
 		}
 
 		_, _ = output.WriteRune(converted)
 
-		previous = letter
 		seenLetter = seenLetter || unicode.IsLetter(letter)
 	}
 

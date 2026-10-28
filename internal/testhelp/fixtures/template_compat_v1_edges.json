@@ -57,13 +57,6 @@
   },
   {
     "bucket": "dig_path_segments",
-    "name": "escaped_dot_not_literal",
-    "template": "v={{ dict \"a.b\" \"literal\" | dig \"a\\\\.b\" | default \"missing\" }}",
-    "want": "v=missing",
-    "error": false
-  },
-  {
-    "bucket": "dig_path_segments",
     "name": "false_leaf",
     "template": "v={{ dict \"a\" false | dig \"a\" | toJson }}",
     "want": "v=false",
@@ -98,35 +91,28 @@
     "error": false
   },
   {
-    "bucket": "ellipsis_byte_and_rune_offsets",
+    "bucket": "ellipsis_boundaries",
     "name": "zero_offset_truncates_right",
     "template": "v={{ ellipsisBoth 0 4 \"abcdef\" | printf \"%q\" }}",
     "want": "v=\"a...\"",
     "error": false
   },
   {
-    "bucket": "ellipsis_byte_and_rune_offsets",
+    "bucket": "ellipsis_boundaries",
     "name": "truncation_uses_rune_offset",
     "template": "v={{ ellipsisBoth 2 7 \"éabcdefghi\" | printf \"%q\" }}",
     "want": "v=\"...b...\"",
     "error": false
   },
   {
-    "bucket": "ellipsis_byte_and_rune_offsets",
-    "name": "non_truncation_can_split_utf8",
-    "template": "v={{ ellipsisBoth 1 10 \"éabc\" | printf \"%q\" }}",
-    "want": "v=\"\\xa9abc\"",
-    "error": false
-  },
-  {
-    "bucket": "ellipsis_byte_and_rune_offsets",
+    "bucket": "ellipsis_boundaries",
     "name": "negative_offset_errors",
     "template": "v={{ ellipsisBoth -1 10 \"abc\" | printf \"%q\" }}",
     "want": "",
     "error": true
   },
   {
-    "bucket": "ellipsis_byte_and_rune_offsets",
+    "bucket": "ellipsis_boundaries",
     "name": "short_width_ignores_offset",
     "template": "v={{ ellipsisBoth 99 3 \"abc\" | printf \"%q\" }}",
     "want": "v=\"abc\"",
@@ -197,24 +183,10 @@
   },
   {
     "bucket": "lists_and_boundaries",
-    "name": "slice_nil_passthrough",
-    "template": "v={{ slice nil | toJson }}",
-    "want": "v=null",
-    "error": false
-  },
-  {
-    "bucket": "lists_and_boundaries",
     "name": "slice_reversed",
     "template": "{{ slice (list 1 2) 2 1 }}",
     "want": "",
     "error": true
-  },
-  {
-    "bucket": "lists_and_boundaries",
-    "name": "slice_scalar_passthrough",
-    "template": "v={{ slice \"abc\" }}",
-    "want": "v=abc",
-    "error": false
   },
   {
     "bucket": "lists_and_boundaries",
