@@ -21,7 +21,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Type:           "org_app_audience",
 	Names:          "Org App Audiences",
 	Types:          "org_app_audiences",
-	DocsURL:        "https://learn.microsoft.com/rest/api/fabric/orgappaudience/items/create-org-app-audience",
+	DocsURL:        "https://learn.microsoft.com/power-bi/explore-reports/org-app-items#use-audiences-in-org-apps",
 	IsPreview:      false,
 	IsSPNSupported: true,
 }

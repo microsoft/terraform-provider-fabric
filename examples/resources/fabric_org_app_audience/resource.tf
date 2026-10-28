@@ -2,8 +2,7 @@
 # - The `definition` is required. The `parentAppId` in the definition must reference an existing Org App in the same workspace.
 # - The `parentAppId` cannot be changed after creation. Use `lifecycle.replace_triggered_by` to recreate the Org App Audience when the parent Org App is replaced.
 # - Deleting the parent Org App also deletes all of its Org App Audiences.
-# - An Org App Audience cannot be moved to another folder on its own; changing `folder_id` forces a new resource to be created.
-#   Moving the parent Org App also moves its Org App Audiences, so keep `folder_id` aligned with the parent to avoid replacement.
+# - An Org App Audience can't be moved to another folder on its own; move the parent Org App instead.
 
 # Parent Org App
 resource "fabric_org_app" "example" {
@@ -48,54 +47,6 @@ resource "fabric_org_app_audience" "example_definition_update" {
         "HasAccessToHiddenContent" = "true"
         "TabOrder"                 = "2"
       }
-    }
-  }
-
-  lifecycle {
-    replace_triggered_by = [fabric_org_app.example.id]
-  }
-}
-
-# Example 3 - Item with custom tokens delimiter
-resource "fabric_org_app_audience" "example_custom_delimiter" {
-  display_name = "example3"
-  description  = "example with custom tokens delimiter"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "Default"
-  definition = {
-    "definition.json" = {
-      source           = "${local.path}/definition-custom-delimiter.json.tmpl"
-      tokens_delimiter = "<<>>"
-      tokens = {
-        "ParentAppId"              = fabric_org_app.example.id
-        "HasAccessToHiddenContent" = "false"
-        "TabOrder"                 = "3"
-      }
-    }
-  }
-
-  lifecycle {
-    replace_triggered_by = [fabric_org_app.example.id]
-  }
-}
-
-# Example 4 - Item with parameters processing mode
-resource "fabric_org_app_audience" "example_parameters" {
-  display_name = "example4"
-  description  = "example with parameters processing mode"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "Default"
-  definition = {
-    "definition.json" = {
-      source          = "${local.path}/definition.json"
-      processing_mode = "Parameters"
-      parameters = [
-        {
-          type  = "JsonPathReplace"
-          find  = "$.parentAppId"
-          value = fabric_org_app.example.id
-        }
-      ]
     }
   }
 

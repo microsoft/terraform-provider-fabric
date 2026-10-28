@@ -27,12 +27,6 @@ var testHelperLocals = at.CompileLocalsConfig(map[string]any{
 	"path": testhelp.GetFixturesDirPath("org_app_audience"),
 })
 
-var testHelperDefinition = map[string]any{
-	`"definition.json"`: map[string]any{
-		"source": "${local.path}/definition.json",
-	},
-}
-
 func testHelperDefinitionTemplate(parentAppID string, hasAccessToHiddenContent bool, tabOrder int) map[string]any {
 	return map[string]any{
 		`"definition.json"`: map[string]any{
@@ -84,7 +78,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 						"workspace_id": "invalid uuid",
 						"display_name": "test",
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -102,7 +96,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 						"display_name": "test",
 						"folder_id":    "invalid uuid",
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -120,7 +114,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 						"display_name":    "test",
 						"unexpected_attr": "test",
 						"format":          "Default",
-						"definition":      testHelperDefinition,
+						"definition":      testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -136,7 +130,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 					map[string]any{
 						"display_name": "test",
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -152,7 +146,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -184,7 +178,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 					map[string]any{
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"display_name": "test",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -201,7 +195,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 						"workspace_id": "00000000-0000-0000-0000-000000000000",
 						"display_name": "test",
 						"format":       "Invalid",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -220,7 +214,7 @@ func TestUnit_OrgAppAudienceResource_Attributes(t *testing.T) {
 						"format":       "Default",
 						"definition": map[string]any{
 							`"invalid.json"`: map[string]any{
-								"source": "${local.path}/definition.json",
+								"source": "${local.path}/definition.json.tmpl",
 							},
 						},
 					},
@@ -247,7 +241,7 @@ func TestUnit_OrgAppAudienceResource_ImportState(t *testing.T) {
 				"workspace_id": *entity.WorkspaceID,
 				"display_name": *entity.DisplayName,
 				"format":       "Default",
-				"definition":   testHelperDefinition,
+				"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 			},
 		),
 	)
@@ -329,7 +323,7 @@ func TestUnit_OrgAppAudienceResource_CRUD(t *testing.T) {
 						"workspace_id": *entityExist.WorkspaceID,
 						"display_name": *entityExist.DisplayName,
 						"format":       "Default",
-						"definition":   testHelperDefinition,
+						"definition":   testHelperDefinitionTemplate(testhelp.RandomUUID(), false, 1),
 					},
 				),
 			),
@@ -424,34 +418,6 @@ func TestUnit_OrgAppAudienceResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
-		// Update folder (forces replacement) and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": *entityBefore.WorkspaceID,
-						"display_name": *entityAfter.DisplayName,
-						"description":  *entityAfter.Description,
-						"folder_id":    *entityAfter.FolderID,
-						"format":       "Default",
-						"definition":   testHelperDefinitionTemplate(parentAppID, true, 2),
-					},
-				),
-			),
-			ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionDestroyBeforeCreate),
-				},
-			},
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
-				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityAfter.FolderID),
-			),
-		},
 		// Delete testing automatically occurs in TestCase
 	}))
 }
@@ -461,11 +427,9 @@ func TestAcc_OrgAppAudienceResource_CRUD(t *testing.T) {
 	workspaceID := workspace["id"].(string)
 	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
 	folder1ID := folder1["id"].(string)
-	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
-	folder2ID := folder2["id"].(string)
 
 	orgAppResourceHCL, orgAppResourceFQN := testHelperParentOrgAppResource(workspaceID)
-	definition := testHelperDefinitionTemplate(testhelp.RefByFQN(orgAppResourceFQN, "id"), false, 1)
+	parentAppID := testhelp.RefByFQN(orgAppResourceFQN, "id")
 
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
@@ -485,7 +449,7 @@ func TestAcc_OrgAppAudienceResource_CRUD(t *testing.T) {
 						"display_name": entityCreateDisplayName,
 						"folder_id":    folder1ID,
 						"format":       "Default",
-						"definition":   definition,
+						"definition":   testHelperDefinitionTemplate(parentAppID, false, 1),
 					},
 				),
 			),
@@ -496,10 +460,12 @@ func TestAcc_OrgAppAudienceResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "format", "Default"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.TabOrder", "1"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.HasAccessToHiddenContent", "false"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
 			),
 		},
-		// Update and Read
+		// Update (display name, description and definition content) and Read
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.JoinConfigs(
@@ -513,7 +479,7 @@ func TestAcc_OrgAppAudienceResource_CRUD(t *testing.T) {
 						"description":  entityUpdateDescription,
 						"folder_id":    folder1ID,
 						"format":       "Default",
-						"definition":   definition,
+						"definition":   testHelperDefinitionTemplate(parentAppID, true, 2),
 					},
 				),
 			),
@@ -526,103 +492,6 @@ func TestAcc_OrgAppAudienceResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
-			),
-		},
-		// Update folder (forces replacement) and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				orgAppResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityUpdateDisplayName,
-						"description":  entityUpdateDescription,
-						"folder_id":    folder2ID,
-						"format":       "Default",
-						"definition":   definition,
-					},
-				),
-			),
-			ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionDestroyBeforeCreate),
-				},
-			},
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
-			),
-		},
-	},
-	))
-}
-
-func TestAcc_OrgAppAudienceResource_CRUD_Definition(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
-	orgAppResourceHCL, orgAppResourceFQN := testHelperParentOrgAppResource(workspaceID)
-	parentAppID := testhelp.RefByFQN(orgAppResourceFQN, "id")
-
-	entityCreateDisplayName := testhelp.RandomName()
-	entityUpdateDescription := testhelp.RandomName()
-
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				orgAppResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"format":       "Default",
-						"definition":   testHelperDefinitionTemplate(parentAppID, false, 1),
-					},
-				),
-			),
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "format", "Default"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.TabOrder", "1"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.HasAccessToHiddenContent", "false"),
-			),
-		},
-		// Update definition content and Read
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.JoinConfigs(
-				testHelperLocals,
-				orgAppResourceHCL,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id":              workspaceID,
-						"display_name":              entityCreateDisplayName,
-						"description":               entityUpdateDescription,
-						"format":                    "Default",
-						"definition_update_enabled": true,
-						"definition":                testHelperDefinitionTemplate(parentAppID, true, 2),
-					},
-				),
-			),
-			ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
-				},
-			},
-			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.TabOrder", "2"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.definition.json.tokens.HasAccessToHiddenContent", "true"),

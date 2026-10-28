@@ -26,8 +26,6 @@ func NewResourceOrgAppAudience() resource.Resource {
 		DefinitionRequired: true,
 		DefinitionEmpty:    "",
 		DefinitionFormats:  itemDefinitionFormats,
-		// An Org App Audience cannot be moved to another folder on its own (only together with its parent Org App).
-		FolderIDRequiresReplace: true,
 	}
 
 	return fabricitem.NewResourceFabricItemDefinition(config)

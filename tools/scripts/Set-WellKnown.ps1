@@ -1455,8 +1455,10 @@ else {
     parts = @(
       @{
         path        = 'definition.json'
-        payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/org_app_audience/definition-wellknown.json.tmpl' -Values @(
+        payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/org_app_audience/definition.json.tmpl' -Values @(
           @{ key = '{{ .ParentAppId }}'; value = $wellKnown['OrgApp'].id }
+          @{ key = '{{ .HasAccessToHiddenContent }}'; value = 'false' }
+          @{ key = '{{ .TabOrder }}'; value = '1' }
         )
         payloadType = 'InlineBase64'
       }

@@ -3,13 +3,13 @@
 page_title: "fabric_org_app_audience Data Source - terraform-provider-fabric"
 subcategory: ""
 description: |-
-  The Org App Audience data-source allows you to retrieve details about a Fabric Org App Audience https://learn.microsoft.com/rest/api/fabric/orgappaudience/items/create-org-app-audience.
+  The Org App Audience data-source allows you to retrieve details about a Fabric Org App Audience https://learn.microsoft.com/power-bi/explore-reports/org-app-items#use-audiences-in-org-apps.
   -> This data-source supports Service Principal authentication.
 ---
 
 # fabric_org_app_audience (Data Source)
 
-The Org App Audience data-source allows you to retrieve details about a Fabric [Org App Audience](https://learn.microsoft.com/rest/api/fabric/orgappaudience/items/create-org-app-audience).
+The Org App Audience data-source allows you to retrieve details about a Fabric [Org App Audience](https://learn.microsoft.com/power-bi/explore-reports/org-app-items#use-audiences-in-org-apps).
 
 -> This data-source supports Service Principal authentication.
 

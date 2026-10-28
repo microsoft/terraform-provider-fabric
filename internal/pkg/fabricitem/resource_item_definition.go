@@ -46,9 +46,6 @@ type ResourceFabricItemDefinition struct {
 	DefinitionRequired          bool
 	DefinitionEmpty             string
 	DefinitionFormats           []DefinitionFormat
-	// FolderIDRequiresReplace forces resource replacement when folder_id changes,
-	// for items that cannot be moved between folders on their own (e.g. child items of a parent item).
-	FolderIDRequiresReplace bool
 }
 
 func NewResourceFabricItemDefinition(config ResourceFabricItemDefinition) resource.Resource {
