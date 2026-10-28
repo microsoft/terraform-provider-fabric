@@ -68,7 +68,7 @@ resource "fabric_gateway" "example_streaming" {
 
 ### Required
 
-- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Gateway type. Value must be one of : `VirtualNetwork`.
+- `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The Gateway type. Value must be one of : `StreamingVirtualNetwork`, `VirtualNetwork`.
 
 ### Optional
 
