@@ -373,7 +373,7 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkAttributes(t *testing.T) {
 						"subnet_name":          "test",
 						"subscription_id":      "00000000-0000-0000-0000-000000000000",
 					},
-					"inactivity_minutes_before_sleep": (int)(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
+					"inactivity_minutes_before_sleep": int(gateway.PossibleInactivityMinutesBeforeSleepValues[0]),
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute inactivity_minutes_before_sleep`),
@@ -392,7 +392,7 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkAttributes(t *testing.T) {
 						"subnet_name":          "test",
 						"subscription_id":      "00000000-0000-0000-0000-000000000000",
 					},
-					"number_of_member_gateways": (int)(gateway.MinNumberOfMemberGatewaysValues),
+					"number_of_member_gateways": int(gateway.MinNumberOfMemberGatewaysValues),
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute number_of_member_gateways`),
@@ -411,8 +411,8 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkAttributes(t *testing.T) {
 						"subnet_name":          "test",
 						"subscription_id":      "00000000-0000-0000-0000-000000000000",
 					},
-					"min_member_gateway_count": (int)(gateway.MinNumberOfMemberGatewaysValues),
-					"max_member_gateway_count": (int)(gateway.MaxNumberOfMemberGatewaysValues),
+					"min_member_gateway_count": int(gateway.MinNumberOfMemberGatewaysValues),
+					"max_member_gateway_count": int(gateway.MaxNumberOfMemberGatewaysValues),
 				},
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute (min|max)_member_gateway_count`),
@@ -602,7 +602,6 @@ func TestUnit_GatewayResource_CRUD(t *testing.T) {
 	}))
 }
 
-
 func TestUnit_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
 	entityExist := fakes.NewRandomStreamingVirtualNetworkGateway()
 	entityBefore := fakes.NewRandomStreamingVirtualNetworkGateway()
@@ -637,7 +636,7 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":         (string)(*entityBefore.Type),
+					"type":         string(*entityBefore.Type),
 					"display_name": *entityBefore.DisplayName,
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
@@ -666,7 +665,7 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":         (string)(*entityBefore.Type),
+					"type":         string(*entityBefore.Type),
 					"display_name": *entityAfter.DisplayName,
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityBefore.VirtualNetworkAzureResource.ResourceGroupName,
@@ -688,7 +687,7 @@ func TestUnit_GatewayResource_StreamingVirtualNetworkCRUD(t *testing.T) {
 			Config: at.CompileConfig(
 				testResourceItemHeader,
 				map[string]any{
-					"type":         (string)(*entityBefore.Type),
+					"type":         string(*entityBefore.Type),
 					"display_name": *entityAfter.DisplayName,
 					"virtual_network_azure_resource": map[string]any{
 						"resource_group_name":  *entityAfter.VirtualNetworkAzureResource.ResourceGroupName,
