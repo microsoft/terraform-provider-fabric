@@ -20,7 +20,7 @@ func NewResourceEventstream() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
-			mapvalidator.SizeAtMost(1),
+			mapvalidator.SizeAtMost(2),
 			mapvalidator.KeysAre(fabricitem.DefinitionPathKeysValidator(itemDefinitionFormats)...),
 		},
 		DefinitionRequired: false,
