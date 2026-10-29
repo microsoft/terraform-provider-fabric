@@ -388,7 +388,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							},
 							"object_type": superschema.StringAttribute{
 								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The type of Microsoft Entra ID object. Possible values: " + utils.ConvertStringSlicesToString(
+									MarkdownDescription: "Deprecated. This attribute is ignored by the resource and is null in data sources when Fabric does not return it. Remove it from configurations and references; it will be removed in the next major version of the provider. Possible values: " + utils.ConvertStringSlicesToString(
 										fabcore.PossibleObjectTypeValues(),
 										true,
 										true,
@@ -398,10 +398,12 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 									},
 								},
 								Resource: &schemaR.StringAttribute{
-									Required: true,
+									Optional:           true,
+									DeprecationMessage: "Remove this attribute from the configuration. Fabric no longer uses it and it will be removed in the next major version of the provider.",
 								},
 								DataSource: &schemaD.StringAttribute{
-									Computed: true,
+									Computed:           true,
+									DeprecationMessage: "Stop referencing this attribute. Fabric no longer returns it and it will be removed in the next major version of the provider.",
 								},
 							},
 							"tenant_id": superschema.SuperStringAttribute{

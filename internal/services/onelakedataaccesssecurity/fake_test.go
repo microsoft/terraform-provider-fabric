@@ -40,18 +40,40 @@ func UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID string, entity fab
 	fakeOneLakeDataAccessRoleStore[id] = entity
 }
 
+func membersWithoutObjectType(members *fabcore.Members) *fabcore.Members {
+	if members == nil {
+		return nil
+	}
+	result := *members
+	if members.MicrosoftEntraMembers != nil {
+		result.MicrosoftEntraMembers = append([]fabcore.MicrosoftEntraMember{}, members.MicrosoftEntraMembers...)
+		for i := range result.MicrosoftEntraMembers {
+			result.MicrosoftEntraMembers[i].ObjectType = nil
+		}
+	}
+	return &result
+}
+
 func fakeGetDataAccessRoleFunc() func(ctx context.Context, workspaceID, itemID, roleName string, options *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], errResp azfake.ErrorResponder) {
+	return fakeGetDataAccessRoleFuncWithMemberTransform(nil)
+}
+
+func fakeGetDataAccessRoleFuncWithMemberTransform(transform func(*fabcore.Members)) func(ctx context.Context, workspaceID, itemID, roleName string, options *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID, roleName string, _ *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse]{}
 		errEntityNotFound := fabcore.ErrCommon.EntityNotFound.Error()
 		id := GenerateOneLakeDataAccessRoleID(workspaceID, itemID, roleName)
 
 		if role, ok := fakeOneLakeDataAccessRoleStore[id]; ok {
+			members := membersWithoutObjectType(role.Members)
+			if transform != nil && members != nil {
+				transform(members)
+			}
 			resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse{
 				Name:          role.Name,
 				Kind:          role.Kind,
 				DecisionRules: role.DecisionRules,
-				Members:       role.Members,
+				Members:       members,
 				ETag:          new(testhelp.RandomName()),
 			}, nil)
 		} else {
@@ -112,8 +134,12 @@ func fakeDeleteDataAccessRoleFunc() func(ctx context.Context, workspaceID, itemI
 func fakeListDataAccessRolesFunc() func(ctx context.Context, workspaceID, itemID string, options *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID string, _ *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse]{}
+		roles := GetAllStoredOneLakeDataAccessRoles(workspaceID, itemID)
+		for i := range roles {
+			roles[i].Members = membersWithoutObjectType(roles[i].Members)
+		}
 		resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{
-			Value: GetAllStoredOneLakeDataAccessRoles(workspaceID, itemID),
+			Value: roles,
 			Etag:  new(testhelp.RandomName()),
 		}, nil)
 

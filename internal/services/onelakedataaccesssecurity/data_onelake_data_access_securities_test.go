@@ -7,8 +7,10 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -25,6 +27,10 @@ func TestUnit_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 	entity1 := fakes.NewRandomOneLakeDataAccessRoleListItem()
 	entity2 := fakes.NewRandomOneLakeDataAccessRoleListItem()
 	entity3 := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	objectID, tenantID := testhelp.RandomUUID(), testhelp.RandomUUID()
+	entity1.Members.MicrosoftEntraMembers = []fabcore.MicrosoftEntraMember{{
+		ObjectID: &objectID, TenantID: &tenantID, ObjectType: to.Ptr(fabcore.ObjectTypeUser),
+	}}
 
 	for key := range fakeOneLakeDataAccessRoleStore {
 		delete(fakeOneLakeDataAccessRoleStore, key)
@@ -80,6 +86,7 @@ func TestUnit_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "values.#", "3"),
+				checkEntraMemberObjectType(testDataSourceItemsFQN, objectID, ""),
 			),
 		},
 	}))

@@ -291,5 +291,10 @@ func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *base
 		return diags
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.DataAccessRoleBase)
+	previousMembers := model.Members
+	if diags := model.set(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), respGet.DataAccessRoleBase); diags.HasError() {
+		return diags
+	}
+
+	return model.reconcileMembers(ctx, previousMembers)
 }

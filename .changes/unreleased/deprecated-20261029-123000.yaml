@@ -1,0 +1,5 @@
+kind: deprecated
+body: Deprecated `members.microsoft_entra_members.object_type` in the `fabric_onelake_data_access_security` resource and data sources because Fabric no longer uses it. The resource now accepts configurations without it and ignores it in API requests.
+time: 2026-10-29T12:30:00+02:00
+custom:
+    Issue: "1044"
