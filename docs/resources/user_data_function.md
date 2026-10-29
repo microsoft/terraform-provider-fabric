@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The User Data Function resource allows you to manage a Fabric User Data Function https://learn.microsoft.com/fabric/data-engineering/user-data-functions/user-data-functions-overview.
   -> This resource does not support Service Principal. Please use a User context authentication.
+  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_user_data_function (Resource)
@@ -12,6 +13,8 @@ description: |-
 The User Data Function resource allows you to manage a Fabric [User Data Function](https://learn.microsoft.com/fabric/data-engineering/user-data-functions/user-data-functions-overview).
 
 -> This resource does not support Service Principal. Please use a User context authentication.
+
+~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

@@ -23,7 +23,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "User Data Functions",
 	Types:          "user_data_functions",
 	DocsURL:        "https://learn.microsoft.com/fabric/data-engineering/user-data-functions/user-data-functions-overview",
-	IsPreview:      false,
+	IsPreview:      true,
 	IsSPNSupported: false,
 }
 
