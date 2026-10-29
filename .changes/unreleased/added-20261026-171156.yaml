@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_org_app_audience` resource
+time: 2026-10-26T17:11:56.8518059+02:00
+custom:
+    Issue: "1130"

@@ -86,6 +86,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgappaudience"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -506,6 +507,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
 		orgapp.NewResourceOrgApp,
+		orgappaudience.NewResourceOrgAppAudience,
 		activator.NewResourceActivator,
 		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
@@ -624,6 +626,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		operationsagent.NewDataSourceOperationsAgents,
 		orgapp.NewDataSourceOrgApp,
 		orgapp.NewDataSourceOrgApps,
+		orgappaudience.NewDataSourceOrgAppAudience,
+		orgappaudience.NewDataSourceOrgAppAudiences,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
