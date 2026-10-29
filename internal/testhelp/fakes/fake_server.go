@@ -56,6 +56,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureSnowflakeDatabase)
 	handleEntity(server, configureSparkJobDefinition)
 	handleEntity(server, configureSQLDatabase)
+	handleEntity(server, configureUserDataFunction)
 	handleEntity(server, configureWarehouse)
 	handleEntity(server, configureWarehouseSnapshot)
 	handleEntity(server, configureWorkspace)

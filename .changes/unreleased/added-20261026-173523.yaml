@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_user_data_function` data source
+time: 2026-10-26T17:35:23.3883339+02:00
+custom:
+    Issue: "1133"
