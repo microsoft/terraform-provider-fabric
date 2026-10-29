@@ -1,0 +1,62 @@
+[
+  {
+    "name": "case_conversion/toPascalCase/empty",
+    "template": "{{ toPascalCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "case_conversion/toPascalCase/existing_camel_boundary",
+    "template": "{{ toPascalCase \"firstName\" }}",
+    "want": "FirstName"
+  },
+  {
+    "name": "case_conversion/toPascalCase/mixed_capitalization",
+    "template": "{{ toPascalCase \"hELLO world\" }}",
+    "want": "HELLOWorld"
+  },
+  {
+    "name": "case_conversion/toPascalCase/leading_digit_and_acronym",
+    "template": "{{ toPascalCase \"2FOo\" }}",
+    "want": "2FOo"
+  },
+  {
+    "name": "case_conversion/toPascalCase/terminal_acronym_lookahead",
+    "template": "{{ toPascalCase \"fooBAR\" }}",
+    "want": "FooBAR"
+  },
+  {
+    "name": "case_conversion/toPascalCase/leading_repeated_separators",
+    "template": "{{ toPascalCase \"__hello--world \" }}",
+    "want": "HelloWorld"
+  },
+  {
+    "name": "case_conversion/toPascalCase/unicode_letters",
+    "template": "{{ toPascalCase \"école Déjà\" }}",
+    "want": "ÉcoleDéjà"
+  },
+  {
+    "name": "case_conversion/toPascalCase/unicode_byte_lookahead",
+    "template": "{{ toPascalCase \"αΒγ\" }}",
+    "want": "ΑΒγ"
+  },
+  {
+    "name": "case_conversion/toPascalCase/punctuation_is_not_separator",
+    "template": "{{ toPascalCase \"a.b/c\" }}",
+    "want": "A.b/c"
+  },
+  {
+    "name": "case_conversion/toPascalCase/separators_only",
+    "template": "{{ toPascalCase \"---\" }}",
+    "want": ""
+  },
+  {
+    "name": "case_conversion/toPascalCase/digit_only",
+    "template": "{{ toPascalCase \"0\" }}",
+    "want": "0"
+  },
+  {
+    "name": "case_conversion/toPascalCase/digit_after_letters",
+    "template": "{{ toPascalCase \"HELLO123_WORLD\" }}",
+    "want": "HELLO123WORLD"
+  }
+]
