@@ -126,5 +126,5 @@ Read-Only:
 Read-Only:
 
 - `object_id` (String) The object id.
-- `object_type` (String) The type of Microsoft Entra ID object. Possible values: `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`. Value must be one of : `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`.
+- `object_type` (String, Deprecated) Deprecated. This attribute is ignored by the resource and is null in data sources when Fabric does not return it. Remove it from configurations and references; it will be removed in the next major version of the provider. Possible values: `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`. Value must be one of : `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`.
 - `tenant_id` (String) The tenant id.
