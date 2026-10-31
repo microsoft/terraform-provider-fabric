@@ -21,7 +21,7 @@ on:
   merge_group:
 
 concurrency:
-  # Hold the shared environment for the entire matrix, including resource teardown.
+  # This declared group spans the whole workflow; incoming workflow edits can change it.
   # Must match cleanup-script.yml; a per-job lock would drop pending matrix legs.
   group: fabric-testacc-environment
   cancel-in-progress: false
@@ -55,6 +55,7 @@ jobs:
               - 'go.mod'
               - 'go.sum'
               - '.github/workflows/test.yml'
+              - '.github/workflows/cleanup-script.yml'
 
   cleanup-workspace:
     name: 🧹 Clean Recoverable WorkspaceRS Items
