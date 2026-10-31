@@ -21,8 +21,10 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ format('{0}-{1}-{2}-{3}-{4}', github.workflow, github.event_name, github.ref, github.base_ref || null, github.head_ref || null) }}
-  cancel-in-progress: true
+  # This declared group spans the whole workflow; incoming workflow edits can change it.
+  # Must match cleanup-script.yml; a per-job lock would drop pending matrix legs.
+  group: fabric-testacc-environment
+  cancel-in-progress: false
 
 env:
   FABRIC_TESTACC_SKIP_NO_SPN: true
@@ -53,6 +55,7 @@ jobs:
               - 'go.mod'
               - 'go.sum'
               - '.github/workflows/test.yml'
+              - '.github/workflows/cleanup-script.yml'
 
   cleanup-workspace:
     name: 🧹 Clean Recoverable WorkspaceRS Items

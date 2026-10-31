@@ -315,6 +315,11 @@ Then run:
 task testacc:setup
 ```
 
+Setup writes `internal/testhelp/fixtures/.wellknown.json`. A populated
+`FABRIC_TESTACC_WELLKNOWN` environment variable takes precedence over that file.
+GitHub workflows use the `FABRIC_TESTACC_WELLKNOWN` Actions variable; a local
+setup run does not publish or refresh that variable.
+
 ### Unit Tests
 
 > [!NOTE]
@@ -344,6 +349,106 @@ sudo chown -R vscode /go/pkg
 
 > [!NOTE]
 > Acceptance tests will create the actual resources since they will be run against real APIs.
+
+The MLModel and MLExperiment CRUD tests create their own folders in `WorkspaceRS`,
+use Terraform references to order item creation and moves, and destroy their owned
+resources afterwards. They do not require pre-created `FolderRS1`/`FolderRS2`.
+
+With the executed workflows retaining `fabric-testacc-environment` and
+`cancel-in-progress: false`, Test and Cleanup share a **repository-wide,
+workflow-level** slot. It lasts until the whole workflow exits, including
+docs-only/build jobs, environment-approval waits and the test matrix.
+GitHub's default single pending slot can be replaced by a newer run; dispatch
+ordering is not guaranteed. Both workflows schedule at 02:00 UTC, so pending
+Cleanup can be superseded, visible as a cancelled Cleanup run. Re-run a superseded
+required check after the group is **idle: no in-progress run and no pending run**.
+An environment-approval wait is in-progress even when no test job is executing.
+A Cleanup dispatch is a newer group run and cancels/replaces a pending required
+Test run; owner coordination does not replace the idle check.
+
+`pull_request` uses the PR merge-ref workflow. An incoming PR workflow can rename
+or remove the group, or set `cancel-in-progress: true` and cancel an active run;
+the guarantees and recovery instructions here do not cover those edits. Upstream fork-PR runs participate
+only while their executed file retains the group and false setting. Review workflow
+changes before granting any required outside-collaborator **workflow approval**.
+Separate **job environment approval** gates jobs and environment secrets; it does
+not protect workflow-level concurrency. Fork-owned workflows, local commands,
+other repositories and manual cleanup remain outside this lock.
+
+The in-workflow **pre-clean** is best-effort and removes recoverable items only.
+**Terraform destroy** runs inside each test job; standalone **Cleanup** can delete
+active items and non-preserved folders. Cancellation, timeout or runner loss can skip destroy,
+leaving active objects the next pre-clean will not reclaim. After interruption or
+pending-Cleanup replacement, coordinate recovery with the environment owner.
+No cancellation or rejection atomically clears the group or rolls back resource
+changes; queued runs can be promoted and new runs can arrive.
+
+1. Inspect the queue and cancel unwanted pending runs **before slow workspace
+   assessment**, including Cleanup that must not start. Recheck before every
+   controllable or expected exit, not only rejection/cancellation: natural completion, timeout, runner loss or
+   rejection of Cleanup's only job can also promote pending work immediately.
+   Promotion is neither approval nor idle; promoted jobs may wait for a new
+   environment review or start at once. Keep observing until the group is idle. If
+   unwanted Cleanup has already started, cancel it and assess changes; deletion
+   is not undone. This ordering reduces risk but is not an atomic guarantee.
+2. Before approving any waiting Cleanup job, review the **workflow and referenced
+   script at that run's actual executing revision/SHA**, including the PR merge
+   revision where applicable, not a head-branch or newer branch tip. Check
+   target/preservation behavior, `development`, the exact script/mode invocation,
+   the group and false setting. Standalone `cleanup-script.yml` must use
+   `Remove-WorkspaceRSItems.ps1 -Force` without `-RecoverableItemsOnly`; Test
+   pre-clean must use `-Force -RecoverableItemsOnly`. Any other invocation is
+   changed execution, not approved. For a new `workflow_dispatch`, review the selected
+   ref's resolved revision; do not dispatch unreviewed/moving work on the assumption
+   that an approval prompt will stop it. Unknown or changed execution is not
+   approved. Distinguish standalone `cleanup-script.yml` (`-Force`) from Test's
+   best-effort pre-clean (`-Force -RecoverableItemsOnly`); approval starts the
+   intended job, and standalone Cleanup then hard-deletes.
+3. Rejection prevents that job starting but siblings may continue; for standalone
+   Cleanup, rejecting its only job can end the run and promote pending work.
+   Cancellation ends the selected run and frees its running slot, which can
+   immediately promote pending work; rejection of Cleanup's only job can do the
+   same, while Test siblings may continue after one rejection. Promotion is not
+   approval: a later environment gate may or may not wait and is not a barrier to
+   rely on. Neither action atomically makes the group idle or rolls back changes.
+   Job timeouts do not bound approval waits.
+   Resolve queued/waiting work with the owner and recheck until the group is idle.
+4. Do not dispatch unneeded Cleanup; cancel any unwanted pending or approval-waiting
+   Cleanup. Dispatch approved Cleanup only in an observed idle group, continuing
+   to monitor arrivals and queued work through run exit and inventory assessment.
+   These manual observations do not enforce a post-run inventory barrier: if
+   unsafe queued work cannot be held back, stop normal recovery and coordinate
+   an owner-reviewed plan rather than claim an atomic lock.
+   After standalone `cleanup-script.yml` exits, a `success` conclusion or
+   "deleted successfully" summary is **inconclusive**: the script has non-fatal
+   fetch/delete errors. Require the `Found`/`No items found`, `Found`/`No folders
+   found`, and `Found`/`No recoverable items found` results for all three fetches;
+   any `Failed to fetch` message is unsuccessful regardless of WARN/ERROR level
+   or later success text. When a deletion summary exists, all three failed counts
+   must be zero. A zero-delete early return is acceptable only with complete fetch
+   evidence and independent inventory of active items, folders and recoverable
+   items matching the expected retained state from the pre-run assessment.
+   After every run, independently inventory all three resource categories against
+   the expected deleted/preserved state recorded before execution; do not infer it
+   from counts or success text. Script totals and `only preserved items
+   found` are not that inventory. The expected `-Force` banner and rate-limit retry
+   warnings alone are neither success nor failure. Missing required evidence,
+   fetch/delete failures, inventory mismatch, timeout or cancellation means
+   unsuccessful Cleanup; stop for an owner-reviewed partial-state plan,
+   without automatic Cleanup retry or Test start. This standalone gate does not
+   turn Test's best-effort recoverable pre-clean into a new hard gate.
+   Recheck idle immediately before a required Test re-run and monitor until it
+   becomes the intended in-progress run, without concurrent Cleanup. Re-run checks
+   affected by supersession, failure, cancellation or rejection only after the
+   owner confirms the workspace and an idle group, in a separate window from Cleanup.
+Do not run manual or standalone cleanup alongside acceptance tests.
+
+Existing cleanup-job limits are 30 minutes and test-matrix limits are 100 minutes.
+Job limits do not bound concurrency-queue or environment-approval waits; jobs
+without explicit limits retain platform defaults. Matrix legs still run in parallel
+in `WorkspaceRS`, and non-ML acceptance tests still share `FolderRS1`/`FolderRS2`.
+Additional job bounds and workspace/stable-identity lifecycle isolation are
+follow-ups, not guarantees supplied by this change.
 
 To run all acceptance tests
 

@@ -7,9 +7,9 @@ on:
     - cron: "0 2 * * *"
   workflow_dispatch:
 
-    # Shared concurrency group with test workflow.
-    # cancel-in-progress: false = if tests are running, cleanup queues until they finish.
 concurrency:
+  # Shared with Test only while the executed workflow retains this group/false setting.
+  # A newer run can replace pending cleanup; incoming workflow edits can change policy.
   group: fabric-testacc-environment
   cancel-in-progress: false
 
