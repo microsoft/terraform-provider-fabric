@@ -156,39 +156,58 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMembers(ctx context.Conte
 		}
 	}
 
-	if old != nil && !old.FabricItemMembers.IsUnknown() && !current.FabricItemMembers.IsUnknown() {
-		if old.FabricItemMembers.IsNull() && !current.FabricItemMembers.IsNull() {
-			items, itemDiags := current.FabricItemMembers.Get(ctx)
-			if itemDiags.HasError() {
-				return itemDiags
-			}
-			if len(items) == 0 {
-				current.FabricItemMembers = old.FabricItemMembers
-			}
-		} else if !old.FabricItemMembers.IsNull() && current.FabricItemMembers.IsNull() {
-			items, itemDiags := old.FabricItemMembers.Get(ctx)
-			if itemDiags.HasError() {
-				return itemDiags
-			}
-			if len(items) == 0 {
-				current.FabricItemMembers = old.FabricItemMembers
-			}
-		}
+	if diags := reconcileFabricItemMembers(ctx, old, current); diags.HasError() {
+		return diags
 	}
 
+	if diags := reconcileMicrosoftEntraMembers(ctx, old, current); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, current)
+}
+
+func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
+	if old == nil || old.FabricItemMembers.IsUnknown() || current.FabricItemMembers.IsUnknown() {
+		return nil
+	}
+
+	if old.FabricItemMembers.IsNull() == current.FabricItemMembers.IsNull() {
+		return nil
+	}
+
+	nonNull := current.FabricItemMembers
+	if current.FabricItemMembers.IsNull() {
+		nonNull = old.FabricItemMembers
+	}
+
+	items, diags := nonNull.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if len(items) == 0 {
+		current.FabricItemMembers = old.FabricItemMembers
+	}
+
+	return nil
+}
+
+func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
 	if old != nil && !old.MicrosoftEntraMembers.IsNull() && !old.MicrosoftEntraMembers.IsUnknown() &&
 		current.MicrosoftEntraMembers.IsNull() {
-		items, itemDiags := old.MicrosoftEntraMembers.Get(ctx)
-		if itemDiags.HasError() {
-			return itemDiags
+		oldMembers, diags := old.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
 		}
-		if len(items) == 0 {
+
+		if len(oldMembers) == 0 {
 			current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
 		}
 	}
 
 	if current.MicrosoftEntraMembers.IsNull() || current.MicrosoftEntraMembers.IsUnknown() {
-		return to.Members.Set(ctx, current)
+		return nil
 	}
 
 	members, diags := current.MicrosoftEntraMembers.Get(ctx)
@@ -198,7 +217,8 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMembers(ctx context.Conte
 
 	if old != nil && old.MicrosoftEntraMembers.IsNull() && len(members) == 0 {
 		current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
-		return to.Members.Set(ctx, current)
+
+		return nil
 	}
 
 	var oldMembers []*microsoftEntraMember
@@ -216,10 +236,12 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMembers(ctx context.Conte
 
 	for _, member := range members {
 		member.ObjectType = types.StringNull()
+
 		key, known, keyDiags := microsoftEntraMemberKey(member)
 		if keyDiags.HasError() {
 			return keyDiags
 		}
+
 		if objectType, ok := knownTypes[key]; known && ok {
 			member.ObjectType = objectType
 		}
@@ -228,7 +250,8 @@ func (to *baseOneLakeDataAccessSecurityModel) reconcileMembers(ctx context.Conte
 	if diags := current.MicrosoftEntraMembers.Set(ctx, members); diags.HasError() {
 		return diags
 	}
-	return to.Members.Set(ctx, current)
+
+	return nil
 }
 
 type microsoftEntraMemberIdentity struct {
@@ -246,11 +269,14 @@ func microsoftEntraMemberKey(member *microsoftEntraMember) (microsoftEntraMember
 	var diags diag.Diagnostics
 	objectID, objectDiags := member.ObjectID.ValueUUID()
 	tenantID, tenantDiags := member.TenantID.ValueUUID()
+
 	diags.Append(objectDiags...)
 	diags.Append(tenantDiags...)
+
 	if diags.HasError() {
 		return key, false, diags
 	}
+
 	return microsoftEntraMemberIdentity{tenantID: tenantID, objectID: objectID}, true, diags
 }
 
@@ -261,11 +287,14 @@ func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[micros
 		if diags.HasError() {
 			return nil, diags
 		}
+
 		if !known {
 			continue
 		}
+
 		knownTypes[key] = member.ObjectType
 	}
+
 	return knownTypes, nil
 }
 
@@ -602,6 +631,7 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		if diags.HasError() {
 			return diags
 		}
+
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{

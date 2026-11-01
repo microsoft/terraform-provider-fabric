@@ -30,15 +30,18 @@ func checkEntraMemberObjectType(resourceName, objectID, want string) resource.Te
 		if !ok || instance.Primary == nil {
 			return fmt.Errorf("resource %s not found in state", resourceName)
 		}
+
 		for key, value := range instance.Primary.Attributes {
 			if strings.Contains(key, "members.microsoft_entra_members.") && strings.HasSuffix(key, ".object_id") && value == objectID {
 				typeKey := strings.TrimSuffix(key, ".object_id") + ".object_type"
 				if got := instance.Primary.Attributes[typeKey]; got != want {
 					return fmt.Errorf("%s: got %q, want %q", typeKey, got, want)
 				}
+
 				return nil
 			}
 		}
+
 		return fmt.Errorf("member %s not found in %s", objectID, resourceName)
 	}
 }
@@ -306,15 +309,18 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 
 	checkRequestOmitsObjectType := func(_ *terraform.State) error {
 		id := GenerateOneLakeDataAccessRoleID(workspaceID, itemID, "deprecated-object-type")
+
 		role, ok := fakeOneLakeDataAccessRoleStore[id]
 		if !ok || role.Members == nil {
 			return errors.New("created role or its members are missing")
 		}
+
 		for _, member := range role.Members.MicrosoftEntraMembers {
 			if member.ObjectType != nil {
 				return errors.New("object_type was sent to Fabric")
 			}
 		}
+
 		return nil
 	}
 
@@ -461,6 +467,7 @@ func TestUnit_OneLakeDataAccessSecurityResource_EmptyMemberCollections(t *testin
 				members.FabricItemMembers = []fabcore.FabricItemMember{}
 			}
 		}
+
 		if len(members.MicrosoftEntraMembers) == 0 {
 			members.MicrosoftEntraMembers = nil
 			if !responseEmptyAsNull {
@@ -476,10 +483,12 @@ func TestUnit_OneLakeDataAccessSecurityResource_EmptyMemberCollections(t *testin
 			if !ok || role.Members == nil {
 				return errors.New("created role or its members are missing")
 			}
+
 			if (role.Members.FabricItemMembers == nil) != fabricNull || (role.Members.MicrosoftEntraMembers == nil) != entraNull {
 				return fmt.Errorf("unexpected request collections: fabric_item_members nil=%t, microsoft_entra_members nil=%t",
 					role.Members.FabricItemMembers == nil, role.Members.MicrosoftEntraMembers == nil)
 			}
+
 			return nil
 		}
 	}
