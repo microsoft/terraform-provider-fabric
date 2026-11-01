@@ -9,6 +9,7 @@ import (
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -165,6 +166,7 @@ func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) 
 }
 
 // reconcileMicrosoftEntraMembers preserves the configured collection shape and restores object_type values omitted by Fabric.
+// Its null/empty handling is speculative defensive code; no Entra mismatch has been observed.
 func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
 	if old != nil && !old.MicrosoftEntraMembers.IsNull() && !old.MicrosoftEntraMembers.IsUnknown() &&
 		current.MicrosoftEntraMembers.IsNull() {
@@ -253,6 +255,7 @@ func microsoftEntraMemberKey(member *microsoftEntraMember) (microsoftEntraMember
 }
 
 // indexMicrosoftEntraMemberTypes maps each known member identity to its configured object_type.
+// The plan and request builders reject duplicate configured identities before writes.
 func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[microsoftEntraMemberIdentity]types.String, diag.Diagnostics) {
 	objectTypesByIdentity := make(map[microsoftEntraMemberIdentity]types.String, len(members))
 	for _, member := range members {
@@ -269,6 +272,47 @@ func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[micros
 	}
 
 	return objectTypesByIdentity, nil
+}
+
+// validateUniqueMicrosoftEntraMemberIdentities prevents ambiguous object_type reconciliation.
+// Fabric doesn't receive object_type, so duplicate identity pairs collapse to one reconciliation key.
+func validateUniqueMicrosoftEntraMemberIdentities(ctx context.Context, members *memberModel) diag.Diagnostics {
+	if members == nil || members.MicrosoftEntraMembers.IsNull() || members.MicrosoftEntraMembers.IsUnknown() {
+		return nil
+	}
+
+	entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	seenIdentities := make(map[microsoftEntraMemberIdentity]struct{}, len(entraMembers))
+	for _, member := range entraMembers {
+		identity, known, keyDiags := microsoftEntraMemberKey(member)
+		diags.Append(keyDiags...)
+
+		if diags.HasError() {
+			return diags
+		}
+
+		if !known {
+			continue
+		}
+
+		if _, exists := seenIdentities[identity]; exists {
+			diags.AddAttributeError(
+				path.Root("members").AtName("microsoft_entra_members"),
+				"Duplicate Microsoft Entra member identity",
+				"Each member must have a unique combination of `tenant_id` and `object_id`. The deprecated `object_type` is not sent to Fabric and cannot distinguish duplicate identities.",
+			)
+
+			return diags
+		}
+
+		seenIdentities[identity] = struct{}{}
+	}
+
+	return diags
 }
 
 func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag.Diagnostics {
@@ -601,6 +645,10 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 
 	members, diags := from.Members.Get(ctx)
 	if diags.HasError() {
+		return diags
+	}
+
+	if diags := validateUniqueMicrosoftEntraMemberIdentities(ctx, members); diags.HasError() {
 		return diags
 	}
 

@@ -555,6 +555,23 @@ func oneLakeMembersConfig(workspaceID, itemID, roleName string, members map[stri
 	})
 }
 
+func TestUnit_OneLakeDataAccessSecurityResource_DuplicateMicrosoftEntraMemberIdentity(t *testing.T) {
+	workspaceID, itemID, objectID, tenantID := testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID(), testhelp.RandomUUID()
+	config := oneLakeMembersConfig(workspaceID, itemID, "duplicate-entra-member", map[string]any{
+		"microsoft_entra_members": []map[string]any{
+			{"object_id": objectID, "tenant_id": tenantID, "object_type": "User"},
+			{"object_id": strings.ToUpper(objectID), "tenant_id": strings.ToUpper(tenantID)},
+		},
+	})
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			Config:      config,
+			ExpectError: regexp.MustCompile(`Duplicate Microsoft Entra member identity`),
+		},
+	}))
+}
+
 func TestAcc_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
