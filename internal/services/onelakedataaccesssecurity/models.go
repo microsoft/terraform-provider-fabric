@@ -137,7 +137,7 @@ func (to *baseOneLakeDataAccessSecurityModel) setMembers(ctx context.Context, fr
 	return to.Members.Set(ctx, m)
 }
 
-// reconcileFabricItemMembers preserves Terraform's configured null or empty shape when Fabric returns an empty collection.
+// reconcileFabricItemMembers preserves Terraform's null/empty choice when Fabric represents no item members differently.
 func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
 	if old == nil || old.FabricItemMembers.IsUnknown() || current.FabricItemMembers.IsUnknown() {
 		return nil
@@ -147,12 +147,12 @@ func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) 
 		return nil
 	}
 
-	nonNull := current.FabricItemMembers
+	membersToCheck := current.FabricItemMembers
 	if current.FabricItemMembers.IsNull() {
-		nonNull = old.FabricItemMembers
+		membersToCheck = old.FabricItemMembers
 	}
 
-	items, diags := nonNull.Get(ctx)
+	items, diags := membersToCheck.Get(ctx)
 	if diags.HasError() {
 		return diags
 	}
@@ -174,6 +174,7 @@ func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberMod
 		}
 
 		if len(oldMembers) == 0 {
+			// Fabric may return null for an explicitly configured empty set.
 			current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
 		}
 	}
@@ -188,6 +189,7 @@ func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberMod
 	}
 
 	if old != nil && old.MicrosoftEntraMembers.IsNull() && len(members) == 0 {
+		// Fabric may return an empty set for an omitted collection.
 		current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
 
 		return nil
@@ -201,7 +203,7 @@ func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberMod
 		}
 	}
 
-	knownTypes, diags := indexMicrosoftEntraMemberTypes(oldMembers)
+	objectTypesByIdentity, diags := indexMicrosoftEntraMemberTypes(oldMembers)
 	if diags.HasError() {
 		return diags
 	}
@@ -212,7 +214,7 @@ func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberMod
 			return keyDiags
 		}
 
-		if objectType, ok := knownTypes[key]; known && ok {
+		if objectType, ok := objectTypesByIdentity[key]; known && ok {
 			member.ObjectType = objectType
 		}
 	}
@@ -250,8 +252,9 @@ func microsoftEntraMemberKey(member *microsoftEntraMember) (microsoftEntraMember
 	return microsoftEntraMemberIdentity{tenantID: tenantID, objectID: objectID}, true, diags
 }
 
+// indexMicrosoftEntraMemberTypes maps each known member identity to its configured object_type.
 func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[microsoftEntraMemberIdentity]types.String, diag.Diagnostics) {
-	knownTypes := make(map[microsoftEntraMemberIdentity]types.String, len(members))
+	objectTypesByIdentity := make(map[microsoftEntraMemberIdentity]types.String, len(members))
 	for _, member := range members {
 		key, known, diags := microsoftEntraMemberKey(member)
 		if diags.HasError() {
@@ -262,10 +265,10 @@ func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[micros
 			continue
 		}
 
-		knownTypes[key] = member.ObjectType
+		objectTypesByIdentity[key] = member.ObjectType
 	}
 
-	return knownTypes, nil
+	return objectTypesByIdentity, nil
 }
 
 func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag.Diagnostics {
