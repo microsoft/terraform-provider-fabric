@@ -107,7 +107,7 @@ func notebookTemplateCompatV1Steps(t *testing.T, workspaceID string) []resource.
 	// representative validation, execution, and parse errors.
 	failureNames := []string{
 		"get_type",
-		"must_slice_single_scalar",
+		"must_slice",
 		"dig_invalid_escape",
 		"must_regex_replace",
 		"regex_find_all_new_order",

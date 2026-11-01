@@ -46,18 +46,12 @@ func applyTemplateCompatV1(funcs template.FuncMap) {
 	funcs["append"] = templateCompatV1ListFunction(sliceRegistry.Append)
 	funcs["prepend"] = templateCompatV1ListFunction(sliceRegistry.Prepend)
 	funcs["slice"] = func(args ...any) (any, error) {
-		listLastArgs := templateCompatV1ListArgs(args)
-
-		result, err := sliceRegistry.Slice(listLastArgs...)
-		if err == nil && result == nil && len(args) == 1 {
-			list := reflect.ValueOf(args[0])
-			if (list.Kind() == reflect.Slice || list.Kind() == reflect.Array) && list.Len() == 0 {
-				// Preserve the original empty list without bypassing Sprout's validation.
-				return args[0], nil
-			}
+		if len(args) == 1 {
+			// Sprout v1.0.3 returned any single argument unchanged.
+			return args[0], nil
 		}
 
-		return result, err
+		return sliceRegistry.Slice(templateCompatV1ListArgs(args)...)
 	}
 	funcs["without"] = func(args ...any) ([]any, error) {
 		listLastArgs := templateCompatV1ListArgs(args)

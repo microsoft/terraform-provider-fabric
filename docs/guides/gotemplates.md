@@ -114,8 +114,10 @@ In particular, keep these limitations in mind:
 - **`substr`:** an end index of `0` (or a negative end equal to the string's
   byte length, which resolves to index `0`) returns an empty string in 1.x.
   The new meaning, “through the end of the string,” is not selectable until 2.0.
-- **`slice` without indices:** a non-nil empty list remains an empty list in 1.x.
-  Native Sprout returns `nil`, which encodes as `null` rather than `[]` in JSON.
+- **`slice` with one argument:** provider 1.x returns the argument unchanged,
+  even when it is a scalar or `nil`. Native Sprout validates it as a list and
+  returns `nil` for an empty list, which encodes as `null` rather than `[]` in
+  JSON.
 - **`toCamelCase` and `toPascalCase`:** keep their old conversion rules to
   preserve generated names. New conversion rules are not selectable until 2.0.
   Other case converters, including `toTitleCase`, are not overridden.
@@ -167,15 +169,10 @@ For example, `toCamelCase "firstName"` produces `firstname` in 1.x but `firstNam
 with Sprout's new rules; `toPascalCase "HTMLParser"` changes from `HTMLParser` to
 `HtmlParser`. These changes can affect content hashes. Also review empty lists
 passed to `slice` without indices: `slice (list) | toJson` changes from `[]` to
-`null` with native Sprout.
+`null` with native Sprout. Single scalar and `nil` arguments accepted in 1.x
+will also fail native validation.
 
 ### Intentional library changes in provider 1.x
-
-`slice` and its `mustSlice` alias now validate single-argument calls using
-Sprout's native behavior. A list without indices remains supported, but a scalar
-or `nil` now produces an error instead of being returned unchanged. A valid empty
-list without indices retains its original result. The legacy list-first argument
-order remains supported for calls with indices.
 
 `toSnakeCase`, `toKebabCase`, `toDotCase`, `toPathCase`, and
 `toConstantCase` use native Sprout v1.1.2 rather than preserving the old conversion

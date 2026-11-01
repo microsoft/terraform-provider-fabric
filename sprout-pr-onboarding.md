@@ -1,9 +1,5 @@
 # Sprout upgrade: PR onboarding
 
-> **Review note:** This document also describes uncommitted work, including
-> single-argument `slice` compatibility and the discussion-only `dig` and
-> separated-case implementations. Those changes are not yet in the PR.
-
 ## What this PR is trying to do
 
 The provider's Go-template renderer previously used **native Sprout v1.0.3**.

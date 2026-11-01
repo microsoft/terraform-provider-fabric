@@ -59,10 +59,8 @@ func TestUnit_TemplateCompatV1Errors(t *testing.T) {
 			require.Equal(t, summary, diags.Errors()[0].Summary())
 
 			switch name {
-			case "slice_nil_first", "slice_single_nil", "must_slice_single_nil":
+			case "slice_nil_first":
 				require.Contains(t, diags.Errors()[0].Detail(), "cannot slice nil")
-			case "slice_single_scalar", "must_slice_single_scalar":
-				require.Contains(t, diags.Errors()[0].Detail(), "last argument must be a slice but got string")
 			case "append_nil_first":
 				require.Contains(t, diags.Errors()[0].Detail(), "cannot append to nil")
 			case "prepend_nil_first":
