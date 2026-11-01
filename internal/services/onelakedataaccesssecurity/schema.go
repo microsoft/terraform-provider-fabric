@@ -388,7 +388,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 							},
 							"object_type": superschema.StringAttribute{
 								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "Deprecated. This attribute is ignored by the resource and is null in data sources when Fabric does not return it. Remove it from configurations and references; it will be removed in the next major version of the provider. Possible values: " + utils.ConvertStringSlicesToString(
+									MarkdownDescription: "Deprecated. This attribute is ignored by the resource and is always null in data sources. Remove it from configurations and references; it will be removed in the next major version of the provider. Possible values: " + utils.ConvertStringSlicesToString(
 										fabcore.PossibleObjectTypeValues(),
 										true,
 										true,

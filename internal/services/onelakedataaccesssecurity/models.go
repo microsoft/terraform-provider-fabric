@@ -137,36 +137,7 @@ func (to *baseOneLakeDataAccessSecurityModel) setMembers(ctx context.Context, fr
 	return to.Members.Set(ctx, m)
 }
 
-// reconcileMembers retains the deprecated, provider-only object type without retaining removed members.
-func (to *baseOneLakeDataAccessSecurityModel) reconcileMembers(ctx context.Context, previous supertypes.SingleNestedObjectValueOf[memberModel]) diag.Diagnostics {
-	if to.Members.IsNull() || to.Members.IsUnknown() {
-		return nil
-	}
-
-	current, diags := to.Members.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	var old *memberModel
-	if !previous.IsNull() && !previous.IsUnknown() {
-		old, diags = previous.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-	}
-
-	if diags := reconcileFabricItemMembers(ctx, old, current); diags.HasError() {
-		return diags
-	}
-
-	if diags := reconcileMicrosoftEntraMembers(ctx, old, current); diags.HasError() {
-		return diags
-	}
-
-	return to.Members.Set(ctx, current)
-}
-
+// reconcileFabricItemMembers preserves Terraform's configured null or empty shape when Fabric returns an empty collection.
 func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
 	if old == nil || old.FabricItemMembers.IsUnknown() || current.FabricItemMembers.IsUnknown() {
 		return nil
@@ -193,6 +164,7 @@ func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) 
 	return nil
 }
 
+// reconcileMicrosoftEntraMembers preserves the configured collection shape and restores object_type values omitted by Fabric.
 func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
 	if old != nil && !old.MicrosoftEntraMembers.IsNull() && !old.MicrosoftEntraMembers.IsUnknown() &&
 		current.MicrosoftEntraMembers.IsNull() {
@@ -235,8 +207,6 @@ func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberMod
 	}
 
 	for _, member := range members {
-		member.ObjectType = types.StringNull()
-
 		key, known, keyDiags := microsoftEntraMemberKey(member)
 		if keyDiags.HasError() {
 			return keyDiags
@@ -456,10 +426,11 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 	if from.MicrosoftEntraMembers != nil {
 		entraMembers := make([]*microsoftEntraMember, 0, len(from.MicrosoftEntraMembers))
 
+		// Fabric omits object_type; resource reads restore the configured value from prior state.
 		for _, item := range from.MicrosoftEntraMembers {
 			entraMembers = append(entraMembers, &microsoftEntraMember{
 				ObjectID:   customtypes.NewUUIDPointerValue(item.ObjectID),
-				ObjectType: types.StringPointerValue((*string)(item.ObjectType)),
+				ObjectType: types.StringNull(),
 				TenantID:   customtypes.NewUUIDPointerValue(item.TenantID),
 			})
 		}
@@ -520,6 +491,41 @@ type resourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+// set maps the API response, then restores resource-only member state that Fabric doesn't return.
+func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.DataAccessRoleBase) diag.Diagnostics {
+	previous := to.Members
+	if diags := to.baseOneLakeDataAccessSecurityModel.set(ctx, workspaceID, itemID, from); diags.HasError() {
+		return diags
+	}
+
+	if to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	current, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	var old *memberModel
+	if !previous.IsNull() && !previous.IsUnknown() {
+		old, diags = previous.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if diags := reconcileFabricItemMembers(ctx, old, current); diags.HasError() {
+		return diags
+	}
+
+	if diags := reconcileMicrosoftEntraMembers(ctx, old, current); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, current)
 }
 
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {

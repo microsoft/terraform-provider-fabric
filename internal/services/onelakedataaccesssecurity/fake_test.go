@@ -137,12 +137,21 @@ func fakeDeleteDataAccessRoleFunc() func(ctx context.Context, workspaceID, itemI
 }
 
 func fakeListDataAccessRolesFunc() func(ctx context.Context, workspaceID, itemID string, options *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
+	return fakeListDataAccessRolesFuncWithMemberTransform(nil)
+}
+
+func fakeListDataAccessRolesFuncWithMemberTransform(
+	transform func(*fabcore.Members),
+) func(ctx context.Context, workspaceID, itemID string, options *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
 	return func(_ context.Context, workspaceID, itemID string, _ *fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesOptions) (resp azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse], errResp azfake.ErrorResponder) {
 		resp = azfake.Responder[fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse]{}
 
 		roles := GetAllStoredOneLakeDataAccessRoles(workspaceID, itemID)
 		for i := range roles {
 			roles[i].Members = membersWithoutObjectType(roles[i].Members)
+			if transform != nil && roles[i].Members != nil {
+				transform(roles[i].Members)
+			}
 		}
 
 		resp.SetResponse(http.StatusOK, fabcore.OneLakeDataAccessSecurityClientListDataAccessRolesResponse{

@@ -40,7 +40,11 @@ func TestUnit_OneLakeDataAccessSecuritiesDataSource(t *testing.T) {
 	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity2)
 	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity3)
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFuncWithMemberTransform(func(members *fabcore.Members) {
+		for i := range members.MicrosoftEntraMembers {
+			members.MicrosoftEntraMembers[i].ObjectType = to.Ptr(fabcore.ObjectTypeUser)
+		}
+	})
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemsFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - no attributes

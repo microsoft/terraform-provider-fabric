@@ -35,7 +35,11 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 
 	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity)
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFuncWithMemberTransform(func(members *fabcore.Members) {
+		for i := range members.MicrosoftEntraMembers {
+			members.MicrosoftEntraMembers[i].ObjectType = to.Ptr(fabcore.ObjectTypeUser)
+		}
+	})
 	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{

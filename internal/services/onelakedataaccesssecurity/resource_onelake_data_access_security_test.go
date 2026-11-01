@@ -349,6 +349,13 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 			),
 		},
 		{
+			PreConfig: func() {
+				fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFuncWithMemberTransform(func(members *fabcore.Members) {
+					for i := range members.MicrosoftEntraMembers {
+						members.MicrosoftEntraMembers[i].ObjectType = to.Ptr(fabcore.ObjectTypeGroup)
+					}
+				})
+			},
 			Config: config([]map[string]any{legacy, second}),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				checkEntraMemberObjectType(testResourceItemFQN, objectID1, "ManagedIdentity"),
