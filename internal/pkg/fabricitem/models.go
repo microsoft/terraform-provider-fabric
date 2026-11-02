@@ -15,39 +15,15 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type sensitivityLabelSettingsModel struct {
-	LabelID                       customtypes.UUID `tfsdk:"label_id"`
-	SensitivityLabelApplyStrategy types.String     `tfsdk:"sensitivity_label_apply_strategy"`
-}
-
 type sensitivityLabelModel struct {
-	LabelID customtypes.UUID `tfsdk:"label_id"`
+	ID customtypes.UUID `tfsdk:"id"`
 }
 
 func (to *sensitivityLabelModel) set(from fabcore.SensitivityLabel) {
-	to.LabelID = customtypes.NewUUIDPointerValue(from.ID)
+	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 }
 
 type fabricItemModel struct {
-	WorkspaceID customtypes.UUID                        `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                        `tfsdk:"id"`
-	DisplayName types.String                            `tfsdk:"display_name"`
-	Description types.String                            `tfsdk:"description"`
-	FolderID    customtypes.UUID                        `tfsdk:"folder_id"`
-	Tags        supertypes.SetValueOf[customtypes.UUID] `tfsdk:"tags"`
-}
-
-func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
-
-	return SetTags(ctx, &to.Tags, from.Tags)
-}
-
-type dataSourceFabricItemBaseModel struct {
 	WorkspaceID      customtypes.UUID                                            `tfsdk:"workspace_id"`
 	ID               customtypes.UUID                                            `tfsdk:"id"`
 	DisplayName      types.String                                                `tfsdk:"display_name"`
@@ -57,7 +33,7 @@ type dataSourceFabricItemBaseModel struct {
 	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
 }
 
-func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
+func (to *fabricItemModel) set(ctx context.Context, from fabcore.Item) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
@@ -77,33 +53,7 @@ func (to *dataSourceFabricItemBaseModel) set(ctx context.Context, from fabcore.I
 	return SetTags(ctx, &to.Tags, from.Tags)
 }
 
-type resourceFabricItemBaseModel struct {
-	fabricItemModel
-
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
-}
-
-type fabricItemPropertiesModel[Ttfprop, Titemprop any] struct {
-	WorkspaceID customtypes.UUID                              `tfsdk:"workspace_id"`
-	ID          customtypes.UUID                              `tfsdk:"id"`
-	DisplayName types.String                                  `tfsdk:"display_name"`
-	Description types.String                                  `tfsdk:"description"`
-	FolderID    customtypes.UUID                              `tfsdk:"folder_id"`
-	Properties  supertypes.SingleNestedObjectValueOf[Ttfprop] `tfsdk:"properties"`
-	Tags        supertypes.SetValueOf[customtypes.UUID]       `tfsdk:"tags"`
-}
-
-func (to *fabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
-	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
-	to.ID = customtypes.NewUUIDPointerValue(from.ID)
-	to.DisplayName = types.StringPointerValue(from.DisplayName)
-	to.Description = types.StringPointerValue(from.Description)
-	to.FolderID = customtypes.NewUUIDPointerValue(from.FolderID)
-
-	return SetTags(ctx, &to.Tags, from.Tags)
-}
-
-type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
+type FabricItemPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
 	WorkspaceID      customtypes.UUID                                            `tfsdk:"workspace_id"`
 	ID               customtypes.UUID                                            `tfsdk:"id"`
 	DisplayName      types.String                                                `tfsdk:"display_name"`
@@ -114,7 +64,7 @@ type DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct { //
 	SensitivityLabel supertypes.SingleNestedObjectValueOf[sensitivityLabelModel] `tfsdk:"sensitivity_label"`
 }
 
-func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
+func (to *FabricItemPropertiesModel[Ttfprop, Titemprop]) set(ctx context.Context, from FabricItemProperties[Titemprop]) diag.Diagnostics {
 	to.WorkspaceID = customtypes.NewUUIDPointerValue(from.WorkspaceID)
 	to.ID = customtypes.NewUUIDPointerValue(from.ID)
 	to.DisplayName = types.StringPointerValue(from.DisplayName)
@@ -132,12 +82,6 @@ func (to *DataSourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop]) set(ctx c
 	}
 
 	return SetTags(ctx, &to.Tags, from.Tags)
-}
-
-type resourceFabricItemPropertiesBaseModel[Ttfprop, Titemprop any] struct {
-	fabricItemPropertiesModel[Ttfprop, Titemprop]
-
-	SensitivityLabelSettings supertypes.SingleNestedObjectValueOf[sensitivityLabelSettingsModel] `tfsdk:"sensitivity_label_settings"`
 }
 
 type FabricItemProperties[Titemprop any] struct { //revive:disable-line:exported

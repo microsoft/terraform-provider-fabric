@@ -305,6 +305,7 @@ FABRIC_TESTACC_WELLKNOWN_AZURE_LOCATION="<AZURE LOCATION>"
 # Optional
 FABRIC_TESTACC_WELLKNOWN_NAME_SUFFIX=""
 FABRIC_TESTACC_WELLKNOWN_NAME_BASE=""
+FABRIC_TESTACC_WELLKNOWN_SENSITIVITY_LABEL_ID="<OPTIONAL LABEL UUID AVAILABLE IN YOUR TENANT>"
 ```
 
 You can set those variables into `./wellknown.env` files as well.
@@ -314,6 +315,17 @@ Then run:
 ```shell
 task testacc:setup
 ```
+
+Setting `FABRIC_TESTACC_WELLKNOWN_SENSITIVITY_LABEL_ID` requests that label when
+creating the existing `KQLDashboard` fixture in `WorkspaceDS` using `ApplyOrFail`.
+For an already-created dashboard with a different label, setup uses the
+[Fabric Admin Bulk Set Labels API](https://learn.microsoft.com/rest/api/fabric/admin/labels/bulk-set-labels).
+That operation requires a Fabric Administrator user with permission to apply the
+label; service principals and managed identities are not supported. The script
+checks the per-item result, verifies the returned `sensitivityLabel.id`, and saves
+it in the same fixture's metadata. It never creates another dashboard or
+recreates the existing one to change its label. Sensitivity-label acceptance
+tests skip when the fixture has no recorded label.
 
 ### Unit Tests
 

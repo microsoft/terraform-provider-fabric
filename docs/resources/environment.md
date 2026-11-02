@@ -34,7 +34,7 @@ resource "fabric_environment" "example" {
 
 - `description` (String) The Environment description.
 - `folder_id` (String) The Folder ID.
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -43,17 +43,13 @@ resource "fabric_environment" "example" {
 - `id` (String) The Environment ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
-
-Required:
-
-- `label_id` (String) The sensitivity label ID.
+### Nested Schema for `sensitivity_label`
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
+- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
 
 <a id="nestedatt--timeouts"></a>
 

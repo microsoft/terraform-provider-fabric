@@ -49,7 +49,7 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Folder ID.
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -66,17 +66,13 @@ Required:
 
 - `collation_type` (String) The collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
-
-Required:
-
-- `label_id` (String) The sensitivity label ID.
+### Nested Schema for `sensitivity_label`
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
+- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
 
 <a id="nestedatt--timeouts"></a>
 

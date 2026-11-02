@@ -233,7 +233,10 @@ function Set-FabricItem {
     [object]$CreationPayload,
 
     [Parameter(Mandatory = $false)]
-    [object]$Definition
+    [object]$Definition,
+
+    [Parameter(Mandatory = $false)]
+    [object]$SensitivityLabelSettings
   )
 
   switch ($Type) {
@@ -377,8 +380,36 @@ function Set-FabricItem {
       $payload['definition'] = $Definition
     }
 
+    if ($SensitivityLabelSettings) {
+      $payload['sensitivityLabelSettings'] = $SensitivityLabelSettings
+    }
+
     $resultPost = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/$itemEndpoint" -Payload $payload)
     $result = $resultPost.Response
+  }
+
+  if ($SensitivityLabelSettings) {
+    $result = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$($result.id)").Response
+    if ($result.sensitivityLabel.id -ne $SensitivityLabelSettings.labelId) {
+      Write-Log -Message "Applying sensitivity label to existing ${Type}: $DisplayName" -Level 'WARN'
+      $labelPayload = @{
+        items   = @(@{
+            id   = $result.id
+            type = $result.type
+          })
+        labelId = $SensitivityLabelSettings.labelId
+      }
+      $labelResult = (Invoke-FabricRest -Method 'POST' -Endpoint 'admin/items/bulkSetLabels' -Payload $labelPayload).Response
+      $labelStatus = @($labelResult.itemsChangeLabelStatus | Where-Object { $_.id -eq $result.id -and $_.type -eq $result.type })
+      if ($labelStatus.Count -ne 1 -or $labelStatus[0].status -ne 'Succeeded') {
+        Write-Log -Message "Failed to apply sensitivity label to ${Type}: $DisplayName. Result: $($labelResult | ConvertTo-Json -Depth 10 -Compress)" -Level 'ERROR'
+      }
+
+      $result = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/items/$($result.id)").Response
+      if ($result.sensitivityLabel.id -ne $SensitivityLabelSettings.labelId) {
+        Write-Log -Message "Sensitivity label verification failed for ${Type}: $DisplayName. Expected $($SensitivityLabelSettings.labelId), got $($result.sensitivityLabel.id)." -Level 'ERROR'
+      }
+    }
   }
 
   Write-Log -Message "${Type} - Name: $($result.displayName) / ID: $($result.id)"
@@ -1283,6 +1314,7 @@ $envVarNames = @(
   'FABRIC_TESTACC_WELLKNOWN_GITHUB_CONNECTION_ID'
   'FABRIC_TESTACC_WELLKNOWN_AZDO_CONNECTION_ID'
   'FABRIC_TESTACC_WELLKNOWN_SQL_SERVER_CONNECTION_ID'
+  'FABRIC_TESTACC_WELLKNOWN_SENSITIVITY_LABEL_ID'
 )
 
 $envVars = $envVarNames | ForEach-Object {
@@ -1405,12 +1437,24 @@ $itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'Da
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
 
+  $sensitivityLabelSettings = $null
+  if ($itemType -eq 'KQLDashboard' -and $Env:FABRIC_TESTACC_WELLKNOWN_SENSITIVITY_LABEL_ID) {
+    $sensitivityLabelSettings = @{
+      labelId                       = [guid]::Parse($Env:FABRIC_TESTACC_WELLKNOWN_SENSITIVITY_LABEL_ID).ToString()
+      sensitivityLabelApplyStrategy = 'ApplyOrFail'
+    }
+  }
+
   $displayNameTemp = "${displayName}_$($itemNaming[$itemType])"
-  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type $itemType -SensitivityLabelSettings $sensitivityLabelSettings
   $wellKnown[$itemType] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description
+  }
+
+  if ($itemType -eq 'KQLDashboard') {
+    $wellKnown[$itemType]['sensitivityLabel'] = $item.sensitivityLabel
   }
 }
 
@@ -2314,4 +2358,3 @@ else {
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
-

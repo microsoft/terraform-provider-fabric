@@ -86,7 +86,7 @@ func getDataSourceFabricItemBaseAttributes(ctx context.Context, itemName string,
 			Computed:            true,
 			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
 			Attributes: map[string]schema.Attribute{
-				"label_id": schema.StringAttribute{
+				"id": schema.StringAttribute{
 					MarkdownDescription: "The sensitivity label ID.",
 					Computed:            true,
 					CustomType:          customtypes.UUIDType{},

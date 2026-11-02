@@ -86,7 +86,7 @@ func TestUnit_LakehousesDataSource(t *testing.T) {
 							"description":  knownvalue.StringExact(*entity.Description),
 							"folder_id":    knownvalue.StringExact(*entity.FolderID),
 							"sensitivity_label": knownvalue.ObjectExact(map[string]knownvalue.Check{
-								"label_id": knownvalue.StringExact(labelID),
+								"id": knownvalue.StringExact(labelID),
 							}),
 							"tags": knownvalue.SetExact([]knownvalue.Check{knownvalue.StringExact(tagID)}),
 						}),

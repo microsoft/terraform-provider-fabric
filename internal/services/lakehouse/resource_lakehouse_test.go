@@ -224,8 +224,8 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
 					"tags":         []string{tag1ID, tag2ID},
-					"sensitivity_label_settings": map[string]any{
-						"label_id": labelID,
+					"sensitivity_label": map[string]any{
+						"id": labelID,
 					},
 				},
 			),
@@ -239,8 +239,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.sensitivity_label_apply_strategy", "ApplyOrFail"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label.id", labelID),
 			),
 		},
 		// Remove and add a new tag and Read
@@ -253,8 +252,8 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
 					"tags":         []string{tag2ID, tag3ID},
-					"sensitivity_label_settings": map[string]any{
-						"label_id": labelID,
+					"sensitivity_label": map[string]any{
+						"id": labelID,
 					},
 				},
 			),
@@ -262,7 +261,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
 				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label.id", labelID),
 			),
 		},
 		// Update and Remove all tags and Read
@@ -274,8 +273,8 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"description":  *entityBefore.Description,
-					"sensitivity_label_settings": map[string]any{
-						"label_id": labelID,
+					"sensitivity_label": map[string]any{
+						"id": labelID,
 					},
 				},
 			),
@@ -286,7 +285,7 @@ func TestUnit_LakehouseResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.onelake_tables_path"),
 				resource.TestCheckResourceAttrSet(testResourceItemFQN, "properties.default_schema"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label_settings.label_id", labelID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "sensitivity_label.id", labelID),
 			),
 		},
 		// Delete testing automatically occurs in TestCase

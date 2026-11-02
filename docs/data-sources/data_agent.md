@@ -101,4 +101,4 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 
 Read-Only:
 
-- `label_id` (String) The sensitivity label ID.
+- `id` (String) The sensitivity label ID.

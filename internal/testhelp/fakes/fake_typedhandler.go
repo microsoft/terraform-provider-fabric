@@ -25,7 +25,6 @@ func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEnti
 	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
 	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
 	setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
-	setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
 
 	return entity
 }
@@ -159,7 +158,10 @@ func (h *typedHandler[TEntity]) Elements() []TEntity {
 		} else if h.entityTypeCanBeConvertedToFabricItem() {
 			// if it is not the right type, but it's a fabric item, convert it to the right type
 			item := asFabricItem(element)
-			ret = append(ret, h.converter.ConvertItemToEntity(item))
+			entity := h.converter.ConvertItemToEntity(item)
+			setReflectedSensitivityLabelPropertyValue(&entity, "SensitivityLabel", item.SensitivityLabel)
+			setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
+			ret = append(ret, entity)
 		}
 	}
 
@@ -229,7 +231,11 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				return h.converter.ConvertItemToEntity(item)
+				entity := h.converter.ConvertItemToEntity(item)
+				setReflectedSensitivityLabelPropertyValue(&entity, "SensitivityLabel", item.SensitivityLabel)
+				setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
+
+				return entity
 			}
 		}
 	}
@@ -316,6 +322,11 @@ func getReflectedSensitivityLabelPropertyValue(element any, propertyName string)
 	}
 
 	return nil
+}
+
+func setReflectedSensitivityLabelPropertyValue[TEntity any](entity *TEntity, propertyName string, label *fabcore.SensitivityLabel) {
+	propertyValue := reflect.ValueOf(entity).Elem().FieldByName(propertyName)
+	propertyValue.Set(reflect.ValueOf(label).Convert(propertyValue.Type()))
 }
 
 func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {

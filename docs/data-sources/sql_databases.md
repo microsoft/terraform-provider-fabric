@@ -75,4 +75,4 @@ Read-Only:
 
 Read-Only:
 
-- `label_id` (String) The sensitivity label ID.
+- `id` (String) The sensitivity label ID.

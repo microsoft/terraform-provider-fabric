@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceMirroredCatalogs(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabmirroredcatalog.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[mirroredCatalogPropertiesModel, fabmirroredcatalog.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabmirroredcatalog.Properties, to *fabricitem.FabricItemPropertiesModel[mirroredCatalogPropertiesModel, fabmirroredcatalog.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[mirroredCatalogPropertiesModel](ctx)
 
 		if from != nil {

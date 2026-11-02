@@ -26,7 +26,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 	supermapvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/mapvalidator"
 	supersetvalidator "github.com/orange-cloudavenue/terraform-plugin-framework-validators/setvalidator"
@@ -207,31 +206,24 @@ func getResourceFabricItemBaseAttributes(
 			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
-		"sensitivity_label_settings": schema.SingleNestedAttribute{
-			MarkdownDescription: "The sensitivity label settings.",
+		"sensitivity_label": schema.SingleNestedAttribute{
+			MarkdownDescription: "The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label.",
 			Optional:            true,
-			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelSettingsModel](ctx),
+			Computed:            true,
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
+			Validators: []validator.Object{
+				objectvalidator.AlsoRequires(path.MatchRoot("sensitivity_label").AtName("id")),
+			},
 			PlanModifiers: []planmodifier.Object{
-				objectplanmodifier.RequiresReplace(),
+				objectplanmodifier.UseStateForUnknown(),
+				objectplanmodifier.RequiresReplaceIfConfigured(),
 			},
 			Attributes: map[string]schema.Attribute{
-				"label_id": schema.StringAttribute{
-					MarkdownDescription: "The sensitivity label ID.",
-					Required:            true,
+				"id": schema.StringAttribute{
+					MarkdownDescription: "The sensitivity label ID. Required when sensitivity_label is configured.",
+					Optional:            true,
+					Computed:            true,
 					CustomType:          customtypes.UUIDType{},
-				},
-				"sensitivity_label_apply_strategy": schema.StringAttribute{
-					MarkdownDescription: fmt.Sprintf(
-						"The strategy for applying the sensitivity label. Possible values: %s. Default: `%s`.",
-						utils.ConvertStringSlicesToString(fabcore.PossibleSensitivityLabelApplyStrategyValues(), true, true),
-						fabcore.SensitivityLabelApplyStrategyApplyOrFail,
-					),
-					Optional: true,
-					Computed: true,
-					Default:  stringdefault.StaticString(string(fabcore.SensitivityLabelApplyStrategyApplyOrFail)),
-					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleSensitivityLabelApplyStrategyValues(), true)...),
-					},
 				},
 			},
 		},

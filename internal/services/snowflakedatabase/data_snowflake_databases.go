@@ -16,7 +16,7 @@ import (
 )
 
 func NewDataSourceSnowflakeDatabases(ctx context.Context) datasource.DataSource {
-	propertiesSetter := func(ctx context.Context, from *fabsnowflakedatabase.Properties, to *fabricitem.DataSourceFabricItemPropertiesBaseModel[snowflakeDatabasePropertiesModel, fabsnowflakedatabase.Properties]) diag.Diagnostics {
+	propertiesSetter := func(ctx context.Context, from *fabsnowflakedatabase.Properties, to *fabricitem.FabricItemPropertiesModel[snowflakeDatabasePropertiesModel, fabsnowflakedatabase.Properties]) diag.Diagnostics {
 		properties := supertypes.NewSingleNestedObjectValueOfNull[snowflakeDatabasePropertiesModel](ctx)
 
 		if from != nil {

@@ -8,7 +8,7 @@ import (
 )
 
 type dataSourceFabricItemModel struct {
-	dataSourceFabricItemBaseModel
+	fabricItemModel
 
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }

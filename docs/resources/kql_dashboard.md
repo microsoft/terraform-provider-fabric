@@ -92,7 +92,17 @@ resource "fabric_kql_dashboard" "example_parameters" {
           find  = "OldValue"
           value = "NewValue"
         }
+
       ]
+    }
+  }
+
+  # Example 6 - Item with a sensitivity label that must be applied on creation
+  resource "fabric_kql_dashboard" "example_labelled" {
+    display_name = "example-labelled"
+    workspace_id = "00000000-0000-0000-0000-000000000000"
+    sensitivity_label = {
+      id = "11111111-1111-1111-1111-111111111111"
     }
   }
 }
@@ -113,7 +123,7 @@ resource "fabric_kql_dashboard" "example_parameters" {
 - `description` (String) The KQL Dashboard description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Dashboard format. Possible values: `Default`
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -152,17 +162,13 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
-
-Required:
-
-- `label_id` (String) The sensitivity label ID.
+### Nested Schema for `sensitivity_label`
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
+- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
 
 <a id="nestedatt--timeouts"></a>
 

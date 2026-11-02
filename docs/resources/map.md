@@ -114,7 +114,7 @@ resource "fabric_map" "example_parameters" {
 - `description` (String) The Map description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Map format. Possible values: `Default`
-- `sensitivity_label_settings` (Attributes) The sensitivity label settings. (see [below for nested schema](#nestedatt--sensitivity_label_settings))
+- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -153,17 +153,13 @@ Required:
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
 
-<a id="nestedatt--sensitivity_label_settings"></a>
+<a id="nestedatt--sensitivity_label"></a>
 
-### Nested Schema for `sensitivity_label_settings`
-
-Required:
-
-- `label_id` (String) The sensitivity label ID.
+### Nested Schema for `sensitivity_label`
 
 Optional:
 
-- `sensitivity_label_apply_strategy` (String) The strategy for applying the sensitivity label. Possible values: `ApplyOrFail`, `Ignore`. Default: `ApplyOrFail`.
+- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
 
 <a id="nestedatt--timeouts"></a>
 

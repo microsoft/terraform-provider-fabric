@@ -19,7 +19,7 @@ import (
 )
 
 type resourceFabricItemDefinitionModel struct {
-	resourceFabricItemBaseModel
+	fabricItemModel
 
 	Format                  types.String                                                             `tfsdk:"format"`
 	DefinitionUpdateEnabled types.Bool                                                               `tfsdk:"definition_update_enabled"`

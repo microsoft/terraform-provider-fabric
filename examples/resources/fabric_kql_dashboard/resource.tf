@@ -74,7 +74,17 @@ resource "fabric_kql_dashboard" "example_parameters" {
           find  = "OldValue"
           value = "NewValue"
         }
+
       ]
+    }
+  }
+
+  # Example 6 - Item with a sensitivity label that must be applied on creation
+  resource "fabric_kql_dashboard" "example_labelled" {
+    display_name = "example-labelled"
+    workspace_id = "00000000-0000-0000-0000-000000000000"
+    sensitivity_label = {
+      id = "11111111-1111-1111-1111-111111111111"
     }
   }
 }
