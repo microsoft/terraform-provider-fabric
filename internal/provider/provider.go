@@ -74,6 +74,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredazuredatabrickscatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredcatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
@@ -84,6 +85,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgappaudience"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -97,6 +100,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tags"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/userdatafunction"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
@@ -489,6 +493,9 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		func() resource.Resource {
+			return mirroredazuredatabrickscatalog.NewResourceMirroredAzureDatabricksCatalog(ctx)
+		},
 		func() resource.Resource { return mirroredcatalog.NewResourceMirroredCatalog(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
@@ -500,6 +507,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
+		orgapp.NewResourceOrgApp,
+		orgappaudience.NewResourceOrgAppAudience,
 		activator.NewResourceActivator,
 		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
@@ -511,6 +520,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return snowflakedatabase.NewResourceSnowflakeDatabase(ctx) },
 		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
+		userdatafunction.NewResourceUserDataFunction,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
@@ -595,6 +605,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalog(ctx)
+		},
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalogs(ctx)
+		},
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalog(ctx) },
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalogs(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
@@ -610,6 +626,10 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebooks,
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
+		orgapp.NewDataSourceOrgApp,
+		orgapp.NewDataSourceOrgApps,
+		orgappaudience.NewDataSourceOrgAppAudience,
+		orgappaudience.NewDataSourceOrgAppAudiences,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
@@ -638,6 +658,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		tenantsetting.NewDataSourceTenantSetting,
 		tenantsetting.NewDataSourceTenantSettings,
+		userdatafunction.NewDataSourceUserDataFunction,
+		userdatafunction.NewDataSourceUserDataFunctions,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
