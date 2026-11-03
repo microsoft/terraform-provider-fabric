@@ -309,7 +309,7 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 		t.Skip("No SPN support")
 	}
 
-	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	entityCreateDisplayName := testhelp.RandomName()
 	entityUpdateDisplayName := testhelp.RandomName()
@@ -380,6 +380,7 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
@@ -403,6 +404,7 @@ func TestAcc_AnomalyDetectorDefinitionResource_CRUD(t *testing.T) {
 				),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
