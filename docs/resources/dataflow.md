@@ -85,7 +85,7 @@ resource "fabric_dataflow" "example_parameters" {
   definition = {
     "queryMetadata.json" = {
       source          = "${local.path}/queryMetadata.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

@@ -80,7 +80,7 @@ resource "fabric_org_app" "example_parameters" {
   definition = {
     "definition.json" = {
       source          = "${local.path}/definition.json"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

@@ -62,7 +62,7 @@ resource "fabric_activator" "example_parameters" {
   definition = {
     "ReflexEntities.json" = {
       source          = "${local.path}/ReflexEntities.json"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

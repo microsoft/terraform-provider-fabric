@@ -62,7 +62,7 @@ resource "fabric_kql_queryset" "example_parameters" {
   definition = {
     "RealTimeQueryset.json" = {
       source          = "${local.path}/RealTimeQueryset.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

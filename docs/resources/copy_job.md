@@ -85,7 +85,7 @@ resource "fabric_copy_job" "example_parameters" {
   definition = {
     "copyjob-content.json" = {
       source          = "${local.path}/copyjob-content.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
