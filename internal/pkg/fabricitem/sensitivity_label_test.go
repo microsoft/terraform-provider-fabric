@@ -369,7 +369,7 @@ func TestUnit_FabricItemSensitivityLabel_Import(t *testing.T) {
 
 			steps := []resource.TestStep{
 				{
-					Config:             labelConfig,
+					Config:             config,
 					ResourceName:       fqn,
 					ImportState:        true,
 					ImportStateId:      *entity.WorkspaceID + "/" + *entity.ID,
@@ -489,6 +489,10 @@ func TestUnit_FabricItemSensitivityLabel_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, server.ServerFactory, nil, []resource.TestStep{
 		{
 			Config:      fmt.Sprintf(config, "{}"),
+			ExpectError: regexp.MustCompile(`attribute "id" is\s+required`),
+		},
+		{
+			Config:      fmt.Sprintf(config, `{ id = null }`),
 			ExpectError: regexp.MustCompile(`sensitivity_label\.id`),
 		},
 		{

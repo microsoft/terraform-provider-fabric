@@ -70,7 +70,7 @@ Required:
 
 ### Nested Schema for `sensitivity_label`
 
-Optional:
+Required:
 
 - `id` (String) The sensitivity label ID.
 

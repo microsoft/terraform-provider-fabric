@@ -211,9 +211,6 @@ func getResourceFabricItemBaseAttributes(
 			Optional:            true,
 			Computed:            true,
 			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
-			Validators: []validator.Object{
-				objectvalidator.AlsoRequires(path.MatchRoot("sensitivity_label").AtName("id")),
-			},
 			PlanModifiers: []planmodifier.Object{
 				objectplanmodifier.UseStateForUnknown(),
 				objectplanmodifier.RequiresReplaceIfConfigured(),
@@ -221,8 +218,7 @@ func getResourceFabricItemBaseAttributes(
 			Attributes: map[string]schema.Attribute{
 				"id": schema.StringAttribute{
 					MarkdownDescription: "The sensitivity label ID.",
-					Optional:            true,
-					Computed:            true,
+					Required:            true,
 					CustomType:          customtypes.UUIDType{},
 				},
 			},

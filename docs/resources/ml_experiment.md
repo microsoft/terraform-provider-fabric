@@ -46,7 +46,7 @@ resource "fabric_ml_experiment" "example" {
 
 ### Nested Schema for `sensitivity_label`
 
-Optional:
+Required:
 
 - `id` (String) The sensitivity label ID.
 
