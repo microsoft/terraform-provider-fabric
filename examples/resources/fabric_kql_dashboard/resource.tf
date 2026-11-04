@@ -62,7 +62,7 @@ resource "fabric_kql_dashboard" "example_parameters" {
   definition = {
     "RealTimeDashboard.json" = {
       source          = "${local.path}/RealTimeDashboard.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

@@ -64,7 +64,7 @@ resource "fabric_{{.Type}}" "example_parameters" {
   definition = {
     "{{.DefinitionPath}}" = {
       source          = "${local.path}/{{.DefinitionPath}}.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

@@ -69,7 +69,7 @@ resource "fabric_paginated_report" "example_parameters" {
   definition = {
     "example_parameters.rdl" = {
       source          = "${local.path}/report.rdl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "TextReplace"

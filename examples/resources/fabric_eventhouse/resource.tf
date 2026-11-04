@@ -60,7 +60,7 @@ resource "fabric_eventhouse" "example_parameters" {
   definition = {
     "EventhouseProperties.json" = {
       source          = "${local.path}/EventhouseProperties.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

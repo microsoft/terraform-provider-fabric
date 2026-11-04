@@ -54,7 +54,7 @@ resource "fabric_mirrored_database" "example_parameters" {
   definition = {
     "mirroring.json" = {
       source          = "${local.path}/mirroring.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

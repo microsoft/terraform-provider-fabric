@@ -56,7 +56,7 @@ resource "fabric_apache_airflow_job" "example_parameters" {
   definition = {
     "apacheairflowjob-content.json" = {
       source          = "${local.path}/apacheairflowjob-content.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

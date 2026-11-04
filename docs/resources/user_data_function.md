@@ -104,7 +104,7 @@ resource "fabric_user_data_function" "example_parameters" {
     }
     "function_app.py" = {
       source          = "${local.path}/function_app.py"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "TextReplace"
