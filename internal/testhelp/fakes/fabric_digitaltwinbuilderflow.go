@@ -35,6 +35,7 @@ func (o *operationsDigitalTwinBuilderFlow) CreateWithParentID(parentID string, d
 	entity := NewRandomDigitalTwinBuilderFlowWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
 
 	return entity
 }
@@ -176,12 +177,13 @@ func configureDigitalTwinBuilderFlow(server *fakeServer) fabdigitaltwinbuilderfl
 
 func NewRandomDigitalTwinBuilderFlow() fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow {
 	return fabdigitaltwinbuilderflow.DigitalTwinBuilderFlow{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
+		SensitivityLabel: &fabdigitaltwinbuilderflow.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabdigitaltwinbuilderflow.ItemTypeDigitalTwinBuilderFlow),
 		Properties: &fabdigitaltwinbuilderflow.Properties{
 			DigitalTwinBuilderItemReference: &fabdigitaltwinbuilderflow.ItemReferenceByID{
 				ItemID:        new(testhelp.RandomUUID()),

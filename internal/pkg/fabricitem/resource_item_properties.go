@@ -102,6 +102,10 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabel(ctx, plan.SensitivityLabel)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	respCreate, err := CreateItem(ctx, r.client, plan.WorkspaceID.ValueString(), reqCreate.CreateItemRequest)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return

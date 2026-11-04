@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Catalog Folder ID.
 - `id` (String) The Mirrored Catalog ID.
 - `properties` (Attributes) The Mirrored Catalog properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Mirrored Catalog sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Mirrored Catalog.
 - `workspace_id` (String) The Workspace ID.
 
@@ -82,3 +83,11 @@ Read-Only:
 - `connection_string` (String) The SQL endpoint connection string.
 - `id` (String) The SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

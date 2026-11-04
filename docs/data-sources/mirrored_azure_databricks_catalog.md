@@ -81,6 +81,7 @@ output "example_definition_content_object" {
 - `description` (String) The Mirrored Azure Databricks Catalog description.
 - `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label` (Attributes) The Mirrored Azure Databricks Catalog sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -144,3 +145,11 @@ Read-Only:
 - `error_code` (String) The error code.
 - `error_details` (String) The error details.
 - `error_message` (String) The error message.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

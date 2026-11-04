@@ -131,6 +131,22 @@ The generator automatically handles file naming based on the provided item name:
 - Plural item files use the lowercase, underscore-separated version of the plural item name
 - Example: "Data Pipeline" becomes "data_pipeline" and "data_pipelines"
 
+## Shared Fabric Item Attributes
+
+All six archetypes inherit sensitivity-label and tag support from the shared
+`fabricitem` implementation. Resources accept `sensitivity_label = { id = ... }`
+and always apply the configured label using `ApplyOrFail` during creation.
+Resources and singular data sources read the actual `sensitivity_label` from
+Fabric; plural data sources expose it on each entry in `values`. Imported items
+retain their observed labels. Omitting the attribute does not remove a label,
+and changing an explicitly configured label requires replacing the item.
+
+Plural data source property setters use `FabricItemPropertiesModel`
+so that properties, sensitivity labels, and tags are represented together. The
+shared typed fake handler preserves labels and tags when converting core items
+to item-specific SDK types; custom converters only need to supply item-specific
+properties.
+
 ## Customization
 
 After generating the files, you may need to:

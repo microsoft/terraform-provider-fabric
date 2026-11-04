@@ -67,6 +67,18 @@ func (d *DataSourceFabricItemsProperties[Ttfprop, Titemprop]) Schema(ctx context
 			Computed:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
+		"sensitivity_label": schema.SingleNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s sensitivity label.", d.TypeInfo.Name),
+			Computed:            true,
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
+			Attributes: map[string]schema.Attribute{
+				"id": schema.StringAttribute{
+					MarkdownDescription: "The sensitivity label ID.",
+					Computed:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+			},
+		},
 		"tags": schema.SetAttribute{
 			MarkdownDescription: "A set of tag IDs assigned to the " + d.TypeInfo.Name + ".",
 			Computed:            true,

@@ -172,6 +172,7 @@ func TestAcc_KQLDashboardDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "sensitivity_label.id"),
 			),
 		},
 		// read by id - not found
@@ -199,6 +200,7 @@ func TestAcc_KQLDashboardDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "sensitivity_label.id"),
 				resource.TestCheckNoResourceAttr(testDataSourceItemFQN, "definition"),
 			),
 		},
@@ -241,6 +243,7 @@ func TestAcc_KQLDashboardDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "sensitivity_label.id"),
 				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.RealTimeDashboard.json.content"),
 			),
 		},

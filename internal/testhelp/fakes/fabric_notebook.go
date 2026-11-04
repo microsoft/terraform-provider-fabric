@@ -38,6 +38,8 @@ func (o *operationsNotebook) CreateWithParentID(parentID string, data fabnoteboo
 	entity := NewRandomNotebookWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -159,12 +161,13 @@ func configureNotebook(server *fakeServer) fabnotebook.Notebook {
 
 func NewRandomNotebook() fabnotebook.Notebook {
 	return fabnotebook.Notebook{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabnotebook.ItemTypeNotebook),
+		SensitivityLabel: &fabnotebook.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabnotebook.ItemTypeNotebook),
 	}
 }
 

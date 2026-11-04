@@ -38,6 +38,8 @@ func (o *operationsReport) CreateWithParentID(parentID string, data fabreport.Cr
 	result := NewRandomReportWithWorkspace(parentID)
 	result.DisplayName = data.DisplayName
 	result.Description = data.Description
+	setCreatedItemSensitivityLabel(&result, data)
+
 	result.FolderID = data.FolderID
 
 	return result
@@ -159,12 +161,13 @@ func configureReport(server *fakeServer) fabreport.Report {
 
 func NewRandomReport() fabreport.Report {
 	return fabreport.Report{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabreport.ItemTypeReport),
+		SensitivityLabel: &fabreport.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabreport.ItemTypeReport),
 	}
 }
 

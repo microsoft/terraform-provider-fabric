@@ -113,6 +113,7 @@ resource "fabric_spark_job_definition" "example_parameters" {
 - `description` (String) The Spark Job Definition description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The Spark Job Definition format. Possible values: `SparkJobDefinitionV1`, `SparkJobDefinitionV2`
+- `sensitivity_label` (Attributes) The Spark Job Definition sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -151,6 +152,14 @@ Required:
 - `find` (String) The find value of the parameter.
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 
