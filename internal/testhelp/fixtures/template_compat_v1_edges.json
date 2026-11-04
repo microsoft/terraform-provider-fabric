@@ -1,0 +1,401 @@
+[
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "camel_nul_is_not_separator",
+    "template": "v={{ toCamelCase \"a\\x00B\" | printf \"%q\" }}",
+    "want": "v=\"a\\x00b\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "camel_tab_is_not_separator",
+    "template": "v={{ toCamelCase \"a\\tB\" | printf \"%q\" }}",
+    "want": "v=\"a\\tb\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "constant_repeated_separators",
+    "template": "v={{ toConstantCase \"a__ B\" | printf \"%q\" }}",
+    "want": "v=\"A_B\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "pascal_combining_mark_consumes_capitalization",
+    "template": "v={{ toPascalCase \"́a B\" | printf \"%q\" }}",
+    "want": "v=\"́aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "pascal_emoji_consumes_capitalization",
+    "template": "v={{ toPascalCase \"😀_aB\" | printf \"%q\" }}",
+    "want": "v=\"😀aB\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "pascal_digit_before_first_letter",
+    "template": "v={{ toPascalCase \"1 a\" | printf \"%q\" }}",
+    "want": "v=\"1a\"",
+    "error": false
+  },
+  {
+    "bucket": "case_unicode_and_separators",
+    "name": "snake_unicode_case_mapping",
+    "template": "v={{ toSnakeCase \"ß İ Σ\" | printf \"%q\" }}",
+    "want": "v=\"ß_i_σ\"",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "empty_key",
+    "template": "v={{ dict \"\" \"yes\" | dig \"\" }}",
+    "want": "v=yes",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "false_leaf",
+    "template": "v={{ dict \"a\" false | dig \"a\" | toJson }}",
+    "want": "v=false",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "list_intermediate",
+    "template": "{{ dict \"a\" (list \"b\") | dig \"a.0\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "literal_dot_vs_path",
+    "template": "v={{ dict \"a.b\" \"literal\" \"a\" (dict \"b\" \"nested\") | dig \"a.b\" }}",
+    "want": "v=nested",
+    "error": false
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "nil_intermediate",
+    "template": "{{ dict \"a\" nil | dig \"a.b\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "dig_path_segments",
+    "name": "nil_leaf",
+    "template": "v={{ dict \"a\" nil | dig \"a\" | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_boundaries",
+    "name": "zero_offset_truncates_right",
+    "template": "v={{ ellipsisBoth 0 4 \"abcdef\" | printf \"%q\" }}",
+    "want": "v=\"a...\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_boundaries",
+    "name": "truncation_uses_rune_offset",
+    "template": "v={{ ellipsisBoth 2 7 \"éabcdefghi\" | printf \"%q\" }}",
+    "want": "v=\"...b...\"",
+    "error": false
+  },
+  {
+    "bucket": "ellipsis_boundaries",
+    "name": "negative_offset_errors",
+    "template": "v={{ ellipsisBoth -1 10 \"abc\" | printf \"%q\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "ellipsis_boundaries",
+    "name": "short_width_ignores_offset",
+    "template": "v={{ ellipsisBoth 99 3 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"abc\"",
+    "error": false
+  },
+  {
+    "bucket": "error_propagation",
+    "name": "decode_error_discards_partial_output",
+    "template": "prefix{{ base64Decode \"!\" }}suffix",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "empty_append",
+    "template": "v={{ append (list) false | toJson }}",
+    "want": "v=[false]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "empty_prepend",
+    "template": "v={{ prepend 0 (list) | toJson }}",
+    "want": "v=[0]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "extra_append",
+    "template": "{{ mustAppend (list) 1 2 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "nil_append",
+    "template": "{{ append nil \"a\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "remove_duplicates",
+    "template": "v={{ without (list 1 1 2 1) 1 | toJson }}",
+    "want": "v=[2]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_at_end",
+    "template": "v={{ slice 2 (list 1 2) | toJson }}",
+    "want": "v=[]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_empty",
+    "template": "v={{ slice (list) 0 0 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_negative",
+    "template": "{{ slice (list 1 2) -1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_reversed",
+    "template": "{{ slice (list 1 2) 2 1 }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "slice_string_index",
+    "template": "v={{ slice (list \"a\" \"b\") \"1\" | toJson }}",
+    "want": "v=[\"b\"]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "string_and_integer",
+    "template": "v={{ without (list 1 \"1\" false nil) \"1\" | toJson }}",
+    "want": "v=[1,false,null]",
+    "error": false
+  },
+  {
+    "bucket": "lists_and_boundaries",
+    "name": "without_nested_pipeline",
+    "template": "v={{ list (list \"a\") \"x\" | without (list \"a\") \"x\" | toJson }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "duplicate_selection",
+    "template": "v={{ pick (dict \"a\" 1) \"a\" \"a\" | toJson }}",
+    "want": "v={\"a\":1}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "empty_key",
+    "template": "{{ $d := dict \"\" 0 }}v={{ get $d \"\" }};exists={{ hasKey $d \"\" }}",
+    "want": "v=0;exists=true",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "empty_selection",
+    "template": "v={{ pick \"missing\" (dict \"a\" 1) | toJson }}",
+    "want": "v={}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "extra_argument",
+    "template": "{{ get \"a\" (dict) \"extra\" }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "map_value_pipeline",
+    "template": "{{ $d := dict }}{{ $_ := $d | set \"a\" (dict \"b\" 0) }}v={{ $d | toJson }}",
+    "want": "v={\"a\":{\"b\":0}}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "missing_unset",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $_ := unset $d \"missing\" }}v={{ $d | toJson }}",
+    "want": "v={\"a\":1}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "nil_target",
+    "template": "{{ get \"a\" nil }}",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "nil_value",
+    "template": "{{ $d := dict \"a\" nil }}v={{ get $d \"a\" | toJson }};exists={{ hasKey $d \"a\" }}",
+    "want": "v=null;exists=true",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "omit_no_mutation",
+    "template": "{{ $d := dict \"a\" 1 \"b\" 2 }}{{ $p := omit $d \"b\" }}{{ $_ := unset $p \"a\" }}v={{ $d | toJson }}",
+    "want": "v={\"a\":1,\"b\":2}",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "pick_no_mutation",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $p := pick $d \"a\" }}{{ $_ := set $p \"a\" 2 }}v={{ get $d \"a\" }}",
+    "want": "v=1",
+    "error": false
+  },
+  {
+    "bucket": "maps_and_mutation",
+    "name": "shared_mutation",
+    "template": "{{ $d := dict \"a\" 1 }}{{ $alias := $d }}{{ $_ := set $alias \"a\" 2 }}v={{ get $d \"a\" }}",
+    "want": "v=2",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "empty_pattern",
+    "template": "v={{ regexFindAll \"\" \"ab\" -1 | toJson }}",
+    "want": "v=[\"\",\"\",\"\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "literal_dollar",
+    "template": "v={{ regexReplaceAllLiteral \"(a)\" \"aba\" \"${1}$$\" }}",
+    "want": "v=${1}$$b${1}$$",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "missing_capture",
+    "template": "v={{ regexReplaceAll \"(a)\" \"aba\" \"${2}\" }}",
+    "want": "v=b",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "named_replacement",
+    "template": "v={{ regexReplaceAll \"(?P<word>[a-z]+)\" \"ab12cd\" \"${word}X\" }}",
+    "want": "v=abX12cdX",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "no_match",
+    "template": "v={{ regexFindAll \"x\" \"abc\" -1 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "partial_output_error",
+    "template": "prefix{{ regexReplaceAll \"[\" \"abc\" \"x\" }}suffix",
+    "want": "",
+    "error": true
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "split_one",
+    "template": "v={{ regexSplit \",\" \"a,b\" 1 | toJson }}",
+    "want": "v=[\"a,b\"]",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "split_zero",
+    "template": "v={{ regexSplit \",\" \"a,b\" 0 | toJson }}",
+    "want": "v=null",
+    "error": false
+  },
+  {
+    "bucket": "regex_empty_limits_and_captures",
+    "name": "unicode",
+    "template": "v={{ regexFindAll \"\\\\p{L}+\" \"\\u00e9 12 \\u03b1\" -1 | toJson }}",
+    "want": "v=[\"é\",\"α\"]",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "empty_input",
+    "template": "v={{ substr 0 0 \"\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "clamp_both_bounds",
+    "template": "v={{ substr -99 99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"abc\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "start_past_end",
+    "template": "v={{ substr 99 99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "end_before_start_of_input",
+    "template": "v={{ substr 0 -99 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "reversed_range",
+    "template": "v={{ substr 2 1 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "negative_indices_relative_to_end",
+    "template": "v={{ substr -2 -1 \"abc\" | printf \"%q\" }}",
+    "want": "v=\"b\"",
+    "error": false
+  },
+  {
+    "bucket": "substring_byte_boundaries",
+    "name": "indices_are_bytes_not_runes",
+    "template": "v={{ substr 1 2 \"éa\" | printf \"%q\" }}",
+    "want": "v=\"\\xa9\"",
+    "error": false
+  }
+]

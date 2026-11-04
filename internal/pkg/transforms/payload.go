@@ -19,7 +19,7 @@ import (
 	sproutmaps "github.com/go-sprout/sprout/registry/maps"
 	sproutnumeric "github.com/go-sprout/sprout/registry/numeric"
 	sproutrandom "github.com/go-sprout/sprout/registry/random"
-	sproutregexp "github.com/go-sprout/sprout/registry/regexp"
+	sproutregex "github.com/go-sprout/sprout/registry/regex"
 	sproutsemver "github.com/go-sprout/sprout/registry/semver"
 	sproutslices "github.com/go-sprout/sprout/registry/slices"
 	sproutstd "github.com/go-sprout/sprout/registry/std"
@@ -87,7 +87,7 @@ func getTmplFuncs() (template.FuncMap, error) {
 		sproutmaps.NewRegistry(),
 		sproutnumeric.NewRegistry(),
 		sproutrandom.NewRegistry(),
-		sproutregexp.NewRegistry(),
+		sproutregex.NewRegistry(),
 		sproutsemver.NewRegistry(),
 		sproutslices.NewRegistry(),
 		sproutstd.NewRegistry(),
@@ -105,7 +105,10 @@ func getTmplFuncs() (template.FuncMap, error) {
 		return nil, err
 	}
 
-	return handler.Build(), nil
+	funcs := handler.Build()
+	applyTemplateCompatV1(funcs)
+
+	return funcs, nil
 }
 
 // SourceFileToPayload transforms a source file into a base64 encoded payload and calculates its SHA256 hash.

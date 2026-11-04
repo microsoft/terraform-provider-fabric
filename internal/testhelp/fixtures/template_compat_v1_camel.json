@@ -1,0 +1,62 @@
+[
+  {
+    "name": "case_conversion/toCamelCase/empty",
+    "template": "{{ toCamelCase \"\" }}",
+    "want": ""
+  },
+  {
+    "name": "case_conversion/toCamelCase/existing_camel_boundary",
+    "template": "{{ toCamelCase \"firstName\" }}",
+    "want": "firstname"
+  },
+  {
+    "name": "case_conversion/toCamelCase/mixed_capitalization",
+    "template": "{{ toCamelCase \"hELLO world\" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "case_conversion/toCamelCase/leading_digit_and_acronym",
+    "template": "{{ toCamelCase \"2FOo\" }}",
+    "want": "2foo"
+  },
+  {
+    "name": "case_conversion/toCamelCase/terminal_acronym_lookahead",
+    "template": "{{ toCamelCase \"fooBAR\" }}",
+    "want": "foobar"
+  },
+  {
+    "name": "case_conversion/toCamelCase/leading_repeated_separators",
+    "template": "{{ toCamelCase \"__hello--world \" }}",
+    "want": "helloWorld"
+  },
+  {
+    "name": "case_conversion/toCamelCase/unicode_letters",
+    "template": "{{ toCamelCase \"école Déjà\" }}",
+    "want": "écoleDéjà"
+  },
+  {
+    "name": "case_conversion/toCamelCase/unicode_byte_lookahead",
+    "template": "{{ toCamelCase \"αΒγ\" }}",
+    "want": "αβγ"
+  },
+  {
+    "name": "case_conversion/toCamelCase/punctuation_is_not_separator",
+    "template": "{{ toCamelCase \"a.b/c\" }}",
+    "want": "a.b/c"
+  },
+  {
+    "name": "case_conversion/toCamelCase/separators_only",
+    "template": "{{ toCamelCase \"---\" }}",
+    "want": ""
+  },
+  {
+    "name": "case_conversion/toCamelCase/digit_only",
+    "template": "{{ toCamelCase \"0\" }}",
+    "want": "0"
+  },
+  {
+    "name": "case_conversion/toCamelCase/digit_after_letters",
+    "template": "{{ toCamelCase \"HELLO123_WORLD\" }}",
+    "want": "hello123World"
+  }
+]
