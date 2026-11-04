@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_plan` resource
+time: 2026-11-04T17:38:13.2694852+02:00
+custom:
+    Issue: "1141"
