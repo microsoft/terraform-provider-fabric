@@ -309,12 +309,12 @@ func TestUnit_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
-	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
-	workspaceID := workspace["id"].(string)
-
 	if testhelp.ShouldSkipTest(t) {
 		t.Skip("Digital Twin Builder parent does not support SPN authentication")
 	}
+
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
 
 	digitalTwinBuilderResourceHCL := at.CompileConfig(
 		at.ResourceHeader(testhelp.TypeName("fabric", "digital_twin_builder"), "test"),
@@ -398,6 +398,10 @@ func TestAcc_DigitalTwinBuilderFlowResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DigitalTwinBuilderFlowCreationPayloadResource_CRUD(t *testing.T) {
+	if testhelp.ShouldSkipTest(t) {
+		t.Skip("Digital Twin Builder parent does not support SPN authentication")
+	}
+
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
