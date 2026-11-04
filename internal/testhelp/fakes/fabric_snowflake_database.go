@@ -51,6 +51,7 @@ func (o *operationsSnowflakeDatabase) CreateWithParentID(parentID string, data f
 	entity := NewRandomSnowflakeDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
 
 	return entity
 }
@@ -173,12 +174,13 @@ func configureSnowflakeDatabase(server *fakeServer) fabsnowflakedatabase.Snowfla
 
 func NewRandomSnowflakeDatabase() fabsnowflakedatabase.SnowflakeDatabase {
 	return fabsnowflakedatabase.SnowflakeDatabase{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabsnowflakedatabase.ItemTypeSnowflakeDatabase),
+		SensitivityLabel: &fabsnowflakedatabase.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabsnowflakedatabase.ItemTypeSnowflakeDatabase),
 		Properties: &fabsnowflakedatabase.Properties{
 			ConnectionID:          new(testhelp.RandomUUID()),
 			DefaultSchema:         new("PUBLIC"),

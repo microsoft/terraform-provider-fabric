@@ -188,10 +188,6 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "CREATE", map[string]any{

@@ -38,6 +38,8 @@ func (o *operationsSemanticModel) CreateWithParentID(parentID string, data fabse
 	entity := NewRandomSemanticModelWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -159,12 +161,13 @@ func configureSemanticModel(server *fakeServer) fabsemanticmodel.SemanticModel {
 
 func NewRandomSemanticModel() fabsemanticmodel.SemanticModel {
 	return fabsemanticmodel.SemanticModel{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabsemanticmodel.ItemTypeSemanticModel),
+		SensitivityLabel: &fabsemanticmodel.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabsemanticmodel.ItemTypeSemanticModel),
 	}
 }
 

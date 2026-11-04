@@ -70,7 +70,7 @@ resource "fabric_mirrored_catalog" "example_definition_update" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Catalog description.
 - `folder_id` (String) The Folder ID.
-- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `sensitivity_label` (Attributes) The Mirrored Catalog sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -116,7 +116,7 @@ Required:
 
 Optional:
 
-- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -329,6 +329,17 @@ func setReflectedSensitivityLabelPropertyValue[TEntity any](entity *TEntity, pro
 	propertyValue.Set(reflect.ValueOf(label).Convert(propertyValue.Type()))
 }
 
+func setCreatedItemSensitivityLabel[TEntity, TRequest any](entity *TEntity, request TRequest) {
+	// Some typed SDK create requests omit this field even though the Core API supports it.
+	settings := reflect.ValueOf(request).FieldByName("SensitivityLabelSettings")
+	if !settings.IsValid() || settings.IsNil() {
+		return
+	}
+
+	labelID := getReflectedStringPropertyValue(settings.Elem().Interface(), "LabelID")
+	setReflectedSensitivityLabelPropertyValue(entity, "SensitivityLabel", &fabcore.SensitivityLabel{ID: labelID})
+}
+
 func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {
 	reflectedValue := reflect.ValueOf(element)
 	propertyValue := reflectedValue.FieldByName(propertyName)

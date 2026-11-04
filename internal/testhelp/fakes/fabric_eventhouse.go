@@ -52,6 +52,8 @@ func (o *operationsEventhouse) CreateWithParentID(parentID string, data fabevent
 	entity := NewRandomEventhouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -175,12 +177,13 @@ func configureEventhouse(server *fakeServer) fabeventhouse.Eventhouse {
 
 func NewRandomEventhouse() fabeventhouse.Eventhouse {
 	return fabeventhouse.Eventhouse{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabeventhouse.ItemTypeEventhouse),
+		SensitivityLabel: &fabeventhouse.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabeventhouse.ItemTypeEventhouse),
 		Properties: &fabeventhouse.Properties{
 			IngestionServiceURI:     new(testhelp.RandomURI()),
 			QueryServiceURI:         new(testhelp.RandomURI()),

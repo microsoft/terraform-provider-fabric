@@ -103,6 +103,7 @@ func TestUnit_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "sensitivity_label.id", entity.SensitivityLabel.ID),
 			),
 		},
 		// read by id - not found
@@ -132,6 +133,7 @@ func TestUnit_{{.TypeInfo}}DataSource(t *testing.T) {
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "display_name", entity.DisplayName),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "description", entity.Description),
 				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "folder_id", entity.FolderID),
+				resource.TestCheckResourceAttrPtr(testDataSourceItemFQN, "sensitivity_label.id", entity.SensitivityLabel.ID),
 			),
 		},
 		// read by name - not found

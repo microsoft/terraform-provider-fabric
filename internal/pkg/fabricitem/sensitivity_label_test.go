@@ -23,11 +23,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
+	fablakehouse "github.com/microsoft/fabric-sdk-go/fabric/lakehouse"
 	"github.com/stretchr/testify/require"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
 )
@@ -52,6 +55,129 @@ func TestUnit_FabricItemSensitivityLabelTemplates(t *testing.T) {
 
 			_, err = parser.ParseFile(token.NewFileSet(), path, output.Bytes(), parser.AllErrors)
 			require.NoError(t, err)
+		})
+	}
+}
+
+func TestUnit_FabricItemSensitivityLabel_GeneratedFixtures(t *testing.T) {
+	for _, archetype := range []string{"basic", "definition", "properties", "definition-properties", "config-properties", "config-definition-properties"} {
+		t.Run(archetype, func(t *testing.T) {
+			config := map[string]any{
+				"Package":        "lakehouse",
+				"ModelName":      "lakehouse",
+				"TypeInfo":       "Lakehouse",
+				"TypesInfo":      "Lakehouses",
+				"HasProperties":  archetype != "basic" && archetype != "definition",
+				"HasDefinition":  archetype == "definition" || archetype == "definition-properties" || archetype == "config-definition-properties",
+				"DefinitionPath": "definition.json",
+			}
+			for _, name := range []string{"data_item_test.go.tmpl", "data_items_test.go.tmpl"} {
+				path := filepath.Join("../../../tools/itemgen/templates", archetype, name)
+				tmpl, err := template.ParseFiles(path)
+				require.NoError(t, err)
+
+				var output bytes.Buffer
+				require.NoError(t, tmpl.Execute(&output, config))
+				require.Contains(t, output.String(), "entity.SensitivityLabel.ID")
+
+				_, err = parser.ParseFile(token.NewFileSet(), path, output.Bytes(), parser.AllErrors)
+				require.NoError(t, err)
+			}
+
+			path := "../../../tools/itemgen/templates/Test/fabric_item.go.tmpl"
+			tmpl, err := template.ParseFiles(path)
+			require.NoError(t, err)
+
+			var output bytes.Buffer
+			require.NoError(t, tmpl.Execute(&output, config))
+			require.Contains(t, output.String(), "setCreatedItemSensitivityLabel(&entity, data)")
+			require.Contains(t, output.String(), "SensitivityLabel:")
+
+			_, err = parser.ParseFile(token.NewFileSet(), path, output.Bytes(), parser.AllErrors)
+			require.NoError(t, err)
+		})
+	}
+}
+
+func TestUnit_FabricItemSensitivityLabel_SDKTypes(t *testing.T) {
+	labelID := testhelp.RandomUUID()
+	for name, input := range map[string]any{
+		"core": fabcore.Item{
+			SensitivityLabel: &fabcore.SensitivityLabel{ID: &labelID},
+		},
+		"typed": fablakehouse.Lakehouse{
+			SensitivityLabel: &fablakehouse.SensitivityLabel{ID: &labelID},
+		},
+		"typed_pointer": &fablakehouse.Lakehouse{
+			SensitivityLabel: &fablakehouse.SensitivityLabel{ID: &labelID},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var item fabricitem.FabricItemProperties[struct{}]
+			item.Set(input)
+			require.Equal(t, &fabcore.SensitivityLabel{ID: &labelID}, item.SensitivityLabel)
+		})
+	}
+}
+
+func TestUnit_FabricItemSensitivityLabel_TypedFixtures(t *testing.T) {
+	fixtures := map[string]any{
+		"data_pipeline":                     fakes.NewRandomDataPipeline(),
+		"digital_twin_builder_flow":         fakes.NewRandomDigitalTwinBuilderFlow(),
+		"environment":                       fakes.NewRandomEnvironment(),
+		"eventhouse":                        fakes.NewRandomEventhouse(),
+		"kql_database":                      fakes.NewRandomKQLDatabase(),
+		"lakehouse":                         fakes.NewRandomLakehouse(),
+		"mirrored_azure_databricks_catalog": fakes.NewRandomMirroredAzureDatabricksCatalog(),
+		"mirrored_catalog":                  fakes.NewRandomMirroredCatalog(),
+		"mirrored_database":                 fakes.NewRandomMirroredDatabase(),
+		"notebook":                          fakes.NewRandomNotebook(),
+		"operations_agent":                  fakes.NewRandomOperationsAgent(),
+		"report":                            fakes.NewRandomReport(),
+		"semantic_model":                    fakes.NewRandomSemanticModel(),
+		"snowflake_database":                fakes.NewRandomSnowflakeDatabase(),
+		"spark_job_definition":              fakes.NewRandomSparkJobDefinition(),
+		"sql_database":                      fakes.NewRandomSQLDatabase(),
+		"variable_library":                  fakes.NewRandomVariableLibrary(),
+		"warehouse":                         fakes.NewRandomWarehouse(),
+		"warehouse_snapshot":                fakes.NewRandomWarehouseSnapshot(),
+	}
+	for name, input := range fixtures {
+		t.Run(name, func(t *testing.T) {
+			var item fabricitem.FabricItemProperties[struct{}]
+			item.Set(input)
+			require.NotNil(t, item.SensitivityLabel)
+			require.NotNil(t, item.SensitivityLabel.ID)
+			require.NotEmpty(t, *item.SensitivityLabel.ID)
+		})
+	}
+}
+
+func TestUnit_FabricItemSensitivityLabel_TypedCreate(t *testing.T) {
+	for _, configured := range []bool{false, true} {
+		t.Run(fmt.Sprintf("configured=%t", configured), func(t *testing.T) {
+			server := fakes.NewFakeServer()
+			options := &fabric.ClientOptions{}
+			options.Transport = fabfake.NewServerFactoryTransport(server.ServerFactory)
+			client, err := fabric.NewClient(&azfake.TokenCredential{}, nil, options)
+			require.NoError(t, err)
+
+			typedClient := fablakehouse.NewClientFactoryWithClient(*client).NewItemsClient()
+			labelID := testhelp.RandomUUID()
+
+			request := fablakehouse.CreateLakehouseRequest{DisplayName: new(testhelp.RandomName())}
+			if configured {
+				request.SensitivityLabelSettings = &fablakehouse.SensitivityLabelSettings{LabelID: &labelID}
+			}
+
+			response, err := typedClient.CreateLakehouse(t.Context(), testhelp.RandomUUID(), request, nil)
+			require.NoError(t, err)
+			require.NotNil(t, response.SensitivityLabel)
+			require.NotNil(t, response.SensitivityLabel.ID)
+
+			if configured {
+				require.Equal(t, labelID, *response.SensitivityLabel.ID)
+			}
 		})
 	}
 }

@@ -91,6 +91,8 @@ func TestUnit_KQLDashboardsDataSource(t *testing.T) {
 func TestAcc_KQLDashboardsDataSource(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceDS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
+	entity := testhelp.WellKnown()["KQLDashboard"].(map[string]any)
+	entityID := entity["id"].(string)
 
 	resource.ParallelTest(t, testhelp.NewTestAccCase(t, nil, nil, []resource.TestStep{
 		// read
@@ -105,6 +107,20 @@ func TestAcc_KQLDashboardsDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemsFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttrSet(testDataSourceItemsFQN, "values.0.id"),
 			),
+			ConfigStateChecks: []statecheck.StateCheck{
+				statecheck.ExpectKnownValue(
+					testDataSourceItemsFQN,
+					tfjsonpath.New("values"),
+					knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectPartial(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact(entityID),
+							"sensitivity_label": knownvalue.ObjectExact(map[string]knownvalue.Check{
+								"id": knownvalue.NotNull(),
+							}),
+						}),
+					}),
+				),
+			},
 		},
 	},
 	))

@@ -92,18 +92,20 @@ resource "fabric_kql_dashboard" "example_parameters" {
           find  = "OldValue"
           value = "NewValue"
         }
-
       ]
     }
   }
+}
 
-  # Example 6 - Item with a sensitivity label that must be applied on creation
-  resource "fabric_kql_dashboard" "example_labelled" {
-    display_name = "example-labelled"
-    workspace_id = "00000000-0000-0000-0000-000000000000"
-    sensitivity_label = {
-      id = "11111111-1111-1111-1111-111111111111"
-    }
+# Example 6 - Item with a sensitivity label
+# The ID is required when sensitivity_label is configured. On creation, the label
+# must be applied or creation fails. Changing the configured ID recreates the item.
+# Omitting sensitivity_label preserves the label discovered by read or import.
+resource "fabric_kql_dashboard" "example_labelled" {
+  display_name = "example-labelled"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  sensitivity_label = {
+    id = "11111111-1111-1111-1111-111111111111"
   }
 }
 ```
@@ -123,7 +125,7 @@ resource "fabric_kql_dashboard" "example_parameters" {
 - `description` (String) The KQL Dashboard description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Dashboard format. Possible values: `Default`
-- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `sensitivity_label` (Attributes) The KQL Dashboard sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -168,7 +170,7 @@ Required:
 
 Optional:
 
-- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

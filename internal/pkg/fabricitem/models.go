@@ -128,6 +128,7 @@ func getFieldStructValue[Titemprop any](v reflect.Value, fieldName string) *Tite
 	}
 
 	if field.IsValid() && field.CanInterface() {
+		// SDK item packages declare distinct but structurally compatible label types.
 		targetType := reflect.TypeFor[Titemprop]()
 		if field.Type().ConvertibleTo(targetType) {
 			if value, ok := reflect.TypeAssert[Titemprop](field.Convert(targetType)); ok {

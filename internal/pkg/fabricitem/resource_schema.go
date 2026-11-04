@@ -207,7 +207,7 @@ func getResourceFabricItemBaseAttributes(
 			CustomType:          customtypes.UUIDType{},
 		},
 		"sensitivity_label": schema.SingleNestedAttribute{
-			MarkdownDescription: "The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label.",
+			MarkdownDescription: fmt.Sprintf("The %s sensitivity label.", name),
 			Optional:            true,
 			Computed:            true,
 			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
@@ -220,7 +220,7 @@ func getResourceFabricItemBaseAttributes(
 			},
 			Attributes: map[string]schema.Attribute{
 				"id": schema.StringAttribute{
-					MarkdownDescription: "The sensitivity label ID. Required when sensitivity_label is configured.",
+					MarkdownDescription: "The sensitivity label ID.",
 					Optional:            true,
 					Computed:            true,
 					CustomType:          customtypes.UUIDType{},

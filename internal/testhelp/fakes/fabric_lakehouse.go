@@ -52,6 +52,8 @@ func (o *operationsLakehouse) CreateWithParentID(parentID string, data fablakeho
 	entity := NewRandomLakehouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -172,12 +174,13 @@ func configureLakehouse(server *fakeServer) fablakehouse.Lakehouse {
 
 func NewRandomLakehouse() fablakehouse.Lakehouse {
 	return fablakehouse.Lakehouse{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fablakehouse.ItemTypeLakehouse),
-		FolderID:    new(testhelp.RandomUUID()),
+		SensitivityLabel: &fablakehouse.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fablakehouse.ItemTypeLakehouse),
+		FolderID:         new(testhelp.RandomUUID()),
 		Properties: &fablakehouse.Properties{
 			OneLakeFilesPath:  new(testhelp.RandomName()),
 			OneLakeTablesPath: new(testhelp.RandomName()),

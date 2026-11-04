@@ -175,7 +175,7 @@ Any changes to this configuration will result in recreation of the KQL Database.
 - `description` (String) The KQL Database description.
 - `folder_id` (String) The Folder ID.
 - `format` (String) The KQL Database format. Possible values: `Default`
-- `sensitivity_label` (Attributes) The sensitivity label applied to the item. On creation, the configured label must be applied or creation fails. Changing a configured label recreates the item. Omitting this attribute preserves the current label. (see [below for nested schema](#nestedatt--sensitivity_label))
+- `sensitivity_label` (Attributes) The KQL Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -243,7 +243,7 @@ Required:
 
 Optional:
 
-- `id` (String) The sensitivity label ID. Required when sensitivity_label is configured.
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

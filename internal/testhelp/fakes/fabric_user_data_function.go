@@ -38,6 +38,7 @@ func (o *operationsUserDataFunction) CreateWithParentID(parentID string, data fa
 	entity := NewRandomUserDataFunctionWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
 
 	return entity
 }
@@ -158,12 +159,13 @@ func configureUserDataFunction(server *fakeServer) fabuserdatafunction.UserDataF
 
 func NewRandomUserDataFunction() fabuserdatafunction.UserDataFunction {
 	return fabuserdatafunction.UserDataFunction{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabuserdatafunction.ItemTypeUserDataFunction),
+		SensitivityLabel: &fabuserdatafunction.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabuserdatafunction.ItemTypeUserDataFunction),
 	}
 }
 
