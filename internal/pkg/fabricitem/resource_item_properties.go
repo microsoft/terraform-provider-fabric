@@ -122,7 +122,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Create(ctx context.Co
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -156,7 +156,12 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Read(ctx context.Cont
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state)
+	result := r.get(ctx, &state)
+	if preserveItemStateOnInactiveCapacity(req, resp, state.ID.ValueString(), result) {
+		return
+	}
+
+	diags = result.Diagnostics
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -231,7 +236,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) Update(ctx context.Co
 	}
 
 	// r.get() updates the plan with current server state
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -321,7 +326,7 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 		Timeouts:    timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -339,17 +344,17 @@ func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) ImportState(
 func (r *ResourceFabricItemProperties[Ttfprop, Titemprop]) get(
 	ctx context.Context,
 	model *ResourceFabricItemPropertiesModel[Ttfprop, Titemprop],
-) diag.Diagnostics {
+) itemReadResult {
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := r.ItemGetter(ctx, *r.pConfigData.FabricClient, *model, &fabricItem)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		return diags
+	if result := getItemReadResult(ctx, err); result.Diagnostics.HasError() {
+		return result
 	}
 
 	if diags := model.set(ctx, fabricItem); diags.HasError() {
-		return diags
+		return itemReadResult{Diagnostics: diags}
 	}
 
-	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
+	return itemReadResult{Diagnostics: r.PropertiesSetter(ctx, fabricItem.Properties, model)}
 }
