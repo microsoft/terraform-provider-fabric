@@ -63,7 +63,7 @@ resource "fabric_data_pipeline" "example_parameters" {
   definition = {
     "pipeline-content.json" = {
       source          = "${local.path}/pipeline-content.json"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

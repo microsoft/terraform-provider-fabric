@@ -74,7 +74,7 @@ resource "fabric_mirrored_azure_databricks_catalog" "example_parameters" {
   definition = {
     "definition.json" = {
       source          = "${local.path}/definition.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
