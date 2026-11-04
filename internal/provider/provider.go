@@ -86,6 +86,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgappaudience"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
@@ -99,6 +100,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tags"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/userdatafunction"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
@@ -506,6 +508,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
 		orgapp.NewResourceOrgApp,
+		orgappaudience.NewResourceOrgAppAudience,
 		activator.NewResourceActivator,
 		paginatedreport.NewResourcePaginatedReport,
 		report.NewResourceReport,
@@ -517,6 +520,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return snowflakedatabase.NewResourceSnowflakeDatabase(ctx) },
 		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
+		userdatafunction.NewResourceUserDataFunction,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
@@ -624,6 +628,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		operationsagent.NewDataSourceOperationsAgents,
 		orgapp.NewDataSourceOrgApp,
 		orgapp.NewDataSourceOrgApps,
+		orgappaudience.NewDataSourceOrgAppAudience,
+		orgappaudience.NewDataSourceOrgAppAudiences,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
@@ -652,6 +658,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		tenantsetting.NewDataSourceTenantSetting,
 		tenantsetting.NewDataSourceTenantSettings,
+		userdatafunction.NewDataSourceUserDataFunction,
+		userdatafunction.NewDataSourceUserDataFunctions,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
