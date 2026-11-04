@@ -100,12 +100,18 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		return
 	}
 
+	knownMembers := plan.Members
+
 	_, err := r.client.CreateOrUpdateSingleDataAccessRole(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), reqCreate.DataAccessRoleBase, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(plan.reconcileMicrosoftEntraMemberObjectTypes(ctx, knownMembers)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -135,6 +141,8 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	knownMembers := state.Members
+
 	diags = r.get(ctx, &state.baseOneLakeDataAccessSecurityModel)
 	if utils.IsErrNotFound(state.RoleName.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
@@ -144,6 +152,10 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 	}
 
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(state.reconcileMicrosoftEntraMemberObjectTypes(ctx, knownMembers)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -179,6 +191,8 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 		return
 	}
 
+	knownMembers := plan.Members
+
 	_, err := r.client.CreateOrUpdateSingleDataAccessRole(
 		ctx,
 		plan.WorkspaceID.ValueString(),
@@ -193,6 +207,10 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 	}
 
 	if resp.Diagnostics.Append(r.get(ctx, &plan.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(plan.reconcileMicrosoftEntraMemberObjectTypes(ctx, knownMembers)...); resp.Diagnostics.HasError() {
 		return
 	}
 
