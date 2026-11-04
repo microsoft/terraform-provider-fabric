@@ -4,16 +4,22 @@
 package workspace
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -227,6 +233,29 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 					},
 				},
 			},
+			"tags": superschema.SuperSetAttribute{
+				Common: &schemaR.SetAttribute{
+					MarkdownDescription: "The set of tag IDs applied to the " + ItemTypeInfo.Name + ".",
+					CustomType: supertypes.SetTypeOf[customtypes.UUID]{
+						SetType: basetypes.SetType{
+							ElemType: customtypes.UUIDType{},
+						},
+					},
+					ElementType: customtypes.UUIDType{},
+				},
+				Resource: &schemaR.SetAttribute{
+					MarkdownDescription: "A " + ItemTypeInfo.Name + " supports a maximum of 10 tags.",
+					Optional:            true,
+					Computed:            true,
+					Default:             setdefault.StaticValue(types.SetValueMust(customtypes.UUIDType{}, []attr.Value{})),
+					Validators: []validator.Set{
+						setvalidator.SizeAtMost(10),
+					},
+				},
+				DataSource: &schemaD.SetAttribute{
+					Computed: true,
+				},
+			},
 			"timeouts": superschema.TimeoutAttribute{
 				Resource: &superschema.ResourceTimeoutAttribute{
 					Create: true,
@@ -258,6 +287,7 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 		delete(r.Attributes, "onelake_endpoints")
 		delete(r.Attributes, "identity")
 		delete(r.Attributes, "skip_capacity_state_validation")
+		delete(r.Attributes, "tags")
 	}
 
 	return r
