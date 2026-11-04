@@ -1,0 +1,5 @@
+kind: added
+body: Added `fabric_plan` and `fabric_plans` data sources
+time: 2026-11-04T17:38:14.2694852+02:00
+custom:
+    Issue: "1142"

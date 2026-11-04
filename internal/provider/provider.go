@@ -88,6 +88,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/orgappaudience"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/plan"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
@@ -511,6 +512,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		orgappaudience.NewResourceOrgAppAudience,
 		activator.NewResourceActivator,
 		paginatedreport.NewResourcePaginatedReport,
+		plan.NewResourcePlan,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		sparkcustompool.NewResourceSparkCustomPool,
@@ -636,6 +638,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		ontology.NewDataSourceOntologies,
 		paginatedreport.NewDataSourcePaginatedReport,
 		paginatedreport.NewDataSourcePaginatedReports,
+		plan.NewDataSourcePlan,
+		plan.NewDataSourcePlans,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		tags.NewDataSourceTags,
