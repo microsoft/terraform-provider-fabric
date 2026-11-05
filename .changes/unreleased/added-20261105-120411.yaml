@@ -1,5 +1,5 @@
 kind: added
-body: Added GCC High sovereign cloud support with `environment = "gcchigh"`, automatic endpoint, token audience, and authentication-cloud selection. Upgraded the Fabric Go SDK to v0.22.0.
+body: Added GCC High sovereign cloud support with `environment = "gcchigh"`.
 time: 2026-11-05T12:04:11.0476705+02:00
 custom:
     Issue: "1146"
