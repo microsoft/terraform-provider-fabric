@@ -260,34 +260,36 @@ func (to *permissionScope) set(ctx context.Context, from fabcore.PermissionScope
 }
 
 func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diagnostics {
-	to.FabricItemMembers = supertypes.NewSetNestedObjectValueOfNull[fabricItemMember](ctx)
+	to.FabricItemMembers = supertypes.NewSetNestedObjectValueOfValueSlice(ctx, []fabricItemMember{})
 	to.MicrosoftEntraMembers = supertypes.NewSetNestedObjectValueOfNull[microsoftEntraMember](ctx)
 
-	fabricItemMembers := make([]*fabricItemMember, 0, len(from.FabricItemMembers))
+	if from.FabricItemMembers != nil {
+		fabricItemMembers := make([]*fabricItemMember, 0, len(from.FabricItemMembers))
 
-	for _, item := range from.FabricItemMembers {
-		fim := &fabricItemMember{
-			SourcePath: types.StringPointerValue(item.SourcePath),
-		}
-
-		fim.ItemAccess = supertypes.NewSetValueOfNull[types.String](ctx)
-
-		if item.ItemAccess != nil {
-			itemAccess := make([]types.String, 0, len(item.ItemAccess))
-			for _, access := range item.ItemAccess {
-				itemAccess = append(itemAccess, types.StringValue(string(access)))
+		for _, item := range from.FabricItemMembers {
+			fim := &fabricItemMember{
+				SourcePath: types.StringPointerValue(item.SourcePath),
 			}
 
-			if diags := fim.ItemAccess.Set(ctx, itemAccess); diags.HasError() {
-				return diags
+			fim.ItemAccess = supertypes.NewSetValueOfNull[types.String](ctx)
+
+			if item.ItemAccess != nil {
+				itemAccess := make([]types.String, 0, len(item.ItemAccess))
+				for _, access := range item.ItemAccess {
+					itemAccess = append(itemAccess, types.StringValue(string(access)))
+				}
+
+				if diags := fim.ItemAccess.Set(ctx, itemAccess); diags.HasError() {
+					return diags
+				}
 			}
+
+			fabricItemMembers = append(fabricItemMembers, fim)
 		}
 
-		fabricItemMembers = append(fabricItemMembers, fim)
-	}
-
-	if diags := to.FabricItemMembers.Set(ctx, fabricItemMembers); diags.HasError() {
-		return diags
+		if diags := to.FabricItemMembers.Set(ctx, fabricItemMembers); diags.HasError() {
+			return diags
+		}
 	}
 
 	if from.MicrosoftEntraMembers != nil {
