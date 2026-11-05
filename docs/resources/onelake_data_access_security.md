@@ -141,7 +141,6 @@ Required:
 Required:
 
 - `object_id` (String) The object id.
-- `object_type` (String) The type of Microsoft Entra ID object. Possible values: `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`. Value must be one of : `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`.
 - `tenant_id` (String) The tenant id.
 
 <a id="nestedatt--timeouts"></a>

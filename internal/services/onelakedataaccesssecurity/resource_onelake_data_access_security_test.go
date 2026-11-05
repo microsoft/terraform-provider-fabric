@@ -181,6 +181,8 @@ func TestUnit_OneLakeDataAccessSecurityResource_ImportState(t *testing.T) {
 func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
+	objectID := testhelp.RandomUUID()
+	tenantID := testhelp.RandomUUID()
 
 	for key := range fakeOneLakeDataAccessRoleStore {
 		delete(fakeOneLakeDataAccessRoleStore, key)
@@ -213,11 +215,18 @@ func TestUnit_OneLakeDataAccessSecurityResource_CRUD(t *testing.T) {
 						"fabric_item_members": []map[string]any{
 							{"item_access": []string{"ReadAll"}, "source_path": workspaceID + "/" + itemID},
 						},
+						"microsoft_entra_members": []map[string]any{
+							{"object_id": objectID, "tenant_id": tenantID},
+						},
 					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "role_name", "example"),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "members.microsoft_entra_members.*", map[string]string{
+					"object_id": objectID,
+					"tenant_id": tenantID,
+				}),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "decision_rules.0.effect", "Permit"),

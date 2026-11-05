@@ -68,9 +68,8 @@ type fabricItemMember struct {
 }
 
 type microsoftEntraMember struct {
-	ObjectID   customtypes.UUID `tfsdk:"object_id"`
-	ObjectType types.String     `tfsdk:"object_type"`
-	TenantID   customtypes.UUID `tfsdk:"tenant_id"`
+	ObjectID customtypes.UUID `tfsdk:"object_id"`
+	TenantID customtypes.UUID `tfsdk:"tenant_id"`
 }
 
 func (to *baseOneLakeDataAccessSecurityModel) setFromBase(
@@ -297,9 +296,8 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 
 		for _, item := range from.MicrosoftEntraMembers {
 			entraMembers = append(entraMembers, &microsoftEntraMember{
-				ObjectID:   customtypes.NewUUIDPointerValue(item.ObjectID),
-				ObjectType: types.StringPointerValue((*string)(item.ObjectType)),
-				TenantID:   customtypes.NewUUIDPointerValue(item.TenantID),
+				ObjectID: customtypes.NewUUIDPointerValue(item.ObjectID),
+				TenantID: customtypes.NewUUIDPointerValue(item.TenantID),
 			})
 		}
 
@@ -472,9 +470,8 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
-				ObjectID:   mem.ObjectID.ValueStringPointer(),
-				TenantID:   mem.TenantID.ValueStringPointer(),
-				ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
+				ObjectID: mem.ObjectID.ValueStringPointer(),
+				TenantID: mem.TenantID.ValueStringPointer(),
 			})
 		}
 	}

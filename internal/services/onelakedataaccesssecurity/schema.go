@@ -386,24 +386,6 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 									Computed: true,
 								},
 							},
-							"object_type": superschema.StringAttribute{
-								Common: &schemaR.StringAttribute{
-									MarkdownDescription: "The type of Microsoft Entra ID object. Possible values: " + utils.ConvertStringSlicesToString(
-										fabcore.PossibleObjectTypeValues(),
-										true,
-										true,
-									) + ".",
-									Validators: []validator.String{
-										stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleObjectTypeValues(), true)...),
-									},
-								},
-								Resource: &schemaR.StringAttribute{
-									Required: true,
-								},
-								DataSource: &schemaD.StringAttribute{
-									Computed: true,
-								},
-							},
 							"tenant_id": superschema.SuperStringAttribute{
 								Common: &schemaR.StringAttribute{
 									MarkdownDescription: "The tenant id.",
