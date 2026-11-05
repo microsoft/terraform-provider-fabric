@@ -138,4 +138,5 @@ Read-Only:
 Read-Only:
 
 - `object_id` (String) The object id.
+- `object_type` (String, Deprecated) The type of Microsoft Entra ID object. Deprecated: this attribute is no longer used by the API.
 - `tenant_id` (String) The tenant id.

@@ -68,8 +68,9 @@ type fabricItemMember struct {
 }
 
 type microsoftEntraMember struct {
-	ObjectID customtypes.UUID `tfsdk:"object_id"`
-	TenantID customtypes.UUID `tfsdk:"tenant_id"`
+	ObjectID   customtypes.UUID `tfsdk:"object_id"`
+	ObjectType types.String     `tfsdk:"object_type"`
+	TenantID   customtypes.UUID `tfsdk:"tenant_id"`
 }
 
 func (to *baseOneLakeDataAccessSecurityModel) setFromBase(
@@ -357,6 +358,61 @@ type resourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.DataAccessRoleBase) diag.Diagnostics {
+	objectTypes := make(map[[2]string]types.String)
+
+	if !to.Members.IsNull() && !to.Members.IsUnknown() {
+		members, diags := to.Members.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if !members.MicrosoftEntraMembers.IsNull() && !members.MicrosoftEntraMembers.IsUnknown() {
+			entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			for _, member := range entraMembers {
+				objectTypes[[2]string{member.ObjectID.ValueString(), member.TenantID.ValueString()}] = member.ObjectType
+			}
+		}
+	}
+
+	if diags := to.baseOneLakeDataAccessSecurityModel.set(ctx, to.WorkspaceID.ValueString(), to.ItemID.ValueString(), from); diags.HasError() {
+		return diags
+	}
+
+	if len(objectTypes) == 0 || to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	members, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if members.MicrosoftEntraMembers.IsNull() || members.MicrosoftEntraMembers.IsUnknown() {
+		return nil
+	}
+
+	entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	// The API never returns objectType; retain the resource's planned or prior value.
+	for _, member := range entraMembers {
+		member.ObjectType = objectTypes[[2]string{member.ObjectID.ValueString(), member.TenantID.ValueString()}]
+	}
+
+	if diags := members.MicrosoftEntraMembers.Set(ctx, entraMembers); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, members)
 }
 
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {

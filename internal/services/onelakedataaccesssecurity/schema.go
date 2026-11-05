@@ -386,6 +386,21 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 									Computed: true,
 								},
 							},
+							"object_type": superschema.StringAttribute{
+								Common: &schemaR.StringAttribute{
+									MarkdownDescription: "The type of Microsoft Entra ID object. Deprecated: this attribute is no longer used by the API.",
+								},
+								Resource: &schemaR.StringAttribute{
+									Optional: true,
+									DeprecationMessage: "This attribute is deprecated and no longer used by the API. Remove it from your configuration. " +
+										"It will be removed in a future major version of the provider.",
+								},
+								DataSource: &schemaD.StringAttribute{
+									Computed: true,
+									DeprecationMessage: "This attribute is deprecated and always returns null. Remove references to it. " +
+										"It will be removed in a future major version of the provider.",
+								},
+							},
 							"tenant_id": superschema.SuperStringAttribute{
 								Common: &schemaR.StringAttribute{
 									MarkdownDescription: "The tenant id.",

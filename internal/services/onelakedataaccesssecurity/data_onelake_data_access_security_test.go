@@ -4,11 +4,13 @@
 package onelakedataaccesssecurity_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -22,6 +24,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	entity := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	entity.Members.MicrosoftEntraMembers = []fabcore.MicrosoftEntraMember{{
+		ObjectID: new(testhelp.RandomUUID()),
+		TenantID: new(testhelp.RandomUUID()),
+	}}
 
 	for key := range fakeOneLakeDataAccessRoleStore {
 		delete(fakeOneLakeDataAccessRoleStore, key)
@@ -74,12 +80,18 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 					"item_id":      itemID,
 					"role_name":    *entity.Name,
 				},
-			),
+			) + fmt.Sprintf(`
+				output "object_types_unset" {
+					value = alltrue([for member in %s.members.microsoft_entra_members : member.object_type == null])
+				}
+			`, testDataSourceItemFQN),
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "members.microsoft_entra_members.#", "1"),
+				resource.TestCheckOutput("object_types_unset", "true"),
 			),
 		},
 	}))

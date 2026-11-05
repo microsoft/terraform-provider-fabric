@@ -143,6 +143,10 @@ Required:
 - `object_id` (String) The object id.
 - `tenant_id` (String) The tenant id.
 
+Optional:
+
+- `object_type` (String, Deprecated) The type of Microsoft Entra ID object. Deprecated: this attribute is no longer used by the API.
+
 <a id="nestedatt--timeouts"></a>
 
 ### Nested Schema for `timeouts`
