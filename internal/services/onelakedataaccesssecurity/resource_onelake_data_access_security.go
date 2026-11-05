@@ -29,6 +29,7 @@ import (
 var (
 	_ resource.ResourceWithConfigure   = (*resourceOneLakeDataAccessSecurity)(nil)
 	_ resource.ResourceWithImportState = (*resourceOneLakeDataAccessSecurity)(nil)
+	_ resource.ResourceWithModifyPlan  = (*resourceOneLakeDataAccessSecurity)(nil)
 )
 
 type resourceOneLakeDataAccessSecurity struct {
@@ -49,6 +50,34 @@ func (r *resourceOneLakeDataAccessSecurity) Metadata(_ context.Context, _ resour
 
 func (r *resourceOneLakeDataAccessSecurity) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = itemSchema(false).GetResource(ctx)
+}
+
+func (r *resourceOneLakeDataAccessSecurity) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var plan resourceOneLakeDataAccessSecurityModel
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !plan.Members.IsNull() && !plan.Members.IsUnknown() {
+		members, diags := plan.Members.Get(ctx)
+		resp.Diagnostics.Append(diags...)
+
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		resp.Diagnostics.Append(validateUniqueMicrosoftEntraMemberIdentities(ctx, members)...)
+
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 }
 
 func (r *resourceOneLakeDataAccessSecurity) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -105,7 +134,7 @@ func (r *resourceOneLakeDataAccessSecurity) Create(ctx context.Context, req reso
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -135,7 +164,7 @@ func (r *resourceOneLakeDataAccessSecurity) Read(ctx context.Context, req resour
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state.baseOneLakeDataAccessSecurityModel)
+	diags = r.get(ctx, &state)
 	if utils.IsErrNotFound(state.RoleName.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 		resp.Diagnostics.Append(diags...)
@@ -192,7 +221,7 @@ func (r *resourceOneLakeDataAccessSecurity) Update(ctx context.Context, req reso
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -274,7 +303,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 		Timeouts:    timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state.baseOneLakeDataAccessSecurityModel)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -285,7 +314,7 @@ func (r *resourceOneLakeDataAccessSecurity) ImportState(ctx context.Context, req
 	})
 }
 
-func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *baseOneLakeDataAccessSecurityModel) diag.Diagnostics {
+func (r *resourceOneLakeDataAccessSecurity) get(ctx context.Context, model *resourceOneLakeDataAccessSecurityModel) diag.Diagnostics {
 	respGet, err := r.client.GetDataAccessRole(ctx, model.WorkspaceID.ValueString(), model.ItemID.ValueString(), model.RoleName.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags

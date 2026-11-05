@@ -7,8 +7,10 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -22,6 +24,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	entity := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	objectID, tenantID := testhelp.RandomUUID(), testhelp.RandomUUID()
+	entity.Members.MicrosoftEntraMembers = []fabcore.MicrosoftEntraMember{{
+		ObjectID: &objectID, TenantID: &tenantID, ObjectType: to.Ptr(fabcore.ObjectTypeUser),
+	}}
 
 	for key := range fakeOneLakeDataAccessRoleStore {
 		delete(fakeOneLakeDataAccessRoleStore, key)
@@ -29,7 +35,11 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 
 	UpsertIntoOneLakeDataAccessRoleStore(workspaceID, itemID, entity)
 
-	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
+	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFuncWithMemberTransform(func(members *fabcore.Members) {
+		for i := range members.MicrosoftEntraMembers {
+			members.MicrosoftEntraMembers[i].ObjectType = to.Ptr(fabcore.ObjectTypeUser)
+		}
+	})
 	fakes.FakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.ListDataAccessRoles = fakeListDataAccessRolesFunc()
 
 	resource.Test(t, testhelp.NewTestUnitCase(t, &testDataSourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
@@ -80,6 +90,10 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "item_id", itemID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
+				resource.TestCheckTypeSetElemNestedAttrs(testDataSourceItemFQN, "members.microsoft_entra_members.*", map[string]string{
+					"object_id": objectID, "tenant_id": tenantID,
+				}),
+				checkEntraMemberObjectType(testDataSourceItemFQN, objectID, ""),
 			),
 		},
 	}))

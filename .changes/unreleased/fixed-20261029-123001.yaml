@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed inconsistent apply results for `fabric_onelake_data_access_security` when Fabric omits Microsoft Entra members' `object_type` or returns an empty `fabric_item_members` collection.
+time: 2026-10-29T12:30:01+02:00
+custom:
+    Issue: "1044"

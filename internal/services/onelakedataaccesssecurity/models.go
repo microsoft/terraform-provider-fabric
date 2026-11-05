@@ -9,6 +9,7 @@ import (
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
@@ -135,6 +136,183 @@ func (to *baseOneLakeDataAccessSecurityModel) setMembers(ctx context.Context, fr
 	}
 
 	return to.Members.Set(ctx, m)
+}
+
+// reconcileFabricItemMembers preserves Terraform's null/empty choice when Fabric represents no item members differently.
+func reconcileFabricItemMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
+	if old == nil || old.FabricItemMembers.IsUnknown() || current.FabricItemMembers.IsUnknown() {
+		return nil
+	}
+
+	if old.FabricItemMembers.IsNull() == current.FabricItemMembers.IsNull() {
+		return nil
+	}
+
+	membersToCheck := current.FabricItemMembers
+	if current.FabricItemMembers.IsNull() {
+		membersToCheck = old.FabricItemMembers
+	}
+
+	items, diags := membersToCheck.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if len(items) == 0 {
+		current.FabricItemMembers = old.FabricItemMembers
+	}
+
+	return nil
+}
+
+// reconcileMicrosoftEntraMembers preserves the configured collection shape and restores object_type values omitted by Fabric.
+// Its null/empty handling is speculative defensive code; no Entra mismatch has been observed.
+func reconcileMicrosoftEntraMembers(ctx context.Context, old, current *memberModel) diag.Diagnostics {
+	if old != nil && !old.MicrosoftEntraMembers.IsNull() && !old.MicrosoftEntraMembers.IsUnknown() &&
+		current.MicrosoftEntraMembers.IsNull() {
+		oldMembers, diags := old.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if len(oldMembers) == 0 {
+			// Fabric may return null for an explicitly configured empty set.
+			current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
+		}
+	}
+
+	if current.MicrosoftEntraMembers.IsNull() || current.MicrosoftEntraMembers.IsUnknown() {
+		return nil
+	}
+
+	members, diags := current.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if old != nil && old.MicrosoftEntraMembers.IsNull() && len(members) == 0 {
+		// Fabric may return an empty set for an omitted collection.
+		current.MicrosoftEntraMembers = old.MicrosoftEntraMembers
+
+		return nil
+	}
+
+	var oldMembers []*microsoftEntraMember
+	if old != nil && !old.MicrosoftEntraMembers.IsNull() && !old.MicrosoftEntraMembers.IsUnknown() {
+		oldMembers, diags = old.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	objectTypesByIdentity, diags := indexMicrosoftEntraMemberTypes(oldMembers)
+	if diags.HasError() {
+		return diags
+	}
+
+	for _, member := range members {
+		key, known, keyDiags := microsoftEntraMemberKey(member)
+		if keyDiags.HasError() {
+			return keyDiags
+		}
+
+		if objectType, ok := objectTypesByIdentity[key]; known && ok {
+			member.ObjectType = objectType
+		}
+	}
+
+	if diags := current.MicrosoftEntraMembers.Set(ctx, members); diags.HasError() {
+		return diags
+	}
+
+	return nil
+}
+
+type microsoftEntraMemberIdentity struct {
+	tenantID string
+	objectID string
+}
+
+func microsoftEntraMemberKey(member *microsoftEntraMember) (microsoftEntraMemberIdentity, bool, diag.Diagnostics) {
+	var key microsoftEntraMemberIdentity
+	if member.ObjectID.IsNull() || member.ObjectID.IsUnknown() || member.TenantID.IsNull() || member.TenantID.IsUnknown() {
+		return key, false, nil
+	}
+
+	// ValueUUID returns canonical binary UUIDs, so different textual spellings match.
+	var diags diag.Diagnostics
+	objectID, objectDiags := member.ObjectID.ValueUUID()
+	tenantID, tenantDiags := member.TenantID.ValueUUID()
+
+	diags.Append(objectDiags...)
+	diags.Append(tenantDiags...)
+
+	if diags.HasError() {
+		return key, false, diags
+	}
+
+	return microsoftEntraMemberIdentity{tenantID: tenantID, objectID: objectID}, true, diags
+}
+
+// indexMicrosoftEntraMemberTypes maps each known member identity to its configured object_type.
+// The plan and request builders reject duplicate configured identities before writes.
+func indexMicrosoftEntraMemberTypes(members []*microsoftEntraMember) (map[microsoftEntraMemberIdentity]types.String, diag.Diagnostics) {
+	objectTypesByIdentity := make(map[microsoftEntraMemberIdentity]types.String, len(members))
+	for _, member := range members {
+		key, known, diags := microsoftEntraMemberKey(member)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if !known {
+			continue
+		}
+
+		objectTypesByIdentity[key] = member.ObjectType
+	}
+
+	return objectTypesByIdentity, nil
+}
+
+// validateUniqueMicrosoftEntraMemberIdentities prevents ambiguous object_type reconciliation.
+// Fabric doesn't receive object_type, so duplicate identity pairs collapse to one reconciliation key.
+func validateUniqueMicrosoftEntraMemberIdentities(ctx context.Context, members *memberModel) diag.Diagnostics {
+	if members == nil || members.MicrosoftEntraMembers.IsNull() || members.MicrosoftEntraMembers.IsUnknown() {
+		return nil
+	}
+
+	entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	seenIdentities := make(map[microsoftEntraMemberIdentity]struct{}, len(entraMembers))
+	for _, member := range entraMembers {
+		identity, known, keyDiags := microsoftEntraMemberKey(member)
+		diags.Append(keyDiags...)
+
+		if diags.HasError() {
+			return diags
+		}
+
+		if !known {
+			continue
+		}
+
+		if _, exists := seenIdentities[identity]; exists {
+			diags.AddAttributeError(
+				path.Root("members").AtName("microsoft_entra_members"),
+				"Duplicate Microsoft Entra member identity",
+				"Each member must have a unique combination of `tenant_id` and `object_id`. The deprecated `object_type` is not sent to Fabric and cannot distinguish duplicate identities.",
+			)
+
+			return diags
+		}
+
+		seenIdentities[identity] = struct{}{}
+	}
+
+	return diags
 }
 
 func (to *decisionRule) set(ctx context.Context, from fabcore.DecisionRule) diag.Diagnostics {
@@ -295,10 +473,11 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 	if from.MicrosoftEntraMembers != nil {
 		entraMembers := make([]*microsoftEntraMember, 0, len(from.MicrosoftEntraMembers))
 
+		// Fabric omits object_type; resource reads restore the configured value from prior state.
 		for _, item := range from.MicrosoftEntraMembers {
 			entraMembers = append(entraMembers, &microsoftEntraMember{
 				ObjectID:   customtypes.NewUUIDPointerValue(item.ObjectID),
-				ObjectType: types.StringPointerValue((*string)(item.ObjectType)),
+				ObjectType: types.StringNull(),
 				TenantID:   customtypes.NewUUIDPointerValue(item.TenantID),
 			})
 		}
@@ -359,6 +538,41 @@ type resourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+// set maps the API response, then restores resource-only member state that Fabric doesn't return.
+func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, workspaceID, itemID string, from fabcore.DataAccessRoleBase) diag.Diagnostics {
+	previous := to.Members
+	if diags := to.baseOneLakeDataAccessSecurityModel.set(ctx, workspaceID, itemID, from); diags.HasError() {
+		return diags
+	}
+
+	if to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	current, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	var old *memberModel
+	if !previous.IsNull() && !previous.IsUnknown() {
+		old, diags = previous.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if diags := reconcileFabricItemMembers(ctx, old, current); diags.HasError() {
+		return diags
+	}
+
+	if diags := reconcileMicrosoftEntraMembers(ctx, old, current); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, current)
 }
 
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {
@@ -434,47 +648,52 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		return diags
 	}
 
-	to.Members = &fabcore.Members{}
-
-	fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
-	if diags.HasError() {
+	if diags := validateUniqueMicrosoftEntraMemberIdentities(ctx, members); diags.HasError() {
 		return diags
 	}
 
-	to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
+	to.Members = &fabcore.Members{}
 
-	for _, fim := range fabricItemMembers {
-		member := fabcore.FabricItemMember{
-			SourcePath: fim.SourcePath.ValueStringPointer(),
-		}
-
-		itemAccess, diags := fim.ItemAccess.Get(ctx)
+	if !members.FabricItemMembers.IsNull() {
+		fabricItemMembers, diags := members.FabricItemMembers.Get(ctx)
 		if diags.HasError() {
 			return diags
 		}
 
-		if len(itemAccess) > 0 {
-			member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
-			for _, access := range itemAccess {
-				member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+		to.Members.FabricItemMembers = make([]fabcore.FabricItemMember, 0, len(fabricItemMembers))
+
+		for _, fim := range fabricItemMembers {
+			member := fabcore.FabricItemMember{
+				SourcePath: fim.SourcePath.ValueStringPointer(),
 			}
+
+			itemAccess, diags := fim.ItemAccess.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			if len(itemAccess) > 0 {
+				member.ItemAccess = make([]fabcore.ItemAccess, 0, len(itemAccess))
+				for _, access := range itemAccess {
+					member.ItemAccess = append(member.ItemAccess, fabcore.ItemAccess(access.ValueString()))
+				}
+			}
+
+			to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
+		}
+	}
+
+	if !members.MicrosoftEntraMembers.IsNull() {
+		microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+		if diags.HasError() {
+			return diags
 		}
 
-		to.Members.FabricItemMembers = append(to.Members.FabricItemMembers, member)
-	}
-
-	microsoftEntraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	if len(microsoftEntraMembers) > 0 {
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
-				ObjectID:   mem.ObjectID.ValueStringPointer(),
-				TenantID:   mem.TenantID.ValueStringPointer(),
-				ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
+				ObjectID: mem.ObjectID.ValueStringPointer(),
+				TenantID: mem.TenantID.ValueStringPointer(),
 			})
 		}
 	}
