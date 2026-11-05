@@ -69,15 +69,18 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 			"role": superschema.StringAttribute{
 				Common: &schemaR.StringAttribute{
 					MarkdownDescription: "The connection role of the principal.",
-					Validators: []validator.String{
-						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleConnectionRoleValues(), true)...),
-					},
 				},
 				Resource: &schemaR.StringAttribute{
 					Required: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleAssignableConnectionRoleValues(), true)...),
+					},
 				},
 				DataSource: &schemaD.StringAttribute{
 					Computed: true,
+					Validators: []validator.String{
+						stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(fabcore.PossibleConnectionRoleValues(), true)...),
+					},
 				},
 			},
 			"principal": superschema.SuperSingleNestedAttributeOf[principalModel]{

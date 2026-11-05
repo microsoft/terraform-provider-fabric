@@ -19,11 +19,13 @@ This guide outlines the steps to provision Microsoft Fabric Capacity in Azure an
 
 ### Using Azure Portal
 
-To add new capacity, visit the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities) and follow the wizard's steps.
+To add new capacity, visit the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Fabric%2Fcapacities), or the [Azure Government portal](https://portal.azure.us) for GCC High, and follow the wizard's steps.
 
 ### Using Terraform
 
 Terraform can also help you create and manage a Fabric Capacity, but not through this specific provider, as it does not support Azure resources. This provider is designed exclusively for managing resources within Microsoft Fabric, which is separate from Azure. For Azure resources, consider using the [AzAPI provider](https://registry.terraform.io/providers/Azure/azapi) instead.
+
+For GCC High, configure the Azure resource provider with `environment = "usgovernment"` and the Fabric provider with `environment = "gcchigh"`. `ARM_ENVIRONMENT` applies to Azure providers, not the Fabric provider.
 
 To assist you in getting started, check out some examples available at [aka.ms/FabricTF/quickstart](https://aka.ms/FabricTF/quickstart). This repository contains Fabric Capacity configuration for Terraform using AzAPI.
 
@@ -37,7 +39,7 @@ The steps outlined below illustrate the manual method for granting access to the
 
 ### Service Principals (SPN) and Managed Identities (MSI)
 
-1. Sign in to the [Azure Portal](https://portal.azure.com/).
+1. Sign in to the [Azure Portal](https://portal.azure.com/), or the [Azure Government portal](https://portal.azure.us) for GCC High.
 1. Browse to the Fabric Capacity you want to grant access to.
 1. Go to **Settings** > **Capacity administrators**.
 1. Click **Add** and select the **Enterprise applications**
@@ -46,7 +48,7 @@ The steps outlined below illustrate the manual method for granting access to the
 
 ### Users
 
-1. Sign in to the [Azure Portal](https://portal.azure.com/).
+1. Sign in to the [Azure Portal](https://portal.azure.com/), or the [Azure Government portal](https://portal.azure.us) for GCC High.
 1. Browse to the Fabric Capacity you want to grant access to.
 1. Go to **Settings** > **Capacity administrators**.
 1. Click **Add** and select the **Users**

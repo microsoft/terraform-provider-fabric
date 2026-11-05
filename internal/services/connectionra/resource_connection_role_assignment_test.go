@@ -23,6 +23,21 @@ var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.Pro
 
 func TestUnit_ConnectionRoleAssignmentResource_Attributes(t *testing.T) {
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"connection_id": testhelp.RandomUUID(),
+					"principal": map[string]any{
+						"id":   testhelp.RandomUUID(),
+						"type": "User",
+					},
+					"role": "PendingOwner",
+				},
+			),
+			ExpectError: regexp.MustCompile(`value must be one of:`),
+		},
 		// error - no required attributes - connection_id
 		{
 			ResourceName: testResourceItemFQN,
@@ -159,6 +174,7 @@ func TestUnit_ConnectionRoleAssignmentResource_ImportState(t *testing.T) {
 func TestUnit_ConnectionRoleAssignmentResource_CRUD(t *testing.T) {
 	connectionID := testhelp.RandomUUID()
 	entity := NewRandomConnectionRoleAssignment()
+	entity.Role = azto.Ptr(fabcore.ConnectionRoleOwner)
 
 	entityUpdate := NewRandomConnectionRoleAssignment()
 	entityUpdate.ID = entity.ID

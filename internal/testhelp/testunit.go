@@ -22,6 +22,7 @@ import (
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/provider"
+	pclient "github.com/microsoft/terraform-provider-fabric/internal/provider/client"
 	pconfig "github.com/microsoft/terraform-provider-fabric/internal/provider/config"
 )
 
@@ -119,7 +120,7 @@ func GetTestUnitProtoV6ProviderFactories(fabricClientOpts *fabric.ClientOptions,
 			clientOptions = *fabricClientOpts
 		}
 
-		client, err := fabric.NewClient(&azfake.TokenCredential{}, &cfg.Endpoint, &clientOptions)
+		client, err := pclient.NewFabricClient(&azfake.TokenCredential{}, cfg, &clientOptions)
 		if err != nil {
 			tflog.Error(ctx, "Failed to initialize Microsoft Fabric test client", map[string]any{"error": err})
 

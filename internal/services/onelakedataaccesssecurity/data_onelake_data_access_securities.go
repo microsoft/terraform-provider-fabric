@@ -42,7 +42,7 @@ func (d *dataSourceOneLakeDataAccessSecurities) Metadata(_ context.Context, _ da
 }
 
 func (d *dataSourceOneLakeDataAccessSecurities) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	s := itemSchema(true).GetDataSource(ctx)
+	s := itemSchema(ctx, true).GetDataSource(ctx)
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: s.GetMarkdownDescription(),
