@@ -85,8 +85,8 @@ You can find more information on how to do this in the following guides:
 - `client_secret` (String, Sensitive) The Client Secret of the app registration. For use when authenticating as a Service Principal using a Client Secret.
 - `client_secret_file_path` (String) The path to a file containing the Client Secret which should be used. For use when authenticating as a Service Principal using a Client Secret.
 - `disable_terraform_partner_id` (Boolean) Disable sending the Terraform Partner ID if a custom `partner_id` isn't specified, which allows Microsoft to better understand the usage of Terraform. The Partner ID does not give HashiCorp any direct access to usage information. This can also be sourced from the `FABRIC_DISABLE_TERRAFORM_PARTNER_ID` environment variable. Defaults to `false`.
-- `endpoint` (String) The Endpoint of the Microsoft Fabric API.
-- `environment` (String) The cloud environment which should be used. Possible values are 'public', 'usgovernment' and 'china'. Defaults to 'public'
+- `endpoint` (String) The endpoint of the Microsoft Fabric API. If provided, this overrides the endpoint of the configured `environment`. This can also be sourced from the `FABRIC_ENDPOINT` environment variable.
+- `environment` (String) The Microsoft Fabric environment which should be used. Possible values are `public` and `gcchigh` (GCC High). This can also be sourced from the `FABRIC_ENVIRONMENT` or `ARM_ENVIRONMENT` environment variables. Defaults to `public`.
 - `oidc_request_token` (String, Sensitive) The bearer token for the request to the OIDC provider. For use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_request_url` (String) The URL for the OIDC provider from which to request an ID token. For use when authenticating as a Service Principal using OpenID Connect.
 - `oidc_token` (String, Sensitive) The OIDC token for use when authenticating as a Service Principal using OpenID Connect.
