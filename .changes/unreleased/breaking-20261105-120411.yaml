@@ -1,0 +1,5 @@
+kind: breaking
+body: Replaced the authentication-only `usgovernment` and `china` provider environments with Fabric environment selection (`public` or `gcchigh`). The SDK upgrade also removes OneLake `members.microsoft_entra_members.object_type`; remove that attribute from configurations and data-source references.
+time: 2026-11-05T12:04:11.1363772+02:00
+custom:
+    Issue: "1146"
