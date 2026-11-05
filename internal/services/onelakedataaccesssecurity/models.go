@@ -5,6 +5,7 @@ package onelakedataaccesssecurity
 
 import (
 	"context"
+	"strings"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -361,7 +362,7 @@ type resourceOneLakeDataAccessSecurityModel struct {
 }
 
 func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.DataAccessRoleBase) diag.Diagnostics {
-	objectTypes := make(map[[2]string]types.String)
+	previousMembers := make(map[[2]string]*microsoftEntraMember)
 
 	if !to.Members.IsNull() && !to.Members.IsUnknown() {
 		members, diags := to.Members.Get(ctx)
@@ -376,7 +377,10 @@ func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from 
 			}
 
 			for _, member := range entraMembers {
-				objectTypes[[2]string{member.ObjectID.ValueString(), member.TenantID.ValueString()}] = member.ObjectType
+				previousMembers[[2]string{
+					strings.ToLower(member.ObjectID.ValueString()),
+					strings.ToLower(member.TenantID.ValueString()),
+				}] = member
 			}
 		}
 	}
@@ -385,7 +389,7 @@ func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from 
 		return diags
 	}
 
-	if len(objectTypes) == 0 || to.Members.IsNull() || to.Members.IsUnknown() {
+	if len(previousMembers) == 0 || to.Members.IsNull() || to.Members.IsUnknown() {
 		return nil
 	}
 
@@ -403,9 +407,17 @@ func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from 
 		return diags
 	}
 
-	// The API never returns objectType; retain the resource's planned or prior value.
+	// Retain UUID spelling and object_type, which the API never returns, for matching members.
 	for _, member := range entraMembers {
-		member.ObjectType = objectTypes[[2]string{member.ObjectID.ValueString(), member.TenantID.ValueString()}]
+		key := [2]string{
+			strings.ToLower(member.ObjectID.ValueString()),
+			strings.ToLower(member.TenantID.ValueString()),
+		}
+		if previous, ok := previousMembers[key]; ok {
+			member.ObjectID = previous.ObjectID
+			member.TenantID = previous.TenantID
+			member.ObjectType = previous.ObjectType
+		}
 	}
 
 	if diags := members.MicrosoftEntraMembers.Set(ctx, entraMembers); diags.HasError() {

@@ -4,13 +4,16 @@
 package onelakedataaccesssecurity_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -398,14 +401,33 @@ func TestUnit_OneLakeDataAccessSecurity_ObjectTypeDeprecation(t *testing.T) {
 func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
-	objectID := testhelp.RandomUUID()
-	tenantID := testhelp.RandomUUID()
-	otherTenantID := testhelp.RandomUUID()
+	objectID := "ABCDEFAB-1234-4678-9ABC-0123456789AB"
+	tenantID := "12345678-ABCD-4123-ABCD-123456789ABC"
+	otherTenantID := "FEDCBA98-ABCD-4123-9876-123456789ABC"
 	roleID := GenerateOneLakeDataAccessRoleID(workspaceID, itemID, "deprecated-types")
 
 	fakeServer := fakes.NewFakeServer()
 	fakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.CreateOrUpdateSingleDataAccessRole = fakeCreateOrUpdateSingleDataAccessRoleFunc()
-	fakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = fakeGetDataAccessRoleFunc()
+	responseUUIDCase := strings.ToLower
+	getRole := fakeGetDataAccessRoleFunc()
+	fakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.GetDataAccessRole = func(
+		ctx context.Context, workspaceID, itemID, roleName string, options *fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleOptions,
+	) (azfake.Responder[fabcore.OneLakeDataAccessSecurityClientGetDataAccessRoleResponse], azfake.ErrorResponder) {
+		role, exists := fakeOneLakeDataAccessRoleStore[GenerateOneLakeDataAccessRoleID(workspaceID, itemID, roleName)]
+		if exists && role.Members != nil {
+			for _, member := range role.Members.MicrosoftEntraMembers {
+				if member.ObjectID != nil {
+					*member.ObjectID = responseUUIDCase(*member.ObjectID)
+				}
+
+				if member.TenantID != nil {
+					*member.TenantID = responseUUIDCase(*member.TenantID)
+				}
+			}
+		}
+
+		return getRole(ctx, workspaceID, itemID, roleName, options)
+	}
 	fakeServer.ServerFactory.Core.OneLakeDataAccessSecurityServer.DeleteDataAccessRole = fakeDeleteDataAccessRoleFunc()
 
 	config := func(firstType any, secondTenant string, secondType any) string {
@@ -461,7 +483,10 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 	updatedConfig := config("ServicePrincipal", otherTenantID, "Group")
 	removedConfig := config(nil, otherTenantID, nil)
 	newTenantID := testhelp.RandomUUID()
-	replacedConfig := config(nil, newTenantID, nil)
+	replacedConfig := strings.NewReplacer(
+		objectID, strings.ToLower(objectID),
+		tenantID, strings.ToLower(tenantID),
+	).Replace(config(nil, newTenantID, nil))
 
 	testCase := testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakeServer.ServerFactory, nil, []resource.TestStep{
 		{
@@ -469,18 +494,26 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 			Check:  checkTypes("User", otherTenantID, "Group"),
 		},
 		{
-			PreConfig: reverseMembers,
-			Config:    legacyConfig,
-			PlanOnly:  true,
+			PreConfig: func() {
+				responseUUIDCase = strings.ToUpper
+
+				reverseMembers()
+			},
+			Config:   legacyConfig,
+			PlanOnly: true,
 		},
 		{
 			Config: updatedConfig,
 			Check:  checkTypes("ServicePrincipal", otherTenantID, "Group"),
 		},
 		{
-			PreConfig: reverseMembers,
-			Config:    updatedConfig,
-			PlanOnly:  true,
+			PreConfig: func() {
+				responseUUIDCase = strings.ToLower
+
+				reverseMembers()
+			},
+			Config:   updatedConfig,
+			PlanOnly: true,
 		},
 		{
 			Config: removedConfig,
@@ -495,6 +528,9 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 			Config: replacedConfig,
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "members.microsoft_entra_members.*", map[string]string{"tenant_id": newTenantID}),
+				resource.TestCheckTypeSetElemNestedAttrs(testResourceItemFQN, "members.microsoft_entra_members.*", map[string]string{
+					"object_id": strings.ToLower(objectID), "tenant_id": strings.ToLower(tenantID),
+				}),
 				resource.TestCheckOutput("object_types_unset", "true"),
 			),
 		},
