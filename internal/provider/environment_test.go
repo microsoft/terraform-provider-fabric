@@ -87,9 +87,8 @@ func TestUnit_Provider_Environment(t *testing.T) {
 			environment: fabric.EnvironmentGCCHigh,
 		},
 		{
-			name:        "legacy environment variable",
-			env:         map[string]string{"ARM_ENVIRONMENT": "gcchigh"},
-			environment: fabric.EnvironmentGCCHigh,
+			name: "ARM environment does not select Fabric",
+			env:  map[string]string{"ARM_ENVIRONMENT": "gcchigh"},
 		},
 		{
 			name:   "provider argument takes precedence",
@@ -97,7 +96,7 @@ func TestUnit_Provider_Environment(t *testing.T) {
 			env:    map[string]string{"FABRIC_ENVIRONMENT": "gcchigh", "ARM_ENVIRONMENT": "usgovernment"},
 		},
 		{
-			name:        "Fabric variable takes precedence over Azure authority",
+			name:        "Fabric and Azure environments are independent",
 			env:         map[string]string{"FABRIC_ENVIRONMENT": "gcchigh", "ARM_ENVIRONMENT": "usgovernment"},
 			environment: fabric.EnvironmentGCCHigh,
 		},
@@ -118,9 +117,16 @@ func TestUnit_Provider_Environment(t *testing.T) {
 			endpoint:    "https://custom.example.com",
 		},
 		{
-			name:      "legacy government authority is ambiguous",
-			env:       map[string]string{"ARM_ENVIRONMENT": "usgovernment"},
-			errorText: `Unsupported Fabric environment "usgovernment". Supported values are 'public' and 'gcchigh'.`,
+			name: "Azure Government environment is ignored",
+			env:  map[string]string{"ARM_ENVIRONMENT": "usgovernment"},
+		},
+		{
+			name: "Azure China environment is ignored",
+			env:  map[string]string{"ARM_ENVIRONMENT": "china"},
+		},
+		{
+			name: "invalid Azure environment is ignored",
+			env:  map[string]string{"ARM_ENVIRONMENT": "typo"},
 		},
 		{
 			name:      "unsupported China",

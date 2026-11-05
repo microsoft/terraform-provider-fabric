@@ -1,0 +1,5 @@
+kind: changed
+body: Removed the ARM_ENVIRONMENT fallback for Fabric environment selection. Use the provider environment argument or FABRIC_ENVIRONMENT instead; other ARM credential fallbacks remain unchanged.
+time: 2026-11-05T15:09:49.0735221+02:00
+custom:
+    Issue: "1146"

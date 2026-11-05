@@ -257,7 +257,7 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 			},
 
 			"environment": schema.StringAttribute{
-				MarkdownDescription: "The Microsoft Fabric environment which should be used. Possible values are `public` and `gcchigh` (GCC High). This can also be sourced from the `FABRIC_ENVIRONMENT` or `ARM_ENVIRONMENT` environment variables. Defaults to `public`.",
+				MarkdownDescription: "The Microsoft Fabric environment which should be used. Possible values are `public` and `gcchigh` (GCC High). This can also be sourced from the `FABRIC_ENVIRONMENT` environment variable. Defaults to `public`.",
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.OneOfCaseInsensitive("public", "gcchigh"),
