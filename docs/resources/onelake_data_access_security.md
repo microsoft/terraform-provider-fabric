@@ -122,7 +122,7 @@ Required:
 
 Optional:
 
-- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. (see [below for nested schema](#nestedatt--members--fabric_item_members))
+- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. Value defaults to `[]`. (see [below for nested schema](#nestedatt--members--fabric_item_members))
 - `microsoft_entra_members` (Attributes Set) The list of Microsoft Entra ID members. (see [below for nested schema](#nestedatt--members--microsoft_entra_members))
 
 <a id="nestedatt--members--fabric_item_members"></a>

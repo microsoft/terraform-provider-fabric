@@ -41,6 +41,11 @@ func TestUnit_OneLakeDataAccessSecurity_ObjectTypeSchema(t *testing.T) {
 	require.False(t, resourceSchema.Schema.ValidateImplementation(t.Context()).HasError())
 
 	members := resourceSchema.Schema.Attributes["members"].(schemaR.SingleNestedAttribute)
+	fabricMembers := members.Attributes["fabric_item_members"].(schemaR.SetNestedAttribute)
+	require.True(t, fabricMembers.Optional)
+	require.True(t, fabricMembers.Computed)
+	require.NotNil(t, fabricMembers.Default)
+
 	entraMembers := members.Attributes["microsoft_entra_members"].(schemaR.SetNestedAttribute)
 	objectType := entraMembers.NestedObject.Attributes["object_type"].(schemaR.StringAttribute)
 	require.True(t, objectType.Optional)
@@ -210,7 +215,6 @@ func TestUnit_OneLakeDataAccessSecurityResource_DeprecatedObjectType(t *testing.
 				},
 			}},
 			"members": map[string]any{
-				"fabric_item_members":     []map[string]any{},
 				"microsoft_entra_members": members,
 			},
 		}) + fmt.Sprintf(`

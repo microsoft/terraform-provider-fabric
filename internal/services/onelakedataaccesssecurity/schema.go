@@ -4,6 +4,7 @@
 package onelakedataaccesssecurity
 
 import (
+	"context"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -11,11 +12,13 @@ import (
 	schemaD "github.com/hashicorp/terraform-plugin-framework/datasource/schema" //revive:disable-line:import-alias-naming
 	schemaR "github.com/hashicorp/terraform-plugin-framework/resource/schema"   //revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	superschema "github.com/orange-cloudavenue/terraform-plugin-framework-superschema"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -23,7 +26,7 @@ import (
 )
 
 //nolint:maintidx
-func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-parameter
+func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:disable-line:flag-parameter
 	var dsTimeout *superschema.DatasourceTimeoutAttribute
 
 	if !isList {
@@ -325,6 +328,8 @@ func itemSchema(isList bool) superschema.Schema { //revive:disable-line:flag-par
 						},
 						Resource: &schemaR.SetNestedAttribute{
 							Optional: true,
+							Computed: true,
+							Default:  setdefault.StaticValue(supertypes.NewSetNestedObjectValueOfValueSlice(ctx, []fabricItemMember{}).SetValue),
 						},
 						DataSource: &schemaD.SetNestedAttribute{
 							Computed: true,

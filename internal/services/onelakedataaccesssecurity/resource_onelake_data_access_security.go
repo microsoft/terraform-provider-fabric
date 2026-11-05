@@ -48,7 +48,7 @@ func (r *resourceOneLakeDataAccessSecurity) Metadata(_ context.Context, _ resour
 }
 
 func (r *resourceOneLakeDataAccessSecurity) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = itemSchema(false).GetResource(ctx)
+	resp.Schema = itemSchema(ctx, false).GetResource(ctx)
 }
 
 func (r *resourceOneLakeDataAccessSecurity) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

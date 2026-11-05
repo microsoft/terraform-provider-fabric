@@ -263,33 +263,31 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 	to.FabricItemMembers = supertypes.NewSetNestedObjectValueOfNull[fabricItemMember](ctx)
 	to.MicrosoftEntraMembers = supertypes.NewSetNestedObjectValueOfNull[microsoftEntraMember](ctx)
 
-	if from.FabricItemMembers != nil {
-		fabricItemMembers := make([]*fabricItemMember, 0, len(from.FabricItemMembers))
+	fabricItemMembers := make([]*fabricItemMember, 0, len(from.FabricItemMembers))
 
-		for _, item := range from.FabricItemMembers {
-			fim := &fabricItemMember{
-				SourcePath: types.StringPointerValue(item.SourcePath),
-			}
-
-			fim.ItemAccess = supertypes.NewSetValueOfNull[types.String](ctx)
-
-			if item.ItemAccess != nil {
-				itemAccess := make([]types.String, 0, len(item.ItemAccess))
-				for _, access := range item.ItemAccess {
-					itemAccess = append(itemAccess, types.StringValue(string(access)))
-				}
-
-				if diags := fim.ItemAccess.Set(ctx, itemAccess); diags.HasError() {
-					return diags
-				}
-			}
-
-			fabricItemMembers = append(fabricItemMembers, fim)
+	for _, item := range from.FabricItemMembers {
+		fim := &fabricItemMember{
+			SourcePath: types.StringPointerValue(item.SourcePath),
 		}
 
-		if diags := to.FabricItemMembers.Set(ctx, fabricItemMembers); diags.HasError() {
-			return diags
+		fim.ItemAccess = supertypes.NewSetValueOfNull[types.String](ctx)
+
+		if item.ItemAccess != nil {
+			itemAccess := make([]types.String, 0, len(item.ItemAccess))
+			for _, access := range item.ItemAccess {
+				itemAccess = append(itemAccess, types.StringValue(string(access)))
+			}
+
+			if diags := fim.ItemAccess.Set(ctx, itemAccess); diags.HasError() {
+				return diags
+			}
 		}
+
+		fabricItemMembers = append(fabricItemMembers, fim)
+	}
+
+	if diags := to.FabricItemMembers.Set(ctx, fabricItemMembers); diags.HasError() {
+		return diags
 	}
 
 	if from.MicrosoftEntraMembers != nil {

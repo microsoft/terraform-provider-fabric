@@ -24,6 +24,7 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 	workspaceID := testhelp.RandomUUID()
 	itemID := testhelp.RandomUUID()
 	entity := fakes.NewRandomOneLakeDataAccessRoleListItem()
+	entity.Members.FabricItemMembers = []fabcore.FabricItemMember{}
 	entity.Members.MicrosoftEntraMembers = []fabcore.MicrosoftEntraMember{{
 		ObjectID: new(testhelp.RandomUUID()),
 		TenantID: new(testhelp.RandomUUID()),
@@ -91,6 +92,7 @@ func TestUnit_OneLakeDataAccessSecurityDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "role_name", *entity.Name),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "decision_rules.0.effect", string(*entity.DecisionRules[0].Effect)),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "members.microsoft_entra_members.#", "1"),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "members.fabric_item_members.#", "0"),
 				resource.TestCheckOutput("object_types_unset", "true"),
 			),
 		},
