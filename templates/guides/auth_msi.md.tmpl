@@ -13,6 +13,8 @@ description: |-
 
 Follow [Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Identities (MSI)](./auth_app_reg_spn.md#configure-microsoft-fabric-to-allow-service-principals-spn-and-managed-identities-msi) guide.
 
+For GCC High, run Terraform on an Azure Government host with its managed identity and set `environment = "gcchigh"` in the Fabric provider or `FABRIC_ENVIRONMENT=gcchigh`. Run the CLI/PowerShell provisioning examples below using sessions authenticated to Azure Government.
+
 ## Using a System-Assigned Managed Identity
 
 ### Configuring a Virtual Machine to use a System-Assigned Managed Identity

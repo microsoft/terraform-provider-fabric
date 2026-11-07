@@ -12,7 +12,7 @@ func GetEnvVarsEndpoint() []string {
 }
 
 func GetEnvVarsEnvironment() []string {
-	return []string{"FABRIC_ENVIRONMENT", "ARM_ENVIRONMENT"}
+	return []string{"FABRIC_ENVIRONMENT"}
 }
 
 func GetEnvVarsTenantID() []string {
