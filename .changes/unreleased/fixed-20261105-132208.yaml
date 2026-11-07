@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed OneLake data access security `members.fabric_item_members` to default to an empty set when omitted or null, matching the API and avoiding inconsistent results after apply. Removing configured members now clears the collection without recurring diffs.
+time: 2026-11-05T13:22:08.2498044+02:00
+custom:
+    Issue: "1146"

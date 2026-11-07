@@ -1,0 +1,5 @@
+kind: deprecated
+body: Deprecated `members.microsoft_entra_members.object_type` in OneLake data access security. The resource attribute is now optional and ignored by the API, with configured values retained in state for compatibility. Data sources continue to return null. Remove the attribute from configuration and references before its removal in a future major provider version.
+time: 2026-11-05T12:58:44.6111786+02:00
+custom:
+    Issue: "1146"

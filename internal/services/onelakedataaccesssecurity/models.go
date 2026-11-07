@@ -5,6 +5,7 @@ package onelakedataaccesssecurity
 
 import (
 	"context"
+	"strings"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
@@ -260,7 +261,7 @@ func (to *permissionScope) set(ctx context.Context, from fabcore.PermissionScope
 }
 
 func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diagnostics {
-	to.FabricItemMembers = supertypes.NewSetNestedObjectValueOfNull[fabricItemMember](ctx)
+	to.FabricItemMembers = supertypes.NewSetNestedObjectValueOfValueSlice(ctx, []fabricItemMember{})
 	to.MicrosoftEntraMembers = supertypes.NewSetNestedObjectValueOfNull[microsoftEntraMember](ctx)
 
 	if from.FabricItemMembers != nil {
@@ -297,9 +298,8 @@ func (to *memberModel) set(ctx context.Context, from *fabcore.Members) diag.Diag
 
 		for _, item := range from.MicrosoftEntraMembers {
 			entraMembers = append(entraMembers, &microsoftEntraMember{
-				ObjectID:   customtypes.NewUUIDPointerValue(item.ObjectID),
-				ObjectType: types.StringPointerValue((*string)(item.ObjectType)),
-				TenantID:   customtypes.NewUUIDPointerValue(item.TenantID),
+				ObjectID: customtypes.NewUUIDPointerValue(item.ObjectID),
+				TenantID: customtypes.NewUUIDPointerValue(item.TenantID),
 			})
 		}
 
@@ -359,6 +359,72 @@ type resourceOneLakeDataAccessSecurityModel struct {
 	baseOneLakeDataAccessSecurityModel
 
 	Timeouts timeoutsR.Value `tfsdk:"timeouts"`
+}
+
+func (to *resourceOneLakeDataAccessSecurityModel) set(ctx context.Context, from fabcore.DataAccessRoleBase) diag.Diagnostics {
+	previousMembers := make(map[[2]string]*microsoftEntraMember)
+
+	if !to.Members.IsNull() && !to.Members.IsUnknown() {
+		members, diags := to.Members.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if !members.MicrosoftEntraMembers.IsNull() && !members.MicrosoftEntraMembers.IsUnknown() {
+			entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+			if diags.HasError() {
+				return diags
+			}
+
+			for _, member := range entraMembers {
+				previousMembers[[2]string{
+					strings.ToLower(member.ObjectID.ValueString()),
+					strings.ToLower(member.TenantID.ValueString()),
+				}] = member
+			}
+		}
+	}
+
+	if diags := to.baseOneLakeDataAccessSecurityModel.set(ctx, to.WorkspaceID.ValueString(), to.ItemID.ValueString(), from); diags.HasError() {
+		return diags
+	}
+
+	if len(previousMembers) == 0 || to.Members.IsNull() || to.Members.IsUnknown() {
+		return nil
+	}
+
+	members, diags := to.Members.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if members.MicrosoftEntraMembers.IsNull() || members.MicrosoftEntraMembers.IsUnknown() {
+		return nil
+	}
+
+	entraMembers, diags := members.MicrosoftEntraMembers.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	// Retain UUID spelling and object_type, which the API never returns, for matching members.
+	for _, member := range entraMembers {
+		key := [2]string{
+			strings.ToLower(member.ObjectID.ValueString()),
+			strings.ToLower(member.TenantID.ValueString()),
+		}
+		if previous, ok := previousMembers[key]; ok {
+			member.ObjectID = previous.ObjectID
+			member.TenantID = previous.TenantID
+			member.ObjectType = previous.ObjectType
+		}
+	}
+
+	if diags := members.MicrosoftEntraMembers.Set(ctx, entraMembers); diags.HasError() {
+		return diags
+	}
+
+	return to.Members.Set(ctx, members)
 }
 
 type requestCreateOrUpdateOneLakeDataAccessSecurity struct {
@@ -472,9 +538,8 @@ func (to *requestCreateOrUpdateOneLakeDataAccessSecurity) setMembers(ctx context
 		to.Members.MicrosoftEntraMembers = make([]fabcore.MicrosoftEntraMember, 0, len(microsoftEntraMembers))
 		for _, mem := range microsoftEntraMembers {
 			to.Members.MicrosoftEntraMembers = append(to.Members.MicrosoftEntraMembers, fabcore.MicrosoftEntraMember{
-				ObjectID:   mem.ObjectID.ValueStringPointer(),
-				TenantID:   mem.TenantID.ValueStringPointer(),
-				ObjectType: (*fabcore.ObjectType)(mem.ObjectType.ValueStringPointer()),
+				ObjectID: mem.ObjectID.ValueStringPointer(),
+				TenantID: mem.TenantID.ValueStringPointer(),
 			})
 		}
 	}

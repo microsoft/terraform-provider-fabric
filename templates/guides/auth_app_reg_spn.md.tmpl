@@ -13,7 +13,7 @@ description: |-
 
 ### Using Azure Portal
 
-1. Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com).
+1. Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High.
 1. Browse to **Identity** > **Applications** > **App registrations** and select **New registration**.
 1. Enter a display Name for your application.
 1. Don't enter anything for **Redirect URI (optional)**
@@ -24,16 +24,20 @@ For more details and advanced scenarios, please follow this [guide](https://lear
 
 Run the following commands to create an App Registration with Service Principal using [Azure CLI](https://learn.microsoft.com/cli/azure/):
 
+For GCC High, run `az cloud set --name AzureUSGovernment` before logging in and running these setup commands.
+
 {{ codefile "shell" "examples/guides/auth_app_reg_spn/app_reg.sh" }}
 
 ### Using Entra PowerShell
 
 Run the following commands to create an App Registration with Service Principal using [Entra PowerShell](https://learn.microsoft.com/powershell/entra-powershell/):
 
+For GCC High, add `-Environment USGov` to the `Connect-Entra` command below. Authenticate the Azure PowerShell session with `Connect-AzAccount -Environment AzureUSGovernment` before running the Az commands.
+
 {{ codefile "powershell" "examples/guides/auth_app_reg_spn/app_reg.ps1" }}
 
 ## Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Identities (MSI)
 
-1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal).
+1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal), or the [GCC High portal](https://app.high.powerbigov.us/admin-portal).
 1. Browse to **Tenant settings** > **Developer settings** > [Service principals can use Fabric APIs](https://learn.microsoft.com/fabric/admin/service-admin-portal-developer#service-principals-can-use-fabric-apis) and check **Enable**.
 1. Apply security restrictions to **The entire organization** or **Specific security groups**

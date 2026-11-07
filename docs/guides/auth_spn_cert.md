@@ -36,7 +36,7 @@ openssl pkcs12 -export -passin pass:'YourPrivateKeyPassword' -password pass:'You
 
 ### Using Azure Portal
 
-1. In the [Microsoft Entra admin center](https://entra.microsoft.com), in **App registrations**, select your application.
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High, open **App registrations** and select your application.
 1. Select **Certificates & secrets** > `Certificates` > `Upload certificate`.
 1. Select the file you want to upload. It must be one of the following file types: *.cer, .pem, .crt*.
 1. Select `Add`.
@@ -44,6 +44,8 @@ openssl pkcs12 -export -passin pass:'YourPrivateKeyPassword' -password pass:'You
 ### Using Azure CLI
 
 Run the following command to upload the certificate:
+
+For GCC High, use an Azure CLI session logged in to `AzureUSGovernment`.
 
 ```shell
 # See https://learn.microsoft.com/cli/azure/ad/app/credential#az-ad-app-credential-reset for more details.
@@ -56,6 +58,8 @@ Replace `00000000-0000-0000-0000-000000000000` with the Application (client) ID 
 
 Run the following command to upload the certificate:
 
+For GCC High, authenticate the session with `Connect-AzAccount -Environment AzureUSGovernment`.
+
 ```powershell
 $certValue = [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes('client.crt'))
 Get-AzADApplication -ApplicationId '00000000-0000-0000-0000-000000000000' | New-AzADAppCredential -CertValue $certValue
@@ -64,6 +68,8 @@ Get-AzADApplication -ApplicationId '00000000-0000-0000-0000-000000000000' | New-
 Replace `00000000-0000-0000-0000-000000000000` with the Application (client) ID of the service principal.
 
 ## Configuring Terraform to use the Client Certificate
+
+For GCC High, use an app registration in your government tenant and set `environment = "gcchigh"` in the Fabric provider or `FABRIC_ENVIRONMENT=gcchigh`.
 
 Now that we have our Client Certificate uploaded to Entra App and ready to use, it's possible to configure Terraform in a few different ways.
 
