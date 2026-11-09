@@ -51,7 +51,6 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureMirroredDatabase)
 	handleEntity(server, configureNotebook)
 	handleEntity(server, configureOperationsAgent)
-	handleEntity(server, configurePlan)
 	handleEntity(server, configureReport)
 	handleEntity(server, configureSemanticModel)
 	handleEntity(server, configureSnowflakeDatabase)

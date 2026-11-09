@@ -23,7 +23,7 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 	Names:          "Plans",
 	Types:          "plans",
 	DocsURL:        "https://learn.microsoft.com/fabric/iq/plan/overview",
-	IsPreview:      true,
+	IsPreview:      false,
 	IsSPNSupported: true,
 }
 

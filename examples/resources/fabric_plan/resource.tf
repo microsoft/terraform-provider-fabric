@@ -48,12 +48,14 @@ resource "fabric_plan" "example_custom_delimiter" {
   format       = "Default"
   definition = {
     "definition.json" = {
-      source           = "${local.path}/definition.json.tmpl"
+      source           = "${local.path}/definition-custom-delimiter.json.tmpl"
       tokens_delimiter = "<<>>"
       tokens = {
-        "MyValue1" = "my value 1"
-        "MyValue2" = "my value 2"
+        "WORKLOAD_ITEM_NAME" = "MyPlan"
       }
+    }
+    "planProperties.json" = {
+      source = "${local.path}/planProperties.json.tmpl"
     }
   }
 }
@@ -66,7 +68,7 @@ resource "fabric_plan" "example_parameters" {
   format       = "Default"
   definition = {
     "definition.json" = {
-      source          = "${local.path}/definition.json.tmpl"
+      source          = "${local.path}/definition.json"
       processing_mode = "Parameters"
       parameters = [
         {
@@ -75,6 +77,9 @@ resource "fabric_plan" "example_parameters" {
           value = "MyPlan"
         }
       ]
+    }
+    "planProperties.json" = {
+      source = "${local.path}/planProperties.json.tmpl"
     }
   }
 }

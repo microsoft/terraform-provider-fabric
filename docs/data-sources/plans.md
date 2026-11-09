@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Plans data-source allows you to retrieve a list of Fabric Plans https://learn.microsoft.com/fabric/iq/plan/overview.
   -> This data-source supports Service Principal authentication.
-  ~> This data-source is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_plans (Data Source)
@@ -13,8 +12,6 @@ description: |-
 The Plans data-source allows you to retrieve a list of Fabric [Plans](https://learn.microsoft.com/fabric/iq/plan/overview).
 
 -> This data-source supports Service Principal authentication.
-
-~> This data-source is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 

@@ -5,7 +5,6 @@ subcategory: ""
 description: |-
   The Plan resource allows you to manage a Fabric Plan https://learn.microsoft.com/fabric/iq/plan/overview.
   -> This resource supports Service Principal authentication.
-  ~> This resource is in preview. To access it, you must explicitly enable the preview mode in the provider level configuration.
 ---
 
 # fabric_plan (Resource)
@@ -13,8 +12,6 @@ description: |-
 The Plan resource allows you to manage a Fabric [Plan](https://learn.microsoft.com/fabric/iq/plan/overview).
 
 -> This resource supports Service Principal authentication.
-
-~> This resource is in **preview**. To access it, you must explicitly enable the `preview` mode in the provider level configuration.
 
 ## Example Usage
 
@@ -69,12 +66,14 @@ resource "fabric_plan" "example_custom_delimiter" {
   format       = "Default"
   definition = {
     "definition.json" = {
-      source           = "${local.path}/definition.json.tmpl"
+      source           = "${local.path}/definition-custom-delimiter.json.tmpl"
       tokens_delimiter = "<<>>"
       tokens = {
-        "MyValue1" = "my value 1"
-        "MyValue2" = "my value 2"
+        "WORKLOAD_ITEM_NAME" = "MyPlan"
       }
+    }
+    "planProperties.json" = {
+      source = "${local.path}/planProperties.json.tmpl"
     }
   }
 }
@@ -87,7 +86,7 @@ resource "fabric_plan" "example_parameters" {
   format       = "Default"
   definition = {
     "definition.json" = {
-      source          = "${local.path}/definition.json.tmpl"
+      source          = "${local.path}/definition.json"
       processing_mode = "Parameters"
       parameters = [
         {
@@ -96,6 +95,9 @@ resource "fabric_plan" "example_parameters" {
           value = "MyPlan"
         }
       ]
+    }
+    "planProperties.json" = {
+      source = "${local.path}/planProperties.json.tmpl"
     }
   }
 }
