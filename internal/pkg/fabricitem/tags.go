@@ -58,7 +58,7 @@ func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient 
 		}
 	}
 
-	toAdd, toRemove := diffTags(currentTagIDs, plannedTagIDs)
+	toAdd, toRemove := DiffTags(currentTagIDs, plannedTagIDs)
 
 	// Unapply only the tags that were removed
 	if len(toRemove) > 0 {
@@ -79,8 +79,8 @@ func SyncTags(ctx context.Context, itemsClient *fabcore.ItemsClient, tagsClient 
 	return nil
 }
 
-// diffTags computes which tags to add and remove by comparing current and planned tag IDs.
-func diffTags(current, planned []string) (toAdd, toRemove []string) { //nolint:nonamedreturns
+// DiffTags computes which tags to add and remove by comparing current and planned tag IDs.
+func DiffTags(current, planned []string) (toAdd, toRemove []string) { //nolint:nonamedreturns
 	for _, id := range planned {
 		if !slices.Contains(current, id) {
 			toAdd = append(toAdd, id)
