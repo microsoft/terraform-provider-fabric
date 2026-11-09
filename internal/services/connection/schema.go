@@ -255,7 +255,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									func(ctx context.Context, req planmodifier.SetRequest, resp *setplanmodifier.RequiresReplaceIfFuncResponse) {
 										var creationMethod types.String
 										resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("connection_details").AtName("creation_method"), &creationMethod)...)
-										resp.RequiresReplace = !creationMethod.IsNull()
+										resp.RequiresReplace = !creationMethod.IsNull() || !req.StateValue.IsNull()
 									},
 									"Replace parameter changes after creation details have been recorded.",
 									"Replace parameter changes after creation details have been recorded.",

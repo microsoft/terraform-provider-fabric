@@ -306,7 +306,109 @@ resource "terraform_data" "vault" {
 	}}))
 }
 
-func TestUnit_ConnectionResource_CredentialSecretsCRUD(t *testing.T) {
+func TestUnit_ConnectionResource_ImportIgnoredCredentialsWithParameters(t *testing.T) {
+	server := fakes.NewFakeServer()
+	connectionImportMetadata(server.ServerFactory)
+
+	entity := fakes.NewRandomShareableCloudConnection()
+	entity.ConnectionDetails = &fabcore.ListConnectionDetails{Type: new("FTP"), Path: new("existing.example.com")}
+	entity.CredentialDetails = nil
+	server.Upsert(entity)
+
+	config := fmt.Sprintf(`
+%s {
+ display_name = %q
+ connectivity_type = "ShareableCloud"
+ privacy_level = %q
+ connection_details = {
+  type = "FTP"
+  creation_method = "FTP.Contents"
+  parameters = [{ name = "server", value = "existing.example.com" }]
+ }
+ credential_details = { credential_type = "Anonymous" }
+ lifecycle { ignore_changes = [credential_details] }
+}
+import {
+ to = %s
+ id = %q
+}
+`, testResourceItemHeader, *entity.DisplayName, *entity.PrivacyLevel, testResourceItemFQN, *entity.ID)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, server.ServerFactory, nil, []resource.TestStep{
+		{
+			Config: config,
+			ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+				plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
+			}},
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "id", *entity.ID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.parameters.0.data_type", "Text"),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "credential_details"),
+			),
+		},
+		{Config: config, PlanOnly: true},
+		{
+			Config:   regexp.MustCompile(`name = "server"`).ReplaceAllString(config, `name = "unsupported"`),
+			PlanOnly: true, ExpectError: regexp.MustCompile("Unsupported connection parameter key"),
+		},
+	}))
+}
+
+func TestUnit_ConnectionResource_ImportIgnoredCreationMethodWithEmptyParameters(t *testing.T) {
+	server := fakes.NewFakeServer()
+	connectionImportMetadata(server.ServerFactory)
+
+	entity := fakes.NewRandomShareableCloudConnection()
+	entity.ConnectionDetails = &fabcore.ListConnectionDetails{Type: new("FTP"), Path: new("existing.example.com")}
+	entity.CredentialDetails = &fabcore.ListCredentialDetails{
+		CredentialType: new(fabcore.CredentialTypeAnonymous), ConnectionEncryption: new(fabcore.ConnectionEncryptionNotEncrypted),
+		SingleSignOnType: new(fabcore.SingleSignOnTypeNone), SkipTestConnection: new(false),
+	}
+	server.Upsert(entity)
+
+	config := fmt.Sprintf(`
+%s {
+ display_name = %q
+ connectivity_type = "ShareableCloud"
+ privacy_level = %q
+ connection_details = {
+  type = "FTP"
+  creation_method = "FTP.Contents"
+  parameters = []
+ }
+ credential_details = { credential_type = "Anonymous" }
+ lifecycle { ignore_changes = [connection_details.creation_method] }
+}
+import {
+ to = %s
+ id = %q
+}
+`, testResourceItemHeader, *entity.DisplayName, *entity.PrivacyLevel, testResourceItemFQN, *entity.ID)
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, server.ServerFactory, nil, []resource.TestStep{
+		{
+			Config: config,
+			ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+				plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionUpdate),
+			}},
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "id", *entity.ID),
+				resource.TestCheckNoResourceAttr(testResourceItemFQN, "connection_details.creation_method"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.parameters.#", "0"),
+			),
+		},
+		{Config: config, PlanOnly: true},
+		{
+			Config:   regexp.MustCompile(`parameters = \[\]`).ReplaceAllString(config, `parameters = [{ name = "server", value = "changed.example.com" }]`),
+			PlanOnly: true, ExpectNonEmptyPlan: true,
+			ConfigPlanChecks: resource.ConfigPlanChecks{PostApplyPreRefresh: []plancheck.PlanCheck{
+				plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionReplace),
+			}},
+		},
+	}))
+}
+
+func TestUnit_ConnectionResource_WriteOnly_CredentialSecretsCRUD(t *testing.T) {
 	for _, tc := range []struct {
 		credentialType string
 		block          string

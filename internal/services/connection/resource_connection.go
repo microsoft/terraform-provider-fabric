@@ -141,31 +141,29 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		return
 	}
 
-	if credentialDetails == nil {
-		return
-	}
+	if credentialDetails != nil {
+		if resp.Diagnostics.Append(r.validateConnectionEncryption(*credentialDetails, supportedConnectionType.SupportedConnectionEncryptionTypes)...); resp.Diagnostics.HasError() {
+			return
+		}
 
-	if resp.Diagnostics.Append(r.validateConnectionEncryption(*credentialDetails, supportedConnectionType.SupportedConnectionEncryptionTypes)...); resp.Diagnostics.HasError() {
-		return
-	}
+		if resp.Diagnostics.Append(r.validateCredentialType(*credentialDetails, supportedConnectionType.SupportedCredentialTypes)...); resp.Diagnostics.HasError() {
+			return
+		}
 
-	if resp.Diagnostics.Append(r.validateCredentialType(*credentialDetails, supportedConnectionType.SupportedCredentialTypes)...); resp.Diagnostics.HasError() {
-		return
-	}
+		//nolint:godox
+		// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
+		// if resp.Diagnostics.Append(
+		// 	r.validateCredentialTypeForUsageInUserControlledCode(
+		// 		plan.AllowUsageInUserControlledCode,
+		// 		*credentialDetails,
+		// 		supportedConnectionType.SupportedCredentialTypesForUsageInUserControlledCode,
+		// 	)...); resp.Diagnostics.HasError() {
+		// 	return
+		// }
 
-	//nolint:godox
-	// TODO: uncomment when API issue with SupportedCredentialTypesForUsageInUserControlledCode list is fixed
-	// if resp.Diagnostics.Append(
-	// 	r.validateCredentialTypeForUsageInUserControlledCode(
-	// 		plan.AllowUsageInUserControlledCode,
-	// 		*credentialDetails,
-	// 		supportedConnectionType.SupportedCredentialTypesForUsageInUserControlledCode,
-	// 	)...); resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
-	if resp.Diagnostics.Append(r.validateSkipTestConnection(*credentialDetails, *supportedConnectionType.SupportsSkipTestConnection)...); resp.Diagnostics.HasError() {
-		return
+		if resp.Diagnostics.Append(r.validateSkipTestConnection(*credentialDetails, *supportedConnectionType.SupportsSkipTestConnection)...); resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	if resp.Diagnostics.Append(r.validateCreationMethodParameters(ctx, *connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
