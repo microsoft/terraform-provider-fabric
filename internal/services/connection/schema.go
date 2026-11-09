@@ -50,7 +50,8 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
-			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false),
+			MarkdownDescription: fabricitem.NewResourceMarkdownDescription(ItemTypeInfo, false) +
+				"\n\nAfter importing an existing connection, the first apply records configured creation-only details in state without replacing the connection. The API does not return `creation_method`, `parameters`, or credential identities and secrets, so verify these inputs match the existing connection. Subsequent changes to recorded creation details require replacement. Write-only secrets and their version attributes may be omitted to preserve existing credentials; supply a secret or Key Vault reference to create a connection or change its credential identity. Use `lifecycle.ignore_changes` for connection or credential details you do not want Terraform to manage.",
 		},
 		DataSource: superschema.SchemaDetails{
 			MarkdownDescription: fabricitem.NewDataSourceMarkdownDescription(ItemTypeInfo, isList),
@@ -100,7 +101,8 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
+					MarkdownDescription: "Includes cloud, on-premises gateway, personal gateway, virtual network gateway, and streaming virtual network gateway connections.",
 				},
 			},
 			"privacy_level": superschema.StringAttribute{
@@ -231,19 +233,33 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 					"creation_method": superschema.StringAttribute{
 						Resource: &schemaR.StringAttribute{
-							MarkdownDescription: "The creation method used to create the connection.",
+							MarkdownDescription: "The creation method used to create the connection. Not returned by the API; after import, the first apply records the configured value without replacing the connection. Subsequent changes require replacement.",
 							Required:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
+								stringplanmodifier.RequiresReplaceIf(
+									func(_ context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
+										resp.RequiresReplace = !req.StateValue.IsNull()
+									},
+									"Replace when a previously recorded creation method changes.",
+									"Replace when a previously recorded creation method changes.",
+								),
 							},
 						},
 					},
 					"parameters": superschema.SuperSetNestedAttributeOf[connectionParametersModel]{
 						Resource: &schemaR.SetNestedAttribute{
-							MarkdownDescription: "A set of connection parameters.",
+							MarkdownDescription: "A set of connection parameters. Not returned by the API; after import, the first apply records configured parameters without replacing the connection. Subsequent changes require replacement.",
 							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.RequiresReplace(),
+								setplanmodifier.RequiresReplaceIf(
+									func(ctx context.Context, req planmodifier.SetRequest, resp *setplanmodifier.RequiresReplaceIfFuncResponse) {
+										var creationMethod types.String
+										resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("connection_details").AtName("creation_method"), &creationMethod)...)
+										resp.RequiresReplace = !creationMethod.IsNull()
+									},
+									"Replace parameter changes after creation details have been recorded.",
+									"Replace parameter changes after creation details have been recorded.",
+								),
 							},
 						},
 						Attributes: superschema.Attributes{
@@ -256,9 +272,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											regexp.MustCompile(`\S`),
 											"Name must contain at least one non-whitespace character.",
 										),
-									},
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
 									},
 								},
 							},
@@ -277,9 +290,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 											regexp.MustCompile(`\S`),
 											"Value must contain at least one non-whitespace character.",
 										),
-									},
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
 									},
 								},
 							},
@@ -348,6 +358,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					"credential_type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The credential type.",
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
 									utils.RemoveSlicesByValues(
@@ -357,9 +370,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									true,
 								)...),
 							},
-						},
-						Resource: &schemaR.StringAttribute{
-							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
@@ -387,12 +397,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"password_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The password (WO). Use password or password_reference. You can't use both at the same time.",
+									MarkdownDescription: "The password (WO). Use password_wo or password_reference, not both. Required on creation; omit both to preserve existing credentials after import.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
-										stringvalidator.ExactlyOneOf(
-											path.MatchRelative().AtParent().AtName("password_wo"),
+										stringvalidator.ConflictsWith(
 											path.MatchRelative().AtParent().AtName("password_reference"),
 										),
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("password_wo_version")),
@@ -427,12 +436,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Attributes: superschema.Attributes{
 							"key_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The key (WO).",
+									MarkdownDescription: "The key (WO). Use key_wo or key_reference, not both. Required on creation; omit both to preserve existing credentials after import.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
-										stringvalidator.ExactlyOneOf(
-											path.MatchRelative().AtParent().AtName("key_wo"),
+										stringvalidator.ConflictsWith(
 											path.MatchRelative().AtParent().AtName("key_reference"),
 										),
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("key_wo_version")),
@@ -479,12 +487,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"client_secret_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The client secret (WO). Use client_secret or client_secret_reference. You can't use both at the same time.",
+									MarkdownDescription: "The client secret (WO). Use client_secret_wo or service_principal_secret_reference, not both. Required on creation; omit both to preserve existing credentials after import.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
-										stringvalidator.ExactlyOneOf(
-											path.MatchRelative().AtParent().AtName("client_secret_wo"),
+										stringvalidator.ConflictsWith(
 											path.MatchRelative().AtParent().AtName("service_principal_secret_reference"),
 										),
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("client_secret_wo_version")),
@@ -527,15 +534,21 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							},
 							"private_key_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The private key based on PKCS #8 standard (WO).",
-									Required:            true,
+									MarkdownDescription: "The private key based on PKCS #8 standard (WO). Required on creation; omit to preserve existing credentials after import.",
+									Optional:            true,
 									WriteOnly:           true,
+									Validators: []validator.String{
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo_version")),
+									},
 								},
 							},
 							"private_key_wo_version": superschema.Int32Attribute{
 								Resource: &schemaR.Int32Attribute{
 									MarkdownDescription: "The version of the `private_key_wo`.",
-									Required:            true,
+									Optional:            true,
+									Validators: []validator.Int32{
+										int32validator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo")),
+									},
 								},
 							},
 							"passphrase_wo": superschema.StringAttribute{
@@ -545,6 +558,7 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									WriteOnly:           true,
 									Validators: []validator.String{
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("passphrase_wo_version")),
+										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("private_key_wo")),
 									},
 								},
 							},
@@ -575,12 +589,11 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 						Attributes: superschema.Attributes{
 							"token_wo": superschema.StringAttribute{
 								Resource: &schemaR.StringAttribute{
-									MarkdownDescription: "The token (WO).",
+									MarkdownDescription: "The token (WO). Use token_wo or token_reference, not both. Required on creation; omit both to preserve existing credentials after import.",
 									Optional:            true,
 									WriteOnly:           true,
 									Validators: []validator.String{
-										stringvalidator.ExactlyOneOf(
-											path.MatchRelative().AtParent().AtName("token_wo"),
+										stringvalidator.ConflictsWith(
 											path.MatchRelative().AtParent().AtName("token_reference"),
 										),
 										stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("token_wo_version")),
