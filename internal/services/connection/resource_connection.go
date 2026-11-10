@@ -97,40 +97,51 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		"action": "start",
 	})
 
-	//nolint:nestif
-	if !req.Plan.Raw.IsNull() {
-		var plan resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]
+	if req.Plan.Raw.IsNull() {
+		return
+	}
 
-		if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
-			return
-		}
+	var plan resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]
 
-		connectionDetails, diags := plan.getConnectionDetails(ctx)
-		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
 
-		var supportedConnectionType fabcore.ConnectionCreationMetadata
+	connectionDetails, diags := plan.getConnectionDetails(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
 
-		if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
-			return
-		}
+	if connectionDetails == nil || connectionDetails.Type.IsNull() || connectionDetails.Type.IsUnknown() {
+		return
+	}
 
-		// If the supported connection metadata wasn't resolved (e.g., gateway_id is unknown at plan time),
-		// skip the metadata-dependent validations and defer them to apply time.
-		if supportedConnectionType.Type == nil {
-			return
-		}
+	if resp.Diagnostics.Append(r.validateCredentialChanges(ctx, req, len(resp.RequiresReplace) > 0)...); resp.Diagnostics.HasError() {
+		return
+	}
 
-		if resp.Diagnostics.Append(r.validateCreationMethod(*connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
-			return
-		}
+	var supportedConnectionType fabcore.ConnectionCreationMetadata
 
-		credentialDetails, diags := plan.getCredentialDetails(ctx)
-		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
-			return
-		}
+	if resp.Diagnostics.Append(r.getConnectionTypeMetadata(ctx, *connectionDetails, plan.GatewayID, &supportedConnectionType)...); resp.Diagnostics.HasError() {
+		return
+	}
 
+	// If the supported connection metadata wasn't resolved (e.g., gateway_id is unknown at plan time),
+	// skip the metadata-dependent validations and defer them to apply time.
+	if supportedConnectionType.Type == nil {
+		return
+	}
+
+	if resp.Diagnostics.Append(r.validateCreationMethod(*connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	credentialDetails, diags := plan.getCredentialDetails(ctx)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if credentialDetails != nil {
 		if resp.Diagnostics.Append(r.validateConnectionEncryption(*credentialDetails, supportedConnectionType.SupportedConnectionEncryptionTypes)...); resp.Diagnostics.HasError() {
 			return
 		}
@@ -153,17 +164,17 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		if resp.Diagnostics.Append(r.validateSkipTestConnection(*credentialDetails, *supportedConnectionType.SupportsSkipTestConnection)...); resp.Diagnostics.HasError() {
 			return
 		}
-
-		if resp.Diagnostics.Append(r.validateCreationMethodParameters(ctx, *connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		if resp.Diagnostics.Append(r.setConnectionPerametersDataType(ctx, supportedConnectionType.CreationMethods, &plan)...); resp.Diagnostics.HasError() {
-			return
-		}
-
-		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 	}
+
+	if resp.Diagnostics.Append(r.validateCreationMethodParameters(ctx, *connectionDetails, supportedConnectionType.CreationMethods)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(r.setConnectionPerametersDataType(ctx, supportedConnectionType.CreationMethods, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 
 	tflog.Debug(ctx, "MODIFY PLAN", map[string]any{
 		"action": "end",
@@ -281,6 +292,15 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	credentialRequest := resource.ModifyPlanRequest{
+		Config: req.Config,
+		Plan:   req.Plan,
+		State:  req.State,
+	}
+	if resp.Diagnostics.Append(r.validateCredentialChanges(ctx, credentialRequest, false)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	timeout, diags := plan.Timeouts.Update(ctx, r.pConfigData.Timeout)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
@@ -383,6 +403,58 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 	return model.set(ctx, respGet.ConnectionClassification)
 }
 
+func (r *resourceConnection) validateCredentialChanges(ctx context.Context, req resource.ModifyPlanRequest, replacing bool) diag.Diagnostics { //revive:disable-line:flag-parameter
+	// Secrets and Key Vault references may not be resolved until apply.
+	if !req.Config.Raw.IsFullyKnown() {
+		tflog.Debug(ctx, "deferring credential validation: configuration is unknown")
+
+		return nil
+	}
+
+	var config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]
+	if diags := req.Config.Get(ctx, &config); diags.HasError() {
+		return diags
+	}
+
+	if !config.CredentialDetails.IsKnown() {
+		return nil
+	}
+
+	var details requestCreateCredentialDetails
+	if diags := details.setWithSecrets(ctx, config.CredentialDetails, req.State.Raw.IsNull() || replacing); diags.HasError() {
+		return diags
+	}
+
+	if details.Credentials != nil || req.State.Raw.IsNull() {
+		return nil
+	}
+
+	var diags diag.Diagnostics
+	// These identities are not returned by Get Connection. Null state values after
+	// import can be recorded, but changing a known identity must not be silently ignored.
+	for _, attributePath := range []path.Path{
+		path.Root("credential_details").AtName("credential_type"),
+		path.Root("credential_details").AtName("basic_credentials").AtName("username"),
+		path.Root("credential_details").AtName("service_principal_credentials").AtName("tenant_id"),
+		path.Root("credential_details").AtName("service_principal_credentials").AtName("client_id"),
+		path.Root("credential_details").AtName("key_pair_credentials").AtName("identifier"),
+	} {
+		var stateValue, planValue types.String
+		diags.Append(req.State.GetAttribute(ctx, attributePath, &stateValue)...)
+		diags.Append(req.Plan.GetAttribute(ctx, attributePath, &planValue)...)
+
+		if diags.HasError() {
+			return diags
+		}
+
+		if !stateValue.IsNull() && !stateValue.IsUnknown() && !planValue.IsUnknown() && !stateValue.Equal(planValue) {
+			diags.AddAttributeError(attributePath, "Missing credential secret", "Supply a write-only secret or Key Vault reference when changing existing credentials.")
+		}
+	}
+
+	return diags
+}
+
 func (r *resourceConnection) getConnectionTypeMetadata(
 	ctx context.Context,
 	model rsConnectionDetailsModel,
@@ -445,6 +517,11 @@ func (r *resourceConnection) getConnectionTypeMetadata(
 }
 
 func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
+	// Imports with ignored connection details have no creation method in state.
+	if model.CreationMethod.IsNull() || model.CreationMethod.IsUnknown() {
+		return nil
+	}
+
 	vNames := make([]string, 0, len(elements))
 
 	for _, v := range elements {
@@ -467,6 +544,10 @@ func (r *resourceConnection) validateCreationMethod(model rsConnectionDetailsMod
 }
 
 func (r *resourceConnection) validateConnectionEncryption(model rsCredentialDetailsModel, elements []fabcore.ConnectionEncryption) diag.Diagnostics {
+	if model.ConnectionEncryption.IsNull() || model.ConnectionEncryption.IsUnknown() {
+		return nil
+	}
+
 	if slices.Contains(elements, fabcore.ConnectionEncryption(model.ConnectionEncryption.ValueString())) {
 		return nil
 	}
@@ -487,6 +568,10 @@ func (r *resourceConnection) validateConnectionEncryption(model rsCredentialDeta
 }
 
 func (r *resourceConnection) validateCredentialType(model rsCredentialDetailsModel, elements []fabcore.CredentialType) diag.Diagnostics {
+	if model.CredentialType.IsNull() || model.CredentialType.IsUnknown() {
+		return nil
+	}
+
 	if slices.Contains(elements, fabcore.CredentialType(model.CredentialType.ValueString())) {
 		return nil
 	}
@@ -554,6 +639,10 @@ func (r *resourceConnection) validateSkipTestConnection(model rsCredentialDetail
 
 //nolint:gocognit,gocyclo
 func (r *resourceConnection) validateCreationMethodParameters(ctx context.Context, model rsConnectionDetailsModel, elements []fabcore.ConnectionCreationMethod) diag.Diagnostics {
+	if model.CreationMethod.IsNull() || model.CreationMethod.IsUnknown() || model.Parameters.IsUnknown() {
+		return nil
+	}
+
 	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
 
@@ -737,6 +826,10 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 	connectionDetails, diags := plan.ConnectionDetails.Get(ctx)
 	if diags.HasError() {
 		return diags
+	}
+
+	if connectionDetails.CreationMethod.IsNull() || connectionDetails.CreationMethod.IsUnknown() || !connectionDetails.Parameters.IsKnown() {
+		return nil
 	}
 
 	for _, v := range elements {
