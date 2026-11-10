@@ -69,26 +69,35 @@ func TestUnit_MonitoringDataSources_MissingProperties(t *testing.T) {
 	entity := fakes.NewRandomMonitoring()
 	entity.Properties = nil
 	server.Upsert(entity)
-	config := fmt.Sprintf(`
+	// Each lookup gets its own step because the SDK fake shares pager state by request path.
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, server.ServerFactory, nil, []resource.TestStep{
+		{
+			Config: fmt.Sprintf(`
 data "fabric_monitoring" "by_id" {
   workspace_id = %q
   id           = %q
 }
+`, *entity.WorkspaceID, *entity.ID),
+			Check: resource.TestCheckNoResourceAttr("data.fabric_monitoring.by_id", "properties.data_collection_state"),
+		},
+		{
+			Config: fmt.Sprintf(`
 data "fabric_monitoring" "by_name" {
   workspace_id = %q
   display_name = %q
 }
+`, *entity.WorkspaceID, *entity.DisplayName),
+			Check: resource.TestCheckNoResourceAttr("data.fabric_monitoring.by_name", "properties.data_collection_state"),
+		},
+		{
+			Config: fmt.Sprintf(`
 data "fabric_monitoring_items" "all" {
   workspace_id = %q
 }
-`, *entity.WorkspaceID, *entity.ID, *entity.WorkspaceID, *entity.DisplayName, *entity.WorkspaceID)
-	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, server.ServerFactory, nil, []resource.TestStep{
-		{
-			Config: config,
+`, *entity.WorkspaceID),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckNoResourceAttr("data.fabric_monitoring.by_id", "properties.data_collection_state"),
-				resource.TestCheckNoResourceAttr("data.fabric_monitoring.by_name", "properties.data_collection_state"),
 				resource.TestCheckResourceAttr("data.fabric_monitoring_items.all", "values.#", "1"),
+				resource.TestCheckNoResourceAttr("data.fabric_monitoring_items.all", "values.0.properties.data_collection_state"),
 			),
 		},
 	}))

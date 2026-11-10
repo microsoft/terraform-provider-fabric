@@ -6,6 +6,7 @@ package fakes
 import (
 	"context"
 	"net/http"
+	"sync"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -16,10 +17,23 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
 )
 
-type operationsMonitoring struct{}
+type operationsMonitoring struct {
+	collectionStatesMu sync.RWMutex
+	collectionStates   map[string]fabmonitoring.DataCollectionState
+}
 
 // ConvertItemToEntity implements itemConverter.
 func (o *operationsMonitoring) ConvertItemToEntity(item fabcore.Item) fabmonitoring.Monitoring {
+	state := fabmonitoring.DataCollectionStateDisabled
+
+	o.collectionStatesMu.RLock()
+
+	if saved, ok := o.collectionStates[generateID(*item.WorkspaceID, *item.ID)]; ok {
+		state = saved
+	}
+
+	o.collectionStatesMu.RUnlock()
+
 	return fabmonitoring.Monitoring{
 		ID:          item.ID,
 		DisplayName: item.DisplayName,
@@ -27,7 +41,7 @@ func (o *operationsMonitoring) ConvertItemToEntity(item fabcore.Item) fabmonitor
 		WorkspaceID: item.WorkspaceID,
 		FolderID:    item.FolderID,
 		Type:        to.Ptr(fabmonitoring.ItemTypeMonitoring),
-		Properties:  NewRandomMonitoring().Properties,
+		Properties:  &fabmonitoring.Properties{DataCollectionState: new(state)},
 		Tags:        convertItemTags[fabmonitoring.ItemTag](item.Tags),
 	}
 }
@@ -143,9 +157,15 @@ func configureMonitoring(server *fakeServer) fabmonitoring.Monitoring {
 			fabcore.ItemsClientUpdateItemDefinitionResponse]
 	}
 
-	var entityOperations concreteEntityOperations = &operationsMonitoring{}
-	var definitionOperations concreteDefinitionOperations = &operationsMonitoring{}
-	var converter itemConverter[fabmonitoring.Monitoring] = &operationsMonitoring{}
+	operations := &operationsMonitoring{
+		collectionStates: make(map[string]fabmonitoring.DataCollectionState),
+	}
+
+	var entityOperations concreteEntityOperations = operations
+
+	var definitionOperations concreteDefinitionOperations = operations
+
+	var converter itemConverter[fabmonitoring.Monitoring] = operations
 
 	handler := newTypedHandlerWithConverter(server, entityOperations, converter)
 
@@ -170,7 +190,7 @@ func configureMonitoring(server *fakeServer) fabmonitoring.Monitoring {
 
 		var errResp azfake.ErrorResponder
 
-		err := setMonitoringCollectionState(handler, workspaceID, monitoringID, fabmonitoring.DataCollectionStateEnabled)
+		err := operations.setCollectionState(handler, workspaceID, monitoringID, fabmonitoring.DataCollectionStateEnabled)
 		if err != nil {
 			errResp.SetError(err)
 		} else {
@@ -184,7 +204,7 @@ func configureMonitoring(server *fakeServer) fabmonitoring.Monitoring {
 
 		var errResp azfake.ErrorResponder
 
-		err := setMonitoringCollectionState(handler, workspaceID, monitoringID, fabmonitoring.DataCollectionStateDisabled)
+		err := operations.setCollectionState(handler, workspaceID, monitoringID, fabmonitoring.DataCollectionStateDisabled)
 		if err != nil {
 			errResp.SetError(err)
 		} else {
@@ -218,15 +238,21 @@ func NewRandomMonitoringWithWorkspace(workspaceID string) fabmonitoring.Monitori
 	return result
 }
 
-func setMonitoringCollectionState(handler *typedHandler[fabmonitoring.Monitoring], workspaceID, monitoringID string, state fabmonitoring.DataCollectionState) error {
+func (o *operationsMonitoring) setCollectionState(handler *typedHandler[fabmonitoring.Monitoring], workspaceID, monitoringID string, state fabmonitoring.DataCollectionState) error {
 	id := generateID(workspaceID, monitoringID)
 	if !handler.Contains(id) {
 		return fabfake.SetResponseError(http.StatusNotFound, "ItemNotFound", "Monitoring item not found")
 	}
 
-	entity := handler.Get(id)
-	entity.Properties = &fabmonitoring.Properties{DataCollectionState: new(state)}
-	handler.Upsert(entity)
+	if entity := handler.getPointer(id); entity != nil {
+		entity.Properties = &fabmonitoring.Properties{DataCollectionState: new(state)}
+		handler.Upsert(*entity)
+	} else {
+		// Keep Core-created items in the Core store so later metadata updates retain their type.
+		o.collectionStatesMu.Lock()
+		o.collectionStates[id] = state
+		o.collectionStatesMu.Unlock()
+	}
 
 	return nil
 }

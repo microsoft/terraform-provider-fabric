@@ -180,6 +180,7 @@ func TestUnit_MonitoringDataCollectionResource_WithMonitoring(t *testing.T) {
 	server := fakes.NewFakeServer()
 	workspaceID := testhelp.RandomUUID()
 	name := testhelp.RandomName()
+	renamed := testhelp.RandomName()
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, nil, server.ServerFactory, nil, []resource.TestStep{
 		{
 			Config: monitoringCollectionConfig(workspaceID, name, true),
@@ -189,8 +190,24 @@ func TestUnit_MonitoringDataCollectionResource_WithMonitoring(t *testing.T) {
 			),
 		},
 		{
-			Config: monitoringCollectionConfig(workspaceID, name, false),
+			Config: monitoringCollectionConfig(workspaceID, renamed, true),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr("fabric_monitoring.test", "display_name", renamed),
+				resource.TestCheckResourceAttr("fabric_monitoring.test", "properties.data_collection_state", "Enabled"),
+				resource.TestCheckResourceAttr(resourceFQN, "enabled", "true"),
+			),
+		},
+		{
+			Config: monitoringCollectionConfig(workspaceID, renamed, false),
 			Check:  resource.TestCheckResourceAttr(resourceFQN, "enabled", "false"),
+		},
+		{
+			Config: monitoringCollectionConfig(workspaceID, name, false),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr("fabric_monitoring.test", "display_name", name),
+				resource.TestCheckResourceAttr("fabric_monitoring.test", "properties.data_collection_state", "Disabled"),
+				resource.TestCheckResourceAttr(resourceFQN, "enabled", "false"),
+			),
 		},
 		{
 			Config:   monitoringCollectionConfig(workspaceID, name, false),
