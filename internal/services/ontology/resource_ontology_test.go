@@ -291,36 +291,194 @@ func TestAcc_OntologyDefinitionResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
-	testHelperDefinition := map[string]any{
-		`"definition.json"`: map[string]any{
-			"source": "${local.path}/definition.json.tmpl",
-		},
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil,
+		ontologyDefinitionSteps(workspaceID, testhelp.RandomName()),
+	))
+}
+
+func TestUnit_OntologyDefinitionResource_CRUD(t *testing.T) {
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil,
+		ontologyDefinitionSteps(testhelp.RandomUUID(), testhelp.RandomName()),
+	))
+}
+
+func ontologyDefinitionSteps(workspaceID, displayName string) []resource.TestStep {
+	config := func(namespace string, updateEnabled bool) string {
+		return at.JoinConfigs(
+			testHelperLocals,
+			at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id":              workspaceID,
+					"display_name":              displayName,
+					"format":                    "TMDL",
+					"definition_update_enabled": updateEnabled,
+					"definition": map[string]any{
+						`".platform"`: map[string]any{
+							"source": "${local.path}/platform.json",
+						},
+						`"database.tmdl"`: map[string]any{
+							"source": "${local.path}/database.tmdl",
+						},
+						`"model.tmdl"`: map[string]any{
+							"source": "${local.path}/model.tmdl.tmpl",
+							"tokens": map[string]any{"Namespace": namespace},
+						},
+						fmt.Sprintf(`"namespaces/%s.tmdl"`, namespace): map[string]any{
+							"source": "${local.path}/namespace.tmdl.tmpl",
+							"tokens": map[string]any{"Namespace": namespace},
+						},
+					},
+				},
+			),
+			fmt.Sprintf(`
+data "fabric_ontology" "definition" {
+  workspace_id      = %q
+  id                = %s.id
+  format            = "TMDL"
+  output_definition = true
+  depends_on        = [%s]
+}
+output "database_tmdl" {
+  value = trimspace(provider::fabric::content_decode(data.fabric_ontology.definition.definition["database.tmdl"].content))
+}
+output "model_tmdl" {
+  value = trimspace(provider::fabric::content_decode(data.fabric_ontology.definition.definition["model.tmdl"].content))
+}
+`, workspaceID, testResourceItemFQN, testResourceItemFQN),
+		)
 	}
 
-	entityCreateDisplayName := testhelp.RandomName()
+	check := func(namespace string) resource.TestCheckFunc {
+		return resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", displayName),
+			resource.TestCheckResourceAttr(testResourceItemFQN, "format", "TMDL"),
+			resource.TestMatchOutput("database_tmdl", regexp.MustCompile(`database\r?\n\tcompatibilityLevel: 1000000`)),
+			resource.TestMatchOutput("model_tmdl", regexp.MustCompile(`ref namespace `+regexp.QuoteMeta(namespace))),
+			resource.TestCheckResourceAttrSet("data.fabric_ontology.definition", "definition.namespaces/"+namespace+".tmdl.content"),
+		)
+	}
 
-	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
-		// Create and Read
+	return []resource.TestStep{
 		{
-			ResourceName: testResourceItemFQN,
+			Config: config("operations", false),
+			Check:  check("operations"),
+		},
+		{
+			Config: config("maintenance", false),
+			Check:  check("operations"),
+		},
+		{
+			Config: config("maintenance", true),
+			Check:  check("operations"),
+		},
+		{
+			Config: config("production", true),
+			Check:  check("production"),
+		},
+		{
+			Config: config("manufacturing", false),
+			Check:  check("production"),
+		},
+		{
+			Config: config("logistics", true),
+			Check:  check("logistics"),
+		},
+		{
 			Config: at.JoinConfigs(
-				testHelperLocals,
-				at.CompileConfig(
-					testResourceItemHeader,
-					map[string]any{
-						"workspace_id": workspaceID,
-						"display_name": entityCreateDisplayName,
-						"format":       "Default",
-						"definition":   testHelperDefinition,
-					},
-				),
+				at.CompileConfig(testResourceItemHeader, map[string]any{
+					"workspace_id": workspaceID,
+					"display_name": displayName,
+					"format":       "TMDL",
+				}),
+				fmt.Sprintf(`
+data "fabric_ontology" "definition" {
+  workspace_id      = %q
+  id                = %s.id
+  format            = "TMDL"
+  output_definition = true
+  depends_on        = [%s]
+}
+output "database_tmdl" {
+  value = trimspace(provider::fabric::content_decode(data.fabric_ontology.definition.definition["database.tmdl"].content))
+}
+`, workspaceID, testResourceItemFQN, testResourceItemFQN),
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
-				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestMatchOutput("database_tmdl", regexp.MustCompile(`database\r?\n\tcompatibilityLevel: 1000000`)),
+				resource.TestCheckNoResourceAttr("data.fabric_ontology.definition", "definition.namespaces/logistics.tmdl.content"),
 			),
 		},
-	},
-	))
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(testResourceItemHeader, map[string]any{
+				"workspace_id": workspaceID,
+				"display_name": displayName,
+			}),
+			ImportState:             true,
+			ImportStateIdPrefix:     workspaceID + "/",
+			ImportStateVerify:       true,
+			ImportStateVerifyIgnore: []string{"definition", "format"},
+		},
+	}
+}
+
+func TestUnit_OntologyResource_DefinitionPaths(t *testing.T) {
+	validPaths := []string{
+		".platform", "database.tmdl", "model.tmdl", "tables/Sensor.tmdl",
+		"metrics/Temperature.tmdl", "relationships.tmdl", "expressions.tmdl",
+		"entities/factory#Sensor.tmdl", "entityRelationships.tmdl",
+		"namespaces/default.tmdl", "rules/SpeedLimit.tmdl",
+	}
+	definition := make(map[string]any, len(validPaths))
+
+	for _, part := range validPaths {
+		definition[fmt.Sprintf("%q", part)] = map[string]any{"source": "${local.path}/database.tmdl"}
+	}
+
+	invalidPaths := []string{
+		"definition.json", "EntityTypes/123/definition.json", "RelationshipTypes/123",
+		"tables/Sensor.json", "definition/model.tmdl", "unknown.tmdl",
+	}
+	steps := make([]resource.TestStep, 0, len(invalidPaths)+2)
+	steps = append(steps, resource.TestStep{
+		PlanOnly:           true,
+		ExpectNonEmptyPlan: true,
+		Config: at.JoinConfigs(testHelperLocals, at.CompileConfig(testResourceItemHeader, map[string]any{
+			"workspace_id": testhelp.RandomUUID(),
+			"display_name": "OntologyTMDL",
+			"format":       "TMDL",
+			"definition":   definition,
+		})),
+		Check: resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr(testResourceItemFQN, "format", "TMDL"),
+		),
+	})
+
+	for _, part := range invalidPaths {
+		steps = append(steps, resource.TestStep{
+			PlanOnly: true,
+			Config: at.JoinConfigs(testHelperLocals, at.CompileConfig(testResourceItemHeader, map[string]any{
+				"workspace_id": testhelp.RandomUUID(),
+				"display_name": "OntologyTMDL",
+				"format":       "TMDL",
+				"definition": map[string]any{
+					fmt.Sprintf("%q", part): map[string]any{"source": "${local.path}/database.tmdl"},
+				},
+			})),
+			ExpectError: regexp.MustCompile(`Definition path must\s+match`),
+		})
+	}
+
+	steps = append(steps, resource.TestStep{
+		PlanOnly: true,
+		Config: at.CompileConfig(testResourceItemHeader, map[string]any{
+			"workspace_id": testhelp.RandomUUID(),
+			"display_name": "OntologyTMDL",
+			"format":       "Default",
+		}),
+		ExpectError: regexp.MustCompile(`value must be one of`),
+	})
+
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, steps))
 }

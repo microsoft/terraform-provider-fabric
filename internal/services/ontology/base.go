@@ -13,7 +13,7 @@ import (
 const (
 	FabricItemType = fabcore.ItemTypeOntology
 
-	ItemDefinitionEmpty       = `{}`
+	ItemDefinitionEmpty       = "database\n\tcompatibilityLevel: 1000000\n"
 	ItemDefinitionPathDocsURL = "https://learn.microsoft.com/rest/api/fabric/articles/item-management/definitions/ontology-definition"
 )
 
@@ -29,17 +29,21 @@ var ItemTypeInfo = tftypeinfo.TFTypeInfo{ //nolint:gochecknoglobals
 
 var itemDefinitionFormats = []fabricitem.DefinitionFormat{ //nolint:gochecknoglobals
 	{
-		Type: fabricitem.DefinitionFormatDefault,
-		API:  "",
+		Type: "TMDL",
+		// The API infers TMDL from the parts; an explicit "TMDL" format is rejected.
+		API: "",
 		Paths: []string{
-			"definition.json",
-			"EntityTypes/*",
-			"EntityTypes/*/DataBindings",
-			"EntityTypes/*/Documents",
-			"EntityTypes/*/Overviews",
-			"EntityTypes/*/ResourceLinks",
-			"RelationshipTypes/*",
-			"RelationshipTypes/*/Contextualizations",
+			"database.tmdl",
+			".platform",
+			"model.tmdl",
+			"tables/*.tmdl",
+			"metrics/*.tmdl",
+			"relationships.tmdl",
+			"expressions.tmdl",
+			"entities/*.tmdl",
+			"entityRelationships.tmdl",
+			"namespaces/*.tmdl",
+			"rules/*.tmdl",
 		},
 	},
 }

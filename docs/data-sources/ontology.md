@@ -35,18 +35,13 @@ data "fabric_ontology" "example_by_id" {
 data "fabric_ontology" "example_definition" {
   id                = "11111111-1111-1111-1111-111111111111"
   workspace_id      = "00000000-0000-0000-0000-000000000000"
-  format            = "Default"
+  format            = "TMDL"
   output_definition = true
 }
 
-# Access the content of the definition with JSONPath expression
-output "example_definition_content_jsonpath" {
-  value = provider::fabric::content_decode(data.fabric_ontology.example_definition.definition["definition.json"].content, "")
-}
-
-# Access the content of the definition as JSON object
-output "example_definition_content_object" {
-  value = provider::fabric::content_decode(data.fabric_ontology.example_definition.definition["definition.json"].content)
+# Decode TMDL as text, not as JSON.
+output "example_database_tmdl" {
+  value = provider::fabric::content_decode(data.fabric_ontology.example_definition.definition["database.tmdl"].content)
 }
 
 # This is an invalid data source
@@ -68,7 +63,7 @@ output "example_definition_content_object" {
 ### Optional
 
 - `display_name` (String) The Ontology display name.
-- `format` (String) The Ontology format. Possible values: `Default`
+- `format` (String) The Ontology format. Possible values: `TMDL`
 - `id` (String) The Ontology ID.
 - `output_definition` (Boolean) Output definition parts as gzip base64 content? Default: `false`
 
@@ -78,7 +73,7 @@ output "example_definition_content_object" {
 
 ### Read-Only
 
-- `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `EntityTypes/*`, `EntityTypes/*/DataBindings`, `EntityTypes/*/Documents`, `EntityTypes/*/Overviews`, `EntityTypes/*/ResourceLinks`, `RelationshipTypes/*`, `RelationshipTypes/*/Contextualizations`, `definition.json` (see [below for nested schema](#nestedatt--definition))
+- `definition` (Attributes Map) Definition parts. Possible path keys: **TMDL** format: `.platform`, `database.tmdl`, `entities/*.tmdl`, `entityRelationships.tmdl`, `expressions.tmdl`, `metrics/*.tmdl`, `model.tmdl`, `namespaces/*.tmdl`, `relationships.tmdl`, `rules/*.tmdl`, `tables/*.tmdl` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The Ontology description.
 - `folder_id` (String) The Ontology Folder ID.
 - `tags` (Set of String) A set of tag IDs applied to the item.
