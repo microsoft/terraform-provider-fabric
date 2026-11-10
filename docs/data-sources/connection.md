@@ -32,7 +32,7 @@ data "fabric_connection" "example" {
 
 - `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways.
 - `allow_usage_in_user_controlled_code` (Boolean) Allow this connection to be used with items that allow user-controlled code such as Notebook.
-- `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
+- `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

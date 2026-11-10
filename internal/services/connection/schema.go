@@ -129,10 +129,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							[]attr.Value{
 								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
 							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
-							}),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -140,6 +136,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 						stringplanmodifier.UseStateForUnknown(),
+					},
+					Validators: []validator.String{
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
+							}),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
