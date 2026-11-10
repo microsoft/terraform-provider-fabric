@@ -672,6 +672,7 @@ func TestUnit_ItemJobSchedulerResource_CopyJobCRUD(t *testing.T) {
 	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeWeekly)
 
 	weekdays := entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Weekdays
+
 	weekdaysStr := make([]string, len(weekdays))
 	for i, weekday := range weekdays {
 		weekdaysStr[i] = string(weekday)
