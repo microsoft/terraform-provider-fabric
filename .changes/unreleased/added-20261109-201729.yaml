@@ -1,0 +1,5 @@
+kind: added
+body: Add Monitoring resource and data sources, with separate data collection enable/disable management.
+time: 2026-11-09T20:17:29.3922851-08:00
+custom:
+    Issue: "1153"
