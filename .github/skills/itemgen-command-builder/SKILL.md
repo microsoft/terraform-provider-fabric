@@ -40,7 +40,7 @@ The `itemgen` tool accepts 9 command-line flags. Determine each value from the S
 | `-rename-allowed`    | bool   | Check SDK for Update/Rename method on the items client                                                              | `true`         |
 | `-is-preview`        | bool   | Check Fabric API docs for "preview" badge or header                                                                 | `false`        |
 | `-is-spn-supported`  | bool   | Check API docs for service principal authentication support                                                         | `false`        |
-| `-generate-fakes`    | bool   | set to `true` unless item is of archetype `basic` or `definition` — generates fake test handlers                    | `true`         |
+| `-generate-fakes`    | bool   | Always set to `true` — itemgen generates typed fake test handlers only for archetypes with properties (skips `basic` and `definition`) | `true`         |
 | `-generate-examples` | bool   | Always set to `true` — generates TF example files                                                                   | `true`         |
 
 ### Flag Value Details

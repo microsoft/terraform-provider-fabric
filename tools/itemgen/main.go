@@ -45,15 +45,17 @@ type ItemConfig struct {
 	FabricItemType    string
 	DefinitionFormats []string
 	DefinitionPath    string
-	DocsURL           string
-	DisplayNameMax    int
-	DescriptionMax    int
-	ItemType          ItemType
-	HasDefinition     bool
-	HasProperties     bool
-	HasConfig         bool
-	IsPreview         bool
-	IsSPNSupported    bool
+	// DefinitionCustomDelimiterPath is the fixture used by the custom tokens delimiter example (e.g. definition-custom-delimiter.json).
+	DefinitionCustomDelimiterPath string
+	DocsURL                       string
+	DisplayNameMax                int
+	DescriptionMax                int
+	ItemType                      ItemType
+	HasDefinition                 bool
+	HasProperties                 bool
+	HasConfig                     bool
+	IsPreview                     bool
+	IsSPNSupported                bool
 	// Internal fields for generation options
 	generateFakes    bool
 	generateExamples bool
@@ -179,26 +181,27 @@ func parseFlags() (ItemConfig, error) {
 
 	// Create configuration
 	return ItemConfig{
-		Name:              *itemName,
-		Type:              normalizeTypeName(*itemName),
-		TypeInfo:          strings.ReplaceAll(*itemName, " ", ""),
-		Names:             *itemsName,
-		Types:             normalizeTypeName(*itemsName),
-		TypesInfo:         strings.ReplaceAll(*itemsName, " ", ""),
-		Package:           strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
-		ModelName:         toCamelCase(*itemName),
-		RenameAllowed:     *renameAllowed,
-		DefinitionFormats: []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
-		DefinitionPath:    *definitionPath,
-		DocsURL:           "<docs-url>", // Placeholder - should be configurable
-		DisplayNameMax:    DefaultDisplayNameMax,
-		DescriptionMax:    DefaultDescriptionMax,
-		ItemType:          itemTypeEnum,
-		HasDefinition:     itemTypeEnum.hasDefinition(),
-		HasProperties:     itemTypeEnum.hasProperties(),
-		HasConfig:         itemTypeEnum.hasConfig(),
-		IsPreview:         *isPreview,
-		IsSPNSupported:    *isSPNSupported,
+		Name:                          *itemName,
+		Type:                          normalizeTypeName(*itemName),
+		TypeInfo:                      strings.ReplaceAll(*itemName, " ", ""),
+		Names:                         *itemsName,
+		Types:                         normalizeTypeName(*itemsName),
+		TypesInfo:                     strings.ReplaceAll(*itemsName, " ", ""),
+		Package:                       strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
+		ModelName:                     toCamelCase(*itemName),
+		RenameAllowed:                 *renameAllowed,
+		DefinitionFormats:             []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
+		DefinitionPath:                *definitionPath,
+		DefinitionCustomDelimiterPath: customDelimiterPath(*definitionPath),
+		DocsURL:                       "<docs-url>", // Placeholder - should be configurable
+		DisplayNameMax:                DefaultDisplayNameMax,
+		DescriptionMax:                DefaultDescriptionMax,
+		ItemType:                      itemTypeEnum,
+		HasDefinition:                 itemTypeEnum.hasDefinition(),
+		HasProperties:                 itemTypeEnum.hasProperties(),
+		HasConfig:                     itemTypeEnum.hasConfig(),
+		IsPreview:                     *isPreview,
+		IsSPNSupported:                *isSPNSupported,
 		// Store flags for optional generation
 		generateFakes:    *generateFakes,
 		generateExamples: *generateExamples,
@@ -229,6 +232,14 @@ func parseItemType(itemTypeFlag string) (ItemType, error) {
 // normalizeTypeName converts a display name to a normalized type name.
 func normalizeTypeName(name string) string {
 	return strings.ToLower(strings.ReplaceAll(name, " ", "_"))
+}
+
+// customDelimiterPath derives the custom tokens delimiter fixture name from the definition path.
+// e.g. "definition.json" -> "definition-custom-delimiter.json".
+func customDelimiterPath(definitionPath string) string {
+	ext := filepath.Ext(definitionPath)
+
+	return strings.TrimSuffix(definitionPath, ext) + "-custom-delimiter" + ext
 }
 
 // toCamelCase converts a display name to unexported camelCase.
@@ -320,12 +331,12 @@ func generateServiceFiles(itemDir string, config ItemConfig) error {
 // generateOptionalFiles generates fake handlers and examples if requested.
 func generateOptionalFiles(config ItemConfig) error {
 	if config.generateFakes {
-		if config.ItemType == TypeBasic {
-			fmt.Println("Skipping fake handler generation for basic items (they use the generic fabcore.Item handler)")
-		} else {
+		if config.needsTypedFake() {
 			if err := generateFakeHandlers(config); err != nil {
 				return fmt.Errorf("failed to generate fake handlers: %w", err)
 			}
+		} else {
+			fmt.Printf("Skipping fake handler generation for %s items (they use the generic fabcore.Item handler)\n", config.ItemType)
 		}
 	}
 
@@ -336,6 +347,12 @@ func generateOptionalFiles(config ItemConfig) error {
 	}
 
 	return nil
+}
+
+// needsTypedFake returns true if the item needs a typed fake handler.
+// Items without properties are served by the generic fabcore.Item fake handler (fakes.NewRandomItemWithWorkspace).
+func (c ItemConfig) needsTypedFake() bool {
+	return c.HasProperties
 }
 
 // generateFakeHandlers generates fake test server handlers.
@@ -356,12 +373,12 @@ func generateFakeHandlers(config ItemConfig) error {
 func printSuccessMessage(config ItemConfig, itemDir string) {
 	fmt.Printf("\nSuccessfully generated item %s in %s\n", config.Name, itemDir)
 
-	if config.generateFakes && config.ItemType != TypeBasic {
+	if config.generateFakes && config.needsTypedFake() {
 		fmt.Printf("Also generated fake test handlers in %s/\n", FakeTestDir)
 	}
 
-	if config.ItemType == TypeBasic {
-		fmt.Println("Note: Basic items use the generic fabcore.Item fake handler (no typed fake needed)")
+	if !config.needsTypedFake() {
+		fmt.Printf("Note: %s items use the generic fabcore.Item fake handler (no typed fake needed)\n", config.ItemType)
 	}
 
 	if config.generateExamples {
@@ -387,7 +404,7 @@ func printNextSteps(config ItemConfig) {
 
 	step++
 
-	if config.generateFakes {
+	if config.generateFakes && config.needsTypedFake() {
 		fmt.Printf("%d. Register the fake handlers in the fake server\n", step)
 
 		step++
@@ -397,6 +414,15 @@ func printNextSteps(config ItemConfig) {
 		fmt.Printf("%d. Review and customize the Terraform examples\n", step)
 
 		step++
+
+		if config.HasDefinition {
+			fmt.Printf("%d. Create the definition fixtures in internal/testhelp/fixtures/%s/ referenced by the examples:\n", step, config.Type)
+			fmt.Printf("   - %s.tmpl: Go template using {{ .TOKEN }} placeholders (examples 2-3)\n", config.DefinitionPath)
+			fmt.Printf("   - %s.tmpl: same content using << .TOKEN >> placeholders (example 4, tokens_delimiter \"<<>>\")\n", config.DefinitionCustomDelimiterPath)
+			fmt.Printf("   - %s: plain content without template expressions (example 5, processing_mode \"Parameters\")\n", config.DefinitionPath)
+
+			step++
+		}
 	}
 
 	fmt.Printf("%d. Run the tests to verify the implementation\n", step)
@@ -451,6 +477,7 @@ func generateFile(dir, tmplPath, outputFile string, config ItemConfig) error {
 
 	// Create output file
 	output := filepath.Join(dir, outputFile)
+
 	f, err := os.Create(output)
 	if err != nil {
 		return fmt.Errorf("error creating output file %s: %w", output, err)

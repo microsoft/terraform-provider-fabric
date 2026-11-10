@@ -41,6 +41,7 @@ The generator supports 6 different item types:
    - Has definition but no properties or config
    - Example: `datapipeline`
    - Uses: `NewDataSourceFabricItemDefinition`, `NewDataSourceFabricItems`, `NewResourceFabricItemDefinition`
+   - Note: Definition-only items have no properties, so they also use the generic `fabcore.Item` fake handler and no typed fake handler is generated
 
 1. **Properties Only** (`properties`)
    - Has properties but no definition or config
@@ -122,6 +123,14 @@ For items with properties (including definition-properties, config-properties, a
 1. `schema_data_<type>.go` - Data source schema
 1. `schema_resource_<type>.go` - Resource schema
 1. `models.go` - Data models
+
+### Optional Files
+
+- **Fake handlers** (`-generate-fakes`, default `true`): `internal/testhelp/fakes/fabric_<type>.go` is generated only for item types with properties (`properties`, `definition-properties`, `config-properties`, `config-definition-properties`). It must be registered in `internal/testhelp/fakes/fake_server.go`. Items without properties (`basic`, `definition`) use the generic `fabcore.Item` fake handler (`fakes.NewRandomItemWithWorkspace`).
+- **Examples** (`-generate-examples`, default `true`): Terraform examples under `examples/`. For item types with a definition, the resource examples reference three fixtures in `internal/testhelp/fixtures/<type>/` that you must create:
+  - `<definition-path>.tmpl` — Go template with `{{ .TOKEN }}` placeholders (examples 2 and 3)
+  - `<definition-name>-custom-delimiter.<ext>.tmpl` — same content with `<< .TOKEN >>` placeholders (example 4, `tokens_delimiter = "<<>>"`)
+  - `<definition-path>` — plain content without template expressions (example 5, `processing_mode = "Parameters"`, which does not render templates)
 
 ## File Naming Convention
 
