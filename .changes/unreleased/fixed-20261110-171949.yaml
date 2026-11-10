@@ -2,4 +2,4 @@ kind: fixed
 body: Fixed GCC High authentication token audience by upgrading the Fabric Go SDK to v0.23.0.
 time: 2026-11-10T17:19:49.0721275+02:00
 custom:
-    Issue: "1146"
+    Issue: "1158"
