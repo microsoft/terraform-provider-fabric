@@ -96,7 +96,7 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 
 	reqCreate.set(plan)
 
-	respCreate, err := r.client.CreateDomain(ctx, ItemTypeInfo.IsPreview, reqCreate.CreateDomainRequest, nil)
+	respCreate, err := r.client.CreateDomain(ctx, reqCreate.CreateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationCreate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -121,7 +121,7 @@ func (r *resourceDomain) Create(ctx context.Context, req resource.CreateRequest,
 		var reqUpdate requestUpdateDomain
 		reqUpdate.set(plan)
 
-		respUpdate, err := r.client.UpdateDomain(ctx, state.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
+		respUpdate, err := r.client.UpdateDomain(ctx, state.ID.ValueString(), reqUpdate.UpdateDomainRequest, nil)
 		if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 			// State already saved — resource exists, Terraform knows about it
 			// Next apply will show drift and retry the Update
@@ -214,7 +214,7 @@ func (r *resourceDomain) Update(ctx context.Context, req resource.UpdateRequest,
 		reqUpdate.DefaultLabelID = new("00000000-0000-0000-0000-000000000000")
 	}
 
-	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), ItemTypeInfo.IsPreview, reqUpdate.UpdateDomainRequest, nil)
+	respUpdate, err := r.client.UpdateDomain(ctx, plan.ID.ValueString(), reqUpdate.UpdateDomainRequest, nil)
 	if resp.Diagnostics.Append(utils.GetDiagsFromError(ctx, err, utils.OperationUpdate, nil)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -282,7 +282,7 @@ func (r *resourceDomain) ImportState(ctx context.Context, req resource.ImportSta
 }
 
 func (r *resourceDomain) get(ctx context.Context, model *resourceDomainModel) diag.Diagnostics {
-	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), ItemTypeInfo.IsPreview, nil)
+	respGet, err := r.client.GetDomain(ctx, model.ID.ValueString(), nil)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
