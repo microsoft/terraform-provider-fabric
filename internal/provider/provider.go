@@ -81,6 +81,8 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlexperiment"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mlmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/monitoring"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/monitoringdatacollection"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mounteddatafactory"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/notebook"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
@@ -498,6 +500,8 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
 		mlexperiment.NewResourceMLExperiment,
+		monitoring.NewResourceMonitoring,
+		monitoringdatacollection.NewResourceMonitoringDataCollection,
 		mlmodel.NewResourceMLModel,
 		onelakedataaccesssecurity.NewResourceOneLakeDataAccessSecurity,
 		ontology.NewResourceOntology,
@@ -616,6 +620,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		mirroredwarehouse.NewDataSourceMirroredWarehouses,
 		mlexperiment.NewDataSourceMLExperiment,
 		mlexperiment.NewDataSourceMLExperiments,
+		monitoring.NewDataSourceMonitoring,
+		monitoring.NewDataSourceMonitoringItems,
 		mlmodel.NewDataSourceMLModel,
 		mlmodel.NewDataSourceMLModels,
 		mounteddatafactory.NewDataSourceMountedDataFactory,

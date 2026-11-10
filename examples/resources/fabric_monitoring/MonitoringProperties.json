@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/monitoring/definition/monitoringProperties/1.0.0/schema.json",
+  "dataCollectionSettings": [
+    {
+      "sources": {
+        "workspaceDiagnostics": {
+          "mode": "All"
+        }
+      },
+      "destinations": {
+        "eventhouse": {
+          "mode": "Auto"
+        }
+      }
+    }
+  ]
+}

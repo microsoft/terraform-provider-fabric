@@ -49,6 +49,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureLakehouse)
 	handleEntity(server, configureMirroredCatalog)
 	handleEntity(server, configureMirroredDatabase)
+	handleEntity(server, configureMonitoring)
 	handleEntity(server, configureNotebook)
 	handleEntity(server, configureOperationsAgent)
 	handleEntity(server, configureReport)
