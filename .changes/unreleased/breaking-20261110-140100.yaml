@@ -1,0 +1,5 @@
+kind: breaking
+body: Migrate fabric_ontology resources and data sources to Ontology generation 2 (new experience) TMDL definitions. Remove support for the legacy Default format and generation 1 JSON definition paths; existing ontologies are not automatically converted.
+time: 2026-11-10T14:01:00.4251751-08:00
+custom:
+    Issue: "1159"
