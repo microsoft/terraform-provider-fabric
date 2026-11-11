@@ -32,6 +32,9 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 	to.DisplayName = types.StringPointerValue(fromConnection.DisplayName)
 	to.ConnectivityType = types.StringPointerValue((*string)(fromConnection.ConnectivityType))
 	to.PrivacyLevel = types.StringPointerValue((*string)(fromConnection.PrivacyLevel))
+	to.GatewayID = customtypes.NewUUIDPointerValue(fromConnection.GatewayID)
+	to.AllowConnectionUsageInGateway = types.BoolNull()
+	to.AllowUsageInUserControlledCode = types.BoolNull()
 
 	var diags diag.Diagnostics
 
@@ -128,6 +131,11 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 	// connectivity type specific information
 	switch v := from.(type) {
 	case *fabcore.ShareableCloudConnection:
+		if _, isResource := any(connectionDetailsModel).(*rsConnectionDetailsModel); isResource {
+			// Cloud gateway IDs are read-only virtual gateway IDs, not resource inputs.
+			to.GatewayID = customtypes.NewUUIDPointerValue(nil)
+		}
+
 		if v.AllowConnectionUsageInGateway != nil {
 			to.AllowConnectionUsageInGateway = types.BoolValue(*v.AllowConnectionUsageInGateway)
 		} else {
@@ -140,10 +148,10 @@ func (to *baseConnectionModel[ConnectionDetails, CredentialDetails]) set(ctx con
 			to.AllowUsageInUserControlledCode = types.BoolValue(false) // default is false
 		}
 	case *fabcore.VirtualNetworkGatewayConnection:
-		to.GatewayID = customtypes.NewUUIDPointerValue(v.GatewayID)
-		// keep it here due to default being "false"
-		to.AllowConnectionUsageInGateway = types.BoolNull()
-		to.AllowUsageInUserControlledCode = types.BoolNull()
+	case *fabcore.PersonalCloudConnection:
+		to.AllowConnectionUsageInGateway = types.BoolPointerValue(v.AllowConnectionUsageInGateway)
+	case *fabcore.OnPremisesGatewayConnection, *fabcore.OnPremisesGatewayPersonalConnection,
+		*fabcore.StreamingVirtualNetworkGatewayConnection, *fabcore.Connection:
 	default:
 		diags.AddError("unexpected connectivity type", "unsupported connection classification type")
 
