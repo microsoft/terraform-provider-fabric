@@ -123,6 +123,13 @@ Create example HCL files in `examples/`:
 - `examples/data-sources/fabric_<type>/main.tf` — singular data source example
 - `examples/data-sources/fabric_<types>/main.tf` — plural data source example
 
+For archetypes with a definition, the scaffolded resource examples 2–5 reference fixtures in `internal/testhelp/fixtures/<type>/`. Create all of them and make sure each one renders to valid content in the mode used by its example:
+
+- `<definition-path>.tmpl` — Go template with `{{ .TOKEN }}` placeholders (examples 2–3, also used by acceptance tests)
+- `<definition-name>-custom-delimiter.<ext>.tmpl` — same content with `<< .TOKEN >>` placeholders (example 4, `tokens_delimiter = "<<>>"`); `{{ }}` expressions are not rendered with a custom delimiter
+- `<definition-path>` — plain content with no template expressions (example 5, `processing_mode = "Parameters"`); Parameters mode does not render Go templates, so `{{ }}` would be sent literally or produce invalid JSON
+- Adapt the example 5 `parameters` (`JsonPathReplace` paths / `TextReplace` values) to fields that exist in the item's definition (reference: `examples/resources/fabric_org_app/`)
+
 ### Step 8 — Lint, Docs, and Unit Tests
 
 **Prerequisites — ensure tooling is available:**
@@ -144,6 +151,7 @@ After all lint, docs, and tests pass, verify:
 - [ ] `tfsdk:"snake_case"` tags correct; `set()` handles all SDK DTO fields
 - [ ] UUID fields use `customtypes.UUID`; enums cast via `(*string)(from.Field)`
 - [ ] Resource registered in `provider.go`; example HCL files exist
+- [ ] Definition examples: custom-delimiter fixture (`<< >>`) and plain fixture (Parameters mode) exist and render to valid content; no typed fake was added for `basic`/`definition` archetypes
 - [ ] `task docs`, `task lint`, and unit tests pass
 - [ ] No `<TODO>` or `// TODO` placeholders remain
 - [ ] Correct `fabricitem.NewResource*` constructor; closures wired; `set()` call sites match signature; `ctx` in constructor if schema uses `supertypes`; fakes have `Properties` populated

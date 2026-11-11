@@ -503,7 +503,7 @@ Otherwise → Pattern E (standalone entity)
 | `-rename-allowed` | `true` unless SDK lacks Update method |
 | `-is-preview` | Check API docs for "preview" badge |
 | `-is-spn-supported` | Check API docs for SPN support |
-| `-generate-fakes` | `true` unless `basic` or `definition` archetype |
+| `-generate-fakes` | Always `true` (itemgen skips typed fakes for `basic` and `definition` archetypes) |
 | `-generate-examples` | Always `true` |
 
 ### Schema Model Generator
