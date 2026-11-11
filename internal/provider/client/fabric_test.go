@@ -66,7 +66,7 @@ func TestUnit_FabricClient_Environment(t *testing.T) {
 			name:          "GCC High",
 			environment:   fabric.EnvironmentGCCHigh,
 			expectedHost:  "highapi.fabric.microsoft.us",
-			expectedScope: "https://api.fabric.microsoft.us/.default",
+			expectedScope: "https://high.analysis.usgovcloudapi.net/powerbi/api/.default",
 		},
 		{
 			name:          "Public endpoint override",
@@ -79,7 +79,7 @@ func TestUnit_FabricClient_Environment(t *testing.T) {
 			environment:   fabric.EnvironmentGCCHigh,
 			endpoint:      "https://override.example.com",
 			expectedHost:  "override.example.com",
-			expectedScope: "https://api.fabric.microsoft.us/.default",
+			expectedScope: "https://high.analysis.usgovcloudapi.net/powerbi/api/.default",
 		},
 		{
 			name:          "Public workspace private links",
@@ -92,7 +92,22 @@ func TestUnit_FabricClient_Environment(t *testing.T) {
 			environment:   fabric.EnvironmentGCCHigh,
 			privateLinks:  true,
 			expectedHost:  "12345678123412341234123456789abc.z12.w.highapi.fabric.microsoft.us",
-			expectedScope: "https://api.fabric.microsoft.us/.default",
+			expectedScope: "https://high.analysis.usgovcloudapi.net/powerbi/api/.default",
+		},
+		{
+			name:          "Public workspace private links with endpoint override",
+			endpoint:      "https://override.example.com",
+			privateLinks:  true,
+			expectedHost:  "12345678123412341234123456789abc.z12.w.override.example.com",
+			expectedScope: "https://api.fabric.microsoft.com/.default",
+		},
+		{
+			name:          "GCC High workspace private links with endpoint override",
+			environment:   fabric.EnvironmentGCCHigh,
+			endpoint:      "https://override.example.com",
+			privateLinks:  true,
+			expectedHost:  "12345678123412341234123456789abc.z12.w.override.example.com",
+			expectedScope: "https://high.analysis.usgovcloudapi.net/powerbi/api/.default",
 		},
 	}
 
