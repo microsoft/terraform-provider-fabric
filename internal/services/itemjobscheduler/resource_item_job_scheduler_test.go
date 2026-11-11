@@ -665,6 +665,76 @@ func TestUnit_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	}))
 }
 
+func TestUnit_ItemJobSchedulerResource_CopyJobCRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	itemID := testhelp.RandomUUID()
+	entity := NewRandomItemSchedule(fabcore.ScheduleTypeCron)
+	entityUpdate := NewRandomItemSchedule(fabcore.ScheduleTypeWeekly)
+
+	weekdays := entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Weekdays
+
+	weekdaysStr := make([]string, len(weekdays))
+	for i, weekday := range weekdays {
+		weekdaysStr[i] = string(weekday)
+	}
+
+	fakes.FakeServer.ServerFactory.Core.ItemsServer.GetItem = fakeGetFabricItem("copyjob")
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.GetItemSchedule = fakeGetItemScheduleFunc()
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.DeleteItemSchedule = fakeDeleteItemScheduleFunc()
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.UpdateItemSchedule = fakeUpdateItemScheduleFunc()
+	fakes.FakeServer.ServerFactory.Core.JobSchedulerServer.CreateItemSchedule = fakeCreateItemScheduleFunc()
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"job_type":     "Execute",
+					"enabled":      *entity.Enabled,
+					"configuration": map[string]any{
+						"start_date_time": entity.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+						"end_date_time":   entity.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
+						"type":            string(*entity.Configuration.GetScheduleConfig().Type),
+						"interval":        int(*entity.Configuration.(*fabcore.CronScheduleConfig).Interval),
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "job_type", "Execute"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeCron)),
+			),
+		},
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+					"item_id":      itemID,
+					"job_type":     "Execute",
+					"enabled":      *entityUpdate.Enabled,
+					"configuration": map[string]any{
+						"start_date_time":    entityUpdate.Configuration.GetScheduleConfig().StartDateTime.Format(time.RFC3339),
+						"end_date_time":      entityUpdate.Configuration.GetScheduleConfig().EndDateTime.Format(time.RFC3339),
+						"local_time_zone_id": testLocalTimeZoneID,
+						"type":               string(fabcore.ScheduleTypeWeekly),
+						"times":              entityUpdate.Configuration.(*fabcore.WeeklyScheduleConfig).Times,
+						"weekdays":           weekdaysStr,
+					},
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "job_type", "Execute"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.type", string(fabcore.ScheduleTypeWeekly)),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "configuration.local_time_zone_id", testLocalTimeZoneID),
+			),
+		},
+	}))
+}
+
 func TestAcc_ItemJobSchedulerResource_CRUD(t *testing.T) {
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
