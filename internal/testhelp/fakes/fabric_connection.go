@@ -113,17 +113,23 @@ func (o *operationsConnection) TransformUpdate(entity fabcore.ConnectionClassifi
 func (o *operationsConnection) Update(base fabcore.ConnectionClassification, data fabcore.UpdateConnectionRequestClassification) fabcore.ConnectionClassification {
 	d := data.GetUpdateConnectionRequest()
 
-	updateCredentialDetails := func(credentialDetails *fabcore.UpdateCredentialDetails) *fabcore.ListCredentialDetails {
+	updateCredentialDetails := func(existing *fabcore.ListCredentialDetails, credentialDetails *fabcore.UpdateCredentialDetails) *fabcore.ListCredentialDetails {
 		if credentialDetails != nil {
-			return &fabcore.ListCredentialDetails{
-				CredentialType:       credentialDetails.Credentials.GetCredentials().CredentialType,
+			updated := &fabcore.ListCredentialDetails{
 				ConnectionEncryption: credentialDetails.ConnectionEncryption,
 				SingleSignOnType:     credentialDetails.SingleSignOnType,
 				SkipTestConnection:   credentialDetails.SkipTestConnection,
 			}
+			if credentialDetails.Credentials != nil {
+				updated.CredentialType = credentialDetails.Credentials.GetCredentials().CredentialType
+			} else if existing != nil {
+				updated.CredentialType = existing.CredentialType
+			}
+
+			return updated
 		}
 
-		return nil
+		return existing
 	}
 
 	// Handle ShareableCloudConnection specific fields
@@ -132,7 +138,7 @@ func (o *operationsConnection) Update(base fabcore.ConnectionClassification, dat
 		if req, ok := data.(*fabcore.UpdateShareableCloudConnectionRequest); ok {
 			connection.AllowConnectionUsageInGateway = req.AllowConnectionUsageInGateway
 			connection.DisplayName = req.DisplayName
-			connection.CredentialDetails = updateCredentialDetails(req.CredentialDetails)
+			connection.CredentialDetails = updateCredentialDetails(connection.CredentialDetails, req.CredentialDetails)
 		}
 
 		connection.ConnectivityType = d.ConnectivityType
@@ -143,7 +149,7 @@ func (o *operationsConnection) Update(base fabcore.ConnectionClassification, dat
 	case *fabcore.VirtualNetworkGatewayConnection:
 		if req, ok := data.(*fabcore.UpdateVirtualNetworkGatewayConnectionRequest); ok {
 			connection.DisplayName = req.DisplayName
-			connection.CredentialDetails = updateCredentialDetails(req.CredentialDetails)
+			connection.CredentialDetails = updateCredentialDetails(connection.CredentialDetails, req.CredentialDetails)
 		}
 
 		connection.ConnectivityType = d.ConnectivityType

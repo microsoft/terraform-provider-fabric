@@ -5,6 +5,7 @@ subcategory: ""
 description: |-
   The Connection resource allows you to manage a Fabric Connection https://learn.microsoft.com/fabric/data-factory/data-source-management.
   -> This resource supports Service Principal authentication.
+  After importing an existing connection, the first apply records configured creation-only details in state without replacing the connection. The API does not return creation_method, parameters, or credential identities and secrets, so verify these inputs match the existing connection. Subsequent changes to recorded creation details require replacement. Write-only secrets and their version attributes may be omitted to preserve existing credentials; supply a secret or Key Vault reference to create a connection or change its credential identity. Use lifecycle.ignore_changes for connection or credential details you do not want Terraform to manage.
 ---
 
 # fabric_connection (Resource)
@@ -12,6 +13,8 @@ description: |-
 The Connection resource allows you to manage a Fabric [Connection](https://learn.microsoft.com/fabric/data-factory/data-source-management).
 
 -> This resource supports Service Principal authentication.
+
+After importing an existing connection, the first apply records configured creation-only details in state without replacing the connection. The API does not return `creation_method`, `parameters`, or credential identities and secrets, so verify these inputs match the existing connection. Subsequent changes to recorded creation details require replacement. Write-only secrets and their version attributes may be omitted to preserve existing credentials; supply a secret or Key Vault reference to create a connection or change its credential identity. Use `lifecycle.ignore_changes` for connection or credential details you do not want Terraform to manage.
 
 ## Example Usage
 
@@ -105,12 +108,12 @@ resource "fabric_connection" "example_virtual_network_gateway" {
 
 Required:
 
-- `creation_method` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The creation method used to create the connection.
+- `creation_method` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The creation method used to create the connection. Not returned by the API; after import, the first apply records the configured value without replacing the connection. Subsequent changes require replacement. Replace when a previously recorded creation method changes.
 - `type` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The type of the connection.
 
 Optional:
 
-- `parameters` (Attributes Set) <i style="color:red;font-weight: bold">(ForceNew)</i> A set of connection parameters. (see [below for nested schema](#nestedatt--connection_details--parameters))
+- `parameters` (Attributes Set) <i style="color:red;font-weight: bold">(ForceNew)</i> A set of connection parameters. Not returned by the API; after import, the first apply records configured parameters without replacing the connection. Subsequent changes require replacement. Replace parameter changes after creation details have been recorded. (see [below for nested schema](#nestedatt--connection_details--parameters))
 
 Read-Only:
 
@@ -122,8 +125,8 @@ Read-Only:
 
 Required:
 
-- `name` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The name of the parameter. Name must contain at least one non-whitespace character.
-- `value` (String) <i style="color:red;font-weight: bold">(ForceNew)</i> The value of the parameter. Value must contain at least one non-whitespace character.
+- `name` (String) The name of the parameter. Name must contain at least one non-whitespace character.
+- `value` (String) The value of the parameter. Value must contain at least one non-whitespace character.
 
 Read-Only:
 
@@ -159,7 +162,7 @@ Required:
 Optional:
 
 - `password_reference` (Attributes) The Key Vault reference for the password secret. (see [below for nested schema](#nestedatt--credential_details--basic_credentials--password_reference))
-- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO). Use password or password_reference. You can't use both at the same time. Ensure that one and only one attribute from this collection is set : `password_wo`, `password_reference`. Ensure that if an attribute is set, also these are set: "[<.password_wo_version]".
+- `password_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password (WO). Use password_wo or password_reference, not both. Required on creation; omit both to preserve existing credentials after import. Ensure that if an attribute is set, these are not set: "[<.password_reference]". Ensure that if an attribute is set, also these are set: "[<.password_wo_version]".
 - `password_wo_version` (Number) The version of the `password_wo`. Ensure that if an attribute is set, also these are set: "[<.password_wo]".
 
 <a id="nestedatt--credential_details--basic_credentials--password_reference"></a>
@@ -182,7 +185,7 @@ Optional:
 Optional:
 
 - `key_reference` (Attributes) The Key Vault reference for the key secret. (see [below for nested schema](#nestedatt--credential_details--key_credentials--key_reference))
-- `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO). Ensure that one and only one attribute from this collection is set : `key_wo`, `key_reference`. Ensure that if an attribute is set, also these are set: "[<.key_wo_version]".
+- `key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The key (WO). Use key_wo or key_reference, not both. Required on creation; omit both to preserve existing credentials after import. Ensure that if an attribute is set, these are not set: "[<.key_reference]". Ensure that if an attribute is set, also these are set: "[<.key_wo_version]".
 - `key_wo_version` (Number) The version of the `key_wo`. Use key or key_reference. You can't use both at the same time. Ensure that if an attribute is set, also these are set: "[<.key_wo]".
 
 <a id="nestedatt--credential_details--key_credentials--key_reference"></a>
@@ -205,13 +208,13 @@ Optional:
 Required:
 
 - `identifier` (String) The identifier for the key.
-- `private_key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The private key based on PKCS #8 standard (WO).
-- `private_key_wo_version` (Number) The version of the `private_key_wo`.
 
 Optional:
 
-- `passphrase_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The passphrase for the private key if the private key is encrypted (WO). Ensure that if an attribute is set, also these are set: "[<.passphrase_wo_version]".
+- `passphrase_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The passphrase for the private key if the private key is encrypted (WO). Ensure that if an attribute is set, also these are set: "[<.passphrase_wo_version]". Ensure that if an attribute is set, also these are set: "[<.private_key_wo]".
 - `passphrase_wo_version` (Number) The version of the `passphrase_wo`. Ensure that if an attribute is set, also these are set: "[<.passphrase_wo]".
+- `private_key_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The private key based on PKCS #8 standard (WO). Required on creation; omit to preserve existing credentials after import. Ensure that if an attribute is set, also these are set: "[<.private_key_wo_version]".
+- `private_key_wo_version` (Number) The version of the `private_key_wo`. Ensure that if an attribute is set, also these are set: "[<.private_key_wo]".
 
 <a id="nestedatt--credential_details--service_principal_credentials"></a>
 
@@ -224,7 +227,7 @@ Required:
 
 Optional:
 
-- `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO). Use client_secret or client_secret_reference. You can't use both at the same time. Ensure that one and only one attribute from this collection is set : `client_secret_wo`, `service_principal_secret_reference`. Ensure that if an attribute is set, also these are set: "[<.client_secret_wo_version]".
+- `client_secret_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The client secret (WO). Use client_secret_wo or service_principal_secret_reference, not both. Required on creation; omit both to preserve existing credentials after import. Ensure that if an attribute is set, these are not set: "[<.service_principal_secret_reference]". Ensure that if an attribute is set, also these are set: "[<.client_secret_wo_version]".
 - `client_secret_wo_version` (Number) The version of the `client_secret_wo`. Ensure that if an attribute is set, also these are set: "[<.client_secret_wo]".
 - `service_principal_secret_reference` (Attributes) The reference to a service principal secret stored in Azure Key Vault. Use servicePrincipalSecret or servicePrincipalSecretReference. You can't use both at the same time. (see [below for nested schema](#nestedatt--credential_details--service_principal_credentials--service_principal_secret_reference))
 
@@ -248,7 +251,7 @@ Optional:
 Optional:
 
 - `token_reference` (Attributes) The Key Vault reference for the SAS token secret. Use token or token_reference. You can't use both at the same time. (see [below for nested schema](#nestedatt--credential_details--shared_access_signature_credentials--token_reference))
-- `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO). Ensure that one and only one attribute from this collection is set : `token_wo`, `token_reference`. Ensure that if an attribute is set, also these are set: "[<.token_wo_version]".
+- `token_wo` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The token (WO). Use token_wo or token_reference, not both. Required on creation; omit both to preserve existing credentials after import. Ensure that if an attribute is set, these are not set: "[<.token_reference]". Ensure that if an attribute is set, also these are set: "[<.token_wo_version]".
 - `token_wo_version` (Number) The version of the `token_wo`. Ensure that if an attribute is set, also these are set: "[<.token_wo]".
 
 <a id="nestedatt--credential_details--shared_access_signature_credentials--token_reference"></a>

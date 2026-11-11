@@ -1,0 +1,5 @@
+kind: fixed
+body: Prevent fabric_connection imports from replacing existing connections, and allow omitted write-only secrets when preserving credentials.
+time: 2026-11-09T15:10:10.3341948+02:00
+custom:
+    Issue: "1127"

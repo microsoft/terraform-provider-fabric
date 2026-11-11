@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -154,6 +155,15 @@ func (to *requestCreateConnection) set(
 	if diags := requestCreateCredentialDetails.set(ctx, config.CredentialDetails); diags.HasError() {
 		return diags
 	}
+
+	credentialDetails, diags := plan.CredentialDetails.Get(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	requestCreateCredentialDetails.ConnectionEncryption = (*fabcore.ConnectionEncryption)(credentialDetails.ConnectionEncryption.ValueStringPointer())
+	requestCreateCredentialDetails.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
+	requestCreateCredentialDetails.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
 	displayName := plan.DisplayName.ValueStringPointer()
 	privacyLevel := (*fabcore.PrivacyLevel)(plan.PrivacyLevel.ValueStringPointer())
@@ -351,7 +361,62 @@ type requestCreateCredentialDetails struct {
 	fabcore.CreateCredentialDetails
 }
 
+func (m rsCredentialDetailsModel) credentialsAvailable(requireSecret bool) (bool, diag.Diagnostics) { //revive:disable-line:flag-parameter
+	var credentialBlock attr.Value
+
+	switch fabcore.CredentialType(m.CredentialType.ValueString()) {
+	case fabcore.CredentialTypeBasic:
+		credentialBlock = m.BasicCredentials
+	case fabcore.CredentialTypeKey:
+		credentialBlock = m.KeyCredentials
+	case fabcore.CredentialTypeKeyPair:
+		credentialBlock = m.KeyPairCredentials
+	case fabcore.CredentialTypeServicePrincipal:
+		credentialBlock = m.ServicePrincipalCredentials
+	case fabcore.CredentialTypeSharedAccessSignature:
+		credentialBlock = m.SharedAccessSignatureCredentials
+	default:
+		return true, nil
+	}
+
+	if credentialBlock.IsUnknown() {
+		return false, nil
+	}
+
+	if credentialBlock.IsNull() {
+		var diags diag.Diagnostics
+		if requireSecret {
+			diags.AddError("Missing credential secret", "Supply the matching credential block and a write-only secret or Key Vault reference to create a connection.")
+		}
+
+		return false, diags
+	}
+
+	return true, nil
+}
+
 func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
+	return to.setWithSecrets(ctx, from, true)
+}
+
+func (to *requestCreateCredentialDetails) setWithSecrets(
+	ctx context.Context,
+	from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel],
+	requireSecret bool,
+) diag.Diagnostics { //revive:disable-line:flag-parameter
+	if from.IsUnknown() {
+		return nil
+	}
+
+	if from.IsNull() {
+		var diags diag.Diagnostics
+		if requireSecret {
+			diags.AddError("Missing credential details", "Credential details are required to create a connection.")
+		}
+
+		return diags
+	}
+
 	credentialDetails, diags := from.Get(ctx)
 	if diags.HasError() {
 		return diags
@@ -362,6 +427,10 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
 
 	credentialType := fabcore.CredentialType(credentialDetails.CredentialType.ValueString())
+
+	if available, diags := credentialDetails.credentialsAvailable(requireSecret); diags.HasError() || !available {
+		return diags
+	}
 
 	var requestCreateCredential fabcore.CredentialsClassification
 
@@ -469,9 +538,42 @@ func (to *requestCreateCredentialDetails) set(ctx context.Context, from supertyp
 		return diags
 	}
 
+	if !hasCredentialSecret(requestCreateCredential) {
+		if requireSecret {
+			diags.AddError(
+				"Missing credential secret",
+				"A write-only secret or Key Vault reference is required to create a connection or change its credentials. Secrets may be omitted only when preserving existing credentials.",
+			)
+
+			return diags
+		}
+
+		// The update API preserves credentials when the credentials property is omitted.
+		return nil
+	}
+
 	to.Credentials = requestCreateCredential
 
 	return nil
+}
+
+func hasCredentialSecret(credentials fabcore.CredentialsClassification) bool {
+	switch v := credentials.(type) {
+	case *fabcore.BasicCredentials:
+		return v.Password != nil || v.PasswordReference != nil
+	case *fabcore.KeyCredentials:
+		return v.Key != nil || v.KeyReference != nil
+	case *fabcore.KeyPairCredentials:
+		return v.PrivateKey != nil
+	case *fabcore.ServicePrincipalCredentials:
+		return v.ServicePrincipalSecret != nil || v.ServicePrincipalSecretReference != nil
+	case *fabcore.SharedAccessSignatureCredentials:
+		return v.Token != nil || v.TokenReference != nil
+	case *fabcore.AnonymousCredentials, *fabcore.WorkspaceIdentityCredentials:
+		return true
+	default:
+		return false
+	}
 }
 
 type requestUpdateCredentialDetails struct {
@@ -479,124 +581,15 @@ type requestUpdateCredentialDetails struct {
 }
 
 func (to *requestUpdateCredentialDetails) set(ctx context.Context, from supertypes.SingleNestedObjectValueOf[rsCredentialDetailsModel]) diag.Diagnostics {
-	credentialDetails, diags := from.Get(ctx)
-	if diags.HasError() {
+	var details requestCreateCredentialDetails
+	if diags := details.setWithSecrets(ctx, from, false); diags.HasError() {
 		return diags
 	}
 
-	to.ConnectionEncryption = (*fabcore.ConnectionEncryption)(credentialDetails.ConnectionEncryption.ValueStringPointer())
-	to.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
-	to.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
-
-	credentialType := fabcore.CredentialType(credentialDetails.CredentialType.ValueString())
-
-	var requestUpdateCredential fabcore.CredentialsClassification
-
-	switch credentialType {
-	case fabcore.CredentialTypeAnonymous:
-		requestUpdateCredential = &fabcore.AnonymousCredentials{
-			CredentialType: &credentialType,
-		}
-
-	case fabcore.CredentialTypeBasic:
-		cred, diags := credentialDetails.BasicCredentials.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		kvRef, diags := getKeyVaultSecretReference(ctx, cred.PasswordReference)
-		if diags.HasError() {
-			return diags
-		}
-
-		requestUpdateCredential = &fabcore.BasicCredentials{
-			CredentialType:    &credentialType,
-			Username:          cred.Username.ValueStringPointer(),
-			Password:          cred.PasswordWO.ValueStringPointer(),
-			PasswordReference: kvRef,
-		}
-
-	case fabcore.CredentialTypeKey:
-		cred, diags := credentialDetails.KeyCredentials.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		kvRef, diags := getKeyVaultSecretReference(ctx, cred.KeyReference)
-		if diags.HasError() {
-			return diags
-		}
-
-		requestUpdateCredential = &fabcore.KeyCredentials{
-			CredentialType: &credentialType,
-			Key:            cred.KeyWO.ValueStringPointer(),
-			KeyReference:   kvRef,
-		}
-
-	case fabcore.CredentialTypeKeyPair:
-		cred, diags := credentialDetails.KeyPairCredentials.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		requestUpdateCredential = &fabcore.KeyPairCredentials{
-			CredentialType: &credentialType,
-			Identifier:     cred.Identifier.ValueStringPointer(),
-			PrivateKey:     cred.PrivateKeyWO.ValueStringPointer(),
-			Passphrase:     cred.PassphraseWO.ValueStringPointer(),
-		}
-
-	case fabcore.CredentialTypeServicePrincipal:
-		cred, diags := credentialDetails.ServicePrincipalCredentials.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		kvRef, diags := getKeyVaultSecretReference(ctx, cred.ServicePrincipalSecretReference)
-		if diags.HasError() {
-			return diags
-		}
-
-		requestUpdateCredential = &fabcore.ServicePrincipalCredentials{
-			CredentialType:                  &credentialType,
-			TenantID:                        cred.TenantID.ValueStringPointer(),
-			ServicePrincipalClientID:        cred.ClientID.ValueStringPointer(),
-			ServicePrincipalSecret:          cred.ClientSecretWO.ValueStringPointer(),
-			ServicePrincipalSecretReference: kvRef,
-		}
-
-	case fabcore.CredentialTypeSharedAccessSignature:
-		cred, diags := credentialDetails.SharedAccessSignatureCredentials.Get(ctx)
-		if diags.HasError() {
-			return diags
-		}
-
-		kvRef, diags := getKeyVaultSecretReference(ctx, cred.TokenReference)
-		if diags.HasError() {
-			return diags
-		}
-
-		requestUpdateCredential = &fabcore.SharedAccessSignatureCredentials{
-			CredentialType: &credentialType,
-			Token:          cred.TokenWO.ValueStringPointer(),
-			TokenReference: kvRef,
-		}
-
-	case fabcore.CredentialTypeWorkspaceIdentity:
-		requestUpdateCredential = &fabcore.WorkspaceIdentityCredentials{
-			CredentialType: &credentialType,
-		}
-	default:
-		var diags diag.Diagnostics
-		diags.AddError(
-			"Unsupported credential type",
-			fmt.Sprintf("Credential type '%s' is not supported", credentialType),
-		)
-
-		return diags
-	}
-
-	to.Credentials = requestUpdateCredential
+	to.ConnectionEncryption = details.ConnectionEncryption
+	to.SingleSignOnType = details.SingleSignOnType
+	to.SkipTestConnection = details.SkipTestConnection
+	to.Credentials = details.Credentials
 
 	return nil
 }
@@ -619,6 +612,20 @@ func (to *requestUpdateConnection) set(
 		}
 	}
 
+	var updateCredentialDetails *fabcore.UpdateCredentialDetails
+
+	if plan.CredentialDetails.IsKnown() {
+		credentialDetails, diags := plan.CredentialDetails.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		requestUpdateCredentialDetails.ConnectionEncryption = (*fabcore.ConnectionEncryption)(credentialDetails.ConnectionEncryption.ValueStringPointer())
+		requestUpdateCredentialDetails.SingleSignOnType = (*fabcore.SingleSignOnType)(credentialDetails.SingleSignOnType.ValueStringPointer())
+		requestUpdateCredentialDetails.SkipTestConnection = credentialDetails.SkipTestConnection.ValueBoolPointer()
+		updateCredentialDetails = &requestUpdateCredentialDetails.UpdateCredentialDetails
+	}
+
 	displayName := plan.DisplayName.ValueStringPointer()
 	privacyLevel := (*fabcore.PrivacyLevel)(plan.PrivacyLevel.ValueStringPointer())
 
@@ -628,7 +635,7 @@ func (to *requestUpdateConnection) set(
 			DisplayName:                   displayName,
 			ConnectivityType:              &connectivityType,
 			PrivacyLevel:                  privacyLevel,
-			CredentialDetails:             &requestUpdateCredentialDetails.UpdateCredentialDetails,
+			CredentialDetails:             updateCredentialDetails,
 			AllowConnectionUsageInGateway: plan.AllowConnectionUsageInGateway.ValueBoolPointer(),
 		}
 
@@ -637,7 +644,7 @@ func (to *requestUpdateConnection) set(
 			DisplayName:       displayName,
 			ConnectivityType:  &connectivityType,
 			PrivacyLevel:      privacyLevel,
-			CredentialDetails: &requestUpdateCredentialDetails.UpdateCredentialDetails,
+			CredentialDetails: updateCredentialDetails,
 		}
 	default:
 		var diags diag.Diagnostics
