@@ -57,5 +57,14 @@ Read-Only:
 - `display_name` (String) The Digital Twin Builder display name.
 - `folder_id` (String) The Digital Twin Builder Folder ID.
 - `id` (String) The Digital Twin Builder ID.
+- `sensitivity_label` (Attributes) The Digital Twin Builder sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Digital Twin Builder.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

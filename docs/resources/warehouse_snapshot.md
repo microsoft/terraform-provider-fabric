@@ -45,6 +45,7 @@ Any changes to this configuration will result in recreation of the Warehouse Sna
 
 - `description` (String) The Warehouse Snapshot description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label` (Attributes) The Warehouse Snapshot sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -64,6 +65,14 @@ Required:
 Optional:
 
 - `snapshot_date_time` (String) The date and time used for the Warehouse snapshot, if not provided the current date and time will be taken. If given it should be in UTC, using the YYYY-MM-DDTHH:mm:ssZ format.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

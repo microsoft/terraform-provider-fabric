@@ -62,6 +62,7 @@ func (o *operationsMirroredAzureDatabricksCatalog) CreateWithParentID(
 	entity := NewRandomMirroredAzureDatabricksCatalogWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
 
 	return entity
 }
@@ -201,12 +202,13 @@ func configureMirroredAzureDatabricksCatalog(server *fakeServer) fabmirroredazur
 
 func NewRandomMirroredAzureDatabricksCatalog() fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog {
 	return fabmirroredazuredatabrickscatalog.MirroredAzureDatabricksCatalog{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
+		SensitivityLabel: &fabmirroredazuredatabrickscatalog.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabmirroredazuredatabrickscatalog.ItemTypeMirroredAzureDatabricksCatalog),
 		Properties: &fabmirroredazuredatabrickscatalog.Properties{
 			AutoSync:                        to.Ptr(fabmirroredazuredatabrickscatalog.AutoSyncEnabled),
 			CatalogName:                     new(testhelp.RandomName()),

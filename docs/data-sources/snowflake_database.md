@@ -78,6 +78,7 @@ output "example_definition_content_object" {
 - `description` (String) The Snowflake Database description.
 - `folder_id` (String) The Snowflake Database Folder ID.
 - `properties` (Attributes) The Snowflake Database properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label` (Attributes) The Snowflake Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -120,3 +121,11 @@ Read-Only:
 - `connection_string` (String) SQL endpoint connection string.
 - `id` (String) SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

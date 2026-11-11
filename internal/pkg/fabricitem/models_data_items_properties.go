@@ -13,7 +13,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
 )
 
-type DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop any] struct {
+type DataSourceFabricItemsPropertiesModel[Ttfprop, Titemprop any] struct { //revive:disable-line:exported
 	WorkspaceID customtypes.UUID                                                                 `tfsdk:"workspace_id"`
 	Values      supertypes.SetNestedObjectValueOf[FabricItemPropertiesModel[Ttfprop, Titemprop]] `tfsdk:"values"`
 	Timeouts    timeouts.Value                                                                   `tfsdk:"timeouts"`

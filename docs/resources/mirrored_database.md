@@ -105,6 +105,7 @@ resource "fabric_mirrored_database" "example_parameters" {
 - `definition_update_enabled` (Boolean) Update definition on change of source content. Default: `true`.
 - `description` (String) The Mirrored Database description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label` (Attributes) The Mirrored Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -143,6 +144,14 @@ Required:
 - `find` (String) The find value of the parameter.
 - `type` (String) Processing type of the parameters. Possible values: `JsonPathReplace`, `TextReplace`.
 - `value` (String) The value of the parameter.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

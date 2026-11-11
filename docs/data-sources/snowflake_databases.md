@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Snowflake Database Folder ID.
 - `id` (String) The Snowflake Database ID.
 - `properties` (Attributes) The Snowflake Database properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Snowflake Database sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Snowflake Database.
 - `workspace_id` (String) The Workspace ID.
 
@@ -81,3 +82,11 @@ Read-Only:
 - `connection_string` (String) SQL endpoint connection string.
 - `id` (String) SQL endpoint ID.
 - `provisioning_status` (String) The SQL endpoint provisioning status.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

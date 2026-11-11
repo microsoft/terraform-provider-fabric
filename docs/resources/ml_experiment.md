@@ -34,12 +34,21 @@ resource "fabric_ml_experiment" "example" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label` (Attributes) The ML Experiment sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ML Experiment ID.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

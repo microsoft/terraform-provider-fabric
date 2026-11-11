@@ -20,7 +20,7 @@ type operations{{.TypeInfo}} struct{}
 
 // ConvertItemToEntity implements itemConverter.
 func (o *operations{{.TypeInfo}}) ConvertItemToEntity(item fabcore.Item) fab{{.Package}}.{{.TypeInfo}} {
-	return fab{{.Package}}.{{.TypeInfo}}{
+	entity := fab{{.Package}}.{{.TypeInfo}}{
 		ID:          item.ID,
 		DisplayName: item.DisplayName,
 		Description: item.Description,
@@ -29,6 +29,12 @@ func (o *operations{{.TypeInfo}}) ConvertItemToEntity(item fabcore.Item) fab{{.P
 		Type:        to.Ptr(fab{{.Package}}.ItemType{{.TypeInfo}}),
 		Properties:  NewRandom{{.TypeInfo}}().Properties,
 	}
+
+	if item.SensitivityLabel != nil {
+		entity.SensitivityLabel = &fab{{.Package}}.SensitivityLabel{ID: item.SensitivityLabel.ID}
+	}
+
+	return entity
 }
 {{- end}}
 
@@ -60,6 +66,8 @@ func (o *operations{{.TypeInfo}}) CreateWithParentID(parentID string, data fab{{
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
 	entity.FolderID = data.FolderID
+
+	setCreatedItemSensitivityLabel(&entity, data)
 
 	return entity
 }
@@ -192,6 +200,9 @@ func configure{{.TypeInfo}}(server *fakeServer) fab{{.Package}}.{{.TypeInfo}} {
 
 func NewRandom{{.TypeInfo}}() fab{{.Package}}.{{.TypeInfo}} {
 	return fab{{.Package}}.{{.TypeInfo}}{
+		SensitivityLabel: &fab{{.Package}}.SensitivityLabel{
+			ID: new(testhelp.RandomUUID()),
+		},
 		ID:          new(testhelp.RandomUUID()),
 		DisplayName: new(testhelp.RandomName()),
 		Description: new(testhelp.RandomName()),

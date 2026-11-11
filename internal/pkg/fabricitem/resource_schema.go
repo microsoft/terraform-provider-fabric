@@ -206,6 +206,23 @@ func getResourceFabricItemBaseAttributes(
 			Optional:            true,
 			CustomType:          customtypes.UUIDType{},
 		},
+		"sensitivity_label": schema.SingleNestedAttribute{
+			MarkdownDescription: fmt.Sprintf("The %s sensitivity label.", name),
+			Optional:            true,
+			Computed:            true,
+			CustomType:          supertypes.NewSingleNestedObjectTypeOf[sensitivityLabelModel](ctx),
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+				objectplanmodifier.RequiresReplaceIfConfigured(),
+			},
+			Attributes: map[string]schema.Attribute{
+				"id": schema.StringAttribute{
+					MarkdownDescription: "The sensitivity label ID.",
+					Required:            true,
+					CustomType:          customtypes.UUIDType{},
+				},
+			},
+		},
 		"tags": schema.SetAttribute{
 			MarkdownDescription: "The set of tag IDs.",
 			Optional:            true,

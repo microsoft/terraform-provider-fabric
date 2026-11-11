@@ -80,6 +80,7 @@ output "example_definition_content_object" {
 - `description` (String) The KQL Database description.
 - `folder_id` (String) The KQL Database Folder ID.
 - `properties` (Attributes) The KQL Database properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label` (Attributes) The KQL Database sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -109,3 +110,11 @@ Read-Only:
 - `eventhouse_id` (String) Parent Eventhouse ID.
 - `ingestion_service_uri` (String) Ingestion service URI.
 - `query_service_uri` (String) Query service URI.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

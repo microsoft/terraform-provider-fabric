@@ -22,6 +22,8 @@ func (o *operationsWarehouse) CreateWithParentID(parentID string, data fabwareho
 	entity := NewRandomWarehouseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -138,12 +140,13 @@ func configureWarehouse(server *fakeServer) fabwarehouse.Warehouse {
 
 func NewRandomWarehouse() fabwarehouse.Warehouse {
 	return fabwarehouse.Warehouse{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabwarehouse.ItemTypeWarehouse),
+		SensitivityLabel: &fabwarehouse.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabwarehouse.ItemTypeWarehouse),
 		Properties: &fabwarehouse.Properties{
 			CollationType:    to.Ptr(fabwarehouse.CollationTypeLatin1General100BIN2UTF8),
 			ConnectionString: new(testhelp.RandomURI()),

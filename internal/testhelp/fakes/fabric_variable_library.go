@@ -52,6 +52,8 @@ func (o *operationsVariableLibrary) CreateWithParentID(parentID string, data fab
 	entity := NewRandomVariableLibraryWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -172,12 +174,13 @@ func configureVariableLibrary(server *fakeServer) fabvariablelibrary.VariableLib
 
 func NewRandomVariableLibrary() fabvariablelibrary.VariableLibrary {
 	return fabvariablelibrary.VariableLibrary{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
+		SensitivityLabel: &fabvariablelibrary.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabvariablelibrary.ItemTypeVariableLibrary),
 		Properties: &fabvariablelibrary.Properties{
 			ActiveValueSetName: new(testhelp.RandomName()),
 		},

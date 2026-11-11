@@ -1,0 +1,5 @@
+kind: added
+body: Added `sensitivity_label.id` to Fabric item resources and data sources, with strict label application on creation and label discovery during import.
+time: 2026-03-29T10:02:10.16780917Z
+custom:
+    Issue: "887"
