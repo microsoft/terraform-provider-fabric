@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -180,7 +179,7 @@ func (r *ResourceFabricItemDefinition) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -214,7 +213,12 @@ func (r *ResourceFabricItemDefinition) Read(ctx context.Context, req resource.Re
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	diags = r.get(ctx, &state)
+	result := r.get(ctx, &state)
+	if preserveItemStateOnInactiveCapacity(req, resp, state.ID.ValueString(), result) {
+		return
+	}
+
+	diags = result.Diagnostics
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -314,7 +318,7 @@ func (r *ResourceFabricItemDefinition) Update(ctx context.Context, req resource.
 	}
 
 	// r.get() updates the plan with current server state
-	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -412,7 +416,7 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 		Timeouts:                timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state).Diagnostics...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -427,13 +431,13 @@ func (r *ResourceFabricItemDefinition) ImportState(ctx context.Context, req reso
 	}
 }
 
-func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceFabricItemDefinitionModel) diag.Diagnostics {
+func (r *ResourceFabricItemDefinition) get(ctx context.Context, model *resourceFabricItemDefinitionModel) itemReadResult {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.TypeInfo.Name, model.ID.ValueString()))
 
 	respGet, err := r.client.GetItem(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
-		return diags
+	if result := getItemReadResult(ctx, err); result.Diagnostics.HasError() {
+		return result
 	}
 
-	return model.set(ctx, respGet.Item)
+	return itemReadResult{Diagnostics: model.set(ctx, respGet.Item)}
 }
