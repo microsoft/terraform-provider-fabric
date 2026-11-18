@@ -45,7 +45,7 @@ resource "fabric_{{.Type}}" "example_custom_delimiter" {
   format       = "Default"
   definition = {
     "{{.DefinitionPath}}" = {
-      source           = "${local.path}/{{.DefinitionPath}}.tmpl"
+      source           = "${local.path}/{{.DefinitionCustomDelimiterPath}}.tmpl"
       tokens_delimiter = "<<>>"
       tokens = {
         "MyValue1" = "my value 1"
@@ -63,7 +63,7 @@ resource "fabric_{{.Type}}" "example_parameters" {
   format       = "Default"
   definition = {
     "{{.DefinitionPath}}" = {
-      source          = "${local.path}/{{.DefinitionPath}}.tmpl"
+      source          = "${local.path}/{{.DefinitionPath}}"
       processing_mode = "Parameters"
       parameters = [
         {

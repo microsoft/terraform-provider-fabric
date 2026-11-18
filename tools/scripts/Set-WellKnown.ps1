@@ -321,6 +321,9 @@ function Set-FabricItem {
     'PaginatedReport' {
       $itemEndpoint = 'paginatedReports'
     }
+    'Plan' {
+      $itemEndpoint = 'plans'
+    }
     'Reflex' {
       $itemEndpoint = 'reflexes'
     }
@@ -1239,6 +1242,7 @@ $itemNaming = @{
   'OrgAppAudience'                  = 'orgappaud'
   'Shortcut'                        = 'srt'
   'PaginatedReport'                 = 'prpt'
+  'Plan'                            = 'plan'
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
@@ -1408,7 +1412,7 @@ $wellKnown['WorkspaceCMK'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'UserDataFunction', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Plan', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'UserDataFunction', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
