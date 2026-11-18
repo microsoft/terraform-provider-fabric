@@ -29,7 +29,7 @@ Also read `tools/itemgen/main.go` for the canonical list of valid item types fro
 
 ## Step 2 — Gather Flag Values
 
-The `itemgen` tool accepts 9 command-line flags. Determine each value from the SDK analysis and Fabric API docs:
+Determine each of the following `itemgen` flag values from the SDK analysis and Fabric API docs. The optional-output flags (`-generate-fakes`, `-generate-examples`) are left at their defaults — itemgen decides deterministically which fakes and examples to generate for the archetype:
 
 | Flag                 | Type   | How to Determine                                                                                                    | Default        |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- | -------------- |
@@ -40,8 +40,6 @@ The `itemgen` tool accepts 9 command-line flags. Determine each value from the S
 | `-rename-allowed`    | bool   | Check SDK for Update/Rename method on the items client                                                              | `true`         |
 | `-is-preview`        | bool   | Check Fabric API docs for "preview" badge or header                                                                 | `false`        |
 | `-is-spn-supported`  | bool   | Check API docs for service principal authentication support                                                         | `false`        |
-| `-generate-fakes`    | bool   | Always set to `true` — itemgen generates typed fake test handlers only for archetypes with properties (skips `basic` and `definition`) | `true`         |
-| `-generate-examples` | bool   | Always set to `true` — generates TF example files                                                                   | `true`         |
 
 ### Flag Value Details
 
@@ -75,9 +73,7 @@ go run tools/itemgen/main.go \
   -definition-path "<definition-file-path>" \
   -rename-allowed=<true|false> \
   -is-preview=<true|false> \
-  -is-spn-supported=<true|false> \
-  -generate-fakes=true \
-  -generate-examples=true
+  -is-spn-supported=<true|false>
 ```
 
 ## Reference

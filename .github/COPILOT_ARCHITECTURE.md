@@ -492,7 +492,7 @@ Otherwise → Pattern E (standalone entity)
 
 **Purpose:** Builds the correct `go run tools/itemgen/main.go` command for scaffolding a new Fabric Item resource. **Only applies to Fabric Items — Non-Items do not use itemgen.**
 
-**9 command flags:**
+**7 command flags** (the optional-output flags `-generate-fakes` / `-generate-examples` stay at their defaults; itemgen decides what to generate per archetype):
 
 | Flag | How to Determine |
 |------|-----------------|
@@ -503,8 +503,6 @@ Otherwise → Pattern E (standalone entity)
 | `-rename-allowed` | `true` unless SDK lacks Update method |
 | `-is-preview` | Check API docs for "preview" badge |
 | `-is-spn-supported` | Check API docs for SPN support |
-| `-generate-fakes` | Always `true` (itemgen skips typed fakes for `basic` and `definition` archetypes) |
-| `-generate-examples` | Always `true` |
 
 ### Schema Model Generator
 

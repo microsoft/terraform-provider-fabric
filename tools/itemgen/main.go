@@ -45,17 +45,15 @@ type ItemConfig struct {
 	FabricItemType    string
 	DefinitionFormats []string
 	DefinitionPath    string
-	// DefinitionCustomDelimiterPath is the fixture used by the custom tokens delimiter example (e.g. definition-custom-delimiter.json).
-	DefinitionCustomDelimiterPath string
-	DocsURL                       string
-	DisplayNameMax                int
-	DescriptionMax                int
-	ItemType                      ItemType
-	HasDefinition                 bool
-	HasProperties                 bool
-	HasConfig                     bool
-	IsPreview                     bool
-	IsSPNSupported                bool
+	DocsURL           string
+	DisplayNameMax    int
+	DescriptionMax    int
+	ItemType          ItemType
+	HasDefinition     bool
+	HasProperties     bool
+	HasConfig         bool
+	IsPreview         bool
+	IsSPNSupported    bool
 	// Internal fields for generation options
 	generateFakes    bool
 	generateExamples bool
@@ -181,27 +179,26 @@ func parseFlags() (ItemConfig, error) {
 
 	// Create configuration
 	return ItemConfig{
-		Name:                          *itemName,
-		Type:                          normalizeTypeName(*itemName),
-		TypeInfo:                      strings.ReplaceAll(*itemName, " ", ""),
-		Names:                         *itemsName,
-		Types:                         normalizeTypeName(*itemsName),
-		TypesInfo:                     strings.ReplaceAll(*itemsName, " ", ""),
-		Package:                       strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
-		ModelName:                     toCamelCase(*itemName),
-		RenameAllowed:                 *renameAllowed,
-		DefinitionFormats:             []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
-		DefinitionPath:                *definitionPath,
-		DefinitionCustomDelimiterPath: customDelimiterPath(*definitionPath),
-		DocsURL:                       "<docs-url>", // Placeholder - should be configurable
-		DisplayNameMax:                DefaultDisplayNameMax,
-		DescriptionMax:                DefaultDescriptionMax,
-		ItemType:                      itemTypeEnum,
-		HasDefinition:                 itemTypeEnum.hasDefinition(),
-		HasProperties:                 itemTypeEnum.hasProperties(),
-		HasConfig:                     itemTypeEnum.hasConfig(),
-		IsPreview:                     *isPreview,
-		IsSPNSupported:                *isSPNSupported,
+		Name:              *itemName,
+		Type:              normalizeTypeName(*itemName),
+		TypeInfo:          strings.ReplaceAll(*itemName, " ", ""),
+		Names:             *itemsName,
+		Types:             normalizeTypeName(*itemsName),
+		TypesInfo:         strings.ReplaceAll(*itemsName, " ", ""),
+		Package:           strings.ToLower(strings.ReplaceAll(*itemName, " ", "")),
+		ModelName:         toCamelCase(*itemName),
+		RenameAllowed:     *renameAllowed,
+		DefinitionFormats: []string{"<part1>", "<part2>"}, // Placeholder - should be configurable
+		DefinitionPath:    *definitionPath,
+		DocsURL:           "<docs-url>", // Placeholder - should be configurable
+		DisplayNameMax:    DefaultDisplayNameMax,
+		DescriptionMax:    DefaultDescriptionMax,
+		ItemType:          itemTypeEnum,
+		HasDefinition:     itemTypeEnum.hasDefinition(),
+		HasProperties:     itemTypeEnum.hasProperties(),
+		HasConfig:         itemTypeEnum.hasConfig(),
+		IsPreview:         *isPreview,
+		IsSPNSupported:    *isSPNSupported,
 		// Store flags for optional generation
 		generateFakes:    *generateFakes,
 		generateExamples: *generateExamples,
@@ -234,12 +231,13 @@ func normalizeTypeName(name string) string {
 	return strings.ToLower(strings.ReplaceAll(name, " ", "_"))
 }
 
-// customDelimiterPath derives the custom tokens delimiter fixture name from the definition path.
-// e.g. "definition.json" -> "definition-custom-delimiter.json".
-func customDelimiterPath(definitionPath string) string {
-	ext := filepath.Ext(definitionPath)
+// DefinitionCustomDelimiterPath returns the fixture name used by the generated resource example that sets
+// tokens_delimiter = "<<>>". That fixture needs << .TOKEN >> placeholders instead of {{ .TOKEN }}, so it cannot
+// share the {{ }} fixture with the other examples. E.g. "definition.json" -> "definition-custom-delimiter.json".
+func (c ItemConfig) DefinitionCustomDelimiterPath() string {
+	ext := filepath.Ext(c.DefinitionPath)
 
-	return strings.TrimSuffix(definitionPath, ext) + "-custom-delimiter" + ext
+	return strings.TrimSuffix(c.DefinitionPath, ext) + "-custom-delimiter" + ext
 }
 
 // toCamelCase converts a display name to unexported camelCase.
@@ -418,7 +416,7 @@ func printNextSteps(config ItemConfig) {
 		if config.HasDefinition {
 			fmt.Printf("%d. Create the definition fixtures in internal/testhelp/fixtures/%s/ referenced by the examples:\n", step, config.Type)
 			fmt.Printf("   - %s.tmpl: Go template using {{ .TOKEN }} placeholders (examples 2-3)\n", config.DefinitionPath)
-			fmt.Printf("   - %s.tmpl: same content using << .TOKEN >> placeholders (example 4, tokens_delimiter \"<<>>\")\n", config.DefinitionCustomDelimiterPath)
+			fmt.Printf("   - %s.tmpl: same content using << .TOKEN >> placeholders (example 4, tokens_delimiter \"<<>>\")\n", config.DefinitionCustomDelimiterPath())
 			fmt.Printf("   - %s: plain content without template expressions (example 5, processing_mode \"Parameters\")\n", config.DefinitionPath)
 
 			step++
