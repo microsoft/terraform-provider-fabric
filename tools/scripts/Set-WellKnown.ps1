@@ -1417,8 +1417,7 @@ $itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'Da
 # Deployment Plan (preview) items can only be created when the 'ArtifactDeploymentPlanPreview' tenant setting is enabled
 $deploymentPlanTenantSettings = Get-TenantSettings -TenantSettingName 'ArtifactDeploymentPlanPreview'
 if ($deploymentPlanTenantSettings.enabled -eq $false) {
-  Write-Log -Message "Users can create deployment plan (preview) items tenant setting is disabled. Skipping DeploymentPlan creation. Please enable the 'Users can create deployment plan (preview) items' tenant setting manually in the Fabric Admin Portal and re-run the script." -Level 'ERROR' -Stop $false
-  $itemTypes = $itemTypes | Where-Object { $_ -ne 'DeploymentPlan' }
+  Write-Log -Message "Users can create deployment plan (preview) items tenant setting is disabled. Please enable the 'Users can create deployment plan (preview) items' tenant setting manually in the Fabric Admin Portal and re-run the script." -Level 'ERROR'
 }
 
 # Loop through each item type and create if not exists

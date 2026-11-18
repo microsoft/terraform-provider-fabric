@@ -21,6 +21,7 @@ func NewResourceDeploymentPlan() resource.Resource {
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
 			mapvalidator.SizeAtMost(len(itemDefinitionFormats)),
 			mapvalidator.KeysAre(stringvalidator.OneOf(fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault)...)),
 		},

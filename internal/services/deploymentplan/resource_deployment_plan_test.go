@@ -130,6 +130,20 @@ func TestUnit_DeploymentPlanResource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 		},
+		// error - definition - empty map
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.CompileConfig(
+				testResourceItemHeader,
+				map[string]any{
+					"workspace_id": "00000000-0000-0000-0000-000000000000",
+					"display_name": "test",
+					"format":       "Default",
+					"definition":   map[string]any{},
+				},
+			),
+			ExpectError: regexp.MustCompile(`Invalid Attribute Value`),
+		},
 	}))
 }
 
@@ -288,10 +302,6 @@ func TestUnit_DeploymentPlanResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DeploymentPlanResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
@@ -350,10 +360,6 @@ func TestAcc_DeploymentPlanResource_CRUD(t *testing.T) {
 }
 
 func TestAcc_DeploymentPlanDefinitionResource_CRUD(t *testing.T) {
-	if testhelp.ShouldSkipTest(t) {
-		t.Skip("No SPN support")
-	}
-
 	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
 	workspaceID := workspace["id"].(string)
 
