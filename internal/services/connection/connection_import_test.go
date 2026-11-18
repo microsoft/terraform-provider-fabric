@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
@@ -95,6 +96,12 @@ func TestUnit_ConnectionResource_ImportWithoutSecrets(t *testing.T) {
 				"connection_details": map[string]any{"type": "FTP", "creation_method": "FTP.Contents", "parameters": []map[string]any{{"name": "server", "value": "existing.example.com"}}},
 				"credential_details": map[string]any{"credential_type": "Basic", "basic_credentials": map[string]any{"username": "changed-user"}},
 			})
+			replacementConfig := strings.Replace(renamedConfig, `"FTP.Contents"`, `"FTP.Alternative"`, 1)
+			unknownDisplayNameConfig := strings.Replace(replacementConfig, strconv.Quote("renamed-"+*entity.DisplayName), "terraform_data.name.output", 1) + `
+resource "terraform_data" "name" {
+ input = "replacement-name"
+}
+`
 			resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, server.ServerFactory, nil, []resource.TestStep{
 				{Config: config, PlanOnly: true, ExpectError: regexp.MustCompile("Missing credential secret")},
 				{
@@ -121,7 +128,11 @@ func TestUnit_ConnectionResource_ImportWithoutSecrets(t *testing.T) {
 					PlanOnly: true, ExpectError: regexp.MustCompile("Missing credential secret"),
 				},
 				{
-					Config:   regexp.MustCompile("FTP.Contents").ReplaceAllString(renamedConfig, "FTP.Alternative"),
+					Config:   replacementConfig,
+					PlanOnly: true, ExpectError: regexp.MustCompile("Missing credential secret"),
+				},
+				{
+					Config:   unknownDisplayNameConfig,
 					PlanOnly: true, ExpectError: regexp.MustCompile("Missing credential secret"),
 				},
 			}))
@@ -354,7 +365,20 @@ import {
 	}))
 }
 
-func TestUnit_ConnectionResource_ImportIgnoredCreationMethodWithEmptyParameters(t *testing.T) {
+func TestUnit_ConnectionResource_ImportIgnoredCreationMethod(t *testing.T) {
+	for _, tc := range []struct{ name, parameters string }{
+		{"empty", "[]"},
+		{"nonempty", `[{ name = "server", value = "existing.example.com" }]`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			testImportIgnoredCreationMethod(t, tc.parameters)
+		})
+	}
+}
+
+func testImportIgnoredCreationMethod(t *testing.T, parameters string) {
+	t.Helper()
+
 	server := fakes.NewFakeServer()
 	connectionImportMetadata(server.ServerFactory)
 
@@ -374,7 +398,7 @@ func TestUnit_ConnectionResource_ImportIgnoredCreationMethodWithEmptyParameters(
  connection_details = {
   type = "FTP"
   creation_method = "FTP.Contents"
-  parameters = []
+  parameters = %s
  }
  credential_details = { credential_type = "Anonymous" }
  lifecycle { ignore_changes = [connection_details.creation_method] }
@@ -383,7 +407,12 @@ import {
  to = %s
  id = %q
 }
-`, testResourceItemHeader, *entity.DisplayName, *entity.PrivacyLevel, testResourceItemFQN, *entity.ID)
+`, testResourceItemHeader, *entity.DisplayName, *entity.PrivacyLevel, parameters, testResourceItemFQN, *entity.ID)
+
+	parameterCheck := resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.parameters.#", "0")
+	if parameters != "[]" {
+		parameterCheck = resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.parameters.0.data_type", "Text")
+	}
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, server.ServerFactory, nil, []resource.TestStep{
 		{
@@ -394,12 +423,12 @@ import {
 			Check: resource.ComposeAggregateTestCheckFunc(
 				resource.TestCheckResourceAttr(testResourceItemFQN, "id", *entity.ID),
 				resource.TestCheckNoResourceAttr(testResourceItemFQN, "connection_details.creation_method"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "connection_details.parameters.#", "0"),
+				parameterCheck,
 			),
 		},
 		{Config: config, PlanOnly: true},
 		{
-			Config:   regexp.MustCompile(`parameters = \[\]`).ReplaceAllString(config, `parameters = [{ name = "server", value = "changed.example.com" }]`),
+			Config:   strings.Replace(config, "parameters = "+parameters, `parameters = [{ name = "server", value = "changed.example.com" }]`, 1),
 			PlanOnly: true, ExpectNonEmptyPlan: true,
 			ConfigPlanChecks: resource.ConfigPlanChecks{PostApplyPreRefresh: []plancheck.PlanCheck{
 				plancheck.ExpectResourceAction(testResourceItemFQN, plancheck.ResourceActionReplace),

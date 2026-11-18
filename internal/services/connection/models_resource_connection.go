@@ -361,21 +361,37 @@ type requestCreateCredentialDetails struct {
 	fabcore.CreateCredentialDetails
 }
 
-func (m rsCredentialDetailsModel) credentialsAvailable(requireSecret bool) (bool, diag.Diagnostics) { //revive:disable-line:flag-parameter
-	var credentialBlock attr.Value
+type credentialInputBlock interface {
+	attr.Value
+	Attributes() map[string]attr.Value
+}
 
+type credentialSecretInputs struct {
+	block     credentialInputBlock
+	secret    string
+	reference string
+}
+
+func (m rsCredentialDetailsModel) secretInputs() credentialSecretInputs {
 	switch fabcore.CredentialType(m.CredentialType.ValueString()) {
 	case fabcore.CredentialTypeBasic:
-		credentialBlock = m.BasicCredentials
+		return credentialSecretInputs{m.BasicCredentials, "password_wo", "password_reference"}
 	case fabcore.CredentialTypeKey:
-		credentialBlock = m.KeyCredentials
+		return credentialSecretInputs{m.KeyCredentials, "key_wo", "key_reference"}
 	case fabcore.CredentialTypeKeyPair:
-		credentialBlock = m.KeyPairCredentials
+		return credentialSecretInputs{m.KeyPairCredentials, "private_key_wo", ""}
 	case fabcore.CredentialTypeServicePrincipal:
-		credentialBlock = m.ServicePrincipalCredentials
+		return credentialSecretInputs{m.ServicePrincipalCredentials, "client_secret_wo", "service_principal_secret_reference"}
 	case fabcore.CredentialTypeSharedAccessSignature:
-		credentialBlock = m.SharedAccessSignatureCredentials
-	default:
+		return credentialSecretInputs{m.SharedAccessSignatureCredentials, "token_wo", "token_reference"}
+	default: // No supported secret block for other credential types.
+		return credentialSecretInputs{}
+	}
+}
+
+func (m rsCredentialDetailsModel) credentialsAvailable(requireSecret bool) (bool, diag.Diagnostics) { //revive:disable-line:flag-parameter
+	credentialBlock := m.secretInputs().block
+	if credentialBlock == nil {
 		return true, nil
 	}
 

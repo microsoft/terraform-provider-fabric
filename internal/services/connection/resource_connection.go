@@ -107,16 +107,16 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		return
 	}
 
+	if resp.Diagnostics.Append(r.validateCredentialChanges(ctx, req, len(resp.RequiresReplace) > 0)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	connectionDetails, diags := plan.getConnectionDetails(ctx)
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
 	if connectionDetails == nil || connectionDetails.Type.IsNull() || connectionDetails.Type.IsUnknown() {
-		return
-	}
-
-	if resp.Diagnostics.Append(r.validateCredentialChanges(ctx, req, len(resp.RequiresReplace) > 0)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -170,7 +170,11 @@ func (r *resourceConnection) ModifyPlan(ctx context.Context, req resource.Modify
 		return
 	}
 
-	if resp.Diagnostics.Append(r.setConnectionPerametersDataType(ctx, supportedConnectionType.CreationMethods, &plan)...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(setConnectionParameterDataTypes(ctx, connectionDetails.CreationMethod, supportedConnectionType.CreationMethods, connectionDetails)...); resp.Diagnostics.HasError() {
+		return
+	}
+
+	if resp.Diagnostics.Append(plan.ConnectionDetails.Set(ctx, connectionDetails)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -311,6 +315,10 @@ func (r *resourceConnection) Update(ctx context.Context, req resource.UpdateRequ
 
 	var reqUpdate requestUpdateConnection
 
+	if resp.Diagnostics.Append(r.resolveUpdateParameterTypes(ctx, config, &plan)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqUpdate.set(ctx, plan, config)...); resp.Diagnostics.HasError() {
 		return
 	}
@@ -404,20 +412,35 @@ func (r *resourceConnection) get(ctx context.Context, model *resourceConnectionM
 }
 
 func (r *resourceConnection) validateCredentialChanges(ctx context.Context, req resource.ModifyPlanRequest, replacing bool) diag.Diagnostics { //revive:disable-line:flag-parameter
-	// Secrets and Key Vault references may not be resolved until apply.
-	if !req.Config.Raw.IsFullyKnown() {
-		tflog.Debug(ctx, "deferring credential validation: configuration is unknown")
-
-		return nil
-	}
-
 	var config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel]
 	if diags := req.Config.Get(ctx, &config); diags.HasError() {
 		return diags
 	}
 
-	if !config.CredentialDetails.IsKnown() {
+	if config.CredentialDetails.IsUnknown() {
 		return nil
+	}
+
+	if config.CredentialDetails.IsKnown() {
+		credentials, diags := config.CredentialDetails.Get(ctx)
+		if diags.HasError() {
+			return diags
+		}
+
+		if credentials.CredentialType.IsUnknown() {
+			return nil
+		}
+
+		secretInputs := credentials.secretInputs()
+		if secretInputs.block != nil {
+			inputs := secretInputs.block.Attributes()
+
+			secret, reference := inputs[secretInputs.secret], inputs[secretInputs.reference]
+			if secretInputs.block.IsUnknown() || (secret != nil && secret.IsUnknown()) ||
+				(reference != nil && reference.IsUnknown()) {
+				return nil
+			}
+		}
 	}
 
 	var details requestCreateCredentialDetails
@@ -815,25 +838,20 @@ func (r *resourceConnection) validateCreationMethodParameters(ctx context.Contex
 	return diags
 }
 
-func (r *resourceConnection) setConnectionPerametersDataType(
+func setConnectionParameterDataTypes(
 	ctx context.Context,
+	method types.String,
 	elements []fabcore.ConnectionCreationMethod,
-	plan *resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+	connectionDetails *rsConnectionDetailsModel,
 ) diag.Diagnostics {
-	var diags diag.Diagnostics
 	var vParameters []fabcore.ConnectionCreationParameter
 
-	connectionDetails, diags := plan.ConnectionDetails.Get(ctx)
-	if diags.HasError() {
-		return diags
-	}
-
-	if connectionDetails.CreationMethod.IsNull() || connectionDetails.CreationMethod.IsUnknown() || !connectionDetails.Parameters.IsKnown() {
+	if method.IsNull() || method.IsUnknown() || !connectionDetails.Parameters.IsKnown() {
 		return nil
 	}
 
 	for _, v := range elements {
-		if *v.Name == connectionDetails.CreationMethod.ValueString() {
+		if *v.Name == method.ValueString() {
 			vParameters = v.Parameters
 
 			break
@@ -859,13 +877,61 @@ func (r *resourceConnection) setConnectionPerametersDataType(
 		}
 	}
 
-	if diags := connectionDetails.Parameters.Set(ctx, parameters); diags.HasError() {
+	return connectionDetails.Parameters.Set(ctx, parameters)
+}
+
+func (r *resourceConnection) resolveUpdateParameterTypes(
+	ctx context.Context,
+	config resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+	plan *resourceConnectionModel[rsConnectionDetailsModel, rsCredentialDetailsModel],
+) diag.Diagnostics {
+	details, diags := plan.getConnectionDetails(ctx)
+	if diags.HasError() || details == nil || !details.CreationMethod.IsNull() || !details.Parameters.IsKnown() {
 		return diags
 	}
 
-	if diags := plan.ConnectionDetails.Set(ctx, connectionDetails); diags.HasError() {
+	parameters, diags := details.Parameters.Get(ctx)
+	if diags.HasError() || !slices.ContainsFunc(parameters, func(p *connectionParametersModel) bool {
+		return p.DataType.IsUnknown()
+	}) {
 		return diags
 	}
 
-	return nil
+	// Terraform masks ignored values when planning, but apply receives the original configuration.
+	configDetails, diags := config.getConnectionDetails(ctx)
+	if diags.HasError() {
+		return diags
+	}
+
+	if configDetails == nil || configDetails.CreationMethod.IsNull() || configDetails.CreationMethod.IsUnknown() {
+		diags.AddAttributeError(
+			path.Root("connection_details").AtName("creation_method"),
+			"Missing creation method",
+			"A configured creation method is needed to resolve connection parameter data types.",
+		)
+
+		return diags
+	}
+
+	effectiveDetails := *details
+	effectiveDetails.CreationMethod = configDetails.CreationMethod
+
+	var metadata fabcore.ConnectionCreationMetadata
+	if diags := r.getConnectionTypeMetadata(ctx, effectiveDetails, plan.GatewayID, &metadata); diags.HasError() {
+		return diags
+	}
+
+	if diags := r.validateCreationMethod(effectiveDetails, metadata.CreationMethods); diags.HasError() {
+		return diags
+	}
+
+	if diags := r.validateCreationMethodParameters(ctx, effectiveDetails, metadata.CreationMethods); diags.HasError() {
+		return diags
+	}
+
+	if diags := setConnectionParameterDataTypes(ctx, effectiveDetails.CreationMethod, metadata.CreationMethods, details); diags.HasError() {
+		return diags
+	}
+
+	return plan.ConnectionDetails.Set(ctx, details)
 }
