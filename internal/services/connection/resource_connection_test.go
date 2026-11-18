@@ -522,7 +522,7 @@ func TestUnit_ConnectionResource_CredentialsAttributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`Invalid configuration for attribute`),
 		},
-		// error - exactly one of - neither key_wo nor key_reference provided
+		// error - creation requires a secret or reference
 		{
 			ResourceName: testResourceItemFQN,
 			Config: at.CompileConfig(
@@ -550,7 +550,7 @@ func TestUnit_ConnectionResource_CredentialsAttributes(t *testing.T) {
 					},
 				},
 			),
-			ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			ExpectError: regexp.MustCompile(`Missing credential secret`),
 		},
 		// error - exactly one of - both key_wo and key_reference provided
 		{
