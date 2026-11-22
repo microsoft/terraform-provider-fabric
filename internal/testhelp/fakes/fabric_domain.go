@@ -107,22 +107,18 @@ func configureDomain(server *fakeServer) fabadmin.Domain {
 
 	handler := newTypedHandler(server, entityOperations)
 
-	getDomainWrapper := func(_ context.Context, id string, _ bool, _ *fabadmin.DomainsClientGetDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientGetDomainResponse], _ azfake.ErrorResponder) {
+	getDomainWrapper := func(_ context.Context, id string, _ *fabadmin.DomainsClientGetDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientGetDomainResponse], _ azfake.ErrorResponder) {
 		return getByID(handler, id, entityOperations)
 	}
 
-	updateDomainWrapper := func(_ context.Context, id string, _ bool, updateRequest fabadmin.UpdateDomainRequest, _ *fabadmin.DomainsClientUpdateDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientUpdateDomainResponse], _ azfake.ErrorResponder) {
+	updateDomainWrapper := func(_ context.Context, id string, updateRequest fabadmin.UpdateDomainRequest, _ *fabadmin.DomainsClientUpdateDomainOptions) (_ azfake.Responder[fabadmin.DomainsClientUpdateDomainResponse], _ azfake.ErrorResponder) {
 		return updateByID(handler, id, updateRequest, entityOperations, entityOperations)
 	}
 
 	var createDomainWrapper func(context.Context, fabadmin.CreateDomainRequest, *fabadmin.DomainsClientCreateDomainOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainResponse], azfake.ErrorResponder)
 	handleCreateWithoutWorkspace(handler, entityOperations, entityOperations, entityOperations, &createDomainWrapper)
 
-	createDomainWrapperWith := func(ctx context.Context, _ bool, createRequest fabadmin.CreateDomainRequest, options *fabadmin.DomainsClientCreateDomainOptions) (azfake.Responder[fabadmin.DomainsClientCreateDomainResponse], azfake.ErrorResponder) {
-		return createDomainWrapper(ctx, createRequest, options)
-	}
-
-	listDomainWrapper := func(_ context.Context, _ bool, options *fabadmin.DomainsClientListDomainsOptions) (_ azfake.Responder[fabadmin.DomainsClientListDomainsResponse], _ azfake.ErrorResponder) {
+	listDomainWrapper := func(_ context.Context, options *fabadmin.DomainsClientListDomainsOptions) (_ azfake.Responder[fabadmin.DomainsClientListDomainsResponse], _ azfake.ErrorResponder) {
 		return listWithFilter[fabadmin.Domain, fabadmin.DomainsClientListDomainsOptions](handler, nil, entityOperations)("", options)
 	}
 
@@ -132,7 +128,7 @@ func configureDomain(server *fakeServer) fabadmin.Domain {
 
 	server.ServerFactory.Admin.DomainsServer.GetDomain = getDomainWrapper
 	server.ServerFactory.Admin.DomainsServer.UpdateDomain = updateDomainWrapper
-	server.ServerFactory.Admin.DomainsServer.CreateDomain = createDomainWrapperWith
+	server.ServerFactory.Admin.DomainsServer.CreateDomain = createDomainWrapper
 	server.ServerFactory.Admin.DomainsServer.ListDomains = listDomainWrapper
 	server.ServerFactory.Admin.DomainsServer.DeleteDomain = deleteDomainWrapper
 
