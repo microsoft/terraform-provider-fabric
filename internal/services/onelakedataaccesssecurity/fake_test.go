@@ -4,12 +4,16 @@
 package onelakedataaccesssecurity_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
@@ -17,6 +21,34 @@ import (
 )
 
 var fakeOneLakeDataAccessRoleStore = map[string]fabcore.DataAccessRoleListItem{}
+
+type oneLakeRequestTransport struct {
+	transport policy.Transporter
+	mu        sync.Mutex
+	bodies    []string
+}
+
+func (t *oneLakeRequestTransport) Do(req *http.Request) (*http.Response, error) {
+	if req.Body != nil && req.Body != http.NoBody {
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			return nil, fmt.Errorf("reading OneLake request body: %w", err)
+		}
+
+		err = req.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("closing OneLake request body: %w", err)
+		}
+
+		req.Body = io.NopCloser(bytes.NewReader(body))
+
+		t.mu.Lock()
+		t.bodies = append(t.bodies, string(body))
+		t.mu.Unlock()
+	}
+
+	return t.transport.Do(req)
+}
 
 func GenerateOneLakeDataAccessRoleID(workspaceID, itemID, roleName string) string {
 	return fmt.Sprintf("%s/%s/%s", workspaceID, itemID, roleName)

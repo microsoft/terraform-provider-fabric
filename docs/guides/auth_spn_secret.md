@@ -19,7 +19,7 @@ Follow [Creating an App Registration for the Service Principal context (SPN)](./
 
 ## Creating Client Secret
 
-1. In the [Microsoft Entra admin center](https://entra.microsoft.com), in **App registrations**, select your application.
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High, open **App registrations** and select your application.
 1. Select **Certificates & secrets** > **Client secrets** > **New client secret**.
 1. Add a description for your client secret.
 1. Select an expiration for the secret or specify a custom lifetime.
@@ -33,6 +33,8 @@ Follow [Creating an App Registration for the Service Principal context (SPN)](./
 For application security recommendations, see [Microsoft identity platform best practices and recommendations](https://learn.microsoft.com/entra/identity-platform/identity-platform-integration-checklist#security).
 
 ## Configuring Terraform to use the Client Secret
+
+For GCC High, use credentials from your government tenant and set `environment = "gcchigh"` in the Fabric provider or `FABRIC_ENVIRONMENT=gcchigh`.
 
 ### Environment Variables
 

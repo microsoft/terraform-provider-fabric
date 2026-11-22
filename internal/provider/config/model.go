@@ -18,6 +18,7 @@ type ProviderData struct {
 	FabricClient                    *fabric.Client
 	Timeout                         time.Duration
 	Endpoint                        string
+	Environment                     fabric.Environment
 	Version                         string
 	Preview                         bool
 	UseWorkspacePrivateLinkEndpoint bool

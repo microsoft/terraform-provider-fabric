@@ -65,6 +65,8 @@ Read more about first-party Microsoft applications ine the [Application IDs of c
 
 After above steps you should be able to authenticate using [Azure CLI](https://learn.microsoft.com/cli/azure/):
 
+For GCC High, run `az cloud set --name AzureUSGovernment` before logging in, and set `environment = "gcchigh"` in the Fabric provider or `FABRIC_ENVIRONMENT=gcchigh`. The provider does not change the CLI's active cloud.
+
 ```shell
 # (optional, useful in the multi-tenant scenarios) Disable the new login experience
 # See https://learn.microsoft.com/cli/azure/authenticate-azure-cli-interactively#sign-in-with-a-different-tenant for more details.
@@ -86,6 +88,8 @@ provider "fabric" {
   use_cli = true
 }
 ```
+
+For GCC High with Azure Developer CLI (`use_dev_cli = true`), configure it separately with `azd config set cloud.name AzureUSGovernment`, then run `azd auth login`.
 
 ## Usage with Azure PowerShell
 
