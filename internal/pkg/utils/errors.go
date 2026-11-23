@@ -159,8 +159,13 @@ func (h *ErrorHandler) processFabricError(
 		"RequestID":  errResp.ErrorResponse.RequestID,
 	})
 
-	// Handle special case for error identity check or not found errors
-	if errIs != nil && (errors.Is(errResp, errIs) || (errResp.RawResponse != nil && errResp.RawResponse.StatusCode == http.StatusNotFound)) {
+	capacityNotActive := errResp.ErrorCode == "CapacityNotActive" ||
+		(errResp.ErrorResponse.ErrorCode != nil && *errResp.ErrorResponse.ErrorCode == "CapacityNotActive")
+
+	// A CapacityNotActive response can use HTTP 404; it does not mean the item was deleted.
+	if errIs != nil &&
+		!capacityNotActive &&
+		(errors.Is(errResp, errIs) || (errResp.RawResponse != nil && errResp.RawResponse.StatusCode == http.StatusNotFound)) {
 		return errIs.Error(), errIs.Error()
 	}
 

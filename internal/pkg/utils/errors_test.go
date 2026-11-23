@@ -477,6 +477,81 @@ func TestUnit_GetDiagsFromError_FabricError(t *testing.T) {
 	}
 }
 
+func TestUnit_GetDiagsFromError_CapacityNotActive404(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		code         string
+		message      string
+		wantNotFound bool
+	}{
+		{name: "capacity_not_active", code: "CapacityNotActive", message: "Capacity is not active"},
+		{name: "ordinary_not_found", code: "ItemNotFound", message: "Item not found", wantNotFound: true},
+		{name: "message_only_capacity_code", code: "ItemNotFound", message: "CapacityNotActive", wantNotFound: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := createFabricError(t, http.StatusNotFound, tt.code, tt.message, "request-id")
+			diags := utils.GetDiagsFromError(t.Context(), err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound)
+			notFound := utils.IsErrNotFound("item-id", &diags, fabcore.ErrCommon.EntityNotFound)
+
+			assert.Equal(t, tt.wantNotFound, notFound)
+			if tt.wantNotFound {
+				assert.False(t, diags.HasError())
+				assert.Len(t, diags.Warnings(), 1)
+				assert.Equal(t, "Resource not found", diags.Warnings()[0].Summary())
+				return
+			}
+
+			assert.True(t, diags.HasError())
+			assert.Empty(t, diags.Warnings())
+			assert.Len(t, diags.Errors(), 1)
+			assert.Equal(t, common.ErrorReadHeader, diags.Errors()[0].Summary())
+			assert.Contains(t, diags.Errors()[0].Detail(), "CapacityNotActive")
+			assert.Contains(t, diags.Errors()[0].Detail(), "Capacity is not active")
+			assert.Contains(t, diags.Errors()[0].Detail(), "request-id")
+		})
+	}
+}
+
+func TestUnit_GetDiagsFromError_CapacityNotActiveAzure404(t *testing.T) {
+	t.Parallel()
+
+	rawResponse := &http.Response{
+		StatusCode: http.StatusNotFound,
+		Status:     "404 Not Found",
+		Header:     http.Header{"Content-Type": []string{"application/json"}},
+		Body: io.NopCloser(strings.NewReader(
+			`{"requestId":"request-id","errorCode":"CapacityNotActive","message":"Capacity is not active"}`,
+		)),
+		Request: &http.Request{
+			Method: http.MethodGet,
+			URL:    &url.URL{Scheme: "https", Host: "example.com"},
+		},
+	}
+	err := &azcore.ResponseError{
+		ErrorCode:   "CapacityNotActive",
+		StatusCode:  http.StatusNotFound,
+		RawResponse: rawResponse,
+	}
+
+	diags := utils.GetDiagsFromError(t.Context(), err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound)
+	notFound := utils.IsErrNotFound("item-id", &diags, fabcore.ErrCommon.EntityNotFound)
+
+	assert.False(t, notFound)
+	assert.True(t, diags.HasError())
+	assert.Empty(t, diags.Warnings())
+	assert.Len(t, diags.Errors(), 1)
+	assert.Equal(t, common.ErrorReadHeader, diags.Errors()[0].Summary())
+	assert.Contains(t, diags.Errors()[0].Detail(), "CapacityNotActive")
+	assert.Contains(t, diags.Errors()[0].Detail(), "Capacity is not active")
+	assert.Contains(t, diags.Errors()[0].Detail(), "request-id")
+}
+
 func TestUnit_GetDiagsFromError_AuthFailedError(t *testing.T) {
 	handler := utils.NewErrorHandler()
 	ctx := t.Context()

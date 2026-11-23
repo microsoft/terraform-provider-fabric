@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -124,7 +125,7 @@ func (r *ResourceFabricItem) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -158,12 +159,7 @@ func (r *ResourceFabricItem) Read(ctx context.Context, req resource.ReadRequest,
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	result := r.get(ctx, &state)
-	if preserveItemStateOnInactiveCapacity(req, resp, state.ID.ValueString(), result) {
-		return
-	}
-
-	diags = result.Diagnostics
+	diags = r.get(ctx, &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -238,7 +234,7 @@ func (r *ResourceFabricItem) Update(ctx context.Context, req resource.UpdateRequ
 		}
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -324,7 +320,7 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 		Timeouts:    timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -339,11 +335,11 @@ func (r *ResourceFabricItem) ImportState(ctx context.Context, req resource.Impor
 	}
 }
 
-func (r *ResourceFabricItem) get(ctx context.Context, model *resourceFabricItemModel) itemReadResult {
+func (r *ResourceFabricItem) get(ctx context.Context, model *resourceFabricItemModel) diag.Diagnostics {
 	respGet, err := r.client.GetItem(ctx, model.WorkspaceID.ValueString(), model.ID.ValueString(), nil)
-	if result := getItemReadResult(ctx, err); result.Diagnostics.HasError() {
-		return result
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
+		return diags
 	}
 
-	return itemReadResult{Diagnostics: model.set(ctx, respGet.Item)}
+	return model.set(ctx, respGet.Item)
 }

@@ -17,11 +17,11 @@ The guide provides troubleshooting steps for common issues that you might encoun
 
 ## Inactive Fabric capacities
 
-When a Fabric Item resource read returns the structured `CapacityNotActive` error code, the provider keeps the item's previous Terraform state and emits a warning instead of treating the item as deleted. The retained state has not been refreshed; resume the capacity and run `terraform plan` again to check for remote changes.
+When a Fabric Item resource read returns the structured `CapacityNotActive` error code, the provider returns an error instead of treating the item as deleted, even when the HTTP status is 404. Resume the capacity and run `terraform plan` again to retry the refresh.
 
-This behavior applies to resource refresh only. Create, update, import, and data source operations still report errors when they cannot read the item. Other not-found responses retain their normal deletion handling.
+The same error is reported for create, update, import, and data source operations. Ordinary not-found responses still remove a resource from Terraform state during reads.
 
-Preserving item state does not make item writes safe while a capacity is inactive. Resume the capacity before applying item changes. The separate workspace capacity-state validation can still block planning unless it is explicitly skipped; skipping that validation is not required or recommended for general use.
+Failing a resource read does not make item writes safe while a capacity is inactive. Resume the capacity before applying item changes. The separate workspace capacity-state validation can still block planning unless it is explicitly skipped; skipping that validation is not required or recommended for general use.
 
 ## Terraform Logging
 

@@ -231,7 +231,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 		return
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -269,12 +269,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	result := r.get(ctx, &state)
-	if preserveItemStateOnInactiveCapacity(req, resp, state.ID.ValueString(), result) {
-		return
-	}
-
-	diags = result.Diagnostics
+	diags = r.get(ctx, &state)
 	if utils.IsErrNotFound(state.ID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 
@@ -378,7 +373,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	}
 
 	// r.get() updates the plan with current server state
-	if resp.Diagnostics.Append(r.get(ctx, &plan).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &plan)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -490,7 +485,7 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 		Timeouts:                timeout,
 	}
 
-	if resp.Diagnostics.Append(r.get(ctx, &state).Diagnostics...); resp.Diagnostics.HasError() {
+	if resp.Diagnostics.Append(r.get(ctx, &state)...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -508,19 +503,19 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfconfig, Titemconfig]) get(
 	ctx context.Context,
 	model *ResourceFabricItemConfigDefinitionPropertiesModel[Ttfprop, Titemprop, Ttfconfig, Titemconfig],
-) itemReadResult {
+) diag.Diagnostics {
 	tflog.Trace(ctx, fmt.Sprintf("getting %s by ID: %s", r.TypeInfo.Name, model.ID.ValueString()))
 
 	var fabricItem FabricItemProperties[Titemprop]
 
 	err := r.ItemGetter(ctx, *r.pConfigData.FabricClient, *model, &fabricItem)
-	if result := getItemReadResult(ctx, err); result.Diagnostics.HasError() {
-		return result
+	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
+		return diags
 	}
 
 	if diags := model.set(ctx, fabricItem); diags.HasError() {
-		return itemReadResult{Diagnostics: diags}
+		return diags
 	}
 
-	return itemReadResult{Diagnostics: r.PropertiesSetter(ctx, fabricItem.Properties, model)}
+	return r.PropertiesSetter(ctx, fabricItem.Properties, model)
 }

@@ -70,7 +70,7 @@ This avoids requiring all SDK item types to implement a shared interface. The `g
 
 ## Resource Read Results
 
-Internal resource `get` methods return `itemReadResult`, separating diagnostics from the `CapacityNotActive` classification. Inactive capacity responses remain error diagnostics for create, update, and import callers. Only resource `Read` converts this outcome to a warning and retains the previous state; other not-found responses continue to remove the item from state.
+Read error handling uses `utils.GetDiagsFromError` and `utils.IsErrNotFound`. A structured `CapacityNotActive` response remains an error, including when returned with HTTP 404; only ordinary not-found responses remove a resource from state.
 
 ## Schema Generation
 
