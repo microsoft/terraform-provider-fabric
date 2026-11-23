@@ -131,7 +131,7 @@ resource "fabric_report" "example_parameters" {
     }
     "definition.pbir" = {
       source          = "${local.path}/definition.pbir.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

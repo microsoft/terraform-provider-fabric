@@ -8,7 +8,6 @@ import (
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"   //revive:disable-line:import-alias-naming
-	//revive:disable-line:import-alias-naming
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
@@ -107,7 +106,7 @@ func (to *requestCreateConnectionRoleAssignment) set(ctx context.Context, from r
 		ID:   principal.ID.ValueStringPointer(),
 		Type: (*fabcore.PrincipalType)(principal.Type.ValueStringPointer()),
 	}
-	to.Role = (*fabcore.ConnectionRole)(from.Role.ValueStringPointer())
+	to.Role = (*fabcore.AssignableConnectionRole)(from.Role.ValueStringPointer())
 
 	return nil
 }
@@ -117,7 +116,7 @@ type requestUpdateConnectionRoleAssignment struct {
 }
 
 func (to *requestUpdateConnectionRoleAssignment) set(from resourceConnectionRoleAssignmentModel) {
-	to.Role = (*fabcore.ConnectionRole)(from.Role.ValueStringPointer())
+	to.Role = (*fabcore.AssignableConnectionRole)(from.Role.ValueStringPointer())
 }
 
 /*

@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/fabric-sdk-go/fabric"
 
@@ -74,6 +75,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/kqlqueryset"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/lakehousetable"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredazuredatabrickscatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredcatalog"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroreddatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/mirroredwarehouse"
@@ -84,10 +86,14 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/onelakedataaccesssecurity"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/ontology"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/operationsagent"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgapp"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/orgappaudience"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/paginatedreport"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/plan"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/snowflakedatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkenvsettings"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkjobdefinition"
@@ -96,6 +102,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sqlendpoint"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tags"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/tenantsetting"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/userdatafunction"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/variablelibrary"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehouse"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/warehousesnapshot"
@@ -136,10 +143,8 @@ type FabricProvider struct {
 
 func New(version string) pclient.ProviderWithFabricClient {
 	cfg := pconfig.ProviderConfig{
-		Auth: &auth.Config{},
-		ProviderData: &pconfig.ProviderData{
-			Endpoint: pconfig.DefaultFabricEndpointURL,
-		},
+		Auth:         &auth.Config{},
+		ProviderData: &pconfig.ProviderData{},
 	}
 	cfg.Timeout, _ = time.ParseDuration(pconfig.DefaultTimeout)
 	cfg.Version = version
@@ -209,10 +214,7 @@ func createDefaultClient(ctx context.Context, cfg *pconfig.ProviderConfig) (*fab
 	perCallPolicies = append(perCallPolicies, pclient.WithUserAgent(pclient.BuildUserAgent(cfg.TerraformVersion, fabric.Version, cfg.Version, cfg.PartnerID, cfg.DisableTerraformPartnerID)))
 	fabricClientOpt.PerCallPolicies = perCallPolicies
 
-	// Set workspace private links
-	fabricClientOpt.UseWorkspacePrivateLinks = cfg.UseWorkspacePrivateLinkEndpoint
-
-	client, err := fabric.NewClient(resp.Cred, &cfg.Endpoint, fabricClientOpt)
+	client, err := pclient.NewFabricClient(resp.Cred, cfg, fabricClientOpt)
 	if err != nil {
 		tflog.Error(ctx, "Failed to initialize Microsoft Fabric client", map[string]any{"error": err.Error()})
 
@@ -250,19 +252,19 @@ func (p *FabricProvider) Schema(ctx context.Context, _ provider.SchemaRequest, r
 
 			// Fabric specific fields
 			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "The Endpoint of the Microsoft Fabric API.",
+				MarkdownDescription: "The endpoint of the Microsoft Fabric API. If provided, this overrides the endpoint of the configured `environment`. This can also be sourced from the `FABRIC_ENDPOINT` environment variable.",
 				Optional:            true,
 				CustomType:          customtypes.URLType{},
 			},
 
-			// Azure specific fields
 			"environment": schema.StringAttribute{
-				MarkdownDescription: "The cloud environment which should be used. Possible values are 'public', 'usgovernment' and 'china'. Defaults to 'public'",
+				MarkdownDescription: "The Microsoft Fabric environment which should be used. Possible values are `public` and `gcchigh` (GCC High). This can also be sourced from the `FABRIC_ENVIRONMENT` environment variable. Defaults to `public`.",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOfCaseInsensitive("public", "usgovernment", "china"),
+					stringvalidator.OneOfCaseInsensitive("public", "gcchigh"),
 				},
 			},
+			// Azure specific fields
 			"tenant_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Microsoft Entra ID tenant that Fabric API uses to authenticate with.",
 				Optional:            true,
@@ -435,11 +437,13 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	client, err := p.createClient(ctx, p.config)
 	if err != nil {
 		tflog.Error(ctx, "Error configuring Microsoft Fabric client", map[string]any{"error": err})
+		resp.Diagnostics.AddError(common.ErrorInvalidConfig, "Could not create the Microsoft Fabric API client: "+err.Error())
 
 		return
 	}
 
 	p.config.FabricClient = client
+	p.config.Endpoint = client.Endpoint
 
 	tflog.Debug(ctx, "Assigning Microsoft Fabric client to DataSourceData")
 
@@ -488,6 +492,9 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		kqldatabase.NewResourceKQLDatabase,
 		kqlqueryset.NewResourceKQLQueryset,
 		func() resource.Resource { return lakehouse.NewResourceLakehouse(ctx) },
+		func() resource.Resource {
+			return mirroredazuredatabrickscatalog.NewResourceMirroredAzureDatabricksCatalog(ctx)
+		},
 		func() resource.Resource { return mirroredcatalog.NewResourceMirroredCatalog(ctx) },
 		func() resource.Resource { return mirroreddatabase.NewResourceMirroredDatabase(ctx) },
 		mounteddatafactory.NewResourceMountedDataFactory,
@@ -499,16 +506,21 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		shortcut.NewResourceShortcut,
 		notebook.NewResourceNotebook,
 		operationsagent.NewResourceOperationsAgent,
+		orgapp.NewResourceOrgApp,
+		orgappaudience.NewResourceOrgAppAudience,
 		activator.NewResourceActivator,
 		paginatedreport.NewResourcePaginatedReport,
+		plan.NewResourcePlan,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
 		sparkcustompool.NewResourceSparkCustomPool,
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewResourceSparkJobDefinition,
+		func() resource.Resource { return snowflakedatabase.NewResourceSnowflakeDatabase(ctx) },
 		func() resource.Resource { return sqldatabase.NewResourceSQLDatabase(ctx) },
 		tags.NewResourceTag,
+		userdatafunction.NewResourceUserDataFunction,
 		variablelibrary.NewResourceVariableLibrary,
 		warehouse.NewResourceWarehouse,
 		warehousesnapshot.NewResourceWarehouseSnapshot,
@@ -593,6 +605,12 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		func() datasource.DataSource { return lakehouse.NewDataSourceLakehouses(ctx) },
 		lakehousetable.NewDataSourceLakehouseTable,
 		lakehousetable.NewDataSourceLakehouseTables,
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalog(ctx)
+		},
+		func() datasource.DataSource {
+			return mirroredazuredatabrickscatalog.NewDataSourceMirroredAzureDatabricksCatalogs(ctx)
+		},
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalog(ctx) },
 		func() datasource.DataSource { return mirroredcatalog.NewDataSourceMirroredCatalogs(ctx) },
 		func() datasource.DataSource { return mirroreddatabase.NewDataSourceMirroredDatabase(ctx) },
@@ -608,12 +626,18 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		notebook.NewDataSourceNotebooks,
 		operationsagent.NewDataSourceOperationsAgent,
 		operationsagent.NewDataSourceOperationsAgents,
+		orgapp.NewDataSourceOrgApp,
+		orgapp.NewDataSourceOrgApps,
+		orgappaudience.NewDataSourceOrgAppAudience,
+		orgappaudience.NewDataSourceOrgAppAudiences,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurity,
 		onelakedataaccesssecurity.NewDataSourceOneLakeDataAccessSecurities,
 		ontology.NewDataSourceOntology,
 		ontology.NewDataSourceOntologies,
 		paginatedreport.NewDataSourcePaginatedReport,
 		paginatedreport.NewDataSourcePaginatedReports,
+		plan.NewDataSourcePlan,
+		plan.NewDataSourcePlans,
 		shortcut.NewDataSourceShortcut,
 		shortcut.NewDataSourceShortcuts,
 		tags.NewDataSourceTags,
@@ -629,11 +653,15 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
 		sparkjobdefinition.NewDataSourceSparkJobDefinition,
 		sparkjobdefinition.NewDataSourceSparkJobDefinitions,
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabase(ctx) },
+		func() datasource.DataSource { return snowflakedatabase.NewDataSourceSnowflakeDatabases(ctx) },
 		sqldatabase.NewDataSourceSQLDatabase,
 		sqldatabase.NewDataSourceSQLDatabases,
 		sqlendpoint.NewDataSourceSQLEndpoints,
 		tenantsetting.NewDataSourceTenantSetting,
 		tenantsetting.NewDataSourceTenantSettings,
+		userdatafunction.NewDataSourceUserDataFunction,
+		userdatafunction.NewDataSourceUserDataFunctions,
 		variablelibrary.NewDataSourceVariableLibrary,
 		variablelibrary.NewDataSourceVariableLibraries,
 		warehouse.NewDataSourceWarehouse,
@@ -696,8 +724,7 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 		return ctx
 	}
 
-	config.Endpoint = customtypes.NewURLValue(putils.GetStringValue(endpoint, pconfig.GetEnvVarsEndpoint(), pconfig.DefaultFabricEndpointURL).ValueString())
-	if config.Endpoint.IsUnknown() || config.Endpoint.IsNull() {
+	if endpoint.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("endpoint"),
 			common.ErrorInvalidConfig,
@@ -708,26 +735,28 @@ func (p *FabricProvider) setConfig(ctx context.Context, config *pconfig.Provider
 		return ctx
 	}
 
-	ctx = tflog.SetField(ctx, "endpoint", config.Endpoint)
-
-	config.Environment = putils.GetStringValue(config.Environment, pconfig.GetEnvVarsEnvironment(), "public")
-	environmentAllowedValues := map[string]bool{
-		"public":       true,
-		"usgovernment": true,
-		"china":        true,
+	config.Endpoint = customtypes.NewURLValue(putils.GetStringValue(endpoint, pconfig.GetEnvVarsEndpoint(), "").ValueString())
+	if config.Endpoint.ValueString() != "" {
+		_, diags := config.Endpoint.ValueURL()
+		if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+			return ctx
+		}
 	}
 
-	if _, ok := environmentAllowedValues[config.Environment.ValueString()]; !ok {
+	ctx = tflog.SetField(ctx, "endpoint", config.Endpoint)
+
+	if config.Environment.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("environment"),
 			common.ErrorInvalidConfig,
-			"The provider cannot create the Microsoft Fabric API client as there is an unknown configuration value for the Cloud environment. "+
+			"The provider cannot create the Microsoft Fabric API client as there is an unknown configuration value for the Fabric environment. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the "+strings.Join(pconfig.GetEnvVarsEnvironment(), ",")+" environment variables.",
 		)
 
 		return ctx
 	}
 
+	config.Environment = types.StringValue(strings.ToLower(putils.GetStringValue(config.Environment, pconfig.GetEnvVarsEnvironment(), "public").ValueString()))
 	ctx = tflog.SetField(ctx, "environment", config.Environment.ValueString())
 
 	tenantID, diags := config.TenantID.ToStringValue(ctx)
@@ -864,13 +893,21 @@ func (p *FabricProvider) mapConfig(ctx context.Context, config *pconfig.Provider
 
 	p.config.Endpoint = config.Endpoint.ValueString()
 
-	switch strings.ToLower(config.Environment.ValueString()) {
-	case "usgovernment":
-		p.config.Auth.Environment = cloud.AzureGovernment
-	case "china":
-		p.config.Auth.Environment = cloud.AzureChina
-	default:
+	switch config.Environment.ValueString() {
+	case "public":
+		p.config.Environment = fabric.EnvironmentPublic
 		p.config.Auth.Environment = cloud.AzurePublic
+	case "gcchigh":
+		p.config.Environment = fabric.EnvironmentGCCHigh
+		p.config.Auth.Environment = cloud.AzureGovernment
+	default:
+		resp.Diagnostics.AddAttributeError(
+			path.Root("environment"),
+			common.ErrorInvalidConfig,
+			"Unsupported Fabric environment "+config.Environment.String()+". Supported values are 'public' and 'gcchigh'.",
+		)
+
+		return
 	}
 
 	p.config.Auth.TenantID = config.TenantID.ValueString()

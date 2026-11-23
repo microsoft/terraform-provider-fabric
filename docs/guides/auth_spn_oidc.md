@@ -19,7 +19,7 @@ Follow [Creating an App Registration for the Service Principal context (SPN)](./
 
 ### Using Azure Portal (GitHub)
 
-1. In the [Microsoft Entra admin center](https://entra.microsoft.com), in **App registrations**, select your application.
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High, open **App registrations** and select your application.
 1. Select **Certificates & secrets** > **Federated credentials** > **Add credential**.
 1. In the **Federated credential scenario** drop-down box, select **GitHub Actions deploying Azure resources**.
 1. Specify the **Organization** and **Repository** for your GitHub Actions workflow. For **Entity type**, select **Environment**, **Branch**, **Pull Request**, or **Tag** and specify the value. The values must exactly match the configuration in the GitHub workflow. For our example, let's select **Branch** and specify `main`.
@@ -54,7 +54,7 @@ See the [official documentation](https://learn.microsoft.com/cli/azure/ad/app/fe
 
 ### Using Azure Portal (Generic)
 
-1. In the [Microsoft Entra admin center](https://entra.microsoft.com), in **App registrations**, select your application.
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High, open **App registrations** and select your application.
 1. Select **Certificates & secrets** > **Federated credentials** > **Add credential**.
 1. In the **Federated credential scenario** drop-down box, select **Other issuer**.
 1. Refer to the instructions from your OIDC provider for completing the form, before choosing a **Name** for the federated credential and clicking the **Add** button.
@@ -62,6 +62,8 @@ See the [official documentation](https://learn.microsoft.com/cli/azure/ad/app/fe
 ## Configuring Terraform to use the OIDC
 
 Now that we have our federated credential for Entra App and ready to use, it's possible to configure Terraform in a few different ways.
+
+For GCC High, set `environment = "gcchigh"` in the Fabric provider or `FABRIC_ENVIRONMENT=gcchigh`. Azure DevOps service connections used with the examples below must also target `AzureUSGovernment`.
 
 ### Environment Variables
 
@@ -88,6 +90,8 @@ The provider will use the `FABRIC_OIDC_TOKEN` environment variable as an OIDC to
 ### GitHub Actions (Environment Variables)
 
 When running in GitHub Actions, the provider will detect the `ACTIONS_ID_TOKEN_REQUEST_URL` and `ACTIONS_ID_TOKEN_REQUEST_TOKEN` environment variables set by the GitHub Actions runner runtime. You can also specify the `FABRIC_OIDC_REQUEST_TOKEN` and `FABRIC_OIDC_REQUEST_URL` environment variables.
+
+The requested ID token audience defaults to `api://AzureADTokenExchange` and must match the app's federated credential. If a different audience is configured, supply it in the `audience` query parameter of `oidc_request_url` or `FABRIC_OIDC_REQUEST_URL`.
 
 For GitHub Actions workflows, you'll need to ensure the workflow has `write` permissions for the `id-token`.
 

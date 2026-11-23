@@ -57,6 +57,7 @@ func NewCredential(cfg Config) (CredentialResponse, error) {
 	case AzureDevOpsWorkloadIdentityFederationAuth:
 		cred, err := azidentity.NewAzurePipelinesCredential(cfg.TenantID, cfg.ClientID, cfg.OIDC.AzureDevOpsServiceConnectionID, cfg.OIDC.RequestToken, &azidentity.AzurePipelinesCredentialOptions{
 			AdditionallyAllowedTenants: cfg.AuxiliaryTenantIDs,
+			Cloud:                      cfg.Environment,
 		})
 
 		return newCredentialResponse(cred, authMethod, info), err

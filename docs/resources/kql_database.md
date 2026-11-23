@@ -138,7 +138,7 @@ resource "fabric_kql_database" "example9" {
   definition = {
     "DatabaseProperties.json" = {
       source          = "${local.path}/DatabaseProperties.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

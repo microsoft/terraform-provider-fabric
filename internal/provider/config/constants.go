@@ -3,8 +3,4 @@
 
 package config
 
-// Default Microsoft Fabric endpoint URL.
-const (
-	DefaultFabricEndpointURL = "https://api.fabric.microsoft.com"
-	DefaultTimeout           = "10m"
-)
+const DefaultTimeout = "10m"

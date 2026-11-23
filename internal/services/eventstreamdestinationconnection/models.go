@@ -5,6 +5,7 @@ package eventstreamdestinationconnection
 
 import (
 	"context"
+	"fmt"
 
 	timeoutsD "github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts" //revive:disable-line:import-alias-naming
 	timeoutsE "github.com/hashicorp/terraform-plugin-framework-timeouts/ephemeral/timeouts"  //revive:disable-line:import-alias-naming
@@ -38,23 +39,36 @@ type baseEventstreamDestinationConnectionModel struct {
 	AccessKeys              supertypes.SingleNestedObjectValueOf[accessKeysModel] `tfsdk:"access_keys"`
 }
 
-func (to *baseEventstreamDestinationConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, destinationID string, from fabeventstream.DestinationConnectionResponse) diag.Diagnostics {
+func (to *baseEventstreamDestinationConnectionModel) set(ctx context.Context, workspaceID, eventstreamID, destinationID string, from fabeventstream.EndpointConnectionClassification) diag.Diagnostics {
 	to.DestinationID = customtypes.NewUUIDValue(destinationID)
 	to.EventstreamID = customtypes.NewUUIDValue(eventstreamID)
 	to.WorkspaceID = customtypes.NewUUIDValue(workspaceID)
-	to.EventHubName = types.StringPointerValue(from.EventHubName)
-	to.FullyQualifiedNamespace = types.StringPointerValue(from.FullyQualifiedNamespace)
-	to.ConsumerGroupName = types.StringPointerValue(from.ConsumerGroupName)
 
 	accessKeys := supertypes.NewSingleNestedObjectValueOfNull[accessKeysModel](ctx)
 
-	if from.AccessKeys != nil {
-		accessKeysModel := &accessKeysModel{}
-		accessKeysModel.set(*from.AccessKeys)
+	switch entity := from.(type) {
+	case *fabeventstream.CustomEndpointConnection:
+		to.EventHubName = types.StringPointerValue(entity.EventHubName)
+		to.FullyQualifiedNamespace = types.StringPointerValue(entity.FullyQualifiedNamespace)
+		to.ConsumerGroupName = types.StringPointerValue(entity.ConsumerGroupName)
 
-		if diags := accessKeys.Set(ctx, accessKeysModel); diags.HasError() {
-			return diags
+		if entity.AccessKeys != nil {
+			accessKeysModel := &accessKeysModel{}
+			accessKeysModel.set(*entity.AccessKeys)
+
+			if diags := accessKeys.Set(ctx, accessKeysModel); diags.HasError() {
+				return diags
+			}
 		}
+	default:
+		var diags diag.Diagnostics
+
+		diags.AddError(
+			"Unsupported Eventstream destination connection type",
+			fmt.Sprintf("The Eventstream destination connection type '%T' is not supported.", entity),
+		)
+
+		return diags
 	}
 
 	to.AccessKeys = accessKeys

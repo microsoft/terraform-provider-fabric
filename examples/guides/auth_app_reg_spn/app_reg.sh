@@ -26,7 +26,9 @@ spObjId=$(az ad sp create --id "${appObjId}" --output tsv --query id)
 
 # (optional, recommended) Add the current user as an owner of the service principal
 # See https://learn.microsoft.com/cli/azure/reference-index#az-rest for more details.
-az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/${spObjId}/owners/\$ref" --body "{\"@odata.id\": \"https://graph.microsoft.com/v1.0/users/${currentUserObjId}\"}"
+graphApiUrl=$(az cloud show --query endpoints.microsoftGraphResourceId --output tsv) || exit $?
+graphApiUrl="${graphApiUrl%/}"
+az rest --method POST --url "${graphApiUrl}/v1.0/servicePrincipals/${spObjId}/owners/\$ref" --body "{\"@odata.id\": \"${graphApiUrl}/v1.0/users/${currentUserObjId}\"}"
 
 # Get the Fabric Capacity
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/get for more details.

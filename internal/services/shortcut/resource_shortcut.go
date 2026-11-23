@@ -132,9 +132,14 @@ func (r *resourceShortcut) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(
-		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...,
-	); resp.Diagnostics.HasError() {
+	stateDiags := state.set(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.ItemID.ValueString(),
+		plan.ShortcutConflictPolicy.ValueStringPointer(),
+		respCreate.Shortcut,
+	)
+	if resp.Diagnostics.Append(stateDiags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -182,9 +187,14 @@ func (r *resourceShortcut) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	if resp.Diagnostics.Append(
-		state.set(ctx, plan.WorkspaceID.ValueString(), plan.ItemID.ValueString(), plan.ShortcutConflictPolicy.ValueStringPointer(), respCreate.Shortcut)...,
-	); resp.Diagnostics.HasError() {
+	stateDiags := state.set(
+		ctx,
+		plan.WorkspaceID.ValueString(),
+		plan.ItemID.ValueString(),
+		plan.ShortcutConflictPolicy.ValueStringPointer(),
+		respCreate.Shortcut,
+	)
+	if resp.Diagnostics.Append(stateDiags...); resp.Diagnostics.HasError() {
 		return
 	}
 

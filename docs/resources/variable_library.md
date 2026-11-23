@@ -85,7 +85,7 @@ resource "fabric_variable_library" "example_parameters" {
   definition = {
     "variables.json" = {
       source          = "${local.path}/variables.json"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

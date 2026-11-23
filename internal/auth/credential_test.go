@@ -6,6 +6,7 @@ package auth_test
 import (
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -153,6 +154,54 @@ func TestUnit_NewCredential(t *testing.T) {
 				assert.Equal(t, testCase.expected, credResponse.AuthMethod)
 				assert.NotNil(t, credResponse.Cred)
 			}
+		})
+	}
+}
+
+func TestUnit_NewCredential_AuthenticationCloud(t *testing.T) {
+	t.Setenv("SYSTEM_OIDCREQUESTURI", "https://example.com")
+
+	certPass := testhelp.RandomName()
+	cert, key, err := auth.ConvertBase64ToCert(testhelp.RandomP12CertB64(certPass), certPass)
+	require.NoError(t, err)
+
+	for _, method := range []auth.AuthenticationMethod{
+		auth.ServicePrincipalSecretAuth,
+		auth.ServicePrincipalCertificateAuth,
+		auth.ServicePrincipalOIDCAuth,
+		auth.AzureDevOpsWorkloadIdentityFederationAuth,
+	} {
+		t.Run(string(method), func(t *testing.T) {
+			cfg := auth.Config{
+				TenantID:    testhelp.RandomUUID(),
+				ClientID:    testhelp.RandomUUID(),
+				Environment: cloud.AzureGovernment,
+			}
+
+			switch method {
+			case auth.ServicePrincipalSecretAuth:
+				cfg.ClientSecret = "test-client-secret"
+			case auth.ServicePrincipalCertificateAuth:
+				cfg.ClientCertificate = cert
+				cfg.ClientCertificateKey = key
+			case auth.ServicePrincipalOIDCAuth:
+				cfg.UseOIDC = true
+				cfg.OIDC.Token = "test-token"
+			case auth.AzureDevOpsWorkloadIdentityFederationAuth:
+				cfg.UseOIDC = true
+				cfg.OIDC.RequestToken = "test-token"
+				cfg.OIDC.AzureDevOpsServiceConnectionID = testhelp.RandomUUID()
+			default:
+				t.Fatalf("unexpected authentication method %q", method)
+			}
+
+			response, err := auth.NewCredential(cfg)
+			require.NoError(t, err)
+			require.Equal(t, method, response.AuthMethod)
+
+			cfg.Environment = cloud.Configuration{ActiveDirectoryAuthorityHost: "http://invalid.example.com"}
+			_, err = auth.NewCredential(cfg)
+			require.ErrorContains(t, err, "cannot use an authority host without https")
 		})
 	}
 }

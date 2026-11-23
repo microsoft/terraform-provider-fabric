@@ -1,0 +1,22 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/orgapp/definition/orgAppDefinition/2.0.0/schema.json",
+    "settings": {
+        "audienceSettings": {
+            "hideAudienceTabs": false,
+            "hideAllTab": false
+        }
+    },
+    "elements": [
+        {
+            "elementType": "overview",
+            "elementId": "11111111-1111-1111-1111-111111111111",
+            "displayName": "Overview",
+            "header": {
+                "title": "Welcome",
+                "body": "Welcome to the Org App.",
+                "showTheme": false
+            },
+            "isHidden": false
+        }
+    ]
+}

@@ -61,7 +61,7 @@ resource "fabric_digital_twin_builder" "example_parameters" {
   definition = {
     "definition.json" = {
       source          = "${local.path}/definition.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

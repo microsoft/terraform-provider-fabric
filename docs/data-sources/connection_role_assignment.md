@@ -37,7 +37,7 @@ data "fabric_connection_role_assignment" "example" {
 ### Read-Only
 
 - `principal` (Attributes) The principal. (see [below for nested schema](#nestedatt--principal))
-- `role` (String) The connection role of the principal. Value must be one of : `Owner`, `User`, `UserWithReshare`.
+- `role` (String) The connection role of the principal. Value must be one of : `Owner`, `PendingOwner`, `User`, `UserWithReshare`.
 
 <a id="nestedatt--timeouts"></a>
 

@@ -1,6 +1,7 @@
 ---
 name: resource-designer
-description: Research SDK contracts, design Terraform schema approach, and compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource. USE FOR: analyzing SDK DTOs, determining design patterns (polymorphic flattening, immutability, enum filtering), and creating well-structured GitHub issues. INVOKES: GitHub MCP tools for issue creation, sdk-contract-navigator skill for SDK analysis.
+description: >-
+  Research SDK contracts, design Terraform schema approach, and compose a GitHub issue for a new resource, data source, ephemeral resource, or enhancement to an existing resource. USE FOR: analyzing SDK DTOs, determining design patterns (polymorphic flattening, immutability, enum filtering), and creating well-structured GitHub issues. INVOKES: GitHub MCP tools for issue creation, sdk-contract-navigator skill for SDK analysis.
 ---
 
 # Skill: Resource Designer

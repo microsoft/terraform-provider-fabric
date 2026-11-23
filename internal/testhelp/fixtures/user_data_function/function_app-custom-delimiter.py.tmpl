@@ -1,0 +1,8 @@
+import fabric.functions as fn
+
+udf = fn.UserDataFunctions()
+
+
+@udf.function()
+def << .FunctionName >>(name: str) -> str:
+    return f"<< .Greeting >> {name}!"

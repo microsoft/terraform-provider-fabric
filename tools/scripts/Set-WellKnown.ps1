@@ -312,8 +312,17 @@ function Set-FabricItem {
     'OperationsAgent' {
       $itemEndpoint = 'operationsAgents'
     }
+    'OrgApp' {
+      $itemEndpoint = 'orgApps'
+    }
+    'OrgAppAudience' {
+      $itemEndpoint = 'orgAppAudiences'
+    }
     'PaginatedReport' {
       $itemEndpoint = 'paginatedReports'
+    }
+    'Plan' {
+      $itemEndpoint = 'plans'
     }
     'Reflex' {
       $itemEndpoint = 'reflexes'
@@ -329,6 +338,9 @@ function Set-FabricItem {
     }
     'SQLDatabase' {
       $itemEndpoint = 'sqlDatabases'
+    }
+    'UserDataFunction' {
+      $itemEndpoint = 'userDataFunctions'
     }
     'VariableLibrary' {
       $itemEndpoint = 'variableLibraries'
@@ -348,7 +360,7 @@ function Set-FabricItem {
     Write-Log -Message 'Only one of CreationPayload or Definition is allowed at time.' -Level 'ERROR'
   }
 
-  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport')
+  $definitionRequired = @('Report', 'SemanticModel', 'MirroredDatabase', 'MountedDataFactory', 'Eventstream', 'PaginatedReport', 'OrgAppAudience')
   if ($Type -in $definitionRequired -and !$Definition) {
     Write-Log -Message "Definition is required for Type: $Type" -Level 'ERROR'
   }
@@ -1226,14 +1238,18 @@ $itemNaming = @{
   'Notebook'                        = 'nb'
   'Ontology'                        = 'ont'
   'OperationsAgent'                 = 'oa'
+  'OrgApp'                          = 'orgapp'
+  'OrgAppAudience'                  = 'orgappaud'
   'Shortcut'                        = 'srt'
   'PaginatedReport'                 = 'prpt'
+  'Plan'                            = 'plan'
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
+  'UserDataFunction'                = 'udf'
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
@@ -1396,7 +1412,7 @@ $wellKnown['WorkspaceCMK'] = @{
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Define an array of item types to create
-$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'VariableLibrary', 'Warehouse')
+$itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Plan', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'UserDataFunction', 'VariableLibrary', 'Warehouse')
 
 # Loop through each item type and create if not exists
 foreach ($itemType in $itemTypes) {
@@ -1429,6 +1445,36 @@ else {
 
   $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'DigitalTwinBuilderFlow' -CreationPayload $creationPayload
   $wellKnown['DigitalTwinBuilderFlow'] = @{
+    id          = $item.id
+    displayName = $item.displayName
+    description = $item.description
+  }
+}
+
+# Create OrgAppAudience if not exists (requires OrgApp in the same workspace)
+if (-not $wellKnown.ContainsKey('OrgApp') -or
+  -not $wellKnown['OrgApp'] -or
+  -not $wellKnown['OrgApp'].id) {
+  Write-Log -Message "OrgApp was not created successfully. Cannot create OrgAppAudience without a valid OrgApp id." -Level 'ERROR'
+}
+else {
+  $displayNameTemp = "${displayName}_$($itemNaming['OrgAppAudience'])"
+  $definition = @{
+    parts = @(
+      @{
+        path        = 'definition.json'
+        payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/org_app_audience/definition.json.tmpl' -Values @(
+          @{ key = '{{ .ParentAppId }}'; value = $wellKnown['OrgApp'].id }
+          @{ key = '{{ .HasAccessToHiddenContent }}'; value = 'false' }
+          @{ key = '{{ .TabOrder }}'; value = '1' }
+        )
+        payloadType = 'InlineBase64'
+      }
+    )
+  }
+
+  $item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'OrgAppAudience' -Definition $definition
+  $wellKnown['OrgAppAudience'] = @{
     id          = $item.id
     displayName = $item.displayName
     description = $item.description

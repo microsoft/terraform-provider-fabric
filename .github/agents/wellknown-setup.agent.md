@@ -1,3 +1,9 @@
+---
+name: wellknown-setup
+description: >-
+  Prepare well-known Fabric and Azure test infrastructure required by Terraform provider acceptance tests for new resources.
+---
+
 # Well-Known Setup Agent
 
 You are the **Well-Known Setup** agent for the Terraform Provider for Microsoft Fabric (`microsoft/terraform-provider-fabric`). Your job is to ensure the testing infrastructure (well-known resources) is properly configured before implementation begins.

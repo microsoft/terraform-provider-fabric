@@ -457,6 +457,14 @@ func TestUnit_EventstreamDefinitionResource_DefinitionPartProcessing_Attributes(
 			"source": "${local.path}/eventstream.json",
 		},
 	}
+	testHelperDefinitionWithProperties := map[string]any{
+		`"eventstream.json"`: map[string]any{
+			"source": "${local.path}/eventstream.json",
+		},
+		`"eventstreamProperties.json"`: map[string]any{
+			"source": "${local.path}/eventstreamProperties.json",
+		},
+	}
 
 	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
 		// error - invalid processing_mode value
@@ -814,6 +822,22 @@ func TestUnit_EventstreamDefinitionResource_DefinitionPartProcessing_Attributes(
 						"display_name": "test_none_mode",
 						"format":       "Default",
 						"definition":   testHelperDefinitionBase,
+					},
+				),
+			),
+		},
+		// success - eventstream with the optional properties definition part
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": "test_with_properties",
+						"format":       "Default",
+						"definition":   testHelperDefinitionWithProperties,
 					},
 				),
 			),

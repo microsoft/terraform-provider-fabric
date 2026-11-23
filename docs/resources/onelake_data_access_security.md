@@ -122,7 +122,7 @@ Required:
 
 Optional:
 
-- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. (see [below for nested schema](#nestedatt--members--fabric_item_members))
+- `fabric_item_members` (Attributes Set) Fabric-scoped members with path-based access. Value defaults to `[]`. (see [below for nested schema](#nestedatt--members--fabric_item_members))
 - `microsoft_entra_members` (Attributes Set) The list of Microsoft Entra ID members. (see [below for nested schema](#nestedatt--members--microsoft_entra_members))
 
 <a id="nestedatt--members--fabric_item_members"></a>
@@ -141,8 +141,11 @@ Required:
 Required:
 
 - `object_id` (String) The object id.
-- `object_type` (String) The type of Microsoft Entra ID object. Possible values: `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`. Value must be one of : `Group`, `ManagedIdentity`, `ServicePrincipal`, `User`.
 - `tenant_id` (String) The tenant id.
+
+Optional:
+
+- `object_type` (String, Deprecated) The type of Microsoft Entra ID object. Deprecated: this attribute is no longer used by the API.
 
 <a id="nestedatt--timeouts"></a>
 

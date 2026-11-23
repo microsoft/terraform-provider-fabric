@@ -168,5 +168,5 @@ func (e *ephemeralEventstreamDestinationConnection) get(ctx context.Context, mod
 		return diags
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.DestinationID.ValueString(), respGet.DestinationConnectionResponse)
+	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.DestinationID.ValueString(), respGet.EndpointConnectionClassification)
 }

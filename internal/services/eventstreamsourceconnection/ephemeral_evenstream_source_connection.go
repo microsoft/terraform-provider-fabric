@@ -164,5 +164,5 @@ func (e *ephemeralEventstreamSourceConnection) get(ctx context.Context, model *e
 		return diags
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.SourceID.ValueString(), respGet.SourceConnectionResponse)
+	return model.set(ctx, model.WorkspaceID.ValueString(), model.EventstreamID.ValueString(), model.SourceID.ValueString(), respGet.EndpointConnectionClassification)
 }

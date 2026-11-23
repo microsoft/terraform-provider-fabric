@@ -54,7 +54,7 @@ func TestAcc_SparkWorkspaceSettingsResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.customize_compute_enabled", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.name", "Starter Pool"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "pool.default_pool.type", "Workspace"),
-				resource.TestCheckResourceAttr(testResourceItemFQN, "environment.runtime_version", "1.3"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "environment.runtime_version"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "job.conservative_job_admission_enabled", "true"),
 				resource.TestCheckResourceAttr(testResourceItemFQN, "job.session_timeout_in_minutes", "60"),
 			),

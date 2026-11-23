@@ -58,7 +58,7 @@ resource "fabric_mounted_data_factory" "example_parameters" {
   definition = {
     "mountedDataFactory-content.json" = {
       source          = "${local.path}/mountedDataFactory-content.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

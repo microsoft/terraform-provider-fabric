@@ -13,7 +13,7 @@ description: |-
 
 ### Using Azure Portal
 
-1. Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com).
+1. Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com), or the [Azure Government portal](https://portal.azure.us) for GCC High.
 1. Browse to **Identity** > **Applications** > **App registrations** and select **New registration**.
 1. Enter a display Name for your application.
 1. Don't enter anything for **Redirect URI (optional)**
@@ -23,6 +23,8 @@ For more details and advanced scenarios, please follow this [guide](https://lear
 ### Using Azure CLI
 
 Run the following commands to create an App Registration with Service Principal using [Azure CLI](https://learn.microsoft.com/cli/azure/):
+
+For GCC High, run `az cloud set --name AzureUSGovernment` before logging in and running these setup commands.
 
 ```shell
 #!/bin/bash
@@ -53,7 +55,9 @@ spObjId=$(az ad sp create --id "${appObjId}" --output tsv --query id)
 
 # (optional, recommended) Add the current user as an owner of the service principal
 # See https://learn.microsoft.com/cli/azure/reference-index#az-rest for more details.
-az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/${spObjId}/owners/\$ref" --body "{\"@odata.id\": \"https://graph.microsoft.com/v1.0/users/${currentUserObjId}\"}"
+graphApiUrl=$(az cloud show --query endpoints.microsoftGraphResourceId --output tsv) || exit $?
+graphApiUrl="${graphApiUrl%/}"
+az rest --method POST --url "${graphApiUrl}/v1.0/servicePrincipals/${spObjId}/owners/\$ref" --body "{\"@odata.id\": \"${graphApiUrl}/v1.0/users/${currentUserObjId}\"}"
 
 # Get the Fabric Capacity
 # See https://learn.microsoft.com/rest/api/microsoftfabric/fabric-capacities/get for more details.
@@ -75,6 +79,8 @@ az fabric capacity update --resource-group "${fabricCapacityRgName}" --capacity-
 ### Using Entra PowerShell
 
 Run the following commands to create an App Registration with Service Principal using [Entra PowerShell](https://learn.microsoft.com/powershell/entra-powershell/):
+
+For GCC High, add `-Environment USGov` to the `Connect-Entra` command below. Authenticate the Azure PowerShell session with `Connect-AzAccount -Environment AzureUSGovernment` before running the Az commands.
 
 ```powershell
 # PowerShell
@@ -127,6 +133,6 @@ Update-AzFabricCapacity -ResourceGroupName $fabricCapacityRgName -CapacityName $
 
 ## Configure Microsoft Fabric to allow Service Principals (SPN) and Managed Identities (MSI)
 
-1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal).
+1. Sign in to the [Microsoft Fabric admin portal](https://app.fabric.microsoft.com/admin-portal), or the [GCC High portal](https://app.high.powerbigov.us/admin-portal).
 1. Browse to **Tenant settings** > **Developer settings** > [Service principals can use Fabric APIs](https://learn.microsoft.com/fabric/admin/service-admin-portal-developer#service-principals-can-use-fabric-apis) and check **Enable**.
 1. Apply security restrictions to **The entire organization** or **Specific security groups**

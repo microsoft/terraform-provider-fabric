@@ -1,6 +1,7 @@
 ---
 name: wellknown-analyzer
-description: Analyze dependencies and determine what infrastructure must be added to tools/scripts/Set-WellKnown.ps1 and internal/testhelp/wellknown.go so that acceptance tests for a new resource have all required pre-requisite resources available. USE FOR: analyzing well-known test fixture requirements for new resources, determining creation strategies, and generating code snippets for Set-WellKnown.ps1 and wellknown.go additions.
+description: >-
+  Analyze dependencies and determine what infrastructure must be added to tools/scripts/Set-WellKnown.ps1 and internal/testhelp/wellknown.go so that acceptance tests for a new resource have all required pre-requisite resources available. USE FOR: analyzing well-known test fixture requirements for new resources, determining creation strategies, and generating code snippets for Set-WellKnown.ps1 and wellknown.go additions.
 ---
 
 # Skill: Well-Known Analyzer

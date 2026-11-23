@@ -62,7 +62,7 @@ resource "fabric_notebook" "example_parameters" {
   definition = {
     "notebook-content.ipynb" = {
       source          = "${local.path}/notebook.ipynb.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

@@ -80,7 +80,7 @@ resource "fabric_spark_job_definition" "example_parameters" {
   definition = {
     "SparkJobDefinitionV1.json" = {
       source          = "${local.path}/SparkJobDefinitionV1.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

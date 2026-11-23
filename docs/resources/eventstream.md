@@ -80,7 +80,7 @@ resource "fabric_eventstream" "example_parameters" {
   definition = {
     "eventstream.json" = {
       source          = "${local.path}/eventstream.json.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"

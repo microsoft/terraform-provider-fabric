@@ -1,6 +1,7 @@
 ---
 name: sdk-contract-navigator
-description: Navigate the fabric-sdk-go SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric Item or non-item resource. USE FOR: identifying SDK packages, client factories, DTO structs, item type constants, and pager methods for any Fabric resource.
+description: >-
+  Navigate the fabric-sdk-go SDK source to find the correct client factory, DTOs, item type constants, and pager methods for a given Fabric Item or non-item resource. USE FOR: identifying SDK packages, client factories, DTO structs, item type constants, and pager methods for any Fabric resource.
 ---
 
 # Skill: SDK Contract Navigator

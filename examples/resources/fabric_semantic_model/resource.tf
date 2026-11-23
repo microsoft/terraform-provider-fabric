@@ -59,7 +59,7 @@ resource "fabric_semantic_model" "example_parameters" {
   definition = {
     "model.bim" = {
       source          = "${local.path}/model.bim.tmpl"
-      processing_mode = "parameters"
+      processing_mode = "Parameters"
       parameters = [
         {
           type  = "JsonPathReplace"
