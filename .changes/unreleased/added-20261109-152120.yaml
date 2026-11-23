@@ -1,0 +1,5 @@
+kind: added
+body: Add Copy Job Execute schedule support to the Item Job Scheduler.
+time: 2026-11-09T15:23:38.7149761+02:00
+custom:
+  Issue: "1151"

@@ -1,0 +1,542 @@
+// Copyright Microsoft Corporation 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package plan_test
+
+import (
+	"errors"
+	"fmt"
+	"regexp"
+	"testing"
+
+	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/microsoft/terraform-provider-fabric/internal/common"
+	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp"
+	"github.com/microsoft/terraform-provider-fabric/internal/testhelp/fakes"
+)
+
+var testResourceItemFQN, testResourceItemHeader = testhelp.TFResource(common.ProviderTypeName, itemTypeInfo.Type, "test")
+
+var testHelperLocals = at.CompileLocalsConfig(map[string]any{
+	"path": testhelp.GetFixturesDirPath("plan"),
+})
+
+func testHelperDefinition(workloadItemName string) map[string]any {
+	return map[string]any{
+		`"definition.json"`: map[string]any{
+			"source": "${local.path}/definition.json.tmpl",
+			"tokens": map[string]any{
+				"WORKLOAD_ITEM_NAME": workloadItemName,
+			},
+		},
+		`"planProperties.json"`: map[string]any{
+			"source": "${local.path}/planProperties.json.tmpl",
+		},
+	}
+}
+
+func TestUnit_PlanResource_Attributes(t *testing.T) {
+	resource.ParallelTest(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - no attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{},
+				),
+			),
+			ExpectError: regexp.MustCompile(`Missing required argument`),
+		},
+		// error - workspace_id - invalid UUID
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "invalid uuid",
+						"display_name": "test",
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// error - unexpected attribute
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id":    "00000000-0000-0000-0000-000000000000",
+						"unexpected_attr": "test",
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`An argument named "unexpected_attr" is not expected here`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"display_name": "test",
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`The argument "workspace_id" is required, but no definition was found.`),
+		},
+		// error - no required attributes
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
+		},
+		// error - definition - invalid path key
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": "00000000-0000-0000-0000-000000000000",
+						"display_name": "test",
+						"format":       "Default",
+						"definition": map[string]any{
+							`"invalid.json"`: map[string]any{
+								"source": "${local.path}/definition.json.tmpl",
+							},
+						},
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(`Definition path must match`),
+		},
+	}))
+}
+
+func TestUnit_PlanResource_ImportState(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entity := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(entity)
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+
+	testCase := at.JoinConfigs(
+		testHelperLocals,
+		at.CompileConfig(
+			testResourceItemHeader,
+			map[string]any{
+				"workspace_id": *entity.WorkspaceID,
+				"display_name": *entity.DisplayName,
+			},
+		),
+	)
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "not-valid",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(fmt.Sprintf(common.ErrorImportIdentifierDetails, fmt.Sprintf("WorkspaceID/%sID", string(fabricItemType)))),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: "test/id",
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", "test", *entity.ID),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		{
+			ResourceName:  testResourceItemFQN,
+			Config:        testCase,
+			ImportStateId: fmt.Sprintf("%s/%s", *entity.WorkspaceID, "test"),
+			ImportState:   true,
+			ExpectError:   regexp.MustCompile(customtypes.UUIDTypeErrorInvalidStringHeader),
+		},
+		// Import state testing
+		{
+			ResourceName:       testResourceItemFQN,
+			Config:             testCase,
+			ImportStateId:      fmt.Sprintf("%s/%s", *entity.WorkspaceID, *entity.ID),
+			ImportState:        true,
+			ImportStatePersist: true,
+			ImportStateCheck: func(is []*terraform.InstanceState) error {
+				if len(is) != 1 {
+					return errors.New("expected one instance state")
+				}
+
+				if is[0].ID != *entity.ID {
+					return errors.New(testResourceItemFQN + ": unexpected ID")
+				}
+
+				return nil
+			},
+		},
+	}))
+}
+
+func TestUnit_PlanResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	tag1ID := testhelp.RandomUUID()
+	tag2ID := testhelp.RandomUUID()
+	tag3ID := testhelp.RandomUUID()
+
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+	fakes.FakeServer.Upsert(entityExist)
+	fakes.FakeServer.Upsert(entityAfter)
+	fakes.FakeServer.Upsert(fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID))
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// error - create - existing entity
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityExist.WorkspaceID,
+						"display_name": *entityExist.DisplayName,
+					},
+				),
+			),
+			ExpectError: regexp.MustCompile(common.ErrorCreateHeader),
+		},
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"folder_id":    *entityBefore.FolderID,
+						"tags":         []string{tag1ID, tag2ID},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag1ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+			),
+		},
+		// Remove and add a new tag and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"folder_id":    *entityBefore.FolderID,
+						"tags":         []string{tag2ID, tag3ID},
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "2"),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag2ID),
+				resource.TestCheckTypeSetElemAttr(testResourceItemFQN, "tags.*", tag3ID),
+			),
+		},
+		// Update and Read - remove all tags
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "folder_id", entityBefore.FolderID),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "tags.#", "0"),
+			),
+		},
+		// Update and Read - add definition
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
+						"format":       "Default",
+						"definition":   testHelperDefinition("PlanBefore"),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.definition.json.source_content_sha256"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.planProperties.json.source_content_sha256"),
+			),
+		},
+		// Update and Read - definition content change
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"folder_id":    *entityBefore.FolderID,
+						"format":       "Default",
+						"definition":   testHelperDefinition("PlanAfter"),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttrSet(testResourceItemFQN, "definition.definition.json.source_content_sha256"),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+func TestUnit_PlanDefinitionResource_CRUD(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+	entityAfter := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
+
+	var definitionHashBefore string
+
+	resource.Test(t, testhelp.NewTestUnitCase(t, &testResourceItemFQN, fakes.FakeServer.ServerFactory, nil, []resource.TestStep{
+		// Create with definition and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityBefore.DisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition("PlanBefore"),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityBefore.DisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "format", "Default"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.%", "2"),
+				resource.TestCheckResourceAttrWith(testResourceItemFQN, "definition.definition.json.source_content_sha256", func(value string) error {
+					if value == "" {
+						return errors.New("expected definition.json source_content_sha256 to be set")
+					}
+
+					definitionHashBefore = value
+
+					return nil
+				}),
+			),
+		},
+		// Update definition content and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": *entityBefore.WorkspaceID,
+						"display_name": *entityAfter.DisplayName,
+						"description":  *entityAfter.Description,
+						"format":       "Default",
+						"definition":   testHelperDefinition("PlanAfter"),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "display_name", entityAfter.DisplayName),
+				resource.TestCheckResourceAttrPtr(testResourceItemFQN, "description", entityAfter.Description),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition.%", "2"),
+				resource.TestCheckResourceAttrWith(testResourceItemFQN, "definition.definition.json.source_content_sha256", func(value string) error {
+					if value == definitionHashBefore {
+						return errors.New("expected definition.json source_content_sha256 to change after definition update")
+					}
+
+					return nil
+				}),
+			),
+		},
+		// Delete testing automatically occurs in TestCase
+	}))
+}
+
+func TestAcc_PlanResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+	folder1 := testhelp.WellKnown()["FolderRS1"].(map[string]any)
+	folder1ID := folder1["id"].(string)
+	folder2 := testhelp.WellKnown()["FolderRS2"].(map[string]any)
+	folder2ID := folder2["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"folder_id":    folder1ID,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder1ID),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"folder_id":    folder2ID,
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "folder_id", folder2ID),
+			),
+		},
+	},
+	))
+}
+
+func TestAcc_PlanDefinitionResource_CRUD(t *testing.T) {
+	workspace := testhelp.WellKnown()["WorkspaceRS"].(map[string]any)
+	workspaceID := workspace["id"].(string)
+
+	entityCreateDisplayName := testhelp.RandomName()
+	entityUpdateDisplayName := testhelp.RandomName()
+	entityUpdateDescription := testhelp.RandomName()
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
+		// Create and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityCreateDisplayName,
+						"format":       "Default",
+						"definition":   testHelperDefinition(entityCreateDisplayName),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityCreateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", ""),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+		// Update and Read
+		{
+			ResourceName: testResourceItemFQN,
+			Config: at.JoinConfigs(
+				testHelperLocals,
+				at.CompileConfig(
+					testResourceItemHeader,
+					map[string]any{
+						"workspace_id": workspaceID,
+						"display_name": entityUpdateDisplayName,
+						"description":  entityUpdateDescription,
+						"format":       "Default",
+						"definition":   testHelperDefinition(entityUpdateDisplayName),
+					},
+				),
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testResourceItemFQN, "display_name", entityUpdateDisplayName),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "description", entityUpdateDescription),
+				resource.TestCheckResourceAttr(testResourceItemFQN, "definition_update_enabled", "true"),
+			),
+		},
+	},
+	))
+}
