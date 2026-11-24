@@ -123,9 +123,9 @@ graph LR
 
 **Stage 1 — Resource Design:** The Resource Designer agent validates that the Go SDK supports the requested resource, classifies it (Fabric Item or Non-Item), determines the archetype or pattern, analyzes DTOs for design decisions (immutability, polymorphism, enum filtering), and creates properly-formatted GitHub issues with all the details downstream agents need.
 
-**Stage 2 — Test Infrastructure:** The Well-Known Setup agent ensures acceptance test fixtures exist. It checks and updates `tools/scripts/Set-WellKnown.ps1` (the PowerShell script that creates pre-requisite Fabric resources) and `internal/testhelp/wellknown.go` (the Go struct that test code uses to access fixture data).
+**Stage 2 — Test Infrastructure:** The Well-Known Setup agent ensures acceptance-test fixtures exist. It checks and updates `tools/scripts/Set-WellKnown.ps1` (the PowerShell script that creates prerequisite Fabric resources) and `internal/testhelp/wellknown.go` (the Go accessor for fixture data). It asks whether the user wants acceptance tests enabled for implementation, obtains permission before using the repository-root `wellknown.env`, and runs `task testacc:setup` only after approval. The setup status is handed off to Stage 3.
 
-**Stage 3 — Implementation:** The appropriate Implementor agent reads the GitHub issue, performs SDK analysis, generates all source files, registers the resource in the provider, creates examples, runs linters and tests, and verifies quality.
+**Stage 3 — Implementation:** The appropriate Implementor agent reads the GitHub issue, performs SDK analysis, generates all source files, registers the resource in the provider, creates examples, and runs docs, lint, and unit tests. It runs targeted acceptance tests only when Stage 2 reports setup as `READY`; otherwise it runs unit tests only and reports why acceptance tests were skipped.
 
 ---
 
@@ -178,7 +178,8 @@ Agents live in `.github/agents/` and define multi-step workflows. Each agent has
 3. **Evaluate and act** — Either confirm everything is in place, or make the necessary additions
 4. **Verify ordering** — Ensure creation order respects dependencies:
    - Azure infrastructure → Workspaces → Simple items → Dependent items → Definitions → Non-items → Sub-resources
-5. **Report** — Summarize changes and confirm readiness for Stage 3
+5. **Offer acceptance-test setup** — Ask whether the user wants acceptance tests run in Stage 3 and whether this agent may prepare the environment by running `task testacc:setup`, explaining that it creates real infrastructure. If they opt in, check only whether the repository-root `wellknown.env` exists; ask permission to use it if present, or ask the user to provide it securely if missing. Run the task only after approval and report `READY` only if it succeeds. Never inspect, echo, or commit the file.
+6. **Report** — Summarize changes, the acceptance-test setup status (`READY`, `NOT PROVIDED`, or `BLOCKED`) with a reason, and readiness for Stage 3. Do not run `task testacc` before the implementation and tests exist.
 
 **Creation strategies:**
 | Strategy | When | Example |
@@ -212,7 +213,7 @@ Agents live in `.github/agents/` and define multi-step workflows. Each agent has
 | 5 | Fix all TODO placeholders | **Critical step** — 7 categories of fixes across 6-8+ files (base.go, models.go, schema, resource, data sources, fakes, tests) |
 | 6 | Register in provider | Add import, resource constructor, and data source constructors to `internal/provider/provider.go` |
 | 7 | Generate examples | Create HCL examples in `examples/resources/` and `examples/data-sources/` |
-| 8 | Lint, docs, tests | Run `task docs`, `task lint`, `task testunit` — fix any failures |
+| 8 | Lint, docs, tests | Run `task docs`, `task lint`, `task testunit`; run targeted `task testacc` only when Stage 2 reports setup `READY` |
 | 9 | Quality verification | Final checklist: coding standards, type mappings, provider registration, no remaining TODOs |
 
 **Enhancement workflow (4 steps):**
@@ -222,7 +223,7 @@ Agents live in `.github/agents/` and define multi-step workflows. Each agent has
 | E1 | SDK diff analysis — compare current SDK DTOs against existing `models.go` to identify new/changed fields |
 | E2 | Apply model and schema changes — add new fields, `set()` mappings, sub-model structs |
 | E3 | Update closures, fakes, and tests — populate new Properties fields in fakes, add test assertions |
-| E4 | Verify — run docs, lint, tests; confirm no regressions |
+| E4 | Verify — run docs, lint, unit tests; run targeted acceptance tests only when Stage 2 reports setup `READY` |
 
 **Post-itemgen fix guide (Step 5 detail):**
 
@@ -278,7 +279,7 @@ Agents live in `.github/agents/` and define multi-step workflows. Each agent has
 | 4.2 | Implement data sources |
 | 5 | Create fakes and tests — centralized or inline depending on API shape |
 | 6 | Complete base constants in `base.go` |
-| 7–10 | Register, examples, lint/docs/tests, quality verification |
+| 7–10 | Register, examples, lint/docs/unit tests, conditional acceptance tests when setup is `READY`, quality verification |
 
 ---
 
@@ -536,6 +537,8 @@ If the issue contains a **DTO Nesting Depth Map**, uses it to determine number o
 3. Creation logic — which strategy (A/B/C/D) to use
 4. `$wellKnown` output — metadata written for test consumption
 
+The Well-Known Setup agent owns the user prompt and setup execution. It uses `task testacc:setup` only after user approval and reports setup as `READY` only on success; implementation agents use that status to decide whether to run acceptance tests.
+
 ---
 
 ## Resource Classification
@@ -565,7 +568,7 @@ This file is always loaded by Copilot regardless of which file is being edited. 
 - **Technology stack** — Go, HashiCorp Terraform Plugin Framework, Fabric SDK, Task runner
 - **Project structure** — directory purposes for `internal/services/`, `internal/pkg/fabricitem/`, `internal/provider/`, etc.
 - **Resource categories** — overview of Fabric Items vs Non-Items with canonical references
-- **Common commands** — `task build`, `task tools`, `task testunit`, `task testacc`, `task lint`, `task docs`
+- **Common commands** — `task build`, `task tools`, `task testunit`, `task testacc`, `task testacc:setup`, `task lint`, `task docs`
 - **Provider registration** — how to register new resources in `provider.go`
 - **Documentation** — `MarkdownDescription`, `tfplugindocs`, example conventions
 - **Coding conventions** — SDK aliases, HCL naming, error constants, black-box tests, parallelism, coverage target
@@ -578,9 +581,9 @@ When a developer says *"I need a Fabric Eventhouse resource"*, the system works 
 
 1. **`@resource-designer`** invokes `#skill:sdk-contract-navigator` → finds `fabric/eventhouse/` package, determines `config-definition-properties` archetype → invokes `#skill:resource-designer` → creates `[RS] fabric_eventhouse` and `[DS] fabric_eventhouse` GitHub issues
 
-2. **`@wellknown-setup`** invokes `#skill:wellknown-analyzer` → confirms Eventhouse is already in the `$itemTypes` simple array → reports "already configured"
+2. **`@wellknown-setup`** invokes `#skill:wellknown-analyzer` → confirms Eventhouse is already in the `$itemTypes` simple array → asks whether acceptance tests should be enabled → on opt-in, asks to use or provide root `wellknown.env`, runs `task testacc:setup` after approval, and reports the setup status
 
-3. **`@fabric-item-implementor`** reads the issue → invokes `#skill:sdk-contract-navigator` (verify) → invokes `#skill:itemgen-command-builder` (scaffold) → invokes `#skill:schema-model-generator` (models + schema) → wires closures → fixes TODOs → registers in provider → creates examples → runs `task docs`, `task lint`, `task testunit`
+3. **`@fabric-item-implementor`** reads the issue → invokes `#skill:sdk-contract-navigator` (verify) → invokes `#skill:itemgen-command-builder` (scaffold) → invokes `#skill:schema-model-generator` (models + schema) → wires closures → fixes TODOs → registers in provider → creates examples → runs `task docs`, `task lint`, and `task testunit`; it also runs targeted `task testacc` only when Stage 2 reports setup `READY`
 
 Throughout Steps 2-3, Copilot automatically loads the relevant **instructions** based on which files are being edited:
 - Editing `internal/services/eventhouse/*.go` → loads `coding-standards`, `fabric-item-patterns`

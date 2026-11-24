@@ -51,11 +51,14 @@ This repository is **terraform-provider-fabric** — the official [Terraform](ht
 | `task tools`                    | Install dev tools (linters, docgen)           |
 | `task testunit -- <Name> <Pkg>` | Run unit tests matching name in package       |
 | `task testacc -- <Name> <Pkg>`  | Run acceptance tests matching name in package |
+| `task testacc:setup`            | Set up well-known acceptance-test fixtures    |
 | `task lint`                     | Run all linters (Go, TF, Markdown)            |
 | `task docs`                     | Auto-generate provider documentation          |
 | `task deps:up`                  | Update Go dependencies                        |
 
 **NEVER run `go test` directly.** Always use `task testunit` or `task testacc`. The Taskfile sets required environment variables (e.g., `FABRIC_PREVIEW=true`) that are missing from raw `go test`, causing preview resource tests to fail.
+
+`task testacc:setup` loads the repository-root `wellknown.env` and creates real test infrastructure. Run it only after explicit user approval. If the file exists, ask before using it; if it is missing, ask the user to provide it securely at the repository root. Never read or echo its contents or commit it. Implementation agents run targeted acceptance tests only after this setup succeeds; otherwise they run unit tests only.
 
 Test name designator is the portion after `TestUnit_` or `TestAcc_`. The optional second argument scopes to a specific package for faster execution. For example, `task testunit -- WorkspaceResource ./internal/services/workspace/` runs all tests matching `TestUnit_WorkspaceResource*` in that package only. Without the package path, it defaults to `./...` (all packages).
 
