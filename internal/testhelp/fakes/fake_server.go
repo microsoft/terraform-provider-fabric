@@ -64,6 +64,7 @@ func NewFakeServer() *fakeServer { //revive:disable-line:unexported-return
 	handleEntity(server, configureMirroredAzureDatabricksCatalog)
 
 	configureItemTags(server)
+	configureWorkspaceTags(server)
 
 	return server
 }
