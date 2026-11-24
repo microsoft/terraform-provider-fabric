@@ -129,7 +129,20 @@ Well-known resources are created sequentially and dependencies matter. Verify th
 
 If the new resource depends on another resource that is not yet in the well-known setup, flag this as a prerequisite.
 
-### Step 5 — Report Output
+### Step 5 — Offer Acceptance-Test Setup
+
+After checking or updating well-known configuration, ask the user whether they want acceptance tests run by the implementation stage and whether this agent may prepare the test environment now by running `task testacc:setup`. Explain that this task creates real test infrastructure. Use the `ask_user` tool; do not ask in plain-text output.
+
+If the user declines, record the acceptance-test setup as `NOT PROVIDED` and do not run setup. If the user opts in:
+
+1. Check only whether `wellknown.env` exists at the repository root. Do not open, print, or log its contents.
+2. If it exists, ask the user for explicit permission to use that file. If it does not exist, ask the user to provide it at the repository root through a secure file handoff; do not ask them to paste its values into chat. Do not commit the file.
+3. Only after explicit approval to run the setup and file availability, run `task testacc:setup`. If an existing file is present, also require explicit permission to use it.
+4. Report `READY` only if `task testacc:setup` succeeds. If the user declines, the file is not provided, or the task fails, report `NOT PROVIDED` or `BLOCKED` with the reason.
+
+Do not run `task testacc` in this stage because the implementation and its acceptance tests may not exist yet. Pass the setup status to the appropriate implementation agent so it can decide whether to run the targeted acceptance tests.
+
+### Step 6 — Report Output
 
 Report a summary of all changes:
 
@@ -145,14 +158,17 @@ Files modified:
 
 Dependencies: <none | list of prerequisites>
 
-Ready for @fabric-item-implementor or @non-item-implementor (Stage 3).
+Acceptance-test setup: <READY — task succeeded | NOT PROVIDED — user declined/file not supplied | BLOCKED — task failed with reason>
+
+Ready for @fabric-item-implementor or @non-item-implementor (Stage 3). The implementation agent runs acceptance tests only when setup is READY.
 ```
 
 If no changes were needed:
 
 ```
 ✅ Well-known setup already in place for <ItemName>. No changes needed.
-Ready for @fabric-item-implementor or @non-item-implementor (Stage 3).
+Acceptance-test setup: <READY — task succeeded | NOT PROVIDED — user declined/file not supplied | BLOCKED — task failed with reason>
+Ready for @fabric-item-implementor or @non-item-implementor (Stage 3). The implementation agent runs acceptance tests only when setup is READY.
 ```
 
 ## Key Rules

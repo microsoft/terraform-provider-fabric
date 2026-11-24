@@ -24,6 +24,16 @@ User → Resource Designer →                    **Non-Item Implementor** → E
 
 Non-item resources typically do **not** need the Well-Known Setup agent (Stage 2), since their test infrastructure patterns differ from Fabric Items.
 
+## Acceptance-Test Gating
+
+This applies to both new-resource and enhancement workflows. Read the acceptance-test setup status from the Well-Known Setup handoff:
+
+- `READY` means the user approved the repository-root `wellknown.env` and `task testacc:setup` succeeded. Run the targeted acceptance tests after the unit tests with `task testacc -- <Name> ./internal/services/<package>/`.
+- `NOT PROVIDED` or `BLOCKED` means run unit tests only; report that acceptance tests were skipped and include the reason.
+- If the status is missing or unclear, ask the user whether acceptance-test setup was provided and completed. Do not infer readiness from the presence of a file, and do not run `task testacc:setup` or use `wellknown.env` from this agent.
+
+Unit tests remain required in every case. Report the actual result of each test command.
+
 ---
 
 ## Input
@@ -171,6 +181,7 @@ Create example HCL files in `examples/`:
 1. **`task docs`** — generate documentation from schema and examples
 2. **`task lint`** — run all linters; fix any reported issues
 3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
+4. **Acceptance tests** — follow [Acceptance-Test Gating](#acceptance-test-gating); run `task testacc -- <Name> ./internal/services/<package>/` only when setup is `READY`
 
 ### Step 10 — Quality Verification
 
@@ -181,6 +192,7 @@ After all lint, docs, and tests pass, verify:
 - [ ] UUID fields use `customtypes.UUID`; enums cast via `(*string)(from.Field)`
 - [ ] Resource registered in `provider.go`; example HCL files exist
 - [ ] `task docs`, `task lint`, and unit tests pass
+- [ ] Acceptance tests pass when setup is `READY`; otherwise the skipped status and reason are reported
 - [ ] Direct CRUD methods (no closures); `superschema` in `schema.go`
 - [ ] Request builders have `set()` methods; `utils.GetDiagsFromError` for errors
 - [ ] Tests use black-box testing (`package <name>_test`) and correct naming (`TestUnit_<TypeName>Resource_CRUD`, `TestUnit_<TypeName>Resource_Attributes`, `TestUnit_<TypeName>DataSource`, etc.)
@@ -267,6 +279,7 @@ For each item in the change list, update models and schema following `schema-mod
 1. **`task docs`** — regenerate documentation
 2. **`task lint`** — run all linters; fix any reported issues
 3. **`task testunit -- <Name> ./internal/services/<package>/`** — run unit tests; fix any failures
+4. **Acceptance tests** — follow [Acceptance-Test Gating](#acceptance-test-gating); run `task testacc -- <Name> ./internal/services/<package>/` only when setup is `READY`
 
 Verify:
 
@@ -277,6 +290,7 @@ Verify:
 - [ ] Tests assert new attributes
 - [ ] No existing tests broken
 - [ ] `task docs`, `task lint`, and unit tests pass
+- [ ] Acceptance tests pass when setup is `READY`; otherwise the skipped status and reason are reported
 - [ ] Examples updated if new user-facing HCL attributes were added
 
 ---
@@ -330,8 +344,11 @@ Files created:
 Files modified:
 - internal/provider/provider.go — registered resource and data sources
 
-Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name> ./internal/services/<package>/
+Verification:
+- Docs: <passed | failed>
+- Lint: <passed | failed>
+- Unit tests: <passed | failed>
+- Acceptance tests: <passed | failed | skipped — setup status and reason>
 ```
 
 ### For Enhancements
@@ -348,6 +365,9 @@ Files modified:
 - internal/services/<package>/resource_<type>.go — updated CRUD methods (if applicable)
 - internal/services/<package>/*_test.go — added test assertions
 
-Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name> ./internal/services/<package>/
+Verification:
+- Docs: <passed | failed>
+- Lint: <passed | failed>
+- Unit tests: <passed | failed>
+- Acceptance tests: <passed | failed | skipped — setup status and reason>
 ```

@@ -1,7 +1,7 @@
 ---
 name: wellknown-analyzer
 description: >-
-  Analyze dependencies and determine what infrastructure must be added to tools/scripts/Set-WellKnown.ps1 and internal/testhelp/wellknown.go so that acceptance tests for a new resource have all required pre-requisite resources available. USE FOR: analyzing well-known test fixture requirements for new resources, determining creation strategies, and generating code snippets for Set-WellKnown.ps1 and wellknown.go additions.
+  Analyze dependencies and determine what infrastructure must be added to tools/scripts/Set-WellKnown.ps1 and internal/testhelp/wellknown.go so that acceptance tests for a new resource have all required pre-requisite resources available. Also provide an acceptance-test setup handoff. USE FOR: analyzing well-known test fixture requirements for new resources, determining creation strategies, and generating code snippets for Set-WellKnown.ps1 and wellknown.go additions.
 ---
 
 # Skill: Well-Known Analyzer
@@ -264,6 +264,12 @@ List all identified dependencies:
 ### Code Snippets
 
 Provide ready-to-paste PowerShell code for each required change.
+
+## Acceptance-Test Setup Handoff
+
+This skill analyzes and recommends well-known changes; the **Well-Known Setup agent** owns user consent and setup execution. After checking or updating the well-known configuration, the agent should ask whether the user wants acceptance tests run by the implementation stage and whether it may prepare the test environment by running `task testacc:setup`, explaining that the task creates real infrastructure.
+
+If the user opts in, the agent must check only whether the repository-root `wellknown.env` exists. If it exists, ask explicit permission to use it; if it does not, ask the user to provide it at the repository root through a secure file handoff. Never read, print, or request the environment file's values in chat, and do not commit it. Run `task testacc:setup` only after explicit user approval and when the file is available. Report `READY` only if the command succeeds, otherwise report `NOT PROVIDED` or `BLOCKED` with the reason. Do not run `task testacc` here; the implementation agent runs the targeted acceptance tests once the code and tests exist.
 
 ## Go Access Pattern (`wellknown.go`)
 
