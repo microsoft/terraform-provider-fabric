@@ -1256,6 +1256,7 @@ $itemNaming = @{
   'WorkspaceOAP'                    = 'wsoap'
   'WorkspaceIAP'                    = 'wsiap'
   'WorkspaceRS'                     = 'wsrs'
+  'WorkspaceOD'                     = 'wsod'
   'WorkspaceMPE'                    = 'wsmpe'
   'WorkspaceCMK'                    = 'wscmk'
   'DomainParent'                    = 'parent'
@@ -1391,6 +1392,23 @@ $wellKnown['WorkspaceDS'] = @{
 }
 
 # Assign SPN to WorkspaceDS if not already assigned
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create a dedicated workspace for OneLake diagnostics acceptance tests
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOD'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+
+# Assign WorkspaceOD to Capacity if not already assigned or assigned to a different capacity
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOD - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceOD'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+# Assign SPN to WorkspaceOD if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
 
 # Create WorkspaceCMK if not exists

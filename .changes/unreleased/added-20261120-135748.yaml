@@ -1,0 +1,5 @@
+kind: added
+body: Added the `fabric_onelake_diagnostic_setting` resource for workspace OneLake diagnostics.
+time: 2026-11-20T13:57:48.9071782+02:00
+custom:
+    Issue: "1172"
