@@ -95,14 +95,14 @@ func (d *dataSourceOneLakeDefaultTier) get(ctx context.Context, model *dataSourc
 	workspaceID := model.WorkspaceID.ValueString()
 	tflog.Trace(ctx, "getting OneLake default tier for Workspace ID: "+workspaceID)
 
-	respGet, err := d.client.GetSettings(ctx, workspaceID, nil)
+	settings, err := getOneLakeSettings(ctx, d.pConfigData.FabricClient, workspaceID)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
 	var tier *fabcore.OneLakeAccessTier
-	if respGet.Lifecycle != nil {
-		tier = respGet.Lifecycle.DefaultTier
+	if settings.Lifecycle != nil {
+		tier = settings.Lifecycle.DefaultTier
 	}
 
 	model.set(workspaceID, tier)

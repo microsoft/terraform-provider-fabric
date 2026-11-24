@@ -213,12 +213,17 @@ func (r *resourceOneLakeDefaultTier) get(ctx context.Context, model *resourceOne
 	workspaceID := model.WorkspaceID.ValueString()
 	tflog.Trace(ctx, "getting OneLake default tier for Workspace ID: "+workspaceID)
 
-	respGet, err := r.client.GetSettings(ctx, workspaceID, nil)
+	settings, err := getOneLakeSettings(ctx, r.pConfigData.FabricClient, workspaceID)
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
-	if respGet.Lifecycle == nil || respGet.Lifecycle.DefaultTier == nil {
+	var tier *fabcore.OneLakeAccessTier
+	if settings.Lifecycle != nil {
+		tier = settings.Lifecycle.DefaultTier
+	}
+
+	if tier == nil {
 		var diags diag.Diagnostics
 		diags.AddError(
 			"OneLake Default Tier Unavailable",
@@ -228,7 +233,7 @@ func (r *resourceOneLakeDefaultTier) get(ctx context.Context, model *resourceOne
 		return diags
 	}
 
-	model.set(workspaceID, respGet.Lifecycle.DefaultTier)
+	model.set(workspaceID, tier)
 
 	return nil
 }
