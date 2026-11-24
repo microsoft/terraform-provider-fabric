@@ -1253,9 +1253,11 @@ $itemNaming = @{
   'Warehouse'                       = 'wh'
   'WarehouseSnapshot'               = 'whs'
   'WorkspaceDS'                     = 'wsds'
+  'WorkspaceOneLakeTierDS'          = 'oltds'
   'WorkspaceOAP'                    = 'wsoap'
   'WorkspaceIAP'                    = 'wsiap'
   'WorkspaceRS'                     = 'wsrs'
+  'WorkspaceOneLakeTierRS'          = 'oltrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'WorkspaceCMK'                    = 'wscmk'
   'DomainParent'                    = 'parent'
@@ -1392,6 +1394,47 @@ $wellKnown['WorkspaceDS'] = @{
 
 # Assign SPN to WorkspaceDS if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Keep these workspaces dedicated and empty: changing the default OneLake tier can move files and incur transaction charges.
+# Create WorkspaceOneLakeTierRS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOneLakeTierRS'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOneLakeTierRS - Name: $($workspace.displayName) / ID: $($workspace.id)"
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+$oneLakeTierResponse = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($workspace.id)/onelake/settings/modifyDefaultTier?defaultTier=Hot").Response
+if ($oneLakeTierResponse.defaultTier -ne 'Hot') {
+  throw "Failed to set the OneLake default tier to Hot for WorkspaceOneLakeTierRS."
+}
+
+$wellKnown['WorkspaceOneLakeTierRS'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+  defaultTier = $oneLakeTierResponse.defaultTier
+}
+
+# Create WorkspaceOneLakeTierDS if not exists
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOneLakeTierDS'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOneLakeTierDS - Name: $($workspace.displayName) / ID: $($workspace.id)"
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+$oneLakeTierResponse = (Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$($workspace.id)/onelake/settings/modifyDefaultTier?defaultTier=Hot").Response
+if ($oneLakeTierResponse.defaultTier -ne 'Hot') {
+  throw "Failed to set the OneLake default tier to Hot for WorkspaceOneLakeTierDS."
+}
+
+$wellKnown['WorkspaceOneLakeTierDS'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+  defaultTier = $oneLakeTierResponse.defaultTier
+}
 
 # Create WorkspaceCMK if not exists
 # Kept empty on purpose: CMK cannot be enabled on a workspace that contains items unsupported by customer-managed keys.
