@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/pkg/fabricitem"
@@ -22,7 +21,6 @@ var _ datasource.DataSourceWithConfigure = (*dataSourceOneLakeDiagnosticSetting)
 
 type dataSourceOneLakeDiagnosticSetting struct {
 	pConfigData *pconfig.ProviderData
-	client      *fabcore.OneLakeSettingsClient
 	TypeInfo    tftypeinfo.TFTypeInfo
 }
 
@@ -60,8 +58,6 @@ func (d *dataSourceOneLakeDiagnosticSetting) Configure(_ context.Context, req da
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
 	}
-
-	d.client = fabcore.NewClientFactoryWithClient(*pConfigData.FabricClient).NewOneLakeSettingsClient()
 }
 
 func (d *dataSourceOneLakeDiagnosticSetting) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -86,16 +82,16 @@ func (d *dataSourceOneLakeDiagnosticSetting) Read(ctx context.Context, req datas
 }
 
 func (d *dataSourceOneLakeDiagnosticSetting) get(ctx context.Context, model *dataSourceOneLakeDiagnosticSettingModel) diag.Diagnostics {
-	respGet, err := d.client.GetSettings(ctx, model.WorkspaceID.ValueString(), nil)
+	diagnostics, err := getOneLakeDiagnosticSettings(ctx, d.pConfigData.FabricClient, model.WorkspaceID.ValueString())
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, nil); diags.HasError() {
 		return diags
 	}
 
-	if respGet.Diagnostics == nil {
+	if diagnostics == nil {
 		return diag.Diagnostics{
 			diag.NewErrorDiagnostic(common.ErrorReadHeader, "The OneLake settings response omitted diagnostics."),
 		}
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), *respGet.Diagnostics)
+	return model.set(ctx, model.WorkspaceID.ValueString(), *diagnostics)
 }

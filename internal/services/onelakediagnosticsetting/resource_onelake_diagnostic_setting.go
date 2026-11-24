@@ -5,6 +5,7 @@ package onelakediagnosticsetting
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	timeoutsR "github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts" //revive:disable-line:import-alias-naming
@@ -92,7 +93,8 @@ func (r *resourceOneLakeDiagnosticSetting) Create(ctx context.Context, req resou
 		return
 	}
 
-	if resp.Diagnostics.Append(r.modifyDiagnostics(ctx, plan.WorkspaceID.ValueString(), request.OneLakeDiagnosticSettings, utils.OperationCreate)...); resp.Diagnostics.HasError() {
+	diags, _ = r.modifyDiagnostics(ctx, plan.WorkspaceID.ValueString(), request.OneLakeDiagnosticSettings, utils.OperationCreate)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -157,7 +159,8 @@ func (r *resourceOneLakeDiagnosticSetting) Update(ctx context.Context, req resou
 		return
 	}
 
-	if resp.Diagnostics.Append(r.modifyDiagnostics(ctx, plan.WorkspaceID.ValueString(), request.OneLakeDiagnosticSettings, utils.OperationUpdate)...); resp.Diagnostics.HasError() {
+	diags, _ = r.modifyDiagnostics(ctx, plan.WorkspaceID.ValueString(), request.OneLakeDiagnosticSettings, utils.OperationUpdate)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -185,11 +188,6 @@ func (r *resourceOneLakeDiagnosticSetting) Delete(ctx context.Context, req resou
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp.Diagnostics.AddWarning(
-		"Disabling OneLake diagnostics",
-		"OneLake diagnostic settings cannot be deleted. Destroying this resource disables diagnostics and clears the destination.",
-	)
-
 	settings := fabcore.OneLakeDiagnosticSettings{
 		Status: new(diagnosticStatusDisabled),
 		Destination: &fabcore.LakehouseOneLakeDiagnosticSettingsDestination{
@@ -197,8 +195,16 @@ func (r *resourceOneLakeDiagnosticSetting) Delete(ctx context.Context, req resou
 		},
 	}
 
-	if resp.Diagnostics.Append(r.modifyDiagnostics(ctx, state.WorkspaceID.ValueString(), settings, utils.OperationDelete)...); resp.Diagnostics.HasError() {
+	diags, alreadyCleared := r.modifyDiagnostics(ctx, state.WorkspaceID.ValueString(), settings, utils.OperationDelete)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
+	}
+
+	if !alreadyCleared {
+		resp.Diagnostics.AddWarning(
+			"Disabling OneLake diagnostics",
+			"OneLake diagnostic settings cannot be deleted. Destroying this resource disables diagnostics and clears the destination.",
+		)
 	}
 
 	tflog.Debug(ctx, "DELETE", map[string]any{"action": "end"})
@@ -237,7 +243,7 @@ func (r *resourceOneLakeDiagnosticSetting) modifyDiagnostics(
 	workspaceID string,
 	settings fabcore.OneLakeDiagnosticSettings,
 	operation utils.Operation,
-) diag.Diagnostics {
+) (diag.Diagnostics, bool) {
 	_, err := r.client.ModifyDiagnostics(
 		ctx,
 		workspaceID,
@@ -246,20 +252,68 @@ func (r *resourceOneLakeDiagnosticSetting) modifyDiagnostics(
 		},
 	)
 
-	return utils.GetDiagsFromError(ctx, err, operation, nil)
+	if isDisabledWithoutDestination(settings) && isNoPreviousSettingsError(err) {
+		tflog.Debug(ctx, "OneLake diagnostics are already disabled and cleared")
+
+		return nil, true
+	}
+
+	return utils.GetDiagsFromError(ctx, err, operation, nil), false
+}
+
+func isNoPreviousSettingsError(err error) bool {
+	var responseError *fabcore.ResponseError
+
+	if !errors.As(err, &responseError) {
+		return false
+	}
+
+	if responseError.ErrorCode == "NoPreviousSettingsExist" {
+		return true
+	}
+
+	if responseError.ErrorResponse == nil {
+		return false
+	}
+
+	if responseError.ErrorResponse.ErrorCode != nil && *responseError.ErrorResponse.ErrorCode == "NoPreviousSettingsExist" {
+		return true
+	}
+
+	for _, detail := range responseError.ErrorResponse.MoreDetails {
+		if detail.ErrorCode != nil && *detail.ErrorCode == "NoPreviousSettingsExist" {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isDisabledWithoutDestination(settings fabcore.OneLakeDiagnosticSettings) bool {
+	if settings.Status == nil || *settings.Status != diagnosticStatusDisabled {
+		return false
+	}
+
+	if settings.Destination == nil {
+		return true
+	}
+
+	destination, ok := settings.Destination.(*fabcore.LakehouseOneLakeDiagnosticSettingsDestination)
+
+	return ok && destination.Lakehouse == nil
 }
 
 func (r *resourceOneLakeDiagnosticSetting) get(ctx context.Context, model *resourceOneLakeDiagnosticSettingModel) diag.Diagnostics {
-	respGet, err := r.client.GetSettings(ctx, model.WorkspaceID.ValueString(), nil)
+	diagnostics, err := getOneLakeDiagnosticSettings(ctx, r.pConfigData.FabricClient, model.WorkspaceID.ValueString())
 	if diags := utils.GetDiagsFromError(ctx, err, utils.OperationRead, fabcore.ErrCommon.EntityNotFound); diags.HasError() {
 		return diags
 	}
 
-	if respGet.Diagnostics == nil {
+	if diagnostics == nil {
 		return diag.Diagnostics{
 			diag.NewErrorDiagnostic(common.ErrorReadHeader, "The OneLake settings response omitted diagnostics."),
 		}
 	}
 
-	return model.set(ctx, model.WorkspaceID.ValueString(), *respGet.Diagnostics)
+	return model.set(ctx, model.WorkspaceID.ValueString(), *diagnostics)
 }

@@ -173,6 +173,10 @@ func TestUnit_OneLakeDiagnosticSettingResource_CRUD(t *testing.T) {
 			return errors.New("expected destroy to clear the Lakehouse destination")
 		}
 
+		if state.noPreviousSettingsErrorCount != 1 {
+			return errors.New("expected delete to treat NoPreviousSettingsExist as an idempotent reset")
+		}
+
 		return nil
 	}
 

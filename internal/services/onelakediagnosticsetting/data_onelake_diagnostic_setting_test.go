@@ -10,7 +10,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	at "github.com/dcarbone/terraform-plugin-framework-utils/v3/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
+	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
 	"github.com/microsoft/terraform-provider-fabric/internal/framework/customtypes"
@@ -218,6 +220,40 @@ func TestUnit_OneLakeDiagnosticSettingDataSource(t *testing.T) {
 			ExpectError: regexp.MustCompile(common.ErrorReadHeader),
 		},
 	}))
+}
+
+func TestUnit_OneLakeDiagnosticSettingDataSource_IgnoresUnrelatedLifecycleType(t *testing.T) {
+	workspaceID := testhelp.RandomUUID()
+	serverFactory, _ := newFakeOneLakeSettingsServer(map[string]fabcore.OneLakeDiagnosticSettings{
+		workspaceID: {
+			Status: new("Disabled"),
+		},
+	})
+
+	testCase := testhelp.NewTestUnitCase(t, nil, serverFactory, nil, []resource.TestStep{
+		{
+			Config: at.CompileConfig(
+				testDataSourceItemHeader,
+				map[string]any{
+					"workspace_id": workspaceID,
+				},
+			),
+			Check: resource.ComposeAggregateTestCheckFunc(
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "workspace_id", workspaceID),
+				resource.TestCheckResourceAttr(testDataSourceItemFQN, "status", "Disabled"),
+			),
+		},
+	})
+
+	transport := &oneLakeSettingsResponseTransport{
+		transport: fabfake.NewServerFactoryTransport(serverFactory),
+	}
+	testCase.ProtoV6ProviderFactories = testhelp.GetTestUnitProtoV6ProviderFactories(
+		&fabric.ClientOptions{Transport: transport},
+		nil,
+	)
+
+	resource.ParallelTest(t, testCase)
 }
 
 func TestAcc_OneLakeDiagnosticSettingDataSource(t *testing.T) {

@@ -4,10 +4,18 @@
 package onelakediagnosticsetting_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"strconv"
+	"strings"
 
 	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 	fabfake "github.com/microsoft/fabric-sdk-go/fabric/fake"
@@ -16,8 +24,9 @@ import (
 )
 
 type oneLakeSettingsState struct {
-	settings        map[string]fabcore.OneLakeDiagnosticSettings
-	omitDiagnostics map[string]bool
+	settings                     map[string]fabcore.OneLakeDiagnosticSettings
+	omitDiagnostics              map[string]bool
+	noPreviousSettingsErrorCount int
 }
 
 func newFakeOneLakeSettingsServer(settings map[string]fabcore.OneLakeDiagnosticSettings) (*fabfake.ServerFactory, *oneLakeSettingsState) {
@@ -81,7 +90,17 @@ func fakeModifyOneLakeDiagnostics(
 			return resp, errResp
 		}
 
-		state.settings[workspaceID] = *options.ModifyOneLakeDiagnosticSettingRequest
+		request := *options.ModifyOneLakeDiagnosticSettingRequest
+		if isClearedSettings(request) && isClearedSettings(state.settings[workspaceID]) {
+			state.noPreviousSettingsErrorCount++
+
+			errResp.SetError(fakeNoPreviousSettingsError())
+			resp.SetTerminalResponse(http.StatusBadRequest, fabcore.OneLakeSettingsClientModifyDiagnosticsResponse{}, nil)
+
+			return resp, errResp
+		}
+
+		state.settings[workspaceID] = request
 
 		resp.SetTerminalResponse(http.StatusOK, fabcore.OneLakeSettingsClientModifyDiagnosticsResponse{}, nil)
 
@@ -101,4 +120,90 @@ func newEnabledOneLakeDiagnosticSetting(destinationWorkspaceID, destinationItemI
 			},
 		},
 	}
+}
+
+func isClearedSettings(settings fabcore.OneLakeDiagnosticSettings) bool {
+	if settings.Status == nil || *settings.Status != "Disabled" {
+		return false
+	}
+
+	if settings.Destination == nil {
+		return true
+	}
+
+	destination, ok := settings.Destination.(*fabcore.LakehouseOneLakeDiagnosticSettingsDestination)
+
+	return ok && destination.Lakehouse == nil
+}
+
+func fakeNoPreviousSettingsError() error {
+	const errorResponse = `{"errorCode":"BadRequest","message":"The request could not be processed due to missing or invalid information","moreDetails":[{"errorCode":"NoPreviousSettingsExist","message":"No previous OneLake diagnostic settings exist"}]}`
+
+	return fabcore.NewResponseError(&http.Response{
+		Status:     "400 Bad Request",
+		StatusCode: http.StatusBadRequest,
+		Header: http.Header{
+			"x-ms-public-api-error-code": []string{"BadRequest"},
+		},
+		Body: io.NopCloser(strings.NewReader(errorResponse)),
+	})
+}
+
+type oneLakeSettingsResponseTransport struct {
+	transport policy.Transporter
+}
+
+func (t *oneLakeSettingsResponseTransport) Do(req *http.Request) (*http.Response, error) {
+	response, err := t.transport.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("sending fake Fabric request: %w", err)
+	}
+
+	if response == nil {
+		return nil, errors.New("fake Fabric transport returned a nil response")
+	}
+
+	if req.Method != http.MethodGet || !strings.HasSuffix(req.URL.Path, "/onelake/settings") || response.StatusCode != http.StatusOK {
+		return response, nil
+	}
+
+	if response.Body == nil {
+		return nil, errors.New("fake Fabric transport returned an empty settings response")
+	}
+
+	body, err := io.ReadAll(response.Body)
+	closeErr := response.Body.Close()
+
+	if err != nil {
+		return nil, fmt.Errorf("reading fake OneLake settings response: %w", err)
+	}
+
+	if closeErr != nil {
+		return nil, fmt.Errorf("closing fake OneLake settings response: %w", closeErr)
+	}
+
+	var responseBody map[string]json.RawMessage
+
+	err = json.Unmarshal(body, &responseBody)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling fake OneLake settings response: %w", err)
+	}
+
+	responseBody["lifecycle"] = json.RawMessage(`{"accessTimeTracking":true}`)
+
+	body, err = json.Marshal(responseBody)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling fake OneLake settings response: %w", err)
+	}
+
+	response.Body = io.NopCloser(bytes.NewReader(body))
+	response.ContentLength = int64(len(body))
+
+	if response.Header == nil {
+		response.Header = make(http.Header)
+	}
+
+	response.Header.Set("Content-Length", strconv.Itoa(len(body)))
+
+	return response, nil
 }
