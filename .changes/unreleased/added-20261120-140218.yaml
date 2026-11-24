@@ -1,0 +1,5 @@
+kind: added
+body: Add a data source for workspace-scoped OneLake immutability policies.
+time: 2026-11-20T14:02:18.0962494+02:00
+custom:
+    Issue: "1168"
