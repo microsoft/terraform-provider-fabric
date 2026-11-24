@@ -5,7 +5,8 @@
 # 1. Any lakehouse named "lh"
 # 2. All SQLEndpoint items
 # 3. All KQLDatabase items
-# 4. FolderRS1 and FolderRS2 folders
+# 4. The SemanticModelRS well-known item
+# 5. FolderRS1 and FolderRS2 folders
 #
 # It reads the workspace ID from the .wellknown.json file.
 #
@@ -283,6 +284,11 @@ function Remove-WorkspaceRSItems {
   }
 
   $workspaceId = $wellKnownContent.WorkspaceRS.id
+  $semanticModelRSId = $null
+  if ($wellKnownContent.SemanticModelRS -and $wellKnownContent.SemanticModelRS.id) {
+    $semanticModelRSId = $wellKnownContent.SemanticModelRS.id
+    Write-Log -Message "Preserving SemanticModelRS ($semanticModelRSId)" -Level 'INFO' -Stop $false
+  }
 
   Write-Log -Message "WorkspaceRS ID: $workspaceId" -Level 'INFO'
 
@@ -362,6 +368,10 @@ function Remove-WorkspaceRSItems {
     else {
       Write-Log -Message "No recoverable items found in WorkspaceRS" -Level 'INFO'
     }
+
+    if ($semanticModelRSId) {
+      $recoverableItems = @($recoverableItems | Where-Object { $_.id -ne $semanticModelRSId })
+    }
   }
   catch {
     Write-Log -Message "Failed to fetch recoverable items from WorkspaceRS: $($_.Exception.Message)" -Level 'ERROR' -Stop $RecoverableItemsOnly
@@ -372,12 +382,14 @@ function Remove-WorkspaceRSItems {
   # 1. Any lakehouse named "lh"
   # 2. All SQLEndpoint items
   # 3. All KQLDatabase items
+  # 4. The SemanticModelRS well-known item
   $itemsToDelete = @()
   if (-not $RecoverableItemsOnly) {
     $itemsToDelete = $items | Where-Object {
       $_.type -ne 'KQLDatabase' -and
       $_.type -ne 'SQLEndpoint' -and
-      -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh')
+      -not ($_.type -eq 'Lakehouse' -and $_.displayName -eq 'lh') -and
+      -not ($semanticModelRSId -and $_.id -eq $semanticModelRSId)
     }
 
     Write-Log -Message "Preserving any lakehouse named 'lh'" -Level 'INFO' -Stop $false
