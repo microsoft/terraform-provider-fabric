@@ -1,0 +1,4 @@
+kind: added
+body: Added the `fabric_workspace_onelake_default_tier` data source for reading a workspace's OneLake default access tier.
+custom:
+  Issue: "1170"
