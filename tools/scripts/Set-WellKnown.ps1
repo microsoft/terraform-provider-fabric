@@ -626,6 +626,103 @@ function Set-FabricWorkspaceCapacity {
   return $workspace.Response
 }
 
+function Set-OneLakeDiagnostic {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$SourceWorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DestinationWorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$DestinationLakehouseId
+  )
+
+  $settings = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$SourceWorkspaceId/onelake/settings").Response
+  $diagnostics = $settings.diagnostics
+  $currentLakehouse = $null
+
+  if ($diagnostics -and $diagnostics.destination -and $diagnostics.destination.type -eq 'Lakehouse') {
+    $currentLakehouse = $diagnostics.destination.lakehouse
+  }
+
+  if (
+    $diagnostics -and
+    $diagnostics.status -eq 'Enabled' -and
+    $currentLakehouse -and
+    $currentLakehouse.workspaceId -eq $DestinationWorkspaceId -and
+    $currentLakehouse.itemId -eq $DestinationLakehouseId
+  ) {
+    Write-Log -Message "OneLake diagnostics already point to the dedicated Lakehouse: $DestinationLakehouseId"
+    return
+  }
+
+  Write-Log -Message "Enabling OneLake diagnostics for Workspace ID: $SourceWorkspaceId" -Level 'WARN'
+  $payload = @{
+    status      = 'Enabled'
+    destination = @{
+      type      = 'Lakehouse'
+      lakehouse = @{
+        referenceType = 'ById'
+        itemId        = $DestinationLakehouseId
+        workspaceId   = $DestinationWorkspaceId
+      }
+    }
+  }
+
+  Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$SourceWorkspaceId/onelake/settings/modifyDiagnostics" -Payload $payload | Out-Null
+
+  $updatedSettings = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$SourceWorkspaceId/onelake/settings").Response
+  $updatedDiagnostics = $updatedSettings.diagnostics
+  $updatedLakehouse = $null
+
+  if ($updatedDiagnostics -and $updatedDiagnostics.destination -and $updatedDiagnostics.destination.type -eq 'Lakehouse') {
+    $updatedLakehouse = $updatedDiagnostics.destination.lakehouse
+  }
+
+  if (
+    -not $updatedDiagnostics -or
+    $updatedDiagnostics.status -ne 'Enabled' -or
+    -not $updatedLakehouse -or
+    $updatedLakehouse.workspaceId -ne $DestinationWorkspaceId -or
+    $updatedLakehouse.itemId -ne $DestinationLakehouseId
+  ) {
+    Write-Log -Message "OneLake diagnostics did not become enabled with the dedicated Lakehouse destination for Workspace ID: $SourceWorkspaceId" -Level 'ERROR'
+  }
+}
+
+function Set-OneLakeImmutabilityPolicy {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId
+  )
+
+  $settings = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/onelake/settings").Response
+  $policy = @($settings.immutabilityPolicies) | Where-Object { $_.scope -eq 'DiagnosticLogs' } | Select-Object -First 1
+
+  if (-not $policy) {
+    Write-Log -Message "Applying the minimum 1-day immutability policy to the dedicated OneLake diagnostics workspace." -Level 'WARN'
+    $payload = @{
+      scope         = 'DiagnosticLogs'
+      retentionDays = 1
+    }
+    Invoke-FabricRest -Method 'POST' -Endpoint "workspaces/$WorkspaceId/onelake/settings/modifyImmutabilityPolicy" -Payload $payload | Out-Null
+
+    $settings = (Invoke-FabricRest -Method 'GET' -Endpoint "workspaces/$WorkspaceId/onelake/settings").Response
+    $policy = @($settings.immutabilityPolicies) | Where-Object { $_.scope -eq 'DiagnosticLogs' } | Select-Object -First 1
+  }
+
+  if (-not $policy) {
+    Write-Log -Message "OneLake immutability policy was not returned for Workspace ID: $WorkspaceId" -Level 'ERROR'
+  }
+
+  if ($null -eq $policy.retentionDays -or $policy.retentionDays -lt 1) {
+    Write-Log -Message "OneLake immutability policy has an invalid retention period for Workspace ID: $WorkspaceId" -Level 'ERROR'
+  }
+
+  return $policy
+}
+
 function Set-FabricWorkspaceRoleAssignment {
   param (
     [Parameter(Mandatory = $true)]
@@ -1258,6 +1355,8 @@ $itemNaming = @{
   'WorkspaceRS'                     = 'wsrs'
   'WorkspaceMPE'                    = 'wsmpe'
   'WorkspaceCMK'                    = 'wscmk'
+  'WorkspaceOneLakeImmutability'    = 'wsimm'
+  'LakehouseOneLakeImmutability'    = 'lhimm'
   'DomainParent'                    = 'parent'
   'DomainChild'                     = 'child'
   'EntraServicePrincipal'           = 'sp'
@@ -1410,6 +1509,34 @@ $wellKnown['WorkspaceCMK'] = @{
 
 # Assign SPN to WorkspaceCMK if not already assigned
 Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create a dedicated workspace for immutable OneLake diagnostic logs
+$displayNameTemp = "${displayName}_$($itemNaming['WorkspaceOneLakeImmutability'])"
+$workspace = Set-FabricWorkspace -DisplayName $displayNameTemp -CapacityId $capacity.id
+$workspace = Set-FabricWorkspaceCapacity -WorkspaceId $workspace.id -CapacityId $capacity.id
+
+Write-Log -Message "WorkspaceOneLakeImmutability - Name: $($workspace.displayName) / ID: $($workspace.id)"
+$wellKnown['WorkspaceOneLakeImmutability'] = @{
+  id          = $workspace.id
+  displayName = $workspace.displayName
+  description = $workspace.description
+}
+
+Set-FabricWorkspaceRoleAssignment -WorkspaceId $workspace.id -SG $SPNS_SG
+
+# Create the dedicated Lakehouse that receives diagnostics
+$displayNameTemp = "${displayName}_$($itemNaming['LakehouseOneLakeImmutability'])"
+$item = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceOneLakeImmutability'].id -Type 'Lakehouse'
+$wellKnown['LakehouseOneLakeImmutability'] = @{
+  id          = $item.id
+  displayName = $item.displayName
+  description = $item.description
+}
+
+Set-OneLakeDiagnostic `
+  -SourceWorkspaceId $wellKnown['WorkspaceDS'].id `
+  -DestinationWorkspaceId $wellKnown['WorkspaceOneLakeImmutability'].id `
+  -DestinationLakehouseId $wellKnown['LakehouseOneLakeImmutability'].id
 
 # Define an array of item types to create
 $itemTypes = @('AnomalyDetector', 'ApacheAirflowJob', 'CopyJob', 'CosmosDB', 'DataAgent', 'Dataflow', 'DataPipeline', 'DigitalTwinBuilder', 'Environment', 'Eventhouse', 'GraphQLApi', 'KQLDashboard', 'KQLQueryset', 'Lakehouse', 'Map', 'MLExperiment', 'MLModel', 'Notebook', 'Ontology', 'OperationsAgent', 'OrgApp', 'Plan', 'Reflex', 'SparkJobDefinition', 'SQLDatabase', 'UserDataFunction', 'VariableLibrary', 'Warehouse')
@@ -2350,6 +2477,21 @@ else {
     displayName = $dataflow.displayName
     folderId    = $dataflow.folderId
   }
+}
+
+# Persist all other well-known resources before the immutability request, which can fail
+# until OneLake diagnostics have had time to propagate.
+$wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
+$wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
+
+# Configure immutability after OneLake diagnostics setup and item provisioning.
+Write-Log -Message "OneLake diagnostics can take up to one hour to start flowing. If policy setup reports WorkspaceNotSupported, rerun after diagnostic events arrive." -Level 'WARN'
+$immutabilityPolicy = Set-OneLakeImmutabilityPolicy -WorkspaceId $wellKnown['WorkspaceOneLakeImmutability'].id
+Write-Log -Message "OneLake immutability is set to $($immutabilityPolicy.retentionDays) days and cannot be shortened or removed." -Level 'WARN'
+$wellKnown['OneLakeImmutabilityPolicy'] = @{
+  workspaceId   = $wellKnown['WorkspaceOneLakeImmutability'].id
+  scope         = $immutabilityPolicy.scope
+  retentionDays = [int]$immutabilityPolicy.retentionDays
 }
 
 # Save wellknown.json file

@@ -117,6 +117,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacencp"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceocr"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceogr"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/workspaceonelakeimmutability"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/workspacera"
 )
 
@@ -532,6 +533,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		workspacegop.NewResourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewResourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewResourceWorkspaceNetworkCommunicationPolicy,
+		workspaceonelakeimmutability.NewResourceWorkspaceOneLakeImmutabilityPolicy,
 		workspaceiar.NewResourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewResourceWorkspaceRoleAssignment,
 		workspacegit.NewResourceWorkspaceGit,
@@ -677,6 +679,7 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		workspacegop.NewDataSourceWorkspaceGitOutboundPolicy,
 		workspaceogr.NewDataSourceWorkspaceOutboundGatewayRules,
 		workspacencp.NewDataSourceWorkspaceNetworkCommunicationPolicy,
+		workspaceonelakeimmutability.NewDataSourceWorkspaceOneLakeImmutabilityPolicy,
 		workspaceiar.NewDataSourceWorkspaceInboundAzureResourceRules,
 		workspacera.NewDataSourceWorkspaceRoleAssignment,
 		workspacera.NewDataSourceWorkspaceRoleAssignments,
