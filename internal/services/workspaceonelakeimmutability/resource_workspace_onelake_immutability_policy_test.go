@@ -390,7 +390,7 @@ func TestAcc_WorkspaceOneLakeImmutabilityPolicyResource_CRUD(t *testing.T) {
 				map[string]any{
 					"workspace_id":   workspaceID,
 					"scope":          scope,
-					"retention_days": retentionDays,
+					"retention_days": int(retentionDays),
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -399,9 +399,24 @@ func TestAcc_WorkspaceOneLakeImmutabilityPolicyResource_CRUD(t *testing.T) {
 				resource.TestCheckResourceAttr(testResourceItemFQN, "retention_days", strconv.FormatInt(retentionDays, 10)),
 			),
 		},
+	}))
+}
+
+func TestAcc_WorkspaceOneLakeImmutabilityPolicyResource_Import(t *testing.T) {
+	workspaceID, scope, retentionDays := oneLakeImmutabilityPolicyFromWellKnown(t)
+	config := at.CompileConfig(
+		testResourceItemHeader,
+		map[string]any{
+			"workspace_id":   workspaceID,
+			"scope":          scope,
+			"retention_days": int(retentionDays),
+		},
+	)
+
+	resource.Test(t, testhelp.NewTestAccCase(t, &testResourceItemFQN, nil, []resource.TestStep{
 		{
 			ResourceName:       testResourceItemFQN,
-			Config:             at.CompileConfig(testResourceItemHeader, map[string]any{"workspace_id": workspaceID, "scope": scope, "retention_days": retentionDays}),
+			Config:             config,
 			ImportState:        true,
 			ImportStateId:      workspaceID + "/" + scope,
 			ImportStatePersist: true,

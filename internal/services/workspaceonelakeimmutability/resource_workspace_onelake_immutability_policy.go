@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -29,9 +30,10 @@ var (
 )
 
 type resourceWorkspaceOneLakeImmutabilityPolicy struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.OneLakeSettingsClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData  *pconfig.ProviderData
+	client       *fabcore.OneLakeSettingsClient
+	fabricClient *fabric.Client
+	TypeInfo     tftypeinfo.TFTypeInfo
 }
 
 func NewResourceWorkspaceOneLakeImmutabilityPolicy() resource.Resource {
@@ -64,6 +66,7 @@ func (r *resourceWorkspaceOneLakeImmutabilityPolicy) Configure(_ context.Context
 	}
 
 	r.pConfigData = pConfigData
+	r.fabricClient = pConfigData.FabricClient
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(r.TypeInfo.Name, r.TypeInfo.IsPreview, r.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
@@ -156,7 +159,7 @@ func (r *resourceWorkspaceOneLakeImmutabilityPolicy) Read(ctx context.Context, r
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	policy, found, diags := getImmutabilityPolicy(ctx, r.client, state.WorkspaceID.ValueString(), state.Scope.ValueString())
+	policy, found, diags := getImmutabilityPolicy(ctx, r.fabricClient, state.WorkspaceID.ValueString(), state.Scope.ValueString())
 	if utils.IsErrNotFound(state.WorkspaceID.ValueString(), &diags, fabcore.ErrCommon.EntityNotFound) {
 		resp.State.RemoveResource(ctx)
 		resp.Diagnostics.Append(diags...)
@@ -282,7 +285,7 @@ func (r *resourceWorkspaceOneLakeImmutabilityPolicy) modify(ctx context.Context,
 		return diags
 	}
 
-	currentPolicy, found, diags := getImmutabilityPolicy(ctx, r.client, plan.WorkspaceID.ValueString(), plan.Scope.ValueString())
+	currentPolicy, found, diags := getImmutabilityPolicy(ctx, r.fabricClient, plan.WorkspaceID.ValueString(), plan.Scope.ValueString())
 	if diags.HasError() {
 		return diags
 	}
@@ -303,7 +306,7 @@ func (r *resourceWorkspaceOneLakeImmutabilityPolicy) modify(ctx context.Context,
 		return diags
 	}
 
-	updatedPolicy, found, diags := getImmutabilityPolicy(ctx, r.client, plan.WorkspaceID.ValueString(), plan.Scope.ValueString())
+	updatedPolicy, found, diags := getImmutabilityPolicy(ctx, r.fabricClient, plan.WorkspaceID.ValueString(), plan.Scope.ValueString())
 	if diags.HasError() {
 		return diags
 	}

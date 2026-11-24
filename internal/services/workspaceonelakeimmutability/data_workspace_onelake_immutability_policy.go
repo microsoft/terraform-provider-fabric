@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/microsoft/fabric-sdk-go/fabric"
 	fabcore "github.com/microsoft/fabric-sdk-go/fabric/core"
 
 	"github.com/microsoft/terraform-provider-fabric/internal/common"
@@ -20,9 +21,10 @@ import (
 var _ datasource.DataSourceWithConfigure = (*dataSourceWorkspaceOneLakeImmutabilityPolicy)(nil)
 
 type dataSourceWorkspaceOneLakeImmutabilityPolicy struct {
-	pConfigData *pconfig.ProviderData
-	client      *fabcore.OneLakeSettingsClient
-	TypeInfo    tftypeinfo.TFTypeInfo
+	pConfigData  *pconfig.ProviderData
+	client       *fabcore.OneLakeSettingsClient
+	fabricClient *fabric.Client
+	TypeInfo     tftypeinfo.TFTypeInfo
 }
 
 func NewDataSourceWorkspaceOneLakeImmutabilityPolicy() datasource.DataSource {
@@ -55,6 +57,7 @@ func (d *dataSourceWorkspaceOneLakeImmutabilityPolicy) Configure(_ context.Conte
 	}
 
 	d.pConfigData = pConfigData
+	d.fabricClient = pConfigData.FabricClient
 
 	if resp.Diagnostics.Append(fabricitem.IsPreviewMode(d.TypeInfo.Name, d.TypeInfo.IsPreview, d.pConfigData.Preview)...); resp.Diagnostics.HasError() {
 		return
@@ -82,7 +85,7 @@ func (d *dataSourceWorkspaceOneLakeImmutabilityPolicy) Read(ctx context.Context,
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	policy, found, diags := getImmutabilityPolicy(ctx, d.client, data.WorkspaceID.ValueString(), data.Scope.ValueString())
+	policy, found, diags := getImmutabilityPolicy(ctx, d.fabricClient, data.WorkspaceID.ValueString(), data.Scope.ValueString())
 	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
