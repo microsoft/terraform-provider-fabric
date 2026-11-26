@@ -1,0 +1,4 @@
+kind: fixed
+body: "Treat CapacityNotActive responses as errors rather than resource not-found when Fabric returns HTTP 404."
+custom:
+  Issue: 1112
