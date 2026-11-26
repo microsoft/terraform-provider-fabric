@@ -55,6 +55,8 @@ func (o *operationsSparkJobDefinition) CreateWithParentID(parentID string, data 
 	entity := NewRandomSparkJobDefinitionWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -176,12 +178,13 @@ func configureSparkJobDefinition(server *fakeServer) fabsparkjobdefinition.Spark
 
 func NewRandomSparkJobDefinition() fabsparkjobdefinition.SparkJobDefinition {
 	return fabsparkjobdefinition.SparkJobDefinition{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
+		SensitivityLabel: &fabsparkjobdefinition.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabsparkjobdefinition.ItemTypeSparkJobDefinition),
 		Properties: &fabsparkjobdefinition.Properties{
 			OneLakeRootPath: new(testhelp.RandomURI()),
 		},

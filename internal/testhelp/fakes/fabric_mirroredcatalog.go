@@ -53,6 +53,8 @@ func (o *operationsMirroredCatalog) CreateWithParentID(parentID string, data fab
 	entity := NewRandomMirroredCatalogWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -177,12 +179,13 @@ func configureMirroredCatalog(server *fakeServer) fabmirroredcatalog.MirroredCat
 // NewRandomMirroredCatalog returns a random Mirrored Catalog entity.
 func NewRandomMirroredCatalog() fabmirroredcatalog.MirroredCatalog {
 	return fabmirroredcatalog.MirroredCatalog{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabmirroredcatalog.ItemTypeMirroredCatalog),
+		SensitivityLabel: &fabmirroredcatalog.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabmirroredcatalog.ItemTypeMirroredCatalog),
 		Properties: &fabmirroredcatalog.Properties{
 			ConnectionID:      new(testhelp.RandomUUID()),
 			OneLakeTablesPath: new(testhelp.RandomURI()),

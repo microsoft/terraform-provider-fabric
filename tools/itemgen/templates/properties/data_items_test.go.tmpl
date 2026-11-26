@@ -80,6 +80,9 @@ func TestUnit_{{.TypesInfo}}DataSource(t *testing.T) {
 							"display_name": knownvalue.StringExact(*entity.DisplayName),
 							"description":  knownvalue.StringExact(*entity.Description),
 							"folder_id":    knownvalue.StringExact(*entity.FolderID),
+							"sensitivity_label": knownvalue.ObjectExact(map[string]knownvalue.Check{
+								"id": knownvalue.StringExact(*entity.SensitivityLabel.ID),
+							}),
 						}),
 					}),
 				),

@@ -54,5 +54,14 @@ Read-Only:
 - `display_name` (String) The ML Model display name.
 - `folder_id` (String) The ML Model Folder ID.
 - `id` (String) The ML Model ID.
+- `sensitivity_label` (Attributes) The ML Model sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the ML Model.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

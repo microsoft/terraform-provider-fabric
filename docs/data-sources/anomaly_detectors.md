@@ -58,5 +58,14 @@ Read-Only:
 - `display_name` (String) The Anomaly Detector display name.
 - `folder_id` (String) The Anomaly Detector Folder ID.
 - `id` (String) The Anomaly Detector ID.
+- `sensitivity_label` (Attributes) The Anomaly Detector sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Anomaly Detector.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

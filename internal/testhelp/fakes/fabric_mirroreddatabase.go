@@ -57,6 +57,8 @@ func (o *operationsMirroredDatabase) CreateWithParentID(parentID string, data fa
 	entity := NewRandomMirroredDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -191,12 +193,13 @@ func configureMirroredDatabase(server *fakeServer) fabmirroreddatabase.MirroredD
 // NewRandomMirroredDatabase returns a random Mirrored Database entity.
 func NewRandomMirroredDatabase() fabmirroreddatabase.MirroredDatabase {
 	return fabmirroreddatabase.MirroredDatabase{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
+		SensitivityLabel: &fabmirroreddatabase.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabmirroreddatabase.ItemTypeMirroredDatabase),
 		Properties: &fabmirroreddatabase.Properties{
 			DefaultSchema:     new(testhelp.RandomName()),
 			OneLakeTablesPath: new(testhelp.RandomURI()),

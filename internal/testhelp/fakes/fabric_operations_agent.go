@@ -52,6 +52,8 @@ func (o *operationsOperationsAgent) CreateWithParentID(parentID string, data fab
 	entity := NewRandomOperationsAgentWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -171,12 +173,13 @@ func configureOperationsAgent(server *fakeServer) faboperationsagent.OperationsA
 
 func NewRandomOperationsAgent() faboperationsagent.OperationsAgent {
 	return faboperationsagent.OperationsAgent{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(faboperationsagent.ItemTypeOperationsAgent),
+		SensitivityLabel: &faboperationsagent.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(faboperationsagent.ItemTypeOperationsAgent),
 		Properties: &faboperationsagent.Properties{
 			State: new(faboperationsagent.AgentStateActive),
 		},

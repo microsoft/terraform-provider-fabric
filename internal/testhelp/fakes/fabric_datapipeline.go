@@ -21,6 +21,8 @@ func (o *operationsDataPipeline) CreateWithParentID(parentID string, data fabdat
 	entity := NewRandomDataPipelineWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -122,12 +124,13 @@ func configureDataPipeline(server *fakeServer) fabdatapipeline.DataPipeline {
 
 func NewRandomDataPipeline() fabdatapipeline.DataPipeline {
 	return fabdatapipeline.DataPipeline{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabdatapipeline.ItemTypeDataPipeline),
+		SensitivityLabel: &fabdatapipeline.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabdatapipeline.ItemTypeDataPipeline),
 	}
 }
 

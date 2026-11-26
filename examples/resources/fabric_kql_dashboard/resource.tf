@@ -78,3 +78,15 @@ resource "fabric_kql_dashboard" "example_parameters" {
     }
   }
 }
+
+# Example 6 - Item with a sensitivity label
+# The ID is required when sensitivity_label is configured. On creation, the label
+# must be applied or creation fails. Changing the configured ID recreates the item.
+# Omitting sensitivity_label preserves the label discovered by read or import.
+resource "fabric_kql_dashboard" "example_labelled" {
+  display_name = "example-labelled"
+  workspace_id = "00000000-0000-0000-0000-000000000000"
+  sensitivity_label = {
+    id = "11111111-1111-1111-1111-111111111111"
+  }
+}

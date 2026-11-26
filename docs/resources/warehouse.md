@@ -49,6 +49,7 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 
 - `description` (String) The Warehouse description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label` (Attributes) The Warehouse sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -64,6 +65,14 @@ Any changes to this configuration will result in recreation of the Warehouse. (s
 Required:
 
 - `collation_type` (String) The collation type of the warehouse. Accepted values: `Latin1_General_100_BIN2_UTF8`, `Latin1_General_100_CI_AS_KS_WS_SC_UTF8`.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

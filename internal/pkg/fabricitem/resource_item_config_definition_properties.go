@@ -200,6 +200,10 @@ func (r *ResourceFabricItemConfigDefinitionProperties[Ttfprop, Titemprop, Ttfcon
 	reqCreate.setFolderID(plan.FolderID)
 	reqCreate.setType(r.FabricItemType)
 
+	if resp.Diagnostics.Append(reqCreate.setSensitivityLabel(ctx, plan.SensitivityLabel)...); resp.Diagnostics.HasError() {
+		return
+	}
+
 	if resp.Diagnostics.Append(reqCreate.setDefinition(ctx, plan.Definition, plan.Format, plan.DefinitionUpdateEnabled, r.DefinitionFormats)...); resp.Diagnostics.HasError() {
 		return
 	}

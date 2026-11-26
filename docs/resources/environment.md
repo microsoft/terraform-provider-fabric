@@ -34,6 +34,7 @@ resource "fabric_environment" "example" {
 
 - `description` (String) The Environment description.
 - `folder_id` (String) The Folder ID.
+- `sensitivity_label` (Attributes) The Environment sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) The set of tag IDs.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -41,6 +42,14 @@ resource "fabric_environment" "example" {
 
 - `id` (String) The Environment ID.
 - `properties` (Attributes) The Environment properties. (see [below for nested schema](#nestedatt--properties))
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Required:
+
+- `id` (String) The sensitivity label ID.
 
 <a id="nestedatt--timeouts"></a>
 

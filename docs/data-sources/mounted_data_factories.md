@@ -54,5 +54,14 @@ Read-Only:
 - `display_name` (String) The Mounted Data Factory display name.
 - `folder_id` (String) The Mounted Data Factory Folder ID.
 - `id` (String) The Mounted Data Factory ID.
+- `sensitivity_label` (Attributes) The Mounted Data Factory sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Mounted Data Factory.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

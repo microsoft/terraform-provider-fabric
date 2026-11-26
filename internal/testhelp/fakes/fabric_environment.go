@@ -36,6 +36,8 @@ func (o *operationsEnvironment) CreateWithParentID(parentID string, data fabenvi
 	entity := NewRandomEnvironmentWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -137,12 +139,13 @@ func configureEnvironment(server *fakeServer) fabenvironment.Environment {
 
 func NewRandomEnvironment() fabenvironment.Environment {
 	return fabenvironment.Environment{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabenvironment.ItemTypeEnvironment),
-		FolderID:    new(testhelp.RandomUUID()),
+		SensitivityLabel: &fabenvironment.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabenvironment.ItemTypeEnvironment),
+		FolderID:         new(testhelp.RandomUUID()),
 		Properties: &fabenvironment.Properties{
 			PublishDetails: &fabenvironment.PublishDetails{
 				State:         to.Ptr(fabenvironment.PublishStateSuccess),

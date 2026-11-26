@@ -58,5 +58,14 @@ Read-Only:
 - `display_name` (String) The User Data Function display name.
 - `folder_id` (String) The User Data Function Folder ID.
 - `id` (String) The User Data Function ID.
+- `sensitivity_label` (Attributes) The User Data Function sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the User Data Function.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

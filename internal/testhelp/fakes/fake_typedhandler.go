@@ -25,7 +25,6 @@ func (c *defaultConverter[TEntity]) ConvertItemToEntity(item fabcore.Item) TEnti
 	setReflectedStringPropertyValue(&entity, "DisplayName", *item.DisplayName)
 	setReflectedStringPropertyValue(&entity, "Description", *item.Description)
 	setReflectedStringPropertyValue(&entity, "FolderID", *item.FolderID)
-	setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
 
 	return entity
 }
@@ -159,7 +158,10 @@ func (h *typedHandler[TEntity]) Elements() []TEntity {
 		} else if h.entityTypeCanBeConvertedToFabricItem() {
 			// if it is not the right type, but it's a fabric item, convert it to the right type
 			item := asFabricItem(element)
-			ret = append(ret, h.converter.ConvertItemToEntity(item))
+			entity := h.converter.ConvertItemToEntity(item)
+			setReflectedSensitivityLabelPropertyValue(&entity, "SensitivityLabel", item.SensitivityLabel)
+			setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
+			ret = append(ret, entity)
 		}
 	}
 
@@ -229,7 +231,11 @@ func (h *typedHandler[TEntity]) Get(id string) TEntity {
 		for _, element := range h.elements {
 			item := asFabricItem(element)
 			if strings.HasSuffix(id, *item.ID) {
-				return h.converter.ConvertItemToEntity(item)
+				entity := h.converter.ConvertItemToEntity(item)
+				setReflectedSensitivityLabelPropertyValue(&entity, "SensitivityLabel", item.SensitivityLabel)
+				setReflectedTagsPropertyValue(&entity, "Tags", item.Tags)
+
+				return entity
 			}
 		}
 	}
@@ -279,16 +285,59 @@ func asFabricItem(element any) fabcore.Item {
 	itemType := fabcore.ItemType(*getReflectedStringPropertyValue(element, "Type"))
 
 	item := fabcore.Item{
-		Type:        &itemType,
-		Description: getReflectedStringPropertyValue(element, "Description"),
-		DisplayName: getReflectedStringPropertyValue(element, "DisplayName"),
-		ID:          getReflectedStringPropertyValue(element, "ID"),
-		WorkspaceID: getReflectedStringPropertyValue(element, "WorkspaceID"),
-		FolderID:    getReflectedStringPropertyValue(element, "FolderID"),
-		Tags:        getReflectedTagsPropertyValue(element, "Tags"),
+		Type:             &itemType,
+		Description:      getReflectedStringPropertyValue(element, "Description"),
+		DisplayName:      getReflectedStringPropertyValue(element, "DisplayName"),
+		ID:               getReflectedStringPropertyValue(element, "ID"),
+		WorkspaceID:      getReflectedStringPropertyValue(element, "WorkspaceID"),
+		FolderID:         getReflectedStringPropertyValue(element, "FolderID"),
+		SensitivityLabel: getReflectedSensitivityLabelPropertyValue(element, "SensitivityLabel"),
+		Tags:             getReflectedTagsPropertyValue(element, "Tags"),
 	}
 
 	return item
+}
+
+func getReflectedSensitivityLabelPropertyValue(element any, propertyName string) *fabcore.SensitivityLabel {
+	reflectedValue := reflect.ValueOf(element)
+	propertyValue := reflectedValue.FieldByName(propertyName)
+
+	if propertyValue.Kind() == reflect.Pointer {
+		if propertyValue.IsNil() {
+			return nil
+		}
+
+		propertyValue = propertyValue.Elem()
+	}
+
+	if !propertyValue.IsValid() || !propertyValue.CanInterface() {
+		return nil
+	}
+
+	targetType := reflect.TypeFor[fabcore.SensitivityLabel]()
+	if propertyValue.Type().ConvertibleTo(targetType) {
+		if sl, ok := reflect.TypeAssert[fabcore.SensitivityLabel](propertyValue.Convert(targetType)); ok {
+			return &sl
+		}
+	}
+
+	return nil
+}
+
+func setReflectedSensitivityLabelPropertyValue[TEntity any](entity *TEntity, propertyName string, label *fabcore.SensitivityLabel) {
+	propertyValue := reflect.ValueOf(entity).Elem().FieldByName(propertyName)
+	propertyValue.Set(reflect.ValueOf(label).Convert(propertyValue.Type()))
+}
+
+func setCreatedItemSensitivityLabel[TEntity, TRequest any](entity *TEntity, request TRequest) {
+	// Some typed SDK create requests omit this field even though the Core API supports it.
+	settings := reflect.ValueOf(request).FieldByName("SensitivityLabelSettings")
+	if !settings.IsValid() || settings.IsNil() {
+		return
+	}
+
+	labelID := getReflectedStringPropertyValue(settings.Elem().Interface(), "LabelID")
+	setReflectedSensitivityLabelPropertyValue(entity, "SensitivityLabel", &fabcore.SensitivityLabel{ID: labelID})
 }
 
 func getReflectedTagsPropertyValue(element any, propertyName string) []fabcore.ItemTag {

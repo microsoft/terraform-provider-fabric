@@ -55,6 +55,7 @@ Read-Only:
 - `folder_id` (String) The Warehouse Folder ID.
 - `id` (String) The Warehouse ID.
 - `properties` (Attributes) The Warehouse properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Warehouse sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Warehouse.
 - `workspace_id` (String) The Workspace ID.
 
@@ -68,3 +69,11 @@ Read-Only:
 - `connection_string` (String) The SQL connection string connected to the workspace containing this warehouse.
 - `created_date` (String) The date and time the warehouse was created.
 - `last_updated_time` (String) The date and time the warehouse was last updated.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

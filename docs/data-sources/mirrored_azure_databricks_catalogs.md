@@ -58,6 +58,7 @@ Read-Only:
 - `folder_id` (String) The Mirrored Azure Databricks Catalog Folder ID.
 - `id` (String) The Mirrored Azure Databricks Catalog ID.
 - `properties` (Attributes) The Mirrored Azure Databricks Catalog properties. (see [below for nested schema](#nestedatt--values--properties))
+- `sensitivity_label` (Attributes) The Mirrored Azure Databricks Catalog sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Mirrored Azure Databricks Catalog.
 - `workspace_id` (String) The Workspace ID.
 
@@ -105,3 +106,11 @@ Read-Only:
 - `error_code` (String) The error code.
 - `error_details` (String) The error details.
 - `error_message` (String) The error message.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

@@ -54,5 +54,14 @@ Read-Only:
 - `display_name` (String) The Data Pipeline display name.
 - `folder_id` (String) The Data Pipeline Folder ID.
 - `id` (String) The Data Pipeline ID.
+- `sensitivity_label` (Attributes) The Data Pipeline sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Data Pipeline.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

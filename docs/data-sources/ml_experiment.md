@@ -52,6 +52,7 @@ data "fabric_ml_experiment" "example_by_name" {
 
 - `description` (String) The ML Experiment description.
 - `folder_id` (String) The ML Experiment Folder ID.
+- `sensitivity_label` (Attributes) The ML Experiment sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -61,3 +62,11 @@ data "fabric_ml_experiment" "example_by_name" {
 Optional:
 
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

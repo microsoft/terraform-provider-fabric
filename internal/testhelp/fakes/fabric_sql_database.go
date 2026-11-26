@@ -35,6 +35,8 @@ func (o *operationsSQLDatabase) CreateWithParentID(parentID string, data fabsqld
 	entity := NewRandomSQLDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -135,12 +137,13 @@ func configureSQLDatabase(server *fakeServer) fabsqldatabase.SQLDatabase {
 
 func NewRandomSQLDatabase() fabsqldatabase.SQLDatabase {
 	return fabsqldatabase.SQLDatabase{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
+		SensitivityLabel: &fabsqldatabase.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabsqldatabase.ItemTypeSQLDatabase),
 		Properties: &fabsqldatabase.Properties{
 			ConnectionString: new(testhelp.RandomName()),
 			DatabaseName:     new(testhelp.RandomName()),

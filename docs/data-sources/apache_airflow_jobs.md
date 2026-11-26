@@ -54,5 +54,14 @@ Read-Only:
 - `display_name` (String) The Apache Airflow Job display name.
 - `folder_id` (String) The Apache Airflow Job Folder ID.
 - `id` (String) The Apache Airflow Job ID.
+- `sensitivity_label` (Attributes) The Apache Airflow Job sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Apache Airflow Job.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

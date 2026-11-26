@@ -52,6 +52,8 @@ func (o *operationsKQLDatabase) CreateWithParentID(parentID string, data fabkqld
 	entity := NewRandomKQLDatabaseWithWorkspace(parentID)
 	entity.DisplayName = data.DisplayName
 	entity.Description = data.Description
+	setCreatedItemSensitivityLabel(&entity, data)
+
 	entity.FolderID = data.FolderID
 
 	return entity
@@ -175,12 +177,13 @@ func configureKQLDatabase(server *fakeServer) fabkqldatabase.KQLDatabase {
 
 func NewRandomKQLDatabase() fabkqldatabase.KQLDatabase {
 	return fabkqldatabase.KQLDatabase{
-		ID:          new(testhelp.RandomUUID()),
-		DisplayName: new(testhelp.RandomName()),
-		Description: new(testhelp.RandomName()),
-		WorkspaceID: new(testhelp.RandomUUID()),
-		FolderID:    new(testhelp.RandomUUID()),
-		Type:        to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
+		SensitivityLabel: &fabkqldatabase.SensitivityLabel{ID: new(testhelp.RandomUUID())},
+		ID:               new(testhelp.RandomUUID()),
+		DisplayName:      new(testhelp.RandomName()),
+		Description:      new(testhelp.RandomName()),
+		WorkspaceID:      new(testhelp.RandomUUID()),
+		FolderID:         new(testhelp.RandomUUID()),
+		Type:             to.Ptr(fabkqldatabase.ItemTypeKQLDatabase),
 		Properties: &fabkqldatabase.Properties{
 			DatabaseType:           to.Ptr(fabkqldatabase.TypeReadWrite),
 			ParentEventhouseItemID: new(testhelp.RandomUUID()),

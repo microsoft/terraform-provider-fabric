@@ -79,6 +79,7 @@ output "example_definition_content_object" {
 - `description` (String) The Variable Library description.
 - `folder_id` (String) The Variable Library Folder ID.
 - `properties` (Attributes) The Variable Library properties. (see [below for nested schema](#nestedatt--properties))
+- `sensitivity_label` (Attributes) The Variable Library sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -105,3 +106,11 @@ Use [`provider::fabric::content_decode`](../functions/content_decode.md) functio
 Read-Only:
 
 - `active_value_set_name` (String) The VariableLibrary current active value set.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

@@ -54,5 +54,14 @@ Read-Only:
 - `display_name` (String) The Report display name.
 - `folder_id` (String) The Report Folder ID.
 - `id` (String) The Report ID.
+- `sensitivity_label` (Attributes) The Report sensitivity label. (see [below for nested schema](#nestedatt--values--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs assigned to the Report.
 - `workspace_id` (String) The Workspace ID.
+
+<a id="nestedatt--values--sensitivity_label"></a>
+
+### Nested Schema for `values.sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.

@@ -82,6 +82,7 @@ output "example_definition_content_object" {
 - `definition` (Attributes Map) Definition parts. Possible path keys: **Default** format: `definition.json`, `function_app.py`, `privateLibraries/*.whl`, `resources/functions.json` (see [below for nested schema](#nestedatt--definition))
 - `description` (String) The User Data Function description.
 - `folder_id` (String) The User Data Function Folder ID.
+- `sensitivity_label` (Attributes) The User Data Function sensitivity label. (see [below for nested schema](#nestedatt--sensitivity_label))
 - `tags` (Set of String) A set of tag IDs applied to the item.
 
 <a id="nestedatt--timeouts"></a>
@@ -100,3 +101,11 @@ Read-Only:
 
 - `content` (String) Gzip base64 content of definition part.
 Use [`provider::fabric::content_decode`](../functions/content_decode.md) function to decode content.
+
+<a id="nestedatt--sensitivity_label"></a>
+
+### Nested Schema for `sensitivity_label`
+
+Read-Only:
+
+- `id` (String) The sensitivity label ID.
