@@ -3,7 +3,7 @@
 name: 🖇️ Assign author to PR
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   assign-author:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0

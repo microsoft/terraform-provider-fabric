@@ -5,7 +5,7 @@
 name: 🔍 Semantic PR
 
 on:
-  pull_request_target:
+  pull_request:
     branches: ["main"]
     types:
       - opened
@@ -15,8 +15,7 @@ on:
       - ready_for_review
 
 permissions:
-  pull-requests: write
-  statuses: write
+  pull-requests: read
 
 jobs:
   main:
@@ -25,31 +24,5 @@ jobs:
     steps:
       - name: 🔍 Run Semantic PR validation
         uses: amannn/action-semantic-pull-request@c5e23b7e584519ee15caa684cf60d056aa9f035f # v6.1.3
-        id: check_pr_title
-        with:
-          wip: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-      - name: 💬 Comment on PR
-        if: always() && (steps.check_pr_title.outputs.error_message != null)
-        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
-        with:
-          header: pr-title-check-error
-          message: |
-            Hey there and thank you for opening this pull request! 👋🏼
-
-            We require pull request titles to follow the [Conventional Commits](https://www.conventionalcommits.org/) specification and it looks like your proposed title needs to be adjusted.
-
-            Details:
-
-            ```
-            ${{ steps.check_pr_title.outputs.error_message }}
-            ```
-
-      - name: 🗑 Delete PR comment
-        if: ${{ steps.check_pr_title.outputs.error_message == null }}
-        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
-        with:
-          header: pr-title-check-error
-          delete: true
