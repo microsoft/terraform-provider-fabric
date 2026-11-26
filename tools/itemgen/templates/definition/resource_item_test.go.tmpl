@@ -6,6 +6,8 @@ package {{.Package}}_test
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
@@ -78,32 +80,6 @@ func TestUnit_{{.TypeInfo}}Resource_Attributes(t *testing.T) {
 			),
 			ExpectError: regexp.MustCompile(`The argument "display_name" is required, but no definition was found.`),
 		},
-		// error - definition - invalid JSON
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"definition":   "invalid json",
-				},
-			),
-			ExpectError: regexp.MustCompile(`The argument "definition" must be a valid JSON string`),
-		},
-		// error - definition - invalid YAML
-		{
-			ResourceName: testResourceItemFQN,
-			Config: at.CompileConfig(
-				testResourceItemHeader,
-				map[string]any{
-					"workspace_id": "00000000-0000-0000-0000-000000000000",
-					"display_name": "test",
-					"definition":   "invalid yaml:",
-				},
-			),
-			ExpectError: regexp.MustCompile(`The argument "definition" must be a valid YAML string`),
-		},
 	}))
 }
 
@@ -175,6 +151,11 @@ func TestUnit_{{.TypeInfo}}Resource_ImportState(t *testing.T) {
 }
 
 func TestUnit_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
+	definitionSource := filepath.Join(t.TempDir(), "definition.json")
+	if err := os.WriteFile(definitionSource, []byte("{}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
 	workspaceID := testhelp.RandomUUID()
 	entityExist := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
 	entityBefore := fakes.NewRandomItemWithWorkspace(fabricItemType, workspaceID)
@@ -207,7 +188,12 @@ func TestUnit_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
 					"workspace_id": *entityBefore.WorkspaceID,
 					"display_name": *entityBefore.DisplayName,
 					"folder_id":    *entityBefore.FolderID,
-					"definition":   "{}",
+					"format":       "Default",
+					"definition": map[string]any{
+						`"{{.DefinitionPath}}"`: map[string]any{
+							"source": definitionSource,
+						},
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -226,7 +212,12 @@ func TestUnit_{{.TypeInfo}}Resource_CRUD(t *testing.T) {
 					"display_name": *entityAfter.DisplayName,
 					"description":  *entityAfter.Description,
 					"folder_id":    *entityBefore.FolderID,
-					"definition":   "{}",
+					"format":       "Default",
+					"definition": map[string]any{
+						`"{{.DefinitionPath}}"`: map[string]any{
+							"source": definitionSource,
+						},
+					},
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(

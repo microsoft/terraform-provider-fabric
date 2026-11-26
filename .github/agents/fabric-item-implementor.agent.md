@@ -145,7 +145,7 @@ For archetypes with a definition, the scaffolded resource examples 2–5 referen
 
 ### Step 9 — Quality Verification
 
-After all lint, docs, and tests pass, verify:
+After local lint, docs, and unit tests pass, verify:
 
 - [ ] Coding standards followed (copyright headers, `MarkdownDescription`, `fab<pkg>` aliases, no `en-us` in URLs)
 - [ ] `tfsdk:"snake_case"` tags correct; `set()` handles all SDK DTO fields
@@ -284,10 +284,12 @@ This agent uses the GitHub MCP server to:
 
 ## Output
 
+For both summaries, follow the shared [Implementation Completion and Validation](../copilot-instructions.md#implementation-completion-and-validation) rules and include the actual validation report.
+
 ### For New Resources
 
 ```
-✅ Implementation complete for fabric_<type> (Fabric Item — <archetype>).
+Implementation summary for fabric_<type> (Fabric Item — <archetype>).
 
 Files created:
 - internal/services/<package>/ — all source files (base, resource, data sources, models, schema, tests)
@@ -297,14 +299,12 @@ Files created:
 Files modified:
 - internal/provider/provider.go — registered resource and data sources
 
-Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name> ./internal/services/<package>/
 ```
 
 ### For Enhancements
 
 ```
-✅ Enhancement complete for fabric_<type>.
+Enhancement summary for fabric_<type>.
 
 SDK changes applied:
 - <list of new/changed fields>
@@ -316,6 +316,4 @@ Files modified:
 - internal/testhelp/fakes/fabric_<type>.go — populated new Properties fields
 - internal/services/<package>/*_test.go — added test assertions
 
-Verification: ✔ docs ✔ lint ✔ unit tests
-Next: → task testacc -- <Name> ./internal/services/<package>/
 ```

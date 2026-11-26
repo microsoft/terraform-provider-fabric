@@ -1,0 +1,5 @@
+kind: fixed
+body: Fixed itemgen definition-test scaffolding and clarified Copilot implementation evidence, changelog, and validation reporting.
+time: 2026-11-12T13:01:14.2768153+02:00
+custom:
+    Issue: "1162"

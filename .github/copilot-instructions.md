@@ -82,3 +82,18 @@ New resources and data sources must be registered in `internal/provider/provider
 - **Black-box tests:** Test packages use `_test` suffix (e.g. `package lakehouse_test`)
 - **Parallelism:** Use `resource.ParallelTest` unless tests have ordered dependencies
 - **Coverage target:** >80% for new contributions
+
+## Evidence and Uncertainty
+
+Issue requirements, pinned SDK contracts, REST documentation, existing provider behavior, and fixtures are distinct evidence sources. If they conflict, or correctness depends on undocumented Fabric service behavior, do not guess. Surface the discrepancy and what remains unverified; use targeted regression or acceptance validation where practical. If the necessary evidence or product decision is unavailable, report the limitation or blocker rather than treating an assumption as verified.
+
+## Implementation Completion and Validation
+
+- Unless explicitly exempted by the repository's changelog policy, add or update a `.changes/unreleased/*.yaml` fragment with a real associated issue/PR number in `custom.Issue`. Do not invent a number; report a missing reference as a blocker.
+- Validate the fragment set with `changie batch patch --dry-run --prerelease dev`, with `CHANGIE_GITHUB_REPOSITORY=microsoft/terraform-provider-fabric` set. Report the result, or explain why changelog work is not applicable.
+- Keep implementation status separate from validation status. Report exact commands, scope, and actual results, distinguishing:
+  - **Local/unit validation:** passed, failed, or not run.
+  - **Acceptance tests:** passed, failed, skipped (which tests and why), or not run (why). Report skips even when the overall command or CI job passed.
+  - **Live Fabric behavior:** the specific behavior actually verified, with authentication mode/environment where relevant, or explicitly not verified.
+  - **Remaining unverified behavior:** the evidence or validation still needed.
+- Docs, lint, unit tests, and green CI alone do not prove live Fabric correctness. Never call an implementation validated merely on that basis when relevant acceptance tests were skipped or not run; limit claims to the behavior actually exercised.
