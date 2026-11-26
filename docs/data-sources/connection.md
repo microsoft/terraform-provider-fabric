@@ -32,13 +32,13 @@ data "fabric_connection" "example" {
 
 - `allow_connection_usage_in_gateway` (Boolean) Allow this connection to be utilized with either on-premises data gateways or VNet data gateways.
 - `allow_usage_in_user_controlled_code` (Boolean) Allow this connection to be used with items that allow user-controlled code such as Notebook.
-- `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**. If the value of [`connectivity_type`](#connectivity_type) attribute is `ShareableCloud` this attribute is **NULL**.
+- `gateway_id` (String) The Connection gateway object ID. If the value of [`connectivity_type`](#connectivity_type) attribute is `VirtualNetworkGateway` this attribute is **REQUIRED**.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `connection_details` (Attributes) The Connection connection details. (see [below for nested schema](#nestedatt--connection_details))
-- `connectivity_type` (String) The Connection connectivity type.
+- `connectivity_type` (String) The Connection connectivity type. Includes cloud, on-premises gateway, personal gateway, virtual network gateway, and streaming virtual network gateway connections.
 - `credential_details` (Attributes) The Connection credential details. (see [below for nested schema](#nestedatt--credential_details))
 - `display_name` (String) The Connection display name.
 - `privacy_level` (String) The Connection privacy level. Value must be one of : `None`, `Organizational`, `Private`, `Public`.
@@ -67,6 +67,6 @@ Read-Only:
 Read-Only:
 
 - `connection_encryption` (String) The connection encryption type. Value must be one of : `Any`, `Encrypted`, `NotEncrypted`.
-- `credential_type` (String) The credential type. Value must be one of : `Anonymous`, `Basic`, `Key`, `KeyPair`, `ServicePrincipal`, `SharedAccessSignature`, `Windows`, `WindowsWithoutImpersonation`, `WorkspaceIdentity`.
+- `credential_type` (String) The credential type.
 - `single_sign_on_type` (String) The single sign-on type. Value must be one of : `Kerberos`, `KerberosDirectQueryAndRefresh`, `MicrosoftEntraID`, `None`, `SecurityAssertionMarkupLanguage`.
 - `skip_test_connection` (Boolean) Whether the connection should skip the test connection during creation and update. `True` - Skip the test connection, `False` - Do not skip the test connection.

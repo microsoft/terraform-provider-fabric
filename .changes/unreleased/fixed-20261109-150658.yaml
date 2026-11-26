@@ -1,0 +1,5 @@
+kind: fixed
+body: Support all SDK connection classifications in fabric_connection and fabric_connections data sources, including on-premises gateways and personal cloud connections.
+time: 2026-11-09T15:06:58.6096614+02:00
+custom:
+    Issue: "1128"

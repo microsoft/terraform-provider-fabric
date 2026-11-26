@@ -178,6 +178,36 @@ func configureShareableCloudConnection(server *fakeServer) fabcore.ShareableClou
 	return fabcore.ShareableCloudConnection{}
 }
 
+func configurePersonalCloudConnection(server *fakeServer) fabcore.PersonalCloudConnection {
+	configureConnection(server)
+
+	return fabcore.PersonalCloudConnection{}
+}
+
+func configureOnPremisesGatewayConnection(server *fakeServer) fabcore.OnPremisesGatewayConnection {
+	configureConnection(server)
+
+	return fabcore.OnPremisesGatewayConnection{}
+}
+
+func configureOnPremisesGatewayPersonalConnection(server *fakeServer) fabcore.OnPremisesGatewayPersonalConnection {
+	configureConnection(server)
+
+	return fabcore.OnPremisesGatewayPersonalConnection{}
+}
+
+func configureStreamingVirtualNetworkGatewayConnection(server *fakeServer) fabcore.StreamingVirtualNetworkGatewayConnection {
+	configureConnection(server)
+
+	return fabcore.StreamingVirtualNetworkGatewayConnection{}
+}
+
+func configureBaseConnection(server *fakeServer) fabcore.Connection {
+	configureConnection(server)
+
+	return fabcore.Connection{}
+}
+
 func configureConnection(server *fakeServer) {
 	type concreteEntityOperations interface {
 		simpleIDOperations[

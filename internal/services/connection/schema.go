@@ -100,7 +100,8 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
-					Computed: true,
+					Computed:            true,
+					MarkdownDescription: "Includes cloud, on-premises gateway, personal gateway, virtual network gateway, and streaming virtual network gateway connections.",
 				},
 			},
 			"privacy_level": superschema.StringAttribute{
@@ -128,10 +129,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 							[]attr.Value{
 								types.StringValue(string(fabcore.ConnectivityTypeVirtualNetworkGateway)),
 							}),
-						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
-							[]attr.Value{
-								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
-							}),
 					},
 				},
 				Resource: &schemaR.StringAttribute{
@@ -139,6 +136,12 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.RequiresReplace(),
 						stringplanmodifier.UseStateForUnknown(),
+					},
+					Validators: []validator.String{
+						superstringvalidator.NullIfAttributeIsOneOf(path.MatchRoot("connectivity_type"),
+							[]attr.Value{
+								types.StringValue(string(fabcore.ConnectivityTypeShareableCloud)),
+							}),
 					},
 				},
 				DataSource: &schemaD.StringAttribute{
@@ -348,6 +351,9 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 					"credential_type": superschema.StringAttribute{
 						Common: &schemaR.StringAttribute{
 							MarkdownDescription: "The credential type.",
+						},
+						Resource: &schemaR.StringAttribute{
+							Required: true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(utils.ConvertEnumsToStringSlices(
 									utils.RemoveSlicesByValues(
@@ -357,9 +363,6 @@ func itemSchema(ctx context.Context, isList bool) superschema.Schema { //revive:
 									true,
 								)...),
 							},
-						},
-						Resource: &schemaR.StringAttribute{
-							Required: true,
 						},
 						DataSource: &schemaD.StringAttribute{
 							Computed: true,
