@@ -1,73 +1,54 @@
-# Example 1 - Item without definition
+# Ontology generation 2 (new experience) only. REST API v1 is still used.
+# A create without a definition defaults to generation 2.
 resource "fabric_ontology" "example" {
-  display_name = "example"
+  display_name = "OntologyExample"
   workspace_id = "00000000-0000-0000-0000-000000000000"
 }
 
-# Example 2 - Item with definition bootstrapping only
+# Bootstrap a generation 2 ontology from its minimal TMDL definition.
+# The service synthesizes model.tmdl and namespaces/default.tmdl when omitted.
 resource "fabric_ontology" "example_definition_bootstrap" {
-  display_name              = "example"
-  description               = "example with definition bootstrapping"
+  display_name              = "OntologyBootstrap"
   workspace_id              = "00000000-0000-0000-0000-000000000000"
   definition_update_enabled = false
-  format                    = "Default"
+  format                    = "TMDL"
   definition = {
-    "definition.json" = {
-      source = "${local.path}/definition.json.tmpl"
+    ".platform" = {
+      source = "${path.module}/definition/platform.json"
+    }
+    "database.tmdl" = {
+      source = "${path.module}/definition/database.tmdl"
     }
   }
 }
 
-# Example 3 - Item with definition update when source or tokens changed
+# Manage the definition, including changes to source files and template tokens.
+# TMDL files are passed through as text; no JSON conversion is required.
 resource "fabric_ontology" "example_definition_update" {
-  display_name = "example"
-  description  = "example with definition update when source or tokens changed"
+  display_name = "OntologyManaged"
   workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "Default"
+  format       = "TMDL"
   definition = {
-    "definition.json" = {
-      source = "${local.path}/definition.json.tmpl"
+    ".platform" = {
+      source = "${path.module}/definition/platform.json"
+    }
+    "database.tmdl" = {
+      source = "${path.module}/definition/database.tmdl"
+    }
+    "model.tmdl" = {
+      source = "${path.module}/definition/model.tmdl.tmpl"
       tokens = {
-        "Key" = "Value"
+        Namespace = "operations"
       }
     }
-  }
-}
-
-# Example 4 - Item with custom tokens delimiter
-resource "fabric_ontology" "example_custom_delimiter" {
-  display_name = "example"
-  description  = "example with custom tokens delimiter"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "Default"
-  definition = {
-    "definition.json" = {
-      source           = "${local.path}/definition.json.tmpl"
-      tokens_delimiter = "{{}}"
-      tokens = {
-        "Key" = "Value"
-      }
+    "namespaces/default.tmdl" = {
+      source = "${path.module}/definition/namespaces/default.tmdl"
     }
-  }
-}
-
-# Example 5 - Item with parameters processing mode
-resource "fabric_ontology" "example_parameters" {
-  display_name = "example"
-  description  = "example with parameters processing mode"
-  workspace_id = "00000000-0000-0000-0000-000000000000"
-  format       = "Default"
-  definition = {
-    "definition.json" = {
-      source          = "${local.path}/definition.json.tmpl"
-      processing_mode = "Parameters"
-      parameters = [
-        {
-          type  = "TextReplace"
-          find  = "Key"
-          value = "Value"
-        }
-      ]
+    "namespaces/operations.tmdl" = {
+      source = "${path.module}/definition/namespaces/namespace.tmdl.tmpl"
+      tokens = {
+        Namespace = "operations"
+      }
     }
   }
 }

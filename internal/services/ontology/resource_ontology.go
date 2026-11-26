@@ -21,7 +21,7 @@ func NewResourceOntology() resource.Resource {
 		TypeInfo:              ItemTypeInfo,
 		FabricItemType:        FabricItemType,
 		NameRenameAllowed:     true,
-		DisplayNameMaxLength:  123,
+		DisplayNameMaxLength:  89,
 		DescriptionMaxLength:  256,
 		DefinitionPathDocsURL: ItemDefinitionPathDocsURL,
 		DefinitionPathKeysValidator: []validator.Map{
@@ -29,10 +29,10 @@ func NewResourceOntology() resource.Resource {
 			mapvalidator.KeysAre(
 				fwvalidators.PatternsIfAttributeIsOneOf(
 					path.MatchRoot("format"),
-					[]attr.Value{types.StringValue(fabricitem.DefinitionFormatDefault)},
-					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault),
+					[]attr.Value{types.StringValue("TMDL")},
+					fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMDL"),
 					"Definition path must match one of the following: "+utils.ConvertStringSlicesToString(
-						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, fabricitem.DefinitionFormatDefault),
+						fabricitem.GetDefinitionFormatPaths(itemDefinitionFormats, "TMDL"),
 						true,
 						false,
 					),

@@ -232,7 +232,7 @@ func TestAcc_OntologyDataSource(t *testing.T) {
 					"workspace_id":      workspaceID,
 					"id":                entityID,
 					"output_definition": true,
-					"format":            "Default",
+					"format":            "TMDL",
 				},
 			),
 			Check: resource.ComposeAggregateTestCheckFunc(
@@ -240,7 +240,9 @@ func TestAcc_OntologyDataSource(t *testing.T) {
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "id", entityID),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "display_name", entityDisplayName),
 				resource.TestCheckResourceAttr(testDataSourceItemFQN, "description", entityDescription),
-				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.definition.json.content"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.database.tmdl.content"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.model.tmdl.content"),
+				resource.TestCheckResourceAttrSet(testDataSourceItemFQN, "definition.namespaces/default.tmdl.content"),
 			),
 		},
 	}))
