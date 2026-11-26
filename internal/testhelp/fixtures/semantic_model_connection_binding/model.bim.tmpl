@@ -1,0 +1,80 @@
+{
+  "compatibilityLevel": 1561,
+  "model": {
+    "culture": "en-US",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "tables": [
+      {
+        "name": "TableTest",
+        "columns": [
+          {
+            "name": "{{ .ColumnName }}",
+            "dataType": "string",
+            "sourceColumn": "{{ .ColumnName }}",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ColumnTest2",
+            "dataType": "string",
+            "sourceColumn": "ColumnTest2",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "TableTest",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "let",
+                "  Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText(\"i45WcsvPV9JRckosUoqNBQA=\", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [{{ .ColumnName }} = _t, ColumnTest2 = _t]),",
+                "  #\"Changed column type\" = Table.TransformColumnTypes(Source, {})",
+                "in",
+                "  #\"Changed column type\""
+              ],
+              "type": "m"
+            }
+          }
+        ]
+      },
+      {
+        "name": "WebConnectionTest",
+        "columns": [
+          {
+            "name": "Name",
+            "dataType": "string",
+            "sourceColumn": "Name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Folder Path",
+            "dataType": "string",
+            "sourceColumn": "Folder Path",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "WebConnectionTest",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "let",
+                "  Source = try Web.Contents(\"https://{{ .WEB_SERVER }}/\") otherwise #binary({}),",
+                "  Output = #table({\"Name\", \"Folder Path\"}, {{Text.From(Binary.Length(Source)), \"https://{{ .WEB_SERVER }}/\"}})",
+                "in",
+                "  Output"
+              ],
+              "type": "m"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

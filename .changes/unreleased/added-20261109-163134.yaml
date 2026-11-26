@@ -1,0 +1,5 @@
+kind: added
+body: Added the Semantic Model connection binding resource with refresh, import, and unbind support.
+time: 2026-11-09T16:31:34.5051514+02:00
+custom:
+    Issue: "1001"

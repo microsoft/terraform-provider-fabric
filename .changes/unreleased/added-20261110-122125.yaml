@@ -1,0 +1,5 @@
+kind: added
+body: Added singular and plural data sources for Semantic Model connection bindings.
+time: 2026-11-10T12:21:25.2028038+02:00
+custom:
+    Issue: "1001"

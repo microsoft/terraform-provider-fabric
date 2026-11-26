@@ -1,3 +1,5 @@
+$script:wellKnownWebServer = 'example.com'
+
 function Write-Log {
   param (
     [Parameter(Mandatory = $true)]
@@ -791,20 +793,20 @@ function Set-FabricConnection {
   $result = $connections.Response.value | Where-Object { $_.displayName -eq $DisplayName }
 
   if (!$result) {
-    Write-Log -Message "Creating $ConnectivityType FTP Connection: $DisplayName" -Level 'WARN'
+    Write-Log -Message "Creating $ConnectivityType Web Connection: $DisplayName" -Level 'WARN'
 
-    # Create the base FTP connection payload
+    # Create the base Web connection payload
     $payload = @{
       connectivityType  = $ConnectivityType
       displayName       = $DisplayName
       connectionDetails = @{
-        type           = "FTP"
-        creationMethod = "FTP.Contents"
+        type           = "Web"
+        creationMethod = "Web"
         parameters     = @(
           @{
             dataType = "Text"
-            name     = "server"
-            value    = "ftp.example.com"
+            name     = "url"
+            value    = "https://$($script:wellKnownWebServer)/"
           }
         )
       }
@@ -833,6 +835,102 @@ function Set-FabricConnection {
 
   Write-Log -Message "$ConnectivityType Connection - Name: $($result.displayName) / ID: $($result.id)"
   return $result
+}
+
+function Set-WellKnownSemanticModelConnectionBinding {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$WorkspaceId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$SemanticModelId,
+
+    [Parameter(Mandatory = $true)]
+    [object]$Definition,
+
+    [Parameter(Mandatory = $true)]
+    [object]$Connection
+  )
+
+  if (-not $Connection.connectionDetails.type) {
+    Write-Log -Message "Connection $($Connection.id) is missing its connection type." -Level 'ERROR'
+  }
+
+  $connectionsEndpoint = "workspaces/$WorkspaceId/items/$SemanticModelId/connections"
+  $connectionReferences = (Invoke-FabricRest -Method 'GET' -Endpoint $connectionsEndpoint).Response.value
+  $matchingReferences = @(
+    $connectionReferences | Where-Object {
+      $_.connectionDetails.type -eq $Connection.connectionDetails.type -and
+      $_.connectionDetails.path -like "*$script:wellKnownWebServer*"
+    }
+  )
+
+  if ($matchingReferences.Count -eq 0) {
+    Write-Log -Message "Updating semantic model $SemanticModelId with its Web data-source reference." -Level 'WARN'
+    Invoke-FabricRest `
+      -Method 'POST' `
+      -Endpoint "workspaces/$WorkspaceId/semanticModels/$SemanticModelId/updateDefinition" `
+      -Payload @{ definition = $Definition } | Out-Null
+
+    $connectionReferences = (Invoke-FabricRest -Method 'GET' -Endpoint $connectionsEndpoint).Response.value
+    $matchingReferences = @(
+      $connectionReferences | Where-Object {
+        $_.connectionDetails.type -eq $Connection.connectionDetails.type -and
+        $_.connectionDetails.path -like "*$script:wellKnownWebServer*"
+      }
+    )
+  }
+
+  if ($matchingReferences.Count -ne 1) {
+    Write-Log -Message "Expected one Web data-source reference on semantic model $SemanticModelId; found $($matchingReferences.Count)." -Level 'ERROR'
+  }
+
+  $connectionDetails = $matchingReferences[0].connectionDetails
+  $binding = $matchingReferences[0]
+
+  if ($binding.id -ne $Connection.id -or $binding.connectivityType -ne 'ShareableCloud') {
+    $payload = @{
+      connectionBinding = @{
+        id                = $Connection.id
+        connectivityType  = 'ShareableCloud'
+        connectionDetails = @{
+          path = $connectionDetails.path
+          type = $connectionDetails.type
+        }
+      }
+    }
+
+    Invoke-FabricRest `
+      -Method 'POST' `
+      -Endpoint "workspaces/$WorkspaceId/semanticModels/$SemanticModelId/bindConnection" `
+      -Payload $payload | Out-Null
+
+    $binding = $null
+    for ($attempt = 0; $attempt -lt 6; $attempt++) {
+      $connectionReferences = (Invoke-FabricRest -Method 'GET' -Endpoint $connectionsEndpoint).Response.value
+      $binding = $connectionReferences | Where-Object {
+        $_.connectionDetails.path -eq $connectionDetails.path -and
+        $_.connectionDetails.type -eq $connectionDetails.type
+      } | Select-Object -First 1
+
+      if ($binding -and $binding.id -eq $Connection.id -and $binding.connectivityType -eq 'ShareableCloud') {
+        break
+      }
+
+      if ($attempt -lt 5) {
+        Start-Sleep -Seconds 5
+      }
+    }
+  }
+
+  if (-not $binding -or $binding.id -ne $Connection.id -or $binding.connectivityType -ne 'ShareableCloud') {
+    Write-Log -Message "Failed to bind semantic model $SemanticModelId to Shareable Cloud connection $($Connection.id)." -Level 'ERROR'
+  }
+
+  return @{
+    path = $connectionDetails.path
+    type = $connectionDetails.type
+  }
 }
 
 function Set-FabricConnectionRoleAssignment {
@@ -1246,6 +1344,8 @@ $itemNaming = @{
   'Reflex'                          = 'rx'
   'Report'                          = 'rpt'
   'SemanticModel'                   = 'sm'
+  'SemanticModelConnectionBinding'  = 'smcb'
+  'SemanticModelRS'                 = 'smrs'
   'SparkJobDefinition'              = 'sjd'
   'SQLDatabase'                     = 'sqldb'
   'SQLEndpoint'                     = 'sqle'
@@ -1273,8 +1373,8 @@ $itemNaming = @{
   'ResourceGroup'                   = 'rg'
   'KeyVault'                        = 'kv'
   'FabricCapacity'                  = 'fc'
-  'ShareableCloudConnection'        = 'scc'
-  'VirtualNetworkGatewayConnection' = 'vngc'
+  'ShareableCloudConnection'        = 'sccweb'
+  'VirtualNetworkGatewayConnection' = 'vngweb'
 }
 
 $baseName = Get-BaseName
@@ -1532,7 +1632,7 @@ $wellKnown['MirroredDatabase'] = @{
 
 # Create SemanticModel if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['SemanticModel'])"
-$definition = @{
+$semanticModelDefinition = @{
   parts = @(
     @{
       path        = 'definition.pbism'
@@ -1547,11 +1647,46 @@ $definition = @{
   )
 }
 
-$semanticModel = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SemanticModel' -Definition $definition
+$semanticModel = Set-FabricItem -DisplayName $displayNameTemp -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SemanticModel' -Definition $semanticModelDefinition
 $wellKnown['SemanticModel'] = @{
   id          = $semanticModel.id
   displayName = $semanticModel.displayName
   description = $semanticModel.description
+}
+
+# Create a SemanticModel with an external Web source for connection binding acceptance tests
+$semanticModelConnectionBindingDisplayName = "${displayName}_$($itemNaming['SemanticModelConnectionBinding'])"
+$semanticModelConnectionBindingDefinition = @{
+  parts = @(
+    @{
+      path        = 'definition.pbism'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/semantic_model_tmsl/definition.pbism'
+      payloadType = 'InlineBase64'
+    }
+    @{
+      path        = 'model.bim'
+      payload     = Get-DefinitionPartBase64 -Path 'internal/testhelp/fixtures/semantic_model_connection_binding/model.bim.tmpl' -Values @(
+        @{ key = '{{ .ColumnName }}'; value = 'ColumnTest1' },
+        @{ key = '{{ .WEB_SERVER }}'; value = $script:wellKnownWebServer }
+      )
+      payloadType = 'InlineBase64'
+    }
+  )
+}
+$semanticModelConnectionBinding = Set-FabricItem -DisplayName $semanticModelConnectionBindingDisplayName -WorkspaceId $wellKnown['WorkspaceDS'].id -Type 'SemanticModel' -Definition $semanticModelConnectionBindingDefinition
+$wellKnown['SemanticModelConnectionBinding'] = @{
+  id          = $semanticModelConnectionBinding.id
+  displayName = $semanticModelConnectionBinding.displayName
+  description = $semanticModelConnectionBinding.description
+}
+
+# Create SemanticModel in WorkspaceRS for resource acceptance tests
+$semanticModelRSDisplayName = "${displayName}_$($itemNaming['SemanticModelRS'])"
+$semanticModelRS = Set-FabricItem -DisplayName $semanticModelRSDisplayName -WorkspaceId $wellKnown['WorkspaceRS'].id -Type 'SemanticModel' -Definition $semanticModelConnectionBindingDefinition
+$wellKnown['SemanticModelRS'] = @{
+  id          = $semanticModelRS.id
+  displayName = $semanticModelRS.displayName
+  description = $semanticModelRS.description
 }
 
 # Create Report if not exists
@@ -2063,6 +2198,22 @@ $wellKnown['ShareableCloudConnection'] = @{
 
 Set-FabricConnectionRoleAssignment -ConnectionId $shareableCloudConnection.id -PrincipalId $SPNS_SG.Id -PrincipalType 'Group' -Role 'Owner'
 
+$wellKnown['SemanticModelConnectionBinding']['connectionDetails'] = Set-WellKnownSemanticModelConnectionBinding `
+  -WorkspaceId $wellKnown['WorkspaceDS'].id `
+  -SemanticModelId $wellKnown['SemanticModelConnectionBinding'].id `
+  -Definition $semanticModelConnectionBindingDefinition `
+  -Connection $shareableCloudConnection
+$wellKnown['SemanticModelConnectionBinding']['connectionId'] = $shareableCloudConnection.id
+$wellKnown['SemanticModelConnectionBinding']['connectivityType'] = 'ShareableCloud'
+
+$wellKnown['SemanticModelRS']['connectionDetails'] = Set-WellKnownSemanticModelConnectionBinding `
+  -WorkspaceId $wellKnown['WorkspaceRS'].id `
+  -SemanticModelId $wellKnown['SemanticModelRS'].id `
+  -Definition $semanticModelConnectionBindingDefinition `
+  -Connection $shareableCloudConnection
+$wellKnown['SemanticModelRS']['connectionId'] = $shareableCloudConnection.id
+$wellKnown['SemanticModelRS']['connectivityType'] = 'ShareableCloud'
+
 # Create Virtual Network Gateway Connection if not exists
 $displayNameTemp = "${displayName}_$($itemNaming['VirtualNetworkGatewayConnection'])"
 $virtualNetworkGatewayConnection = Set-FabricConnection -DisplayName $displayNameTemp -ConnectivityType "VirtualNetworkGateway" -GatewayId $gateway.id
@@ -2356,4 +2507,3 @@ else {
 $wellKnownJson = $wellKnown | ConvertTo-Json -Depth 10
 $wellKnownJson
 $wellKnownJson | Set-Content -Path './internal/testhelp/fixtures/.wellknown.json' -Force -NoNewline -Encoding utf8
-

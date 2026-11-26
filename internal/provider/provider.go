@@ -92,6 +92,7 @@ import (
 	"github.com/microsoft/terraform-provider-fabric/internal/services/plan"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/report"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodel"
+	"github.com/microsoft/terraform-provider-fabric/internal/services/semanticmodelconnectionbinding"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/shortcut"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/snowflakedatabase"
 	"github.com/microsoft/terraform-provider-fabric/internal/services/sparkcustompool"
@@ -513,6 +514,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 		plan.NewResourcePlan,
 		report.NewResourceReport,
 		semanticmodel.NewResourceSemanticModel,
+		semanticmodelconnectionbinding.NewResourceSemanticModelConnectionBinding,
 		sparkcustompool.NewResourceSparkCustomPool,
 		sparkenvsettings.NewResourceSparkEnvironmentSettings,
 		sparkwssettings.NewResourceSparkWorkspaceSettings,
@@ -648,6 +650,8 @@ func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.Da
 		report.NewDataSourceReports,
 		semanticmodel.NewDataSourceSemanticModel,
 		semanticmodel.NewDataSourceSemanticModels,
+		semanticmodelconnectionbinding.NewDataSourceSemanticModelConnectionBinding,
+		semanticmodelconnectionbinding.NewDataSourceSemanticModelConnectionBindings,
 		sparkcustompool.NewDataSourceSparkCustomPool,
 		sparkenvsettings.NewDataSourceSparkEnvironmentSettings,
 		sparkwssettings.NewDataSourceSparkWorkspaceSettings,
